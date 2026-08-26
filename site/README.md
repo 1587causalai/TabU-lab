@@ -5,6 +5,7 @@ This directory owns the source for the public TabU-lab entrance.
 ## Route
 
 - Canonical URL: `https://research.wehub.us/tabu-lab/`
+- Chinese URL: `https://research.wehub.us/tabu-lab/zh/`
 - Project source: `site/public/`
 - dgx2 staging: `/home/cms/wehub-sites/research/tabu-lab/`
 - dgx2 public root: `/var/www/research.wehub.us/tabu-lab/`

@@ -5,6 +5,7 @@ An open research lab for tabular foundation models, inspired by [Marin](https://
 ## Website
 
 - Public entrance: https://research.wehub.us/tabu-lab/
+- Chinese entrance: https://research.wehub.us/tabu-lab/zh/
 - Static source: [`site/public/`](./site/public/)
 - Machine-readable project card: https://research.wehub.us/tabu-lab/agent.json
 

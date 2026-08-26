@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TabU-lab — 开放训练表格基础模型 · WeHub Research</title>
+  <meta name="description" content="TabU-lab 是 WeHub 从零训练表格基础模型的开放研究实验室，以预注册 gate、可复现 run receipt 和诚实 verdict 组织实验。">
+  <meta name="theme-color" content="#06101d">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://research.wehub.us/tabu-lab/zh/">
+  <link rel="alternate" hreflang="zh-CN" href="https://research.wehub.us/tabu-lab/zh/">
+  <link rel="alternate" hreflang="en" href="https://research.wehub.us/tabu-lab/">
+  <link rel="alternate" hreflang="x-default" href="https://research.wehub.us/tabu-lab/">
+  <link rel="icon" href="../assets/tabu-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../styles.css">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="TabU-lab — 开放训练表格基础模型">
+  <meta property="og:description" content="每个实验从可证伪的假设开始，以可审计的 run receipt 结束。">
+  <meta property="og:url" content="https://research.wehub.us/tabu-lab/zh/">
+  <meta property="og:image" content="https://research.wehub.us/tabu-lab/assets/tabu-mark.svg">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ResearchProject",
+    "name": "TabU-lab",
+    "description": "一个从零训练表格基础模型的开放研究实验室。",
+    "url": "https://research.wehub.us/tabu-lab/zh/",
+    "codeRepository": "https://github.com/1587causalai/TabU-lab",
+    "parentOrganization": {"@type": "Organization", "name": "WeHub", "url": "https://wehub.us/"}
+  }
+  </script>
+</head>
+<body data-site-version="tabu-lab-site-v20260826-02">
+  <a class="skip-link" href="#main">跳到正文</a>
+  <div class="ambient ambient-a" aria-hidden="true"></div>
+  <div class="ambient ambient-b" aria-hidden="true"></div>
+  <div class="grid-field" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <nav class="nav-shell" aria-label="主导航">
+      <a class="brand" href="#top" aria-label="TabU-lab 首页">
+        <img src="../assets/tabu-mark.svg" alt="" width="42" height="42">
+        <span><strong>TabU-lab</strong><small>WeHub Research 开放实验室</small></span>
+      </a>
+      <div class="nav-actions">
+        <div class="nav-links" id="nav-links">
+          <a href="#mission">使命</a>
+          <a href="#protocol">实验协议</a>
+          <a href="#ledger">公开账本</a>
+          <a href="#join">加入</a>
+          <a class="nav-external" href="https://research.wehub.us/zh/">WeHub Research <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="language-switch" aria-label="语言">
+          <a class="active" href="./" lang="zh-CN" hreflang="zh-CN" aria-current="page">中文</a>
+          <a href="../" lang="en" hreflang="en">EN</a>
+        </div>
+        <button class="menu-button" type="button" aria-expanded="false" aria-controls="nav-links">
+          <span class="sr-only">展开导航</span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero section-shell" id="top">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="pulse-dot"></span> 实验室启动期 · 公开入口已上线</div>
+        <h1>表格基础模型，<br><em>在开放中训练。</em></h1>
+        <p class="hero-lede">TabU-lab 是 WeHub 从零构建表格基础模型的开放研究实验室。每个 run 都从一个可证伪的问题开始，以足够完整的 provenance 结束，使他人能够复现、否定或继续推进。</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="https://github.com/1587causalai/TabU-lab">查看源码 <span aria-hidden="true">↗</span></a>
+          <a class="button button-secondary" href="#protocol">检查实验协议 <span aria-hidden="true">↓</span></a>
+        </div>
+        <dl class="principles" aria-label="实验室原则">
+          <div><dt>公开</dt><dd>代码、config、曲线与错误</dd></div>
+          <div><dt>可复现</dt><dd>固定 seed、split 与 compute</dd></div>
+          <div><dt>可证伪</dt><dd>run 前写清 pass / kill gate</dd></div>
+        </dl>
+      </div>
+
+      <div class="hero-visual" aria-label="表格被编译为 typed tokens，并形成公开实验收据">
+        <div class="visual-topline"><span>公开训练轨迹</span><span>00 · 启动期</span></div>
+        <div class="carrier-stage">
+          <div class="stage-label">typed table</div>
+          <div class="table-grid" aria-hidden="true">
+            <span class="cell unit">U₁</span><span class="cell value">3.2</span><span class="cell category">A</span><span class="cell query">?</span>
+            <span class="cell unit">U₂</span><span class="cell value">1.7</span><span class="cell null">∅</span><span class="cell value">0.8</span>
+            <span class="cell unit">U₃</span><span class="cell value">4.1</span><span class="cell category">B</span><span class="cell value">1.4</span>
+          </div>
+          <div class="compile-arrow"><span>compile</span><b>→</b></div>
+          <div class="token-field" aria-hidden="true">
+            <i class="token token-unit">u</i><i class="token token-value">v</i><i class="token token-role">r</i><i class="token token-query">q</i>
+            <i class="token token-unit">u</i><i class="token token-value">v</i><i class="token token-null">0</i><i class="token token-value">v</i>
+            <i class="token token-unit">u</i><i class="token token-value">v</i><i class="token token-role">r</i><i class="token token-value">v</i>
+            <svg viewBox="0 0 260 170" preserveAspectRatio="none"><path d="M28 30C85 18 87 80 132 76S196 29 232 38M28 84c55 0 72 59 122 50s39-54 82-44M28 140c59 8 72-44 119-34s44 45 85 38"/></svg>
+          </div>
+        </div>
+        <div class="receipt">
+          <div><span>假设</span><b>执行前写清</b></div>
+          <div><span>执行</span><b>seed + config + compute</b></div>
+          <div><span>结论</span><b class="pending">等待首个 run</b></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="truth-strip" aria-label="当前 claim 边界">
+      <div class="section-shell truth-inner"><span>当前事实</span><p>目前只有实验室基础设施。尚无公开训练结果、模型 checkpoint 或 benchmark claim 被接受。</p><a href="#ledger">查看公开账本 →</a></div>
+    </section>
+
+    <section class="section-shell split-section" id="mission">
+      <div class="section-heading sticky-heading">
+        <span class="kicker">01 · 使命</span>
+        <h2>让模型诞生的路径可检查。</h2>
+        <p>“开放”不只是发布最终 checkpoint。促成模型的关键决策也必须足够可见，让另一位研究者——或另一个 agent——能够审计并继续。</p>
+      </div>
+      <div class="mission-stack">
+        <article class="mission-card">
+          <span class="card-index">A</span>
+          <div><h3>按公开 recipe 训练</h3><p>架构、数据准备、objective 与 compute 假设保留在版本化源码中，不藏在最终 metric 后面。</p></div>
+        </article>
+        <article class="mission-card">
+          <span class="card-index">B</span>
+          <div><h3>先在小规模上可复现</h3><p>每个想法先在明确预算下取得信号。scale 是后续决策，不是理解机制的替代品。</p></div>
+        </article>
+        <article class="mission-card">
+          <span class="card-index">C</span>
+          <div><h3>把失败也发布为信息</h3><p>当 protocol、日志和边界清楚时，被 kill 的假设也是有用结果。沉默的死路教不会任何人。</p></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="protocol-section" id="protocol">
+      <div class="section-shell">
+        <div class="section-heading wide-heading">
+          <span class="kicker">02 · 实验协议</span>
+          <h2>每个实验都是一个有类型、可审计的工作单元。</h2>
+          <p>Marin 展示了公开完整实验生命周期的价值。TabU-lab 把这个思想适配到 WeHub：简洁的 gate、精确的 execution receipt，以及先于综合结论的诚实 verdict。</p>
+        </div>
+        <ol class="protocol-grid">
+          <li><span>01</span><h3>预注册</h3><p>执行前写下 hypothesis、baseline、预算和 pass / kill criterion。</p></li>
+          <li><span>02</span><h3>实现</h3><p>提交能够执行预期比较的代码与 config。</p></li>
+          <li><span>03</span><h3>运行</h3><p>记录 command、seed、数据 provenance、environment、host 与 compute。</p></li>
+          <li><span>04</span><h3>收据</h3><p>发布 raw metrics、曲线、日志、artifact，以及所有限制解释的因素。</p></li>
+          <li><span>05</span><h3>结论</h3><p>标记 pass、kill 或 revise；只综合 receipt 真正支持的内容。</p></li>
+        </ol>
+        <div class="receipt-schema">
+          <div class="schema-title"><span>RUN RECEIPT / 最小字段</span><code>receipt.v0</code></div>
+          <ul>
+            <li>hypothesis + gate</li><li>commit + config hash</li><li>dataset + split</li><li>seed + environment</li><li>host + compute budget</li><li>raw metrics + curves</li><li>failure notes</li><li>pass / kill / revise</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-shell ledger-section" id="ledger">
+      <div class="section-heading ledger-heading">
+        <span class="kicker">03 · 公开账本</span>
+        <h2>实验室从空账本开始，不制造虚假的进展感。</h2>
+        <p>这里如实暴露当前状态。只有当 repository 中存在对应 preregistration 或 receipt 时，新的实验卡片才会出现。</p>
+      </div>
+      <div class="ledger-board">
+        <article class="ledger-card active-card">
+          <div class="ledger-meta"><span class="status status-live">进行中</span><time datetime="2026-08-26">2026-08-26</time></div>
+          <span class="ledger-id">启动期 · LAB-000</span>
+          <h3>开放实验室底座</h3>
+          <p>已建立 repository layout、experiment receipt contract 与 WeHub Research 入口。</p>
+          <div class="evidence-row"><span>证据</span><a href="https://github.com/1587causalai/TabU-lab">repository ↗</a><a href="../agent.json">agent card</a></div>
+        </article>
+        <article class="ledger-card empty-card">
+          <div class="ledger-meta"><span class="status status-open">开放席位</span><span>G1</span></div>
+          <span class="ledger-id">首个公开 RUN</span>
+          <h3>尚未预注册</h3>
+          <p>只有在 hypothesis 和 gate 提交后，第一个训练问题才会在这里命名。</p>
+          <div class="evidence-row"><span>状态</span><b>未声称任何结果</b></div>
+        </article>
+      </div>
+      <div class="ledger-links">
+        <a href="https://github.com/1587causalai/TabU-lab/tree/main/experiments"><span>Experiments</span><small>预注册与 run receipts</small><b>↗</b></a>
+        <a href="https://github.com/1587causalai/TabU-lab/tree/main/docs/reports"><span>Reports</span><small>跨 run 综合与复盘</small><b>↗</b></a>
+        <a href="../agent.json"><span>Agent card</span><small>机器可读的状态与边界</small><b>→</b></a>
+      </div>
+    </section>
+
+    <section class="lanes-section" id="lanes">
+      <div class="section-shell lanes-grid">
+        <div class="section-heading">
+          <span class="kicker">04 · 研究方向</span>
+          <h2>四个可以提出可证伪问题的地方。</h2>
+          <p>这些是邀请研究的问题面，不是声称对应系统已经存在。</p>
+        </div>
+        <div class="lane-list">
+          <article><span>01</span><h3>数据与先验</h3><p>什么样的 synthetic 或 real-table distribution 能教会可复用结构，同时不隐藏 test knowledge？</p></article>
+          <article><span>02</span><h3>表征</h3><p>value、role、missingness、Unit 与表格结构，应如何成为 typed computational objects？</p></article>
+          <article><span>03</span><h3>训练系统</h3><p>哪些小规模 recipe 能在昂贵 scaling 前产生稳定的 learning signal？</p></article>
+          <article><span>04</span><h3>评测</h3><p>哪些 held-out tables、distribution shifts 和 negative controls 真正能够证伪所提机制？</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-shell join-section" id="join">
+      <div class="join-panel">
+        <div>
+          <span class="kicker">05 · 加入实验室</span>
+          <h2>带来一个可能输掉的问题。</h2>
+          <p>最好的贡献不是宏大的承诺，而是一个清晰 hypothesis、一个匹配的 comparison，以及一份让后来者可以继续的 receipt。</p>
+          <div class="join-actions">
+            <a class="button button-primary" href="https://github.com/1587causalai/TabU-lab/issues/new">提出实验 <span aria-hidden="true">↗</span></a>
+            <a class="button button-secondary" href="https://github.com/1587causalai/TabU-lab#readme">阅读实验室指南 <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+        <aside class="relationship-card">
+          <span>与 WEHUB RESEARCH 的关系</span>
+          <h3>一个嵌入更大研究系统的开放训练 surface。</h3>
+          <p>TabU-lab 提供公开、可复现的实验 evidence；TabU 提供更广的 Unit-as-Primitive 研究语境；WeHub Research 把它连接到因果智能与人–agent 协作，但不转移 source ownership。</p>
+          <div><a href="https://research.wehub.us/zh/">WeHub Research ↗</a><a href="https://wehub.us/causal-superintelligence/">Causal Superintelligence ↗</a></div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="section-shell footer-inner">
+      <div class="footer-brand"><img src="../assets/tabu-mark.svg" alt="" width="36" height="36"><span><strong>TabU-lab</strong><small>Tabular Foundation Modeling from Scratch</small></span></div>
+      <p>公开研究 surface · 源码与 evidence 保留在项目 repository。</p>
+      <nav aria-label="页脚导航"><a href="https://research.wehub.us/zh/">Research</a><a href="https://wehub.us/">WeHub</a><a href="https://github.com/1587causalai/TabU-lab">GitHub</a></nav>
+    </div>
+  </footer>
+  <script src="../app.js"></script>
+</body>
+</html>

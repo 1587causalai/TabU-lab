@@ -7,7 +7,7 @@ HOST="${TABU_SITE_HOST:-dgx2}"
 STAGING="/home/cms/wehub-sites/research/tabu-lab"
 LIVE="/var/www/research.wehub.us/tabu-lab"
 ARCHIVE="/home/cms/wehub-sites/research/.backups/tabu-lab"
-MARKER="tabu-lab-site-v20260826-01"
+MARKER="tabu-lab-site-v20260826-02"
 STAMP="$(date +%Y%m%d-%H%M%S)"
 
 python3 "$ROOT/scripts/verify_site.py"
@@ -27,7 +27,7 @@ trap 'unset SSH_PASS_CMS' EXIT
 printf '%s\n' "$SSH_PASS_CMS" | ssh "$HOST" "sudo -S -p '' bash -c 'set -e; mkdir -p \"$ARCHIVE\"; if [ -d \"$LIVE\" ]; then cp -a \"$LIVE\" \"$ARCHIVE/live-before-$STAMP\"; fi; mkdir -p \"$LIVE\"; rsync -a --delete \"$STAGING/\" \"$LIVE/\"; chown -R www-data:www-data \"$LIVE\"; find \"$LIVE\" -type d -exec chmod 755 {} +; find \"$LIVE\" -type f -exec chmod 644 {} +'"
 unset SSH_PASS_CMS
 
-ssh "$HOST" "set -e; grep -Fq '$MARKER' '$STAGING/index.html'; grep -Fq '$MARKER' '$LIVE/index.html'; test -f '$STAGING/agent.json'; test -f '$LIVE/agent.json'; sha256sum '$STAGING/index.html' '$LIVE/index.html'"
+ssh "$HOST" "set -e; grep -Fq '$MARKER' '$STAGING/index.html'; grep -Fq '$MARKER' '$LIVE/index.html'; grep -Fq '$MARKER' '$STAGING/zh/index.html'; grep -Fq '$MARKER' '$LIVE/zh/index.html'; test -f '$STAGING/agent.json'; test -f '$LIVE/agent.json'; sha256sum '$STAGING/index.html' '$LIVE/index.html' '$STAGING/zh/index.html' '$LIVE/zh/index.html'"
 
 echo "Deployed https://research.wehub.us/tabu-lab/"
 echo "Backup root: $HOST:$ARCHIVE"
