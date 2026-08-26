@@ -12,9 +12,20 @@ STAMP="$(date +%Y%m%d-%H%M%S)"
 
 python3 "$ROOT/scripts/verify_site.py"
 
-ssh "$HOST" "set -e; mkdir -p '$ARCHIVE'; if [ -d '$STAGING' ]; then cp -a '$STAGING' '$ARCHIVE/staging-before-$STAMP'; fi; if [ -d '$LIVE' ]; then cp -a '$LIVE' '$ARCHIVE/live-before-$STAMP'; fi; mkdir -p '$STAGING' '$LIVE'"
+ssh "$HOST" "set -e; mkdir -p '$ARCHIVE'; if [ -d '$STAGING' ]; then cp -a '$STAGING' '$ARCHIVE/staging-before-$STAMP'; fi; mkdir -p '$STAGING'"
 rsync -az --delete "$PUBLIC"/ "$HOST":"$STAGING"/
-rsync -az --delete "$PUBLIC"/ "$HOST":"$LIVE"/
+
+if [[ -z "${SSH_PASS_CMS:-}" ]]; then
+  set +u
+  # shellcheck disable=SC1090
+  source "$HOME/.openclaw/.env"
+  set -u
+fi
+: "${SSH_PASS_CMS:?SSH_PASS_CMS is required for the www-data-owned public root}"
+trap 'unset SSH_PASS_CMS' EXIT
+
+printf '%s\n' "$SSH_PASS_CMS" | ssh "$HOST" "sudo -S -p '' bash -c 'set -e; mkdir -p \"$ARCHIVE\"; if [ -d \"$LIVE\" ]; then cp -a \"$LIVE\" \"$ARCHIVE/live-before-$STAMP\"; fi; mkdir -p \"$LIVE\"; rsync -a --delete \"$STAGING/\" \"$LIVE/\"; chown -R www-data:www-data \"$LIVE\"; find \"$LIVE\" -type d -exec chmod 755 {} +; find \"$LIVE\" -type f -exec chmod 644 {} +'"
+unset SSH_PASS_CMS
 
 ssh "$HOST" "set -e; grep -Fq '$MARKER' '$STAGING/index.html'; grep -Fq '$MARKER' '$LIVE/index.html'; test -f '$STAGING/agent.json'; test -f '$LIVE/agent.json'; sha256sum '$STAGING/index.html' '$LIVE/index.html'"
 

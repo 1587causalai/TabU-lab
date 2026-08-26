@@ -23,4 +23,4 @@ python3 scripts/verify_site.py
 scripts/deploy_site.sh
 ```
 
-The deployment script verifies the local projection, backs up any existing remote route, syncs only `site/public/`, and checks the page-specific marker on both staging and public roots.
+The deployment script verifies the local projection, backs up any existing remote route, syncs only `site/public/`, installs the public copy with the host's established credential-backed `sudo` route, and checks the page-specific marker on both staging and public roots. It reads `SSH_PASS_CMS` from the environment or `~/.openclaw/.env` without printing it.
