@@ -21,6 +21,7 @@ The website is a public research surface, not a source of model or benchmark evi
 
 - `experiments/` — one file/directory per experiment; hypothesis, gate, command, results, receipt
 - `docs/reports/` — consolidated learnings and retrospectives
+- `docs/references/` — structured reading directory for Marin, tabular foundation models, evaluation and open-science references
 - `lib/` — model / data / evaluation code
 
 ## Related
