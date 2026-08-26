@@ -1,4 +1,4 @@
-# TabFM-lab
+# TabU-lab
 
 An open research lab for tabular foundation models, inspired by [Marin](https://github.com/marin-community/marin).
 
