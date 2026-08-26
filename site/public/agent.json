@@ -1,0 +1,40 @@
+{
+  "schema": "https://research.wehub.us/schemas/research-project-card.v0.json",
+  "project": {
+    "name": "TabU-lab",
+    "tagline": "Tabular Foundation Modeling from Scratch",
+    "kind": "open_research_lab",
+    "public_url": "https://research.wehub.us/tabu-lab/",
+    "repository": "https://github.com/1587causalai/tabfm-lab",
+    "parent_surfaces": [
+      "https://research.wehub.us/",
+      "https://wehub.us/causal-superintelligence/"
+    ]
+  },
+  "purpose": "Develop tabular foundation models through open, small-scale-reproducible, falsifiable experiments.",
+  "status": {
+    "phase": "lab_bootstrap",
+    "updated_at": "2026-08-26",
+    "public_training_receipts": 0,
+    "accepted_model_claims": 0,
+    "next_gate": "Commit the first experiment preregistration before reporting a run."
+  },
+  "protocol": [
+    "preregister_hypothesis_and_gate",
+    "commit_reproducible_code_and_config",
+    "record_seed_data_environment_host_and_compute",
+    "publish_raw_metrics_curves_logs_and_limitations",
+    "declare_pass_kill_or_revise"
+  ],
+  "claim_boundaries": [
+    "The public website is not model evidence.",
+    "A local or public run is not a benchmark claim without a matching receipt.",
+    "A TabU-lab experiment does not by itself validate the broader TabU research program.",
+    "Failures remain publishable when their protocol and provenance are complete."
+  ],
+  "participation": {
+    "propose_experiment": "https://github.com/1587causalai/tabfm-lab/issues/new",
+    "experiment_ledger": "https://github.com/1587causalai/tabfm-lab/tree/main/experiments",
+    "reports": "https://github.com/1587causalai/tabfm-lab/tree/main/docs/reports"
+  }
+}
