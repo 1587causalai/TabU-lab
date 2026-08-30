@@ -23,6 +23,18 @@ from .query_row_supervised_synthetic import (
 from .query_row_synthetic_fit import _episode_loss, make_query_row_synthetic_episode
 from .tabubase_scale import resolve_device
 
+_PRETRAIN_GENERATOR_IDS = {
+    "completion.artificial_mask.v1": "tabur.query-row-latent-mixture.v1",
+    "supervised.label_broadcast.v1": "tabur.supervised-query-row-latent-mixture.v1",
+}
+
+
+def _generator_id(profile: str) -> str:
+    try:
+        return _PRETRAIN_GENERATOR_IDS[profile]
+    except KeyError as exc:
+        raise ValueError(f"unsupported TabUR synthetic pretraining profile: {profile!r}") from exc
+
 
 def _config(row_token_count: int) -> ReferenceConfig:
     return ReferenceConfig(
@@ -108,6 +120,7 @@ class QueryRowPretrainingResult:
     worlds: int
     steps: int
     learning_rate: float
+    loss_aggregation: str
     generator_id: str
     initial_loss: float
     final_loss: float
@@ -223,8 +236,10 @@ def run_query_row_synthetic_pretraining(
     )
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     model.train()
-    initial_loss = float(_loss(model, episodes[0], profile).detach().item())
-    final_loss = float("nan")
+    with torch.no_grad():
+        initial_loss = sum(
+            float(_loss(model, episode, profile).item()) for episode in episodes
+        ) / len(episodes)
     for step in range(steps):
         loss = _loss(model, episodes[step % len(episodes)], profile)
         if not bool(torch.isfinite(loss)):
@@ -233,16 +248,16 @@ def run_query_row_synthetic_pretraining(
         loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
         optimizer.step()
-        final_loss = float(loss.detach().item())
+    with torch.no_grad():
+        final_loss = sum(
+            float(_loss(model, episode, profile).item()) for episode in episodes
+        ) / len(episodes)
+    generator_id = _generator_id(profile)
     checkpoint_info: dict[str, str] = {}
     if output is not None:
         metadata = {
             "profile_id": profile,
-            "generator_id": (
-                "tabur.row-latent-linear-world.v1"
-                if profile == "completion.artificial_mask.v1"
-                else "tabur.supervised-row-latent-linear.v1"
-            ),
+            "generator_id": generator_id,
             "seed": seed,
             "rows": rows,
             "worlds": worlds,
@@ -273,11 +288,8 @@ def run_query_row_synthetic_pretraining(
         worlds=worlds,
         steps=steps,
         learning_rate=learning_rate,
-        generator_id=(
-            "tabur.row-latent-linear-world.v1"
-            if profile == "completion.artificial_mask.v1"
-            else "tabur.supervised-row-latent-linear.v1"
-        ),
+        loss_aggregation="mean_over_training_worlds",
+        generator_id=generator_id,
         initial_loss=initial_loss,
         final_loss=final_loss,
         **checkpoint_info,

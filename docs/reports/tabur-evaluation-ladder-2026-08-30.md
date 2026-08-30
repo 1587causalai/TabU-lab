@@ -68,10 +68,10 @@ python scripts/pretrain_tabur_synthetic.py \
   --output /tmp/tabur-pretrain-completion.safetensors
 ```
 
-本地 smoke 的 loss 从 `1.6936` 降到 `0.6390`，checkpoint 与 sidecar 均可由同
-profile 模型加载；换成 `supervised.label_broadcast.v1` 会在 tensor loading 前因
-profile identity 不匹配而 fail closed。该 smoke 仍是 `local_unissued`，不构成正式
-预训练 receipt。
+本地默认规模 smoke（16 worlds、32 rows、100 steps）的训练-world 平均 loss 从
+`1.5366` 降到 `1.2583`；checkpoint 与 sidecar 均可由同 profile 模型加载；换成
+`supervised.label_broadcast.v1` 会在 tensor loading 前因 profile identity 不匹配而
+fail closed。该 smoke 仍是 `local_unissued`，不构成正式预训练 receipt。
 
 正式能力结论仍需要扩大 world/task/dataset 规模、固定数据与环境 provenance、
 immutable receipt、独立 review 和 owner approval。
