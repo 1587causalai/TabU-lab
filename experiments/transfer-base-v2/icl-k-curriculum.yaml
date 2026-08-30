@@ -1,0 +1,37 @@
+schema_version: tabu.transfer-base-pretrain-curriculum.v1
+status: local_unissued_preregistration
+experiment_id: tabubase-codebook-b100-icl-k-curriculum-v1
+parent_checkpoint_line: transfer-base-v2-codebook-b100
+model:
+  contract_id: tabu.cell.base
+  contract_version: 0.2.0
+  profile_id: supervised.label_broadcast.v1
+tokenizer:
+  version: cell-tokenizer.v2
+  nominal_plan: source_scoped_frozen_codebook.v2
+  codebook_size: 100
+  codebook_seed: 1729
+intervention:
+  changed: context_rows_schedule
+  value: [2, 4, 8, 16, 32, 64]
+  held_constant:
+    - architecture
+    - optimizer
+    - learning_rate
+    - weight_decay
+    - world_generator_families
+    - response_type_schedule
+    - nominal_codebook
+pilot:
+  phase: PT-S0
+  worlds: 2048
+  updates: 2000
+  seed: 1729
+  gates: [finite, exact_resume, validation_improvement]
+scale:
+  phase: PT-S1
+  worlds: 20000
+  updates: 20000
+  seeds: [1729, 2718, 31415]
+promotion_rule: run PT-S1 seed 1729 only after PT-S0 passes; expand remaining seeds only after frozen ICL improves.
+claim_boundary: variable-K curriculum diagnostic only; historical fixed-K checkpoint and negative ICL result remain immutable.

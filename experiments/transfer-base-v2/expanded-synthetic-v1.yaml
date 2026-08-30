@@ -1,0 +1,134 @@
+schema_version: tabu.transfer-base-expanded-synthetic.v1
+status: local_unissued_preregistration
+experiment_id: tabubase-expanded-synthetic-v1
+date: 2026-08-30
+
+model:
+  contract_id: tabu.cell.base
+  contract_version: 0.2.0
+  profile_id: supervised.label_broadcast.v1
+  architecture_changed: false
+
+tokenizer:
+  version: cell-tokenizer.v2
+  nominal_plan: source_scoped_frozen_codebook.v2
+  codebook_size: 100
+  codebook_seed: 1729
+  category_assignment_scope: source_scoped
+
+intervention:
+  changed: synthetic_world_distribution
+  generator_version: tabubase.expanded-synthetic.v1
+  held_constant:
+    - model_architecture
+    - supervised_profile
+    - optimizer
+    - learning_rate
+    - weight_decay
+    - nominal_codebook
+    - context_rows_schedule
+    - query_rows
+    - PT-S0_and_PT-S1_world_update_budgets
+
+world_prior:
+  predictor_counts: [4, 8, 16, 32]
+  schema_regimes:
+    - numeric_only
+    - ordinal_only
+    - nominal_only
+    - mixed
+  training_families:
+    - sparse_glm
+    - sparse_dag_scm
+    - tree_threshold
+    - latent_factor
+    - polynomial_interaction
+    - periodic_monotone
+    - categorical_interaction
+  heldout_families: [mixture_of_experts]
+  response_modalities: [numeric, binary, ordinal, categorical]
+  missingness_regimes: [none, mcar, mar]
+  explicitly_heldout_missingness: [mnar]
+  nominal_cardinality_max: 100
+  predictor_order: deterministic_world_permutation
+  world_split_order: family_then_world_then_rows_then_episode
+
+episode_prior:
+  context_rows_schedule: [2, 4, 8, 16, 32, 64]
+  query_rows: 64
+  loss_normalization: per_target_cell
+  context_statistics: visible_context_only
+  query_response_location: TruthSidecar_only
+
+generator_gates:
+  G-D0:
+    name: deterministic_replay
+    pass: byte_equivalent_world_manifest_episode_and_truth_hashes
+  G-D1:
+    name: authority_and_leakage
+    pass:
+      - query_response_is_physical_zero_in_model_input
+      - query_response_exists_only_in_TruthSidecar
+      - statistics_and_missingness_do_not_use_query_response
+  G-D2:
+    name: distribution_coverage
+    audit_worlds: 2048
+    pass:
+      - every_training_family_present
+      - every_response_modality_present
+      - every_predictor_count_present
+      - homogeneous_and_mixed_schemas_present
+      - every_training_missingness_regime_present
+      - nominal_cardinality_never_exceeds_100
+  G-D3:
+    name: selected_world_known_reference_recovery
+    pass: closed_form_ridge_mean_RMSE_at_K128_not_worse_than_K8
+  deferred_to_runtime_stage: [G-D4, G-D5]
+
+pilot:
+  phase: PT-S0
+  worlds: 2048
+  updates: 2000
+  seed: 1729
+  checkpoint_updates: [0, 2000]
+  gates: [G-D0, G-D1, G-D2, G-D3, finite, exact_resume, validation_improvement]
+
+bounded_scale:
+  phase: PT-S1
+  worlds: 20000
+  updates: 20000
+  seeds: [1729, 2718, 31415]
+  checkpoint_updates: [0, 2000, 5000, 10000, 20000]
+  promotion_rule: >-
+    Run seed 1729 only after the generator audit and PT-S0 pass. Run seeds 2718
+    and 31415 only after the seed-1729 frozen synthetic ICL comparison is finite,
+    preserves all parameter hashes, and does not erase the existing low-K signal.
+
+frozen_evaluation:
+  optimizer_created: false
+  parameter_gate: every frozen arm records identical before and after state hashes
+  synthetic_controls:
+    - current_variable_K_PT-S1
+    - random_init_frozen
+    - pretrained_shuffled
+  real_datasets:
+    - iris
+    - wine
+    - breast_cancer
+    - digits
+    - diabetes
+    - california_housing
+  primary_comparison: paired_AULC_and_K32_endpoint_by_dataset_and_modality
+
+kill_conditions:
+  - any_generator_gate_fails
+  - any_non_finite_training_or_evaluation_value
+  - exact_resume_fails
+  - any_frozen_parameter_hash_changes
+  - dense_long_context_path_is_accidentally_enabled
+
+claim_boundary: >-
+  Local optimizer-free mechanism experiment only. This preregistration does not
+  create a formal receipt, accepted claim, public checkpoint, benchmark result,
+  or foundation-model designation. Long-context support remains a separate
+  Stage-B runtime intervention.

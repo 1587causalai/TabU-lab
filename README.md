@@ -101,6 +101,17 @@ evaluation sidecar, uses a separate validation world, and reports only
 [`docs/architecture/synthetic-fit-gate.md`](./docs/architecture/synthetic-fit-gate.md)
 and run `uv run python scripts/run_tabubase_synthetic_fit.py`.
 
+## Synthetic pretraining implementation history
+
+The repository now also preserves the latest local implementation for expanded
+synthetic-world generation, response readout, scale-transfer training, and their
+versioned YAML/schema inputs. The accompanying reports record the development
+history exactly as `local_unissued` material; they are not formal receipts,
+accepted claims, or evidence that synthetic pretraining improves a real task.
+
+See
+[`docs/architecture/tabubase-expanded-synthetic-pretraining-data.md`](./docs/architecture/tabubase-expanded-synthetic-pretraining-data.md).
+
 ## Website
 
 - Public entrance: https://research.wehub.us/tabu-lab/

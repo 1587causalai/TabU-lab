@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tabu-lab.local/schemas/tabubase-synthetic-world-v3.schema.json",
+  "title": "TabUBase expanded synthetic v3 world manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "generator_version",
+    "model_contract",
+    "profile_id",
+    "root_seed",
+    "partition",
+    "family_scope",
+    "world_index",
+    "world_id",
+    "family",
+    "predictor_width",
+    "schema_profile",
+    "predictor_kinds",
+    "predictor_cardinalities",
+    "predictor_permutation",
+    "response_modality",
+    "response_cardinality",
+    "missingness_regime",
+    "latent_dimension",
+    "parameter_seed",
+    "row_seed",
+    "noise_seed",
+    "missingness_seed",
+    "response_calibration_seed",
+    "response_calibration_noise_seed",
+    "response_calibration_rows",
+    "numeric_distributions",
+    "locations",
+    "scales",
+    "category_skews",
+    "latent_loadings",
+    "primary_coefficients",
+    "secondary_coefficients",
+    "bias",
+    "noise_scale",
+    "missingness_probability",
+    "missingness_slope",
+    "response_thresholds"
+  ],
+  "properties": {
+    "generator_version": {"const": "tabubase.expanded-synthetic.v3"},
+    "model_contract": {"const": "tabu.cell.base@0.2.0"},
+    "profile_id": {"const": "supervised.label_broadcast.v1"},
+    "root_seed": {"type": "integer", "minimum": 0},
+    "partition": {"enum": ["train", "validation", "test", "heldout_family"]},
+    "family_scope": {"enum": ["training", "heldout"]},
+    "world_index": {"type": "integer", "minimum": 0},
+    "world_id": {"type": "string", "pattern": "^tabubase-expanded-v3-"},
+    "family": {
+      "enum": [
+        "sparse_glm",
+        "sparse_dag_scm",
+        "tree_threshold",
+        "latent_factor",
+        "polynomial_interaction",
+        "periodic_monotone",
+        "categorical_interaction",
+        "mixture_of_experts"
+      ]
+    },
+    "predictor_width": {"enum": [4, 8, 16, 32]},
+    "schema_profile": {"enum": ["numeric_only", "ordinal_only", "nominal_only", "mixed"]},
+    "predictor_kinds": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 32,
+      "items": {"enum": ["numeric", "ordinal", "categorical"]}
+    },
+    "predictor_cardinalities": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 32,
+      "items": {"type": "integer", "minimum": 0, "maximum": 100}
+    },
+    "predictor_permutation": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 32,
+      "items": {"type": "integer", "minimum": 0, "maximum": 31},
+      "uniqueItems": true
+    },
+    "response_modality": {"enum": ["numeric", "binary", "ordinal", "categorical"]},
+    "response_cardinality": {"enum": [0, 2, 4]},
+    "missingness_regime": {"enum": ["none", "mcar", "mar"]},
+    "latent_dimension": {"type": "integer", "minimum": 1, "maximum": 8},
+    "parameter_seed": {"type": "integer", "minimum": 0},
+    "row_seed": {"type": "integer", "minimum": 0},
+    "noise_seed": {"type": "integer", "minimum": 0},
+    "missingness_seed": {"type": "integer", "minimum": 0},
+    "response_calibration_seed": {"type": "integer", "minimum": 0},
+    "response_calibration_noise_seed": {"type": "integer", "minimum": 0},
+    "response_calibration_rows": {"const": 64},
+    "numeric_distributions": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 32,
+      "items": {"enum": ["normal", "heavy_tail", "positive_skew", "mixture", "not_numeric"]}
+    },
+    "locations": {"$ref": "#/$defs/predictorNumbers"},
+    "scales": {"$ref": "#/$defs/predictorNumbers"},
+    "category_skews": {"$ref": "#/$defs/predictorNumbers"},
+    "latent_loadings": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 32,
+      "items": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 8,
+        "items": {"type": "number"}
+      }
+    },
+    "primary_coefficients": {"$ref": "#/$defs/predictorNumbers"},
+    "secondary_coefficients": {"$ref": "#/$defs/predictorNumbers"},
+    "bias": {"type": "number"},
+    "noise_scale": {"type": "number", "exclusiveMinimum": 0},
+    "missingness_probability": {"type": "number", "minimum": 0, "maximum": 1},
+    "missingness_slope": {"type": "number", "minimum": 0},
+    "response_thresholds": {
+      "type": "array",
+      "maxItems": 3,
+      "items": {"type": "number"}
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"response_modality": {"const": "numeric"}}},
+      "then": {
+        "properties": {
+          "response_cardinality": {"const": 0},
+          "response_thresholds": {"maxItems": 0}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"response_modality": {"const": "binary"}}},
+      "then": {
+        "properties": {
+          "response_cardinality": {"const": 2},
+          "response_thresholds": {"minItems": 1, "maxItems": 1}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"response_modality": {"enum": ["ordinal", "categorical"]}}},
+      "then": {
+        "properties": {
+          "response_cardinality": {"const": 4},
+          "response_thresholds": {"minItems": 3, "maxItems": 3}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "predictorNumbers": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 32,
+      "items": {"type": "number"}
+    }
+  }
+}

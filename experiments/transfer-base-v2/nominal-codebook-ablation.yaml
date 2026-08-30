@@ -1,0 +1,36 @@
+schema_version: tabu.transfer-base-nominal-codebook-ablation.v1
+experiment_id: transfer-base-v2-nominal-codebook-b100
+status: local_unissued
+model:
+  contract_id: tabu.cell.base
+  contract_version: 0.2.0
+  profile_id: supervised.label_broadcast.v1
+paired_arms:
+  control:
+    tokenizer: episode_random_sphere
+    tokenizer_version: cell-tokenizer.v1
+  treatment:
+    tokenizer: source_scoped_frozen_codebook.v2
+    tokenizer_version: cell-tokenizer.v2
+    codebook_size: 100
+    codebook_seed: 1729
+    scope: source_and_declared_domain_label
+gates:
+  first: PT-S0
+  promote_to_PT-S1_only_if:
+    - finite
+    - exact_resume
+    - validation_improvement
+paired_controls:
+  - synthetic_world_ids
+  - model_initialization_seed
+  - optimizer
+  - update_budget
+  - validation_worlds
+primary_comparison:
+  - final_validation_loss
+  - validation_loss_reduction
+downstream_if_promoted:
+  - corrected_classification_panel
+  - frozen_icl
+claim_boundary: exploratory mechanism ablation; no formal receipt or superiority claim

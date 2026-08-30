@@ -1,0 +1,170 @@
+schema_version: tabu.transfer-base-expanded-synthetic-long-context.v1
+status: local_unissued_preregistration_not_run
+experiment_id: tabubase-expanded-synthetic-long-context-v1
+date: 2026-08-30
+depends_on: tabubase-expanded-synthetic-v4
+purpose: >-
+  Extend the already-implemented expanded-synthetic-v4 pretraining curriculum
+  through K=512 while holding the sampled world-law distribution fixed. Replace
+  only the quadratic all-cell terminal used during training with a differentiable
+  query-response-only terminal that is first required to match the dense loss and
+  parameter gradients at small K.
+
+model:
+  contract_id: tabu.cell.base
+  contract_version: 0.2.0
+  profile_id: supervised.label_broadcast.v1
+  architecture_changed: false
+
+tokenizer:
+  version: cell-tokenizer.v2
+  nominal_plan: source_scoped_frozen_codebook.v2
+  codebook_size: 100
+  codebook_seed: 1729
+  category_assignment_scope: source_codebook_id_and_domain_label
+
+intervention:
+  changed:
+    - training_context_rows_schedule_extended_through_512
+    - frozen_context_candidate_bank_extended_to_512
+    - differentiable_query_response_only_training_terminal
+  held_constant:
+    - tabubase.expanded-synthetic.v4_world_manifest_distribution
+    - generator_version_tabubase.expanded-synthetic.v4
+    - model_architecture_and_supervised_profile
+    - source_scoped_nominal_codebook_B100_seed1729
+    - AdamW_optimizer
+    - learning_rate_0.0003
+    - weight_decay_0.0001
+    - query_rows_64
+    - PT-S0_and_PT-S1_world_update_budgets
+    - validation_world_partition_and_offset
+  protocol_id: tabubase.expanded-synthetic-long-context.v1
+  training_forward_mode: query_response_only_v1
+  dense_training_forward_mode_control: fast_no_trace
+
+episode_prior:
+  frozen_context_rows_schedule: [2, 4, 8, 16, 32, 64, 128, 256, 512]
+  eligible_context_rows:
+    numeric: [2, 4, 8, 16, 32, 64, 128, 256, 512]
+    binary: [2, 4, 8, 16, 32, 64, 128, 256, 512]
+    ordinal: [4, 8, 16, 32, 64, 128, 256, 512]
+    categorical: [4, 8, 16, 32, 64, 128, 256, 512]
+  training_context_assignment: deterministic_world_stratified_without_response_K_parity_lock
+  frozen_context_candidate_rows: 512
+  context_candidate_max_rows: 1024
+  classification_context_order: class_balanced_from_context_candidate_pool_only
+  nested_context_prefixes: true
+  nested_query_bank: true
+  query_rows: 64
+  query_readout_chunk_rows: 64
+  loss_normalization: per_target_cell
+  context_statistics: visible_context_only
+  query_response_location: TruthSidecar_only
+
+validation:
+  worlds: 192
+  partition: validation
+  world_index_offset: 1000000
+  contexts_per_world: every_support_realizable_K
+  episodes: 1632
+  primary_gate: final_mean_target_loss_strictly_less_than_initial_mean_target_loss
+
+preflight_gates:
+  G-D0_through_G-D3: rerun_expanded_synthetic_v4_stage_a_and_full_20000_world_compile
+  G-D4_dense_query_response_parity:
+    modalities: [numeric, binary, ordinal, categorical]
+    context_rows: 8
+    query_rows: 8
+    loss_absolute_tolerance: 0.000001
+    loss_relative_tolerance: 0.000001
+    gradient_absolute_tolerance: 0.00005
+    gradient_relative_tolerance: 0.0002
+    checks:
+      - identical_loss_within_registered_tolerance
+      - every_parameter_has_matching_gradient_presence
+      - every_parameter_gradient_matches_within_registered_tolerance
+      - query_chunking_is_numerically_invariant
+      - query_response_path_never_calls_dense_terminal
+  G-D5_L512_bounded_runtime:
+    status_scope: partial_runtime_gate_only
+    modalities: [numeric, binary, ordinal, categorical]
+    predictor_width: 32
+    context_rows: [128, 256, 512]
+    query_rows: 64
+    device: cuda
+    peak_allocated_bytes_max: 8589934592
+    peak_reserved_bytes_max: 12884901888
+    checks:
+      - finite_forward_loss
+      - finite_backward_gradients
+      - at_least_one_nonzero_parameter_gradient
+      - dense_terminal_not_called
+      - peak_memory_within_registered_bounds
+    explicit_non_claim: >-
+      Passing K<=512 does not close architecture gate G-D5, whose registered
+      long-context ladder remains K in [1024, 2048, 4096, 8192].
+
+pilot:
+  phase: PT-S0
+  worlds: 2048
+  updates: 2000
+  seed: 1729
+  checkpoint_updates: [0, 2000]
+  gates:
+    - expanded_v4_generator_stage_a_passes
+    - full_20000_world_long_context_compile_passes
+    - G-D4_dense_query_response_parity_passes
+    - G-D5_L512_bounded_runtime_passes
+    - finite
+    - exact_resume
+    - validation_improvement
+  promotion_rule: >-
+    Do not launch PT-S0 until every preflight gate passes in the same source
+    snapshot and isolated run root.
+
+bounded_scale:
+  phase: PT-S1
+  worlds: 20000
+  updates: 20000
+  checkpoint_updates: [0, 2000, 5000, 10000, 20000]
+  first_seed: 1729
+  remaining_seeds: [2718, 31415]
+  first_seed_promotion_rule: >-
+    Launch seed 1729 only from a matching passed PT-S0 receipt. After seed 1729,
+    run frozen synthetic and real full-train-context evaluation before deciding
+    whether to spend the remaining two seed budgets.
+  remaining_seed_promotion_rule: >-
+    Seeds 2718 and 31415 require a matching passed seed-1729 result plus finite
+    frozen evaluation with unchanged adjacent parameter hashes and evidence that
+    the extended curriculum did not erase the existing low-K signal.
+  PT-S2_status: not_preregistered
+
+frozen_evaluation_contract:
+  context_policy: all_downstream_training_rows_as_labeled_context
+  query_policy: complete_heldout_test_partition
+  optimizer_created_for_frozen_arms: false
+  parameter_update_for_frozen_arms: false
+  model_mode: eval
+  gradient_mode: torch.inference_mode
+  parameter_gate: every_frozen_arm_has_identical_adjacent_before_and_after_state_hashes
+  fitted_baselines: [MLP, XGBoost]
+  baseline_fit_scope: downstream_training_partition_only
+  common_classification_metrics: [accuracy, balanced_accuracy, macro_f1, normalized_nll]
+  common_regression_metrics: [rmse, mae, r2, scaled_rmse, scaled_mae]
+
+kill_conditions:
+  - any_preflight_gate_fails
+  - any_non_finite_training_or_evaluation_value
+  - exact_resume_fails
+  - validation_improvement_fails
+  - any_frozen_parameter_hash_changes
+  - any_optimizer_is_created_in_a_frozen_arm
+  - promotion_receipt_protocol_identity_mismatch
+  - existing_nonempty_run_directory_would_be_overwritten
+
+claim_boundary: >-
+  Local-unissued pretraining and optimizer-free frozen-ICL mechanism evidence
+  only. This preregistration does not create a formal receipt, accepted claim,
+  public checkpoint, benchmark result, foundation-model designation, unlimited
+  context claim, or completion of the K=1024..8192 architecture runtime gate.
