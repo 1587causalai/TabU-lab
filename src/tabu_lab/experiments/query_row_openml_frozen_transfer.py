@@ -185,7 +185,15 @@ def _source_commit() -> str | None:
     explicit = os.environ.get("TABU_SOURCE_COMMIT")
     if explicit:
         return explicit
-    result = subprocess.run(("git", "rev-parse", "HEAD"), capture_output=True, text=True, check=False)
+    try:
+        result = subprocess.run(
+            ("git", "rev-parse", "HEAD"), capture_output=True, text=True, check=False
+        )
+    except FileNotFoundError:
+        # The fail-closed experiment runtime is intentionally minimal and may
+        # not ship the git binary.  Callers can bind the immutable source
+        # explicitly through TABU_SOURCE_COMMIT.
+        return None
     return result.stdout.strip() or None
 
 
