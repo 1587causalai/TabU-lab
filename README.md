@@ -35,6 +35,17 @@ uv sync --frozen --extra dev
 uv run pytest
 ```
 
+## Compiler and data boundary
+
+Raw tables do not go directly into a model. The compiler first binds a complete,
+disjoint split; fits statistics, imputation, categorical vocabularies, and feature
+selection only on the declared fit partition; then emits separate model-visible
+evidence and host-side truth. Typed row topology is preserved when present.
+
+See [`docs/architecture/compiler-data-boundary.md`](./docs/architecture/compiler-data-boundary.md).
+This is leakage prevention and deterministic episode construction, not a model-
+quality result.
+
 ## Stage 2: bounded composability
 
 The next gate checks whether the existing tokenizer, dynamics, and readout
