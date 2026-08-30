@@ -18,10 +18,10 @@ from typing import Any
 import torch
 from torch import Tensor, nn
 
-from tabu_lab.primitives import NumericReadoutOutput, RoutingOutput
+from tabu_lab.primitives import NumericReadoutOutput, RoutingOutput, presence_gate
 
-from .components import CellTokenizer
-from .dynamics import PairUnitDynamics
+from .components import CellTokenizer, NumericScaleState
+from .dynamics import CellUnitDynamics
 from .readouts import PairUnitReadout
 from .reference import DenseReferenceModel, _shape_event
 from .types import ModelVariantRef, ReferenceConfig, TabUCellBaseProfile
@@ -62,28 +62,18 @@ class LabelColumnBroadcast(nn.Module):
             getattr(getattr(spec, "role", None), "value", getattr(spec, "role", None)) == "response"
             for spec in getattr(inputs, "feature_specs", ())
         ]
-        response_mask = (
-            torch.tensor(
-                response_flags,
-                dtype=torch.bool,
-                device=cells.device,
+        if len(response_flags) != n_features or sum(response_flags) != 1:
+            raise ValueError(
+                "supervised.label_broadcast.v1 requires exactly one declared response column"
             )
-            if response_flags
-            else torch.zeros(n_features, dtype=torch.bool, device=cells.device)
+        response_mask = torch.tensor(
+            response_flags,
+            dtype=torch.bool,
+            device=cells.device,
         )
-        if response_mask.numel() not in {0, n_features}:
-            raise ValueError("response roles must match the feature axis")
-        if response_flags and int(response_mask.sum().item()) != 1:
-            raise ValueError("supervised.label_broadcast.v1 requires exactly one response column")
         query_columns = inputs.query_target_mask.any(dim=(0, 1)).to(device=cells.device)
-        if response_flags and bool((query_columns & ~response_mask).any()):
-            raise ValueError("query target columns must be declared response features")
-        if not bool(response_mask.any()):
-            # A dense implementation probe may omit FeatureSpec roles; query
-            # columns still identify a label source without consulting truth.
-            response_mask = query_columns
-        if not bool(response_mask.any()):
-            return cells
+        if not torch.equal(query_columns, response_mask):
+            raise ValueError("query targets must match the single declared response column")
 
         visible = inputs.visible_mask.to(device=cells.device)
         query = inputs.query_target_mask.to(device=cells.device)
@@ -94,8 +84,7 @@ class LabelColumnBroadcast(nn.Module):
         receiver_mask = (~response_mask).view(1, 1, n_features)
         receiver_mask = receiver_mask & (visible | inputs.target_mask.to(device=cells.device))
         receiver_mask = receiver_mask & ~inputs.natural_missing_mask.to(device=cells.device)
-        norm_sq = cells.square().sum(dim=-1, keepdim=True)
-        receiver_gate = norm_sq / (self.tau + norm_sq)
+        receiver_gate = presence_gate(cells, self.tau).unsqueeze(-1)
         return torch.where(
             receiver_mask.unsqueeze(-1),
             cells + receiver_gate * label_mix.unsqueeze(2),
@@ -176,16 +165,15 @@ class TabUCellBaseModel(DenseReferenceModel):
         config: ReferenceConfig | None = None,
         *,
         numeric_terminal: str = "local_linear",
-        profile: TabUCellBaseProfile | str | None = None,
+        profile: TabUCellBaseProfile | str,
         label_broadcast: bool | None = None,
         label_broadcast_tau: float = _LABEL_BROADCAST_TAU,
         nominal_tokenizer: str = CellTokenizer.EPISODE_RANDOM_SPHERE_V1,
         nominal_codebook_size: int = 100,
         nominal_codebook_seed: int = 1729,
-        variant_ref: ModelVariantRef | None = None,
     ) -> None:
         config = config or ReferenceConfig()
-        super().__init__(config, marker="mask", feature_identity=False)
+        super().__init__(config)
         self.tokenizer = CellTokenizer(
             config,
             marker="mask",
@@ -213,19 +201,17 @@ class TabUCellBaseModel(DenseReferenceModel):
                     "nominal_codebook_scope": "source_codebook_id_and_domain_label",
                 }
             )
-        if profile is None:
-            profile = (
-                TabUCellBaseProfile.SUPERVISED_LABEL_BROADCAST_V1
-                if bool(label_broadcast)
-                else TabUCellBaseProfile.COMPLETION_ARTIFICIAL_MASK_V1
-            )
         self.profile = TabUCellBaseProfile(profile)
         expected_broadcast = self.profile.uses_label_broadcast
         if label_broadcast is not None and bool(label_broadcast) != expected_broadcast:
             raise ValueError("label_broadcast is derived from the explicit TabUCellBaseProfile")
         self.label_broadcast = expected_broadcast
         self.label_broadcast_tau = _validate_label_broadcast_tau(label_broadcast_tau)
-        self.dynamics = PairUnitDynamics(config)
+        if not self.label_broadcast and self.label_broadcast_tau != _LABEL_BROADCAST_TAU:
+            raise ValueError(
+                "completion.artificial_mask.v1 requires the canonical label_broadcast_tau"
+            )
+        self.dynamics = CellUnitDynamics(config)
         self.readout = PairUnitReadout(config, numeric_terminal=numeric_terminal)
         semantic_payload = {
             "reference_config": _reference_config_payload(config),
@@ -251,26 +237,59 @@ class TabUCellBaseModel(DenseReferenceModel):
             source_identity="unbound-local-source",
             semantic_config_hash=semantic_config_hash,
         )
-        if variant_ref is not None:
-            required = {
-                "contract_id": expected_variant.contract_id,
-                "contract_version": expected_variant.contract_version,
-                "profile_id": expected_variant.profile_id,
-                "model_spec_hash": expected_variant.model_spec_hash,
-                "semantic_config_hash": expected_variant.semantic_config_hash,
-            }
-            for key, expected in required.items():
-                if getattr(variant_ref, key) != expected:
-                    raise ValueError(
-                        f"variant_ref mismatch at {key}: expected {expected!r}"
-                    )
-        self.variant_ref = variant_ref or expected_variant
+        # Source provenance is bound by a later trusted receipt boundary, not
+        # by arbitrary model-construction input.  Local builds therefore carry
+        # the explicit unbound sentinel and callers cannot forge an approved
+        # source identity through this constructor.
+        self.variant_ref = expected_variant
+
+    def _validate_profile_input(self, inputs: Any) -> None:
+        """Reject target-origin/profile mixtures before tokenization."""
+
+        natural_targets = inputs.natural_missing_mask & inputs.target_mask
+        if bool((natural_targets & ~inputs.unsupported_target_mask).any()):
+            raise ValueError("natural-missing targets must use the unsupported origin")
+
+        if self.profile is TabUCellBaseProfile.COMPLETION_ARTIFICIAL_MASK_V1:
+            if bool(inputs.query_target_mask.any()):
+                raise ValueError("completion.artificial_mask.v1 rejects query target origins")
+            response_count = sum(
+                getattr(getattr(spec, "role", None), "value", getattr(spec, "role", None))
+                == "response"
+                for spec in inputs.feature_specs
+            )
+            if response_count:
+                raise ValueError("completion.artificial_mask.v1 requires zero response columns")
+            return
+
+        if bool(inputs.artificial_target_mask.any()):
+            raise ValueError("supervised.label_broadcast.v1 rejects artificial-mask target origins")
+        if not bool(inputs.query_target_mask.any()):
+            raise ValueError("supervised.label_broadcast.v1 requires query targets")
+
+        n_features = inputs.values.shape[2]
+        response_flags = tuple(
+            getattr(getattr(spec, "role", None), "value", getattr(spec, "role", None)) == "response"
+            for spec in inputs.feature_specs
+        )
+        if len(response_flags) != n_features or sum(response_flags) != 1:
+            raise ValueError(
+                "supervised.label_broadcast.v1 requires exactly one declared response column"
+            )
+        response_mask = torch.tensor(
+            response_flags,
+            dtype=torch.bool,
+            device=inputs.values.device,
+        )
+        query_columns = inputs.query_target_mask.any(dim=(0, 1))
+        if not torch.equal(query_columns, response_mask):
+            raise ValueError("query targets must match the single declared response column")
 
     def _encode_dense_cells(
         self,
         inputs: Any,
         **kwargs: Any,
-    ) -> tuple[Any, Any, Tensor, Tensor]:
+    ) -> tuple[Any, Any, Tensor, Tensor, NumericScaleState]:
         """Resolve one dense episode through Step 3 without materializing readout routing.
 
         Full-context evaluation can contain tens of thousands of rows.  The
@@ -290,6 +309,7 @@ class TabUCellBaseModel(DenseReferenceModel):
             target_feature=kwargs.get("target_feature"),
             episode_id=kwargs.get("episode_id"),
         )
+        self._validate_profile_input(resolved)
         context_mask = resolved.visible_mask
         if self.profile.uses_label_broadcast:
             query_rows = resolved.query_target_mask.any(dim=2, keepdim=True)
@@ -304,6 +324,8 @@ class TabUCellBaseModel(DenseReferenceModel):
         )
         symbols = self.symbolizer(resolved)
         tokens = self.tokenizer(symbols)
+        if tokens.numeric_scale_state is None:
+            raise RuntimeError("TabUBase tokenizer did not expose numeric scale state")
         dynamics_input = _label_broadcast(
             tokens.cells,
             resolved,
@@ -312,20 +334,40 @@ class TabUCellBaseModel(DenseReferenceModel):
         )
         cells = self.dynamics(
             dynamics_input,
-            column_source_mask=resolved.visible_mask,
+            column_source_mask=context_mask,
             row_source_mask=resolved.visible_mask,
         )
-        return resolved, symbols, dynamics_input, cells
+        return resolved, symbols, dynamics_input, cells, tokens.numeric_scale_state
 
     def _forward_dense(self, inputs: Any, **kwargs: Any) -> Any:
         emit_trace = bool(kwargs.get("emit_trace", True))
-        resolved, symbols, dynamics_input, cells = self._encode_dense_cells(inputs, **kwargs)
-        coordinates, readout = self.readout(cells, resolved.values, resolved.visible_mask)
+        (
+            resolved,
+            symbols,
+            dynamics_input,
+            cells,
+            numeric_scale_state,
+        ) = self._encode_dense_cells(inputs, **kwargs)
+        coordinates, readout = self.readout(
+            cells,
+            numeric_scale_state.standardized_values,
+            resolved.visible_mask,
+        )
         readout = _apply_cell_null_contract(
             readout,
             coordinates,
             cells,
             null_mask=resolved.natural_missing_mask,
+        )
+        numeric_features = torch.tensor(
+            tuple(kind == "numeric" for kind in symbols.feature_kinds),
+            dtype=torch.bool,
+            device=readout.values.device,
+        ).view(1, 1, -1)
+        numeric_raw_prediction = torch.where(
+            readout.support_available & numeric_features & ~resolved.unsupported_target_mask,
+            readout.values * numeric_scale_state.scale + numeric_scale_state.mean,
+            torch.zeros_like(readout.values),
         )
         events = (
             (
@@ -371,6 +413,7 @@ class TabUCellBaseModel(DenseReferenceModel):
                     ),
                     terminal=f"numeric_{self.readout.numeric_terminal_trace}",
                     geometry="cell_projection",
+                    numeric_prediction_scale="context_standardized",
                 ),
                 _shape_event(
                     "prediction_boundary",
@@ -395,11 +438,19 @@ class TabUCellBaseModel(DenseReferenceModel):
             routing_log_weights=readout.routing.log_weights,
             routing_support_mask=readout.routing.support_mask,
             events=events,
+            extra_auxiliaries={
+                "numeric_raw_prediction": numeric_raw_prediction,
+                "numeric_context_mean": numeric_scale_state.mean,
+                "numeric_context_std": numeric_scale_state.std,
+                "numeric_context_scale": numeric_scale_state.scale,
+                "numeric_context_count": numeric_scale_state.context_count,
+            },
             metadata={
                 "dynamics_plan": self._dynamics_plan_name(self.dynamics),
                 "unit": "cell",
                 "family_id": "tabu.table_cell_as_unit",
                 "numeric_terminal": self.readout.numeric_terminal,
+                "numeric_prediction_scale": "context_standardized",
                 "profile_id": self.profile.value,
                 "contract_version": self.variant_ref.contract_version,
                 "variant_ref": self.variant_ref.as_dict(),

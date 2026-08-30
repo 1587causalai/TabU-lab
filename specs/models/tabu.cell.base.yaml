@@ -6,9 +6,11 @@
   "upstream": {
     "repository": "TabU/latex/model-factory",
     "path": "../latex/model-factory/table-cell-as-unit-models/TabUBase/main.tex",
-    "sha256": "2769168c7e60d1b419d7308c9baec494aa1c851bcdd77c580c02ee311e3bd501",
+    "sha256": "e239b5f67e2fa55111c201b9497e5bf812b6997bc0e9cc2bf88a1c2d8d8f29a0",
+    "semantic_source_tree_sha256": "28ea55544184e18f23fb378b563b62224b190ecb912b34ab1545d82c33d7e7f2",
+    "source_manifest": "pkg://tabu_lab.specs/model-factory-source-manifest.json#contracts/tabu.cell.base",
     "readonly": true,
-    "observed_at": "2026-08-28",
+    "observed_at": "2026-08-30",
     "license_boundary": "Metadata-only reference: upstream TeX remains readonly and is not redistributed by this manifest."
   },
   "carrier": {
@@ -26,16 +28,18 @@
     "geometry": "global learned projection W c_ra in R^K",
     "support": "same-feature visible cells",
     "numeric_terminal": "default local-linear; NW nested baseline",
+    "numeric_prediction_scale": "context-standardized hat-tilde-y; raw-unit inverse projection is auxiliary only",
     "categorical_terminal": "NW probability mass on declared domain",
     "no_support": "typed no-support"
   },
   "loss": {
     "truth_entry": "Step 5 only",
+    "numeric": "MSE in the Step-1 context-standardized space using the emitted mean and scale",
     "target_families": ["artificial_mask_completion", "supervised_single_response"]
   },
   "interfaces": {
     "compile": "typed partially observed table with cell Units",
-    "forward": "truth-free cell predictions plus trace; explicit profile required",
+    "forward": "truth-free cell predictions plus trace; numeric is context-standardized with an explicit raw-unit auxiliary; explicit profile required",
     "train": "truth supplied only through the loss sidecar",
     "infer": "profile-gated artificial-mask completion or single-response query labels"
   },
@@ -74,6 +78,7 @@
       }
     },
     "numeric_terminal": "local_linear",
+    "numeric_prediction_scale": "context_standardized",
     "feature_identity": "forbidden",
     "continuous_tokenizer": "context_only_standardization_then_shared_learnable_fourier",
     "nominal_tokenizer": "episode_random_sphere",

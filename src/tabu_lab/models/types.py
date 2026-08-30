@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from enum import StrEnum
@@ -82,11 +83,6 @@ class ReferenceConfig:
     presence_tau: float = 1.0e-6
     denominator_epsilon: float = 1.0e-8
     routing_bandwidth: float = 1.0
-    # Router-local address gauge. ``rms_unit`` normalizes every evolved
-    # Unit/Feature token independently before matched inner products.  It is
-    # an explicit experimental plan, not a silent change to the ``none``
-    # reference geometry.
-    geometry_normalization: str = "none"
     # ``omab`` is the canonical O-closed implementation.  ``mab`` is a
     # parameter-isomorphic non-O control used for paired ablations.  Keep
     # this field last to preserve the positional layout of legacy configs.
@@ -116,10 +112,11 @@ class ReferenceConfig:
         if not 0.0 <= self.dropout < 1.0:
             raise ValueError("dropout must be in [0, 1)")
         for name in ("presence_tau", "denominator_epsilon", "routing_bandwidth"):
-            if getattr(self, name) <= 0.0:
-                raise ValueError(f"{name} must be positive")
-        if self.geometry_normalization not in {"none", "rms_unit"}:
-            raise ValueError("geometry_normalization must be none or rms_unit")
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                raise ValueError(f"{name} must be one finite positive scalar")
+            if not math.isfinite(float(value)) or float(value) <= 0.0:
+                raise ValueError(f"{name} must be one finite positive scalar")
 
     @property
     def semantic_hash(self) -> str:
@@ -553,22 +550,6 @@ class DenseTraceEvent:
     metadata: Mapping[str, Any] = field(default_factory=dict)
 
 
-@dataclass(frozen=True)
-class DesignOpenBuild:
-    model_id: str
-    status: str = "design_open"
-    reason: str = (
-        "The model-factory source keeps intervention semantics and causal identification open; "
-        "a forward implementation would silently invent a contract."
-    )
-    open_questions: tuple[str, ...] = (
-        "scenario versus intervention semantics",
-        "allowed factual evidence and post-treatment variables",
-        "paired-outcome or structural-identification assumptions",
-        "typed prediction, contrast, and abstention contract",
-    )
-
-
 def hash_dense_input(inputs: DenseModelInput) -> str:
     digest = hashlib.sha256()
     for tensor in (
@@ -610,7 +591,6 @@ def hash_dense_input(inputs: DenseModelInput) -> str:
 __all__ = [
     "DenseModelInput",
     "DenseTraceEvent",
-    "DesignOpenBuild",
     "DynamicsBlockKind",
     "FeatureLayout",
     "ReferenceConfig",

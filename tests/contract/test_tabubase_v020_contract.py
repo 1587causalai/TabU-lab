@@ -1,19 +1,30 @@
 from __future__ import annotations
 
+import hashlib
+import json
 from dataclasses import replace
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 import torch
+from pydantic import BaseModel
 
 from tabu_lab.contracts import (
     FeatureKind,
     FeatureRole,
     FeatureSpec,
     TruthSidecar,
+    assert_truth_free,
     canonical_hash,
 )
-from tabu_lab.models import TabUCellBaseModel, TabUCellBaseProfile, build_model
+from tabu_lab.models import (
+    MODEL_BUILDERS,
+    TabUCellBaseModel,
+    TabUCellBaseProfile,
+    build_from_spec,
+    build_model,
+)
 from tabu_lab.models.components import CellTokenizer, Symbolizer
 from tabu_lab.models.table_cell import _label_broadcast
 from tabu_lab.models.types import DenseModelInput, DynamicsBlockKind, ReferenceConfig
@@ -95,18 +106,48 @@ def test_v020_profiles_are_explicit_and_identity_bound() -> None:
             profile=TabUCellBaseProfile.COMPLETION_ARTIFICIAL_MASK_V1,
             label_broadcast=True,
         )
-    with pytest.raises(ValueError, match="contract_version"):
+    with pytest.raises(TypeError, match="variant_ref"):
         build_model(
             "tabu.cell.base",
             profile=TabUCellBaseProfile.COMPLETION_ARTIFICIAL_MASK_V1,
-            variant_ref=replace(completion.variant_ref, contract_version="0.1.0"),
+            variant_ref=replace(
+                completion.variant_ref,
+                source_identity="forged-approved-receipt",
+            ),
         )
+    with pytest.raises(ValueError, match="canonical label_broadcast_tau"):
+        build_model(
+            "tabu.cell.base",
+            profile=TabUCellBaseProfile.COMPLETION_ARTIFICIAL_MASK_V1,
+            label_broadcast_tau=9.0,
+        )
+    supervised_custom_tau = build_model(
+        "tabu.cell.base",
+        profile=TabUCellBaseProfile.SUPERVISED_LABEL_BROADCAST_V1,
+        label_broadcast_tau=9.0,
+    )
+    assert supervised.variant_ref.semantic_hash != supervised_custom_tau.variant_ref.semantic_hash
     with pytest.raises(ValueError, match="unexpected fields"):
         completion.validate_checkpoint_identity({**completion.checkpoint_identity(), "extra": True})
 
 
 def test_registry_build_is_typed_versioned_and_yaml_bound() -> None:
     spec = get_model_spec("tabu.cell.base", "0.2.0")
+    repository_root = Path(__file__).resolve().parents[2]
+    public_manifest = repository_root / "specs" / "model-factory-source-manifest.json"
+    packaged_manifest = repository_root / "src" / "tabu_lab" / "specs" / public_manifest.name
+    assert public_manifest.read_bytes() == packaged_manifest.read_bytes()
+    manifest = json.loads(public_manifest.read_text())
+    source = manifest["contracts"]["tabu.cell.base"]
+    closure_payload = json.dumps(
+        source["semantic_source_closure"],
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode()
+    assert source["entrypoint_sha256"] == spec.upstream.sha256
+    assert hashlib.sha256(closure_payload).hexdigest() == source["semantic_source_tree_sha256"]
+    assert source["semantic_source_tree_sha256"] == spec.upstream.semantic_source_tree_sha256
     result = build_contract(
         "tabu.cell.base",
         config=_small_config(),
@@ -116,9 +157,54 @@ def test_registry_build_is_typed_versioned_and_yaml_bound() -> None:
     assert result.executable
     assert isinstance(result.model, TabUCellBaseModel)
     assert result.model.model_spec_hash == canonical_hash(spec.model_dump(mode="json"))
+    exact = build_from_spec(
+        spec,
+        config=_small_config(),
+        profile="completion.artificial_mask.v1",
+    )
+    assert exact.model_spec_hash == canonical_hash(spec.model_dump(mode="json"))
+    with pytest.raises(TypeError, match="typed ModelSpec"):
+        build_from_spec(
+            spec.model_dump(mode="json"),
+            config=_small_config(),
+            profile="completion.artificial_mask.v1",
+        )
+    with pytest.raises(ModelVersionNotFoundError):
+        build_from_spec(
+            spec.model_copy(update={"contract_version": "999.0.0"}),
+            config=_small_config(),
+            profile="completion.artificial_mask.v1",
+        )
+    tampered = spec.model_copy(
+        update={"upstream": spec.upstream.model_copy(update={"sha256": "0" * 64})}
+    )
+    with pytest.raises(ValueError, match="exactly match"):
+        build_from_spec(
+            tampered,
+            config=_small_config(),
+            profile="completion.artificial_mask.v1",
+        )
+    missing_profile = build_contract("tabu.cell.base", config=_small_config())
+    assert missing_profile.status is BuildStatus.BUILD_ERROR
+    assert not missing_profile.executable
+    assert "explicit profile" in (missing_profile.detail or "")
     validate_registry_source_parity()
     with pytest.raises(ModelVersionNotFoundError):
         get_model_spec("tabu.cell.base", "0.1.0")
+    with pytest.raises(TypeError, match="unknown table-cell base builder options"):
+        build_model(
+            "tabu.cell.base",
+            profile="supervised.label_broadcast.v1",
+            label_columns=(2,),
+        )
+    with pytest.raises(ValueError, match="canonical model builder cannot be replaced"):
+        MODEL_BUILDERS.register("tabu.cell.base", lambda **_: object(), replace=True)
+    exact_after_rejected_override = build_from_spec(
+        spec,
+        config=_small_config(),
+        profile="completion.artificial_mask.v1",
+    )
+    assert isinstance(exact_after_rejected_override, TabUCellBaseModel)
 
 
 def test_source_scoped_codebook_v2_has_distinct_checkpoint_identity() -> None:
@@ -139,6 +225,32 @@ def test_source_scoped_codebook_v2_has_distinct_checkpoint_identity() -> None:
     assert v1.variant_ref.semantic_hash != v2.variant_ref.semantic_hash
     with pytest.raises(ValueError, match="tokenizer_version"):
         v2.validate_checkpoint_identity(v1_identity)
+    for option, value in (
+        ("nominal_codebook_size", 2),
+        ("nominal_codebook_seed", 999),
+    ):
+        with pytest.raises(ValueError, match="only configurable"):
+            build_model(
+                "tabu.cell.base",
+                profile="supervised.label_broadcast.v1",
+                **{option: value},
+            )
+
+
+def test_reference_config_max_features_is_enforced() -> None:
+    too_small = build_model(
+        "tabu.cell.base",
+        config=replace(_small_config(), max_features=2),
+        profile="completion.artificial_mask.v1",
+    )
+    with pytest.raises(ValueError, match="exceeds max_features=2"):
+        too_small._forward_dense(_completion_input())
+    exact = build_model(
+        "tabu.cell.base",
+        config=replace(_small_config(), max_features=3),
+        profile="completion.artificial_mask.v1",
+    )
+    exact._forward_dense(_completion_input())
 
 
 def test_supervised_profile_has_one_response_and_no_self_support() -> None:
@@ -147,7 +259,7 @@ def test_supervised_profile_has_one_response_and_no_self_support() -> None:
     assert prediction.metadata["profile_id"] == "supervised.label_broadcast.v1"
     # Query row 0 is never allowed to support its own target.
     assert float(prediction.outputs["support_weights"][0, 0, 2, 2].detach()) == 0.0
-    with pytest.raises(ValueError, match="exactly one response"):
+    with pytest.raises(ValueError, match="exactly one declared response"):
         bad = _supervised_input()
         bad = DenseModelInput(
             bad.values,
@@ -163,6 +275,116 @@ def test_supervised_profile_has_one_response_and_no_self_support() -> None:
             ),
         )
         model._forward_dense(bad)
+
+
+def test_profile_target_origins_fail_closed() -> None:
+    completion = build_model(
+        "tabu.cell.base",
+        config=_small_config(),
+        profile="completion.artificial_mask.v1",
+    )
+    with pytest.raises(ValueError, match="rejects query target"):
+        completion._forward_dense(_supervised_input())
+    with pytest.raises(ValueError, match="zero response columns"):
+        completion._forward_dense(
+            replace(
+                _completion_input(),
+                feature_specs=(
+                    FeatureSpec(name="x0"),
+                    FeatureSpec(name="x1"),
+                    FeatureSpec(name="y", role=FeatureRole.RESPONSE),
+                ),
+            )
+        )
+
+    supervised = build_model(
+        "tabu.cell.base",
+        config=_small_config(),
+        profile="supervised.label_broadcast.v1",
+    )
+    with pytest.raises(ValueError, match="rejects artificial-mask"):
+        supervised._forward_dense(_completion_input())
+    with pytest.raises(ValueError, match="exactly one declared response"):
+        supervised._forward_dense(replace(_supervised_input(), feature_specs=()))
+
+    visible = torch.tensor([[[True, False, False], [True, True, True]]])
+    query = ~visible
+    misaligned = DenseModelInput(
+        values=torch.tensor([[[1.0, 0.0, 0.0], [2.0, 3.0, 4.0]]]),
+        visible_mask=visible,
+        target_mask=query,
+        natural_missing_mask=torch.zeros_like(query),
+        artificial_target_mask=torch.zeros_like(query),
+        query_target_mask=query,
+        unsupported_target_mask=torch.zeros_like(query),
+        feature_specs=(
+            FeatureSpec(name="x0"),
+            FeatureSpec(name="x1"),
+            FeatureSpec(name="y", role=FeatureRole.RESPONSE),
+        ),
+    )
+    with pytest.raises(ValueError, match="single declared response"):
+        supervised._forward_dense(misaligned)
+
+
+def test_supervised_column_axis_excludes_query_rows_but_row_axis_keeps_predictors() -> None:
+    model = build_model(
+        "tabu.cell.base",
+        config=_small_config(),
+        profile="supervised.label_broadcast.v1",
+    )
+    observed: dict[str, torch.Tensor] = {}
+
+    def capture_masks(
+        _module: torch.nn.Module,
+        _args: tuple[torch.Tensor, ...],
+        kwargs: dict[str, torch.Tensor],
+    ) -> None:
+        observed["column"] = kwargs["column_source_mask"].detach().clone()
+        observed["row"] = kwargs["row_source_mask"].detach().clone()
+
+    handle = model.dynamics.blocks[0].register_forward_pre_hook(
+        capture_masks,
+        with_kwargs=True,
+    )
+    try:
+        inputs = _supervised_input()
+        model._forward_dense(inputs)
+    finally:
+        handle.remove()
+
+    query_rows = inputs.query_target_mask.any(dim=2, keepdim=True)
+    assert torch.equal(observed["column"], inputs.visible_mask & ~query_rows)
+    assert torch.equal(observed["row"], inputs.visible_mask)
+    assert model.dynamics.blocks[0].exclude_row_self is False
+
+
+def test_label_broadcast_is_finite_for_large_finite_receivers() -> None:
+    visible = torch.tensor([[[True, False]]])
+    query = ~visible
+    inputs = DenseModelInput(
+        values=torch.tensor([[[1.0e20, 0.0]]]),
+        visible_mask=visible,
+        target_mask=query,
+        natural_missing_mask=torch.zeros_like(query),
+        artificial_target_mask=torch.zeros_like(query),
+        query_target_mask=query,
+        feature_specs=(
+            FeatureSpec(name="x"),
+            FeatureSpec(name="y", role=FeatureRole.RESPONSE),
+        ),
+    )
+    cells = torch.tensor([[[[1.0e20, 0.0], [1.0, 0.0]]]])
+    broadcast = _label_broadcast(cells, inputs, enabled=True)
+    assert torch.isfinite(broadcast).all()
+
+
+@pytest.mark.parametrize("name", ["presence_tau", "denominator_epsilon", "routing_bandwidth"])
+def test_reference_config_rejects_non_finite_kernel_scalars(name: str) -> None:
+    with pytest.raises(ValueError, match="finite positive scalar"):
+        ReferenceConfig(**{name: float("nan")})
+    with pytest.raises(ValueError, match="finite positive scalar"):
+        ReferenceConfig(**{name: float("inf")})
 
 
 def test_completion_profile_trace_contains_profile_and_tokenizer_version() -> None:
@@ -181,6 +403,8 @@ def test_completion_profile_trace_contains_profile_and_tokenizer_version() -> No
     )
     dynamics = next(event for event in prediction.trace.events if event.name == "dynamics_plan")
     assert dynamics.metadata["shape"] == (1, 3, 3, model.config.d_model)
+    assert prediction.metadata["dynamics_plan"] == "cell_unit_three_omab"
+    assert dynamics.metadata["plan"] == get_model_spec("tabu.cell.base").dynamics["family"]
     assert prediction.metadata["unit"] == "cell"
 
 
@@ -204,12 +428,8 @@ def test_truth_free_query_marker_drives_label_broadcast_without_label_payload() 
 
 
 def test_cell_tokenizer_has_typed_numeric_nominal_and_exact_null_branches() -> None:
-    values = torch.tensor(
-        [[[1.0, 0.0], [2.0, 1.0], [3.0, 2.0], [0.0, 0.0]]]
-    )
-    visible = torch.tensor(
-        [[[True, True], [True, True], [True, True], [False, False]]]
-    )
+    values = torch.tensor([[[1.0, 0.0], [2.0, 1.0], [3.0, 2.0], [0.0, 0.0]]])
+    visible = torch.tensor([[[True, True], [True, True], [True, True], [False, False]]])
     natural = ~visible
     inputs = DenseModelInput(
         values=values,
@@ -266,11 +486,71 @@ def test_cell_base_keeps_numeric_and_nominal_predictions_typed() -> None:
     prediction = build_model(
         "tabu.cell.base",
         config=_small_config(),
+        profile="completion.artificial_mask.v1",
     )._forward_dense(inputs)
     assert prediction.entries["numeric"].status.value == "ok"
     assert prediction.entries["categorical"].status.value == "ok"
     assert prediction.outputs["categorical"].shape == (1, 3, 2)
     assert torch.isfinite(prediction.auxiliaries["categorical_log_probabilities"]).all()
+    assert not bool(prediction.auxiliaries["numeric_raw_prediction"][:, :, 1].any())
+
+
+def test_numeric_prediction_uses_context_standardized_scale_with_raw_projection() -> None:
+    def episode(multiplier: float, shift: float) -> DenseModelInput:
+        visible = torch.tensor([[[True], [True], [True], [False]]])
+        target = ~visible
+        raw = torch.tensor([1.0, 2.0, 3.0]) * multiplier + shift
+        values = torch.zeros(1, 4, 1)
+        values[0, :3, 0] = raw
+        return DenseModelInput(
+            values,
+            visible,
+            target,
+            torch.zeros_like(target),
+            artificial_target_mask=target,
+            query_target_mask=torch.zeros_like(target),
+            unsupported_target_mask=torch.zeros_like(target),
+            feature_specs=(FeatureSpec(name="x", kind=FeatureKind.NUMERIC),),
+        )
+
+    torch.manual_seed(37)
+    model = build_model(
+        "tabu.cell.base",
+        config=_small_config(),
+        profile="completion.artificial_mask.v1",
+        numeric_terminal="nadaraya_watson",
+    ).eval()
+    first = model._forward_dense(episode(1.0, 0.0))
+    affine = model._forward_dense(episode(10.0, 5.0))
+    large = model._forward_dense(episode(1.0e20, 0.0))
+    target_index = (0, 3, 0)
+
+    first_standardized = first.outputs["numeric"][target_index]
+    affine_standardized = affine.outputs["numeric"][target_index]
+    assert torch.allclose(first_standardized, affine_standardized, atol=2.0e-5)
+    assert first.entries["numeric"].metadata["value_space"] == "context_standardized"
+    assert first.auxiliaries["numeric_context_count"].item() == 3
+    assert torch.allclose(
+        affine.auxiliaries["numeric_context_mean"],
+        first.auxiliaries["numeric_context_mean"] * 10.0 + 5.0,
+    )
+    assert torch.allclose(
+        affine.auxiliaries["numeric_context_std"],
+        first.auxiliaries["numeric_context_std"] * 10.0,
+        atol=2.0e-6,
+    )
+    first_raw = first.auxiliaries["numeric_raw_prediction"][target_index]
+    affine_raw = affine.auxiliaries["numeric_raw_prediction"][target_index]
+    assert torch.allclose(affine_raw, first_raw * 10.0 + 5.0, atol=2.0e-4)
+    assert torch.isfinite(large.outputs["numeric"]).all()
+    assert torch.isfinite(large.auxiliaries["numeric_context_mean"]).all()
+    assert torch.isfinite(large.auxiliaries["numeric_context_std"]).all()
+    assert torch.isfinite(large.auxiliaries["numeric_raw_prediction"]).all()
+    assert torch.allclose(
+        large.outputs["numeric"][target_index],
+        first_standardized,
+        atol=2.0e-5,
+    )
 
 
 @pytest.mark.parametrize("block_kind", [DynamicsBlockKind.OMAB, DynamicsBlockKind.MAB])
@@ -285,18 +565,40 @@ def test_natural_missing_is_typed_no_support_for_both_dynamics_blocks(
         visible_mask=visible,
         target_mask=target,
         natural_missing_mask=torch.tensor([[[True], [False]]]),
-        artificial_target_mask=target,
+        artificial_target_mask=torch.zeros_like(target),
         query_target_mask=torch.zeros_like(target),
-        unsupported_target_mask=torch.zeros_like(target),
+        unsupported_target_mask=target,
         episode_id=f"tabubase-null-{block_kind.value}",
     )
     prediction = build_model(
         "tabu.cell.base",
         config=_small_config(block_kind=block_kind),
+        profile="completion.artificial_mask.v1",
     )._forward_dense(inputs)
-    assert prediction.metadata["status"] == "no_support"
-    assert prediction.entries["numeric"].status.value == "no_support"
+    assert prediction.metadata["status"] == "unsupported"
+    assert prediction.entries["numeric"].status.value == "unsupported"
     assert prediction.auxiliaries["support_available"][0, 0, 0].item() is False
+
+
+def test_unsupported_numeric_target_has_no_raw_auxiliary_prediction() -> None:
+    visible = torch.tensor([[[False], [True], [True]]])
+    target = ~visible
+    inputs = DenseModelInput(
+        values=torch.tensor([[[0.0], [2.0], [3.0]]]),
+        visible_mask=visible,
+        target_mask=target,
+        natural_missing_mask=torch.zeros_like(target),
+        artificial_target_mask=torch.zeros_like(target),
+        query_target_mask=torch.zeros_like(target),
+        unsupported_target_mask=target,
+    )
+    prediction = build_model(
+        "tabu.cell.base",
+        config=_small_config(),
+        profile="completion.artificial_mask.v1",
+    )._forward_dense(inputs)
+    assert prediction.entries["numeric"].status.value == "unsupported"
+    assert prediction.auxiliaries["numeric_raw_prediction"][0, 0, 0].item() == 0.0
 
 
 def test_truth_enters_only_after_forward_and_hidden_payload_is_inert() -> None:
@@ -321,7 +623,11 @@ def test_truth_enters_only_after_forward_and_hidden_payload_is_inert() -> None:
     assert torch.equal(clean_dense.values, poisoned_dense.values)
 
     torch.manual_seed(5)
-    model = build_model("tabu.cell.base", config=_small_config()).eval()
+    model = build_model(
+        "tabu.cell.base",
+        config=_small_config(),
+        profile="completion.artificial_mask.v1",
+    ).eval()
     first = model._forward_dense(clean_dense)
     second = model._forward_dense(poisoned_dense)
     assert torch.equal(first.outputs["numeric"], second.outputs["numeric"])
@@ -344,7 +650,10 @@ def test_truth_enters_only_after_forward_and_hidden_payload_is_inert() -> None:
 
     def numeric_loss(truth: TruthSidecar) -> torch.Tensor:
         prediction = first.outputs["numeric"]
-        residual = prediction[truth.target_mask] - truth.target_values[truth.target_mask]
+        standardized_truth = (
+            truth.target_values - first.auxiliaries["numeric_context_mean"]
+        ) / first.auxiliaries["numeric_context_scale"]
+        residual = prediction[truth.target_mask] - standardized_truth[truth.target_mask]
         return residual.square().mean()
 
     assert numeric_loss(sidecar(5.0)).item() != numeric_loss(sidecar(50.0)).item()
@@ -353,9 +662,17 @@ def test_truth_enters_only_after_forward_and_hidden_payload_is_inert() -> None:
 
 def test_fixed_seed_checkpoint_roundtrip_is_deterministic() -> None:
     torch.manual_seed(1729)
-    first = build_model("tabu.cell.base", config=_small_config()).eval()
+    first = build_model(
+        "tabu.cell.base",
+        config=_small_config(),
+        profile="completion.artificial_mask.v1",
+    ).eval()
     torch.manual_seed(1729)
-    second = build_model("tabu.cell.base", config=_small_config()).eval()
+    second = build_model(
+        "tabu.cell.base",
+        config=_small_config(),
+        profile="completion.artificial_mask.v1",
+    ).eval()
     second.load_state_dict(first.state_dict())
 
     fixture = _completion_input()
@@ -374,3 +691,11 @@ def test_fixed_seed_checkpoint_roundtrip_is_deterministic() -> None:
         profile="supervised.label_broadcast.v1",
     )
     assert first.variant_ref.semantic_hash != supervised.variant_ref.semantic_hash
+
+
+def test_truth_free_guard_recurses_into_pydantic_models() -> None:
+    class WrappedTruth(BaseModel):
+        target_values: list[float]
+
+    with pytest.raises(ValueError, match="truth-bearing key"):
+        assert_truth_free({"opaque": WrappedTruth(target_values=[999.0])})

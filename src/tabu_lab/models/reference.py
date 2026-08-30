@@ -16,7 +16,7 @@ from tabu_lab.primitives import (
     categorical_from_routing,
 )
 
-from .components import Symbolizer, Tokenizer
+from .components import Symbolizer
 from .types import (
     DenseModelInput,
     DenseTraceEvent,
@@ -242,9 +242,7 @@ def _make_forward_trace(
         "ll_ridge",
         "bandwidth",
     )
-    variant_payload = {
-        key: metadata[key] for key in variant_keys if key in metadata
-    }
+    variant_payload = {key: metadata[key] for key in variant_keys if key in metadata}
     model_variant = json.dumps(
         variant_payload,
         sort_keys=True,
@@ -293,7 +291,7 @@ class DenseReferenceModel(nn.Module):
 
     model_id: str
 
-    def __init__(self, config: ReferenceConfig, *, marker: str, feature_identity: bool = False):
+    def __init__(self, config: ReferenceConfig):
         super().__init__()
         self.config = config
         from tabu_lab.contracts import canonical_hash
@@ -303,7 +301,6 @@ class DenseReferenceModel(nn.Module):
         self.contract_version = model_spec.contract_version
         self.model_spec_hash = canonical_hash(model_spec.model_dump(mode="json"))
         self.symbolizer = Symbolizer()
-        self.tokenizer = Tokenizer(config, marker=marker, add_feature_identity=feature_identity)
 
     def forward(self, episode: EvidenceEpisode) -> PredictionBundle:
         """Fail-closed public boundary: only compiled evidence may reach a model."""
@@ -385,18 +382,6 @@ class DenseReferenceModel(nn.Module):
             raise ValueError("support_visible_mask must be a subset of visible evidence")
         numeric_features = layout.numeric_mask.view(1, 1, n_features)
         categorical_features = layout.categorical_mask.view(1, 1, n_features)
-        if metadata.get("numeric_terminal") == "parameterized_matching" and bool(
-            layout.categorical_mask.any()
-        ):
-            raise ValueError(
-                "parameterized matching is numeric-only in the current TabU4Rec "
-                "mainline; select an explicit categorical appendix terminal"
-            )
-
-        # Numeric terminals may use richer support axes (for example Rec's
-        # row-plus-column arms).  Categorical probabilities must consume the
-        # same declared support geometry as numeric values; otherwise a Rec
-        # item arm would silently disappear for categorical interactions.
         numeric_values = values.masked_fill(~numeric_features, 0.0)
         numeric_available = support_available & numeric_features
         numeric_weights = routing_weights * numeric_features.unsqueeze(-1)
@@ -550,12 +535,7 @@ class DenseReferenceModel(nn.Module):
 
         def support_ids_for(weights: Tensor) -> tuple[Tensor, str]:
             n_support = weights.shape[-1]
-            if n_support == n_rows:
-                support_kind = "row"
-            elif n_support == n_rows + n_features:
-                support_kind = "row_then_feature"
-            else:
-                support_kind = "local_axis"
+            support_kind = "row" if n_support == n_rows else "local_axis"
             support_axis = torch.arange(n_support, device=weights.device)
             support_ids = support_axis.view(*((1,) * (weights.ndim - 1)), n_support).expand_as(
                 weights
@@ -579,20 +559,12 @@ class DenseReferenceModel(nn.Module):
         if numeric_terminal not in {
             "nadaraya_watson",
             "local_linear",
-            "parameterized_matching",
         }:
-            raise ValueError(
-                "numeric_terminal metadata must be nadaraya_watson, local_linear, "
-                "or parameterized_matching"
-            )
+            raise ValueError("numeric_terminal metadata must be nadaraya_watson or local_linear")
         numeric_terminal_label = (
             "empirical_nadaraya_watson"
             if numeric_terminal == "nadaraya_watson"
-            else (
-                "empirical_local_linear"
-                if numeric_terminal == "local_linear"
-                else "parameterized_matching"
-            )
+            else "empirical_local_linear"
         )
 
         def make_entry(
@@ -648,6 +620,14 @@ class DenseReferenceModel(nn.Module):
 
         entries: dict[str, Any] = {}
         if bool(layout.numeric_mask.any()):
+            numeric_entry_metadata = {}
+            if "numeric_prediction_scale" in metadata:
+                numeric_entry_metadata = {
+                    "value_space": metadata["numeric_prediction_scale"],
+                    "raw_prediction_key": "numeric_raw_prediction",
+                    "context_mean_key": "numeric_context_mean",
+                    "context_scale_key": "numeric_context_scale",
+                }
             entries["numeric"] = make_entry(
                 kind=PredictionKind.NUMERIC,
                 entry_values=numeric_values,
@@ -656,6 +636,7 @@ class DenseReferenceModel(nn.Module):
                 family_available=numeric_available & ~numeric_unsupported,
                 family_weights=numeric_weights,
                 terminal=numeric_terminal_label,
+                entry_metadata=numeric_entry_metadata,
             )
         if categorical_readout is not None:
             schema_metadata = tuple(

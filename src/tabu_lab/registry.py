@@ -61,11 +61,13 @@ class UpstreamSource(BaseModel):
     repository: str = Field(min_length=1)
     path: str = Field(min_length=1)
     sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    semantic_source_tree_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    source_manifest: str = Field(min_length=1)
     readonly: Literal[True]
     observed_at: str = Field(min_length=1)
     license_boundary: str = Field(min_length=1)
 
-    @field_validator("sha256")
+    @field_validator("sha256", "semantic_source_tree_sha256")
     @classmethod
     def validate_sha256(cls, value: str) -> str:
         normalized = value.lower()
@@ -196,20 +198,13 @@ class ModelSpec(BaseModel):
             self.maturity.evidence,
         )
         gated = {MaturityStage.SUPPORTED, MaturityStage.EVIDENCE_BACKED}
-        if (
-            any(dimension in gated for dimension in dimensions)
-            and self.maturity_evidence is None
-        ):
+        if any(dimension in gated for dimension in dimensions) and self.maturity_evidence is None:
             raise ValueError(
                 "supported/evidence-backed maturity requires an immutable Gate 1 "
                 "receipt, independent review report, and gong approval"
             )
-        if (
-            any(dimension is MaturityStage.EVIDENCE_BACKED for dimension in dimensions)
-            and (
-                self.maturity_evidence is None
-                or self.maturity_evidence.accepted_claim_hash is None
-            )
+        if any(dimension is MaturityStage.EVIDENCE_BACKED for dimension in dimensions) and (
+            self.maturity_evidence is None or self.maturity_evidence.accepted_claim_hash is None
         ):
             raise ValueError("evidence-backed maturity requires an accepted claim hash")
         return self
@@ -403,9 +398,7 @@ def validate_registry_source_parity(
             f"missing public={missing_public}, missing packaged={missing_packaged}"
         )
     mismatches = sorted(
-        path
-        for path, payload in public_manifests.items()
-        if packaged_manifests[path] != payload
+        path for path, payload in public_manifests.items() if packaged_manifests[path] != payload
     )
     if mismatches:
         raise RegistryValidationError(
@@ -442,26 +435,6 @@ def validate_model_spec(
         return ValidationReport(checked=(), issues=(issue,))
 
     issues: list[ValidationIssue] = []
-    if validated.contract_id == "tabu4do":
-        if validated.maturity.build_state is not ContractBuildState.DESIGN_OPEN:
-            issues.append(
-                ValidationIssue(
-                    severity=IssueSeverity.ERROR,
-                    code="tabu4do_must_be_design_open",
-                    message="TabU4Do cannot be marked buildable until its realization is frozen",
-                    contract_id=validated.contract_id,
-                )
-            )
-        if not any(item.blocking_build for item in validated.known_open):
-            issues.append(
-                ValidationIssue(
-                    severity=IssueSeverity.ERROR,
-                    code="tabu4do_missing_blocking_open",
-                    message="TabU4Do must retain at least one build-blocking realization question",
-                    contract_id=validated.contract_id,
-                )
-            )
-
     if verify_upstream:
         source = _source_path(validated, source_root)
         if not source.is_file():
@@ -531,17 +504,17 @@ def build_model(contract_id: str, **kwargs: Any) -> BuildResult:
 
     try:
         models = import_module("tabu_lab.models")
-        builder = models.build_model
+        builder = models.build_from_spec
     except (ModuleNotFoundError, AttributeError) as exc:
         return BuildResult(
             status=BuildStatus.BUILDER_UNAVAILABLE,
             contract_id=contract_id,
             spec=spec,
-            detail=f"tabu_lab.models.build_model is unavailable: {exc}",
+            detail=f"tabu_lab.models.build_from_spec is unavailable: {exc}",
         )
 
     try:
-        model = builder(contract_id, **kwargs)
+        model = builder(spec, **kwargs)
     except Exception as exc:
         return BuildResult(
             status=BuildStatus.BUILD_ERROR,

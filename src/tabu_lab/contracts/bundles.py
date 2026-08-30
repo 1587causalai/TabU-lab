@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import math
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from enum import StrEnum
@@ -63,8 +62,10 @@ class PredictionEntry:
         values = None if self.values is None else torch.as_tensor(self.values)
         if status is PredictionStatus.OK and values is None:
             raise ValueError("PredictionStatus.OK requires prediction values")
-        if values is not None and values.is_floating_point() and not bool(
-            torch.isfinite(values).all()
+        if (
+            values is not None
+            and values.is_floating_point()
+            and not bool(torch.isfinite(values).all())
         ):
             raise ValueError("prediction values must be finite")
 
@@ -80,9 +81,7 @@ class PredictionEntry:
             raise ValueError("PredictionEntry.support_weights must use a real float dtype")
         if tuple(support_ids.shape) != tuple(support_weights.shape):
             raise ValueError("support_ids and support_weights must have identical shapes")
-        if not bool(torch.isfinite(support_weights).all()) or bool(
-            (support_weights < 0).any()
-        ):
+        if not bool(torch.isfinite(support_weights).all()) or bool((support_weights < 0).any()):
             raise ValueError("support_weights must be finite and non-negative")
         if status is PredictionStatus.NO_SUPPORT and (
             support_ids.numel() or support_weights.numel()
@@ -266,97 +265,8 @@ class PredictionBundle:
         return self.outputs[name]
 
 
-@dataclass(frozen=True, slots=True)
-class LossBundle:
-    """Differentiable aggregate loss without retaining a TruthSidecar."""
-
-    episode_id: str
-    total: torch.Tensor
-    components: Mapping[str, torch.Tensor] = field(default_factory=dict)
-    counts: Mapping[str, int] = field(default_factory=dict)
-    metadata: Mapping[str, Any] = field(default_factory=dict)
-
-    def __post_init__(self) -> None:
-        total = torch.as_tensor(self.total)
-        if (
-            total.numel() != 1
-            or not total.is_floating_point()
-            or not bool(torch.isfinite(total).all())
-        ):
-            raise ValueError("LossBundle.total must be one finite floating scalar tensor")
-        components: dict[str, torch.Tensor] = {}
-        for name, component in self.components.items():
-            value = torch.as_tensor(component)
-            if (
-                value.numel() != 1
-                or not value.is_floating_point()
-                or not bool(torch.isfinite(value).all())
-            ):
-                raise ValueError(
-                    f"loss component {name!r} must be one finite floating scalar"
-                )
-            components[name] = value
-        counts = dict(self.counts)
-        if any(type(value) is not int or value < 0 for value in counts.values()):
-            raise ValueError("LossBundle counts must be non-negative integers")
-        object.__setattr__(self, "total", total)
-        object.__setattr__(self, "components", MappingProxyType(dict(sorted(components.items()))))
-        object.__setattr__(self, "counts", MappingProxyType(dict(sorted(counts.items()))))
-        object.__setattr__(self, "metadata", _frozen_metadata(self.metadata, truth_free=False))
-
-
-@dataclass(frozen=True, slots=True)
-class EvaluationBundle:
-    """Receipt-ready aggregate metrics, never a claim by itself."""
-
-    evaluation_id: str
-    episode_ids: tuple[str, ...]
-    metrics: Mapping[str, float | None]
-    counts: Mapping[str, int] = field(default_factory=dict)
-    excluded: Mapping[str, int] = field(default_factory=dict)
-    metadata: Mapping[str, Any] = field(default_factory=dict)
-
-    def __post_init__(self) -> None:
-        if not self.evaluation_id.strip() or not self.episode_ids:
-            raise ValueError("EvaluationBundle needs an id and at least one episode")
-        if len(set(self.episode_ids)) != len(self.episode_ids):
-            raise ValueError("EvaluationBundle episode_ids must be unique")
-        metrics = dict(self.metrics)
-        if not metrics:
-            raise ValueError("EvaluationBundle.metrics cannot be empty")
-        for name, value in metrics.items():
-            if not name.strip() or (value is not None and not math.isfinite(float(value))):
-                raise ValueError(f"metric {name!r} must have a finite value or None")
-        counts = dict(self.counts)
-        excluded = dict(self.excluded)
-        all_counts = (*counts.values(), *excluded.values())
-        if any(type(value) is not int or value < 0 for value in all_counts):
-            raise ValueError("evaluation counts must be non-negative integers")
-        object.__setattr__(self, "episode_ids", tuple(self.episode_ids))
-        object.__setattr__(self, "metrics", MappingProxyType(dict(sorted(metrics.items()))))
-        object.__setattr__(self, "counts", MappingProxyType(dict(sorted(counts.items()))))
-        object.__setattr__(self, "excluded", MappingProxyType(dict(sorted(excluded.items()))))
-        object.__setattr__(self, "metadata", _frozen_metadata(self.metadata, truth_free=False))
-
-    @property
-    def evaluation_hash(self) -> str:
-        return canonical_hash(
-            {
-                "schema": "tabu.evaluation-bundle.v1",
-                "evaluation_id": self.evaluation_id,
-                "episode_ids": self.episode_ids,
-                "metrics": self.metrics,
-                "counts": self.counts,
-                "excluded": self.excluded,
-                "metadata": self.metadata,
-            }
-        )
-
-
 __all__ = [
-    "EvaluationBundle",
     "ForwardTrace",
-    "LossBundle",
     "PredictionBundle",
     "PredictionEntry",
     "PredictionKind",

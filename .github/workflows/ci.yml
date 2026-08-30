@@ -30,6 +30,8 @@ jobs:
         run: uv run ruff check src tests
       - name: ModelSpec schema is current
         run: uv run python scripts/build_model_spec_schema.py --check
+      - name: TabUBase source closure is current when owner source is available
+        run: uv run python scripts/build_model_source_manifest.py --check --if-available
       - name: TabUBase contract tests
         run: uv run pytest
 

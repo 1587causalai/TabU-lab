@@ -57,6 +57,13 @@ def assert_truth_free(value: Any, *, path: str = "payload") -> None:
                 raise ValueError(f"truth-bearing field {item.name!r} is forbidden at {path}")
             assert_truth_free(getattr(value, item.name), path=f"{path}.{item.name}")
         return
+    model_dump = getattr(value, "model_dump", None)
+    if callable(model_dump):
+        assert_truth_free(
+            model_dump(mode="python", by_alias=True, exclude_none=False),
+            path=path,
+        )
+        return
     if isinstance(value, Mapping):
         for key, nested in value.items():
             if not isinstance(key, str):
@@ -226,12 +233,8 @@ class EvidenceEpisode:
                 dtype=DEFAULT_FLOAT_DTYPE,
                 non_blocking=non_blocking,
             ),
-            origin_states=self.origin_states.to(
-                device=resolved, non_blocking=non_blocking
-            ),
-            forward_roles=self.forward_roles.to(
-                device=resolved, non_blocking=non_blocking
-            ),
+            origin_states=self.origin_states.to(device=resolved, non_blocking=non_blocking),
+            forward_roles=self.forward_roles.to(device=resolved, non_blocking=non_blocking),
             graph_topology=self.graph_topology,
             metadata=self.metadata,
         )
@@ -331,9 +334,7 @@ class TruthSidecar:
                 dtype=DEFAULT_FLOAT_DTYPE,
                 non_blocking=non_blocking,
             ),
-            target_mask=self.target_mask.to(
-                device=resolved, non_blocking=non_blocking
-            ),
+            target_mask=self.target_mask.to(device=resolved, non_blocking=non_blocking),
             metadata=self.metadata,
         )
 

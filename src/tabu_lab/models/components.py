@@ -72,104 +72,24 @@ class Symbolizer(nn.Module):
 
 
 @dataclass(frozen=True)
+class NumericScaleState:
+    standardized_values: Tensor
+    mean: Tensor
+    std: Tensor
+    scale: Tensor
+    context_count: Tensor
+
+
+@dataclass(frozen=True)
 class TokenTable:
     cells: Tensor
     visible_mask: Tensor
     target_mask: Tensor
     natural_missing_mask: Tensor
-
-
-class Tokenizer(nn.Module):
-    """Step 2: numeric value, artificial-mask/query, and exact-null tokens."""
-
-    def __init__(
-        self,
-        config: ReferenceConfig,
-        *,
-        marker: str,
-        add_feature_identity: bool = False,
-    ) -> None:
-        super().__init__()
-        if marker not in {"mask", "query"}:
-            raise ValueError("marker must be 'mask' or 'query'")
-        self.config = config
-        self.marker = marker
-        self.add_feature_identity = bool(add_feature_identity)
-        self.numeric_value_encoder = nn.Sequential(
-            nn.Linear(1, config.d_model, dtype=DEFAULT_FLOAT_DTYPE),
-            nn.GELU(),
-            nn.Linear(config.d_model, config.d_model, dtype=DEFAULT_FLOAT_DTYPE),
-        )
-        self.categorical_value_encoder = nn.Sequential(
-            nn.Linear(1, config.d_model, dtype=DEFAULT_FLOAT_DTYPE),
-            nn.GELU(),
-            nn.Linear(config.d_model, config.d_model, dtype=DEFAULT_FLOAT_DTYPE),
-        )
-        self.ordinal_value_encoder = nn.Sequential(
-            nn.Linear(1, config.d_model, dtype=DEFAULT_FLOAT_DTYPE),
-            nn.GELU(),
-            nn.Linear(config.d_model, config.d_model, dtype=DEFAULT_FLOAT_DTYPE),
-        )
-        self.mask_token = nn.Parameter(torch.empty(config.d_model, dtype=DEFAULT_FLOAT_DTYPE))
-        self.query_token = nn.Parameter(torch.empty(config.d_model, dtype=DEFAULT_FLOAT_DTYPE))
-        self.feature_identity = nn.Embedding(
-            config.max_features,
-            config.d_model,
-            dtype=DEFAULT_FLOAT_DTYPE,
-        )
-        nn.init.normal_(self.mask_token, std=0.02)
-        nn.init.normal_(self.query_token, std=0.02)
-        nn.init.normal_(self.feature_identity.weight, std=0.02)
-
-    def forward(self, symbols: SymbolTable) -> TokenTable:
-        _, _, n_features = symbols.values.shape
-        if n_features > self.config.max_features:
-            raise ValueError("feature count exceeds max_features")
-        if len(symbols.feature_kinds) != n_features or any(
-            kind not in {"numeric", "categorical", "ordinal"} for kind in symbols.feature_kinds
-        ):
-            raise ValueError(
-                "tokenizer requires one declared numeric/categorical/ordinal kind per feature"
-            )
-        numeric_encoded = self.numeric_value_encoder(symbols.values.unsqueeze(-1))
-        categorical_encoded = self.categorical_value_encoder(symbols.values.unsqueeze(-1))
-        ordinal_encoded = self.ordinal_value_encoder(symbols.values.unsqueeze(-1))
-        categorical_features = torch.tensor(
-            tuple(kind == "categorical" for kind in symbols.feature_kinds),
-            dtype=torch.bool,
-            device=symbols.values.device,
-        ).view(1, 1, n_features, 1)
-        ordinal_features = torch.tensor(
-            tuple(kind == "ordinal" for kind in symbols.feature_kinds),
-            dtype=torch.bool,
-            device=symbols.values.device,
-        ).view(1, 1, n_features, 1)
-        encoded = torch.where(
-            categorical_features,
-            categorical_encoded,
-            torch.where(ordinal_features, ordinal_encoded, numeric_encoded),
-        )
-        cells = torch.zeros_like(encoded)
-        cells = torch.where(symbols.visible_mask.unsqueeze(-1), encoded, cells)
-        marker_token = self.mask_token if self.marker == "mask" else self.query_token
-        cells = torch.where(
-            symbols.target_mask.unsqueeze(-1),
-            marker_token.view(1, 1, 1, -1).expand_as(cells),
-            cells,
-        )
-        if self.add_feature_identity:
-            feature_ids = torch.arange(n_features, device=cells.device)
-            identity = self.feature_identity(feature_ids).view(1, 1, n_features, -1)
-            present = symbols.visible_mask | symbols.target_mask
-            cells = cells + present.unsqueeze(-1) * identity
-        # Natural missing and undeclared structural positions stay exact zero.
-        cells = torch.where(symbols.natural_missing_mask.unsqueeze(-1), 0.0, cells)
-        return TokenTable(
-            cells=cells,
-            visible_mask=symbols.visible_mask,
-            target_mask=symbols.target_mask,
-            natural_missing_mask=symbols.natural_missing_mask,
-        )
+    # TabUBase numeric terminals operate on the same context-standardized
+    # scale as Step 1.  This stays optional so the legacy tokenizer carrier
+    # remains source-compatible.
+    numeric_scale_state: NumericScaleState | None = None
 
 
 class CellTokenizer(nn.Module):
@@ -178,13 +98,15 @@ class CellTokenizer(nn.Module):
     Continuous values use context-only standardization followed by one shared
     learnable multi-scale Fourier lift.  Nominal values use an episode-seeded
     random sphere table, so no static category or feature identity is learned.
-    The legacy :class:`Tokenizer` remains unchanged for the axis-A contracts.
+    Only the table-cell-as-Unit carrier is included in this model anchor.
     """
 
     _scale_epsilon = 1.0e-6
 
     EPISODE_RANDOM_SPHERE_V1 = "episode_random_sphere"
     SOURCE_SCOPED_FROZEN_CODEBOOK_V2 = "source_scoped_frozen_codebook.v2"
+    DEFAULT_NOMINAL_CODEBOOK_SIZE = 100
+    DEFAULT_NOMINAL_CODEBOOK_SEED = 1729
 
     def __init__(
         self,
@@ -203,8 +125,23 @@ class CellTokenizer(nn.Module):
             self.SOURCE_SCOPED_FROZEN_CODEBOOK_V2,
         }:
             raise ValueError("unknown nominal tokenizer plan")
-        if nominal_codebook_size < 2 or nominal_codebook_seed < 0:
+        if (
+            isinstance(nominal_codebook_size, bool)
+            or not isinstance(nominal_codebook_size, int)
+            or isinstance(nominal_codebook_seed, bool)
+            or not isinstance(nominal_codebook_seed, int)
+            or nominal_codebook_size < 2
+            or nominal_codebook_seed < 0
+        ):
             raise ValueError("nominal codebook size must exceed one and seed be non-negative")
+        if nominal_tokenizer == self.EPISODE_RANDOM_SPHERE_V1 and (
+            nominal_codebook_size != self.DEFAULT_NOMINAL_CODEBOOK_SIZE
+            or nominal_codebook_seed != self.DEFAULT_NOMINAL_CODEBOOK_SEED
+        ):
+            raise ValueError(
+                "episode_random_sphere v1 requires the canonical codebook size and seed; "
+                "these controls are only configurable for source_scoped_frozen_codebook.v2"
+            )
         self.config = config
         self.marker = marker
         self.nominal_tokenizer = nominal_tokenizer
@@ -298,8 +235,7 @@ class CellTokenizer(nn.Module):
         # therefore preserves semantic category tokens.
         for label in sorted(domain):
             payload = (
-                f"tabubase-nominal-codebook-v2|{self.nominal_codebook_seed}|"
-                f"{codebook_id}|{label}"
+                f"tabubase-nominal-codebook-v2|{self.nominal_codebook_seed}|{codebook_id}|{label}"
             ).encode()
             index = int.from_bytes(hashlib.sha256(payload).digest()[:8], "big")
             index %= self.nominal_codebook_size
@@ -319,16 +255,88 @@ class CellTokenizer(nn.Module):
         lifted = torch.cat((lifted.sin(), lifted.cos()), dim=-1)
         return self.continuous_value_encoder(lifted)
 
+    def context_standardize_numeric(
+        self,
+        symbols: SymbolTable,
+    ) -> NumericScaleState:
+        """Return Step-1 numeric values and their context-only affine state.
+
+        Numeric supports and numeric predictions share this standardized
+        scale.  Non-numeric wire codes pass through unchanged; their reported
+        mean/scale sentinels are zero/one and are ignored by typed terminals.
+        """
+
+        values = symbols.values.to(dtype=DEFAULT_FLOAT_DTYPE)
+        _, _, n_features = values.shape
+        if len(symbols.feature_kinds) != n_features:
+            raise ValueError("cell tokenizer requires one declared kind per feature")
+        context = symbols.visible_mask
+        if symbols.context_mask is not None:
+            if (
+                symbols.context_mask.shape != symbols.values.shape
+                or symbols.context_mask.dtype is not torch.bool
+            ):
+                raise ValueError("context_mask must be bool and match values shape")
+            context = context & symbols.context_mask
+        numeric_features = torch.tensor(
+            tuple(kind == "numeric" for kind in symbols.feature_kinds),
+            dtype=torch.bool,
+            device=values.device,
+        ).view(1, 1, n_features)
+        statistics_mask = context & numeric_features
+        count = statistics_mask.sum(dim=1, keepdim=True).to(values.dtype)
+        safe_count = count.clamp_min(1.0)
+        masked_abs = torch.where(statistics_mask, values.abs(), torch.zeros_like(values))
+        max_abs = masked_abs.amax(dim=1, keepdim=True)
+        safe_max_abs = torch.where(max_abs > 0.0, max_abs, torch.ones_like(max_abs))
+        scaled_values = values / safe_max_abs
+        scaled_context = torch.where(
+            statistics_mask,
+            scaled_values,
+            torch.zeros_like(scaled_values),
+        )
+        scaled_mean = scaled_context.sum(dim=1, keepdim=True) / safe_count
+        centered_for_statistics = torch.where(
+            statistics_mask,
+            scaled_values - scaled_mean,
+            torch.zeros_like(scaled_values),
+        )
+        scaled_variance = centered_for_statistics.square().sum(dim=1, keepdim=True) / safe_count
+        scaled_std = scaled_variance.sqrt()
+        mean = scaled_mean * safe_max_abs
+        std = scaled_std * safe_max_abs
+        scale = std + self._scale_epsilon
+        scaled_denominator = (scaled_std + self._scale_epsilon / safe_max_abs).clamp_min(
+            torch.finfo(values.dtype).tiny
+        )
+        standardized_numeric = (scaled_values - scaled_mean) / scaled_denominator
+        standardized = torch.where(numeric_features, standardized_numeric, values)
+        public_mean = torch.where(numeric_features, mean, torch.zeros_like(mean))
+        public_std = torch.where(numeric_features, std, torch.zeros_like(std))
+        public_scale = torch.where(numeric_features, scale, torch.ones_like(scale))
+        public_count = torch.where(numeric_features, count, torch.zeros_like(count))
+        return NumericScaleState(
+            standardized_values=standardized,
+            mean=public_mean,
+            std=public_std,
+            scale=public_scale,
+            context_count=public_count,
+        )
+
     def forward(self, symbols: SymbolTable) -> TokenTable:
         batch, n_rows, n_features = symbols.values.shape
+        if n_features > self.config.max_features:
+            raise ValueError(
+                f"feature count {n_features} exceeds max_features={self.config.max_features}"
+            )
         if len(symbols.feature_kinds) != n_features:
             raise ValueError("cell tokenizer requires one declared kind per feature")
         if symbols.feature_domains and len(symbols.feature_domains) != n_features:
             raise ValueError("cell tokenizer feature domains must match the feature axis")
         if symbols.feature_codebooks and len(symbols.feature_codebooks) != n_features:
             raise ValueError("cell tokenizer feature codebooks must match the feature axis")
-
-        values = symbols.values.to(dtype=DEFAULT_FLOAT_DTYPE)
+        numeric_scale_state = self.context_standardize_numeric(symbols)
+        values = numeric_scale_state.standardized_values
         visible = symbols.visible_mask
         cells = values.new_zeros(batch, n_rows, n_features, self.config.d_model)
         for feature, kind in enumerate(symbols.feature_kinds):
@@ -336,23 +344,7 @@ class CellTokenizer(nn.Module):
             kind_name = getattr(kind, "value", kind)
             domain = symbols.feature_domains[feature] if symbols.feature_domains else ()
             if kind_name in {"numeric", "ordinal"}:
-                if kind_name == "numeric":
-                    mask = visible[:, :, feature]
-                    if symbols.context_mask is not None:
-                        if symbols.context_mask.shape != symbols.values.shape:
-                            raise ValueError("context_mask must match values shape")
-                        mask = mask & symbols.context_mask[:, :, feature]
-                    count = mask.sum(dim=1, keepdim=True).to(values.dtype)
-                    safe_count = count.clamp_min(1.0)
-                    mean = (normalized * mask.to(values.dtype)).sum(
-                        dim=1, keepdim=True
-                    ) / safe_count
-                    centered = normalized - mean
-                    variance = (centered.square() * mask.to(values.dtype)).sum(
-                        dim=1, keepdim=True
-                    ) / safe_count
-                    normalized = centered / (variance.sqrt() + self._scale_epsilon)
-                else:
+                if kind_name == "ordinal":
                     if not domain:
                         raise ValueError("ordinal cell features require a declared domain")
                     if bool((visible[:, :, feature] & (normalized != normalized.round())).any()):
@@ -450,13 +442,14 @@ class CellTokenizer(nn.Module):
             visible_mask=symbols.visible_mask,
             target_mask=symbols.target_mask,
             natural_missing_mask=symbols.natural_missing_mask,
+            numeric_scale_state=numeric_scale_state,
         )
 
 
 __all__ = [
     "CellTokenizer",
+    "NumericScaleState",
     "SymbolTable",
     "Symbolizer",
     "TokenTable",
-    "Tokenizer",
 ]

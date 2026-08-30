@@ -44,6 +44,7 @@ where = ["src"]
 [tool.setuptools.package-data]
 tabu_lab = [
   "py.typed",
+  "specs/*.json",
   "specs/models/*.yaml",
 ]
 

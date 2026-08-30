@@ -212,9 +212,19 @@
           "title": "Repository",
           "type": "string"
         },
+        "semantic_source_tree_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Semantic Source Tree Sha256",
+          "type": "string"
+        },
         "sha256": {
           "pattern": "^[0-9a-f]{64}$",
           "title": "Sha256",
+          "type": "string"
+        },
+        "source_manifest": {
+          "minLength": 1,
+          "title": "Source Manifest",
           "type": "string"
         }
       },
@@ -222,6 +232,8 @@
         "repository",
         "path",
         "sha256",
+        "semantic_source_tree_sha256",
+        "source_manifest",
         "readonly",
         "observed_at",
         "license_boundary"

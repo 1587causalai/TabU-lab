@@ -1,9 +1,7 @@
 """Stable L0 contracts shared by every TabU-lab model adapter."""
 
 from .bundles import (
-    EvaluationBundle,
     ForwardTrace,
-    LossBundle,
     PredictionBundle,
     PredictionEntry,
     PredictionKind,
@@ -40,7 +38,6 @@ from .topology import GraphDirection, GraphTopology
 __all__ = [
     "CanonicalizationError",
     "EpisodeRecipe",
-    "EvaluationBundle",
     "EvidenceEpisode",
     "FeatureKind",
     "FeatureRole",
@@ -49,7 +46,6 @@ __all__ = [
     "ForwardTrace",
     "GraphDirection",
     "GraphTopology",
-    "LossBundle",
     "OriginState",
     "PredictionBundle",
     "PredictionEntry",

@@ -12,6 +12,9 @@ forward profiles:
 - `supervised.label_broadcast.v1` for a single declared response column.
 
 This anchor establishes a buildable, identity-bound, truth-free reference forward.
+Numeric terminals and the canonical `numeric` prediction use the Step-1
+context-standardized scale; `numeric_raw_prediction` is an explicitly named
+inverse projection for inference display, not the Step-5 loss value.
 It does **not** claim useful fitting, real-data prediction, frozen ICL, fine-tuning
 lift, or foundation-model evidence. Those are separate evaluation gates.
 
@@ -19,6 +22,11 @@ The public and packaged ModelSpec files are byte-identical:
 
 - `specs/models/tabu.cell.base.yaml`
 - `src/tabu_lab/specs/models/tabu.cell.base.yaml`
+
+The ModelSpec binds both the TeX entrypoint hash and its recursive semantic source
+tree through the public and packaged `model-factory-source-manifest.json`. The
+first-public-anchor authority decision is recorded in
+`docs/decisions/tabubase-0.2.0-source-authority.md`.
 
 Run the focused contract gate with:
 
