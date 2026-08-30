@@ -1,0 +1,574 @@
+{
+  "$defs": {
+    "Alternative": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "first_alternative",
+            "deferred",
+            "rejected"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "description",
+        "status"
+      ],
+      "title": "Alternative",
+      "type": "object"
+    },
+    "ContractBuildState": {
+      "description": "Build state asserted by a source contract, independent of installed code.",
+      "enum": [
+        "buildable_contract",
+        "design_open"
+      ],
+      "title": "ContractBuildState",
+      "type": "string"
+    },
+    "Gate": {
+      "additionalProperties": false,
+      "properties": {
+        "condition": {
+          "minLength": 1,
+          "title": "Condition",
+          "type": "string"
+        },
+        "evidence": {
+          "minLength": 1,
+          "title": "Evidence",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "condition",
+        "evidence"
+      ],
+      "title": "Gate",
+      "type": "object"
+    },
+    "MathEquation": {
+      "additionalProperties": false,
+      "description": "One display equation with a stable reference and plain-language meaning.",
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "latex": {
+          "minLength": 1,
+          "title": "Latex",
+          "type": "string"
+        },
+        "meaning": {
+          "minLength": 1,
+          "title": "Meaning",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "latex",
+        "meaning"
+      ],
+      "title": "MathEquation",
+      "type": "object"
+    },
+    "MathInvariant": {
+      "additionalProperties": false,
+      "description": "A falsifiable statement attached to the mathematical projection.",
+      "properties": {
+        "evidence": {
+          "minLength": 1,
+          "title": "Evidence",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "statement": {
+          "minLength": 1,
+          "title": "Statement",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "statement",
+        "evidence"
+      ],
+      "title": "MathInvariant",
+      "type": "object"
+    },
+    "MathStep": {
+      "additionalProperties": false,
+      "description": "An ordered mathematical stage in the generated model explanation.",
+      "properties": {
+        "equations": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/MathEquation"
+          },
+          "title": "Equations",
+          "type": "array"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "invariants": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Invariants",
+          "type": "array"
+        },
+        "purpose": {
+          "minLength": 1,
+          "title": "Purpose",
+          "type": "string"
+        },
+        "title": {
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "purpose"
+      ],
+      "title": "MathStep",
+      "type": "object"
+    },
+    "MathSymbol": {
+      "additionalProperties": false,
+      "description": "One named symbol in the contract's notation table.",
+      "properties": {
+        "domain": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Domain"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "meaning": {
+          "minLength": 1,
+          "title": "Meaning",
+          "type": "string"
+        },
+        "symbol": {
+          "minLength": 1,
+          "title": "Symbol",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "symbol",
+        "meaning"
+      ],
+      "title": "MathSymbol",
+      "type": "object"
+    },
+    "Mathematics": {
+      "additionalProperties": false,
+      "description": "Structured mathematical narrative for one model contract.\n\nThe renderer intentionally accepts raw LaTeX only in ``symbol`` and ``latex``.\nHuman-facing prose is escaped before it enters the generated TeX document.",
+      "properties": {
+        "abstract": {
+          "minLength": 1,
+          "title": "Abstract",
+          "type": "string"
+        },
+        "invariants": {
+          "items": {
+            "$ref": "#/$defs/MathInvariant"
+          },
+          "minItems": 1,
+          "title": "Invariants",
+          "type": "array"
+        },
+        "notation": {
+          "items": {
+            "$ref": "#/$defs/MathSymbol"
+          },
+          "minItems": 1,
+          "title": "Notation",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/MathStep"
+          },
+          "minItems": 1,
+          "title": "Steps",
+          "type": "array"
+        },
+        "unit_semantics": {
+          "minLength": 1,
+          "title": "Unit Semantics",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "abstract",
+        "unit_semantics",
+        "notation",
+        "steps",
+        "invariants"
+      ],
+      "title": "Mathematics",
+      "type": "object"
+    },
+    "Maturity": {
+      "additionalProperties": false,
+      "properties": {
+        "build_state": {
+          "$ref": "#/$defs/ContractBuildState"
+        },
+        "contract": {
+          "$ref": "#/$defs/MaturityStage"
+        },
+        "evidence": {
+          "$ref": "#/$defs/MaturityStage"
+        },
+        "implementation": {
+          "$ref": "#/$defs/MaturityStage"
+        },
+        "source_contract": {
+          "const": "factory_source",
+          "title": "Source Contract",
+          "type": "string"
+        },
+        "stage": {
+          "$ref": "#/$defs/MaturityStage"
+        }
+      },
+      "required": [
+        "source_contract",
+        "stage",
+        "contract",
+        "implementation",
+        "evidence",
+        "build_state"
+      ],
+      "title": "Maturity",
+      "type": "object"
+    },
+    "MaturityEvidence": {
+      "additionalProperties": false,
+      "description": "Immutable gate references required before public maturity promotion.",
+      "properties": {
+        "accepted_claim_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accepted Claim Hash"
+        },
+        "gate1_receipt_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Gate1 Receipt Hash",
+          "type": "string"
+        },
+        "gong_approval_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Gong Approval Hash",
+          "type": "string"
+        },
+        "independent_review_report_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Independent Review Report Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "gate1_receipt_hash",
+        "independent_review_report_hash",
+        "gong_approval_hash"
+      ],
+      "title": "MaturityEvidence",
+      "type": "object"
+    },
+    "MaturityStage": {
+      "description": "Monotone public maturity vocabulary; transitions require explicit evidence.",
+      "enum": [
+        "design_open",
+        "specified",
+        "experimental",
+        "contract-tested",
+        "gate0_sanity",
+        "gate1_reproducible",
+        "supported",
+        "evidence-backed"
+      ],
+      "title": "MaturityStage",
+      "type": "string"
+    },
+    "OpenItem": {
+      "additionalProperties": false,
+      "properties": {
+        "blocking_build": {
+          "default": false,
+          "title": "Blocking Build",
+          "type": "boolean"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "question": {
+          "minLength": 1,
+          "title": "Question",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "question"
+      ],
+      "title": "OpenItem",
+      "type": "object"
+    },
+    "UpstreamSource": {
+      "additionalProperties": false,
+      "properties": {
+        "license_boundary": {
+          "minLength": 1,
+          "title": "License Boundary",
+          "type": "string"
+        },
+        "observed_at": {
+          "minLength": 1,
+          "title": "Observed At",
+          "type": "string"
+        },
+        "path": {
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        },
+        "readonly": {
+          "const": true,
+          "title": "Readonly",
+          "type": "boolean"
+        },
+        "repository": {
+          "minLength": 1,
+          "title": "Repository",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "repository",
+        "path",
+        "sha256",
+        "readonly",
+        "observed_at",
+        "license_boundary"
+      ],
+      "title": "UpstreamSource",
+      "type": "object"
+    }
+  },
+  "$id": "https://research.wehub.us/schemas/model-spec.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Machine-readable boundary for one model-factory contract.",
+  "properties": {
+    "alternatives": {
+      "items": {
+        "$ref": "#/$defs/Alternative"
+      },
+      "title": "Alternatives",
+      "type": "array"
+    },
+    "capabilities": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Capabilities",
+      "type": "array"
+    },
+    "carrier": {
+      "additionalProperties": true,
+      "minProperties": 1,
+      "title": "Carrier",
+      "type": "object"
+    },
+    "contract_id": {
+      "pattern": "^[a-z][a-z0-9_.-]*$",
+      "title": "Contract Id",
+      "type": "string"
+    },
+    "contract_version": {
+      "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "display_name": {
+      "minLength": 1,
+      "title": "Display Name",
+      "type": "string"
+    },
+    "dynamics": {
+      "additionalProperties": true,
+      "minProperties": 1,
+      "title": "Dynamics",
+      "type": "object"
+    },
+    "exit": {
+      "items": {
+        "$ref": "#/$defs/Gate"
+      },
+      "minItems": 1,
+      "title": "Exit",
+      "type": "array"
+    },
+    "experimental_defaults": {
+      "additionalProperties": true,
+      "minProperties": 1,
+      "title": "Experimental Defaults",
+      "type": "object"
+    },
+    "interfaces": {
+      "additionalProperties": true,
+      "title": "Interfaces",
+      "type": "object"
+    },
+    "kill": {
+      "items": {
+        "$ref": "#/$defs/Gate"
+      },
+      "minItems": 1,
+      "title": "Kill",
+      "type": "array"
+    },
+    "known_open": {
+      "items": {
+        "$ref": "#/$defs/OpenItem"
+      },
+      "title": "Known Open",
+      "type": "array"
+    },
+    "loss": {
+      "additionalProperties": true,
+      "title": "Loss",
+      "type": "object"
+    },
+    "mathematics": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Mathematics"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "maturity": {
+      "$ref": "#/$defs/Maturity"
+    },
+    "maturity_evidence": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/MaturityEvidence"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "readout": {
+      "additionalProperties": true,
+      "minProperties": 1,
+      "title": "Readout",
+      "type": "object"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "upstream": {
+      "$ref": "#/$defs/UpstreamSource"
+    }
+  },
+  "required": [
+    "schema_version",
+    "contract_id",
+    "contract_version",
+    "display_name",
+    "upstream",
+    "carrier",
+    "dynamics",
+    "readout",
+    "capabilities",
+    "maturity",
+    "experimental_defaults",
+    "known_open",
+    "alternatives",
+    "kill",
+    "exit"
+  ],
+  "title": "ModelSpec",
+  "type": "object"
+}
