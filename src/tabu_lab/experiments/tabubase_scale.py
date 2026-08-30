@@ -24,6 +24,7 @@ from typing import Any, Literal
 
 import numpy as np
 import torch
+from safetensors import safe_open
 from safetensors.torch import load_file, save_file
 
 from tabu_lab.contracts import (
@@ -88,10 +89,29 @@ def _sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def source_tree_sha256() -> str:
-    root = Path(__file__).resolve().parents[3]
-    candidates = sorted((root / "src" / "tabu_lab").rglob("*.py"))
-    candidates += sorted((root / "specs" / "models").rglob("*.yaml"))
+_SOURCE_TREE_GLOBS = (
+    "src/tabu_lab/**/*.py",
+    "specs/models/**/*.yaml",
+    "scripts/run_tabubase_scale_transfer.py",
+    "experiments/transfer-base-v2/*.yaml",
+    "schemas/tabubase-synthetic-world*.json",
+    "pyproject.toml",
+    "uv.lock",
+)
+
+
+def source_tree_sha256(root: Path | None = None) -> str:
+    root = Path(__file__).resolve().parents[3] if root is None else root.resolve()
+    candidates = sorted(
+        {
+            path
+            for pattern in _SOURCE_TREE_GLOBS
+            for path in root.glob(pattern)
+            if path.is_file()
+        }
+    )
+    if not candidates:
+        raise RuntimeError("source identity contains no files")
     digest = hashlib.sha256()
     for path in candidates:
         digest.update(path.relative_to(root).as_posix().encode())
@@ -464,12 +484,28 @@ def save_pretrain_checkpoint(
 
 def load_pretrain_checkpoint(model: torch.nn.Module, path: Path) -> None:
     identity_path = path.with_suffix(".identity.json")
-    if identity_path.is_file():
-        identity = json.loads(identity_path.read_text(encoding="utf-8"))
-        model_identity = identity.get("model_identity")
-        validate_identity = getattr(model, "validate_checkpoint_identity", None)
-        if model_identity is not None and validate_identity is not None:
-            validate_identity(model_identity)
+    if not identity_path.is_file():
+        raise FileNotFoundError(f"checkpoint identity sidecar is required: {identity_path}")
+    sidecar_identity = json.loads(identity_path.read_text(encoding="utf-8"))
+    if not isinstance(sidecar_identity, dict):
+        raise ValueError("checkpoint identity sidecar must contain a JSON object")
+    with safe_open(str(path), framework="pt", device="cpu") as checkpoint:
+        metadata = checkpoint.metadata() or {}
+    embedded_payload = metadata.get("identity")
+    if embedded_payload is None:
+        raise ValueError("checkpoint must embed identity metadata")
+    embedded_identity = json.loads(embedded_payload)
+    if not isinstance(embedded_identity, dict):
+        raise ValueError("embedded checkpoint identity must contain a JSON object")
+    if sidecar_identity != embedded_identity:
+        raise ValueError("checkpoint sidecar identity does not match embedded identity")
+    model_identity = embedded_identity.get("model_identity")
+    if not isinstance(model_identity, dict):
+        raise ValueError("checkpoint identity must bind model_identity")
+    validate_identity = getattr(model, "validate_checkpoint_identity", None)
+    if not callable(validate_identity):
+        raise TypeError("checkpoint target model cannot validate identity")
+    validate_identity(model_identity)
     tensors = load_file(str(path), device="cpu")
     state = {name.removeprefix("model."): value for name, value in tensors.items()}
     model.load_state_dict(state, strict=True)
