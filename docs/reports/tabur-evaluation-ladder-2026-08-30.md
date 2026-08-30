@@ -9,8 +9,9 @@ PYTHONPATH=src python scripts/run_tabur_evaluation_ladder.py --device cpu
 
 本轮完整 runner 在当前 clean worktree 的 CPU float32 路径通过，六层状态均为
 `implemented / passed / local_unissued / none`。`dgx2` 的 CUDA/PyTorch 环境已
-确认（NVIDIA GB10、CUDA 可用），但检查时该主机的 SGLang `qwen38-27b` 服务正在
-占用 GPU，因此没有抢占式长跑。
+确认（NVIDIA GB10、CUDA 可用）。按实验请求停止了占用 GPU 的 Docker
+`qwen38-dflash2` 容器后，CUDA 长跑已完成；运行结束复核 GPU 利用率为 0%，容器
+没有自动重启。
 
 已准备远端独立快照：
 `/home/cms/experiments/tabur-querybase-runtime-cf2d5a0`（commit `cf2d5a0`）。
@@ -39,6 +40,29 @@ ssh dgx2 'cd /home/cms/experiments/tabur-querybase-runtime-cf2d5a0 && \
 completion checkpoint → supervised profile 的隐式迁移。$g_t>0$ 才表示预训练臂在该
 任务上损失更低；本轮两个 bounded task 都是负值，不能推出 TabUR 没有预训练价值，
 也不能推出有泛化能力。
+
+## dgx2 CUDA 复核
+
+原始结果保存在：
+`/home/cms/experiments/tabur-querybase-runtime-cf2d5a0/results/ladder-dgx2-2026-08-30.json`。
+运行环境为 host-owned Docker GPU backend、NVIDIA GB10、
+`torch 2.12.0.dev20260322+cu130`。六层 ladder 仍全部为
+`implemented / passed / local_unissued / none`。
+
+- Stage 3：F0 `1.998049 → 0.678003`；S1 `2.194799 → 1.337409`。
+- Stage 4：Iris accuracy `0.3333`、log-loss `1.624523`；Diabetes RMSE
+  `65.582948`、MAE `52.631615`。
+- Stage 5：pretrained frozen MSE（context 2/4/8）为
+  `0.797049 / 1.555821 / 0.646947`；每个 frozen arm 均无 optimizer 且参数 hash 不变。
+- Stage 6：Iris $g=-2.155444$；Diabetes $g=-2.800370$，仍没有观察到正向 lift。
+
+同一 CUDA 环境还生成了两个 profile-bound checkpoint：
+
+- `/home/cms/experiments/tabur-querybase-runtime-cf2d5a0/results/tabur-row-pretrain-completion-dgx2.safetensors`
+- `/home/cms/experiments/tabur-querybase-runtime-cf2d5a0/results/tabur-row-pretrain-supervised-dgx2.safetensors`
+
+completion checkpoint 已完成同 profile 加载校验；profile identity 不匹配会在 tensor
+loading 前拒绝。它们仍是 local diagnostic artifacts，不是 formal receipt。
 
 ## 运行实现
 
