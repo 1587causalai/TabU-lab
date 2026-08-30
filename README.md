@@ -46,6 +46,18 @@ See [`docs/architecture/compiler-data-boundary.md`](./docs/architecture/compiler
 This is leakage prevention and deterministic episode construction, not a model-
 quality result.
 
+## Evidence core
+
+The evidence layer defines strict, content-addressed schemas for preregistrations,
+run receipts, claim ledgers, and source identities. Receipt files are immutable and
+self-verifying; public evidence rejects local paths and likely secrets. A source is
+`formal` only when its review and immutable source bindings close, otherwise it
+remains `local_unissued` with explicit reasons.
+
+See [`docs/architecture/evidence-core.md`](./docs/architecture/evidence-core.md).
+These contracts make evidence auditable; they do not issue a receipt or accept a
+scientific claim by themselves.
+
 ## Stage 2: bounded composability
 
 The next gate checks whether the existing tokenizer, dynamics, and readout

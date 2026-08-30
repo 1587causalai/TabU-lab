@@ -1,0 +1,176 @@
+{
+  "$id": "https://research.wehub.us/schemas/source-identity.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Public, path-free identity of the source that produced an attempt.\n\n``formal`` is deliberately a narrow state. A Git identity is formal only\nwhen the exact preregistration is committed, the declared source scope is\nclean, and the commit is reachable from a configured remote-tracking ref.\nThe scope may be a repository root or a public repository subdirectory;\nunrelated parent-repository dirt is deliberately outside that identity.\nA distribution identity is formal only when a reviewer-approved immutable\nwheel/sdist URI, digest, dependency-lock digest, and exact installed-package\nsource-tree binding are all present.",
+  "properties": {
+    "commit": {
+      "anyOf": [
+        {
+          "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Commit"
+    },
+    "distribution_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Distribution Sha256"
+    },
+    "distribution_uri": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Distribution Uri"
+    },
+    "git_tree_oid": {
+      "anyOf": [
+        {
+          "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Git Tree Oid"
+    },
+    "issuance_status": {
+      "enum": [
+        "formal",
+        "local_unissued"
+      ],
+      "title": "Issuance Status",
+      "type": "string"
+    },
+    "lock_hash": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Lock Hash"
+    },
+    "preregistration_blob_hash": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Preregistration Blob Hash"
+    },
+    "reasons": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Reasons",
+      "type": "array"
+    },
+    "remote_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Remote Ref"
+    },
+    "repository_subdirectory": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Repository Subdirectory"
+    },
+    "repository_uri": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Repository Uri"
+    },
+    "reviewed": {
+      "default": false,
+      "title": "Reviewed",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "const": "tabu.source-identity.v2",
+      "default": "tabu.source-identity.v2",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_kind": {
+      "enum": [
+        "git",
+        "distribution",
+        "local"
+      ],
+      "title": "Source Kind",
+      "type": "string"
+    },
+    "source_tree_hash": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Tree Hash"
+    }
+  },
+  "required": [
+    "source_kind",
+    "issuance_status"
+  ],
+  "title": "SourceIdentity",
+  "type": "object"
+}
