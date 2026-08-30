@@ -1,5 +1,12 @@
 """Small, reproducible evaluation runners."""
 
+from .query_row_classical_icl import (
+    CLASSICAL_ICL_BASELINE_IDS,
+    CLASSICAL_ICL_CONFIG,
+    QueryRowClassicalICLRecord,
+    QueryRowClassicalICLResult,
+    run_query_row_classical_icl_benchmark,
+)
 from .query_row_finetune_lift import (
     QueryRowFinetuneLiftRecord,
     QueryRowFinetuneLiftResult,
@@ -84,4 +91,9 @@ __all__ = [
     "run_query_row_synthetic_pretraining",
     "save_query_row_pretrain_checkpoint",
     "train_query_row_synthetic_pretraining_model",
+    "CLASSICAL_ICL_BASELINE_IDS",
+    "CLASSICAL_ICL_CONFIG",
+    "QueryRowClassicalICLRecord",
+    "QueryRowClassicalICLResult",
+    "run_query_row_classical_icl_benchmark",
 ]
