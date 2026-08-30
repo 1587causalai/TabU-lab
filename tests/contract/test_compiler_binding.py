@@ -145,3 +145,26 @@ def test_compiler_applies_target_excluded_fit_normalizer_to_evidence_and_sidecar
     assert result.provenance.numeric_normalizer_hash == normalizer.artifact_hash
     assert result.evidence.metadata["numeric_normalized"] is True
     assert "numeric_normalizer_hash" not in result.evidence.metadata
+
+
+def test_compiler_rejects_fit_normalizer_that_includes_or_misexcludes_target_truth() -> None:
+    _, _, fit_view, _, _ = _bound_views()
+    roles = (
+        (SOURCE, TARGET),
+        (SOURCE, SOURCE),
+        (SOURCE, SOURCE),
+    )
+    recipe = EpisodeRecipe.create(fit_view, fit_view, roles)
+    leaky = NumericNormalizer.fit(fit_view)
+    wrong_exclusion = torch.zeros(fit_view.shape, dtype=torch.bool)
+    wrong_exclusion[1, 1] = True
+    mismatched = NumericNormalizer.fit(fit_view, excluded_mask=wrong_exclusion)
+
+    for normalizer in (leaky, mismatched):
+        with pytest.raises(FitPartitionBindingError, match="target exclusion"):
+            compile_episode(
+                fit_view,
+                recipe,
+                fit_view=fit_view,
+                numeric_normalizer=normalizer,
+            )

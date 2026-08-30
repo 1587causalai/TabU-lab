@@ -191,25 +191,6 @@ class EpisodeCompiler:
             raise TopologyBindingError("RawDataset, recipe, and explicit graph topology conflict")
         resolved_topology = topology_sources[-1] if topology_sources else None
 
-        normalizer_config_hash: str | None = None
-        normalizer_artifact_hash: str | None = None
-        if numeric_normalizer is not None:
-            from .statistics import NumericNormalizer
-
-            if not isinstance(numeric_normalizer, NumericNormalizer):
-                raise TypeError("numeric_normalizer must be NumericNormalizer or None")
-            if numeric_normalizer.statistics.fit_view_hash != fit_view.view_hash:
-                raise FitPartitionBindingError(
-                    "numeric normalizer was not fitted on the bound fit SplitView"
-                )
-            values = numeric_normalizer.transform(source_view).to(
-                dtype=source_view.values.dtype
-            )
-            normalizer_config_hash = numeric_normalizer.statistics.config_hash
-            normalizer_artifact_hash = numeric_normalizer.artifact_hash
-        else:
-            values = source_view.values
-
         raw_origins = source_view.origin_states
         origins = recipe.origin_states
         roles = recipe.forward_roles
@@ -246,6 +227,34 @@ class EpisodeCompiler:
             )
         if not torch.equal(origins[~target], raw_origins[~target]):
             raise TruthIsolationError("non-TARGET origin states cannot be rewritten by a recipe")
+
+        normalizer_config_hash: str | None = None
+        normalizer_artifact_hash: str | None = None
+        if numeric_normalizer is not None:
+            from .statistics import NumericNormalizer
+
+            if not isinstance(numeric_normalizer, NumericNormalizer):
+                raise TypeError("numeric_normalizer must be NumericNormalizer or None")
+            if numeric_normalizer.statistics.fit_view_hash != fit_view.view_hash:
+                raise FitPartitionBindingError(
+                    "numeric normalizer was not fitted on the bound fit SplitView"
+                )
+            fit_target_exclusion = (
+                truth_target
+                if source_view.view_hash == fit_view.view_hash
+                else torch.zeros(fit_view.shape, dtype=torch.bool)
+            )
+            numeric_normalizer.require_fit_value_mask(
+                fit_view,
+                excluded_mask=fit_target_exclusion,
+            )
+            values = numeric_normalizer.transform(source_view).to(
+                dtype=source_view.values.dtype
+            )
+            normalizer_config_hash = numeric_normalizer.statistics.config_hash
+            normalizer_artifact_hash = numeric_normalizer.artifact_hash
+        else:
+            values = source_view.values
 
         forward_values = torch.where(source, values, torch.zeros_like(values))
         target_values = torch.where(truth_target, values, torch.zeros_like(values))

@@ -282,6 +282,43 @@ class NumericNormalizer:
     def artifact_hash(self) -> str:
         return self.statistics.artifact_hash
 
+    def require_fit_value_mask(
+        self,
+        view: SplitView,
+        *,
+        excluded_mask: torch.Tensor | None = None,
+    ) -> None:
+        """Require the fitted mask to match the compiler's target exclusion."""
+
+        _require_fit_view(view)
+        excluded = (
+            torch.zeros(view.shape, dtype=torch.bool)
+            if excluded_mask is None
+            else torch.as_tensor(excluded_mask).detach().clone().cpu().bool()
+        )
+        if tuple(excluded.shape) != view.shape:
+            raise ValueError("excluded_mask must match the fit SplitView shape")
+        numeric_features = torch.tensor(
+            tuple(spec.kind is FeatureKind.NUMERIC for spec in view.feature_specs),
+            dtype=torch.bool,
+        )
+        visible = (
+            origin_value_mask(view.origin_states)
+            & ~excluded
+            & numeric_features.view(1, -1)
+        )
+        expected = canonical_hash(
+            {
+                "schema": "tabu.numeric-fit-value-mask.v1",
+                "fit_view_hash": view.view_hash,
+                "value_mask": visible,
+            }
+        )
+        if self.statistics.fit_value_mask_hash != expected:
+            raise FitPartitionBindingError(
+                "numeric normalizer target exclusion does not match this episode"
+            )
+
     def transform(self, view: SplitView) -> torch.Tensor:
         _require_same_fit_binding(
             view,
