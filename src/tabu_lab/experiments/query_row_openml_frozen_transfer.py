@@ -484,10 +484,17 @@ def _summarize(
         selected = [summary[dataset_id] for dataset_id in dataset_ids if summary[dataset_id]["task"] == task]
         primary = "normalized_nll" if task == "classification" else "scaled_rmse"
         macro: dict[str, Any] = {"dataset_count": len(selected), "primary_metric": primary}
-        for arm in ("pretrained_frozen", "random_init_frozen", "pretrained_shuffled", "linear", "mlp", "xgboost"):
+        frozen_arms = {"pretrained_frozen", "random_init_frozen", "pretrained_shuffled"}
+        for arm in (*sorted(frozen_arms), "linear", "mlp", "xgboost"):
             curves: list[float] = []
             for item in selected:
-                vals = [item["contexts"][str(k)]["frozen" if arm.endswith("frozen") else "baselines"].get(arm, {}).get(primary) for k in QUERY_OPENML_K_GRID if k > 0 and (item["contexts"][str(k)]["frozen" if arm.endswith("frozen") else "baselines"].get(arm, {}).get(primary) is not None)]
+                bucket = "frozen" if arm in frozen_arms else "baselines"
+                vals = [
+                    item["contexts"][str(k)][bucket].get(arm, {}).get(primary)
+                    for k in QUERY_OPENML_K_GRID
+                    if k > 0
+                    and item["contexts"][str(k)][bucket].get(arm, {}).get(primary) is not None
+                ]
                 if vals:
                     curves.append(float(np.mean(vals)))
             macro[arm] = {"dataset_macro_mean_primary": float(np.mean(curves)) if curves else None}
