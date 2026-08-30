@@ -1,0 +1,49 @@
+schema_version: tabu.evaluation-chain.v1
+chain_id: tabu.cell.base@0.2.0-six-link
+model:
+  contract_id: tabu.cell.base
+  contract_version: 0.2.0
+  profiles: [completion.artificial_mask.v1, supervised.label_broadcast.v1]
+status: diagnostic_scaffold
+formal_receipts_allowed: false
+stop_downstream_on_failure: true
+diagnostic_runner:
+  command: uv run python scripts/verify_tabubase_chain.py
+  output: evaluations/chain/tabubase-0.2.0-diagnostic.json
+  diagnostic_hash: 32c395a258a04691bfbea21e27a1038ebc4b8b26f94ffe7889100c609f444c01
+  scope: bounded_local_no_training_no_download_no_formal_receipt
+links:
+  - link_id: 1
+    name: component_correctness
+    prerequisite: clean_exact_source_identity
+    harness: tests/contract/test_tabubase_v020_contract.py
+    receipt_status: local_unissued
+    diagnostic_result:
+      path: verification/results/tabu.cell.base/component-contract-v0.json
+      result_hash: c6dec3312bdbad98eac6f2c5759b3f3b3b271543e8d86172c24ee30d4cfb14ae
+      evidence_level: local_unissued
+  - link_id: 2
+    name: component_decoupling_extensibility_growability
+    harness: verification/suites/architecture-evolvability-v0.yaml
+    receipt_status: local_unissued
+    diagnostic_result:
+      path: verification/results/tabu.cell.base/architecture-evolvability-v0.json
+      result_hash: 82330b8de843e96315cae59172999faa51660bf8b31ed44ca81363be01cb9367
+      evidence_level: local_unissued
+  - link_id: 3
+    name: synthetic_basic_fit
+    assets: [F0-023-tabu-cell-base-completion-v1, F0-024-tabu-cell-base-supervised-regression-v1, F0-025-tabu-cell-base-supervised-classification-v1, S1-010-tabu-cell-base-completion-v1, S1-011-tabu-cell-base-supervised-regression-v1, S1-012-tabu-cell-base-supervised-classification-v1]
+    receipt_status: blocked_until_links_1_2_review
+  - link_id: 4
+    name: real_data_basic_prediction
+    suites: [table-completion-micro-v1, table-supervised-micro-v1]
+    receipt_status: blocked_until_dataset_passports
+  - link_id: 5
+    name: synthetic_pretraining_icl
+    manifest: experiments/transfer-base-v1/icl-harness.yaml
+    receipt_status: blocked_until_link_3_s1
+  - link_id: 6
+    name: synthetic_pretraining_real_finetune
+    manifest: experiments/transfer-base-v1/finetune-template.yaml
+    receipt_status: blocked_until_link_5_selected_checkpoint
+claim_boundary: mechanism evidence only; no S2, no SOTA, no leaderboard, no public checkpoint, no foundation-model claim.

@@ -1,0 +1,340 @@
+{
+  "chain_id": "tabu.cell.base@0.2.0-six-link",
+  "diagnostic_hash": "32c395a258a04691bfbea21e27a1038ebc4b8b26f94ffe7889100c609f444c01",
+  "links": [
+    {
+      "blockers": [],
+      "checks": [
+        {
+          "check_id": "suite_outcome",
+          "evidence": {
+            "outcome": "passed",
+            "result_hash": "c6dec3312bdbad98eac6f2c5759b3f3b3b271543e8d86172c24ee30d4cfb14ae",
+            "suite_id": "component-contract-v0"
+          },
+          "status": "passed"
+        },
+        {
+          "check_id": "chain_hash_binding",
+          "evidence": {
+            "bound_hash": "c6dec3312bdbad98eac6f2c5759b3f3b3b271543e8d86172c24ee30d4cfb14ae",
+            "path": "verification/results/tabu.cell.base/component-contract-v0.json",
+            "result_hash": "c6dec3312bdbad98eac6f2c5759b3f3b3b271543e8d86172c24ee30d4cfb14ae"
+          },
+          "status": "passed"
+        }
+      ],
+      "claim_boundary": "diagnostic only; no formal receipt, score, or model claim",
+      "evidence_level": "local_unissued",
+      "formal_gate": "blocked_until_clean_source_and_independent_review",
+      "link_id": 1,
+      "name": "component_correctness",
+      "status": "passed",
+      "verification_mode": "structured_mve_suite"
+    },
+    {
+      "blockers": [],
+      "checks": [
+        {
+          "check_id": "suite_outcome",
+          "evidence": {
+            "outcome": "passed",
+            "result_hash": "82330b8de843e96315cae59172999faa51660bf8b31ed44ca81363be01cb9367",
+            "suite_id": "architecture-evolvability-v0"
+          },
+          "status": "passed"
+        },
+        {
+          "check_id": "chain_hash_binding",
+          "evidence": {
+            "bound_hash": "82330b8de843e96315cae59172999faa51660bf8b31ed44ca81363be01cb9367",
+            "path": "verification/results/tabu.cell.base/architecture-evolvability-v0.json",
+            "result_hash": "82330b8de843e96315cae59172999faa51660bf8b31ed44ca81363be01cb9367"
+          },
+          "status": "passed"
+        }
+      ],
+      "claim_boundary": "diagnostic only; no formal receipt, score, or model claim",
+      "evidence_level": "local_unissued",
+      "formal_gate": "blocked_until_clean_source_and_independent_review",
+      "link_id": 2,
+      "name": "component_decoupling_extensibility_growability",
+      "status": "passed",
+      "verification_mode": "structured_mve_suite"
+    },
+    {
+      "blockers": [],
+      "checks": [
+        {
+          "check_id": "f0_s1_preregistrations",
+          "evidence": {
+            "count": 6,
+            "specs": [
+              {
+                "experiment_id": "F0-023-tabu-cell-base-completion-v1",
+                "path": "experiments/fit-first/F0/F0-023-tabu-cell-base-completion-v1/preregistration.yaml",
+                "profile_id": "completion.artificial_mask.v1",
+                "spec_hash": "dba7187972593fb93d2e5c8c63b5144bfdaef49b238069c139f2bda2d52131b4",
+                "stage": "F0"
+              },
+              {
+                "experiment_id": "F0-024-tabu-cell-base-supervised-regression-v1",
+                "path": "experiments/fit-first/F0/F0-024-tabu-cell-base-supervised-regression-v1/preregistration.yaml",
+                "profile_id": "supervised.label_broadcast.v1",
+                "spec_hash": "7da3834deed0347220dead9db1a0b1d9ff947c83cc0e573e20a500e25ffce4a6",
+                "stage": "F0"
+              },
+              {
+                "experiment_id": "F0-025-tabu-cell-base-supervised-classification-v1",
+                "path": "experiments/fit-first/F0/F0-025-tabu-cell-base-supervised-classification-v1/preregistration.yaml",
+                "profile_id": "supervised.label_broadcast.v1",
+                "spec_hash": "39a314e92ccf5fecb63794965b3a05170e9de8944ff16c6377b1db34c94345d3",
+                "stage": "F0"
+              },
+              {
+                "experiment_id": "S1-010-tabu-cell-base-completion-v1",
+                "path": "experiments/fit-first/S1/S1-010-tabu-cell-base-completion-v1/preregistration.yaml",
+                "profile_id": "completion.artificial_mask.v1",
+                "spec_hash": "5aadc628c33e32933a7f05216b87fbbbda84a4c69b960e91ccdc728e74667e12",
+                "stage": "S1"
+              },
+              {
+                "experiment_id": "S1-011-tabu-cell-base-supervised-regression-v1",
+                "path": "experiments/fit-first/S1/S1-011-tabu-cell-base-supervised-regression-v1/preregistration.yaml",
+                "profile_id": "supervised.label_broadcast.v1",
+                "spec_hash": "fc33829c1146e0c881eb2a32ce2d5a8940bae69d7c303bbe8d772781892a4551",
+                "stage": "S1"
+              },
+              {
+                "experiment_id": "S1-012-tabu-cell-base-supervised-classification-v1",
+                "path": "experiments/fit-first/S1/S1-012-tabu-cell-base-supervised-classification-v1/preregistration.yaml",
+                "profile_id": "supervised.label_broadcast.v1",
+                "spec_hash": "c370439384466931fa747073d56260b3ca2484f436828810d519f6f6928a6eca",
+                "stage": "S1"
+              }
+            ]
+          },
+          "status": "passed"
+        },
+        {
+          "check_id": "representative_s1_corpus_binding_and_feasibility",
+          "evidence": {
+            "corpus_hash": "983c8453a97f72127c6195f654d7e38dfbc418cbac891e06ccf3cc77548ee188",
+            "experiment_id": "S1-010-tabu-cell-base-completion-v1",
+            "feasibility_status": "ready",
+            "test_episodes": 4,
+            "train_episodes": 24,
+            "validation_episodes": 4
+          },
+          "status": "passed"
+        }
+      ],
+      "claim_boundary": "diagnostic only; no formal receipt, score, or model claim",
+      "evidence_level": "local_unissued",
+      "formal_gate": "blocked_until_reviewed_link_1_2_and_training_receipts",
+      "link_id": 3,
+      "name": "synthetic_basic_fit",
+      "status": "passed",
+      "verification_mode": "preregistration_and_corpus_compile_smoke"
+    },
+    {
+      "blockers": [
+        "independent Adult/Diabetes dataset authority review and promotion are pending"
+      ],
+      "checks": [
+        {
+          "check_id": "suite_contracts",
+          "evidence": {
+            "table-completion-micro-v1": {
+              "scenario_count": 2,
+              "suite_hash": "f56ad3fb17d3033cddfd4b674171a646353bb42cf55a8632999b6b23238b8ad7"
+            },
+            "table-supervised-micro-v1": {
+              "scenario_count": 2,
+              "suite_hash": "1553e6111724883f2338b0cf999dfa943e3d6faafec63988ae6c70460a9c93ac"
+            }
+          },
+          "status": "passed"
+        },
+        {
+          "check_id": "root_package_suite_parity",
+          "evidence": {
+            "table-completion-micro-v1.yaml": "byte_identical",
+            "table-supervised-micro-v1.yaml": "byte_identical"
+          },
+          "status": "passed"
+        },
+        {
+          "check_id": "candidate_snapshot_registration",
+          "evidence": {
+            "count": 4,
+            "snapshots": [
+              {
+                "authority_review_subject_sha256": "2c978e5747bd07846cd24c9801844439a6633c5120c799fc07c03dfa2d27f347",
+                "scenario_id": "adult-v2-feature-completion-micro-base",
+                "snapshot_id": "openml-adult-v2-task-7592-adult-v2-feature-completion-micro-base-8ecfce76041b0110",
+                "snapshot_sha256": "2c978e5747bd07846cd24c9801844439a6633c5120c799fc07c03dfa2d27f347",
+                "source_sha256": "ee01944ba0b86b3353e268984cac3b482fbb2f1269960db73b334f852f4fa61d",
+                "split_sha256": "0f1e7659cd527b854d0e47e2f38fa8eaae7f8bf30227bd8aad2c6a3f858c8be7",
+                "truth_sidecar_sha256": "19729ac606c6d2b02de5950b25914cfc6c5dcc2397ef0ab7761adb5063484c0c"
+              },
+              {
+                "authority_review_subject_sha256": "7b9f1ce68f901bad84309c448b81ea5f07c2675d522609093b0af2b3c8b2b4e9",
+                "scenario_id": "adult-v2-task-7592-classification-micro-base",
+                "snapshot_id": "openml-adult-v2-task-7592-adult-v2-task-7592-classification-micro-base-f15a8e858b23d5fc",
+                "snapshot_sha256": "7b9f1ce68f901bad84309c448b81ea5f07c2675d522609093b0af2b3c8b2b4e9",
+                "source_sha256": "ee01944ba0b86b3353e268984cac3b482fbb2f1269960db73b334f852f4fa61d",
+                "split_sha256": "d2f7b162ebaecd378c028dd1b2122cfe3579dcc0ed2560990b188fb8268fa46c",
+                "truth_sidecar_sha256": "568ea791961f4e92a32bae326602ef9d64cc5777683ea9b0fe62aa5c64049809"
+              },
+              {
+                "authority_review_subject_sha256": "8ed15731ff5df1d7fb5fb572f023a06255f69db2b797c1b6130b68788edfcd10",
+                "scenario_id": "sklearn-diabetes-feature-completion-micro-base",
+                "snapshot_id": "sklearn-diabetes-sklearn-diabetes-feature-completion-micro-base-0577f05ca93db62a",
+                "snapshot_sha256": "8ed15731ff5df1d7fb5fb572f023a06255f69db2b797c1b6130b68788edfcd10",
+                "source_sha256": "0ea9e8f5a8f0c85548add40324bdab3d49e73fe335689556e233fbf09b3f2d3a",
+                "split_sha256": "e067742be73a73df8d1c30abe92041d188e1acd3ead7aa7bd1137dbfd9d05468",
+                "truth_sidecar_sha256": "4cf547bb6ba6b606a5c679fd0aaf67d356c3574ada202103d908915f9402687c"
+              },
+              {
+                "authority_review_subject_sha256": "9f03d0257ee68f2b5f0c10f2db49cd26cfbd30b61e401d5b1f252586384feecc",
+                "scenario_id": "sklearn-diabetes-regression-micro-base",
+                "snapshot_id": "sklearn-diabetes-sklearn-diabetes-regression-micro-base-6d91fe17958f67cb",
+                "snapshot_sha256": "9f03d0257ee68f2b5f0c10f2db49cd26cfbd30b61e401d5b1f252586384feecc",
+                "source_sha256": "0ea9e8f5a8f0c85548add40324bdab3d49e73fe335689556e233fbf09b3f2d3a",
+                "split_sha256": "905944d77cd7d5cebcdf45bdf4a0aa3cdab4eeb9ee12930e27c1d4d99da6d13c",
+                "truth_sidecar_sha256": "1c9041d03968f87500f12b9919962c770058dd3d5cc72938ece0fe8bb521a1b0"
+              }
+            ]
+          },
+          "status": "passed"
+        },
+        {
+          "check_id": "passport_authority_gate",
+          "evidence": {
+            "authority_statuses": [
+              "self_consistent_unreviewed",
+              "self_consistent_unreviewed"
+            ],
+            "candidate_hashes_present": true,
+            "passport_status": "candidate_frozen_pending_independent_review",
+            "reviewed_authority_ready": false
+          },
+          "status": "passed"
+        }
+      ],
+      "claim_boundary": "diagnostic only; no formal receipt, score, or model claim",
+      "evidence_level": "local_unissued",
+      "formal_gate": "blocked_until_reviewed_dataset_passports",
+      "link_id": 4,
+      "name": "real_data_basic_prediction",
+      "status": "blocked",
+      "verification_mode": "suite_validation_and_authority_gate"
+    },
+    {
+      "blockers": [],
+      "checks": [
+        {
+          "check_id": "pretrain_schema_and_schedule",
+          "evidence": {
+            "checkpoints": [
+              0,
+              2000,
+              5000,
+              10000,
+              20000
+            ],
+            "pilot_updates": 2000,
+            "pilot_worlds": 2048,
+            "updates": 20000,
+            "worlds": 20000
+          },
+          "status": "passed"
+        },
+        {
+          "check_id": "icl_schema_and_arms",
+          "evidence": {
+            "arms": [
+              "pretrained_frozen",
+              "random_init_frozen",
+              "pretrained_shuffled",
+              "scratch_finetune"
+            ],
+            "classification_worlds": 256,
+            "context_sizes": [
+              0,
+              1,
+              2,
+              4,
+              8,
+              16,
+              32
+            ],
+            "heldout_worlds": 512,
+            "regression_worlds": 256
+          },
+          "status": "passed"
+        }
+      ],
+      "claim_boundary": "diagnostic only; no formal receipt, score, or model claim",
+      "evidence_level": "local_unissued",
+      "formal_gate": "blocked_until_link_3_s1_checkpoint",
+      "link_id": 5,
+      "name": "synthetic_pretraining_icl",
+      "status": "passed",
+      "verification_mode": "transfer_schema_and_arm_contract_smoke"
+    },
+    {
+      "blockers": [],
+      "checks": [
+        {
+          "check_id": "finetune_schema_and_budgets",
+          "evidence": {
+            "initialization_arms": [
+              "pretrained_s1",
+              "scratch"
+            ],
+            "schedule": {
+              "learning_rates": [
+                0.0001,
+                0.0003,
+                0.001
+              ],
+              "updates": [
+                400,
+                1200
+              ]
+            },
+            "seeds": [
+              1729,
+              2718,
+              31415
+            ],
+            "tasks": [
+              "adult_classification",
+              "diabetes_regression"
+            ]
+          },
+          "status": "passed"
+        }
+      ],
+      "claim_boundary": "diagnostic only; no formal receipt, score, or model claim",
+      "evidence_level": "local_unissued",
+      "formal_gate": "blocked_until_link_5_selected_checkpoint",
+      "link_id": 6,
+      "name": "synthetic_pretraining_real_finetune",
+      "status": "passed",
+      "verification_mode": "finetune_schema_and_budget_contract_smoke"
+    }
+  ],
+  "model": {
+    "contract_id": "tabu.cell.base",
+    "contract_version": "0.2.0",
+    "profiles": [
+      "completion.artificial_mask.v1",
+      "supervised.label_broadcast.v1"
+    ]
+  },
+  "schema_version": "tabu.tabubase-six-link-diagnostic.v1",
+  "verification_scope": "bounded local diagnostic; no training, download, formal receipt, or total score"
+}

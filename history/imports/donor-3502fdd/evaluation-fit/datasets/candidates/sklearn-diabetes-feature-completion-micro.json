@@ -1,0 +1,27 @@
+{
+  "adapter": {
+    "adapter_id": "offline-eval-prepared-snapshot",
+    "adapter_version": "1.0.0",
+    "schema_version": "tabu.dataset-adapter.v1"
+  },
+  "authority_sha256": "611a841cb12c14368e533707243db8e70315da7b343c6514ae4ce696921dc949",
+  "authority_status": "self_consistent_unreviewed",
+  "contamination_boundary": "split-before-prepare; selection, preprocessing, normalizers, and codebooks are fitted on train only",
+  "content_sha256": "577ce530f7d5335a316d9d9c2e48b0407acadf4c405494faafe291c3d854c7b8",
+  "dataset_id": "sklearn-diabetes",
+  "dataset_snapshot_id": "sklearn-diabetes-sklearn-diabetes-feature-completion-micro-577ce530f7d5335a",
+  "episode_recipe_hashes": [
+    "a0cf75f0815dda5ef8dc001f4561985c007446b531e5a676f3b5e754a7ffe4c2"
+  ],
+  "evaluation_scenario_id": "sklearn-diabetes-feature-completion-micro",
+  "fit_partition": "train",
+  "license_id": "BSD-3-Clause",
+  "mask_boundary": "post-split artificial masking; target truth remains evaluator-side",
+  "request_sha256": "c2606779c16492b235a6343b3476ab3d4096ecd04cd9ce1b114516da91d696f0",
+  "schema_version": "tabu.dataset-snapshot.v3",
+  "source_sha256": "0ea9e8f5a8f0c85548add40324bdab3d49e73fe335689556e233fbf09b3f2d3a",
+  "source_uri": "sklearn.datasets.load_diabetes",
+  "split_before_compile": true,
+  "split_manifest_sha256": "e067742be73a73df8d1c30abe92041d188e1acd3ead7aa7bd1137dbfd9d05468",
+  "truth_sidecar_sha256": "4cf547bb6ba6b606a5c679fd0aaf67d356c3574ada202103d908915f9402687c"
+}

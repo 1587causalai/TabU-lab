@@ -1,0 +1,24 @@
+schema_version: tabu.transfer-base-finetune.v2
+transfer_id: transfer-base-v1
+model:
+  contract_id: tabu.cell.base
+  contract_version: 0.2.0
+  profile_id: supervised.label_broadcast.v1
+initialization_arms: [pretrained_s1, scratch]
+tasks:
+  - task_id: adult_classification
+    dataset_id: openml-adult-v2-task-7592
+    label_budgets: [128, 512, 2048]
+    primary_budget: 128
+  - task_id: diabetes_regression
+    dataset_id: sklearn-diabetes
+    label_budgets: [32, 128, 256]
+    primary_budget: 128
+seeds: [1729, 2718, 31415]
+schedule_selection:
+  validation_only: true
+  learning_rates: [0.0001, 0.0003, 0.001]
+  updates: [400, 1200]
+  test_openings: 1
+paired_controls: [split, label_subset, batch_order, optimizer_reset, update_budget, checkpoint_selection]
+claim_boundary: initialization-only transfer comparison; classification and regression remain separate.

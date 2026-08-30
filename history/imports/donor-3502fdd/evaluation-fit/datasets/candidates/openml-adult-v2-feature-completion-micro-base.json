@@ -1,0 +1,27 @@
+{
+  "adapter": {
+    "adapter_id": "offline-eval-prepared-snapshot",
+    "adapter_version": "1.0.0",
+    "schema_version": "tabu.dataset-adapter.v1"
+  },
+  "authority_sha256": "901885b96c274a1d179bb220d82e41d9593af67da657952ca3eeebd91a20e295",
+  "authority_status": "self_consistent_unreviewed",
+  "contamination_boundary": "split-before-prepare; selection, preprocessing, normalizers, and codebooks are fitted on train only",
+  "content_sha256": "8ecfce76041b011042b05aa549900e3877f2c370f4d390e5062825f0428f62f1",
+  "dataset_id": "openml-adult-v2-task-7592",
+  "dataset_snapshot_id": "openml-adult-v2-task-7592-adult-v2-feature-completion-micro-base-8ecfce76041b0110",
+  "episode_recipe_hashes": [
+    "f6160b3e2f87825d95344b00cae6f49d8adc288e651302853758cb6f540165cc"
+  ],
+  "evaluation_scenario_id": "adult-v2-feature-completion-micro-base",
+  "fit_partition": "train",
+  "license_id": "CC-BY-4.0",
+  "mask_boundary": "post-split artificial masking; target truth remains evaluator-side",
+  "request_sha256": "351e893480d31b7a92847a7677c74a3a44b18f9e2e1498cdc263d419b71930ce",
+  "schema_version": "tabu.dataset-snapshot.v3",
+  "source_sha256": "ee01944ba0b86b3353e268984cac3b482fbb2f1269960db73b334f852f4fa61d",
+  "source_uri": "https://www.openml.org/t/7592",
+  "split_before_compile": true,
+  "split_manifest_sha256": "0f1e7659cd527b854d0e47e2f38fa8eaae7f8bf30227bd8aad2c6a3f858c8be7",
+  "truth_sidecar_sha256": "19729ac606c6d2b02de5950b25914cfc6c5dcc2397ef0ab7761adb5063484c0c"
+}

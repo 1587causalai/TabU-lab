@@ -1,0 +1,797 @@
+schema_version: tabu.fit-experiment.v1
+experiment_id: S1-004-tabul-compositional-xor-v1
+supersedes_experiment_ids: []
+revision_rationale: null
+stage: S1
+contract_id: tabul
+contract_version: 0.1.0
+model_spec:
+  schema_version: 1.0.0
+  contract_id: tabul
+  contract_version: 0.1.0
+  display_name: TabUL
+  upstream:
+    repository: TabU/latex/model-factory
+    path: ../latex/model-factory/TabUL/main.tex
+    sha256: f272a3262f34dec6be22814249d924653191bd21ff9421d07f9a356123fed865
+    readonly: true
+    observed_at: '2026-08-27'
+    license_boundary: 'Metadata-only reference: upstream TeX remains readonly and is not redistributed by this manifest.'
+  carrier:
+    input_unit: row-linked carrier address; semantic Unit mapping is task-declared
+    input_axes:
+    - row
+    - feature_or_label
+    - hidden
+    shape: (N+K) x (M+K) x d
+    context_query:
+      context: naturally visible context feature/label cells are evidence
+      query: query features are local evidence; query labels use receiver-only markers and never source cross-row slots
+    tokenization:
+      visible_value: type-specific value encoder
+      artificial_mask: absent
+      query_label: learned e_query
+      natural_missing: fixed e_null = 0_d
+      structural_corner: fixed 0_d
+    specials:
+      unit: K per row
+      feature: K per feature/label column
+      corner: K x K fixed zero
+    truth_boundary: query-label truth enters only at Step 5
+  dynamics:
+    family: O-closed augmented-table Transformer
+    entry: multi-label OInject over ordinary cells
+    operations:
+    - slot_from_context_omab
+    - token_from_slot_omab
+    - row_axis_omab
+    inducing: S transient slots per block; S is distinct from K
+    source_contract: naturally visible context only; query rows are receiver-only for cross-row memory
+    null_contract: OInject, OAttention, and OFFN preserve exact zero
+  readout:
+    geometry: matched Unit-special/label-Feature-special diagonal inner products in R^K
+    support: per-label naturally visible context rows
+    numeric_terminal: LL or NW; selection is not frozen by source
+    categorical_terminal: NW probability mass on declared domain
+    no_support: explicit no-support; target omitted from loss
+  loss:
+    truth_entry: Step 5 only
+    numeric: MSE on source-normalized query label
+    categorical: NLL on declared-domain PMF
+    target_families:
+    - query_label
+    weighting: equal across active types by default
+  interfaces:
+    compile: typed context/query episode with natural visibility and query-label roles; no context artificial mask
+    forward: truth-free per-label query predictions plus trace
+    train: supply query-label truth only as a loss sidecar
+    infer: declare query rows and label targets; preserve per-label no-support
+  capabilities:
+  - supervised_multi_label_prediction
+  - mixed_numeric_categorical
+  - query_label_blind
+  - exact_zero_closure
+  maturity:
+    source_contract: factory_source
+    stage: experimental
+    contract: specified
+    implementation: experimental
+    evidence: specified
+    build_state: buildable_contract
+  maturity_evidence: null
+  mathematics: null
+  experimental_defaults:
+    context_value_masking: false
+    query_marker: global_shared_e_query
+    active_type_weights: equal
+    numeric_terminal: null
+    reference_backend:
+      backend: dense_reference_v0
+      provenance: tabu_lab.models.ReferenceConfig; these are implementation experiment defaults, not upstream factory invariants
+      d_model: 32
+      n_heads: 4
+      d_ff: 64
+      n_blocks: 2
+      inducing_slots: 4
+      matched_slots: 4
+      max_features: 256
+      dropout: 0
+      presence_tau: 1.0e-06
+      denominator_epsilon: 1e-8
+      routing_bandwidth: 1
+    label_columns:
+    - -1
+  known_open:
+  - id: numeric_terminal_choice
+    question: Freeze LL versus NW for numeric labels.
+    blocking_build: false
+  - id: unit_query_cardinality
+    question: Define aggregation if multiple query rows refer to one semantic Unit.
+    blocking_build: false
+  - id: typed_query_marker
+    question: Decide whether time, query type, or intervention role needs an additional typed marker.
+    blocking_build: false
+  - id: loss_weighting_and_abstention
+    question: Freeze class weighting, calibration, and abstention as an output/loss contract.
+    blocking_build: false
+  - id: closure_host_scope
+    question: Revalidate exact-zero closure whenever normalization, attention host, or readout changes.
+    blocking_build: false
+  alternatives:
+  - id: typed_query_role
+    description: Add declared query-type/time/intervention tokens without exposing label truth.
+    status: deferred
+  kill:
+  - id: truth_leakage
+    condition: Changing query truth changes any Step 1-4 state, support, or prediction.
+    evidence: truth-substitution invariance test
+  - id: query_writes_context
+    condition: A query row contributes K/V to cross-row contextual slots.
+    evidence: source-mask trace
+  - id: context_mask_present
+    condition: An artificial context-value mask or e_mask is introduced into the TabUL contract.
+    evidence: compiled-role audit
+  exit:
+  - id: supervised_only
+    condition: The target ledger contains only query-label targets and no feature reconstruction route.
+    evidence: target-ledger snapshot
+  - id: carrier_shape
+    condition: Every layer preserves (N+K) x (M+K) x d.
+    evidence: shape trace
+  - id: query_truth_isolation
+    condition: Query truth is first read in Step 5.
+    evidence: truth-dependency audit
+model_spec_hash: 43fbaa0303d80f07cf19e9241c295cafa194a125aa682b2ac7f2bcf00e6a2755
+dataset:
+  dataset_id: s1-compositional-xor-supervised-v1
+  origin: generated
+  source_uri: pkg://tabu_lab.experiments.s1_table_synthetic#build_s1_supervised_corpus
+  source_sha256: 0094db30422bf5977dbe50f71db497b621b6a6a143a83cb5bb128d00a26599b9
+  dataset_hash: d9d2205ec930b9fa7c9af7bf390e2e06d722e86a86ebae4adf887d7cbc56d9b8
+  license_id: Apache-2.0
+  redistribution: allowed
+  adapter:
+    adapter_id: tabu-s1-table-synthetic
+    adapter_version: 1.0.0
+  raw_files_in_git: false
+  split_before_compile: true
+split:
+  schema_version: tabu.fit-split.v1
+  dataset_id: s1-compositional-xor-supervised-v1
+  dataset_hash: d9d2205ec930b9fa7c9af7bf390e2e06d722e86a86ebae4adf887d7cbc56d9b8
+  split_id: S1-supervised-row-split-v1
+  fit_partition: train
+  strategy: deterministic_synthetic_row_split_v1
+  seed: 130363
+  require_complete: true
+  kind: row
+  partitions:
+  - name: train
+    row_ids:
+    - supervised-row-000
+    - supervised-row-001
+    - supervised-row-002
+    - supervised-row-003
+    - supervised-row-004
+    - supervised-row-005
+    - supervised-row-006
+    - supervised-row-007
+    - supervised-row-008
+    - supervised-row-009
+    - supervised-row-010
+    - supervised-row-011
+    - supervised-row-012
+    - supervised-row-013
+    - supervised-row-014
+    - supervised-row-015
+    - supervised-row-016
+    - supervised-row-017
+    - supervised-row-018
+    - supervised-row-019
+    - supervised-row-020
+    - supervised-row-021
+    - supervised-row-022
+    - supervised-row-023
+    - supervised-row-024
+    - supervised-row-025
+    - supervised-row-026
+    - supervised-row-027
+    - supervised-row-028
+    - supervised-row-029
+    - supervised-row-030
+    - supervised-row-031
+    - supervised-row-032
+    - supervised-row-033
+    - supervised-row-034
+    - supervised-row-035
+    - supervised-row-036
+    - supervised-row-037
+    - supervised-row-038
+    - supervised-row-039
+    - supervised-row-040
+    - supervised-row-041
+    - supervised-row-042
+    - supervised-row-043
+    - supervised-row-044
+    - supervised-row-045
+    - supervised-row-046
+    - supervised-row-047
+    - supervised-row-048
+    - supervised-row-049
+    - supervised-row-050
+    - supervised-row-051
+    - supervised-row-052
+    - supervised-row-053
+    - supervised-row-054
+    - supervised-row-055
+    - supervised-row-056
+    - supervised-row-057
+    - supervised-row-058
+    - supervised-row-059
+    - supervised-row-060
+    - supervised-row-061
+    - supervised-row-062
+    - supervised-row-063
+    - supervised-row-064
+    - supervised-row-065
+    - supervised-row-066
+    - supervised-row-067
+    - supervised-row-068
+    - supervised-row-069
+    - supervised-row-070
+    - supervised-row-071
+    - supervised-row-072
+    - supervised-row-073
+    - supervised-row-074
+    - supervised-row-075
+    - supervised-row-076
+    - supervised-row-077
+    - supervised-row-078
+    - supervised-row-079
+    - supervised-row-080
+    - supervised-row-081
+    - supervised-row-082
+    - supervised-row-083
+    - supervised-row-084
+    - supervised-row-085
+    - supervised-row-086
+    - supervised-row-087
+    - supervised-row-088
+    - supervised-row-089
+    - supervised-row-090
+    - supervised-row-091
+    - supervised-row-092
+    - supervised-row-093
+    - supervised-row-094
+    - supervised-row-095
+    - supervised-row-096
+    - supervised-row-097
+    - supervised-row-098
+    - supervised-row-099
+    - supervised-row-100
+    - supervised-row-101
+    - supervised-row-102
+    - supervised-row-103
+    - supervised-row-104
+    - supervised-row-105
+    - supervised-row-106
+    - supervised-row-107
+    - supervised-row-108
+    - supervised-row-109
+    - supervised-row-110
+    - supervised-row-111
+    - supervised-row-112
+    - supervised-row-113
+    - supervised-row-114
+    - supervised-row-115
+    - supervised-row-116
+    - supervised-row-117
+    - supervised-row-118
+    - supervised-row-119
+    - supervised-row-120
+    - supervised-row-121
+    - supervised-row-122
+    - supervised-row-123
+    - supervised-row-124
+    - supervised-row-125
+    - supervised-row-126
+    - supervised-row-127
+    - supervised-row-128
+    - supervised-row-129
+    - supervised-row-130
+    - supervised-row-131
+    - supervised-row-132
+    - supervised-row-133
+    - supervised-row-134
+    - supervised-row-135
+    - supervised-row-136
+    - supervised-row-137
+    - supervised-row-138
+    - supervised-row-139
+    - supervised-row-140
+    - supervised-row-141
+    - supervised-row-142
+    - supervised-row-143
+    - supervised-row-144
+    - supervised-row-145
+    - supervised-row-146
+    - supervised-row-147
+    - supervised-row-148
+    - supervised-row-149
+    - supervised-row-150
+    - supervised-row-151
+    - supervised-row-152
+    - supervised-row-153
+    - supervised-row-154
+    - supervised-row-155
+    - supervised-row-156
+    - supervised-row-157
+    - supervised-row-158
+    - supervised-row-159
+    - supervised-row-160
+    - supervised-row-161
+    - supervised-row-162
+    - supervised-row-163
+    - supervised-row-164
+    - supervised-row-165
+    - supervised-row-166
+    - supervised-row-167
+    - supervised-row-168
+    - supervised-row-169
+    - supervised-row-170
+    - supervised-row-171
+    - supervised-row-172
+    - supervised-row-173
+    - supervised-row-174
+    - supervised-row-175
+    - supervised-row-176
+    - supervised-row-177
+    - supervised-row-178
+    - supervised-row-179
+    - supervised-row-180
+    - supervised-row-181
+    - supervised-row-182
+    - supervised-row-183
+    - supervised-row-184
+    - supervised-row-185
+    - supervised-row-186
+    - supervised-row-187
+    - supervised-row-188
+    - supervised-row-189
+    - supervised-row-190
+    - supervised-row-191
+    - supervised-row-192
+    - supervised-row-193
+    - supervised-row-194
+    - supervised-row-195
+    - supervised-row-196
+    - supervised-row-197
+    - supervised-row-198
+    - supervised-row-199
+    - supervised-row-200
+    - supervised-row-201
+    - supervised-row-202
+    - supervised-row-203
+    - supervised-row-204
+    - supervised-row-205
+    - supervised-row-206
+    - supervised-row-207
+    - supervised-row-208
+    - supervised-row-209
+    - supervised-row-210
+    - supervised-row-211
+    - supervised-row-212
+    - supervised-row-213
+    - supervised-row-214
+    - supervised-row-215
+    - supervised-row-216
+    - supervised-row-217
+    - supervised-row-218
+    - supervised-row-219
+    - supervised-row-220
+    - supervised-row-221
+    - supervised-row-222
+    - supervised-row-223
+    - supervised-row-224
+    - supervised-row-225
+    - supervised-row-226
+    - supervised-row-227
+    - supervised-row-228
+    - supervised-row-229
+    - supervised-row-230
+    - supervised-row-231
+    - supervised-row-232
+    - supervised-row-233
+    - supervised-row-234
+    - supervised-row-235
+    - supervised-row-236
+    - supervised-row-237
+    - supervised-row-238
+    - supervised-row-239
+    - supervised-row-240
+    - supervised-row-241
+    - supervised-row-242
+    - supervised-row-243
+    - supervised-row-244
+    - supervised-row-245
+    - supervised-row-246
+    - supervised-row-247
+    - supervised-row-248
+    - supervised-row-249
+    - supervised-row-250
+    - supervised-row-251
+    - supervised-row-252
+    - supervised-row-253
+    - supervised-row-254
+    - supervised-row-255
+    - supervised-row-256
+    - supervised-row-257
+    - supervised-row-258
+    - supervised-row-259
+    - supervised-row-260
+    - supervised-row-261
+    - supervised-row-262
+    - supervised-row-263
+    - supervised-row-264
+    - supervised-row-265
+    - supervised-row-266
+    - supervised-row-267
+    - supervised-row-268
+    - supervised-row-269
+    - supervised-row-270
+    - supervised-row-271
+    - supervised-row-272
+    - supervised-row-273
+    - supervised-row-274
+    - supervised-row-275
+    - supervised-row-276
+    - supervised-row-277
+    - supervised-row-278
+    - supervised-row-279
+    - supervised-row-280
+    - supervised-row-281
+    - supervised-row-282
+    - supervised-row-283
+    - supervised-row-284
+    - supervised-row-285
+    - supervised-row-286
+    - supervised-row-287
+    - supervised-row-288
+    - supervised-row-289
+    - supervised-row-290
+    - supervised-row-291
+    - supervised-row-292
+    - supervised-row-293
+    - supervised-row-294
+    - supervised-row-295
+    - supervised-row-296
+    - supervised-row-297
+    - supervised-row-298
+    - supervised-row-299
+    - supervised-row-300
+    - supervised-row-301
+    - supervised-row-302
+    - supervised-row-303
+    - supervised-row-304
+    - supervised-row-305
+    - supervised-row-306
+    - supervised-row-307
+    - supervised-row-308
+    - supervised-row-309
+    - supervised-row-310
+    - supervised-row-311
+    - supervised-row-312
+    - supervised-row-313
+    - supervised-row-314
+    - supervised-row-315
+    - supervised-row-316
+    - supervised-row-317
+    - supervised-row-318
+    - supervised-row-319
+    - supervised-row-320
+    - supervised-row-321
+    - supervised-row-322
+    - supervised-row-323
+    - supervised-row-324
+    - supervised-row-325
+    - supervised-row-326
+    - supervised-row-327
+    - supervised-row-328
+    - supervised-row-329
+    - supervised-row-330
+    - supervised-row-331
+    - supervised-row-332
+    - supervised-row-333
+    - supervised-row-334
+    - supervised-row-335
+    - supervised-row-336
+    - supervised-row-337
+    - supervised-row-338
+    - supervised-row-339
+    - supervised-row-340
+    - supervised-row-341
+    - supervised-row-342
+    - supervised-row-343
+    - supervised-row-344
+    - supervised-row-345
+    - supervised-row-346
+    - supervised-row-347
+    - supervised-row-348
+    - supervised-row-349
+    - supervised-row-350
+    - supervised-row-351
+    - supervised-row-352
+    - supervised-row-353
+    - supervised-row-354
+    - supervised-row-355
+    - supervised-row-356
+    - supervised-row-357
+    - supervised-row-358
+    - supervised-row-359
+    - supervised-row-360
+    - supervised-row-361
+    - supervised-row-362
+    - supervised-row-363
+    - supervised-row-364
+    - supervised-row-365
+    - supervised-row-366
+    - supervised-row-367
+    - supervised-row-368
+    - supervised-row-369
+    - supervised-row-370
+    - supervised-row-371
+    - supervised-row-372
+    - supervised-row-373
+    - supervised-row-374
+    - supervised-row-375
+    - supervised-row-376
+    - supervised-row-377
+    - supervised-row-378
+    - supervised-row-379
+    - supervised-row-380
+    - supervised-row-381
+    - supervised-row-382
+    - supervised-row-383
+  - name: validation
+    row_ids:
+    - supervised-row-384
+    - supervised-row-385
+    - supervised-row-386
+    - supervised-row-387
+    - supervised-row-388
+    - supervised-row-389
+    - supervised-row-390
+    - supervised-row-391
+    - supervised-row-392
+    - supervised-row-393
+    - supervised-row-394
+    - supervised-row-395
+    - supervised-row-396
+    - supervised-row-397
+    - supervised-row-398
+    - supervised-row-399
+    - supervised-row-400
+    - supervised-row-401
+    - supervised-row-402
+    - supervised-row-403
+    - supervised-row-404
+    - supervised-row-405
+    - supervised-row-406
+    - supervised-row-407
+    - supervised-row-408
+    - supervised-row-409
+    - supervised-row-410
+    - supervised-row-411
+    - supervised-row-412
+    - supervised-row-413
+    - supervised-row-414
+    - supervised-row-415
+    - supervised-row-416
+    - supervised-row-417
+    - supervised-row-418
+    - supervised-row-419
+    - supervised-row-420
+    - supervised-row-421
+    - supervised-row-422
+    - supervised-row-423
+    - supervised-row-424
+    - supervised-row-425
+    - supervised-row-426
+    - supervised-row-427
+    - supervised-row-428
+    - supervised-row-429
+    - supervised-row-430
+    - supervised-row-431
+    - supervised-row-432
+    - supervised-row-433
+    - supervised-row-434
+    - supervised-row-435
+    - supervised-row-436
+    - supervised-row-437
+    - supervised-row-438
+    - supervised-row-439
+    - supervised-row-440
+    - supervised-row-441
+    - supervised-row-442
+    - supervised-row-443
+    - supervised-row-444
+    - supervised-row-445
+    - supervised-row-446
+    - supervised-row-447
+  - name: test
+    row_ids:
+    - supervised-row-448
+    - supervised-row-449
+    - supervised-row-450
+    - supervised-row-451
+    - supervised-row-452
+    - supervised-row-453
+    - supervised-row-454
+    - supervised-row-455
+    - supervised-row-456
+    - supervised-row-457
+    - supervised-row-458
+    - supervised-row-459
+    - supervised-row-460
+    - supervised-row-461
+    - supervised-row-462
+    - supervised-row-463
+    - supervised-row-464
+    - supervised-row-465
+    - supervised-row-466
+    - supervised-row-467
+    - supervised-row-468
+    - supervised-row-469
+    - supervised-row-470
+    - supervised-row-471
+    - supervised-row-472
+    - supervised-row-473
+    - supervised-row-474
+    - supervised-row-475
+    - supervised-row-476
+    - supervised-row-477
+    - supervised-row-478
+    - supervised-row-479
+    - supervised-row-480
+    - supervised-row-481
+    - supervised-row-482
+    - supervised-row-483
+    - supervised-row-484
+    - supervised-row-485
+    - supervised-row-486
+    - supervised-row-487
+    - supervised-row-488
+    - supervised-row-489
+    - supervised-row-490
+    - supervised-row-491
+    - supervised-row-492
+    - supervised-row-493
+    - supervised-row-494
+    - supervised-row-495
+    - supervised-row-496
+    - supervised-row-497
+    - supervised-row-498
+    - supervised-row-499
+    - supervised-row-500
+    - supervised-row-501
+    - supervised-row-502
+    - supervised-row-503
+    - supervised-row-504
+    - supervised-row-505
+    - supervised-row-506
+    - supervised-row-507
+    - supervised-row-508
+    - supervised-row-509
+    - supervised-row-510
+    - supervised-row-511
+episode_schedule:
+  schedule_id: S1-tabul-multi-episode-v1
+  sampling: deterministic_shuffle
+  episode_count: 24
+  targets_per_episode: 32
+  target_families:
+  - label
+  target_origins:
+  - query
+  sampler_seed: 104729
+  order_seed: 130363
+  recipe_hashes: []
+semantic:
+  reference:
+    backend: dense_reference_v0
+    d_model: 32
+    n_heads: 4
+    d_ff: 64
+    n_blocks: 2
+    inducing_slots: 4
+    matched_slots: 4
+    max_features: 256
+    dropout: 0.0
+    presence_tau: 1.0e-06
+    denominator_epsilon: 1.0e-08
+    routing_bandwidth: 1.0
+    geometry_normalization: none
+  numeric_terminal: nadaraya_watson
+  categorical_terminal: nadaraya_watson
+  augmented_readout_geometry: matched_uf
+  label_columns:
+  - 6
+  - 7
+  label_address_plan: predictor_unit_linked_per_label_v2
+  target_feature: null
+  graph_unit_receiver_plan: null
+  response_family: null
+  recommendation_address_plan: null
+  rec_axis_summary_dim: null
+  rec_matched_residual_scale: null
+training:
+  optimizer: adamw
+  learning_rate: 0.001
+  weight_decay: 0.0
+  gradient_clip_norm: 1.0
+  max_updates: 3000
+  max_epochs: null
+  wall_clock_budget_minutes: 15
+  episode_batch_size: 1
+  scheduler: none
+  exact_resume: true
+  warm_start: false
+  pretraining: false
+execution:
+  device: cuda
+  device_index: 0
+  dtype: float32
+  deterministic_algorithms: true
+  evidence_mode: gate
+  compile_on_cpu: true
+  backend: dense_reference_v0
+seeds:
+  model_seeds:
+  - 1729
+  - 2718
+  - 31415
+  data_seed: 104729
+  split_seed: 130363
+  episode_order_seed: 130363
+target_families:
+- label
+baselines:
+- baseline_id: exact-support-mean-mode
+  role: trivial
+  max_updates: null
+- baseline_id: frozen-initialization
+  role: diagnostic
+  max_updates: null
+pass_gate:
+  stage: S1
+  required_coverage: 1.0
+  max_loss_ratio: 0.1
+  max_trivial_baseline_ratio: 0.5
+  max_numeric_mse: null
+  max_numeric_nrmse: 0.05
+  min_categorical_accuracy: 0.98
+  max_categorical_nll: 0.1
+  require_all_seeds: true
+kill_conditions:
+  fail_on_nonfinite: true
+  require_nonzero_gradient_by_step: 10
+  require_nonzero_parameter_delta: true
+  stop_model_after_stage_failure: true
+  preserve_failed_receipt: true
+heldout_policy: diagnostic_only
+required_artifacts:
+- preregistration.yaml
+- resolved-configs
+- dataset-manifest.json
+- split-manifest.json
+- compiler-manifest.json
+- feasibility.json
+- metrics.jsonl
+- evaluation.json
+- forward-traces.json
+- baselines.json
+- checkpoint
+- environment.json
+- artifacts.sha256
+- receipt.json
+- verdict.md

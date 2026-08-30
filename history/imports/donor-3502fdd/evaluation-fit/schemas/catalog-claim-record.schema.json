@@ -1,0 +1,204 @@
+{
+  "$defs": {
+    "CatalogObjectKind": {
+      "enum": [
+        "model_contract",
+        "experiment",
+        "run",
+        "run_attempt",
+        "receipt",
+        "model_artifact",
+        "dataset_snapshot",
+        "eval_suite",
+        "eval_result",
+        "eval_comparison",
+        "review",
+        "claim",
+        "verification_suite",
+        "verification_result"
+      ],
+      "title": "CatalogObjectKind",
+      "type": "string"
+    },
+    "ClaimMaturity": {
+      "enum": [
+        "proposal",
+        "f0_fit",
+        "microbenchmark",
+        "formal_benchmark",
+        "supported_model",
+        "foundation_model"
+      ],
+      "title": "ClaimMaturity",
+      "type": "string"
+    },
+    "ClaimStatus": {
+      "enum": [
+        "proposed",
+        "reviewed",
+        "accepted",
+        "rejected",
+        "superseded",
+        "retracted"
+      ],
+      "title": "ClaimStatus",
+      "type": "string"
+    },
+    "EvidencePointer": {
+      "additionalProperties": false,
+      "properties": {
+        "media_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Media Type"
+        },
+        "schema_version": {
+          "const": "tabu.catalog-evidence-pointer.v1",
+          "default": "tabu.catalog-evidence-pointer.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "uri": {
+          "minLength": 1,
+          "title": "Uri",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uri",
+        "sha256"
+      ],
+      "title": "EvidencePointer",
+      "type": "object"
+    },
+    "ObjectRef": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence Sha256"
+        },
+        "kind": {
+          "$ref": "#/$defs/CatalogObjectKind"
+        },
+        "object_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.@-]*$",
+          "title": "Object Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "tabu.catalog-object-ref.v1",
+          "default": "tabu.catalog-object-ref.v1",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "object_id"
+      ],
+      "title": "ObjectRef",
+      "type": "object"
+    }
+  },
+  "$id": "https://research.wehub.us/schemas/catalog-claim-record.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "boundary": {
+      "minLength": 1,
+      "title": "Boundary",
+      "type": "string"
+    },
+    "claim_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.@-]*$",
+      "title": "Claim Id",
+      "type": "string"
+    },
+    "evidence": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/ObjectRef"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "gong_approval": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/EvidencePointer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "maturity": {
+      "$ref": "#/$defs/ClaimMaturity",
+      "default": "proposal"
+    },
+    "receipt": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/EvidencePointer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "review_ids": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Review Ids",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "tabu.catalog-claim.v1",
+      "default": "tabu.catalog-claim.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "statement": {
+      "minLength": 1,
+      "title": "Statement",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/ClaimStatus",
+      "default": "proposed"
+    }
+  },
+  "required": [
+    "claim_id",
+    "statement",
+    "boundary"
+  ],
+  "title": "ClaimRecord",
+  "type": "object"
+}

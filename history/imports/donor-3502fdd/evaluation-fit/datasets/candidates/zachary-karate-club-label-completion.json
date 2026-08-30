@@ -1,0 +1,27 @@
+{
+  "adapter": {
+    "adapter_id": "offline-eval-prepared-snapshot",
+    "adapter_version": "1.0.0",
+    "schema_version": "tabu.dataset-adapter.v1"
+  },
+  "authority_sha256": "862fe2a65376669d2df89e2732eaf482e02a1938b5d7106aee77be7c20718ef5",
+  "authority_status": "self_consistent_unreviewed",
+  "contamination_boundary": "split-before-prepare; selection, preprocessing, normalizers, and codebooks are fitted on train only",
+  "content_sha256": "1d59fd4e3dbacda607f4cfeed9f5bcad01c85714443e8339bf49b66d8ea13b80",
+  "dataset_id": "zachary-karate-club",
+  "dataset_snapshot_id": "zachary-karate-club-zachary-karate-club-label-completion-1d59fd4e3dbacda6",
+  "episode_recipe_hashes": [
+    "2ece1a4736c2ff42fa91060d9e6c735637d12ee6a8f7c8d37f79505253f7ebec"
+  ],
+  "evaluation_scenario_id": "zachary-karate-club-label-completion",
+  "fit_partition": "train",
+  "license_id": "BSD-3-Clause",
+  "mask_boundary": "test target truth remains evaluator-side and absent from adapter payloads",
+  "request_sha256": "26dc8ef04be02e9b52497efaabb6e37a18bb4bf830a3cb02db7d8bf3ae8e56a8",
+  "schema_version": "tabu.dataset-snapshot.v3",
+  "source_sha256": "01c9a11751f41667c2f87aa7fac67d780180d0fa389bf86a92142873d5d5168f",
+  "source_uri": "networkx.generators.social.karate_club_graph",
+  "split_before_compile": true,
+  "split_manifest_sha256": "1a527d8c26cd27026ac9cd85526c184d3059c382178dce57c87f602f72360ff6",
+  "truth_sidecar_sha256": "001441dd533f28c0548acc5d67cec12a5267f4e50789281f68aeb07136f3eb20"
+}

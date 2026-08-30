@@ -1,0 +1,497 @@
+schema_version: tabu.fit-experiment.v1
+experiment_id: S1-010-tabu-cell-base-completion-v1
+supersedes_experiment_ids: []
+revision_rationale: null
+stage: S1
+contract_id: tabu.cell.base
+contract_version: 0.2.0
+model_spec:
+  schema_version: 1.0.0
+  contract_id: tabu.cell.base
+  contract_version: 0.2.0
+  display_name: TabUBase (table-cell-as-Unit)
+  upstream:
+    repository: TabU/latex/model-factory
+    path: ../latex/model-factory/table-cell-as-unit-models/TabUBase/main.tex
+    sha256: 2769168c7e60d1b419d7308c9baec494aa1c851bcdd77c580c02ee311e3bd501
+    readonly: true
+    observed_at: '2026-08-28'
+    license_boundary: 'Metadata-only reference: upstream TeX remains readonly and is not redistributed by this manifest.'
+  carrier:
+    family: tabu.table_cell_as_unit
+    unit: cell
+    shape: N x M x d
+    specials: none
+  dynamics:
+    family: cell_unit_three_omab
+    source_contract: visible cell tokens source; artificial masks receiver-only
+    null_contract: exact-zero closure
+  readout:
+    geometry: global learned projection W c_ra in R^K
+    support: same-feature visible cells
+    numeric_terminal: default local-linear; NW nested baseline
+    categorical_terminal: NW probability mass on declared domain
+    no_support: typed no-support
+  loss:
+    truth_entry: Step 5 only
+    target_families:
+    - artificial_mask_completion
+    - supervised_single_response
+  interfaces:
+    compile: typed partially observed table with cell Units
+    forward: truth-free cell predictions plus trace; explicit profile required
+    train: truth supplied only through the loss sidecar
+    infer: profile-gated artificial-mask completion or single-response query labels
+  capabilities:
+  - table_cell_as_unit
+  - artificial_mask_completion
+  - supervised_single_response
+  - mixed_numeric_categorical
+  - same_feature_support
+  - exact_zero_closure
+  maturity:
+    source_contract: factory_source
+    stage: experimental
+    contract: specified
+    implementation: experimental
+    evidence: specified
+    build_state: buildable_contract
+  maturity_evidence: null
+  mathematics: null
+  experimental_defaults:
+    family_id: tabu.table_cell_as_unit
+    profile_id: completion.artificial_mask.v1
+    profiles:
+      completion.artificial_mask.v1:
+        target_origin: artificial_mask
+        label_broadcast: false
+        response_columns: 0
+        natural_missing_inference: false
+      supervised.label_broadcast.v1:
+        target_origin: query
+        label_broadcast: true
+        response_columns: 1
+        label_cells_write_other_labels: false
+        natural_missing_inference: false
+    numeric_terminal: local_linear
+    feature_identity: forbidden
+    continuous_tokenizer: context_only_standardization_then_shared_learnable_fourier
+    nominal_tokenizer: episode_random_sphere
+    scale_epsilon: 1e-6
+    label_broadcast: explicit_step_3_module_profile_gated
+    label_broadcast_tau: 1e-6
+    inference_targets: artificial_masks_only
+    reference_backend: dense_reference_v0
+  known_open: []
+  alternatives: []
+  kill:
+  - id: truth_leakage
+    condition: Changing completion truth changes Steps 1-4.
+    evidence: truth-substitution invariance test
+  - id: null_feature_identity
+    condition: Natural missing receives a feature-identity add.
+    evidence: compiled-token exact-value test
+  exit:
+  - id: carrier_shape
+    condition: Every layer preserves N x M x d.
+    evidence: shape trace
+  - id: cell_projection
+    condition: Every target coordinate is W c_ra.
+    evidence: readout trace
+model_spec_hash: 415103ae057e5cf63d033a3685c30b96a2f400575101bf17ee17acc2bb22f452
+dataset:
+  dataset_id: s1-tabu-cell-base-completion-v1
+  origin: generated
+  source_uri: pkg://tabu_lab.experiments.s1_table_synthetic#build_s1_completion_corpus
+  source_sha256: 182d5bf8147a854228172542e532fff3fb1083ecaadd73e5fff8270dcf6bb3eb
+  dataset_hash: 75ae417c761ea43c8e4b719ec11968aae6c449ecbe1ba9a3ade1ca169d6cba82
+  license_id: Apache-2.0
+  redistribution: allowed
+  adapter:
+    adapter_id: tabu-s1-table-synthetic-base
+    adapter_version: 1.0.0
+  raw_files_in_git: false
+  split_before_compile: true
+split:
+  schema_version: tabu.fit-split.v1
+  dataset_id: s1-tabu-cell-base-completion-v1
+  dataset_hash: 75ae417c761ea43c8e4b719ec11968aae6c449ecbe1ba9a3ade1ca169d6cba82
+  split_id: S1-completion-row-split-v1
+  fit_partition: train
+  strategy: deterministic_synthetic_row_split_v1
+  seed: 130363
+  require_complete: true
+  kind: row
+  partitions:
+  - name: train
+    row_ids:
+    - completion-row-000
+    - completion-row-001
+    - completion-row-002
+    - completion-row-003
+    - completion-row-004
+    - completion-row-005
+    - completion-row-006
+    - completion-row-007
+    - completion-row-008
+    - completion-row-009
+    - completion-row-010
+    - completion-row-011
+    - completion-row-012
+    - completion-row-013
+    - completion-row-014
+    - completion-row-015
+    - completion-row-016
+    - completion-row-017
+    - completion-row-018
+    - completion-row-019
+    - completion-row-020
+    - completion-row-021
+    - completion-row-022
+    - completion-row-023
+    - completion-row-024
+    - completion-row-025
+    - completion-row-026
+    - completion-row-027
+    - completion-row-028
+    - completion-row-029
+    - completion-row-030
+    - completion-row-031
+    - completion-row-032
+    - completion-row-033
+    - completion-row-034
+    - completion-row-035
+    - completion-row-036
+    - completion-row-037
+    - completion-row-038
+    - completion-row-039
+    - completion-row-040
+    - completion-row-041
+    - completion-row-042
+    - completion-row-043
+    - completion-row-044
+    - completion-row-045
+    - completion-row-046
+    - completion-row-047
+    - completion-row-048
+    - completion-row-049
+    - completion-row-050
+    - completion-row-051
+    - completion-row-052
+    - completion-row-053
+    - completion-row-054
+    - completion-row-055
+    - completion-row-056
+    - completion-row-057
+    - completion-row-058
+    - completion-row-059
+    - completion-row-060
+    - completion-row-061
+    - completion-row-062
+    - completion-row-063
+    - completion-row-064
+    - completion-row-065
+    - completion-row-066
+    - completion-row-067
+    - completion-row-068
+    - completion-row-069
+    - completion-row-070
+    - completion-row-071
+    - completion-row-072
+    - completion-row-073
+    - completion-row-074
+    - completion-row-075
+    - completion-row-076
+    - completion-row-077
+    - completion-row-078
+    - completion-row-079
+    - completion-row-080
+    - completion-row-081
+    - completion-row-082
+    - completion-row-083
+    - completion-row-084
+    - completion-row-085
+    - completion-row-086
+    - completion-row-087
+    - completion-row-088
+    - completion-row-089
+    - completion-row-090
+    - completion-row-091
+    - completion-row-092
+    - completion-row-093
+    - completion-row-094
+    - completion-row-095
+    - completion-row-096
+    - completion-row-097
+    - completion-row-098
+    - completion-row-099
+    - completion-row-100
+    - completion-row-101
+    - completion-row-102
+    - completion-row-103
+    - completion-row-104
+    - completion-row-105
+    - completion-row-106
+    - completion-row-107
+    - completion-row-108
+    - completion-row-109
+    - completion-row-110
+    - completion-row-111
+    - completion-row-112
+    - completion-row-113
+    - completion-row-114
+    - completion-row-115
+    - completion-row-116
+    - completion-row-117
+    - completion-row-118
+    - completion-row-119
+    - completion-row-120
+    - completion-row-121
+    - completion-row-122
+    - completion-row-123
+    - completion-row-124
+    - completion-row-125
+    - completion-row-126
+    - completion-row-127
+    - completion-row-128
+    - completion-row-129
+    - completion-row-130
+    - completion-row-131
+    - completion-row-132
+    - completion-row-133
+    - completion-row-134
+    - completion-row-135
+    - completion-row-136
+    - completion-row-137
+    - completion-row-138
+    - completion-row-139
+    - completion-row-140
+    - completion-row-141
+    - completion-row-142
+    - completion-row-143
+    - completion-row-144
+    - completion-row-145
+    - completion-row-146
+    - completion-row-147
+    - completion-row-148
+    - completion-row-149
+    - completion-row-150
+    - completion-row-151
+    - completion-row-152
+    - completion-row-153
+    - completion-row-154
+    - completion-row-155
+    - completion-row-156
+    - completion-row-157
+    - completion-row-158
+    - completion-row-159
+    - completion-row-160
+    - completion-row-161
+    - completion-row-162
+    - completion-row-163
+    - completion-row-164
+    - completion-row-165
+    - completion-row-166
+    - completion-row-167
+    - completion-row-168
+    - completion-row-169
+    - completion-row-170
+    - completion-row-171
+    - completion-row-172
+    - completion-row-173
+    - completion-row-174
+    - completion-row-175
+    - completion-row-176
+    - completion-row-177
+    - completion-row-178
+    - completion-row-179
+    - completion-row-180
+    - completion-row-181
+    - completion-row-182
+    - completion-row-183
+    - completion-row-184
+    - completion-row-185
+    - completion-row-186
+    - completion-row-187
+    - completion-row-188
+    - completion-row-189
+    - completion-row-190
+    - completion-row-191
+  - name: validation
+    row_ids:
+    - completion-row-192
+    - completion-row-194
+    - completion-row-196
+    - completion-row-198
+    - completion-row-200
+    - completion-row-202
+    - completion-row-204
+    - completion-row-206
+    - completion-row-208
+    - completion-row-210
+    - completion-row-212
+    - completion-row-214
+    - completion-row-216
+    - completion-row-218
+    - completion-row-220
+    - completion-row-222
+    - completion-row-224
+    - completion-row-226
+    - completion-row-228
+    - completion-row-230
+    - completion-row-232
+    - completion-row-234
+    - completion-row-236
+    - completion-row-238
+    - completion-row-240
+    - completion-row-242
+    - completion-row-244
+    - completion-row-246
+    - completion-row-248
+    - completion-row-250
+    - completion-row-252
+    - completion-row-254
+  - name: test
+    row_ids:
+    - completion-row-193
+    - completion-row-195
+    - completion-row-197
+    - completion-row-199
+    - completion-row-201
+    - completion-row-203
+    - completion-row-205
+    - completion-row-207
+    - completion-row-209
+    - completion-row-211
+    - completion-row-213
+    - completion-row-215
+    - completion-row-217
+    - completion-row-219
+    - completion-row-221
+    - completion-row-223
+    - completion-row-225
+    - completion-row-227
+    - completion-row-229
+    - completion-row-231
+    - completion-row-233
+    - completion-row-235
+    - completion-row-237
+    - completion-row-239
+    - completion-row-241
+    - completion-row-243
+    - completion-row-245
+    - completion-row-247
+    - completion-row-249
+    - completion-row-251
+    - completion-row-253
+    - completion-row-255
+episode_schedule:
+  schedule_id: S1-010-tabu-cell-base-completion-v1
+  sampling: deterministic_shuffle
+  episode_count: 32
+  targets_per_episode: 12
+  target_families:
+  - completion
+  target_origins:
+  - artificial_mask
+  sampler_seed: 104729
+  order_seed: 130363
+  recipe_hashes: []
+semantic:
+  reference:
+    backend: dense_reference_v0
+    d_model: 32
+    n_heads: 4
+    d_ff: 64
+    n_blocks: 2
+    inducing_slots: 4
+    matched_slots: 4
+    max_features: 256
+    dropout: 0.0
+    presence_tau: 1.0e-06
+    denominator_epsilon: 1.0e-08
+    routing_bandwidth: 1.0
+    geometry_normalization: none
+  numeric_terminal: nadaraya_watson
+  categorical_terminal: nadaraya_watson
+  augmented_readout_geometry: null
+  label_columns: []
+  label_address_plan: null
+  target_feature: null
+  graph_unit_receiver_plan: null
+  response_family: null
+  recommendation_address_plan: null
+  rec_axis_summary_dim: null
+  rec_matched_residual_scale: null
+  profile_id: completion.artificial_mask.v1
+training:
+  optimizer: adamw
+  learning_rate: 0.001
+  weight_decay: 0.0
+  gradient_clip_norm: 1.0
+  max_updates: 3000
+  max_epochs: null
+  wall_clock_budget_minutes: 15
+  episode_batch_size: 1
+  scheduler: none
+  exact_resume: true
+  warm_start: false
+  pretraining: false
+execution:
+  device: cuda
+  device_index: 0
+  dtype: float32
+  deterministic_algorithms: true
+  evidence_mode: gate
+  compile_on_cpu: true
+  backend: dense_reference_v0
+seeds:
+  model_seeds:
+  - 1729
+  - 2718
+  - 31415
+  data_seed: 104729
+  split_seed: 130363
+  episode_order_seed: 130363
+target_families:
+- completion
+baselines:
+- baseline_id: exact-support-mean-mode
+  role: trivial
+  max_updates: null
+- baseline_id: frozen-initialization
+  role: diagnostic
+  max_updates: null
+pass_gate:
+  stage: S1
+  required_coverage: 1.0
+  max_loss_ratio: 0.1
+  max_trivial_baseline_ratio: 0.5
+  max_numeric_mse: null
+  max_numeric_nrmse: 0.05
+  min_categorical_accuracy: 0.98
+  max_categorical_nll: 0.1
+  require_all_seeds: true
+kill_conditions:
+  fail_on_nonfinite: true
+  require_nonzero_gradient_by_step: 10
+  require_nonzero_parameter_delta: true
+  stop_model_after_stage_failure: true
+  preserve_failed_receipt: true
+heldout_policy: diagnostic_only
+required_artifacts:
+- preregistration.yaml
+- resolved-configs
+- dataset-manifest.json
+- split-manifest.json
+- compiler-manifest.json
+- feasibility.json
+- metrics.jsonl
+- evaluation.json
+- forward-traces.json
+- baselines.json
+- checkpoint
+- environment.json
+- artifacts.sha256
+- receipt.json
+- verdict.md

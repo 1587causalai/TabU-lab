@@ -1,0 +1,1278 @@
+{
+  "$defs": {
+    "AdapterKind": {
+      "enum": [
+        "model",
+        "baseline"
+      ],
+      "title": "AdapterKind",
+      "type": "string"
+    },
+    "AdapterSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+          "title": "Adapter Id",
+          "type": "string"
+        },
+        "adapter_version": {
+          "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$",
+          "title": "Adapter Version",
+          "type": "string"
+        },
+        "artifact_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Artifact Id"
+        },
+        "baseline_family": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Baseline Family"
+        },
+        "contract_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Contract Id"
+        },
+        "deterministic": {
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "device_class": {
+          "const": "single_device",
+          "title": "Device Class",
+          "type": "string"
+        },
+        "fit_iterations": {
+          "minimum": 0,
+          "title": "Fit Iterations",
+          "type": "integer"
+        },
+        "kind": {
+          "$ref": "#/$defs/AdapterKind"
+        },
+        "profile_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Profile Id"
+        },
+        "schema_version": {
+          "const": "tabu.eval-adapter.v2",
+          "default": "tabu.eval-adapter.v2",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "adapter_id",
+        "adapter_version",
+        "kind",
+        "fit_iterations",
+        "device_class",
+        "deterministic"
+      ],
+      "title": "AdapterSpec",
+      "type": "object"
+    },
+    "EnvironmentDisclosure": {
+      "additionalProperties": false,
+      "properties": {
+        "accelerator": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accelerator"
+        },
+        "architecture": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Architecture"
+        },
+        "device": {
+          "minLength": 1,
+          "title": "Device",
+          "type": "string"
+        },
+        "environment_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Environment Hash",
+          "type": "string"
+        },
+        "host_class": {
+          "minLength": 1,
+          "title": "Host Class",
+          "type": "string"
+        },
+        "operating_system": {
+          "minLength": 1,
+          "title": "Operating System",
+          "type": "string"
+        },
+        "python_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Python Version"
+        }
+      },
+      "required": [
+        "environment_hash",
+        "host_class",
+        "operating_system",
+        "device"
+      ],
+      "title": "EnvironmentDisclosure",
+      "type": "object"
+    },
+    "EvalExecutionReceipt": {
+      "additionalProperties": false,
+      "description": "Independent immutable receipt for one evaluation execution.\n\n``result_content_sha256`` binds the complete canonical ``EvalResult``\npayload *before* this receipt is attached.  Excluding the receipt from that\none hash is intentional and avoids a circular self-hash; every substantive\nresult field remains covered.",
+      "properties": {
+        "adapter_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Adapter Sha256",
+          "type": "string"
+        },
+        "baseline_spec_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Baseline Spec Sha256"
+        },
+        "budget_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Budget Hash",
+          "type": "string"
+        },
+        "completed_at": {
+          "format": "date-time",
+          "title": "Completed At",
+          "type": "string"
+        },
+        "dataset_authority_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dataset Authority Sha256"
+        },
+        "dataset_authority_status": {
+          "anyOf": [
+            {
+              "const": "reviewed",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dataset Authority Status"
+        },
+        "dataset_request_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dataset Request Sha256"
+        },
+        "dataset_snapshot_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dataset Snapshot Id"
+        },
+        "dataset_snapshot_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dataset Snapshot Sha256"
+        },
+        "environment": {
+          "$ref": "#/$defs/EnvironmentDisclosure"
+        },
+        "eval_run_id": {
+          "pattern": "^evalrun-[0-9a-f]{64}$",
+          "title": "Eval Run Id",
+          "type": "string"
+        },
+        "failure_category": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FailureCategory"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "issuance_status": {
+          "enum": [
+            "formal",
+            "local_unissued"
+          ],
+          "title": "Issuance Status",
+          "type": "string"
+        },
+        "producer_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Producer Sha256",
+          "type": "string"
+        },
+        "receipt_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+          "title": "Receipt Id",
+          "type": "string"
+        },
+        "recipe_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Recipe Sha256",
+          "type": "string"
+        },
+        "result_content_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Result Content Sha256",
+          "type": "string"
+        },
+        "result_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+          "title": "Result Id",
+          "type": "string"
+        },
+        "scenario_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+          "title": "Scenario Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "tabu.eval-execution-receipt.v2",
+          "default": "tabu.eval-execution-receipt.v2",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "seed": {
+          "minimum": 0,
+          "title": "Seed",
+          "type": "integer"
+        },
+        "source_authorization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EvaluatorSourceAuthorization"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "source_identity": {
+          "$ref": "#/$defs/SourceIdentity"
+        },
+        "source_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Source Sha256",
+          "type": "string"
+        },
+        "split_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Split Sha256",
+          "type": "string"
+        },
+        "started_at": {
+          "format": "date-time",
+          "title": "Started At",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/EvaluationStatus"
+        },
+        "suite_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Suite Hash",
+          "type": "string"
+        },
+        "suite_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+          "title": "Suite Id",
+          "type": "string"
+        },
+        "suite_version": {
+          "title": "Suite Version",
+          "type": "string"
+        },
+        "truth_sidecar_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Truth Sidecar Sha256"
+        }
+      },
+      "required": [
+        "receipt_id",
+        "eval_run_id",
+        "issuance_status",
+        "status",
+        "suite_id",
+        "suite_version",
+        "suite_hash",
+        "scenario_id",
+        "adapter_sha256",
+        "producer_sha256",
+        "seed",
+        "source_sha256",
+        "split_sha256",
+        "recipe_sha256",
+        "budget_hash",
+        "result_id",
+        "result_content_sha256",
+        "environment",
+        "source_identity",
+        "started_at",
+        "completed_at"
+      ],
+      "title": "EvalExecutionReceipt",
+      "type": "object"
+    },
+    "EvalProducerBinding": {
+      "additionalProperties": false,
+      "description": "Lineage of the subject being evaluated, never the evaluation execution.\n\nA model points back to the immutable training receipt that produced its\ncheckpoint.  That producer receipt may be ``local_unissued``: it is enough\nto make an exploratory result reproducible, but it does not make the result\npublic evidence.  An evaluator-owned baseline has no training run.  Both\nstill require a separate :class:`EvalExecutionReceipt` for every execution.",
+      "properties": {
+        "provenance": {
+          "$ref": "#/$defs/ProducerProvenance"
+        },
+        "publication_eligible": {
+          "title": "Publication Eligible",
+          "type": "boolean"
+        },
+        "receipt_pointer": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Receipt Pointer"
+        },
+        "receipt_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Receipt Sha256"
+        },
+        "run_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Run Id"
+        },
+        "schema_version": {
+          "const": "tabu.eval-producer-binding.v1",
+          "default": "tabu.eval-producer-binding.v1",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "provenance",
+        "publication_eligible"
+      ],
+      "title": "EvalProducerBinding",
+      "type": "object"
+    },
+    "EvaluationFailure": {
+      "additionalProperties": false,
+      "properties": {
+        "category": {
+          "$ref": "#/$defs/FailureCategory"
+        },
+        "code": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+          "title": "Code",
+          "type": "string"
+        },
+        "public_detail": {
+          "maxLength": 240,
+          "minLength": 1,
+          "title": "Public Detail",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "tabu.eval-failure.v1",
+          "default": "tabu.eval-failure.v1",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "category",
+        "code",
+        "public_detail"
+      ],
+      "title": "EvaluationFailure",
+      "type": "object"
+    },
+    "EvaluationStatus": {
+      "enum": [
+        "succeeded",
+        "failed"
+      ],
+      "title": "EvaluationStatus",
+      "type": "string"
+    },
+    "EvaluatorSourceAuthorization": {
+      "additionalProperties": false,
+      "description": "Path-free replay handle for the evaluator implementation source.\n\nThis object deliberately does *not* authorize an evaluation protocol or a\ndataset.  Those authorities remain the exact ``EvalSuiteSpec`` hash and a\nseparately reviewed ``DatasetSnapshotSpec``.  The fields below mirror the\nverified Git authorization summary without importing the catalog-backed\nverifier into this low-level schema module (which would create an import\ncycle).",
+      "properties": {
+        "authorization_schema_version": {
+          "const": "tabu.formal-run-authorization.v3",
+          "default": "tabu.formal-run-authorization.v3",
+          "title": "Authorization Schema Version",
+          "type": "string"
+        },
+        "canonical_commit": {
+          "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$",
+          "title": "Canonical Commit",
+          "type": "string"
+        },
+        "catalog_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Catalog Hash",
+          "type": "string"
+        },
+        "catalog_source_tree_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Catalog Source Tree Hash",
+          "type": "string"
+        },
+        "experiment_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+          "title": "Experiment Id",
+          "type": "string"
+        },
+        "experiment_status": {
+          "minLength": 1,
+          "title": "Experiment Status",
+          "type": "string"
+        },
+        "gong_approval_sha256s": {
+          "items": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Gong Approval Sha256S",
+          "type": "array"
+        },
+        "preregistration_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Preregistration Sha256",
+          "type": "string"
+        },
+        "purpose": {
+          "const": "evaluator_source",
+          "default": "evaluator_source",
+          "title": "Purpose",
+          "type": "string"
+        },
+        "review_ids": {
+          "items": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Review Ids",
+          "type": "array"
+        },
+        "review_report_sha256s": {
+          "items": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Review Report Sha256S",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "tabu.eval-source-authorization.v1",
+          "default": "tabu.eval-source-authorization.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "source_identity_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Source Identity Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "canonical_commit",
+        "catalog_hash",
+        "catalog_source_tree_hash",
+        "experiment_id",
+        "experiment_status",
+        "preregistration_sha256",
+        "source_identity_sha256",
+        "review_ids",
+        "review_report_sha256s",
+        "gong_approval_sha256s"
+      ],
+      "title": "EvaluatorSourceAuthorization",
+      "type": "object"
+    },
+    "FailureCategory": {
+      "enum": [
+        "model",
+        "data",
+        "evaluator",
+        "artifact",
+        "infrastructure",
+        "budget",
+        "kill-condition"
+      ],
+      "title": "FailureCategory",
+      "type": "string"
+    },
+    "JsonValue": {},
+    "PerExampleScore": {
+      "additionalProperties": false,
+      "properties": {
+        "categorical_support": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Categorical Support",
+          "type": "array"
+        },
+        "example_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+          "title": "Example Id",
+          "type": "string"
+        },
+        "failure_category": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FailureCategory"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "metrics": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Metrics",
+          "type": "object"
+        },
+        "normalization_scale": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Normalization Scale"
+        },
+        "prediction_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Prediction Sha256",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "tabu.eval-example-score.v2",
+          "default": "tabu.eval-example-score.v2",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "scored": {
+          "title": "Scored",
+          "type": "boolean"
+        },
+        "target_family": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+          "title": "Target Family",
+          "type": "string"
+        },
+        "target_kind": {
+          "$ref": "#/$defs/TargetKind"
+        },
+        "truth": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Truth"
+        }
+      },
+      "required": [
+        "example_id",
+        "prediction_sha256",
+        "target_kind",
+        "target_family",
+        "truth",
+        "scored"
+      ],
+      "title": "PerExampleScore",
+      "type": "object"
+    },
+    "ProducerProvenance": {
+      "enum": [
+        "receipted_run",
+        "unissued_baseline"
+      ],
+      "title": "ProducerProvenance",
+      "type": "string"
+    },
+    "RawPrediction": {
+      "additionalProperties": false,
+      "properties": {
+        "abstained": {
+          "default": false,
+          "title": "Abstained",
+          "type": "boolean"
+        },
+        "diagnostics": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Diagnostics",
+          "type": "object"
+        },
+        "example_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+          "title": "Example Id",
+          "type": "string"
+        },
+        "failure_category": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FailureCategory"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "failure_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Failure Code"
+        },
+        "probabilities": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "number"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Probabilities"
+        },
+        "schema_version": {
+          "const": "tabu.eval-raw-prediction.v1",
+          "default": "tabu.eval-raw-prediction.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        }
+      },
+      "required": [
+        "example_id"
+      ],
+      "title": "RawPrediction",
+      "type": "object"
+    },
+    "SourceIdentity": {
+      "additionalProperties": false,
+      "description": "Public, path-free identity of the source that produced an attempt.\n\n``formal`` is deliberately a narrow state. A Git identity is formal only\nwhen the exact preregistration is committed, the declared source scope is\nclean, and the commit is reachable from a configured remote-tracking ref.\nThe scope may be a repository root or a public repository subdirectory;\nunrelated parent-repository dirt is deliberately outside that identity.\nA distribution identity is formal only when a reviewer-approved immutable\nwheel/sdist URI, digest, dependency-lock digest, and exact installed-package\nsource-tree binding are all present.",
+      "properties": {
+        "commit": {
+          "anyOf": [
+            {
+              "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Commit"
+        },
+        "distribution_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Distribution Sha256"
+        },
+        "distribution_uri": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Distribution Uri"
+        },
+        "git_tree_oid": {
+          "anyOf": [
+            {
+              "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Git Tree Oid"
+        },
+        "issuance_status": {
+          "enum": [
+            "formal",
+            "local_unissued"
+          ],
+          "title": "Issuance Status",
+          "type": "string"
+        },
+        "lock_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lock Hash"
+        },
+        "preregistration_blob_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Preregistration Blob Hash"
+        },
+        "reasons": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Reasons",
+          "type": "array"
+        },
+        "remote_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Remote Ref"
+        },
+        "repository_subdirectory": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Repository Subdirectory"
+        },
+        "repository_uri": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Repository Uri"
+        },
+        "reviewed": {
+          "default": false,
+          "title": "Reviewed",
+          "type": "boolean"
+        },
+        "schema_version": {
+          "const": "tabu.source-identity.v2",
+          "default": "tabu.source-identity.v2",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "source_kind": {
+          "enum": [
+            "git",
+            "distribution",
+            "local"
+          ],
+          "title": "Source Kind",
+          "type": "string"
+        },
+        "source_tree_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Tree Hash"
+        }
+      },
+      "required": [
+        "source_kind",
+        "issuance_status"
+      ],
+      "title": "SourceIdentity",
+      "type": "object"
+    },
+    "TargetKind": {
+      "enum": [
+        "numeric",
+        "categorical"
+      ],
+      "title": "TargetKind",
+      "type": "string"
+    },
+    "TaskKind": {
+      "enum": [
+        "supervised_classification",
+        "supervised_regression",
+        "table_completion",
+        "graph_completion",
+        "recsys_completion"
+      ],
+      "title": "TaskKind",
+      "type": "string"
+    },
+    "TopologyCheckResult": {
+      "additionalProperties": false,
+      "description": "Retained paired outputs scored by the evaluator, never model diagnostics.",
+      "properties": {
+        "base_example_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+          "title": "Base Example Id",
+          "type": "string"
+        },
+        "base_prediction": {
+          "$ref": "#/$defs/RawPrediction"
+        },
+        "check_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+          "title": "Check Id",
+          "type": "string"
+        },
+        "expected_relation": {
+          "$ref": "#/$defs/TopologyRelation"
+        },
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        },
+        "perturbed_example_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Perturbed Example Sha256",
+          "type": "string"
+        },
+        "perturbed_prediction": {
+          "$ref": "#/$defs/RawPrediction"
+        },
+        "schema_version": {
+          "const": "tabu.eval-topology-check-result.v1",
+          "default": "tabu.eval-topology-check-result.v1",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "check_id",
+        "base_example_id",
+        "perturbed_example_sha256",
+        "expected_relation",
+        "base_prediction",
+        "perturbed_prediction",
+        "passed"
+      ],
+      "title": "TopologyCheckResult",
+      "type": "object"
+    },
+    "TopologyRelation": {
+      "enum": [
+        "equal",
+        "different"
+      ],
+      "title": "TopologyRelation",
+      "type": "string"
+    }
+  },
+  "$id": "https://research.wehub.us/schemas/eval-result.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "adapter": {
+      "$ref": "#/$defs/AdapterSpec"
+    },
+    "budget_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Budget Hash",
+      "type": "string"
+    },
+    "claim_boundary": {
+      "minLength": 1,
+      "title": "Claim Boundary",
+      "type": "string"
+    },
+    "counts": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Counts",
+      "type": "object"
+    },
+    "coverage": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Coverage",
+      "type": "number"
+    },
+    "execution_receipt": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/EvalExecutionReceipt"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "failure": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/EvaluationFailure"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "failure_counts": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "propertyNames": {
+        "$ref": "#/$defs/FailureCategory"
+      },
+      "title": "Failure Counts",
+      "type": "object"
+    },
+    "metrics": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "title": "Metrics",
+      "type": "object"
+    },
+    "per_example": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/PerExampleScore"
+      },
+      "title": "Per Example",
+      "type": "array"
+    },
+    "producer": {
+      "$ref": "#/$defs/EvalProducerBinding"
+    },
+    "raw_predictions": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/RawPrediction"
+      },
+      "title": "Raw Predictions",
+      "type": "array"
+    },
+    "recipe_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Recipe Sha256",
+      "type": "string"
+    },
+    "result_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+      "title": "Result Id",
+      "type": "string"
+    },
+    "scenario_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+      "title": "Scenario Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "tabu.eval-result.v2",
+      "default": "tabu.eval-result.v2",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "seed": {
+      "minimum": 0,
+      "title": "Seed",
+      "type": "integer"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "split_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Split Sha256",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/EvaluationStatus"
+    },
+    "suite_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Suite Hash",
+      "type": "string"
+    },
+    "suite_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+      "title": "Suite Id",
+      "type": "string"
+    },
+    "suite_version": {
+      "title": "Suite Version",
+      "type": "string"
+    },
+    "task": {
+      "$ref": "#/$defs/TaskKind"
+    },
+    "topology_checks": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/TopologyCheckResult"
+      },
+      "title": "Topology Checks",
+      "type": "array"
+    },
+    "truth_sidecar_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Truth Sidecar Sha256"
+    }
+  },
+  "required": [
+    "result_id",
+    "status",
+    "suite_id",
+    "suite_version",
+    "suite_hash",
+    "scenario_id",
+    "task",
+    "adapter",
+    "producer",
+    "seed",
+    "source_sha256",
+    "split_sha256",
+    "recipe_sha256",
+    "budget_hash",
+    "coverage",
+    "claim_boundary"
+  ],
+  "title": "EvalResult",
+  "type": "object"
+}

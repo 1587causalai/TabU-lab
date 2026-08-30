@@ -1,0 +1,343 @@
+schema_version: tabu.fit-experiment.v1
+experiment_id: F0-004-tabul-v1
+stage: F0
+contract_id: tabul
+contract_version: 0.1.0
+model_spec:
+  schema_version: 1.0.0
+  contract_id: tabul
+  contract_version: 0.1.0
+  display_name: TabUL
+  upstream:
+    repository: TabU/latex/model-factory
+    path: ../latex/model-factory/TabUL/main.tex
+    sha256: f272a3262f34dec6be22814249d924653191bd21ff9421d07f9a356123fed865
+    readonly: true
+    observed_at: '2026-08-27'
+    license_boundary: 'Metadata-only reference: upstream TeX remains readonly and is not redistributed by this manifest.'
+  carrier:
+    input_unit: row-linked carrier address; semantic Unit mapping is task-declared
+    input_axes:
+    - row
+    - feature_or_label
+    - hidden
+    shape: (N+K) x (M+K) x d
+    context_query:
+      context: naturally visible context feature/label cells are evidence
+      query: query features are local evidence; query labels use receiver-only markers and never source cross-row slots
+    tokenization:
+      visible_value: type-specific value encoder
+      artificial_mask: absent
+      query_label: learned e_query
+      natural_missing: fixed e_null = 0_d
+      structural_corner: fixed 0_d
+    specials:
+      unit: K per row
+      feature: K per feature/label column
+      corner: K x K fixed zero
+    truth_boundary: query-label truth enters only at Step 5
+  dynamics:
+    family: O-closed augmented-table Transformer
+    entry: multi-label OInject over ordinary cells
+    operations:
+    - slot_from_context_omab
+    - token_from_slot_omab
+    - row_axis_omab
+    inducing: S transient slots per block; S is distinct from K
+    source_contract: naturally visible context only; query rows are receiver-only for cross-row memory
+    null_contract: OInject, OAttention, and OFFN preserve exact zero
+  readout:
+    geometry: matched Unit-special/label-Feature-special diagonal inner products in R^K
+    support: per-label naturally visible context rows
+    numeric_terminal: LL or NW; selection is not frozen by source
+    categorical_terminal: NW probability mass on declared domain
+    no_support: explicit no-support; target omitted from loss
+  loss:
+    truth_entry: Step 5 only
+    numeric: MSE on source-normalized query label
+    categorical: NLL on declared-domain PMF
+    target_families:
+    - query_label
+    weighting: equal across active types by default
+  interfaces:
+    compile: typed context/query episode with natural visibility and query-label roles; no context artificial mask
+    forward: truth-free per-label query predictions plus trace
+    train: supply query-label truth only as a loss sidecar
+    infer: declare query rows and label targets; preserve per-label no-support
+  capabilities:
+  - supervised_multi_label_prediction
+  - mixed_numeric_categorical
+  - query_label_blind
+  - exact_zero_closure
+  maturity:
+    source_contract: factory_source
+    stage: experimental
+    contract: specified
+    implementation: experimental
+    evidence: specified
+    build_state: buildable_contract
+  maturity_evidence: null
+  mathematics: null
+  experimental_defaults:
+    context_value_masking: false
+    query_marker: global_shared_e_query
+    active_type_weights: equal
+    numeric_terminal: null
+    reference_backend:
+      backend: dense_reference_v0
+      provenance: tabu_lab.models.ReferenceConfig; these are implementation experiment defaults, not upstream factory invariants
+      d_model: 32
+      n_heads: 4
+      d_ff: 64
+      n_blocks: 2
+      inducing_slots: 4
+      matched_slots: 4
+      max_features: 256
+      dropout: 0
+      presence_tau: 1.0e-06
+      denominator_epsilon: 1e-8
+      routing_bandwidth: 1
+    label_columns:
+    - -1
+  known_open:
+  - id: numeric_terminal_choice
+    question: Freeze LL versus NW for numeric labels.
+    blocking_build: false
+  - id: unit_query_cardinality
+    question: Define aggregation if multiple query rows refer to one semantic Unit.
+    blocking_build: false
+  - id: typed_query_marker
+    question: Decide whether time, query type, or intervention role needs an additional typed marker.
+    blocking_build: false
+  - id: loss_weighting_and_abstention
+    question: Freeze class weighting, calibration, and abstention as an output/loss contract.
+    blocking_build: false
+  - id: closure_host_scope
+    question: Revalidate exact-zero closure whenever normalization, attention host, or readout changes.
+    blocking_build: false
+  alternatives:
+  - id: typed_query_role
+    description: Add declared query-type/time/intervention tokens without exposing label truth.
+    status: deferred
+  kill:
+  - id: truth_leakage
+    condition: Changing query truth changes any Step 1-4 state, support, or prediction.
+    evidence: truth-substitution invariance test
+  - id: query_writes_context
+    condition: A query row contributes K/V to cross-row contextual slots.
+    evidence: source-mask trace
+  - id: context_mask_present
+    condition: An artificial context-value mask or e_mask is introduced into the TabUL contract.
+    evidence: compiled-role audit
+  exit:
+  - id: supervised_only
+    condition: The target ledger contains only query-label targets and no feature reconstruction route.
+    evidence: target-ledger snapshot
+  - id: carrier_shape
+    condition: Every layer preserves (N+K) x (M+K) x d.
+    evidence: shape trace
+  - id: query_truth_isolation
+    condition: Query truth is first read in Step 5.
+    evidence: truth-dependency audit
+model_spec_hash: 43fbaa0303d80f07cf19e9241c295cafa194a125aa682b2ac7f2bcf00e6a2755
+dataset:
+  dataset_id: f0-supervised-xor-bounded-v1
+  origin: generated
+  source_uri: pkg://tabu_lab.experiments.fixtures
+  source_sha256: f01ef5345df1126e0dda7957b6d8cd2c2f6fecd3f5158449fdb5aca7739b9ddf
+  dataset_hash: 8f9490075989ead6189d768183d4402a5a0c2836626455c1a980c4b658aa5848
+  license_id: Apache-2.0
+  redistribution: allowed
+  adapter:
+    adapter_id: tabu-f0-fixtures
+    adapter_version: 1.0.0
+  raw_files_in_git: false
+  split_before_compile: true
+split:
+  schema_version: tabu.fit-split.v1
+  dataset_id: f0-supervised-xor-bounded-v1
+  dataset_hash: 8f9490075989ead6189d768183d4402a5a0c2836626455c1a980c4b658aa5848
+  split_id: F0-004-tabul-v1-fit-split-v1
+  fit_partition: train
+  strategy: fixed_f0_episode
+  seed: 130363
+  require_complete: true
+  kind: row
+  partitions:
+  - name: train
+    row_ids:
+    - row-00
+    - row-01
+    - row-02
+    - row-03
+    - row-04
+    - row-05
+    - row-06
+    - row-07
+    - row-08
+    - row-09
+    - row-10
+    - row-11
+    - row-12
+    - row-13
+    - row-14
+    - row-15
+    - row-16
+    - row-17
+    - row-18
+    - row-19
+    - row-20
+    - row-21
+    - row-22
+    - row-23
+    - row-24
+    - row-25
+    - row-26
+    - row-27
+    - row-28
+    - row-29
+    - row-30
+    - row-31
+    - row-32
+    - row-33
+    - row-34
+    - row-35
+    - row-36
+    - row-37
+    - row-38
+    - row-39
+    - row-40
+    - row-41
+    - row-42
+    - row-43
+    - row-44
+    - row-45
+    - row-46
+    - row-47
+    - row-48
+    - row-49
+    - row-50
+    - row-51
+    - row-52
+    - row-53
+    - row-54
+    - row-55
+    - row-56
+    - row-57
+    - row-58
+    - row-59
+    - row-60
+    - row-61
+    - row-62
+    - row-63
+episode_schedule:
+  schedule_id: F0-002-tabul-query-label-v1-schedule-v1
+  sampling: fixed
+  episode_count: 1
+  targets_per_episode: 32
+  target_families:
+  - label
+  target_origins:
+  - query
+  sampler_seed: 104729
+  order_seed: 130363
+  recipe_hashes:
+  - c1afb1ab9f914974185e75a9f33ca3ecb529f176d6b0640099f3beebe80fdfc7
+semantic:
+  reference:
+    backend: dense_reference_v0
+    d_model: 32
+    n_heads: 4
+    d_ff: 64
+    n_blocks: 2
+    inducing_slots: 4
+    matched_slots: 4
+    max_features: 256
+    dropout: 0.0
+    presence_tau: 1.0e-06
+    denominator_epsilon: 1.0e-08
+    routing_bandwidth: 1.0
+    geometry_normalization: none
+  numeric_terminal: nadaraya_watson
+  categorical_terminal: nadaraya_watson
+  augmented_readout_geometry: matched_uf
+  label_columns:
+  - 4
+  - 5
+  label_address_plan: matched_uf
+  target_feature: null
+  graph_unit_receiver_plan: null
+  response_family: null
+  recommendation_address_plan: null
+  rec_axis_summary_dim: null
+  rec_matched_residual_scale: null
+training:
+  optimizer: adamw
+  learning_rate: 0.01
+  weight_decay: 0.0
+  gradient_clip_norm: 1.0
+  max_updates: 1200
+  max_epochs: null
+  wall_clock_budget_minutes: 10
+  episode_batch_size: 1
+  scheduler: none
+  exact_resume: true
+  warm_start: false
+  pretraining: false
+execution:
+  device: cuda
+  device_index: 0
+  dtype: float32
+  deterministic_algorithms: true
+  compile_on_cpu: true
+  backend: dense_reference_v0
+seeds:
+  model_seeds:
+  - 1729
+  - 2718
+  - 31415
+  data_seed: 104729
+  split_seed: 130363
+  episode_order_seed: 130363
+target_families:
+- label
+baselines:
+- baseline_id: exact-support-mean-mode
+  role: trivial
+  max_updates: null
+- baseline_id: frozen-initialization
+  role: diagnostic
+  max_updates: null
+pass_gate:
+  stage: F0
+  required_coverage: 1.0
+  max_loss_ratio: 0.01
+  max_trivial_baseline_ratio: null
+  max_numeric_mse: 0.001
+  max_numeric_nrmse: null
+  min_categorical_accuracy: 1.0
+  max_categorical_nll: 0.05
+  require_all_seeds: true
+kill_conditions:
+  fail_on_nonfinite: true
+  require_nonzero_gradient_by_step: 10
+  require_nonzero_parameter_delta: true
+  stop_model_after_stage_failure: true
+  preserve_failed_receipt: true
+heldout_policy: diagnostic_only
+required_artifacts:
+- preregistration.yaml
+- resolved-configs
+- dataset-manifest.json
+- split-manifest.json
+- compiler-manifest.json
+- feasibility.json
+- metrics.jsonl
+- evaluation.json
+- forward-traces.json
+- baselines.json
+- checkpoint
+- environment.json
+- artifacts.sha256
+- receipt.json
+- verdict.md

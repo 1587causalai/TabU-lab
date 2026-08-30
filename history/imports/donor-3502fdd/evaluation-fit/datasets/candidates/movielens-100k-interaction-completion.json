@@ -1,0 +1,27 @@
+{
+  "adapter": {
+    "adapter_id": "offline-eval-prepared-snapshot",
+    "adapter_version": "1.0.0",
+    "schema_version": "tabu.dataset-adapter.v1"
+  },
+  "authority_sha256": "7f89729d46aeb2ba0d5e8c11ee00d6c666b6fbeb28f6e8ba45d78db06698f4c0",
+  "authority_status": "self_consistent_unreviewed",
+  "contamination_boundary": "split-before-prepare; selection, preprocessing, normalizers, and codebooks are fitted on train only",
+  "content_sha256": "90ca18b447f06e6d684055f78bf49c2d15a80e39360feed137e71554d178c886",
+  "dataset_id": "movielens-100k",
+  "dataset_snapshot_id": "movielens-100k-movielens-100k-interaction-completion-90ca18b447f06e6d",
+  "episode_recipe_hashes": [
+    "c4f9e1b37e4b84e4c217cb0b3e82fe30aa8addb85ccb07032fc0285da5e7ff9a"
+  ],
+  "evaluation_scenario_id": "movielens-100k-interaction-completion",
+  "fit_partition": "train",
+  "license_id": "MovieLens-100K-research-use",
+  "mask_boundary": "test target truth remains evaluator-side and absent from adapter payloads",
+  "request_sha256": "e960a5aec9eeb5d1204dc2ea4e0291e3c59cb4f551815ff061ca5aeabcc89670",
+  "schema_version": "tabu.dataset-snapshot.v3",
+  "source_sha256": "50d2a982c66986937beb9ffb3aa76efe955bf3d5c6b761f4e3a7cd717c6a3229",
+  "source_uri": "https://files.grouplens.org/datasets/movielens/ml-100k.zip",
+  "split_before_compile": true,
+  "split_manifest_sha256": "be5157088915bbe0e235888b70aed59ef7ea3f5a1ebea79f199bb34fc9dced6e",
+  "truth_sidecar_sha256": "d2b1634aa80fc17ef806111c2d1fcc993c3f1f8d5d680f19e3107bfa3ab86293"
+}

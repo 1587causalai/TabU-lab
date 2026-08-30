@@ -1,0 +1,151 @@
+{
+  "axis": "architecture_evolvability",
+  "blockers": [],
+  "checks": [
+    {
+      "check_id": "architecture.controlled_substitution",
+      "detail": "controlled substitutions changed only the declared composition seams",
+      "metrics": {
+        "composition_hashes": {
+          "base": "a88cbea4ec7564aa00d0e38734b7889db6747c65efed51a47639c3aa410cfccc",
+          "local_linear": "a88cbea4ec7564aa00d0e38734b7889db6747c65efed51a47639c3aa410cfccc",
+          "mab": "911f1dc5e83d6047c12393ddf0309dfad735138b127862f7f889483268ce32da",
+          "nadaraya_watson": "2bc1ec91b4c6d4df0f851a88448682b332a2355440f662ad331e1fe0f154ecc9",
+          "omab": "a88cbea4ec7564aa00d0e38734b7889db6747c65efed51a47639c3aa410cfccc"
+        },
+        "substitutions": [
+          "omab->mab",
+          "nadaraya_watson->local_linear"
+        ]
+      },
+      "outcome": "passed",
+      "references": [],
+      "schema_version": "tabu.verification-check-result.v1"
+    },
+    {
+      "check_id": "architecture.substitution_nonregression",
+      "detail": "substituted variants pass the component oracle unchanged",
+      "metrics": {
+        "seam_reports": {
+          "numeric_terminal:local_linear": {
+            "build": "passed",
+            "forward_finite": "passed",
+            "gradient_reachability": "passed",
+            "seed_dtype_checkpoint": "passed",
+            "truth_sidecar_abstention": "passed"
+          },
+          "numeric_terminal:nadaraya_watson": {
+            "build": "passed",
+            "forward_finite": "passed",
+            "gradient_reachability": "passed",
+            "seed_dtype_checkpoint": "passed",
+            "truth_sidecar_abstention": "passed"
+          }
+        }
+      },
+      "outcome": "passed",
+      "references": [],
+      "schema_version": "tabu.verification-check-result.v1"
+    },
+    {
+      "check_id": "architecture.composition_checkpoint_identity",
+      "detail": "composition has a stable semantic hash",
+      "metrics": {
+        "composition_hash": "a88cbea4ec7564aa00d0e38734b7889db6747c65efed51a47639c3aa410cfccc"
+      },
+      "outcome": "passed",
+      "references": [],
+      "schema_version": "tabu.verification-check-result.v1"
+    },
+    {
+      "check_id": "architecture.builder_registry_extension",
+      "detail": "registry extension resolves new builders, rejects duplicates, and leaves built-in registrations unchanged",
+      "metrics": {
+        "baseline_builder_count": 13,
+        "probe_extension_id": "probe.extension"
+      },
+      "outcome": "passed",
+      "references": [],
+      "schema_version": "tabu.verification-check-result.v1"
+    }
+  ],
+  "claim_boundary": "Controlled substitution and extension probes only; no architecture quality score or automatic promotion is emitted.",
+  "composition": {
+    "components": {
+      "dynamics": "tabu_lab.models.dynamics.PairUnitDynamics",
+      "readout": "tabu_lab.models.readouts.PairUnitReadout",
+      "symbolizer": "tabu_lab.models.components.Symbolizer",
+      "tokenizer": "tabu_lab.models.components.CellTokenizer"
+    },
+    "configuration": {
+      "bandwidth": 1.0,
+      "block_kind": "omab",
+      "d_ff": 16,
+      "d_model": 8,
+      "denominator_epsilon": 1e-08,
+      "dropout": 0.0,
+      "geometry_normalization": "none",
+      "inducing_slots": 2,
+      "label_broadcast": false,
+      "label_broadcast_tau": 1e-06,
+      "ll_ridge": null,
+      "matched_slots": 2,
+      "max_features": 256,
+      "n_blocks": 1,
+      "n_heads": 2,
+      "presence_tau": 1e-06,
+      "profile": "completion.artificial_mask.v1",
+      "readout.numeric_terminal": "local_linear",
+      "reference_config": {
+        "block_kind": "omab",
+        "d_ff": 16,
+        "d_model": 8,
+        "denominator_epsilon": 1e-08,
+        "dropout": 0.0,
+        "geometry_normalization": "none",
+        "inducing_slots": 2,
+        "matched_slots": 2,
+        "max_features": 256,
+        "n_blocks": 1,
+        "n_heads": 2,
+        "presence_tau": 1e-06,
+        "routing_bandwidth": 1.0
+      },
+      "routing_bandwidth": 1.0,
+      "terminal": "local_linear",
+      "tokenizer_version": "cell-tokenizer.v1",
+      "variant_ref": {
+        "contract_id": "tabu.cell.base",
+        "contract_version": "0.2.0",
+        "model_spec_hash": "415103ae057e5cf63d033a3685c30b96a2f400575101bf17ee17acc2bb22f452",
+        "profile_id": "completion.artificial_mask.v1",
+        "semantic_config_hash": "dd0669321af9fd58356fff314a24b3bd147f33f6aa046c29169862f9c12e1d94",
+        "source_identity": "unbound-local-source"
+      }
+    },
+    "contract_id": "tabu.cell.base",
+    "contract_version": "0.2.0",
+    "implementation_modules": {
+      "dynamics": "tabu_lab.models.dynamics",
+      "readout": "tabu_lab.models.readouts",
+      "symbolizer": "tabu_lab.models.components",
+      "tokenizer": "tabu_lab.models.components"
+    },
+    "schema_version": "tabu.model-composition.v1"
+  },
+  "contract_id": "tabu.cell.base",
+  "contract_version": "0.2.0",
+  "evidence_level": "local_unissued",
+  "limitations": [
+    "local verification is not a formal receipt or independent review"
+  ],
+  "model_spec_hash": "415103ae057e5cf63d033a3685c30b96a2f400575101bf17ee17acc2bb22f452",
+  "outcome": "passed",
+  "receipt_ref": null,
+  "result_id": "mve-architecture-evolvability-v0-tabu.cell.base-fc4a7c83d163",
+  "review_ref": null,
+  "schema_version": "tabu.verification-result.v1",
+  "suite_hash": "fc4a7c83d163f96085bc1292c49e8c962df577d48d3214e419f5826a1ca91c7b",
+  "suite_id": "architecture-evolvability-v0",
+  "suite_version": "0.2.0"
+}

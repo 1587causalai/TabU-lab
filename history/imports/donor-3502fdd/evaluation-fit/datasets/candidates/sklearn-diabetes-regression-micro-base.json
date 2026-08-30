@@ -1,0 +1,27 @@
+{
+  "adapter": {
+    "adapter_id": "offline-eval-prepared-snapshot",
+    "adapter_version": "1.0.0",
+    "schema_version": "tabu.dataset-adapter.v1"
+  },
+  "authority_sha256": "be523a474559ca1c99880e38903b92dcdc5fe34bb9665f70587437bda12fc369",
+  "authority_status": "self_consistent_unreviewed",
+  "contamination_boundary": "split-before-prepare; selection, preprocessing, normalizers, and codebooks are fitted on train only",
+  "content_sha256": "6d91fe17958f67cb5ec1cb868167397f8c5e217f06b88ca467cff73049c4fa4b",
+  "dataset_id": "sklearn-diabetes",
+  "dataset_snapshot_id": "sklearn-diabetes-sklearn-diabetes-regression-micro-base-6d91fe17958f67cb",
+  "episode_recipe_hashes": [
+    "e1e4d52709390e3df082fc7ba708050b85f86754d1507cda1975030bc0117155"
+  ],
+  "evaluation_scenario_id": "sklearn-diabetes-regression-micro-base",
+  "fit_partition": "train",
+  "license_id": "BSD-3-Clause",
+  "mask_boundary": "test target truth remains evaluator-side and absent from adapter payloads",
+  "request_sha256": "48dc18594d74c017db64e735fb243aca84eeb996a8b5d8d9f9402fd66a6ff25c",
+  "schema_version": "tabu.dataset-snapshot.v3",
+  "source_sha256": "0ea9e8f5a8f0c85548add40324bdab3d49e73fe335689556e233fbf09b3f2d3a",
+  "source_uri": "sklearn.datasets.load_diabetes",
+  "split_before_compile": true,
+  "split_manifest_sha256": "905944d77cd7d5cebcdf45bdf4a0aa3cdab4eeb9ee12930e27c1d4d99da6d13c",
+  "truth_sidecar_sha256": "1c9041d03968f87500f12b9919962c770058dd3d5cc72938ece0fe8bb521a1b0"
+}

@@ -1,0 +1,1786 @@
+{
+  "$defs": {
+    "Alternative": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "first_alternative",
+            "deferred",
+            "rejected"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "description",
+        "status"
+      ],
+      "title": "Alternative",
+      "type": "object"
+    },
+    "AugmentedReadoutGeometry": {
+      "description": "Executable geometry choices frozen by the augmented model contracts.",
+      "enum": [
+        "matched_uf",
+        "matched_ufc"
+      ],
+      "title": "AugmentedReadoutGeometry",
+      "type": "string"
+    },
+    "BaselineRole": {
+      "enum": [
+        "trivial",
+        "diagnostic"
+      ],
+      "title": "BaselineRole",
+      "type": "string"
+    },
+    "BaselineSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "baseline_id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Baseline Id",
+          "type": "string"
+        },
+        "max_updates": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Updates"
+        },
+        "role": {
+          "$ref": "#/$defs/BaselineRole"
+        }
+      },
+      "required": [
+        "baseline_id",
+        "role"
+      ],
+      "title": "BaselineSpec",
+      "type": "object"
+    },
+    "CategoricalTerminal": {
+      "enum": [
+        "nadaraya_watson"
+      ],
+      "title": "CategoricalTerminal",
+      "type": "string"
+    },
+    "ContractBuildState": {
+      "description": "Build state asserted by a source contract, independent of installed code.",
+      "enum": [
+        "buildable_contract",
+        "design_open"
+      ],
+      "title": "ContractBuildState",
+      "type": "string"
+    },
+    "DatasetAdapterSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter_id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Adapter Id",
+          "type": "string"
+        },
+        "adapter_version": {
+          "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$",
+          "title": "Adapter Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "adapter_id",
+        "adapter_version"
+      ],
+      "title": "DatasetAdapterSpec",
+      "type": "object"
+    },
+    "DatasetOrigin": {
+      "enum": [
+        "generated",
+        "classic"
+      ],
+      "title": "DatasetOrigin",
+      "type": "string"
+    },
+    "DynamicsBlockKind": {
+      "description": "The global dynamics block variant selected for one model run.",
+      "enum": [
+        "omab",
+        "mab"
+      ],
+      "title": "DynamicsBlockKind",
+      "type": "string"
+    },
+    "DynamicsSemanticConfig": {
+      "additionalProperties": false,
+      "description": "Global dynamics block choice for one executable model variant.",
+      "properties": {
+        "block_kind": {
+          "$ref": "#/$defs/DynamicsBlockKind",
+          "default": "omab"
+        }
+      },
+      "title": "DynamicsSemanticConfig",
+      "type": "object"
+    },
+    "EpisodeSchedule": {
+      "additionalProperties": false,
+      "properties": {
+        "episode_count": {
+          "exclusiveMinimum": 0,
+          "title": "Episode Count",
+          "type": "integer"
+        },
+        "order_seed": {
+          "minimum": 0,
+          "title": "Order Seed",
+          "type": "integer"
+        },
+        "recipe_hashes": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Recipe Hashes",
+          "type": "array"
+        },
+        "sampler_seed": {
+          "minimum": 0,
+          "title": "Sampler Seed",
+          "type": "integer"
+        },
+        "sampling": {
+          "$ref": "#/$defs/ScheduleSampling"
+        },
+        "schedule_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+          "title": "Schedule Id",
+          "type": "string"
+        },
+        "target_families": {
+          "items": {
+            "$ref": "#/$defs/FitTargetFamily"
+          },
+          "minItems": 1,
+          "title": "Target Families",
+          "type": "array"
+        },
+        "target_origins": {
+          "items": {
+            "$ref": "#/$defs/FitTargetOrigin"
+          },
+          "minItems": 1,
+          "title": "Target Origins",
+          "type": "array"
+        },
+        "targets_per_episode": {
+          "exclusiveMinimum": 0,
+          "title": "Targets Per Episode",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schedule_id",
+        "sampling",
+        "episode_count",
+        "targets_per_episode",
+        "target_families",
+        "target_origins",
+        "sampler_seed",
+        "order_seed"
+      ],
+      "title": "EpisodeSchedule",
+      "type": "object"
+    },
+    "FitDatasetSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter": {
+          "$ref": "#/$defs/DatasetAdapterSpec"
+        },
+        "dataset_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Dataset Hash",
+          "type": "string"
+        },
+        "dataset_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+          "title": "Dataset Id",
+          "type": "string"
+        },
+        "license_id": {
+          "minLength": 1,
+          "title": "License Id",
+          "type": "string"
+        },
+        "origin": {
+          "$ref": "#/$defs/DatasetOrigin"
+        },
+        "raw_files_in_git": {
+          "const": false,
+          "default": false,
+          "title": "Raw Files In Git",
+          "type": "boolean"
+        },
+        "redistribution": {
+          "$ref": "#/$defs/RedistributionPolicy"
+        },
+        "source_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Source Sha256",
+          "type": "string"
+        },
+        "source_uri": {
+          "minLength": 1,
+          "title": "Source Uri",
+          "type": "string"
+        },
+        "split_before_compile": {
+          "const": true,
+          "default": true,
+          "title": "Split Before Compile",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "dataset_id",
+        "origin",
+        "source_uri",
+        "source_sha256",
+        "dataset_hash",
+        "license_id",
+        "redistribution",
+        "adapter"
+      ],
+      "title": "FitDatasetSpec",
+      "type": "object"
+    },
+    "FitDevice": {
+      "enum": [
+        "cpu",
+        "cuda",
+        "mps"
+      ],
+      "title": "FitDevice",
+      "type": "string"
+    },
+    "FitEvidenceMode": {
+      "description": "Whether an execution can satisfy a reproducible fit gate.",
+      "enum": [
+        "gate",
+        "diagnostic_nondeterministic"
+      ],
+      "title": "FitEvidenceMode",
+      "type": "string"
+    },
+    "FitExecutionConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "backend": {
+          "const": "dense_reference_v0",
+          "default": "dense_reference_v0",
+          "title": "Backend",
+          "type": "string"
+        },
+        "compile_on_cpu": {
+          "const": true,
+          "default": true,
+          "title": "Compile On Cpu",
+          "type": "boolean"
+        },
+        "deterministic_algorithms": {
+          "default": true,
+          "title": "Deterministic Algorithms",
+          "type": "boolean"
+        },
+        "device": {
+          "$ref": "#/$defs/FitDevice"
+        },
+        "device_index": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Device Index"
+        },
+        "dtype": {
+          "const": "float32",
+          "default": "float32",
+          "title": "Dtype",
+          "type": "string"
+        },
+        "evidence_mode": {
+          "$ref": "#/$defs/FitEvidenceMode",
+          "default": "gate"
+        }
+      },
+      "required": [
+        "device"
+      ],
+      "title": "FitExecutionConfig",
+      "type": "object"
+    },
+    "FitKillConditions": {
+      "additionalProperties": false,
+      "properties": {
+        "fail_on_nonfinite": {
+          "const": true,
+          "default": true,
+          "title": "Fail On Nonfinite",
+          "type": "boolean"
+        },
+        "preserve_failed_receipt": {
+          "const": true,
+          "default": true,
+          "title": "Preserve Failed Receipt",
+          "type": "boolean"
+        },
+        "require_nonzero_gradient_by_step": {
+          "default": 10,
+          "exclusiveMinimum": 0,
+          "title": "Require Nonzero Gradient By Step",
+          "type": "integer"
+        },
+        "require_nonzero_parameter_delta": {
+          "const": true,
+          "default": true,
+          "title": "Require Nonzero Parameter Delta",
+          "type": "boolean"
+        },
+        "stop_model_after_stage_failure": {
+          "const": true,
+          "default": true,
+          "title": "Stop Model After Stage Failure",
+          "type": "boolean"
+        }
+      },
+      "title": "FitKillConditions",
+      "type": "object"
+    },
+    "FitPassGate": {
+      "additionalProperties": false,
+      "properties": {
+        "max_categorical_nll": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Categorical Nll"
+        },
+        "max_loss_ratio": {
+          "exclusiveMinimum": 0.0,
+          "title": "Max Loss Ratio",
+          "type": "number"
+        },
+        "max_numeric_mse": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Numeric Mse"
+        },
+        "max_numeric_nrmse": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Numeric Nrmse"
+        },
+        "max_trivial_baseline_ratio": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Trivial Baseline Ratio"
+        },
+        "min_categorical_accuracy": {
+          "anyOf": [
+            {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min Categorical Accuracy"
+        },
+        "require_all_seeds": {
+          "const": true,
+          "default": true,
+          "title": "Require All Seeds",
+          "type": "boolean"
+        },
+        "required_coverage": {
+          "const": 1.0,
+          "default": 1.0,
+          "title": "Required Coverage",
+          "type": "number"
+        },
+        "stage": {
+          "$ref": "#/$defs/FitStage"
+        }
+      },
+      "required": [
+        "stage",
+        "max_loss_ratio"
+      ],
+      "title": "FitPassGate",
+      "type": "object"
+    },
+    "FitSeedConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "data_seed": {
+          "minimum": 0,
+          "title": "Data Seed",
+          "type": "integer"
+        },
+        "episode_order_seed": {
+          "minimum": 0,
+          "title": "Episode Order Seed",
+          "type": "integer"
+        },
+        "model_seeds": {
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1,
+          "title": "Model Seeds",
+          "type": "array"
+        },
+        "split_seed": {
+          "minimum": 0,
+          "title": "Split Seed",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "model_seeds",
+        "data_seed",
+        "split_seed",
+        "episode_order_seed"
+      ],
+      "title": "FitSeedConfig",
+      "type": "object"
+    },
+    "FitStage": {
+      "enum": [
+        "F0",
+        "S1",
+        "R1"
+      ],
+      "title": "FitStage",
+      "type": "string"
+    },
+    "FitTargetFamily": {
+      "enum": [
+        "completion",
+        "label"
+      ],
+      "title": "FitTargetFamily",
+      "type": "string"
+    },
+    "FitTargetOrigin": {
+      "enum": [
+        "artificial_mask",
+        "query"
+      ],
+      "title": "FitTargetOrigin",
+      "type": "string"
+    },
+    "FitTrainingConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "episode_batch_size": {
+          "const": 1,
+          "default": 1,
+          "title": "Episode Batch Size",
+          "type": "integer"
+        },
+        "exact_resume": {
+          "default": true,
+          "title": "Exact Resume",
+          "type": "boolean"
+        },
+        "gradient_clip_norm": {
+          "default": 1.0,
+          "exclusiveMinimum": 0.0,
+          "title": "Gradient Clip Norm",
+          "type": "number"
+        },
+        "learning_rate": {
+          "exclusiveMinimum": 0.0,
+          "title": "Learning Rate",
+          "type": "number"
+        },
+        "max_epochs": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Epochs"
+        },
+        "max_updates": {
+          "exclusiveMinimum": 0,
+          "title": "Max Updates",
+          "type": "integer"
+        },
+        "optimizer": {
+          "const": "adamw",
+          "default": "adamw",
+          "title": "Optimizer",
+          "type": "string"
+        },
+        "pretraining": {
+          "const": false,
+          "default": false,
+          "title": "Pretraining",
+          "type": "boolean"
+        },
+        "scheduler": {
+          "const": "none",
+          "default": "none",
+          "title": "Scheduler",
+          "type": "string"
+        },
+        "wall_clock_budget_minutes": {
+          "exclusiveMinimum": 0,
+          "title": "Wall Clock Budget Minutes",
+          "type": "integer"
+        },
+        "warm_start": {
+          "const": false,
+          "default": false,
+          "title": "Warm Start",
+          "type": "boolean"
+        },
+        "weight_decay": {
+          "default": 0.0,
+          "minimum": 0.0,
+          "title": "Weight Decay",
+          "type": "number"
+        }
+      },
+      "required": [
+        "learning_rate",
+        "max_updates",
+        "wall_clock_budget_minutes"
+      ],
+      "title": "FitTrainingConfig",
+      "type": "object"
+    },
+    "Gate": {
+      "additionalProperties": false,
+      "properties": {
+        "condition": {
+          "minLength": 1,
+          "title": "Condition",
+          "type": "string"
+        },
+        "evidence": {
+          "minLength": 1,
+          "title": "Evidence",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "condition",
+        "evidence"
+      ],
+      "title": "Gate",
+      "type": "object"
+    },
+    "GraphElementId": {
+      "additionalProperties": false,
+      "properties": {
+        "graph_id": {
+          "minLength": 1,
+          "title": "Graph Id",
+          "type": "string"
+        },
+        "node_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Node Id"
+        }
+      },
+      "required": [
+        "graph_id"
+      ],
+      "title": "GraphElementId",
+      "type": "object"
+    },
+    "GraphPartition": {
+      "additionalProperties": false,
+      "properties": {
+        "elements": {
+          "items": {
+            "$ref": "#/$defs/GraphElementId"
+          },
+          "minItems": 1,
+          "title": "Elements",
+          "type": "array"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "elements"
+      ],
+      "title": "GraphPartition",
+      "type": "object"
+    },
+    "GraphSplitManifest": {
+      "additionalProperties": false,
+      "properties": {
+        "dataset_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Dataset Hash",
+          "type": "string"
+        },
+        "dataset_id": {
+          "minLength": 1,
+          "title": "Dataset Id",
+          "type": "string"
+        },
+        "fit_partition": {
+          "default": "train",
+          "minLength": 1,
+          "title": "Fit Partition",
+          "type": "string"
+        },
+        "kind": {
+          "const": "graph",
+          "default": "graph",
+          "title": "Kind",
+          "type": "string"
+        },
+        "partitions": {
+          "items": {
+            "$ref": "#/$defs/GraphPartition"
+          },
+          "minItems": 1,
+          "title": "Partitions",
+          "type": "array"
+        },
+        "require_complete": {
+          "default": true,
+          "title": "Require Complete",
+          "type": "boolean"
+        },
+        "schema_version": {
+          "const": "tabu.fit-split.v1",
+          "default": "tabu.fit-split.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "scope": {
+          "$ref": "#/$defs/GraphSplitScope"
+        },
+        "seed": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Seed"
+        },
+        "split_id": {
+          "minLength": 1,
+          "title": "Split Id",
+          "type": "string"
+        },
+        "strategy": {
+          "default": "explicit",
+          "minLength": 1,
+          "title": "Strategy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dataset_id",
+        "dataset_hash",
+        "split_id",
+        "scope",
+        "partitions"
+      ],
+      "title": "GraphSplitManifest",
+      "type": "object"
+    },
+    "GraphSplitScope": {
+      "enum": [
+        "graph",
+        "node"
+      ],
+      "title": "GraphSplitScope",
+      "type": "string"
+    },
+    "GraphUnitReceiverPlan": {
+      "description": "Versioned graph Unit-special row-axis realization.",
+      "enum": [
+        "legacy_graph_units_only",
+        "same_row_visible_cells"
+      ],
+      "title": "GraphUnitReceiverPlan",
+      "type": "string"
+    },
+    "InteractionId": {
+      "additionalProperties": false,
+      "properties": {
+        "item_id": {
+          "minLength": 1,
+          "title": "Item Id",
+          "type": "string"
+        },
+        "user_id": {
+          "minLength": 1,
+          "title": "User Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "user_id",
+        "item_id"
+      ],
+      "title": "InteractionId",
+      "type": "object"
+    },
+    "InteractionPartition": {
+      "additionalProperties": false,
+      "properties": {
+        "interactions": {
+          "items": {
+            "$ref": "#/$defs/InteractionId"
+          },
+          "minItems": 1,
+          "title": "Interactions",
+          "type": "array"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "interactions"
+      ],
+      "title": "InteractionPartition",
+      "type": "object"
+    },
+    "InteractionSplitManifest": {
+      "additionalProperties": false,
+      "properties": {
+        "dataset_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Dataset Hash",
+          "type": "string"
+        },
+        "dataset_id": {
+          "minLength": 1,
+          "title": "Dataset Id",
+          "type": "string"
+        },
+        "fit_partition": {
+          "default": "train",
+          "minLength": 1,
+          "title": "Fit Partition",
+          "type": "string"
+        },
+        "kind": {
+          "const": "interaction",
+          "default": "interaction",
+          "title": "Kind",
+          "type": "string"
+        },
+        "partitions": {
+          "items": {
+            "$ref": "#/$defs/InteractionPartition"
+          },
+          "minItems": 1,
+          "title": "Partitions",
+          "type": "array"
+        },
+        "require_complete": {
+          "default": true,
+          "title": "Require Complete",
+          "type": "boolean"
+        },
+        "schema_version": {
+          "const": "tabu.fit-split.v1",
+          "default": "tabu.fit-split.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "seed": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Seed"
+        },
+        "split_id": {
+          "minLength": 1,
+          "title": "Split Id",
+          "type": "string"
+        },
+        "strategy": {
+          "default": "explicit",
+          "minLength": 1,
+          "title": "Strategy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dataset_id",
+        "dataset_hash",
+        "split_id",
+        "partitions"
+      ],
+      "title": "InteractionSplitManifest",
+      "type": "object"
+    },
+    "LabelAddressPlan": {
+      "description": "Versioned supervised L-lane address realizations.",
+      "enum": [
+        "matched_uf",
+        "predictor_only_per_label_v1",
+        "predictor_unit_linked_per_label_v2"
+      ],
+      "title": "LabelAddressPlan",
+      "type": "string"
+    },
+    "Maturity": {
+      "additionalProperties": false,
+      "properties": {
+        "build_state": {
+          "$ref": "#/$defs/ContractBuildState"
+        },
+        "contract": {
+          "$ref": "#/$defs/MaturityStage"
+        },
+        "evidence": {
+          "$ref": "#/$defs/MaturityStage"
+        },
+        "implementation": {
+          "$ref": "#/$defs/MaturityStage"
+        },
+        "source_contract": {
+          "const": "factory_source",
+          "title": "Source Contract",
+          "type": "string"
+        },
+        "stage": {
+          "$ref": "#/$defs/MaturityStage"
+        }
+      },
+      "required": [
+        "source_contract",
+        "stage",
+        "contract",
+        "implementation",
+        "evidence",
+        "build_state"
+      ],
+      "title": "Maturity",
+      "type": "object"
+    },
+    "MaturityEvidence": {
+      "additionalProperties": false,
+      "description": "Immutable gate references required before public maturity promotion.",
+      "properties": {
+        "accepted_claim_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accepted Claim Hash"
+        },
+        "gate1_receipt_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Gate1 Receipt Hash",
+          "type": "string"
+        },
+        "gong_approval_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Gong Approval Hash",
+          "type": "string"
+        },
+        "independent_review_report_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Independent Review Report Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "gate1_receipt_hash",
+        "independent_review_report_hash",
+        "gong_approval_hash"
+      ],
+      "title": "MaturityEvidence",
+      "type": "object"
+    },
+    "MaturityStage": {
+      "description": "Monotone public maturity vocabulary; transitions require explicit evidence.",
+      "enum": [
+        "design_open",
+        "specified",
+        "experimental",
+        "contract-tested",
+        "gate0_sanity",
+        "gate1_reproducible",
+        "supported",
+        "evidence-backed"
+      ],
+      "title": "MaturityStage",
+      "type": "string"
+    },
+    "ModelSemanticConfig": {
+      "additionalProperties": false,
+      "description": "Resolved model semantics used to build and identify one run.",
+      "properties": {
+        "augmented_readout_geometry": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AugmentedReadoutGeometry"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "categorical_terminal": {
+          "$ref": "#/$defs/CategoricalTerminal",
+          "default": "nadaraya_watson"
+        },
+        "dynamics": {
+          "$ref": "#/$defs/DynamicsSemanticConfig"
+        },
+        "graph_unit_receiver_plan": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GraphUnitReceiverPlan"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "label_address_plan": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LabelAddressPlan"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "label_columns": {
+          "default": [],
+          "items": {
+            "type": "integer"
+          },
+          "title": "Label Columns",
+          "type": "array"
+        },
+        "numeric_terminal": {
+          "$ref": "#/$defs/NumericTerminal",
+          "default": "nadaraya_watson"
+        },
+        "rec_axis_summary_dim": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rec Axis Summary Dim"
+        },
+        "rec_matched_residual_scale": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rec Matched Residual Scale"
+        },
+        "recommendation_address_plan": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecommendationAddressPlan"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "reference": {
+          "$ref": "#/$defs/ReferenceBackendConfig"
+        },
+        "response_family": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Response Family"
+        },
+        "target_feature": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Feature"
+        }
+      },
+      "required": [
+        "reference"
+      ],
+      "title": "ModelSemanticConfig",
+      "type": "object"
+    },
+    "ModelSpec": {
+      "$id": "https://research.wehub.us/schemas/model-spec.schema.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "additionalProperties": false,
+      "description": "Machine-readable boundary for one model-factory contract.",
+      "properties": {
+        "alternatives": {
+          "items": {
+            "$ref": "#/$defs/Alternative"
+          },
+          "title": "Alternatives",
+          "type": "array"
+        },
+        "capabilities": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Capabilities",
+          "type": "array"
+        },
+        "carrier": {
+          "additionalProperties": true,
+          "minProperties": 1,
+          "title": "Carrier",
+          "type": "object"
+        },
+        "contract_id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Contract Id",
+          "type": "string"
+        },
+        "contract_version": {
+          "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "display_name": {
+          "minLength": 1,
+          "title": "Display Name",
+          "type": "string"
+        },
+        "dynamics": {
+          "additionalProperties": true,
+          "minProperties": 1,
+          "title": "Dynamics",
+          "type": "object"
+        },
+        "exit": {
+          "items": {
+            "$ref": "#/$defs/Gate"
+          },
+          "minItems": 1,
+          "title": "Exit",
+          "type": "array"
+        },
+        "experimental_defaults": {
+          "additionalProperties": true,
+          "minProperties": 1,
+          "title": "Experimental Defaults",
+          "type": "object"
+        },
+        "interfaces": {
+          "additionalProperties": true,
+          "title": "Interfaces",
+          "type": "object"
+        },
+        "kill": {
+          "items": {
+            "$ref": "#/$defs/Gate"
+          },
+          "minItems": 1,
+          "title": "Kill",
+          "type": "array"
+        },
+        "known_open": {
+          "items": {
+            "$ref": "#/$defs/OpenItem"
+          },
+          "title": "Known Open",
+          "type": "array"
+        },
+        "loss": {
+          "additionalProperties": true,
+          "title": "Loss",
+          "type": "object"
+        },
+        "maturity": {
+          "$ref": "#/$defs/Maturity"
+        },
+        "maturity_evidence": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MaturityEvidence"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "readout": {
+          "additionalProperties": true,
+          "minProperties": 1,
+          "title": "Readout",
+          "type": "object"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "upstream": {
+          "$ref": "#/$defs/UpstreamSource"
+        }
+      },
+      "required": [
+        "schema_version",
+        "contract_id",
+        "contract_version",
+        "display_name",
+        "upstream",
+        "carrier",
+        "dynamics",
+        "readout",
+        "capabilities",
+        "maturity",
+        "experimental_defaults",
+        "known_open",
+        "alternatives",
+        "kill",
+        "exit"
+      ],
+      "title": "ModelSpec",
+      "type": "object"
+    },
+    "NumericTerminal": {
+      "enum": [
+        "nadaraya_watson",
+        "local_linear"
+      ],
+      "title": "NumericTerminal",
+      "type": "string"
+    },
+    "OpenItem": {
+      "additionalProperties": false,
+      "properties": {
+        "blocking_build": {
+          "default": false,
+          "title": "Blocking Build",
+          "type": "boolean"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "question": {
+          "minLength": 1,
+          "title": "Question",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "question"
+      ],
+      "title": "OpenItem",
+      "type": "object"
+    },
+    "RecommendationAddressPlan": {
+      "description": "Versioned truth-free recommendation address realizations.",
+      "enum": [
+        "matched_uf",
+        "axis_address_bootstrap_v1"
+      ],
+      "title": "RecommendationAddressPlan",
+      "type": "string"
+    },
+    "RedistributionPolicy": {
+      "enum": [
+        "allowed",
+        "metadata_only",
+        "forbidden"
+      ],
+      "title": "RedistributionPolicy",
+      "type": "string"
+    },
+    "ReferenceBackendConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "backend": {
+          "const": "dense_reference_v0",
+          "default": "dense_reference_v0",
+          "title": "Backend",
+          "type": "string"
+        },
+        "d_ff": {
+          "default": 64,
+          "exclusiveMinimum": 0,
+          "title": "D Ff",
+          "type": "integer"
+        },
+        "d_model": {
+          "default": 32,
+          "exclusiveMinimum": 0,
+          "title": "D Model",
+          "type": "integer"
+        },
+        "denominator_epsilon": {
+          "default": 1e-08,
+          "exclusiveMinimum": 0.0,
+          "title": "Denominator Epsilon",
+          "type": "number"
+        },
+        "dropout": {
+          "default": 0.0,
+          "exclusiveMaximum": 1.0,
+          "minimum": 0.0,
+          "title": "Dropout",
+          "type": "number"
+        },
+        "geometry_normalization": {
+          "default": "none",
+          "enum": [
+            "none",
+            "rms_unit"
+          ],
+          "title": "Geometry Normalization",
+          "type": "string"
+        },
+        "inducing_slots": {
+          "default": 4,
+          "exclusiveMinimum": 0,
+          "title": "Inducing Slots",
+          "type": "integer"
+        },
+        "matched_slots": {
+          "default": 4,
+          "exclusiveMinimum": 0,
+          "title": "Matched Slots",
+          "type": "integer"
+        },
+        "max_features": {
+          "default": 256,
+          "exclusiveMinimum": 0,
+          "title": "Max Features",
+          "type": "integer"
+        },
+        "n_blocks": {
+          "default": 2,
+          "exclusiveMinimum": 0,
+          "title": "N Blocks",
+          "type": "integer"
+        },
+        "n_heads": {
+          "default": 4,
+          "exclusiveMinimum": 0,
+          "title": "N Heads",
+          "type": "integer"
+        },
+        "presence_tau": {
+          "default": 1e-06,
+          "exclusiveMinimum": 0.0,
+          "title": "Presence Tau",
+          "type": "number"
+        },
+        "routing_bandwidth": {
+          "default": 1.0,
+          "exclusiveMinimum": 0.0,
+          "title": "Routing Bandwidth",
+          "type": "number"
+        }
+      },
+      "title": "ReferenceBackendConfig",
+      "type": "object"
+    },
+    "RequiredArtifact": {
+      "enum": [
+        "preregistration.yaml",
+        "resolved-configs",
+        "dataset-manifest.json",
+        "split-manifest.json",
+        "compiler-manifest.json",
+        "feasibility.json",
+        "metrics.jsonl",
+        "evaluation.json",
+        "forward-traces.json",
+        "baselines.json",
+        "checkpoint",
+        "environment.json",
+        "artifacts.sha256",
+        "receipt.json",
+        "verdict.md"
+      ],
+      "title": "RequiredArtifact",
+      "type": "string"
+    },
+    "RowPartition": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "row_ids": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Row Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "row_ids"
+      ],
+      "title": "RowPartition",
+      "type": "object"
+    },
+    "RowSplitManifest": {
+      "additionalProperties": false,
+      "properties": {
+        "dataset_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Dataset Hash",
+          "type": "string"
+        },
+        "dataset_id": {
+          "minLength": 1,
+          "title": "Dataset Id",
+          "type": "string"
+        },
+        "fit_partition": {
+          "default": "train",
+          "minLength": 1,
+          "title": "Fit Partition",
+          "type": "string"
+        },
+        "kind": {
+          "const": "row",
+          "default": "row",
+          "title": "Kind",
+          "type": "string"
+        },
+        "partitions": {
+          "items": {
+            "$ref": "#/$defs/RowPartition"
+          },
+          "minItems": 1,
+          "title": "Partitions",
+          "type": "array"
+        },
+        "require_complete": {
+          "default": true,
+          "title": "Require Complete",
+          "type": "boolean"
+        },
+        "schema_version": {
+          "const": "tabu.fit-split.v1",
+          "default": "tabu.fit-split.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "seed": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Seed"
+        },
+        "split_id": {
+          "minLength": 1,
+          "title": "Split Id",
+          "type": "string"
+        },
+        "strategy": {
+          "default": "explicit",
+          "minLength": 1,
+          "title": "Strategy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dataset_id",
+        "dataset_hash",
+        "split_id",
+        "partitions"
+      ],
+      "title": "RowSplitManifest",
+      "type": "object"
+    },
+    "ScheduleSampling": {
+      "enum": [
+        "fixed",
+        "deterministic_shuffle"
+      ],
+      "title": "ScheduleSampling",
+      "type": "string"
+    },
+    "UpstreamSource": {
+      "additionalProperties": false,
+      "properties": {
+        "license_boundary": {
+          "minLength": 1,
+          "title": "License Boundary",
+          "type": "string"
+        },
+        "observed_at": {
+          "minLength": 1,
+          "title": "Observed At",
+          "type": "string"
+        },
+        "path": {
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        },
+        "readonly": {
+          "const": true,
+          "title": "Readonly",
+          "type": "boolean"
+        },
+        "repository": {
+          "minLength": 1,
+          "title": "Repository",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "repository",
+        "path",
+        "sha256",
+        "readonly",
+        "observed_at",
+        "license_boundary"
+      ],
+      "title": "UpstreamSource",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Decision-complete input accepted by the future fit runner.",
+  "properties": {
+    "baselines": {
+      "items": {
+        "$ref": "#/$defs/BaselineSpec"
+      },
+      "minItems": 1,
+      "title": "Baselines",
+      "type": "array"
+    },
+    "contract_id": {
+      "pattern": "^[a-z][a-z0-9_.-]*$",
+      "title": "Contract Id",
+      "type": "string"
+    },
+    "contract_version": {
+      "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "dataset": {
+      "$ref": "#/$defs/FitDatasetSpec"
+    },
+    "episode_schedule": {
+      "$ref": "#/$defs/EpisodeSchedule"
+    },
+    "execution": {
+      "$ref": "#/$defs/FitExecutionConfig"
+    },
+    "experiment_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+      "title": "Experiment Id",
+      "type": "string"
+    },
+    "heldout_policy": {
+      "const": "diagnostic_only",
+      "default": "diagnostic_only",
+      "title": "Heldout Policy",
+      "type": "string"
+    },
+    "kill_conditions": {
+      "$ref": "#/$defs/FitKillConditions"
+    },
+    "model_spec": {
+      "$ref": "#/$defs/ModelSpec"
+    },
+    "model_spec_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Model Spec Hash",
+      "type": "string"
+    },
+    "pass_gate": {
+      "$ref": "#/$defs/FitPassGate"
+    },
+    "required_artifacts": {
+      "default": [
+        "preregistration.yaml",
+        "resolved-configs",
+        "dataset-manifest.json",
+        "split-manifest.json",
+        "compiler-manifest.json",
+        "feasibility.json",
+        "metrics.jsonl",
+        "evaluation.json",
+        "forward-traces.json",
+        "baselines.json",
+        "checkpoint",
+        "environment.json",
+        "artifacts.sha256",
+        "receipt.json",
+        "verdict.md"
+      ],
+      "items": {
+        "$ref": "#/$defs/RequiredArtifact"
+      },
+      "title": "Required Artifacts",
+      "type": "array"
+    },
+    "revision_rationale": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Revision Rationale"
+    },
+    "schema_version": {
+      "const": "tabu.fit-experiment.v1",
+      "default": "tabu.fit-experiment.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "seeds": {
+      "$ref": "#/$defs/FitSeedConfig"
+    },
+    "semantic": {
+      "$ref": "#/$defs/ModelSemanticConfig"
+    },
+    "split": {
+      "discriminator": {
+        "mapping": {
+          "graph": "#/$defs/GraphSplitManifest",
+          "interaction": "#/$defs/InteractionSplitManifest",
+          "row": "#/$defs/RowSplitManifest"
+        },
+        "propertyName": "kind"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/RowSplitManifest"
+        },
+        {
+          "$ref": "#/$defs/InteractionSplitManifest"
+        },
+        {
+          "$ref": "#/$defs/GraphSplitManifest"
+        }
+      ],
+      "title": "Split"
+    },
+    "stage": {
+      "$ref": "#/$defs/FitStage"
+    },
+    "supersedes_experiment_ids": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Supersedes Experiment Ids",
+      "type": "array"
+    },
+    "target_families": {
+      "items": {
+        "$ref": "#/$defs/FitTargetFamily"
+      },
+      "minItems": 1,
+      "title": "Target Families",
+      "type": "array"
+    },
+    "training": {
+      "$ref": "#/$defs/FitTrainingConfig"
+    }
+  },
+  "required": [
+    "experiment_id",
+    "stage",
+    "contract_id",
+    "contract_version",
+    "model_spec",
+    "model_spec_hash",
+    "dataset",
+    "split",
+    "episode_schedule",
+    "semantic",
+    "training",
+    "execution",
+    "seeds",
+    "target_families",
+    "baselines",
+    "pass_gate"
+  ],
+  "title": "FitExperimentSpec",
+  "type": "object"
+}

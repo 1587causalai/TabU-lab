@@ -1,0 +1,207 @@
+{
+  "$defs": {
+    "DatasetAdapter": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter_id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Adapter Id",
+          "type": "string"
+        },
+        "adapter_version": {
+          "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$",
+          "title": "Adapter Version",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "tabu.dataset-adapter.v1",
+          "default": "tabu.dataset-adapter.v1",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "adapter_id",
+        "adapter_version"
+      ],
+      "title": "DatasetAdapter",
+      "type": "object"
+    },
+    "DatasetAuthorityStatus": {
+      "description": "Review state of the authority that produced an evaluation snapshot.",
+      "enum": [
+        "self_consistent_unreviewed",
+        "reviewed"
+      ],
+      "title": "DatasetAuthorityStatus",
+      "type": "string"
+    }
+  },
+  "$id": "https://research.wehub.us/schemas/catalog-dataset-snapshot.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "adapter": {
+      "$ref": "#/$defs/DatasetAdapter"
+    },
+    "authority_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Authority Sha256"
+    },
+    "authority_status": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DatasetAuthorityStatus"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "contamination_boundary": {
+      "minLength": 1,
+      "title": "Contamination Boundary",
+      "type": "string"
+    },
+    "content_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Content Sha256",
+      "type": "string"
+    },
+    "dataset_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.@-]*$",
+      "title": "Dataset Id",
+      "type": "string"
+    },
+    "dataset_snapshot_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.@-]*$",
+      "title": "Dataset Snapshot Id",
+      "type": "string"
+    },
+    "episode_recipe_hashes": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Episode Recipe Hashes",
+      "type": "array"
+    },
+    "evaluation_scenario_id": {
+      "anyOf": [
+        {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.@-]*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Evaluation Scenario Id"
+    },
+    "fit_partition": {
+      "minLength": 1,
+      "title": "Fit Partition",
+      "type": "string"
+    },
+    "license_id": {
+      "minLength": 1,
+      "title": "License Id",
+      "type": "string"
+    },
+    "mask_boundary": {
+      "minLength": 1,
+      "title": "Mask Boundary",
+      "type": "string"
+    },
+    "request_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Request Sha256"
+    },
+    "review_ids": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Review Ids",
+      "type": "array"
+    },
+    "schema_version": {
+      "default": "tabu.dataset-snapshot.v2",
+      "enum": [
+        "tabu.dataset-snapshot.v2",
+        "tabu.dataset-snapshot.v3"
+      ],
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Source Sha256",
+      "type": "string"
+    },
+    "source_uri": {
+      "minLength": 1,
+      "title": "Source Uri",
+      "type": "string"
+    },
+    "split_before_compile": {
+      "const": true,
+      "default": true,
+      "title": "Split Before Compile",
+      "type": "boolean"
+    },
+    "split_manifest_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Split Manifest Sha256",
+      "type": "string"
+    },
+    "truth_sidecar_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Truth Sidecar Sha256"
+    }
+  },
+  "required": [
+    "dataset_snapshot_id",
+    "dataset_id",
+    "source_uri",
+    "source_sha256",
+    "content_sha256",
+    "license_id",
+    "split_manifest_sha256",
+    "fit_partition",
+    "adapter",
+    "mask_boundary",
+    "contamination_boundary"
+  ],
+  "title": "DatasetSnapshotSpec",
+  "type": "object"
+}

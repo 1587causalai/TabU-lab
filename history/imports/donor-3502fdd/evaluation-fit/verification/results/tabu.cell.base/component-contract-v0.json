@@ -1,0 +1,163 @@
+{
+  "axis": "component_correctness",
+  "blockers": [],
+  "checks": [
+    {
+      "check_id": "component.build_interface",
+      "detail": "reference builder constructed the declared model",
+      "metrics": {
+        "composition_hash": "a88cbea4ec7564aa00d0e38734b7889db6747c65efed51a47639c3aa410cfccc"
+      },
+      "outcome": "passed",
+      "references": [],
+      "schema_version": "tabu.verification-check-result.v1"
+    },
+    {
+      "check_id": "component.finite_forward",
+      "detail": "forward outputs are finite",
+      "metrics": {
+        "output_tensors": 29
+      },
+      "outcome": "passed",
+      "references": [],
+      "schema_version": "tabu.verification-check-result.v1"
+    },
+    {
+      "check_id": "component.gradient_reachability",
+      "detail": "finite gradients reach declared trainable parameters",
+      "metrics": {
+        "reachable_parameters": 61,
+        "trainable_parameters": 61
+      },
+      "outcome": "passed",
+      "references": [],
+      "schema_version": "tabu.verification-check-result.v1"
+    },
+    {
+      "check_id": "component.seed_dtype_checkpoint",
+      "detail": "fixed seed save/load produced equivalent forward outputs",
+      "metrics": {},
+      "outcome": "passed",
+      "references": [],
+      "schema_version": "tabu.verification-check-result.v1"
+    },
+    {
+      "check_id": "component.invalid_config_fail_closed",
+      "detail": "invalid configuration was rejected",
+      "metrics": {},
+      "outcome": "passed",
+      "references": [],
+      "schema_version": "tabu.verification-check-result.v1"
+    },
+    {
+      "check_id": "component.truth_sidecar_abstention",
+      "detail": "forward boundary carries no TruthSidecar payload",
+      "metrics": {},
+      "outcome": "passed",
+      "references": [],
+      "schema_version": "tabu.verification-check-result.v1"
+    },
+    {
+      "check_id": "component.profile_matrix",
+      "detail": "completion and supervised profiles pass the same finite forward boundary",
+      "metrics": {
+        "profiles": {
+          "completion.artificial_mask.v1": {
+            "finite": true,
+            "label_broadcast": false,
+            "profile_id": "completion.artificial_mask.v1",
+            "query_marker": "absent"
+          },
+          "supervised.label_broadcast.v1": {
+            "finite": true,
+            "label_broadcast": true,
+            "profile_id": "supervised.label_broadcast.v1",
+            "query_marker": "unified"
+          }
+        }
+      },
+      "outcome": "passed",
+      "references": [],
+      "schema_version": "tabu.verification-check-result.v1"
+    }
+  ],
+  "claim_boundary": "Local component probes only; this result does not promote ModelSpec maturity or create a predictive claim.",
+  "composition": {
+    "components": {
+      "dynamics": "tabu_lab.models.dynamics.PairUnitDynamics",
+      "readout": "tabu_lab.models.readouts.PairUnitReadout",
+      "symbolizer": "tabu_lab.models.components.Symbolizer",
+      "tokenizer": "tabu_lab.models.components.CellTokenizer"
+    },
+    "configuration": {
+      "bandwidth": 1.0,
+      "block_kind": "omab",
+      "d_ff": 16,
+      "d_model": 8,
+      "denominator_epsilon": 1e-08,
+      "dropout": 0.0,
+      "geometry_normalization": "none",
+      "inducing_slots": 2,
+      "label_broadcast": false,
+      "label_broadcast_tau": 1e-06,
+      "ll_ridge": null,
+      "matched_slots": 2,
+      "max_features": 256,
+      "n_blocks": 1,
+      "n_heads": 2,
+      "presence_tau": 1e-06,
+      "profile": "completion.artificial_mask.v1",
+      "readout.numeric_terminal": "local_linear",
+      "reference_config": {
+        "block_kind": "omab",
+        "d_ff": 16,
+        "d_model": 8,
+        "denominator_epsilon": 1e-08,
+        "dropout": 0.0,
+        "geometry_normalization": "none",
+        "inducing_slots": 2,
+        "matched_slots": 2,
+        "max_features": 256,
+        "n_blocks": 1,
+        "n_heads": 2,
+        "presence_tau": 1e-06,
+        "routing_bandwidth": 1.0
+      },
+      "routing_bandwidth": 1.0,
+      "terminal": "local_linear",
+      "tokenizer_version": "cell-tokenizer.v1",
+      "variant_ref": {
+        "contract_id": "tabu.cell.base",
+        "contract_version": "0.2.0",
+        "model_spec_hash": "415103ae057e5cf63d033a3685c30b96a2f400575101bf17ee17acc2bb22f452",
+        "profile_id": "completion.artificial_mask.v1",
+        "semantic_config_hash": "dd0669321af9fd58356fff314a24b3bd147f33f6aa046c29169862f9c12e1d94",
+        "source_identity": "unbound-local-source"
+      }
+    },
+    "contract_id": "tabu.cell.base",
+    "contract_version": "0.2.0",
+    "implementation_modules": {
+      "dynamics": "tabu_lab.models.dynamics",
+      "readout": "tabu_lab.models.readouts",
+      "symbolizer": "tabu_lab.models.components",
+      "tokenizer": "tabu_lab.models.components"
+    },
+    "schema_version": "tabu.model-composition.v1"
+  },
+  "contract_id": "tabu.cell.base",
+  "contract_version": "0.2.0",
+  "evidence_level": "local_unissued",
+  "limitations": [
+    "local verification is not a formal receipt or independent review"
+  ],
+  "model_spec_hash": "415103ae057e5cf63d033a3685c30b96a2f400575101bf17ee17acc2bb22f452",
+  "outcome": "passed",
+  "receipt_ref": null,
+  "result_id": "mve-component-contract-v0-tabu.cell.base-572b48ca925a",
+  "review_ref": null,
+  "schema_version": "tabu.verification-result.v1",
+  "suite_hash": "572b48ca925a3e25d0305188d65b89dcfb738743751d8ff3a1208e5b39c7ecf7",
+  "suite_id": "component-contract-v0",
+  "suite_version": "0.1.0"
+}

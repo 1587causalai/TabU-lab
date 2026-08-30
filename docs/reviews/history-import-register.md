@@ -40,3 +40,35 @@ Policy for the consolidation phase:
 
 Independent-review findings are appended to this register without fixing them during
 the consolidation phase.
+
+## Batch PR13 — evaluation, fit, and receipt history
+
+- Main base: `6fcbda7015e31b6bf92928687ee8f7edfeaa02f4`
+- Donor Git base: `3502fdd80539f2a8b9703cc4e4546fd01f3826ce`
+- Imported scope: 138 selected donor files
+- Snapshot root: `history/imports/donor-3502fdd/evaluation-fit/`
+- Activation status: `staged_history_only`
+
+### Registered integration findings
+
+- **HIST-005 — model-family dependency:** `registered_unresolved`. Fit-first and
+  verification records refer to model families and builders preserved in PR12 but not
+  active on current `main`.
+- **HIST-006 — catalog/evidence contract overlap:** `registered_unresolved`. Historical
+  catalog schemas, formal-receipt scaffolding, and public projection code overlap newer
+  catalog and evidence-safety contracts already on `main`; no canonical version is
+  selected in this import.
+- **HIST-007 — historical data authority:** `registered_unresolved`. Dataset candidates,
+  passports, freeze adapters, and diagnostic results remain historical metadata or
+  `local_unissued` evidence. Import does not establish retained bytes, replayability, or
+  formal dataset authority.
+- **HIST-008 — site projection dependency:** `registered_unresolved`.
+  `build_site_manifest.py` refers to public-site history that is outside this batch.
+  The script is preserved but not activated or claimed runnable.
+- **HIST-009 — execution compatibility:** `registered_unresolved`. Historical tests and
+  runners were authored against the donor's combined dirty tree, including overlapping
+  edits to existing registry, builder, CLI, catalog, and evidence modules. They are not
+  used as current-main test evidence.
+
+Independent-review findings for this batch are appended without repairing imported
+code during consolidation.
