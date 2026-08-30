@@ -1,0 +1,176 @@
+schema_version: tabu.transfer-base-expanded-synthetic.v4
+status: local_unissued_preregistration
+experiment_id: tabubase-expanded-synthetic-v4
+date: 2026-08-30
+supersedes: tabubase-expanded-synthetic-v3
+revision_reason: >-
+  V3 passed PT-S0 but its seed-1729 PT-S1 stopped fail-closed after update 10000.
+  In world 12194, the independent response calibration bank and episode bank
+  used different nominal predictor distributions because category-probability
+  permutation was incorrectly tied to the row seed. V4 binds that permutation
+  to the world parameter seed and leaves the row seed responsible only for row
+  sampling. V1 failures and the V2/V3 preflight and runtime evidence remain
+  immutable and are not reclassified.
+
+model:
+  contract_id: tabu.cell.base
+  contract_version: 0.2.0
+  profile_id: supervised.label_broadcast.v1
+  architecture_changed: false
+
+tokenizer:
+  version: cell-tokenizer.v2
+  nominal_plan: source_scoped_frozen_codebook.v2
+  codebook_size: 100
+  codebook_seed: 1729
+  category_assignment_scope: source_codebook_id_and_domain_label
+  source_scope_id: tabubase.expanded-synthetic.source-codebook.v1
+
+intervention:
+  changed:
+    - synthetic_world_distribution
+    - support_realizable_context_compilation
+    - world_scoped_nominal_probability_permutation
+  generator_version: tabubase.expanded-synthetic.v4
+  held_constant:
+    - model_architecture
+    - supervised_profile
+    - AdamW_optimizer
+    - learning_rate_0.0003
+    - weight_decay_0.0001
+    - source_scoped_nominal_codebook_B100_seed1729
+    - query_rows_64
+    - PT-S0_and_PT-S1_world_update_budgets
+
+world_prior:
+  predictor_counts: [4, 8, 16, 32]
+  schema_regimes: [numeric_only, ordinal_only, nominal_only, mixed]
+  training_families:
+    - sparse_glm
+    - sparse_dag_scm
+    - tree_threshold
+    - latent_factor
+    - polynomial_interaction
+    - periodic_monotone
+    - categorical_interaction
+  heldout_families: [mixture_of_experts]
+  response_modalities: [numeric, binary, ordinal, categorical]
+  response_cardinalities: {numeric: 0, binary: 2, ordinal: 4, categorical: 4}
+  response_calibration:
+    rows: 256
+    row_and_noise_seeds: independent_from_episode_rows
+    nominal_probability_permutation_seed: world_parameter_seed
+    query_response_used: false
+  categorical_semantics_limit: >-
+    Categorical response is an unordered codebook representation of scalar-score
+    bins, not an independent multiclass-logit family. It cannot support an
+    arbitrary-label or broad nominal-transfer claim.
+  missingness_regimes: [none, mcar, mar]
+  explicitly_heldout_missingness: [mnar]
+  nominal_cardinality_max: 100
+  predictor_order: deterministic_world_permutation
+
+episode_prior:
+  frozen_context_rows_schedule: [2, 4, 8, 16, 32, 64]
+  eligible_context_rows:
+    numeric: [2, 4, 8, 16, 32, 64]
+    binary: [2, 4, 8, 16, 32, 64]
+    ordinal: [4, 8, 16, 32, 64]
+    categorical: [4, 8, 16, 32, 64]
+  training_context_assignment: deterministic_world_stratified_without_response_K_parity_lock
+  context_candidate_initial_rows: 64
+  context_candidate_max_rows: 1024
+  classification_context_order: class_balanced_from_context_candidate_pool_only
+  nested_query_bank: true
+  query_rows: 64
+  loss_normalization: per_target_cell
+  context_statistics: visible_context_only
+  query_response_location: TruthSidecar_only
+
+validation:
+  worlds: 192
+  partition: validation
+  world_index_offset: 1000000
+  contexts_per_world: every_support_realizable_K
+  episodes: 1056
+  stratum_coverage: >-
+    Full cross of response modality, predictor width, schema regime, and
+    missingness regime. All seven training families occur marginally; this is
+    not the 1344-world full family cross.
+  primary_gate: final_mean_target_loss_strictly_less_than_initial_mean_target_loss
+
+generator_gates:
+  G-D0: deterministic_replay_within_runtime
+  G-D1:
+    - query_response_is_physical_zero_in_model_input
+    - query_response_exists_only_in_TruthSidecar
+    - statistics_missingness_and_context_selection_do_not_use_query_response
+    - every_classification_query_label_is_present_in_legal_context
+    - four_class_K2_fails_closed
+    - all_K_conditions_share_the_same_query_row_bank
+  G-D2:
+    coverage_worlds: 2048
+    checks:
+      - every_training_family_present
+      - every_response_modality_present
+      - every_predictor_count_present
+      - homogeneous_and_mixed_schemas_present
+      - every_training_missingness_regime_present
+      - nominal_cardinality_never_exceeds_100
+  G-D2U:
+    training_compile_worlds: 20000
+    query_rows_for_compile_smoke: 8
+    checks:
+      - every_world_compiles
+      - every_support_realizable_modality_K_pair_present
+      - candidate_pool_never_exceeds_1024
+  G-D3: closed_form_ridge_mean_RMSE_at_K128_not_worse_than_K8
+  deferred_to_runtime_stage: [G-D4, G-D5]
+
+pilot:
+  phase: PT-S0
+  worlds: 2048
+  updates: 2000
+  seed: 1729
+  checkpoint_updates: [0, 2000]
+  gates: [G-D0, G-D1, G-D2, G-D2U, G-D3, finite, exact_resume, validation_improvement]
+  exact_resume_scope: >-
+    Single-step in-memory model, optimizer, CPU RNG, and CUDA RNG restore;
+    persisted checkpoint resume remains a separate unpassed gate.
+
+bounded_scale:
+  phase: PT-S1
+  worlds: 20000
+  updates: 20000
+  seeds: [1729, 2718, 31415]
+  checkpoint_updates: [0, 2000, 5000, 10000, 20000]
+  promotion_rule: >-
+    Run seed 1729 only after V4 Stage-A and PT-S0 pass. Run seeds 2718 and
+    31415 only after seed-1729 paired frozen synthetic ICL is finite, preserves
+    every per-arm adjacent parameter hash, and does not erase the low-K signal.
+  PT-S2_status: not_preregistered
+
+frozen_evaluation:
+  optimizer_created: false
+  model_mode: eval
+  gradient_mode: torch.inference_mode
+  parameter_gate: every frozen arm records identical adjacent before and after state hashes
+  synthetic_controls: [current_variable_K_PT-S1, random_init_frozen, pretrained_shuffled]
+  current_real_panel: [iris, wine, breast_cancer, digits, diabetes, california_housing]
+  new_real_panel_manifest: real-frozen-icl-openml-new6.yaml
+
+kill_conditions:
+  - any_generator_gate_fails
+  - any_non_finite_training_or_evaluation_value
+  - exact_resume_fails
+  - validation_improvement_fails
+  - any_frozen_parameter_hash_changes
+  - any_optimizer_is_created_in_a_frozen_arm
+  - promotion_receipt_protocol_identity_mismatch
+  - existing_nonempty_run_directory_would_be_overwritten
+
+claim_boundary: >-
+  Local optimizer-free mechanism experiment only. This preregistration does not
+  create a formal receipt, accepted claim, public checkpoint, benchmark result,
+  or foundation-model designation. Long-context support remains a separate
+  Stage-B runtime intervention.

@@ -2,6 +2,7 @@
 
 from .bundles import (
     ForwardTrace,
+    LossBundle,
     PredictionBundle,
     PredictionEntry,
     PredictionKind,
@@ -46,6 +47,7 @@ __all__ = [
     "ForwardTrace",
     "GraphDirection",
     "GraphTopology",
+    "LossBundle",
     "OriginState",
     "PredictionBundle",
     "PredictionEntry",

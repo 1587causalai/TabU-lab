@@ -265,8 +265,48 @@ class PredictionBundle:
         return self.outputs[name]
 
 
+@dataclass(frozen=True, slots=True)
+class LossBundle:
+    """Differentiable aggregate loss without retaining a TruthSidecar."""
+
+    episode_id: str
+    total: torch.Tensor
+    components: Mapping[str, torch.Tensor] = field(default_factory=dict)
+    counts: Mapping[str, int] = field(default_factory=dict)
+    metadata: Mapping[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        total = torch.as_tensor(self.total)
+        if (
+            total.numel() != 1
+            or not total.is_floating_point()
+            or not bool(torch.isfinite(total).all())
+        ):
+            raise ValueError("LossBundle.total must be one finite floating scalar tensor")
+        components: dict[str, torch.Tensor] = {}
+        for name, component in self.components.items():
+            value = torch.as_tensor(component)
+            if (
+                value.numel() != 1
+                or not value.is_floating_point()
+                or not bool(torch.isfinite(value).all())
+            ):
+                raise ValueError(
+                    f"loss component {name!r} must be one finite floating scalar"
+                )
+            components[name] = value
+        counts = dict(self.counts)
+        if any(type(value) is not int or value < 0 for value in counts.values()):
+            raise ValueError("LossBundle counts must be non-negative integers")
+        object.__setattr__(self, "total", total)
+        object.__setattr__(self, "components", MappingProxyType(dict(sorted(components.items()))))
+        object.__setattr__(self, "counts", MappingProxyType(dict(sorted(counts.items()))))
+        object.__setattr__(self, "metadata", _frozen_metadata(self.metadata, truth_free=False))
+
+
 __all__ = [
     "ForwardTrace",
+    "LossBundle",
     "PredictionBundle",
     "PredictionEntry",
     "PredictionKind",
