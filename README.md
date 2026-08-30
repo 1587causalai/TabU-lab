@@ -47,6 +47,15 @@ See [`docs/architecture/tabubase-composability.md`](./docs/architecture/tabubase
 for the reader-facing boundary. This is an architecture-evolvability check, not
 a fitting or prediction-quality result.
 
+## Stage 3: synthetic-data basic fitting
+
+The bounded synthetic gate asks whether a fresh TabUBase can reduce masked
+response loss on a fixed linear synthetic world. It keeps response truth in an
+evaluation sidecar, uses a separate validation world, and reports only
+`local_unissued` diagnostic evidence. See
+[`docs/architecture/synthetic-fit-gate.md`](./docs/architecture/synthetic-fit-gate.md)
+and run `uv run python scripts/run_tabubase_synthetic_fit.py`.
+
 ## Website
 
 - Public entrance: https://research.wehub.us/tabu-lab/

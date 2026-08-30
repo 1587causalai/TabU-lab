@@ -1,0 +1,29 @@
+experiment_id: F0-023-tabu-cell-base-completion-v1
+stage: synthetic_data_basic_fitting
+contract:
+  model_id: tabu.cell.base
+  version: 0.2.0
+  profile: completion.artificial_mask.v1
+synthetic_world:
+  generator_id: tabubase.linear-world.v1
+  law: y = 0.8*x0 - 0.4*x1 + Normal(0, 0.1)
+  train_seed: 1730
+  validation_seed: 1731
+  batch_size: 8
+  rows: 12
+  response_mask_ratio: 0.35
+optimizer:
+  name: Adam
+  learning_rate: 0.01
+  steps: 80
+metric:
+  name: standardized_numeric_mse_on_masked_response
+gate:
+  pass:
+    - final_train_loss < initial_train_loss
+    - final_train_loss is finite
+    - final_validation_loss is finite
+  kill:
+    - non-finite loss
+evidence_status: local_unissued
+claim_boundary: synthetic linear-world fitting only; does not establish real-data prediction, frozen ICL, fine-tuning lift, or foundation-model evidence
