@@ -40,6 +40,7 @@ CLASSIFICATION_METRICS = (
 REGRESSION_METRICS = ("rmse", "mae", "scaled_rmse", "scaled_mae", "r2")
 
 _SHA256 = re.compile(r"[0-9a-f]{64}")
+_GIT_COMMIT = re.compile(r"[0-9a-f]{7,64}")
 
 
 class FullContextComparisonValidationError(ValueError):
@@ -79,6 +80,29 @@ def _require_sha256(value: Any, *, label: str) -> str:
     if not isinstance(value, str) or _SHA256.fullmatch(value) is None:
         raise FullContextComparisonValidationError(f"{label} must be a lowercase SHA-256")
     return value
+
+
+def _require_git_commit(value: Any, *, label: str) -> str:
+    if not isinstance(value, str) or _GIT_COMMIT.fullmatch(value) is None:
+        raise FullContextComparisonValidationError(
+            f"{label} must be a lowercase Git commit id"
+        )
+    return value
+
+
+def _validate_producer_source_identity(
+    receipt: Mapping[str, Any], *, label: str
+) -> dict[str, str]:
+    """Require the evaluator source identity before accepting a comparison input."""
+
+    return {
+        "git_commit": _require_git_commit(
+            receipt.get("git_commit"), label=f"{label}/git_commit"
+        ),
+        "source_tree_sha256": _require_sha256(
+            receipt.get("source_tree_sha256"), label=f"{label}/source_tree_sha256"
+        ),
+    }
 
 
 def _require_positive_int(value: Any, *, label: str) -> int:
@@ -287,6 +311,7 @@ def _validate_frozen_receipt(
         raise FullContextComparisonValidationError("frozen receipt schema is not full-context v1")
     if receipt.get("status") != "local_unissued":
         raise FullContextComparisonValidationError("frozen receipt status must be local_unissued")
+    producer_source_identity = _validate_producer_source_identity(receipt, label="frozen")
     if (
         receipt.get("context_policy") != "full_train"
         or receipt.get("context_sizes") is not None
@@ -457,6 +482,7 @@ def _validate_frozen_receipt(
         "split_seeds": split_seeds,
         "split_manifests": manifests,
         "panel_manifest": receipt.get("panel_manifest"),
+        "producer_source_identity": producer_source_identity,
         "records": index,
         "dataset_contracts": dataset_contracts,
     }
@@ -467,6 +493,7 @@ def _validate_baseline_receipt(receipt: Mapping[str, Any]) -> dict[str, Any]:
         raise FullContextComparisonValidationError("baseline receipt schema is not full-context v1")
     if receipt.get("status") != "local_unissued":
         raise FullContextComparisonValidationError("baseline receipt status must be local_unissued")
+    producer_source_identity = _validate_producer_source_identity(receipt, label="baseline")
     if (
         receipt.get("context_policy") != "full_train"
         or receipt.get("train_policy") != "all_train_partition_rows"
@@ -604,6 +631,7 @@ def _validate_baseline_receipt(receipt: Mapping[str, Any]) -> dict[str, Any]:
         "split_seeds": split_seeds,
         "split_manifests": manifests,
         "panel_manifest": receipt.get("panel_manifest"),
+        "producer_source_identity": producer_source_identity,
         "records": index,
         "dataset_contracts": dataset_contracts,
     }
@@ -752,6 +780,10 @@ def _compare_full_context_receipts(
         raise FullContextComparisonValidationError(
             "frozen and baseline receipts differ at compatibility field: panel_manifest_identity"
         )
+    if frozen["producer_source_identity"] != baseline["producer_source_identity"]:
+        raise FullContextComparisonValidationError(
+            "frozen and baseline receipts differ at compatibility field: producer_source_identity"
+        )
 
     split_manifest_hashes = {
         dataset_id: {
@@ -788,6 +820,8 @@ def _compare_full_context_receipts(
                 "baselines": baseline_panel_path,
             },
             "panel_manifest_path_is_nonsemantic": True,
+            "producer_source_identity": frozen["producer_source_identity"],
+            "producer_source_identity_equal": True,
             "all_heldout_query_rows_identical": True,
             "all_train_context_rows_identical": True,
             "frozen_optimizer_created": False,

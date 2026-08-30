@@ -3,6 +3,32 @@
 This register captures findings intentionally deferred under the owner-approved
 “merge first, govern after main is consolidated” policy.
 
+## PR8 — consolidated real evaluation stack follow-up
+
+Reviewed commit: `1364761b5b4668658c371ce504c555db4ccfe6a8`; follow-up is
+implemented in the isolated `codex/pr8-debt-followup` worktree.
+
+- **P1 — fine-tune held-out estimand:** **resolved in implementation.** Held-out
+  evaluation now constructs one transductive evidence episode and applies the
+  bounded chunk size only to the response readout. The receipt binds the
+  estimand, readout chunk size, context-row hash, and query-row hash. The
+  calibration path uses the same helper.
+- **P2 — producer source identity:** **resolved in implementation.** Full-context
+  frozen/baseline receipts now require lowercase `git_commit` and
+  `source_tree_sha256`, and the strict comparator rejects any mismatch before
+  producing a comparison receipt.
+- **P3 — Link-4 authority checker and report hygiene:** **checker resolved;
+  promotion remains intentionally blocked.**
+  `scripts/freeze_eval_data_authority.py check --output-root ...` now exists,
+  validates the checked-in freeze schema and retained source/output byte
+  identities, and fails closed on unknown keys, unsafe paths, or hash/size drift.
+  Historical report trailing whitespace and host-local evidence paths remain
+  preserved until portable artifact manifests are introduced; they are not
+  treated as formal authority or public evidence.
+
+The follow-up changes are local and unissued. No private freeze, checkpoint, or
+scientific evaluation was run by this follow-up.
+
 ## PR5 — typed YAML mathematics projection
 
 Reviewed commit: `2672034dfc6b2854b9522e2860fd3ace759fc5de`.
