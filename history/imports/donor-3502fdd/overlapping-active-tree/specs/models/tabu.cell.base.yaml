@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "tabu.cell.base",
+  "contract_version": "0.2.0",
+  "display_name": "TabUBase (table-cell-as-Unit)",
+  "upstream": {
+    "repository": "TabU/latex/model-factory",
+    "path": "../latex/model-factory/table-cell-as-unit-models/TabUBase/main.tex",
+    "sha256": "2769168c7e60d1b419d7308c9baec494aa1c851bcdd77c580c02ee311e3bd501",
+    "readonly": true,
+    "observed_at": "2026-08-28",
+    "license_boundary": "Metadata-only reference: upstream TeX remains readonly and is not redistributed by this manifest."
+  },
+  "carrier": {
+    "family": "tabu.table_cell_as_unit",
+    "unit": "cell",
+    "shape": "N x M x d",
+    "specials": "none"
+  },
+  "dynamics": {
+    "family": "cell_unit_three_omab",
+    "source_contract": "visible cell tokens source; artificial masks receiver-only",
+    "null_contract": "exact-zero closure"
+  },
+  "readout": {
+    "geometry": "global learned projection W c_ra in R^K",
+    "support": "same-feature visible cells",
+    "numeric_terminal": "default local-linear; NW nested baseline",
+    "categorical_terminal": "NW probability mass on declared domain",
+    "no_support": "typed no-support"
+  },
+  "loss": {
+    "truth_entry": "Step 5 only",
+    "target_families": ["artificial_mask_completion", "supervised_single_response"]
+  },
+  "interfaces": {
+    "compile": "typed partially observed table with cell Units",
+    "forward": "truth-free cell predictions plus trace; explicit profile required",
+    "train": "truth supplied only through the loss sidecar",
+    "infer": "profile-gated artificial-mask completion or single-response query labels"
+  },
+  "capabilities": [
+    "table_cell_as_unit",
+    "artificial_mask_completion",
+    "supervised_single_response",
+    "mixed_numeric_categorical",
+    "same_feature_support",
+    "exact_zero_closure"
+  ],
+  "maturity": {
+    "source_contract": "factory_source",
+    "stage": "experimental",
+    "contract": "specified",
+    "implementation": "experimental",
+    "evidence": "specified",
+    "build_state": "buildable_contract"
+  },
+  "experimental_defaults": {
+    "family_id": "tabu.table_cell_as_unit",
+    "profile_id": "completion.artificial_mask.v1",
+    "profiles": {
+      "completion.artificial_mask.v1": {
+        "target_origin": "artificial_mask",
+        "label_broadcast": false,
+        "response_columns": 0,
+        "natural_missing_inference": false
+      },
+      "supervised.label_broadcast.v1": {
+        "target_origin": "query",
+        "label_broadcast": true,
+        "response_columns": 1,
+        "label_cells_write_other_labels": false,
+        "natural_missing_inference": false
+      }
+    },
+    "numeric_terminal": "local_linear",
+    "feature_identity": "forbidden",
+    "continuous_tokenizer": "context_only_standardization_then_shared_learnable_fourier",
+    "nominal_tokenizer": "episode_random_sphere",
+    "scale_epsilon": "1e-6",
+    "label_broadcast": "explicit_step_3_module_profile_gated",
+    "label_broadcast_tau": "1e-6",
+    "inference_targets": "artificial_masks_only",
+    "reference_backend": "dense_reference_v0"
+  },
+  "known_open": [
+    {
+      "id": "nominal_token_stability",
+      "question": "Does source-scoped frozen categorical geometry improve ICL and real classification without harming relabel and transfer controls?",
+      "blocking_build": false
+    }
+  ],
+  "alternatives": [
+    {
+      "id": "nominal_source_scoped_frozen_codebook_v2",
+      "description": "Use a frozen 100-vector unit-sphere pool with deterministic codebook_id/domain-label assignment; explicit tokenizer ablation only.",
+      "status": "first_alternative"
+    }
+  ],
+  "kill": [
+    {
+      "id": "truth_leakage",
+      "condition": "Changing completion truth changes Steps 1-4.",
+      "evidence": "truth-substitution invariance test"
+    },
+    {
+      "id": "null_feature_identity",
+      "condition": "Natural missing receives a feature-identity add.",
+      "evidence": "compiled-token exact-value test"
+    }
+  ],
+  "exit": [
+    {
+      "id": "carrier_shape",
+      "condition": "Every layer preserves N x M x d.",
+      "evidence": "shape trace"
+    },
+    {
+      "id": "cell_projection",
+      "condition": "Every target coordinate is W c_ra.",
+      "evidence": "readout trace"
+    }
+  ]
+}

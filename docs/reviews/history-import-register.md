@@ -76,3 +76,36 @@ the consolidation phase.
 
 Independent-review findings for this batch are appended without repairing imported
 code during consolidation.
+
+## Batch PR14 — overlapping active-tree history
+
+- Main base: `116e0975654f39fc07b4b82b7d7fa7e4555d7602`
+- Donor Git base: `3502fdd80539f2a8b9703cc4e4546fd01f3826ce`
+- Imported scope: donor versions of 41 paths whose active-main bytes differ
+- Snapshot root: `history/imports/donor-3502fdd/overlapping-active-tree/`
+- Activation status: `staged_conflict_side_only`
+
+### Registered integration findings
+
+- **HIST-011 — same-path semantic conflicts:** `registered_unresolved`. This batch
+  preserves the donor side without overwriting active-main files. A later governance
+  PR must reconcile each path explicitly rather than treating modification time or
+  either tree wholesale as authoritative.
+- **HIST-012 — identity-governance versus model breadth:** `registered_unresolved`.
+  Current main contains newer checkpoint, source, ModelSpec, and catalog identity
+  protections, while the donor versions contain broader model-family builders and
+  exports. Whole-file replacement in either direction would discard important work.
+- **HIST-013 — experiment implementation overlap:** `registered_unresolved`. Donor
+  versions of scale, real-benchmark, response-readout, and full-context comparison
+  modules differ from implementations consolidated through PR7–PR9. This import does
+  not infer which individual hunks remain necessary.
+- **HIST-014 — source/spec projection overlap:** `registered_unresolved`. ModelSpec,
+  packaged spec, schema, and source-manifest versions must evolve together. Their donor
+  sides are preserved here but not promoted independently.
+- **HIST-015 — verification export overlap:** `registered_unresolved`. Active main and
+  donor expose different verification surfaces. Later governance must preserve the
+  current composability gate while deciding how the historical MVE surface is
+  activated.
+
+Independent review checks snapshot integrity and registration only; it does not select
+conflict resolutions.

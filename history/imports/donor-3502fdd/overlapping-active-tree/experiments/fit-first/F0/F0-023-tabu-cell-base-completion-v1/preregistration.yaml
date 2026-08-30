@@ -1,0 +1,270 @@
+schema_version: tabu.fit-experiment.v1
+experiment_id: F0-023-tabu-cell-base-completion-v1
+supersedes_experiment_ids: []
+revision_rationale: null
+stage: F0
+contract_id: tabu.cell.base
+contract_version: 0.2.0
+model_spec:
+  schema_version: 1.0.0
+  contract_id: tabu.cell.base
+  contract_version: 0.2.0
+  display_name: TabUBase (table-cell-as-Unit)
+  upstream:
+    repository: TabU/latex/model-factory
+    path: ../latex/model-factory/table-cell-as-unit-models/TabUBase/main.tex
+    sha256: 2769168c7e60d1b419d7308c9baec494aa1c851bcdd77c580c02ee311e3bd501
+    readonly: true
+    observed_at: '2026-08-28'
+    license_boundary: 'Metadata-only reference: upstream TeX remains readonly and is not redistributed by this manifest.'
+  carrier:
+    family: tabu.table_cell_as_unit
+    unit: cell
+    shape: N x M x d
+    specials: none
+  dynamics:
+    family: cell_unit_three_omab
+    source_contract: visible cell tokens source; artificial masks receiver-only
+    null_contract: exact-zero closure
+  readout:
+    geometry: global learned projection W c_ra in R^K
+    support: same-feature visible cells
+    numeric_terminal: default local-linear; NW nested baseline
+    categorical_terminal: NW probability mass on declared domain
+    no_support: typed no-support
+  loss:
+    truth_entry: Step 5 only
+    target_families:
+    - artificial_mask_completion
+    - supervised_single_response
+  interfaces:
+    compile: typed partially observed table with cell Units
+    forward: truth-free cell predictions plus trace; explicit profile required
+    train: truth supplied only through the loss sidecar
+    infer: profile-gated artificial-mask completion or single-response query labels
+  capabilities:
+  - table_cell_as_unit
+  - artificial_mask_completion
+  - supervised_single_response
+  - mixed_numeric_categorical
+  - same_feature_support
+  - exact_zero_closure
+  maturity:
+    source_contract: factory_source
+    stage: experimental
+    contract: specified
+    implementation: experimental
+    evidence: specified
+    build_state: buildable_contract
+  maturity_evidence: null
+  mathematics: null
+  experimental_defaults:
+    family_id: tabu.table_cell_as_unit
+    profile_id: completion.artificial_mask.v1
+    profiles:
+      completion.artificial_mask.v1:
+        target_origin: artificial_mask
+        label_broadcast: false
+        response_columns: 0
+        natural_missing_inference: false
+      supervised.label_broadcast.v1:
+        target_origin: query
+        label_broadcast: true
+        response_columns: 1
+        label_cells_write_other_labels: false
+        natural_missing_inference: false
+    numeric_terminal: local_linear
+    feature_identity: forbidden
+    continuous_tokenizer: context_only_standardization_then_shared_learnable_fourier
+    nominal_tokenizer: episode_random_sphere
+    scale_epsilon: 1e-6
+    label_broadcast: explicit_step_3_module_profile_gated
+    label_broadcast_tau: 1e-6
+    inference_targets: artificial_masks_only
+    reference_backend: dense_reference_v0
+  known_open: []
+  alternatives: []
+  kill:
+  - id: truth_leakage
+    condition: Changing completion truth changes Steps 1-4.
+    evidence: truth-substitution invariance test
+  - id: null_feature_identity
+    condition: Natural missing receives a feature-identity add.
+    evidence: compiled-token exact-value test
+  exit:
+  - id: carrier_shape
+    condition: Every layer preserves N x M x d.
+    evidence: shape trace
+  - id: cell_projection
+    condition: Every target coordinate is W c_ra.
+    evidence: readout trace
+model_spec_hash: 415103ae057e5cf63d033a3685c30b96a2f400575101bf17ee17acc2bb22f452
+dataset:
+  dataset_id: f0-023-tabu-cell-base-completion-v1
+  origin: generated
+  source_uri: pkg://tabu_lab.experiments.fixtures
+  source_sha256: 833a7d379ee5c3766d8cb665ed316787859db299ae294bb78e134e02bc42f5b7
+  dataset_hash: b61da7d09c0bfe10706c958cd95010d484ca14de76248826500efc4c618bcc8a
+  license_id: Apache-2.0
+  redistribution: allowed
+  adapter:
+    adapter_id: tabu-f0-fixtures
+    adapter_version: 2.0.0
+  raw_files_in_git: false
+  split_before_compile: true
+split:
+  schema_version: tabu.fit-split.v1
+  dataset_id: f0-023-tabu-cell-base-completion-v1
+  dataset_hash: b61da7d09c0bfe10706c958cd95010d484ca14de76248826500efc4c618bcc8a
+  split_id: F0-023-tabu-cell-base-completion-v1-fit-split-v1
+  fit_partition: train
+  strategy: fixed_f0_episode
+  seed: 130363
+  require_complete: true
+  kind: row
+  partitions:
+  - name: train
+    row_ids:
+    - row-00
+    - row-01
+    - row-02
+    - row-03
+    - row-04
+    - row-05
+    - row-06
+    - row-07
+    - row-08
+    - row-09
+    - row-10
+    - row-11
+    - row-12
+    - row-13
+    - row-14
+    - row-15
+    - row-16
+    - row-17
+    - row-18
+    - row-19
+    - row-20
+    - row-21
+    - row-22
+    - row-23
+    - row-24
+    - row-25
+    - row-26
+    - row-27
+    - row-28
+    - row-29
+    - row-30
+    - row-31
+episode_schedule:
+  schedule_id: F0-023-tabu-cell-base-completion-v1-schedule-v1
+  sampling: fixed
+  episode_count: 1
+  targets_per_episode: 16
+  target_families:
+  - completion
+  target_origins:
+  - artificial_mask
+  sampler_seed: 104729
+  order_seed: 130363
+  recipe_hashes:
+  - 5bfb9e7b7ef2e2d48ae35beb0c416dd349bcb98e357617b53b3f75ea56feaf8c
+semantic:
+  reference:
+    backend: dense_reference_v0
+    d_model: 32
+    n_heads: 4
+    d_ff: 64
+    n_blocks: 2
+    inducing_slots: 4
+    matched_slots: 4
+    max_features: 256
+    dropout: 0.0
+    presence_tau: 1.0e-06
+    denominator_epsilon: 1.0e-08
+    routing_bandwidth: 1.0
+    geometry_normalization: none
+  numeric_terminal: nadaraya_watson
+  categorical_terminal: nadaraya_watson
+  augmented_readout_geometry: null
+  label_columns: []
+  label_address_plan: null
+  target_feature: null
+  graph_unit_receiver_plan: null
+  response_family: null
+  recommendation_address_plan: null
+  rec_axis_summary_dim: null
+  rec_matched_residual_scale: null
+  profile_id: completion.artificial_mask.v1
+training:
+  optimizer: adamw
+  learning_rate: 0.01
+  weight_decay: 0.0
+  gradient_clip_norm: 1.0
+  max_updates: 1200
+  max_epochs: null
+  wall_clock_budget_minutes: 10
+  episode_batch_size: 1
+  scheduler: none
+  exact_resume: true
+  warm_start: false
+  pretraining: false
+execution:
+  device: cpu
+  device_index: null
+  dtype: float32
+  deterministic_algorithms: true
+  evidence_mode: gate
+  compile_on_cpu: true
+  backend: dense_reference_v0
+seeds:
+  model_seeds:
+  - 1729
+  - 2718
+  - 31415
+  data_seed: 104729
+  split_seed: 130363
+  episode_order_seed: 130363
+target_families:
+- completion
+baselines:
+- baseline_id: exact-support-mean-mode
+  role: trivial
+  max_updates: null
+- baseline_id: frozen-initialization
+  role: diagnostic
+  max_updates: null
+pass_gate:
+  stage: F0
+  required_coverage: 1.0
+  max_loss_ratio: 0.01
+  max_trivial_baseline_ratio: null
+  max_numeric_mse: 0.001
+  max_numeric_nrmse: null
+  min_categorical_accuracy: 1.0
+  max_categorical_nll: 0.05
+  require_all_seeds: true
+kill_conditions:
+  fail_on_nonfinite: true
+  require_nonzero_gradient_by_step: 10
+  require_nonzero_parameter_delta: true
+  stop_model_after_stage_failure: true
+  preserve_failed_receipt: true
+heldout_policy: diagnostic_only
+required_artifacts:
+- preregistration.yaml
+- resolved-configs
+- dataset-manifest.json
+- split-manifest.json
+- compiler-manifest.json
+- feasibility.json
+- metrics.jsonl
+- evaluation.json
+- forward-traces.json
+- baselines.json
+- checkpoint
+- environment.json
+- artifacts.sha256
+- receipt.json
+- verdict.md
