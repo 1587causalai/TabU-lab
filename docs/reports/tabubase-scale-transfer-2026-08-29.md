@@ -1,8 +1,8 @@
 # TabUBase 20k synthetic pretraining and real-transfer panel
 
-Date: 2026-08-29  
-Evidence status: `local_unissued`  
-Contract: `tabu.cell.base@0.2.0`  
+Date: 2026-08-29
+Evidence status: `local_unissued`
+Contract: `tabu.cell.base@0.2.0`
 Profile: `supervised.label_broadcast.v1`
 
 ## Outcome
@@ -55,8 +55,7 @@ initial validation loss was `1.1675147` and the final loss was `0.1561162`
 passed. PT-S1 artifacts remain unchanged. This extension is exploratory and
 has no transfer or public-claim status until downstream runs are complete.
 
-The immutable local-unissued receipt is
-`/home/cms/tabubase-eval/20260829-scale-v1/outputs/tabubase-pt-s2-seed-1729/result.json`
+The immutable local-unissued receipt ID is `pt-s2-seed-1729-result`
 (`sha256:bbf22fda0ad00afd572d7c3172cce484194a0e3bf751139e0c748c47dd2f9c8d`).
 
 ### PT-S2 single-seed real-transfer diagnostic
@@ -78,8 +77,8 @@ The S2 initialization wins only on California Housing in this single seed;
 it loses to scratch and classical baselines on the other four datasets. This
 does not indicate that PT-S2 failed to fit synthetic data—the PT-S2 gates
 passed—but it is an early negative-transfer signal for the current fine-tune
-schedule and architecture. The result file is
-`/home/cms/tabubase-eval/20260829-scale-v1/outputs/real-panel-pt-s2-seed-1729.json`
+schedule and architecture. The result artifact ID is
+`real-panel-pt-s2-seed-1729`
 (`sha256:5b23e2a21cea0e1ea76613907818bd7a3dd0969328a54e9072a79f8d26f34494`).
 
 As a schedule diagnostic, the same S2 checkpoint was rerun at the R0-selected
@@ -97,8 +96,7 @@ The gentler schedule improves all five PT-S2 values relative to `3e-4`, and
 beats scratch on both regression tasks, but still trails XGBoost everywhere
 and trails the MLP on all classification tasks. This separates a schedule
 effect from the remaining classification transfer limitation. The diagnostic
-file is
-`/home/cms/tabubase-eval/20260829-scale-v1/outputs/real-panel-pt-s2-seed-1729-lr1e-4.json`
+artifact ID is `real-panel-pt-s2-seed-1729-lr1e-4`
 (`sha256:b1265c27316cdc3b9d43e838cae1aae5431a0e52ab20bbebd51e9b00c5f9d7dd`).
 
 ### Runtime reduction benchmark
@@ -243,19 +241,19 @@ evidence rather than a sealed one-time test result.
 ## Artifacts and boundary
 
 - Corrected classification panel:
-  `.local-runs/tabubase-scale-v1/real-panel-classification-corrected-v2.json`
+  `real-panel-classification-corrected-v2`
   (`sha256:4c602faa3b3b099afd231ed351244c0e928dec0ffc13fd299f8b737d3ade2711`)
 - R0 validation selection:
-  `.local-runs/tabubase-scale-v1/classification-r0-selection-v1.json`
+  `classification-r0-selection-v1`
   (`sha256:d8d37d7913f214e8167f0602624d14f78c43742250baed7887525f48f1bb27e8`)
 - R0-selected classification test:
-  `.local-runs/tabubase-scale-v1/real-panel-classification-r0-selected-v1.json`
+  `real-panel-classification-r0-selected-v1`
   (`sha256:b9d6b8fb340ed28d9cf057bedb294bc63f8adff20c568145b782d9f26f28d7a5`)
 - Original panel retained for regression only:
-  `.local-runs/tabubase-scale-v1/real-panel-400.json`
+  `real-panel-400`
   (`sha256:66a722e8ed69f881cc28e3835ba8a74bd96cf8e136b58abc5727954b7fdeecfd`)
-- Pretraining artifacts: `.local-runs/tabubase-scale-v1/outputs/`
-- Remote execution root: `/home/cms/tabubase-eval/20260829-scale-v1`
+- Portable locators: [local-artifact index](local-artifact-index.json)
+- Execution ID: `tabubase-scale-v1` (machine-local root omitted)
 - Primary host: `dgx2` / `spark-b5b3`, NVIDIA GB10
 - Benchmark source-tree hash:
   `8b3dc490cea22c480fd8065b6051e7dcb9ffd4df6842ff194d3dab3b22547b9f`

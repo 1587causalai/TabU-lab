@@ -17,14 +17,15 @@ merged from the isolated `codex/pr8-debt-followup` worktree at `1c4299e`.
   frozen/baseline receipts now require lowercase `git_commit` and
   `source_tree_sha256`, and the strict comparator rejects any mismatch before
   producing a comparison receipt.
-- **P3 — Link-4 authority checker and report hygiene:** **checker resolved;
-  promotion remains intentionally blocked.**
+- **P3 — Link-4 authority checker and report hygiene:** **resolved in
+  implementation; promotion remains intentionally blocked.**
   `scripts/freeze_eval_data_authority.py check --output-root ...` now exists,
   validates the checked-in freeze schema and retained source/output byte
   identities, and fails closed on unknown keys, unsafe paths, or hash/size drift.
-  Historical report trailing whitespace and host-local evidence paths remain
-  preserved until portable artifact manifests are introduced; they are not
-  treated as formal authority or public evidence.
+  Historical reports now use logical execution/artifact ids and the checked-in
+  `docs/reports/local-artifact-index.json`; machine-local paths are omitted and
+  trailing whitespace is normalized. The underlying local artifacts remain
+  unbundled and are not treated as formal authority or public evidence.
 
 The follow-up did not run a private freeze, checkpoint, or scientific evaluation.
 
@@ -65,8 +66,11 @@ Reviewed commit: `45a9c815119b67a73d5efef42dba24295c25d0f9`.
 - **P2 — source hash scope:** **resolved in implementation.** Promotion source
   identity now covers package code, ModelSpecs, the invoked runner, transfer YAML,
   synthetic-world schemas, `pyproject.toml`, and `uv.lock`.
-- **P3 — imported history hygiene:** historical reports retain trailing whitespace
-  and host-local evidence paths. Preserve them for now; later project evidence
-  through portable artifact manifests.
+- **P3 — imported history hygiene:** **resolved in report projection.** Historical
+  reports now reference content-addressed logical artifact ids through the
+  portable local-artifact index, omit machine-local paths, and contain no
+  trailing whitespace. One truncated historical digest was corrected from the
+  preserved artifact bytes. No local run, checkpoint, cache, or private dataset
+  was copied into Git.
 
 Only entries not explicitly marked resolved remain deferred.

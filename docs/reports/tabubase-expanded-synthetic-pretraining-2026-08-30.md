@@ -1,10 +1,10 @@
 # TabUBase expanded synthetic pretraining and paired frozen ICL
 
-Date: 2026-08-30  
-Evidence status: `local_unissued`  
-Contract: `tabu.cell.base@0.2.0`  
-Profile: `supervised.label_broadcast.v1`  
-Generator: `tabubase.expanded-synthetic.v4`  
+Date: 2026-08-30
+Evidence status: `local_unissued`
+Contract: `tabu.cell.base@0.2.0`
+Profile: `supervised.label_broadcast.v1`
+Generator: `tabubase.expanded-synthetic.v4`
 Tokenizer: `cell-tokenizer.v2`, source-scoped frozen nominal codebook,
 `B=100`, seed `1729`
 
@@ -55,9 +55,8 @@ training-stability risk despite passing the current training gates.
 ## Live workspace and execution audit
 
 The pre-run audit resolved the local project path and Git top level to the same
-non-symlinked directory:
-
-`/Users/cms/.openclaw/workspace/projects/causal-superintelligence/TabU/tabu-lab`
+non-symlinked historical donor workspace. Its machine-local path is intentionally
+omitted from this portable report.
 
 The inspected branch was `codex/tabubase-eval-chain` at
 `3502fdd80539f2a8b9703cc4e4546fd01f3826ce`. The worktree was already dirty:
@@ -67,12 +66,11 @@ or issued receipt by this report.
 
 No relevant local TabUBase process was running. The `dgx2` host resolved to
 `spark-b5b3`; it was reachable, had no TabUBase process, and had no GPU compute
-process before the new run. The historical remote root
-`/home/cms/tabubase-eval/20260829-codebook-b100-v1` was intact but was not a Git
-checkout. It was treated as an artifact projection, not semantic source
-authority. The new isolated execution root is:
-
-`/home/cms/tabubase-eval/20260830-expanded-synthetic-v4`
+process before the new run. Historical execution ID
+`tabubase-codebook-b100-v1` was intact but was not a Git checkout. It was
+treated as an artifact projection, not semantic source authority. The new
+isolated execution ID is `tabubase-expanded-synthetic-v4`; machine-local roots
+are intentionally omitted.
 
 The source snapshot used by the `v4` run has source-tree SHA-256:
 
@@ -299,6 +297,7 @@ and any long-context experiment remain separate later gates.
 - replacement real full-context protocols:
   [`real-full-context-frozen-icl.yaml`](../../experiments/transfer-base-v2/real-full-context-frozen-icl.yaml),
   [`real-full-context-frozen-icl-openml-new6.yaml`](../../experiments/transfer-base-v2/real-full-context-frozen-icl-openml-new6.yaml)
-- local copy of the three-seed descriptive summary:
-  [`.local-runs/tabubase-expanded-synthetic-v4/three-seed/expanded-v4-three-seed-summary-v1.json`](../../.local-runs/tabubase-expanded-synthetic-v4/three-seed/expanded-v4-three-seed-summary-v1.json),
+- local-unissued three-seed descriptive summary artifact ID
+  `expanded-v4-three-seed-summary-v1` in the
+  [portable local-artifact index](local-artifact-index.json),
   SHA-256 `40825efb2a9af554780d29ba5ba88cebe942bf530ef889ff2db62489623cf52c`

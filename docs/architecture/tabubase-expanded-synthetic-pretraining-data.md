@@ -1,8 +1,8 @@
 # TabUBase expanded synthetic pretraining distribution
 
-Status: design proposal v0.1 (`design_open`)  
-Date: 2026-08-30  
-Scope: `tabu.cell.base@0.2.0` / `supervised.label_broadcast.v1`  
+Status: design proposal v0.1 (`design_open`)
+Date: 2026-08-30
+Scope: `tabu.cell.base@0.2.0` / `supervised.label_broadcast.v1`
 Implementation status: a bounded `v4` Stage-A/PT-S0/three-seed PT-S1 run and a
 separate, preregistered `K<=512` query-response-only long-context PT-S1 arm now
 exist as `local_unissued` evidence. Both use corrected full-train-context frozen

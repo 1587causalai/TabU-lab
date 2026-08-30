@@ -1,9 +1,9 @@
 # TabUBase cached-OpenML regression-8 frozen full-context exploration
 
-Date: 2026-08-30  
-Evidence status: `local_unissued`  
-Model: `tabu.cell.base@0.2.0`  
-Profile: `supervised.label_broadcast.v1`  
+Date: 2026-08-30
+Evidence status: `local_unissued`
+Model: `tabu.cell.base@0.2.0`
+Profile: `supervised.label_broadcast.v1`
 Tokenizer: `cell-tokenizer.v2`, source-scoped frozen codebook, `B=100`, seed `1729`
 
 ## Outcome
@@ -29,7 +29,7 @@ the source for classification coverage.
 | Field | Value |
 |---|---|
 | Panel | `tabubase-real-full-context-cached-openml-regression-8-v1` |
-| Source cache | `/home/cms/experiments/openml-ctr23-tabuf-v0/cache/data` |
+| Source cache | `openml-ctr23-tabuf-v0-cache` (machine-local path omitted) |
 | Parser | `scipy.io.arff.loadarff` / `liac-arff` |
 | Context | all train-partition rows and labels |
 | Query | all held-out predictors, one transductive episode |
@@ -81,10 +81,14 @@ over held-out predictors, while MLP/XGBoost are inductive fitted comparators.
 
 ## Receipts and hashes
 
-- Frozen receipt: [`real-full-context-cached-openml-3x3.json`](../../.local-runs/tabubase-codebook-b100-v1/expanded-real-cached-openml-2026-08-30/real-full-context-cached-openml-3x3.json), SHA-256 `3f8aa78f134d3f75d9b1cc5b96fa18dac81e3030a5b419cc751a95bc159bdd67`
-- Baseline receipt: [`baselines-full-context-cached-openml-3x3.json`](../../.local-runs/tabubase-codebook-b100-v1/expanded-real-cached-openml-2026-08-30/baselines-full-context-cached-openml-3x3.json), SHA-256 `078b3a1c33ac3454e1bf57b3823c27432e96233984500a51fa569e86bd6b2c4d`
-- Strict comparison: [`comparison-full-context-cached-openml-3x3.json`](../../.local-runs/tabubase-codebook-b100-v1/expanded-real-cached-openml-2026-08-30/comparison-full-context-cached-openml-3x3.json), SHA-256 `66e97a1fe1b694acf9d9c3f46a2978408d49e6b3b420669e9dc0428df9e0507f`
-- Artifact manifest: [`artifact-manifest.json`](../../.local-runs/tabubase-codebook-b100-v1/expanded-real-cached-openml-2026-08-30/artifact-manifest.json)
+- Frozen receipt ID: `cached-openml-frozen-full-context-3x3`, SHA-256 `3f8aa78f134d3f75d9b1cc5b96fa18dac81e3030a5b419cc751a95bc159bdd67`
+- Baseline receipt ID: `cached-openml-baselines-full-context-3x3`, SHA-256 `078b3a1c33ac3454e1bf57b3823c27432e96233984500a51fa569e86bd6b2c4d`
+- Strict comparison ID: `cached-openml-comparison-full-context-3x3`, SHA-256 `66e97a1fe1b694acf9d9c3f46a2978408d49e6b3b420669e9dc0428df9e0507f`
+- Artifact manifest ID: `cached-openml-full-context-manifest`, SHA-256 `f2194d4c4508b47598802f4b0b866d86228806e13205308f859c331b393a7d2b`
+
+These logical locators are also recorded in the
+[portable local-artifact index](local-artifact-index.json); artifacts are not
+bundled with this repository.
 
 Remote source-tree SHA recorded by both run receipts: `4e77c1dd59f2e6d294b119acb08c5615b3c100425dd48808f85378d74e050893`.
 The local worktree was dirty before this run and remains preserved; the local

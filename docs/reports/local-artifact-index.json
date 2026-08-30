@@ -1,0 +1,100 @@
+{
+  "schema_version": "tabu.report-local-artifact-index.v1",
+  "status": "local_unissued",
+  "availability": "artifacts_not_bundled_with_repository",
+  "locator_policy": "logical artifact ids only; machine-local workspace, cache, and execution paths are intentionally omitted",
+  "claim_boundary": "content identities for historical local diagnostics; not a formal receipt, artifact publication, accepted claim, or replay guarantee",
+  "reports": [
+    {
+      "report_id": "tabubase-real-frozen-icl-2026-08-29",
+      "report_path": "docs/reports/tabubase-real-frozen-icl-2026-08-29.md",
+      "execution_id": "tabubase-codebook-b100-v1",
+      "artifacts": [
+        {
+          "artifact_id": "real-frozen-icl-6datasets-3x3-v2",
+          "sha256": "7e9e3aa4944f9efdf65211b8034a69377ebae18fb8657bd71699d7c7027c4b09"
+        }
+      ]
+    },
+    {
+      "report_id": "tabubase-nominal-codebook-b100-2026-08-29",
+      "report_path": "docs/reports/tabubase-nominal-codebook-b100-2026-08-29.md",
+      "execution_id": "tabubase-codebook-b100-v1",
+      "artifacts": [
+        {"artifact_id": "pt-s1-seed-1729", "sha256": "f43dbc718eecd0ccaae582a802f89f0da66af51f00e0bb0cc8ee61da1a07ec77"},
+        {"artifact_id": "pt-s1-seed-2718", "sha256": "7621546dbe029c114055ef3fc86792f14784f7e305b514595f4019e3f9d46d62"},
+        {"artifact_id": "pt-s1-seed-31415", "sha256": "1eea6105b854d0a936d85de31356450057f4aee10fa06bdfaf496be63e0b4148"},
+        {"artifact_id": "three-seed-raw-classification-panel", "sha256": "dd2bb79bcb80706ec6d782c6db7607b58e73f8748adc70db47c44dd06b7d3c28"},
+        {"artifact_id": "three-seed-temperature-diagnostic", "sha256": "1a23d2b328f160b6583773aab4f13d53d7cb991c928066f10068cbc413e7b8ab"},
+        {"artifact_id": "fixed-k-heldout-icl-seed-1729", "sha256": "82e2856cb96358cc0f8701ca521138d6c7b9c30f761635ed91e9ce748bc2aa89"},
+        {"artifact_id": "variable-k-pt-s0-seed-1729", "sha256": "8f124c1c0b4c0ed5cfb0253db197c35ff84434f1f1f746e5cd93fc70d9be5a02"},
+        {"artifact_id": "variable-k-pt-s1-seed-1729", "sha256": "eb803ca62c5caede88c8f56b20f1c606537bffab7362d4d0fb80c63d1fff2cb1"},
+        {"artifact_id": "variable-k-heldout-icl-seed-1729", "sha256": "cb4e48cfdeef33b6c5d74c3764eccb88e385db85fc714d2af31d467e8087bb66"},
+        {"artifact_id": "variable-k-real-classification-seed-1729", "sha256": "0c5d3b635dfc27c34c9ca9c9c9ebf907a9ccae17f3139f0feb791be7e5a4c796"},
+        {"artifact_id": "variable-k-pt-s1-seed-2718", "sha256": "bfee5218e635612b524fd2b25569e318ab62b2867c4fbbf725ed14baa15cdcdd"},
+        {"artifact_id": "variable-k-pt-s1-seed-31415", "sha256": "7ac3f697f4cf734b4c13ab64c71f9a084f3b76496d22210c98e069353a477769"},
+        {"artifact_id": "variable-k-common-world-icl-seed-2718", "sha256": "cfb82b0fb3cb5d5bf2cc819395336dddf4e0d968192eb6008d5065d85648deef"},
+        {"artifact_id": "variable-k-common-world-icl-seed-31415", "sha256": "823bc862c5626b994ee944c4914ff6ad6c41dc9f753366c315cd18ee33d32e01"},
+        {"artifact_id": "variable-k-three-seed-clustered-icl", "sha256": "afea37d6ff06f79cadb29b16d1c77259a30db1991228a7919de89177dddeae21"},
+        {"artifact_id": "variable-k-three-seed-real-classification", "sha256": "298c116b5ea5957b975003a98ff0ef59deaa666b1a0f9b265025a1a7430e7ca5"}
+      ]
+    },
+    {
+      "report_id": "tabubase-scale-transfer-2026-08-29",
+      "report_path": "docs/reports/tabubase-scale-transfer-2026-08-29.md",
+      "execution_id": "tabubase-scale-v1",
+      "artifacts": [
+        {"artifact_id": "pt-s2-seed-1729-result", "sha256": "bbf22fda0ad00afd572d7c3172cce484194a0e3bf751139e0c748c47dd2f9c8d"},
+        {"artifact_id": "real-panel-pt-s2-seed-1729", "sha256": "5b23e2a21cea0e1ea76613907818bd7a3dd0969328a54e9072a79f8d26f34494"},
+        {"artifact_id": "real-panel-pt-s2-seed-1729-lr1e-4", "sha256": "b1265c27316cdc3b9d43e838cae1aae5431a0e52ab20bbebd51e9b00c5f9d7dd"},
+        {"artifact_id": "real-panel-classification-corrected-v2", "sha256": "4c602faa3b3b099afd231ed351244c0e928dec0ffc13fd299f8b737d3ade2711"},
+        {"artifact_id": "classification-r0-selection-v1", "sha256": "d8d37d7913f214e8167f0602624d14f78c43742250baed7887525f48f1bb27e8"},
+        {"artifact_id": "real-panel-classification-r0-selected-v1", "sha256": "b9d6b8fb340ed28d9cf057bedb294bc63f8adff20c568145b782d9f26f28d7a5"},
+        {"artifact_id": "real-panel-400", "sha256": "66a722e8ed69f881cc28e3835ba8a74bd96cf8e136b58abc5727954b7fdeecfd"}
+      ]
+    },
+    {
+      "report_id": "tabubase-expanded-synthetic-pretraining-2026-08-30",
+      "report_path": "docs/reports/tabubase-expanded-synthetic-pretraining-2026-08-30.md",
+      "execution_id": "tabubase-expanded-synthetic-v4",
+      "artifacts": [
+        {"artifact_id": "expanded-v4-three-seed-summary-v1", "sha256": "40825efb2a9af554780d29ba5ba88cebe942bf530ef889ff2db62489623cf52c"}
+      ]
+    },
+    {
+      "report_id": "tabubase-real-full-context-frozen-icl-2026-08-30",
+      "report_path": "docs/reports/tabubase-real-full-context-frozen-icl-2026-08-30.md",
+      "execution_id": "tabubase-real-full-context-v1",
+      "artifacts": [
+        {"artifact_id": "real-full-context-v4-manifest", "sha256": "9448bbf5010077a5316295fe0d06aeed0607e1dc229a64ad4be1fd02ed98b690"}
+      ]
+    },
+    {
+      "report_id": "tabubase-expanded-synthetic-long-context-2026-08-30",
+      "report_path": "docs/reports/tabubase-expanded-synthetic-long-context-2026-08-30.md",
+      "execution_id": "tabubase-expanded-synthetic-long-context-v1",
+      "artifacts": [
+        {"artifact_id": "expanded-synthetic-long-context-3checkpoints-manifest", "sha256": "d8dee96db081e4b5aa8597069f9c18d6c6d3aacdfdcdbdfdab4338a7a72cd0ac"}
+      ]
+    },
+    {
+      "report_id": "tabubase-cached-openml-regression-8-full-context-2026-08-30",
+      "report_path": "docs/reports/tabubase-cached-openml-regression-8-full-context-2026-08-30.md",
+      "execution_id": "tabubase-expanded-real-panel-v1",
+      "artifacts": [
+        {"artifact_id": "cached-openml-frozen-full-context-3x3", "sha256": "3f8aa78f134d3f75d9b1cc5b96fa18dac81e3030a5b419cc751a95bc159bdd67"},
+        {"artifact_id": "cached-openml-baselines-full-context-3x3", "sha256": "078b3a1c33ac3454e1bf57b3823c27432e96233984500a51fa569e86bd6b2c4d"},
+        {"artifact_id": "cached-openml-comparison-full-context-3x3", "sha256": "66e97a1fe1b694acf9d9c3f46a2978408d49e6b3b420669e9dc0428df9e0507f"},
+        {"artifact_id": "cached-openml-full-context-manifest", "sha256": "f2194d4c4508b47598802f4b0b866d86228806e13205308f859c331b393a7d2b"}
+      ]
+    },
+    {
+      "report_id": "tabubase-cached-openml-regression-8-finetune-2026-08-30",
+      "report_path": "docs/reports/tabubase-cached-openml-regression-8-finetune-2026-08-30.md",
+      "execution_id": "tabubase-real-finetune-openml8-v1",
+      "artifacts": [
+        {"artifact_id": "real-finetune-openml8-pt-s1-3x3", "sha256": "4b06f4d1a12e10376f14b07f52fd2e7b6faf57b34eae880c69ff5ee7fa655d38"}
+      ]
+    }
+  ]
+}

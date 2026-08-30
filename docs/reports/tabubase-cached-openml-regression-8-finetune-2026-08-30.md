@@ -1,9 +1,9 @@
 # TabUBase synthetic-pretraining → real-task fine-tuning: OpenML regression-8
 
-Date: 2026-08-30  
-Evidence status: `local_unissued`  
-Model: `tabu.cell.base@0.2.0`  
-Profile: `supervised.label_broadcast.v1`  
+Date: 2026-08-30
+Evidence status: `local_unissued`
+Model: `tabu.cell.base@0.2.0`
+Profile: `supervised.label_broadcast.v1`
 Tokenizer: `cell-tokenizer.v2`, source-scoped frozen codebook, `B=100`, seed `1729`
 
 ## Outcome
@@ -92,8 +92,10 @@ whereas MLP/XGBoost are ordinary inductive fits.
 
 ## Receipt and provenance
 
-- Receipt: [`real-finetune-openml8-pt-s1-3x3.json`](../../.local-runs/tabubase-codebook-b100-v1/real-finetune-openml8-2026-08-30/real-finetune-openml8-pt-s1-3x3.json), SHA-256 `4b06f4d1a12e10376f14b07f52fd2e7b6faf57b34eae880c69ff5ee7fa655d38`
-- Remote run root: `/home/cms/tabubase-eval/20260830-real-finetune-openml8-v1`
+- Receipt ID: `real-finetune-openml8-pt-s1-3x3` in the
+  [portable local-artifact index](local-artifact-index.json), SHA-256
+  `4b06f4d1a12e10376f14b07f52fd2e7b6faf57b34eae880c69ff5ee7fa655d38`
+- Execution ID: `tabubase-real-finetune-openml8-v1` (machine-local root omitted)
 - Remote physical host: `dgx2` / `spark-b5b3`
 - Runtime: Docker `wehub/ml-gpu:20260712`, Python 3.12.3, torch `2.12.0.dev20260322+cu130`, scikit-learn `1.8.0`, XGBoost `3.3.0`, CUDA device
 - Remote source snapshot SHA recorded in receipt: `9527494510ac789f0ec158b627cdf41e2332a80bc3c7a8c161415b892a8cc49b`

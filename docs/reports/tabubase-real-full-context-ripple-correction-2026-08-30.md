@@ -1,7 +1,7 @@
 # TabUBase real frozen-ICL estimand correction
 
-Date: 2026-08-30  
-Status: protocol and implementation corrected; full-context evaluation not run  
+Date: 2026-08-30
+Status: protocol and implementation corrected; full-context evaluation not run
 Evidence status: `local_unissued`
 
 ## Error and affected evidence
