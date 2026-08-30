@@ -18,10 +18,16 @@ from tabu_lab.contracts import canonical_hash
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def test_current_catalog_indexes_only_consolidated_model_sources() -> None:
+def test_current_catalog_indexes_consolidated_model_sources() -> None:
     catalog = build_catalog(ROOT)
 
-    assert [entry.entry_id for entry in catalog.entries] == ["model_contract:tabu.cell.base@0.2.0"]
+    assert [entry.entry_id for entry in catalog.entries] == [
+        "model_contract:tabu.cell.base@0.2.0",
+        "model_contract:tabu.query.base@0.1.0",
+        "model_contract:tabu.query.column@0.1.0",
+        "model_contract:tabu.query.row@0.1.0",
+        "model_contract:tabu.query.row_column@0.1.0",
+    ]
     assert catalog.formal_receipt_count == 0
     assert catalog.accepted_claim_count == 0
 
@@ -34,6 +40,10 @@ def test_catalog_json_and_html_are_deterministic_bounded_projections() -> None:
     assert "catalog projection; not evidence or claim acceptance" in html
     assert "Formal receipts: 0;\naccepted claims: 0" in html
     assert "tabu.cell.base@0.2.0" in html
+    assert "tabu.query.base@0.1.0" in html
+    assert "tabu.query.row@0.1.0" in html
+    assert "tabu.query.column@0.1.0" in html
+    assert "tabu.query.row_column@0.1.0" in html
 
 
 def test_catalog_rejects_tampered_source_tree_hash() -> None:

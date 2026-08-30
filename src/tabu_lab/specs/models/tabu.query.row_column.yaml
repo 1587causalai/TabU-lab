@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "tabu.query.row_column",
+  "contract_version": "0.1.0",
+  "display_name": "TabURC (table-cell-as-query, heterogeneous row and column axes)",
+  "upstream": {
+    "repository": "TabU/latex/model-factory",
+    "path": "../latex/model-factory/table-cell-as-query-models/TabURC/main.tex",
+    "sha256": "a00318c41e4758f4f449b81e5b2c40e41f18d0af00b488f5562c45177ffd9418",
+    "semantic_source_tree_sha256": "c4c75a5e68870512d2054118cf57f5cac688743c1cb3430a19110af84535c6ae",
+    "source_manifest": "pkg://tabu_lab.specs/model-factory-source-manifest.json#contracts/tabu.query.row_column",
+    "readonly": true,
+    "observed_at": "2026-08-30",
+    "license_boundary": "Metadata-only reference: upstream TeX remains readonly and is not redistributed by this manifest."
+  },
+  "carrier": {
+    "family": "tabu.table_cell_as_query",
+    "cell_role": "query",
+    "row_axis": "heterogeneous",
+    "column_axis": "heterogeneous",
+    "unit_semantics": "abstract_axis_roles_with_row_and_column_unit_tokens",
+    "shape": "(N+K) x (M+K) x d",
+    "specials": "row and column unit tokens; cross-corner fixed zero"
+  },
+  "dynamics": {
+    "family": "query_axis_three_omab",
+    "source_contract": "ordinary cells follow Base; row and column unit tokens are receiver-only; cross-corner is neither source nor receiver",
+    "null_contract": "exact-zero closure",
+    "label_broadcast": "supervised profile only; label marker is not truth"
+  },
+  "readout": {
+    "geometry": "concat(row-unit projection U_r c_ra, column-unit projection F_a c_ra) in R^(2K)",
+    "response_mechanism": "row_column_concat",
+    "support": "same-feature completion or same-label context query cells",
+    "numeric_terminal": "default local-linear; NW nested baseline",
+    "numeric_prediction_scale": "context-standardized hat-tilde-y; raw-unit inverse projection is auxiliary only",
+    "categorical_terminal": "NW probability mass on declared domain",
+    "no_support": "typed no-support"
+  },
+  "loss": {
+    "truth_entry": "Step 5 only",
+    "numeric": "MSE in the Step-1 context-standardized space using the emitted mean and scale",
+    "target_families": ["artificial_mask_completion", "supervised_single_response"]
+  },
+  "interfaces": {
+    "compile": "typed partially observed table whose cells are semantic queries and whose two axes have explicit heterogeneous tokens",
+    "forward": "truth-free query predictions plus trace; explicit profile required",
+    "train": "truth supplied only through the loss sidecar",
+    "infer": "profile-gated artificial-mask completion or single-response query labels"
+  },
+  "capabilities": [
+    "table_cell_as_query",
+    "heterogeneous_row_axis",
+    "heterogeneous_column_axis",
+    "row_column_concat",
+    "artificial_mask_completion",
+    "supervised_single_response",
+    "mixed_numeric_categorical",
+    "exact_zero_closure"
+  ],
+  "maturity": {
+    "source_contract": "factory_source",
+    "stage": "design_open",
+    "contract": "design_open",
+    "implementation": "design_open",
+    "evidence": "design_open",
+    "build_state": "design_open"
+  },
+  "experimental_defaults": {
+    "family_id": "tabu.table_cell_as_query",
+    "cell_role": "query",
+    "row_axis_mode": "heterogeneous",
+    "column_axis_mode": "heterogeneous",
+    "geometry": "row_column_concat",
+    "response_mechanism": "row_column_concat",
+    "profile_id": "completion.artificial_mask.v1",
+    "profiles": {
+      "completion.artificial_mask.v1": {"target_origin": "artificial_mask", "label_broadcast": false, "response_columns": 0, "natural_missing_inference": false},
+      "supervised.label_broadcast.v1": {"target_origin": "query", "label_broadcast": true, "response_columns": 1, "label_cells_write_other_labels": false, "natural_missing_inference": false}
+    },
+    "row_token_bank": "explicit heterogeneous row-unit tokens",
+    "column_token_bank": "explicit heterogeneous column-unit tokens",
+    "cross_corner": "exact_zero",
+    "numeric_terminal": "local_linear",
+    "numeric_prediction_scale": "context_standardized",
+    "feature_identity": "forbidden",
+    "column_unit_is_feature_identity": false,
+    "label_broadcast": "explicit step_3 module profile-gated",
+    "reference_backend": "query_family_runtime_pending"
+  },
+  "known_open": [
+    {"id": "row_column_token_carrier_runtime", "question": "Freeze the executable augmented carrier, both token source/receiver masks, and exact-zero corner closure before enabling the builder.", "blocking_build": true},
+    {"id": "row_column_token_width", "question": "Freeze whether K_row and K_column may differ; the current source defaults to equal K and 2K output.", "blocking_build": true},
+    {"id": "row_column_special_policy", "question": "Owner may revise special source policy or split row/column widths in a later contract version.", "blocking_build": false}
+  ],
+  "alternatives": [
+    {"id": "query_specific_row_column_adapter", "description": "Implement the direct-sum row/column carrier and projection through query-specific adapters without inheriting Axis-B identity.", "status": "first_alternative"}
+  ],
+  "kill": [
+    {"id": "truth_leakage", "condition": "Changing query truth changes Steps 1-4.", "evidence": "truth-substitution invariance test"},
+    {"id": "query_unit_reversal", "condition": "Runtime identifies a cell as semantic Unit or W as Unit.", "evidence": "query-role and identity-bound trace inspection"},
+    {"id": "cross_corner_leakage", "condition": "The row/column cross-corner becomes a source or receiver.", "evidence": "corner zero and source-mask audit"}
+  ],
+  "exit": [
+    {"id": "carrier_shape", "condition": "Every layer preserves (N+K) x (M+K) x d and the cross-corner remains zero.", "evidence": "shape and zero-corner trace"},
+    {"id": "direct_sum_projection", "condition": "Every target coordinate is the concat of row and column projections against c_ra.", "evidence": "geometry and readout trace"},
+    {"id": "axis_growth_seam", "condition": "The public forward envelope remains identical to QueryBase while both axes change.", "evidence": "Base/RC typed family probe"}
+  ]
+}

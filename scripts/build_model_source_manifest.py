@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Hash the readonly TabUBase source closure without vendoring its contents."""
+"""Hash readonly TabU model-factory source closures without vendoring contents."""
 
 from __future__ import annotations
 
@@ -15,7 +15,13 @@ OUTPUTS = (
     ROOT / "specs" / "model-factory-source-manifest.json",
     ROOT / "src" / "tabu_lab" / "specs" / "model-factory-source-manifest.json",
 )
-ENTRYPOINT = "table-cell-as-unit-models/TabUBase/main.tex"
+ENTRYPOINTS = {
+    "tabu.cell.base": "table-cell-as-unit-models/TabUBase/main.tex",
+    "tabu.query.base": "table-cell-as-query-models/TabUBase/main.tex",
+    "tabu.query.row": "table-cell-as-query-models/TabUR/main.tex",
+    "tabu.query.column": "table-cell-as-query-models/TabUC/main.tex",
+    "tabu.query.row_column": "table-cell-as-query-models/TabURC/main.tex",
+}
 INPUT_PATTERN = re.compile(r"\\(?:input|include)\{([^}]+)\}")
 GRAPHIC_PATTERN = re.compile(r"\\includegraphics(?:\[[^]]*\])?\{([^}]+)\}")
 
@@ -97,20 +103,21 @@ def build_payload() -> dict[str, object]:
         raise FileNotFoundError(
             "readonly model-factory source is unavailable; the checked manifest remains usable"
         )
-    entrypoint = FACTORY / ENTRYPOINT
-    semantic_sources = source_closure(entrypoint)
+    contracts: dict[str, object] = {}
+    for contract_id, entrypoint_name in ENTRYPOINTS.items():
+        entrypoint = FACTORY / entrypoint_name
+        semantic_sources = source_closure(entrypoint)
+        contracts[contract_id] = {
+            "entrypoint": entrypoint_name,
+            "entrypoint_sha256": sha256(entrypoint),
+            "semantic_source_closure": semantic_sources,
+            "semantic_source_tree_sha256": content_hash(semantic_sources),
+        }
     return {
         "schema_version": "tabu-lab.model-factory-source-manifest.v1",
         "observed_at": "2026-08-30",
-        "scope": "TabUBase entrypoint plus recursive TeX and graphics include closure",
-        "contracts": {
-            "tabu.cell.base": {
-                "entrypoint": ENTRYPOINT,
-                "entrypoint_sha256": sha256(entrypoint),
-                "semantic_source_closure": semantic_sources,
-                "semantic_source_tree_sha256": content_hash(semantic_sources),
-            }
-        },
+        "scope": "TabU query-family entrypoints plus recursive TeX and graphics include closures",
+        "contracts": contracts,
     }
 
 

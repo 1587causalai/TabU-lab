@@ -205,7 +205,12 @@ def _local_linear_values(
         centered_x,
         centered_y,
     )
-    slope = torch.linalg.solve(covariance, cross.unsqueeze(-1)).squeeze(-1)
+    # Flatten the leading batch/receiver/feature axes before solving.  Besides
+    # being equivalent to the dense batched solve, this avoids an MPS
+    # ``lu_solve`` shape bug for rank-5 covariance tensors.
+    flat_covariance = covariance.reshape(-1, k, k)
+    flat_cross = cross.reshape(-1, k, 1)
+    slope = torch.linalg.solve(flat_covariance, flat_cross).reshape_as(cross)
     prediction = mean_y - (slope * mean_x).sum(dim=-1)
     return torch.where(available, prediction, torch.zeros_like(prediction)).to(source_values.dtype)
 

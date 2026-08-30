@@ -28,6 +28,46 @@ tree through the public and packaged `model-factory-source-manifest.json`. The
 first-public-anchor authority decision is recorded in
 `docs/decisions/tabubase-0.2.0-source-authority.md`.
 
+## Axis-C query family
+
+The query-role family is registered under independent contract IDs:
+
+- `tabu.query.base@0.1.0` — the first executable QueryBase anchor; both axes are
+  homogeneous and the response geometry is global $z=Wc$.
+- `tabu.query.row@0.1.0` — the first heterogeneous row concrete family
+  (TabUR), with explicit row-unit token bank and row projection geometry.
+- `tabu.query.column@0.1.0` and `tabu.query.row_column@0.1.0` — source-bound
+  `design_open` contracts. They remain fail-closed until their axis carrier,
+  token-bank, and source/receiver policies are frozen.
+
+Select the executable query anchor through the typed registry boundary:
+
+```python
+from tabu_lab.registry import build_model
+
+result = build_model(
+    "tabu.query.base",
+    profile="completion.artificial_mask.v1",
+)
+model = result.model if result.executable else None
+```
+
+Changing the `contract_id` to one of the not-yet-buildable sibling contracts
+intentionally returns `DESIGN_OPEN`; it does not silently construct the Base
+runtime or reuse its checkpoint identity.
+
+Build TabUR explicitly with the supervised or completion profile:
+
+```python
+from tabu_lab.models import build_model
+
+model = build_model(
+    "tabu.query.row",
+    profile="supervised.label_broadcast.v1",
+    row_token_count=4,
+)
+```
+
 Run the focused contract gate with:
 
 ```bash
