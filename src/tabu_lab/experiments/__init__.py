@@ -43,6 +43,12 @@ from .query_row_real_coordinates import (
     query_row_real_regression_loss,
     task_scale_to_raw,
 )
+from .query_row_r3_diagnosis import (
+    DEFAULT_R3_DATASETS,
+    DEFAULT_R3_SEEDS,
+    DEFAULT_R3_UPDATES,
+    run_query_row_r3_diagnosis,
+)
 from .query_row_supervised_synthetic import (
     QueryRowSupervisedSyntheticEpisode,
     make_query_row_supervised_synthetic_episode,
@@ -81,6 +87,10 @@ __all__ = [
     "numeric_raw_prediction_from_public",
     "query_row_real_regression_loss",
     "task_scale_to_raw",
+    "DEFAULT_R3_DATASETS",
+    "DEFAULT_R3_SEEDS",
+    "DEFAULT_R3_UPDATES",
+    "run_query_row_r3_diagnosis",
     "QueryRowFrozenICLRecord",
     "QueryRowFrozenICLResult",
     "run_query_row_frozen_icl",
