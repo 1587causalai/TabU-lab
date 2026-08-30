@@ -10,11 +10,20 @@ from .query_row_frozen_icl import (
     QueryRowFrozenICLResult,
     run_query_row_frozen_icl,
 )
+from .query_row_icl_threshold import (
+    LINEAR_REGRESSION_BASELINE_ID,
+    LINEAR_REGRESSION_BASELINE_SPEC,
+    QueryRowLinearICLContextSummary,
+    QueryRowLinearICLRecord,
+    QueryRowLinearICLThresholdResult,
+    run_query_row_linear_icl_threshold,
+)
 from .query_row_pretraining import (
     QueryRowPretrainingResult,
     load_query_row_pretrain_checkpoint,
     run_query_row_synthetic_pretraining,
     save_query_row_pretrain_checkpoint,
+    train_query_row_synthetic_pretraining_model,
 )
 from .query_row_real_benchmark import (
     QueryRowRealBenchmarkResult,
@@ -58,6 +67,12 @@ __all__ = [
     "QueryRowFrozenICLRecord",
     "QueryRowFrozenICLResult",
     "run_query_row_frozen_icl",
+    "LINEAR_REGRESSION_BASELINE_ID",
+    "LINEAR_REGRESSION_BASELINE_SPEC",
+    "QueryRowLinearICLContextSummary",
+    "QueryRowLinearICLRecord",
+    "QueryRowLinearICLThresholdResult",
+    "run_query_row_linear_icl_threshold",
     "QueryRowSupervisedSyntheticEpisode",
     "make_query_row_supervised_synthetic_episode",
     "supervised_synthetic_episode_loss",
@@ -68,4 +83,5 @@ __all__ = [
     "load_query_row_pretrain_checkpoint",
     "run_query_row_synthetic_pretraining",
     "save_query_row_pretrain_checkpoint",
+    "train_query_row_synthetic_pretraining_model",
 ]

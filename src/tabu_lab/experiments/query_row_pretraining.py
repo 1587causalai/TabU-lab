@@ -202,7 +202,7 @@ def load_query_row_pretrain_checkpoint(model: Any, path: Path) -> None:
     )
 
 
-def run_query_row_synthetic_pretraining(
+def train_query_row_synthetic_pretraining_model(
     *,
     profile: str = "completion.artificial_mask.v1",
     seed: int = 1729,
@@ -213,8 +213,13 @@ def run_query_row_synthetic_pretraining(
     row_token_count: int = 4,
     device: str | torch.device = "cpu",
     output: Path | None = None,
-) -> QueryRowPretrainingResult:
-    """Train a fresh TabUR model on independent synthetic worlds."""
+) -> tuple[Any, QueryRowPretrainingResult]:
+    """Train a fresh TabUR model on independent synthetic worlds.
+
+    The model is returned alongside its diagnostic result so a caller can run
+    a held-out frozen-ICL gate without serializing and reloading between the
+    training and evaluation boundaries.
+    """
 
     if rows < 3 or worlds <= 0 or steps <= 0 or row_token_count <= 0:
         raise ValueError("rows, worlds, steps and row_token_count must be positive")
@@ -270,7 +275,7 @@ def run_query_row_synthetic_pretraining(
         checkpoint_info = save_query_row_pretrain_checkpoint(model, output, metadata=metadata)
     if not math.isfinite(final_loss):
         raise RuntimeError("TabUR synthetic pretraining did not complete")
-    return QueryRowPretrainingResult(
+    result = QueryRowPretrainingResult(
         status="pass" if final_loss < initial_loss else "diagnostic_complete_no_decrease",
         evidence_status="local_unissued",
         claim_boundary=(
@@ -294,6 +299,16 @@ def run_query_row_synthetic_pretraining(
         final_loss=final_loss,
         **checkpoint_info,
     )
+    return model, result
+
+
+def run_query_row_synthetic_pretraining(
+    **kwargs: Any,
+) -> QueryRowPretrainingResult:
+    """Train TabUR synthetic worlds and return only the diagnostic result."""
+
+    _, result = train_query_row_synthetic_pretraining_model(**kwargs)
+    return result
 
 
 __all__ = [
@@ -301,4 +316,5 @@ __all__ = [
     "load_query_row_pretrain_checkpoint",
     "run_query_row_synthetic_pretraining",
     "save_query_row_pretrain_checkpoint",
+    "train_query_row_synthetic_pretraining_model",
 ]
