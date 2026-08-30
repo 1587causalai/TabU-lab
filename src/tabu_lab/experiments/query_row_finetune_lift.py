@@ -214,6 +214,13 @@ def run_query_row_finetune_lift(
     )
     records: list[QueryRowFinetuneLiftRecord] = []
     model_spec_hash = pretrained.model_spec_hash
+    # Keep a detached CPU snapshot as the transfer boundary.  Loading an MPS
+    # state_dict directly into a second MPS module is not stable across
+    # repeated runs on current PyTorch builds.
+    pretrained_state = {
+        name: tensor.detach().cpu().clone()
+        for name, tensor in pretrained.state_dict().items()
+    }
     for offset, dataset_id in enumerate(dataset_ids):
         task_seed = seed + offset
         task = prepare_real_task(
@@ -229,7 +236,7 @@ def run_query_row_finetune_lift(
             row_token_count=row_token_count,
             device=resolved_device,
         )
-        pretrained_arm.load_state_dict(pretrained.state_dict())
+        pretrained_arm.load_state_dict(pretrained_state)
         scratch_arm = _new_row_model(
             seed=seed + 1000 + offset,
             row_token_count=row_token_count,
