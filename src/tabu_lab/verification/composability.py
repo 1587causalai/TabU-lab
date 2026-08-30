@@ -152,6 +152,10 @@ def _non_target_identity(model: TabUCellBaseModel, expected_axis: str) -> dict[s
     identity = dict(model.checkpoint_identity())
     identity.pop("variant_hash")
     identity.pop("variant_ref")
+    identity.pop("component_manifest_hash", None)
+    identity.pop("component_composition_hash", None)
+    identity.pop("component_spec_hashes", None)
+    identity.pop("experimental_component_axes", None)
     if expected_axis == "tokenizer":
         for key in _TOKENIZER_IDENTITY_KEYS:
             identity.pop(key, None)
@@ -172,7 +176,8 @@ def _prediction_is_bound_to_model(
     """Require an emitted trace and exact semantic variant identity."""
 
     trace = prediction.trace
-    return bool(
+    component_identity = model._component_manifest_identity()
+    base_identity_bound = bool(
         prediction.model_id == model.model_id
         and prediction.contract_version == model.contract_version
         and prediction.metadata.get("variant_hash") == model.variant_ref.semantic_hash
@@ -182,6 +187,12 @@ def _prediction_is_bound_to_model(
         and trace.model_id == model.model_id
         and trace.metadata.get("variant_hash") == model.variant_ref.semantic_hash
         and trace.metadata.get("profile_id") == model.profile.value
+    )
+    return bool(
+        base_identity_bound
+        and all(prediction.metadata.get(key) == value for key, value in component_identity.items())
+        and trace is not None
+        and all(trace.metadata.get(key) == value for key, value in component_identity.items())
     )
 
 

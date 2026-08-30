@@ -18,6 +18,7 @@ from .composability import SubstitutionStatus, assess_tabu_base_substitution
 class TabUBaseVerificationStage(StrEnum):
     COMPONENT_CORRECTNESS = "component_correctness"
     COMPONENT_EVOLVABILITY = "component_evolvability"
+    COMPONENT_EXTENSION = "component_extension"
 
 
 class TabUBaseVerificationStatus(StrEnum):
@@ -180,6 +181,76 @@ def verify_tabu_base_component_evolvability(
     )
 
 
+def verify_tabu_base_component_extension(
+    *,
+    reference_model: TabUCellBaseModel,
+    candidate_model: TabUCellBaseModel,
+    reference_prediction: PredictionBundle,
+    candidate_prediction: PredictionBundle,
+    expected_axis: str,
+) -> TabUBaseLocalVerification:
+    """Verify one registered experimental component without promoting ModelSpec maturity."""
+
+    reference = inspect_tabu_base_composition(reference_model)
+    candidate = inspect_tabu_base_composition(candidate_model)
+    assessment = assess_tabu_base_substitution(
+        reference_model=reference_model,
+        candidate_model=candidate_model,
+        reference_prediction=reference_prediction,
+        candidate_prediction=candidate_prediction,
+        expected_axis=expected_axis,
+    )
+    resolved = candidate_model.component_composition
+    extension_bound = bool(
+        resolved is not None
+        and resolved.experimental_axes == (expected_axis,)
+        and candidate.declaration_status == "component_spec_experimental"
+    )
+    checks = (
+        VerificationCheck(
+            check_id="one_registered_axis_changed",
+            passed=assessment.changed_axes == (expected_axis,),
+        ),
+        VerificationCheck(check_id="extension_spec_bound", passed=extension_bound),
+        VerificationCheck(check_id="forward_interface_stable", passed=assessment.interface_stable),
+        VerificationCheck(check_id="predictions_bound", passed=assessment.predictions_bound),
+        VerificationCheck(
+            check_id="input_evidence_matched",
+            passed=assessment.input_evidence_matched,
+        ),
+        VerificationCheck(
+            check_id="non_target_config_stable",
+            passed=assessment.non_target_config_stable,
+        ),
+        VerificationCheck(
+            check_id="variant_identity_changed",
+            passed=assessment.variant_identity_changed,
+        ),
+    )
+    status = (
+        TabUBaseVerificationStatus.PASS
+        if all(check.passed for check in checks)
+        else TabUBaseVerificationStatus.FAIL
+    )
+    return TabUBaseLocalVerification(
+        schema_version="tabu.tabubase-local-verification.v1",
+        evidence_status="local_unissued",
+        stage=TabUBaseVerificationStage.COMPONENT_EXTENSION,
+        contract_id="tabu.cell.base",
+        contract_version="0.2.0",
+        model_spec_hash=reference.model_spec_hash,
+        profile_id=reference.profile_id,
+        reference_composition_hash=reference.composition_hash,
+        candidate_composition_hash=candidate.composition_hash,
+        checks=checks,
+        status=status,
+        claim_boundary=(
+            "local component verification only; not a training result, formal receipt, "
+            "or accepted claim"
+        ),
+    )
+
+
 __all__ = [
     "TabUBaseLocalVerification",
     "TabUBaseVerificationStage",
@@ -187,4 +258,5 @@ __all__ = [
     "VerificationCheck",
     "verify_tabu_base_component_correctness",
     "verify_tabu_base_component_evolvability",
+    "verify_tabu_base_component_extension",
 ]

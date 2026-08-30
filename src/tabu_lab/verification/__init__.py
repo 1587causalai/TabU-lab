@@ -15,6 +15,7 @@ from .tabubase import (
     VerificationCheck,
     verify_tabu_base_component_correctness,
     verify_tabu_base_component_evolvability,
+    verify_tabu_base_component_extension,
 )
 
 __all__ = [
@@ -22,12 +23,13 @@ __all__ = [
     "SubstitutionAssessment",
     "SubstitutionStatus",
     "TabUBaseComposition",
-    "assess_tabu_base_substitution",
-    "inspect_tabu_base_composition",
     "TabUBaseLocalVerification",
     "TabUBaseVerificationStage",
     "TabUBaseVerificationStatus",
     "VerificationCheck",
+    "assess_tabu_base_substitution",
+    "inspect_tabu_base_composition",
     "verify_tabu_base_component_correctness",
     "verify_tabu_base_component_evolvability",
+    "verify_tabu_base_component_extension",
 ]

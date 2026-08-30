@@ -33,7 +33,7 @@
 - 模型级 `BuilderRegistry` 可以增加新的 namespaced builder；
 - canonical `tabu.cell.base` builder 受保护，扩展不能覆盖它冒充基准实现。
 
-这一结果是**有边界的可组合性通过**，不是任意第三方组件注入能力。未来若需要开放自定义 tokenizer/dynamics/readout factory，应使用新的、可验证的 component identity contract，而不是向 `0.2.0` 构造器塞入任意 callable。
+内置 alternatives 的验证仍是 ModelSpec 内部的**有边界可组合性**。新的实验组件通过 [Component extension contract](component-extension-contract.md) 接入：它必须具有版本化 ComponentSpec、源码身份、受保护 registry 和 typed manifest，不能向 `0.2.0` 构造器塞入匿名 callable，也不能自动提升成 ModelSpec alternative。
 
 验证结果使用严格 schema，并固定标记为 `local_unissued`；它不会自动升级成 formal receipt 或 accepted claim。
 

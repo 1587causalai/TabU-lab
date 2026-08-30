@@ -48,6 +48,7 @@ class TabUBaseComposition:
     supervision_route: str
     truth_boundary: str
     declaration_status: str
+    registry_composition_hash: str
 
     def __post_init__(self) -> None:
         for name in self.__dataclass_fields__:
@@ -166,6 +167,63 @@ def resolve_tabu_base_composition(spec: Any, model: Any) -> TabUBaseComposition:
     if type(declared_broadcast) is not bool or declared_broadcast != model.label_broadcast:
         raise ValueError("runtime supervision route disagrees with the ModelSpec profile")
 
+    resolved_components = getattr(model, "component_composition", None)
+    if resolved_components is not None:
+        from .component_registry import CANONICAL_COMPONENTS, ComponentRegistry
+
+        component_registry = getattr(model, "component_registry", None)
+        if not isinstance(component_registry, ComponentRegistry):
+            raise TypeError("resolved composition requires its ComponentRegistry")
+        component_registry.assert_extends(CANONICAL_COMPONENTS)
+        component_registry.validate_runtime(
+            resolved_components,
+            {
+                "tokenizer": model.tokenizer,
+                "dynamics": model.dynamics,
+                "readout": model.readout,
+            },
+        )
+        manifest = resolved_components.manifest
+        tokenizer_id = {
+            "tabu.tokenizer.cell@1.0.0": "cell-tokenizer.v1",
+            "tabu.tokenizer.cell@2.0.0": "cell-tokenizer.v2",
+        }.get(manifest.tokenizer.spec_ref, manifest.tokenizer.spec_ref)
+        dynamics_id = {
+            "tabu.dynamics.cell-unit-three-omab@1.0.0": "cell_unit_three_omab",
+        }.get(manifest.dynamics.spec_ref, manifest.dynamics.spec_ref)
+        numeric_readout_id = {
+            "tabu.readout.same-column-local-linear@1.0.0": "same_column.local_linear",
+            "tabu.readout.same-column-nadaraya-watson@1.0.0": (
+                "same_column.nadaraya_watson"
+            ),
+        }.get(manifest.readout.spec_ref, manifest.readout.spec_ref)
+        authoritative = all(
+            component_registry.is_authoritative(ref, CANONICAL_COMPONENTS)
+            for ref in (manifest.tokenizer, manifest.dynamics, manifest.readout)
+            if ref.spec_ref
+        )
+        if resolved_components.experimental_axes:
+            declaration_status = "component_spec_experimental"
+        elif authoritative:
+            declaration_status = "model_spec_declared"
+        else:
+            declaration_status = "component_registry_untrusted"
+    else:
+        numeric_readout_id = f"same_column.{numeric_terminal}"
+
+    registry_composition_hash = (
+        resolved_components.composition_hash
+        if resolved_components is not None
+        else canonical_hash(
+            {
+                "schema": "tabu.legacy-derived-components.v1",
+                "tokenizer": tokenizer_id,
+                "dynamics": dynamics_id,
+                "readout": numeric_readout_id,
+            }
+        )
+    )
+
     return TabUBaseComposition(
         schema_version="tabu.tabubase-components.v1",
         contract_id=spec.contract_id,
@@ -175,10 +233,11 @@ def resolve_tabu_base_composition(spec: Any, model: Any) -> TabUBaseComposition:
         unit_semantics="table_cell_as_unit",
         tokenizer=tokenizer_id,
         dynamics=dynamics_id,
-        readout=f"same_column.{numeric_terminal}",
+        readout=numeric_readout_id,
         supervision_route="label_broadcast.v1" if model.label_broadcast else "none",
         truth_boundary="loss_sidecar_step_5_only",
         declaration_status=declaration_status,
+        registry_composition_hash=registry_composition_hash,
     )
 
 

@@ -191,3 +191,52 @@ Reviewed commit: `886cae9bcfca94190c0c8e63607ba55dfabd37ec`.
 
 The independent review reported no P0 or P1 finding. These corrections remain within
 the first-station identity boundary and do not add training or scientific evaluation.
+
+## Governance station 2 — component extension contract
+
+- Main base: `ff796162c7874b30556cc9cb8c47c5f17c9ee942`
+- Scope: `ComponentSpec → protected registry → typed manifest → resolved modules → identity-bound local verification`
+- Compatibility boundary: the default `tabu.cell.base@0.2.0` variant and checkpoint
+  identity remain unchanged
+- Evidence boundary: experimental extensions are `local_unissued` and are not ModelSpec
+  alternatives or accepted claims
+
+This station adds a controlled growth seam for tokenizer, dynamics, and readout roles.
+It activates no historical broad model family and does not promote the code-only MAB
+ablation. Component source identity covers the direct runtime class; repository-level
+source closure remains a separate run/receipt responsibility.
+
+- **HIST-002 — active-builder conflict:** remains `partially_resolved_tabubase_only`.
+  TabUBase now has a namespaced component extension boundary, but historical broad
+  model-family builders remain staged and unresolved.
+- **HIST-015 — verification export overlap:** remains
+  `partially_resolved_tabubase_only`. A typed local component-extension verification is
+  now active; historical broad MVE exports remain staged and unresolved.
+
+Independent-review findings for this station are registered below after review and are
+not repaired silently.
+
+### Independent review findings for governance station 2
+
+Reviewed commit: `3f3dbf7c686a64f1417be154c7c079a633dd4bcc`.
+
+- **GOV2-001 — canonical registry trust root:** `resolved_in_follow_up`. Builder-supplied
+  registries must preserve every exact canonical anchor; public registration accepts
+  experimental maturity only, and `model_spec_declared` is derived from authoritative
+  spec membership rather than an empty experimental-axis list.
+- **GOV2-002 — runtime/spec rebinding:** `resolved_in_follow_up`. Inspection now
+  re-resolves the attached manifest against its registry and requires every runtime
+  module to have the exact registered concrete type and current source identity.
+- **GOV2-003 — recursively immutable config:** `resolved_in_follow_up`. Component specs,
+  refs, manifests, and composition payloads recursively copy/freeze nested canonical
+  values; prediction binding also checks the complete component identity metadata.
+- **GOV2-004 — factory dependency identity:** `resolved_in_follow_up`. Factories must be
+  import-resolvable module-level functions. Their direct source, bytecode, referenced
+  concrete types/constants, and defaults are identity-bound and rechecked before every
+  build; helper functions, module objects, callable objects, and nonlocal closures are
+  rejected rather than incompletely hashed.
+- **GOV2-005 — export lint ordering:** `resolved_in_follow_up`. Public `__all__` exports
+  are sorted under the repository Ruff policy.
+
+The independent review reported no P0/P1 finding. The superseding commit receives a
+focused independent re-review before merge.

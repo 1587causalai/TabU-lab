@@ -44,28 +44,91 @@ def build_tabu_cell_base(**kwargs: Any) -> TabUCellBaseModel:
 
     options = dict(kwargs)
     config = _config_from_kwargs(options)
-    numeric_terminal = options.pop("numeric_terminal", "local_linear")
     if "profile" not in options:
         raise TypeError("tabu.cell.base@0.2.0 requires an explicit profile")
     profile = options.pop("profile")
     label_broadcast = options.pop("label_broadcast", None)
     label_broadcast_tau = float(options.pop("label_broadcast_tau", 1.0e-6))
-    nominal_tokenizer = options.pop("nominal_tokenizer", "episode_random_sphere")
-    nominal_codebook_size = options.pop("nominal_codebook_size", 100)
-    nominal_codebook_seed = options.pop("nominal_codebook_seed", 1729)
-    if options:
-        raise TypeError(f"unknown table-cell base builder options: {sorted(options)}")
-    model = _build_float32(
-        TabUCellBaseModel,
-        config,
-        numeric_terminal=numeric_terminal,
-        profile=profile,
-        label_broadcast=label_broadcast,
-        label_broadcast_tau=label_broadcast_tau,
-        nominal_tokenizer=nominal_tokenizer,
-        nominal_codebook_size=nominal_codebook_size,
-        nominal_codebook_seed=nominal_codebook_seed,
-    )
+    component_manifest = options.pop("component_manifest", None)
+    component_registry = options.pop("component_registry", None)
+    if component_manifest is None:
+        if component_registry is not None:
+            raise TypeError("component_registry requires an explicit component_manifest")
+        numeric_terminal = options.pop("numeric_terminal", "local_linear")
+        nominal_tokenizer = options.pop("nominal_tokenizer", "episode_random_sphere")
+        nominal_codebook_size = options.pop("nominal_codebook_size", 100)
+        nominal_codebook_seed = options.pop("nominal_codebook_seed", 1729)
+        if options:
+            raise TypeError(f"unknown table-cell base builder options: {sorted(options)}")
+        model = _build_float32(
+            TabUCellBaseModel,
+            config,
+            numeric_terminal=numeric_terminal,
+            profile=profile,
+            label_broadcast=label_broadcast,
+            label_broadcast_tau=label_broadcast_tau,
+            nominal_tokenizer=nominal_tokenizer,
+            nominal_codebook_size=nominal_codebook_size,
+            nominal_codebook_seed=nominal_codebook_seed,
+        )
+    else:
+        conflicting = sorted(
+            set(options)
+            & {
+                "numeric_terminal",
+                "nominal_tokenizer",
+                "nominal_codebook_size",
+                "nominal_codebook_seed",
+            }
+        )
+        if conflicting:
+            raise TypeError(
+                "component_manifest is the only component-selection authority; "
+                f"remove {conflicting}"
+            )
+        if options:
+            raise TypeError(f"unknown table-cell base builder options: {sorted(options)}")
+        from .component_registry import (
+            CANONICAL_COMPONENTS,
+            ComponentRegistry,
+            ComponentRole,
+            TabUBaseComponentManifest,
+        )
+
+        if not isinstance(component_manifest, TabUBaseComponentManifest):
+            raise TypeError("component_manifest must be a typed TabUBaseComponentManifest")
+        registry = CANONICAL_COMPONENTS if component_registry is None else component_registry
+        if not isinstance(registry, ComponentRegistry):
+            raise TypeError("component_registry must be a ComponentRegistry")
+        registry.assert_extends(CANONICAL_COMPONENTS)
+        composition = registry.resolve(component_manifest)
+        tokenizer = registry.build(
+            component_manifest.tokenizer,
+            expected_role=ComponentRole.TOKENIZER,
+            config=config,
+        )
+        dynamics = registry.build(
+            component_manifest.dynamics,
+            expected_role=ComponentRole.DYNAMICS,
+            config=config,
+        )
+        readout = registry.build(
+            component_manifest.readout,
+            expected_role=ComponentRole.READOUT,
+            config=config,
+        )
+        model = _build_float32(
+            TabUCellBaseModel,
+            config,
+            profile=profile,
+            label_broadcast=label_broadcast,
+            label_broadcast_tau=label_broadcast_tau,
+            _component_tokenizer=tokenizer,
+            _component_dynamics=dynamics,
+            _component_readout=readout,
+            _component_composition=composition,
+            _component_registry=registry,
+        )
     # The packaged ModelSpec is the semantic authority.  Every public build,
     # including direct ``build_model`` calls, must close the full binding to
     # the concrete runtime composition before it can escape the builder.

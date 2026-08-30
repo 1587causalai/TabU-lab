@@ -171,16 +171,49 @@ class TabUCellBaseModel(DenseReferenceModel):
         nominal_tokenizer: str = CellTokenizer.EPISODE_RANDOM_SPHERE_V1,
         nominal_codebook_size: int = 100,
         nominal_codebook_seed: int = 1729,
+        _component_tokenizer: nn.Module | None = None,
+        _component_dynamics: nn.Module | None = None,
+        _component_readout: nn.Module | None = None,
+        _component_composition: Any | None = None,
+        _component_registry: Any | None = None,
     ) -> None:
         config = config or ReferenceConfig()
         super().__init__(config)
-        self.tokenizer = CellTokenizer(
-            config,
-            marker="mask",
-            nominal_tokenizer=nominal_tokenizer,
-            nominal_codebook_size=nominal_codebook_size,
-            nominal_codebook_seed=nominal_codebook_seed,
+        supplied_components = (
+            _component_tokenizer,
+            _component_dynamics,
+            _component_readout,
+            _component_composition,
+            _component_registry,
         )
+        if any(value is not None for value in supplied_components) and not all(
+            value is not None for value in supplied_components
+        ):
+            raise ValueError("resolved component injection requires one complete composition")
+        if _component_tokenizer is None:
+            self.tokenizer = CellTokenizer(
+                config,
+                marker="mask",
+                nominal_tokenizer=nominal_tokenizer,
+                nominal_codebook_size=nominal_codebook_size,
+                nominal_codebook_seed=nominal_codebook_seed,
+            )
+            self.dynamics = CellUnitDynamics(config)
+            self.readout = PairUnitReadout(config, numeric_terminal=numeric_terminal)
+            self.component_composition = None
+            self.component_registry = None
+        else:
+            if not isinstance(_component_tokenizer, CellTokenizer):
+                raise TypeError("resolved tokenizer violates the TabUBase interface")
+            if not isinstance(_component_dynamics, CellUnitDynamics):
+                raise TypeError("resolved dynamics violates the TabUBase interface")
+            if not isinstance(_component_readout, PairUnitReadout):
+                raise TypeError("resolved readout violates the TabUBase interface")
+            self.tokenizer = _component_tokenizer
+            self.dynamics = _component_dynamics
+            self.readout = _component_readout
+            self.component_composition = _component_composition
+            self.component_registry = _component_registry
         self.nominal_tokenizer = self.tokenizer.nominal_tokenizer
         self.nominal_codebook_size = self.tokenizer.nominal_codebook_size
         self.nominal_codebook_seed = self.tokenizer.nominal_codebook_seed
@@ -211,8 +244,6 @@ class TabUCellBaseModel(DenseReferenceModel):
             raise ValueError(
                 "completion.artificial_mask.v1 requires the canonical label_broadcast_tau"
             )
-        self.dynamics = CellUnitDynamics(config)
-        self.readout = PairUnitReadout(config, numeric_terminal=numeric_terminal)
         semantic_payload = {
             "reference_config": _reference_config_payload(config),
             "profile_id": self.profile.value,
@@ -222,6 +253,10 @@ class TabUCellBaseModel(DenseReferenceModel):
             "numeric_terminal": self.readout.numeric_terminal,
             "ll_ridge": self.readout.ll_ridge,
         }
+        if self.component_composition is not None:
+            semantic_payload["component_composition_hash"] = (
+                self.component_composition.composition_hash
+            )
         semantic_config_hash = hashlib.sha256(
             json.dumps(semantic_payload, sort_keys=True, separators=(",", ":")).encode()
         ).hexdigest()
@@ -242,6 +277,18 @@ class TabUCellBaseModel(DenseReferenceModel):
         # the explicit unbound sentinel and callers cannot forge an approved
         # source identity through this constructor.
         self.variant_ref = expected_variant
+
+    def _component_manifest_identity(self) -> dict[str, Any]:
+        composition = self.component_composition
+        if composition is None:
+            return {}
+        payload = composition.as_dict()
+        return {
+            "component_manifest_hash": payload["manifest_hash"],
+            "component_composition_hash": composition.composition_hash,
+            "component_spec_hashes": payload["component_spec_hashes"],
+            "experimental_component_axes": composition.experimental_axes,
+        }
 
     def _validate_profile_input(self, inputs: Any) -> None:
         """Reject target-origin/profile mixtures before tokenization."""
@@ -455,6 +502,7 @@ class TabUCellBaseModel(DenseReferenceModel):
                 "contract_version": self.variant_ref.contract_version,
                 "variant_ref": self.variant_ref.as_dict(),
                 "variant_hash": self.variant_ref.semantic_hash,
+                **self._component_manifest_identity(),
                 **self.tokenizer_metadata,
                 "label_broadcast": self.label_broadcast,
                 "label_broadcast_tau": self.label_broadcast_tau,
@@ -482,6 +530,7 @@ class TabUCellBaseModel(DenseReferenceModel):
             "ll_ridge": getattr(self.readout, "ll_ridge", None),
             "bandwidth": self.config.routing_bandwidth,
             "variant_ref": self.variant_ref.as_dict(),
+            **self._component_manifest_identity(),
         }
         if self.tokenizer_metadata["tokenizer_version"] == "cell-tokenizer.v2":
             identity.update(
