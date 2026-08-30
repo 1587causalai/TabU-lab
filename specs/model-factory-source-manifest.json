@@ -1,0 +1,24 @@
+{
+  "contracts": {
+    "tabu.cell.base": {
+      "entrypoint": "table-cell-as-unit-models/TabUBase/main.tex",
+      "entrypoint_sha256": "e239b5f67e2fa55111c201b9497e5bf812b6997bc0e9cc2bf88a1c2d8d8f29a0",
+      "semantic_source_closure": {
+        "table-cell-as-unit-models/TabUBase/main.tex": "e239b5f67e2fa55111c201b9497e5bf812b6997bc0e9cc2bf88a1c2d8d8f29a0",
+        "table-cell-as-unit-models/fig/TabUBase/fig-axis-source.tex": "c7717f28aad9ee9d2a5f944ae5ea6f16a3ff209b508206b283bb1c3ed6fb3451",
+        "table-cell-as-unit-models/fig/TabUBase/fig-carrier.tex": "a54729fb0f356327db257b64dada58037fa054ee22e3b91f768dc4dbe17002e3",
+        "table-cell-as-unit-models/fig/TabUBase/fig-step5.tex": "dbb8949ea52ec5d1773c08258c2fa16feace4759037a904ccc35b291efb5698b",
+        "table-cell-as-unit-models/fig/shared/fig-label-broadcast.tex": "f0177a957e798bc5b3f6d3cf8f85e043952bc6fb7f5969a5c44fc480dd14327a",
+        "table-cell-as-unit-models/fig/shared/fig-oattention.tex": "2a70ef7546512461419b93689da28f60795a45abe11d1f1bf1571c61063fb25a",
+        "table-cell-as-unit-models/fig/shared/fig-omab.tex": "e6b944e001a0e82752df39daa592318862754421e437ebe6feb728eb5551ef3f",
+        "table-cell-as-unit-models/tex/family-style.tex": "a7d63c4ba9153e2f612efcad494aa2becee2595300535211de5a28dbdabe2115",
+        "table-cell-as-unit-models/tex/frag-label-broadcast.tex": "36229f672aa56c3d26f1a279275caaf665db4fe6fea65ea9172ba367ffdbe3d4",
+        "table-cell-as-unit-models/tex/frag-omab.tex": "8b9f12f96fc88e920a79698c0bfc2962a49759d17c2173d47308ff0a3ba963de"
+      },
+      "semantic_source_tree_sha256": "28ea55544184e18f23fb378b563b62224b190ecb912b34ab1545d82c33d7e7f2"
+    }
+  },
+  "observed_at": "2026-08-30",
+  "schema_version": "tabu-lab.model-factory-source-manifest.v1",
+  "scope": "TabUBase entrypoint plus recursive TeX and graphics include closure"
+}

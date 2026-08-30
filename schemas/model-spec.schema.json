@@ -1,0 +1,379 @@
+{
+  "$defs": {
+    "Alternative": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "first_alternative",
+            "deferred",
+            "rejected"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "description",
+        "status"
+      ],
+      "title": "Alternative",
+      "type": "object"
+    },
+    "ContractBuildState": {
+      "description": "Build state asserted by a source contract, independent of installed code.",
+      "enum": [
+        "buildable_contract",
+        "design_open"
+      ],
+      "title": "ContractBuildState",
+      "type": "string"
+    },
+    "Gate": {
+      "additionalProperties": false,
+      "properties": {
+        "condition": {
+          "minLength": 1,
+          "title": "Condition",
+          "type": "string"
+        },
+        "evidence": {
+          "minLength": 1,
+          "title": "Evidence",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "condition",
+        "evidence"
+      ],
+      "title": "Gate",
+      "type": "object"
+    },
+    "Maturity": {
+      "additionalProperties": false,
+      "properties": {
+        "build_state": {
+          "$ref": "#/$defs/ContractBuildState"
+        },
+        "contract": {
+          "$ref": "#/$defs/MaturityStage"
+        },
+        "evidence": {
+          "$ref": "#/$defs/MaturityStage"
+        },
+        "implementation": {
+          "$ref": "#/$defs/MaturityStage"
+        },
+        "source_contract": {
+          "const": "factory_source",
+          "title": "Source Contract",
+          "type": "string"
+        },
+        "stage": {
+          "$ref": "#/$defs/MaturityStage"
+        }
+      },
+      "required": [
+        "source_contract",
+        "stage",
+        "contract",
+        "implementation",
+        "evidence",
+        "build_state"
+      ],
+      "title": "Maturity",
+      "type": "object"
+    },
+    "MaturityEvidence": {
+      "additionalProperties": false,
+      "description": "Immutable gate references required before public maturity promotion.",
+      "properties": {
+        "accepted_claim_hash": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accepted Claim Hash"
+        },
+        "gate1_receipt_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Gate1 Receipt Hash",
+          "type": "string"
+        },
+        "gong_approval_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Gong Approval Hash",
+          "type": "string"
+        },
+        "independent_review_report_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Independent Review Report Hash",
+          "type": "string"
+        }
+      },
+      "required": [
+        "gate1_receipt_hash",
+        "independent_review_report_hash",
+        "gong_approval_hash"
+      ],
+      "title": "MaturityEvidence",
+      "type": "object"
+    },
+    "MaturityStage": {
+      "description": "Monotone public maturity vocabulary; transitions require explicit evidence.",
+      "enum": [
+        "design_open",
+        "specified",
+        "experimental",
+        "contract-tested",
+        "gate0_sanity",
+        "gate1_reproducible",
+        "supported",
+        "evidence-backed"
+      ],
+      "title": "MaturityStage",
+      "type": "string"
+    },
+    "OpenItem": {
+      "additionalProperties": false,
+      "properties": {
+        "blocking_build": {
+          "default": false,
+          "title": "Blocking Build",
+          "type": "boolean"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "question": {
+          "minLength": 1,
+          "title": "Question",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "question"
+      ],
+      "title": "OpenItem",
+      "type": "object"
+    },
+    "UpstreamSource": {
+      "additionalProperties": false,
+      "properties": {
+        "license_boundary": {
+          "minLength": 1,
+          "title": "License Boundary",
+          "type": "string"
+        },
+        "observed_at": {
+          "minLength": 1,
+          "title": "Observed At",
+          "type": "string"
+        },
+        "path": {
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        },
+        "readonly": {
+          "const": true,
+          "title": "Readonly",
+          "type": "boolean"
+        },
+        "repository": {
+          "minLength": 1,
+          "title": "Repository",
+          "type": "string"
+        },
+        "semantic_source_tree_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Semantic Source Tree Sha256",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "source_manifest": {
+          "minLength": 1,
+          "title": "Source Manifest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "repository",
+        "path",
+        "sha256",
+        "semantic_source_tree_sha256",
+        "source_manifest",
+        "readonly",
+        "observed_at",
+        "license_boundary"
+      ],
+      "title": "UpstreamSource",
+      "type": "object"
+    }
+  },
+  "$id": "https://research.wehub.us/schemas/model-spec.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Machine-readable boundary for one model-factory contract.",
+  "properties": {
+    "alternatives": {
+      "items": {
+        "$ref": "#/$defs/Alternative"
+      },
+      "title": "Alternatives",
+      "type": "array"
+    },
+    "capabilities": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Capabilities",
+      "type": "array"
+    },
+    "carrier": {
+      "additionalProperties": true,
+      "minProperties": 1,
+      "title": "Carrier",
+      "type": "object"
+    },
+    "contract_id": {
+      "pattern": "^[a-z][a-z0-9_.-]*$",
+      "title": "Contract Id",
+      "type": "string"
+    },
+    "contract_version": {
+      "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "display_name": {
+      "minLength": 1,
+      "title": "Display Name",
+      "type": "string"
+    },
+    "dynamics": {
+      "additionalProperties": true,
+      "minProperties": 1,
+      "title": "Dynamics",
+      "type": "object"
+    },
+    "exit": {
+      "items": {
+        "$ref": "#/$defs/Gate"
+      },
+      "minItems": 1,
+      "title": "Exit",
+      "type": "array"
+    },
+    "experimental_defaults": {
+      "additionalProperties": true,
+      "minProperties": 1,
+      "title": "Experimental Defaults",
+      "type": "object"
+    },
+    "interfaces": {
+      "additionalProperties": true,
+      "title": "Interfaces",
+      "type": "object"
+    },
+    "kill": {
+      "items": {
+        "$ref": "#/$defs/Gate"
+      },
+      "minItems": 1,
+      "title": "Kill",
+      "type": "array"
+    },
+    "known_open": {
+      "items": {
+        "$ref": "#/$defs/OpenItem"
+      },
+      "title": "Known Open",
+      "type": "array"
+    },
+    "loss": {
+      "additionalProperties": true,
+      "title": "Loss",
+      "type": "object"
+    },
+    "maturity": {
+      "$ref": "#/$defs/Maturity"
+    },
+    "maturity_evidence": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/MaturityEvidence"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "readout": {
+      "additionalProperties": true,
+      "minProperties": 1,
+      "title": "Readout",
+      "type": "object"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "upstream": {
+      "$ref": "#/$defs/UpstreamSource"
+    }
+  },
+  "required": [
+    "schema_version",
+    "contract_id",
+    "contract_version",
+    "display_name",
+    "upstream",
+    "carrier",
+    "dynamics",
+    "readout",
+    "capabilities",
+    "maturity",
+    "experimental_defaults",
+    "known_open",
+    "alternatives",
+    "kill",
+    "exit"
+  ],
+  "title": "ModelSpec",
+  "type": "object"
+}
