@@ -55,7 +55,11 @@ completion checkpoint → supervised profile 的隐式迁移。$g_t>0$ 才表示
   合成监督数据生成器，truth 只在 `TruthSidecar`。
 - `src/tabu_lab/experiments/query_row_finetune_lift.py`：同一 split、episode schedule、
   optimizer、update budget 的 pretrained/scratch 配对微调。
-- 所有 runner 支持 `--device cpu|mps|cuda|auto`；本机 MPS Stage 3 smoke 通过。
+- 所有 runner 支持 `--device cpu|mps|cuda|auto`。本机 MPS 后端可见，但在
+  `PYTORCH_ENABLE_MPS_FALLBACK=0` 的 Stage 3 smoke 中，local-linear 的
+  `torch.linalg.solve` 路径触发了 `torch.AcceleratorError`；因此 MPS 当前只记为
+  可用性实验路径，不作为稳定通过证据。CPU float32 是必过路径，长跑优先使用
+  `dgx2` CUDA。
 
 ### 当前预训练 smoke
 
