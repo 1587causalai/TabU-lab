@@ -8,6 +8,7 @@ from .builders import (
     build_tabu_cell_base,
     register_model_builder,
 )
+from .component_contract import TabUBaseComposition
 from .table_cell import LabelColumnBroadcast, TabUCellBaseModel
 from .types import (
     DenseModelInput,
@@ -27,6 +28,7 @@ __all__ = [
     "ReferenceConfig",
     "TabUCellBaseModel",
     "TabUCellBaseProfile",
+    "TabUBaseComposition",
     "build_from_spec",
     "build_model",
     "build_tabu_cell_base",

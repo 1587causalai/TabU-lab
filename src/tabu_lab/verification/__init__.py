@@ -8,6 +8,14 @@ from .composability import (
     assess_tabu_base_substitution,
     inspect_tabu_base_composition,
 )
+from .tabubase import (
+    TabUBaseLocalVerification,
+    TabUBaseVerificationStage,
+    TabUBaseVerificationStatus,
+    VerificationCheck,
+    verify_tabu_base_component_correctness,
+    verify_tabu_base_component_evolvability,
+)
 
 __all__ = [
     "ForwardInterfaceSignature",
@@ -16,4 +24,10 @@ __all__ = [
     "TabUBaseComposition",
     "assess_tabu_base_substitution",
     "inspect_tabu_base_composition",
+    "TabUBaseLocalVerification",
+    "TabUBaseVerificationStage",
+    "TabUBaseVerificationStatus",
+    "VerificationCheck",
+    "verify_tabu_base_component_correctness",
+    "verify_tabu_base_component_evolvability",
 ]

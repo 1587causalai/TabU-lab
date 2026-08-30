@@ -13,6 +13,10 @@ from enum import StrEnum
 from typing import Any
 
 from tabu_lab.contracts import PredictionBundle, canonical_hash
+from tabu_lab.models.component_contract import (
+    TabUBaseComposition,
+    inspect_tabu_base_composition,
+)
 from tabu_lab.models.table_cell import TabUCellBaseModel
 
 _COMPONENT_AXES = ("tokenizer", "dynamics", "readout")
@@ -30,48 +34,6 @@ class SubstitutionStatus(StrEnum):
 
     PASS = "pass"
     FAIL = "fail"
-
-
-@dataclass(frozen=True, slots=True)
-class TabUBaseComposition:
-    """Stable semantic names for the components used by one built model."""
-
-    contract_id: str
-    contract_version: str
-    profile_id: str
-    tokenizer: str
-    dynamics: str
-    readout: str
-    supervision_route: str
-
-    def __post_init__(self) -> None:
-        for name in self.__dataclass_fields__:
-            value = getattr(self, name)
-            if not isinstance(value, str) or not value.strip():
-                raise ValueError(f"{name} must be a non-empty string")
-
-    def as_dict(self) -> dict[str, str]:
-        return {name: getattr(self, name) for name in self.__dataclass_fields__}
-
-    @property
-    def composition_hash(self) -> str:
-        return canonical_hash(self.as_dict())
-
-    def changed_axes(self, other: TabUBaseComposition) -> tuple[str, ...]:
-        """Return changed component axes after checking the comparison boundary."""
-
-        if (self.contract_id, self.contract_version) != (
-            other.contract_id,
-            other.contract_version,
-        ):
-            raise ValueError("component substitution requires the same model contract")
-        if self.profile_id != other.profile_id:
-            raise ValueError("component substitution requires the same evidence profile")
-        if self.supervision_route != other.supervision_route:
-            raise ValueError("component substitution cannot change the supervision route")
-        return tuple(
-            axis for axis in _COMPONENT_AXES if getattr(self, axis) != getattr(other, axis)
-        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -147,6 +109,9 @@ class SubstitutionAssessment:
     expected_axis: str
     changed_axes: tuple[str, ...]
     interface_stable: bool
+    predictions_bound: bool
+    input_evidence_matched: bool
+    components_declared: bool
     non_target_config_stable: bool
     variant_identity_changed: bool
     reference_composition_hash: str
@@ -162,6 +127,9 @@ class SubstitutionAssessment:
             "expected_axis": self.expected_axis,
             "changed_axes": self.changed_axes,
             "interface_stable": self.interface_stable,
+            "predictions_bound": self.predictions_bound,
+            "input_evidence_matched": self.input_evidence_matched,
+            "components_declared": self.components_declared,
             "non_target_config_stable": self.non_target_config_stable,
             "variant_identity_changed": self.variant_identity_changed,
             "reference_composition_hash": self.reference_composition_hash,
@@ -176,29 +144,6 @@ class SubstitutionAssessment:
     @property
     def assessment_hash(self) -> str:
         return canonical_hash(self.as_dict())
-
-
-def inspect_tabu_base_composition(model: TabUCellBaseModel) -> TabUBaseComposition:
-    """Read component-plan identity from an already-built canonical model."""
-
-    if not isinstance(model, TabUCellBaseModel):
-        raise TypeError("model must be a TabUCellBaseModel")
-    plan = getattr(model.dynamics, "plan", None)
-    if plan is None or not callable(getattr(plan, "resolved_name", None)):
-        raise ValueError("TabUBase dynamics must expose a resolvable plan")
-    tokenizer = model.tokenizer_metadata.get("tokenizer_version")
-    terminal = getattr(model.readout, "numeric_terminal", None)
-    if not isinstance(tokenizer, str) or not isinstance(terminal, str):
-        raise ValueError("TabUBase components must expose stable semantic names")
-    return TabUBaseComposition(
-        contract_id=model.model_id,
-        contract_version=model.variant_ref.contract_version,
-        profile_id=model.profile.value,
-        tokenizer=tokenizer,
-        dynamics=plan.resolved_name(model.config.block_kind),
-        readout=f"same_column.{terminal}",
-        supervision_route=("label_broadcast.v1" if model.label_broadcast else "none"),
-    )
 
 
 def _non_target_identity(model: TabUCellBaseModel, expected_axis: str) -> dict[str, Any]:
@@ -220,6 +165,26 @@ def _non_target_identity(model: TabUCellBaseModel, expected_axis: str) -> dict[s
     return identity
 
 
+def _prediction_is_bound_to_model(
+    prediction: PredictionBundle,
+    model: TabUCellBaseModel,
+) -> bool:
+    """Require an emitted trace and exact semantic variant identity."""
+
+    trace = prediction.trace
+    return bool(
+        prediction.model_id == model.model_id
+        and prediction.contract_version == model.contract_version
+        and prediction.metadata.get("variant_hash") == model.variant_ref.semantic_hash
+        and prediction.metadata.get("variant_ref") == model.variant_ref.as_dict()
+        and prediction.metadata.get("profile_id") == model.profile.value
+        and trace is not None
+        and trace.model_id == model.model_id
+        and trace.metadata.get("variant_hash") == model.variant_ref.semantic_hash
+        and trace.metadata.get("profile_id") == model.profile.value
+    )
+
+
 def assess_tabu_base_substitution(
     *,
     reference_model: TabUCellBaseModel,
@@ -238,6 +203,20 @@ def assess_tabu_base_substitution(
     reference_interface = ForwardInterfaceSignature.from_prediction(reference_prediction)
     candidate_interface = ForwardInterfaceSignature.from_prediction(candidate_prediction)
     interface_stable = reference_interface == candidate_interface
+    predictions_bound = _prediction_is_bound_to_model(
+        reference_prediction,
+        reference_model,
+    ) and _prediction_is_bound_to_model(candidate_prediction, candidate_model)
+    input_evidence_matched = bool(
+        reference_prediction.episode_id == candidate_prediction.episode_id
+        and reference_prediction.trace is not None
+        and candidate_prediction.trace is not None
+        and reference_prediction.trace.input_hash == candidate_prediction.trace.input_hash
+    )
+    components_declared = (
+        reference.declaration_status == "model_spec_declared"
+        and candidate.declaration_status == "model_spec_declared"
+    )
     reference_variant_hash = reference_model.variant_ref.semantic_hash
     candidate_variant_hash = candidate_model.variant_ref.semantic_hash
     variant_identity_changed = reference_variant_hash != candidate_variant_hash
@@ -247,6 +226,9 @@ def assess_tabu_base_substitution(
     passed = (
         changed_axes == (expected_axis,)
         and interface_stable
+        and predictions_bound
+        and input_evidence_matched
+        and components_declared
         and non_target_config_stable
         and variant_identity_changed
     )
@@ -254,6 +236,9 @@ def assess_tabu_base_substitution(
         expected_axis=expected_axis,
         changed_axes=changed_axes,
         interface_stable=interface_stable,
+        predictions_bound=predictions_bound,
+        input_evidence_matched=input_evidence_matched,
+        components_declared=components_declared,
         non_target_config_stable=non_target_config_stable,
         variant_identity_changed=variant_identity_changed,
         reference_composition_hash=reference.composition_hash,

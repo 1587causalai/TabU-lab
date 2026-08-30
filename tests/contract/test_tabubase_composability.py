@@ -66,13 +66,11 @@ def _build(
     ).eval()
 
 
-@pytest.mark.parametrize("axis", ["tokenizer", "dynamics", "readout"])
+@pytest.mark.parametrize("axis", ["tokenizer", "readout"])
 def test_one_component_axis_changes_independently(axis: str) -> None:
     reference = _build()
     if axis == "tokenizer":
         candidate = _build(nominal_tokenizer="source_scoped_frozen_codebook.v2")
-    elif axis == "dynamics":
-        candidate = _build(config=replace(_config(), block_kind=DynamicsBlockKind.MAB))
     else:
         candidate = _build(numeric_terminal="nadaraya_watson")
     candidate.load_state_dict(reference.state_dict())
@@ -92,6 +90,9 @@ def test_one_component_axis_changes_independently(axis: str) -> None:
     assert assessment.status is SubstitutionStatus.PASS
     assert assessment.changed_axes == (axis,)
     assert assessment.interface_stable
+    assert assessment.predictions_bound
+    assert assessment.input_evidence_matched
+    assert assessment.components_declared
     assert assessment.non_target_config_stable
     assert assessment.variant_identity_changed
     assert len(assessment.assessment_hash) == 64
@@ -119,6 +120,46 @@ def test_substitution_gate_rejects_a_two_axis_change() -> None:
     assert assessment.status is SubstitutionStatus.FAIL
     assert assessment.changed_axes == ("dynamics", "readout")
     assert assessment.interface_stable
+
+
+def test_code_only_mab_ablation_is_not_a_declared_component_substitution() -> None:
+    reference = _build()
+    candidate = _build(config=replace(_config(), block_kind=DynamicsBlockKind.MAB))
+    candidate.load_state_dict(reference.state_dict())
+    fixture = _fixture()
+    with torch.no_grad():
+        reference_prediction = reference._forward_dense(fixture)
+        candidate_prediction = candidate._forward_dense(fixture)
+    assessment = assess_tabu_base_substitution(
+        reference_model=reference,
+        candidate_model=candidate,
+        reference_prediction=reference_prediction,
+        candidate_prediction=candidate_prediction,
+        expected_axis="dynamics",
+    )
+
+    assert assessment.changed_axes == ("dynamics",)
+    assert not assessment.components_declared
+    assert assessment.status is SubstitutionStatus.FAIL
+
+
+def test_substitution_gate_binds_each_prediction_to_its_model() -> None:
+    reference = _build()
+    candidate = _build(numeric_terminal="nadaraya_watson")
+    candidate.load_state_dict(reference.state_dict())
+    fixture = _fixture()
+    with torch.no_grad():
+        reference_prediction = reference._forward_dense(fixture)
+    assessment = assess_tabu_base_substitution(
+        reference_model=reference,
+        candidate_model=candidate,
+        reference_prediction=reference_prediction,
+        candidate_prediction=reference_prediction,
+        expected_axis="readout",
+    )
+
+    assert not assessment.predictions_bound
+    assert assessment.status is SubstitutionStatus.FAIL
 
 
 def test_substitution_gate_rejects_extra_non_target_config_change() -> None:

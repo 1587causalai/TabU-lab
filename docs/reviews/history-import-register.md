@@ -150,3 +150,44 @@ to classify if broader donor closure is required.
 
 No HIST finding is repaired at this checkpoint. Semantic governance begins only after
 the owner accepts the consolidation scope or requests additional history batches.
+
+## Governance station 1 — TabUBase canonical vertical slice
+
+- Main base: `c18f8393c20a8d67d8d0e598cde79e1b9f41b7d3`
+- Scope: `Unit semantics → ModelSpec → canonical builder → runtime components → Step 1/2 local verification`
+- Contract boundary: existing `tabu.cell.base@0.2.0`; no ModelSpec byte or version change
+- Evidence boundary: `local_unissued`; no training or scientific evaluation
+
+This station activates no historical model family or broad MVE runner. It adds a
+current-main-compatible component binding for TabUBase, preserves the existing
+one-axis composability gate, and gives Step 1/2 results a strict local evidence schema.
+
+- **HIST-002 — active-builder conflict:** `partially_resolved_tabubase_only`. The
+  canonical TabUBase builder now proves its runtime composition against the exact
+  registered ModelSpec before returning. Historical broad model-family builders remain
+  staged and unresolved.
+- **HIST-015 — verification export overlap:** `partially_resolved_tabubase_only`. The
+  active composability surface is preserved and now consumes the ModelSpec-bound
+  composition identity. Historical broad MVE exports remain staged and unresolved.
+
+All other HIST findings retain their previous status.
+
+### Independent review findings for governance station 1
+
+Reviewed commit: `886cae9bcfca94190c0c8e63607ba55dfabd37ec`.
+
+- **GOV1-001 — prediction/model evidence binding:** `resolved_in_follow_up`. Step 2
+  now requires each prediction and trace to bind the corresponding model variant, and
+  requires both sides to share the episode and input hash.
+- **GOV1-002 — terminal label/class agreement:** `resolved_in_follow_up`. Component
+  resolution now checks the concrete numeric terminal class instead of trusting its
+  mutable semantic label.
+- **GOV1-003 — undeclared MAB substitution:** `resolved_in_follow_up`. MAB remains a
+  code-only non-O ablation and cannot pass as a ModelSpec-declared component
+  substitution.
+- **GOV1-004 — lint and DCO hygiene:** `resolved_in_follow_up`. The reported line-length
+  violation is corrected; the reviewed commit is superseded by a signed follow-up
+  commit before merge.
+
+The independent review reported no P0 or P1 finding. These corrections remain within
+the first-station identity boundary and do not add training or scientific evaluation.

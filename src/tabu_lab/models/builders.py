@@ -55,7 +55,7 @@ def build_tabu_cell_base(**kwargs: Any) -> TabUCellBaseModel:
     nominal_codebook_seed = options.pop("nominal_codebook_seed", 1729)
     if options:
         raise TypeError(f"unknown table-cell base builder options: {sorted(options)}")
-    return _build_float32(
+    model = _build_float32(
         TabUCellBaseModel,
         config,
         numeric_terminal=numeric_terminal,
@@ -66,6 +66,16 @@ def build_tabu_cell_base(**kwargs: Any) -> TabUCellBaseModel:
         nominal_codebook_size=nominal_codebook_size,
         nominal_codebook_seed=nominal_codebook_seed,
     )
+    # The packaged ModelSpec is the semantic authority.  Every public build,
+    # including direct ``build_model`` calls, must close the full binding to
+    # the concrete runtime composition before it can escape the builder.
+    from tabu_lab.registry import get_model_spec
+
+    from .component_contract import resolve_tabu_base_composition
+
+    spec = get_model_spec(model.model_id, model.contract_version)
+    resolve_tabu_base_composition(spec, model)
+    return model
 
 
 class BuilderRegistry:
