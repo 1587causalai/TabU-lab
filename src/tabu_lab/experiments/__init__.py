@@ -90,6 +90,13 @@ from .query_row_openml_frozen_transfer import (
     load_query_openml_panel_manifest,
     run_query_row_openml_frozen_transfer,
 )
+from .query_row_openml_full_context import (
+    QUERY_OPENML_FULL_PANEL_ID,
+    QUERY_OPENML_FULL_PANEL_SCHEMA,
+    QUERY_OPENML_FULL_RESULT_SCHEMA,
+    load_query_openml_full_context_panel_manifest,
+    run_query_row_openml_full_context,
+)
 from .query_row_synthetic_fit import (
     QueryRowSyntheticEpisode,
     QueryRowSyntheticFitResult,
@@ -167,6 +174,11 @@ __all__ = [
     "QUERY_OPENML_RESULT_SCHEMA",
     "load_query_openml_panel_manifest",
     "run_query_row_openml_frozen_transfer",
+    "QUERY_OPENML_FULL_PANEL_ID",
+    "QUERY_OPENML_FULL_PANEL_SCHEMA",
+    "QUERY_OPENML_FULL_RESULT_SCHEMA",
+    "load_query_openml_full_context_panel_manifest",
+    "run_query_row_openml_full_context",
     "QueryRowFinetuneLiftRecord",
     "QueryRowFinetuneLiftResult",
     "run_query_row_finetune_lift",

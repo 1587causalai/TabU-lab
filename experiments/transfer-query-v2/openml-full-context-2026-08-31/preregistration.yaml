@@ -1,0 +1,53 @@
+schema_version: tabu.query-row.openml-full-context-transfer.preregistration.v1
+experiment_id: tabur-query-row-openml-full-context-transfer-2026-08-31
+status: proposed
+created_at: '2026-08-31'
+panel_manifest: ../openml-full-context-2026-08-31.yaml
+contract:
+  contract_id: tabu.query.row
+  contract_version: '0.1.0'
+  model_spec_hash: 24f9ddae70b116b2ac88d2ccc833870ca351de8148774fe8b9fbf72a0c58d1c0
+hypothesis: >-
+  Current R4 v2 synthetic pretraining yields finite optimizer-free predictions
+  when the entire labeled real-data train partition is placed in context; the
+  result will be compared to classical estimators trained on the same split.
+checkpoint_source:
+  run: r5-b0-b1-20260830
+  rung: B1
+  seeds: [1729, 2718, 31415]
+  generator_id: tabur.supervised-query-row-diverse-v2
+data:
+  provider: OpenML
+  datasets: [banknote_authentication, segment, spambase, airfoil_self_noise, concrete_compressive_strength, qsar_fish_toxicity]
+  split_seeds: [1729, 2718, 31415]
+  train_fraction: 0.7
+  query_policy: all_heldout_rows
+metrics:
+  classification_primary: [log_loss, normalized_nll, accuracy, balanced_accuracy, macro_f1, roc_auc_ovr_macro]
+  regression_primary: [rmse, scaled_rmse, mae, scaled_mae, r2]
+  baseline_comparison: [ordinary_least_squares, mlp, xgboost]
+controls:
+  frozen_optimizer_created: false
+  frozen_parameter_hash_unchanged: true
+  target_truth_substitution_invariant: true
+pass_conditions:
+  - all train rows are visible labeled context and all held-out rows are query-only
+  - pinned OpenML source metadata and materialized arrays validate
+  - all frozen and baseline metrics are finite on the same full test rows
+  - every frozen checkpoint passes adjacent hash and no-optimizer controls
+kill_conditions:
+  - source pin drift or incomplete OpenML panel
+  - query checkpoint identity mismatch
+  - target leakage, frozen update, or non-finite output
+required_artifacts:
+  - result_json
+  - source_materialization_manifest
+  - split_manifests
+  - checkpoint_and_identity_hashes
+  - environment_and_source_commit
+claim_boundary: >-
+  Local-unissued full-context OpenML frozen-transfer diagnostic only; no formal
+  receipt, accepted capability, benchmark, SOTA, causal, or foundation-model claim.
+review:
+  developer_and_reviewer_must_differ: true
+  gong_approval_required_for_release: true
