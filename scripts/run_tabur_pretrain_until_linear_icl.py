@@ -5,10 +5,18 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
-from tabu_lab.experiments import run_query_row_linear_icl_threshold
+# ``wehub-python`` deliberately passes only runtime selectors into its GPU
+# container; make this checked-out script self-contained instead of relying on
+# an ambient PYTHONPATH.
+_SOURCE_ROOT = Path(__file__).resolve().parents[1] / "src"
+if str(_SOURCE_ROOT) not in sys.path:
+    sys.path.insert(0, str(_SOURCE_ROOT))
+
+from tabu_lab.experiments import run_query_row_linear_icl_threshold  # noqa: E402
 
 
 def _ints(value: str, *, name: str) -> tuple[int, ...]:
