@@ -1,0 +1,140 @@
+schema_version: tabu.transfer-base-real-frozen-icl-openml-new6.v1
+panel_id: tabubase-real-frozen-icl-openml-numeric-nomissing-new6-v1
+status:
+  registration: candidate_preregistered
+  execution: not_run
+  data_materialization: not_run
+  empirical_claim: none
+
+purpose: >-
+  An independent numeric, no-missing OpenML panel for optimizer-free TabUBase
+  frozen ICL. It does not replace or alter the existing sklearn old6 panel.
+
+model:
+  contract_id: tabu.cell.base
+  contract_version: 0.2.0
+  profile_id: supervised.label_broadcast.v1
+tokenizer:
+  version: cell-tokenizer.v2
+  nominal_plan: source_scoped_frozen_codebook.v2
+  codebook_size: 100
+  codebook_seed: 1729
+
+source_contract:
+  provider: OpenML
+  api: sklearn.datasets.fetch_openml
+  identity_key: data_id
+  target_column: default-target
+  as_frame: false
+  parser: liac-arff
+  cache: true
+  materialization_checks:
+    - returned data_id and version equal the pins below
+    - returned upstream md5 and license equal the pins below
+    - returned dataset status is active
+    - observed feature shape equals the pin below
+    - predictors and targets contain no missing or non-finite values
+    - classification labels use sorted unique source labels mapped to 0..C-1
+  receipt_fields:
+    - resolved target column
+    - classification label mapping when applicable
+    - parser and cache policy
+    - materialized array SHA-256
+    - source manifest SHA-256
+
+datasets:
+  - dataset_id: banknote_authentication
+    openml_name: banknote-authentication
+    data_id: 1462
+    version: 1
+    upstream_md5: baa2dc5b745775a943ebeb9c276401f8
+    license: Public
+    task: classification
+    shape: {rows: 1372, predictors: 4}
+    classes: 2
+    missing_values: 0
+  - dataset_id: segment
+    openml_name: segment
+    data_id: 36
+    version: 1
+    upstream_md5: 037621812203bfd85c8dab1d7f16ebc6
+    license: Public
+    task: classification
+    shape: {rows: 2310, predictors: 19}
+    classes: 7
+    missing_values: 0
+  - dataset_id: spambase
+    openml_name: spambase
+    data_id: 44
+    version: 1
+    upstream_md5: d9ace01aeac3461e326a8e1b2d53fd84
+    license: Public
+    task: classification
+    shape: {rows: 4601, predictors: 57}
+    classes: 2
+    missing_values: 0
+  - dataset_id: airfoil_self_noise
+    openml_name: airfoil_self_noise
+    data_id: 43919
+    version: 1
+    upstream_md5: 79f7daecfdeb6457ba37fd8982966048
+    license: CC BY 4.0
+    task: regression
+    shape: {rows: 1503, predictors: 5}
+    classes: null
+    missing_values: 0
+  - dataset_id: concrete_compressive_strength
+    openml_name: concrete_compressive_strength
+    data_id: 44959
+    version: 7
+    upstream_md5: 1906eae71bd8b8142d079a4b966549ac
+    license: CC BY 4.0
+    task: regression
+    shape: {rows: 1030, predictors: 8}
+    classes: null
+    missing_values: 0
+  - dataset_id: qsar_fish_toxicity
+    openml_name: QSAR_fish_toxicity
+    data_id: 44970
+    version: 7
+    upstream_md5: 4900e250afcfee9d523aba87895260fe
+    license: CC BY 4.0
+    task: regression
+    shape: {rows: 908, predictors: 6}
+    classes: null
+    missing_values: 0
+
+evaluation_design:
+  checkpoint_seeds: [1729, 2718, 31415]
+  split_seeds: [1729, 2718, 31415]
+  context_sizes: [0, 1, 2, 4, 8, 16, 32]
+  query_limit: 256
+  query_chunk_rows: 64
+  feature_rule: >-
+    Split first; if required, select at most 63 predictors by train-only
+    variance. All preregistered new6 datasets are already within the limit.
+  classification_primary_curve: exclude K below the declared class count
+  regression_primary_curve: K in [1, 2, 4, 8, 16, 32]
+  comparison: >-
+    Re-run the existing PT-S1 and expanded checkpoints on this same panel with
+    identical splits, queries, and contexts; report old6 and new6 macros
+    separately.
+
+frozen_protocol:
+  arms: [pretrained_frozen, random_init_frozen, pretrained_shuffled]
+  one_independent_model_instance_per_arm: true
+  requires_grad: false
+  eval_mode: true
+  inference_mode: true
+  optimizer_created: false
+  parameter_hash_gate:
+    scope: every frozen arm for every checkpoint, dataset, and split
+    timing: immediately adjacent before and after each arm evaluation
+    algorithm: SHA-256 over model state
+    acceptance: before and after hashes must be byte-identical
+    aggregate_gate: all_frozen_arm_parameter_hashes_unchanged must be true
+
+claim_boundary: >-
+  Candidate preregistration only. No OpenML rows have been downloaded, no arm
+  has been evaluated, and this file supports no empirical, foundation-model,
+  causal, release, or benchmark claim.

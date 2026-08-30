@@ -1,0 +1,182 @@
+schema_version: tabu.transfer-base-real-full-context-cached-openml.v1
+panel_id: tabubase-real-full-context-cached-openml-regression-8-v1
+experiment_id: tabubase-real-full-context-cached-openml-regression-8-3x3-v1
+status:
+  registration: candidate_preregistered
+  execution: not_run
+  data_materialization: pinned_cache_available_not_evaluated
+  empirical_claim: none
+
+purpose: >-
+  Exploratory optimizer-free full-context TabUBase ICL on eight additional
+  numeric-only OpenML CTR23 regression tables. Every train-partition row is
+  exposed with its label and every held-out row is queried in one complete
+  transductive episode. This panel is independent of the existing new6 panel.
+
+model:
+  contract_id: tabu.cell.base
+  contract_version: 0.2.0
+  profile_id: supervised.label_broadcast.v1
+tokenizer:
+  version: cell-tokenizer.v2
+  nominal_plan: source_scoped_frozen_codebook.v2
+  codebook_size: 100
+  codebook_seed: 1729
+
+source_contract:
+  provider: OpenML cached ARFF
+  api: scipy.io.arff.loadarff
+  identity_key: data_id
+  parser: liac-arff
+  cache: true
+  materialization_checks:
+    - ARFF file SHA-256 equals the pin below
+    - task id and task snapshot SHA-256 equal the pins below
+    - resolved target column equals the pin below after quote normalization
+    - all columns are numeric and the target is excluded from predictors
+    - observed feature shape equals the pin below
+    - predictors and targets contain no missing or non-finite values
+    - file is read from the explicitly recorded cache snapshot path
+  receipt_fields:
+    - resolved target column
+    - OpenML data id and task id
+    - ARFF file SHA-256
+    - materialized array SHA-256
+    - source manifest SHA-256
+
+datasets:
+  - dataset_id: white_wine
+    openml_name: white_wine
+    data_id: 44971
+    task_id: 361249
+    task_sha256: b5fe9cc6b1cbfe122b1fd597a9ec0c3071bc5fe750f024c72db45b615b8ee55a
+    target_column: quality
+    task: regression
+    shape: {rows: 4898, predictors: 11}
+    file_sha256: bf6ded4123efe6be1ed2998736794fdbac3a65aca6d08cd349bd750393dc58ba
+    data_sha256: bf6ded4123efe6be1ed2998736794fdbac3a65aca6d08cd349bd750393dc58ba
+    path: /home/cms/experiments/openml-ctr23-tabuf-v0/cache/data/44971.arff
+  - dataset_id: red_wine
+    openml_name: red_wine
+    data_id: 44972
+    task_id: 361250
+    task_sha256: 83fca5b50eef4115acbf190dbf69f814bf39cb531da57e479ceb3785446ed9f6
+    target_column: quality
+    task: regression
+    shape: {rows: 1599, predictors: 11}
+    file_sha256: 48f5b09fb01b33ac1d6905c916d3c93f578c63b6ff4cc87db2b06e05839b484d
+    data_sha256: 48f5b09fb01b33ac1d6905c916d3c93f578c63b6ff4cc87db2b06e05839b484d
+    path: /home/cms/experiments/openml-ctr23-tabuf-v0/cache/data/44972.arff
+  - dataset_id: cpu_activity
+    openml_name: cpu_activity
+    data_id: 44978
+    task_id: 361256
+    task_sha256: b1c30c7e05e33edb539023dafd731711607b8e5e96279a588979e0ec1bbc7c9b
+    target_column: usr
+    task: regression
+    shape: {rows: 8192, predictors: 21}
+    file_sha256: ab02dc78a837a939da07fb9d95269b563d4504cb849ede1c4b7b8c02e713ed89
+    data_sha256: ab02dc78a837a939da07fb9d95269b563d4504cb849ede1c4b7b8c02e713ed89
+    path: /home/cms/experiments/openml-ctr23-tabuf-v0/cache/data/44978.arff
+  - dataset_id: kin8nm
+    openml_name: kin8nm
+    data_id: 44980
+    task_id: 361258
+    task_sha256: 54942ec7994eba3fbd49812aecd720cc0d8b2e5486b8d7c24c88d3c16f9cfc14
+    target_column: y
+    task: regression
+    shape: {rows: 8192, predictors: 8}
+    file_sha256: 81b4b681d4134670f04434e3815037c5ee9e2ea54551ebe2d8b7344dbc7b4210
+    data_sha256: 81b4b681d4134670f04434e3815037c5ee9e2ea54551ebe2d8b7344dbc7b4210
+    path: /home/cms/experiments/openml-ctr23-tabuf-v0/cache/data/44980.arff
+  - dataset_id: pumadyn32nh
+    openml_name: pumadyn32nh
+    data_id: 44981
+    task_id: 361259
+    task_sha256: c528a76d405dfd9b4764f56b45b83be5f05f77b31902913698ca4873fd7599c3
+    target_column: thetadd6
+    task: regression
+    shape: {rows: 8192, predictors: 32}
+    file_sha256: 0756f4da4500b61e2025862e2b550ee83fc8684616b1a77cebf6dccd5e13d705
+    data_sha256: 0756f4da4500b61e2025862e2b550ee83fc8684616b1a77cebf6dccd5e13d705
+    path: /home/cms/experiments/openml-ctr23-tabuf-v0/cache/data/44981.arff
+  - dataset_id: energy_efficiency
+    openml_name: energy_efficiency
+    data_id: 44960
+    task_id: 361617
+    task_sha256: ff4890578ca20d455e3fd30670771cdb0c659f781b0817aa313f0cc80bbf7692
+    target_column: heating_load
+    task: regression
+    shape: {rows: 768, predictors: 9}
+    file_sha256: 7d52e49858ff8785d6d4cfe36a4202ffcb0c83df084f1582e666e17a6fa69b24
+    data_sha256: 7d52e49858ff8785d6d4cfe36a4202ffcb0c83df084f1582e666e17a6fa69b24
+    path: /home/cms/experiments/openml-ctr23-tabuf-v0/cache/data/44960.arff
+  - dataset_id: cars
+    openml_name: cars
+    data_id: 44994
+    task_id: 361622
+    task_sha256: b0b70ad95d9c4a54e356c7e209100a18589ca89e64ca52a84ccc6c1daf60552b
+    target_column: Price
+    task: regression
+    shape: {rows: 804, predictors: 17}
+    file_sha256: 98a42023fa9701a1266dcea95b0808807f33b1f346d24b5503d89048656ae48c
+    data_sha256: 98a42023fa9701a1266dcea95b0808807f33b1f346d24b5503d89048656ae48c
+    path: /home/cms/experiments/openml-ctr23-tabuf-v0/cache/data/44994.arff
+  - dataset_id: space_ga
+    openml_name: space_ga
+    data_id: 45402
+    task_id: 361623
+    task_sha256: addedb9730e52637a9ed8dfae8400b2a722fbd493d68bd38b84299cb45beb7e8
+    target_column: ln_votes_pop
+    task: regression
+    shape: {rows: 3107, predictors: 6}
+    file_sha256: 417f4852334046bd927e71fbbe51557071fc3679cb053fe504ec13dfa0ba4291
+    data_sha256: 417f4852334046bd927e71fbbe51557071fc3679cb053fe504ec13dfa0ba4291
+    path: /home/cms/experiments/openml-ctr23-tabuf-v0/cache/data/45402.arff
+
+evaluation_design:
+  checkpoint_seeds: [1729, 2718, 31415]
+  split_seeds: [1729, 2718, 31415]
+  context_policy: full_train
+  train_fraction: 0.7
+  context_rows: all_train_partition_rows
+  context_label_visibility: every train-partition response is visible in one frozen invocation
+  query_policy: all_heldout_rows
+  query_limit: null
+  query_predictor_visibility: every held-out predictor row is jointly visible in one episode
+  query_response_visibility: held-out responses are scorer-only TruthSidecar values
+  single_transductive_episode: true
+  no_context_or_query_sampling_or_truncation: true
+  query_readout_chunk_rows: 64
+  query_chunk_rows: 64
+  classification_primary_metrics: []
+  regression_primary_metrics: [scaled_rmse, scaled_mae, r2]
+  regression_reported_common_metrics: [rmse, mae, scaled_rmse, scaled_mae, r2]
+  common_scorer_contract: identical held-out rows, target scale, and metric implementation
+
+frozen_protocol:
+  arms: [pretrained_frozen, random_init_frozen, pretrained_shuffled]
+  one_independent_model_instance_per_arm: true
+  requires_grad: false
+  eval_mode: true
+  inference_mode: true
+  optimizer_created: false
+  parameter_hash_gate:
+    algorithm: SHA-256 over model state
+    acceptance: before and after hashes are byte-identical for every checkpoint and arm
+
+baseline_protocol:
+  role: supervised_fitted_inductive_comparators_not_frozen_icl_arms
+  estimators: [xgboost, mlp]
+  fit_rows: all_train_partition_rows
+  query_rows: all_heldout_rows
+  tuning_or_validation_rows: none
+  estimator_seed: split_seed
+  checkpoint_seed_replication: none
+
+claim_boundary: >-
+  Exploratory local_unissued optimizer-free real-data full-context ICL
+  diagnostic. The OpenML CTR23 cache and split/task records are provenance
+  inputs, not independently reviewed formal data authority. Side-by-side MLP
+  and XGBoost values are descriptive and do not support SOTA, benchmark,
+  foundation-model, or causal claims.

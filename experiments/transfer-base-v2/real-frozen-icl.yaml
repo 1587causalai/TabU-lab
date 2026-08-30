@@ -1,0 +1,37 @@
+schema_version: tabu.transfer-base-real-frozen-icl.v1
+status: local_unissued_diagnostic
+experiment_id: tabubase-real-frozen-icl-6datasets-3x3-v1
+model:
+  contract_id: tabu.cell.base
+  contract_version: 0.2.0
+  profile_id: supervised.label_broadcast.v1
+tokenizer:
+  version: cell-tokenizer.v2
+  nominal_plan: source_scoped_frozen_codebook.v2
+  codebook_size: 100
+  codebook_seed: 1729
+checkpoint_line:
+  phase: PT-S1
+  context_rows_schedule: [2, 4, 8, 16, 32, 64]
+  updates: 20000
+  seeds: [1729, 2718, 31415]
+datasets:
+  classification: [iris, wine, breast_cancer, digits]
+  regression: [diabetes, california_housing]
+dataset_status: sklearn loader snapshots; content hashed but not independently reviewed authority
+split_seeds: [1729, 2718, 31415]
+context_sizes: [0, 1, 2, 4, 8, 16, 32]
+query_limit: 256
+query_chunk_rows: 64
+feature_rule: split first; if required, select at most 63 predictors by train-only variance
+frozen_arms: [pretrained_frozen, random_init_frozen, pretrained_shuffled]
+optimizer_created: false
+parameter_gate: every model state hash must be byte-identical before and after evaluation
+primary_metrics:
+  classification: normalized_nll
+  regression: scaled_rmse
+primary_curve:
+  classification: exclude K below declared class count because response support is impossible
+  regression: K in [1, 2, 4, 8, 16, 32]
+comparison: paired primary-curve AULC and K32 endpoint; positive baseline-minus-pretrained gain favors pretraining
+claim_boundary: optimizer-free real-data ICL diagnostic only; no task fine-tuning, formal receipt, SOTA, or foundation-model claim

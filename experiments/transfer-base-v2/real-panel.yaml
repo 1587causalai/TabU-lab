@@ -1,0 +1,42 @@
+schema_version: tabu.transfer-base-real-panel.v1
+transfer_id: transfer-base-v2
+inherits_pretraining: transfer-base-v1
+model:
+  contract_id: tabu.cell.base
+  contract_version: 0.2.0
+  profile_id: supervised.label_broadcast.v1
+pretraining_checkpoint:
+  phase: PT-S1
+  worlds: 20000
+  updates: 20000
+  seeds: [1729, 2718, 31415]
+pretraining_extension:
+  phase: PT-S2
+  worlds: 200000
+  updates: 200000
+  seeds: [1729]
+  checkpoint_updates: [0, 20000, 50000, 100000, 150000, 200000]
+  prerequisite: passed_PT-S1_seed_1729
+  claim_boundary: exploratory_scale_extension; not a replacement for PT-S1
+datasets:
+  classification: [iris, wine, breast_cancer]
+  regression: [diabetes, california_housing]
+label_budget: 128
+fine_tune:
+  arms: [pretrained, scratch]
+  updates: 400
+  learning_rate: 0.0003
+r0_validation_selection:
+  learning_rates: [0.0001, 0.0003, 0.001]
+  checkpoint_updates: [400, 1200]
+  partition: validation
+  objective: dataset_macro_mean_log_loss_across_paired_seeds_and_arms
+  selects: one_global_schedule_for_both_arms
+  test_evaluations_during_selection: 0
+baselines: [xgboost, mlp]
+paired_controls: [split, label_subset, test_rows, seed]
+primary_metrics:
+  classification: log_loss
+  regression: nrmse
+reporting: per_dataset_per_seed_no_cross_task_average
+claim_boundary: paired exploratory panel; no SOTA or accepted benchmark claim.
