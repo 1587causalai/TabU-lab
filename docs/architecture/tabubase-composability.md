@@ -18,7 +18,7 @@
 
 一次替换同时满足以下条件才记为 `pass`：
 
-1. 只有声明的组件轴发生变化；
+1. 只有声明的组件轴发生变化，其他 semantic config 必须完全一致；
 2. prediction entries、status、tensor shapes、auxiliary shapes 和 trace 有无保持一致；
 3. `variant_ref.semantic_hash` 必须变化，避免新组件伪装成旧模型身份。
 

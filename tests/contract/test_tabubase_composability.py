@@ -5,6 +5,7 @@ from dataclasses import replace
 import pytest
 import torch
 
+from tabu_lab.contracts import FeatureKind, FeatureSpec
 from tabu_lab.models import BuilderRegistry, build_model
 from tabu_lab.models.types import DenseModelInput, DynamicsBlockKind, ReferenceConfig
 from tabu_lab.verification import (
@@ -28,7 +29,7 @@ def _config(*, block_kind: DynamicsBlockKind = DynamicsBlockKind.OMAB) -> Refere
 
 
 def _fixture() -> DenseModelInput:
-    values = torch.tensor([[[0.0, 2.0], [2.0, 4.0], [3.0, 7.0]]])
+    values = torch.tensor([[[0.0, 0.0], [2.0, 1.0], [3.0, 0.0]]])
     visible = torch.tensor([[[False, True], [True, True], [True, True]]])
     target = ~visible
     return DenseModelInput(
@@ -36,6 +37,15 @@ def _fixture() -> DenseModelInput:
         visible_mask=visible,
         target_mask=target,
         natural_missing_mask=torch.zeros_like(target),
+        feature_specs=(
+            FeatureSpec(name="numeric"),
+            FeatureSpec(
+                name="category",
+                kind=FeatureKind.CATEGORICAL,
+                domain=("red", "blue"),
+                codebook_id="stage2.colors.v1",
+            ),
+        ),
         episode_id="tabubase-stage2-composability",
     )
 
@@ -82,6 +92,7 @@ def test_one_component_axis_changes_independently(axis: str) -> None:
     assert assessment.status is SubstitutionStatus.PASS
     assert assessment.changed_axes == (axis,)
     assert assessment.interface_stable
+    assert assessment.non_target_config_stable
     assert assessment.variant_identity_changed
     assert len(assessment.assessment_hash) == 64
 
@@ -108,6 +119,34 @@ def test_substitution_gate_rejects_a_two_axis_change() -> None:
     assert assessment.status is SubstitutionStatus.FAIL
     assert assessment.changed_axes == ("dynamics", "readout")
     assert assessment.interface_stable
+
+
+def test_substitution_gate_rejects_extra_non_target_config_change() -> None:
+    reference = _build()
+    candidate = _build(
+        config=replace(
+            _config(),
+            block_kind=DynamicsBlockKind.MAB,
+            presence_tau=0.25,
+        )
+    )
+    candidate.load_state_dict(reference.state_dict())
+    fixture = _fixture()
+    with torch.no_grad():
+        reference_prediction = reference._forward_dense(fixture)
+        candidate_prediction = candidate._forward_dense(fixture)
+    assessment = assess_tabu_base_substitution(
+        reference_model=reference,
+        candidate_model=candidate,
+        reference_prediction=reference_prediction,
+        candidate_prediction=candidate_prediction,
+        expected_axis="dynamics",
+    )
+
+    assert assessment.changed_axes == ("dynamics",)
+    assert assessment.interface_stable
+    assert not assessment.non_target_config_stable
+    assert assessment.status is SubstitutionStatus.FAIL
 
 
 def test_model_registry_can_grow_without_replacing_a_protected_anchor() -> None:

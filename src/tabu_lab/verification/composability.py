@@ -16,6 +16,13 @@ from tabu_lab.contracts import PredictionBundle, canonical_hash
 from tabu_lab.models.table_cell import TabUCellBaseModel
 
 _COMPONENT_AXES = ("tokenizer", "dynamics", "readout")
+_TOKENIZER_IDENTITY_KEYS = (
+    "tokenizer_version",
+    "nominal_tokenizer",
+    "nominal_codebook_size",
+    "nominal_codebook_seed",
+    "nominal_codebook_hash",
+)
 
 
 class SubstitutionStatus(StrEnum):
@@ -140,11 +147,14 @@ class SubstitutionAssessment:
     expected_axis: str
     changed_axes: tuple[str, ...]
     interface_stable: bool
+    non_target_config_stable: bool
     variant_identity_changed: bool
     reference_composition_hash: str
     candidate_composition_hash: str
     reference_variant_hash: str
     candidate_variant_hash: str
+    reference_non_target_hash: str
+    candidate_non_target_hash: str
     status: SubstitutionStatus
 
     def as_dict(self) -> dict[str, Any]:
@@ -152,11 +162,14 @@ class SubstitutionAssessment:
             "expected_axis": self.expected_axis,
             "changed_axes": self.changed_axes,
             "interface_stable": self.interface_stable,
+            "non_target_config_stable": self.non_target_config_stable,
             "variant_identity_changed": self.variant_identity_changed,
             "reference_composition_hash": self.reference_composition_hash,
             "candidate_composition_hash": self.candidate_composition_hash,
             "reference_variant_hash": self.reference_variant_hash,
             "candidate_variant_hash": self.candidate_variant_hash,
+            "reference_non_target_hash": self.reference_non_target_hash,
+            "candidate_non_target_hash": self.candidate_non_target_hash,
             "status": self.status.value,
         }
 
@@ -188,6 +201,25 @@ def inspect_tabu_base_composition(model: TabUCellBaseModel) -> TabUBaseCompositi
     )
 
 
+def _non_target_identity(model: TabUCellBaseModel, expected_axis: str) -> dict[str, Any]:
+    """Normalize checkpoint identity by removing only the declared target axis."""
+
+    identity = dict(model.checkpoint_identity())
+    identity.pop("variant_hash")
+    identity.pop("variant_ref")
+    if expected_axis == "tokenizer":
+        for key in _TOKENIZER_IDENTITY_KEYS:
+            identity.pop(key, None)
+    elif expected_axis == "dynamics":
+        reference_config = dict(identity["reference_config"])
+        reference_config.pop("block_kind")
+        identity["reference_config"] = reference_config
+    else:
+        identity.pop("terminal")
+        identity.pop("ll_ridge")
+    return identity
+
+
 def assess_tabu_base_substitution(
     *,
     reference_model: TabUCellBaseModel,
@@ -209,16 +241,27 @@ def assess_tabu_base_substitution(
     reference_variant_hash = reference_model.variant_ref.semantic_hash
     candidate_variant_hash = candidate_model.variant_ref.semantic_hash
     variant_identity_changed = reference_variant_hash != candidate_variant_hash
-    passed = changed_axes == (expected_axis,) and interface_stable and variant_identity_changed
+    reference_non_target_hash = canonical_hash(_non_target_identity(reference_model, expected_axis))
+    candidate_non_target_hash = canonical_hash(_non_target_identity(candidate_model, expected_axis))
+    non_target_config_stable = reference_non_target_hash == candidate_non_target_hash
+    passed = (
+        changed_axes == (expected_axis,)
+        and interface_stable
+        and non_target_config_stable
+        and variant_identity_changed
+    )
     return SubstitutionAssessment(
         expected_axis=expected_axis,
         changed_axes=changed_axes,
         interface_stable=interface_stable,
+        non_target_config_stable=non_target_config_stable,
         variant_identity_changed=variant_identity_changed,
         reference_composition_hash=reference.composition_hash,
         candidate_composition_hash=candidate.composition_hash,
         reference_variant_hash=reference_variant_hash,
         candidate_variant_hash=candidate_variant_hash,
+        reference_non_target_hash=reference_non_target_hash,
+        candidate_non_target_hash=candidate_non_target_hash,
         status=SubstitutionStatus.PASS if passed else SubstitutionStatus.FAIL,
     )
 
