@@ -81,6 +81,15 @@ from .query_row_r5_classical_icl import (
     QueryRowR5ClassicalResult,
     run_query_row_r5_classical_icl,
 )
+from .query_row_openml_frozen_transfer import (
+    BASELINE_CONFIG as QUERY_OPENML_BASELINE_CONFIG,
+    BASELINE_IDS as QUERY_OPENML_BASELINE_IDS,
+    QUERY_OPENML_K_GRID,
+    QUERY_OPENML_PANEL_SCHEMA,
+    QUERY_OPENML_RESULT_SCHEMA,
+    load_query_openml_panel_manifest,
+    run_query_row_openml_frozen_transfer,
+)
 from .query_row_synthetic_fit import (
     QueryRowSyntheticEpisode,
     QueryRowSyntheticFitResult,
@@ -151,6 +160,13 @@ __all__ = [
     "QueryRowR5ClassicalRecord",
     "QueryRowR5ClassicalResult",
     "run_query_row_r5_classical_icl",
+    "QUERY_OPENML_BASELINE_CONFIG",
+    "QUERY_OPENML_BASELINE_IDS",
+    "QUERY_OPENML_K_GRID",
+    "QUERY_OPENML_PANEL_SCHEMA",
+    "QUERY_OPENML_RESULT_SCHEMA",
+    "load_query_openml_panel_manifest",
+    "run_query_row_openml_frozen_transfer",
     "QueryRowFinetuneLiftRecord",
     "QueryRowFinetuneLiftResult",
     "run_query_row_finetune_lift",
