@@ -35,6 +35,18 @@ uv sync --frozen --extra dev
 uv run pytest
 ```
 
+## Stage 2: bounded composability
+
+The next gate checks whether the existing tokenizer, dynamics, and readout
+alternatives can be substituted one axis at a time while the public forward
+interface stays fixed and model identity changes honestly. It also checks that
+the model registry can add a namespaced builder without replacing the protected
+TabUBase anchor.
+
+See [`docs/architecture/tabubase-composability.md`](./docs/architecture/tabubase-composability.md)
+for the reader-facing boundary. This is an architecture-evolvability check, not
+a fitting or prediction-quality result.
+
 ## Website
 
 - Public entrance: https://research.wehub.us/tabu-lab/
