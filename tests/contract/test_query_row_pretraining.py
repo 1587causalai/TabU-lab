@@ -6,6 +6,7 @@ import pytest
 
 from tabu_lab.experiments import (
     load_query_row_pretrain_checkpoint,
+    run_query_row_frozen_icl,
     run_query_row_synthetic_pretraining,
 )
 from tabu_lab.models import build_model
@@ -101,3 +102,27 @@ def test_tabur_supervised_pretraining_uses_a_distinct_profile_identity() -> None
     assert completion.profile_id != supervised.profile_id
     assert completion.model_spec_hash == supervised.model_spec_hash
 
+
+def test_tabur_frozen_icl_can_bind_a_completion_checkpoint(tmp_path: Path) -> None:
+    checkpoint = tmp_path / "tabur-completion.safetensors"
+    run_query_row_synthetic_pretraining(
+        profile="completion.artificial_mask.v1",
+        rows=8,
+        worlds=2,
+        steps=2,
+        row_token_count=4,
+        output=checkpoint,
+    )
+
+    result = run_query_row_frozen_icl(
+        seed=1729,
+        rows=12,
+        context_rows=(4, 8),
+        row_token_count=4,
+        checkpoint=checkpoint,
+    )
+
+    assert result.status == "pass"
+    assert result.checkpoint == str(checkpoint)
+    assert all(record.parameter_hash_unchanged for record in result.records)
+    assert all(not record.optimizer_created for record in result.records)

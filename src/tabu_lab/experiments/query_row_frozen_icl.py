@@ -10,6 +10,7 @@ from __future__ import annotations
 import hashlib
 import math
 from dataclasses import asdict, dataclass
+from pathlib import Path
 from typing import Any
 
 import torch
@@ -41,6 +42,7 @@ def _row_model(
     seed: int,
     row_token_count: int,
     device: torch.device,
+    max_features: int = 4,
 ) -> torch.nn.Module:
     torch.manual_seed(seed)
     return build_model(
@@ -52,7 +54,7 @@ def _row_model(
             n_blocks=1,
             inducing_slots=2,
             matched_slots=row_token_count,
-            max_features=4,
+            max_features=max_features,
         ),
         profile="completion.artificial_mask.v1",
         row_token_count=row_token_count,
@@ -104,6 +106,7 @@ class QueryRowFrozenICLResult:
     device: str
     seed: int
     records: tuple[QueryRowFrozenICLRecord, ...]
+    checkpoint: str | None = None
 
     def as_dict(self) -> dict[str, Any]:
         payload = asdict(self)
@@ -131,6 +134,7 @@ def run_query_row_frozen_icl(
     row_token_count: int = 4,
     learning_rate: float = 1.0e-2,
     device: str | torch.device = "cpu",
+    checkpoint: Path | None = None,
 ) -> QueryRowFrozenICLResult:
     """Run frozen synthetic ICL with explicit no-optimizer controls."""
 
@@ -142,28 +146,37 @@ def run_query_row_frozen_icl(
     if not context_rows or any(size < 1 or size >= rows for size in context_rows):
         raise ValueError("context_rows must be non-empty and smaller than rows")
 
+    checkpointed = checkpoint is not None
     pretrained = _row_model(
         seed=seed,
         row_token_count=row_token_count,
         device=resolved_device,
+        max_features=256 if checkpointed else 4,
     )
-    train_episodes = tuple(
-        make_query_row_synthetic_episode(
-            seed=seed + 10 + index,
-            rows=rows,
-            row_token_count=row_token_count,
-            world_id=f"pretrain-world-{index}",
-            world_family="row_latent_linear" if index % 2 == 0 else "row_latent_polynomial",
+    if checkpointed:
+        from .query_row_pretraining import load_query_row_pretrain_checkpoint
+
+        load_query_row_pretrain_checkpoint(pretrained, checkpoint)
+    else:
+        train_episodes = tuple(
+            make_query_row_synthetic_episode(
+                seed=seed + 10 + index,
+                rows=rows,
+                row_token_count=row_token_count,
+                world_id=f"pretrain-world-{index}",
+                world_family="row_latent_linear"
+                if index % 2 == 0
+                else "row_latent_polynomial",
+            )
+            for index in range(pretrain_worlds)
         )
-        for index in range(pretrain_worlds)
-    )
-    optimizer = torch.optim.Adam(pretrained.parameters(), lr=learning_rate)
-    pretrained.train()
-    for step in range(pretrain_steps):
-        loss = _episode_loss(pretrained, train_episodes[step % len(train_episodes)])
-        optimizer.zero_grad(set_to_none=True)
-        loss.backward()
-        optimizer.step()
+        optimizer = torch.optim.Adam(pretrained.parameters(), lr=learning_rate)
+        pretrained.train()
+        for step in range(pretrain_steps):
+            loss = _episode_loss(pretrained, train_episodes[step % len(train_episodes)])
+            optimizer.zero_grad(set_to_none=True)
+            loss.backward()
+            optimizer.step()
 
     records: list[QueryRowFrozenICLRecord] = []
     model_spec_hash = pretrained.model_spec_hash
@@ -180,6 +193,7 @@ def run_query_row_frozen_icl(
             seed=seed + 1000 + context_size,
             row_token_count=row_token_count,
             device=resolved_device,
+            max_features=256 if checkpointed else 4,
         )
         shuffled = _shuffled_sidecar(episode)
         arms = (
@@ -223,6 +237,7 @@ def run_query_row_frozen_icl(
         device=str(resolved_device),
         seed=seed,
         records=tuple(records),
+        checkpoint=str(checkpoint) if checkpoint is not None else None,
     )
 
 
