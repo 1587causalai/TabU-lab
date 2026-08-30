@@ -68,6 +68,11 @@ from .query_row_supervised_synthetic_v2 import (
     supervised_synthetic_v2_episode_loss,
     validate_query_row_supervised_synthetic_v2,
 )
+from .query_row_r5_pretraining import (
+    R5_LEARNING_RATES,
+    R5_RUNG_SPECS,
+    run_query_row_r5_bounded_pretraining,
+)
 from .query_row_synthetic_fit import (
     QueryRowSyntheticEpisode,
     QueryRowSyntheticFitResult,
@@ -129,6 +134,9 @@ __all__ = [
     "substitute_query_truth",
     "supervised_synthetic_v2_episode_loss",
     "validate_query_row_supervised_synthetic_v2",
+    "R5_LEARNING_RATES",
+    "R5_RUNG_SPECS",
+    "run_query_row_r5_bounded_pretraining",
     "QueryRowFinetuneLiftRecord",
     "QueryRowFinetuneLiftResult",
     "run_query_row_finetune_lift",
