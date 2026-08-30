@@ -58,6 +58,17 @@ See [`docs/architecture/evidence-core.md`](./docs/architecture/evidence-core.md)
 These contracts make evidence auditable; they do not issue a receipt or accept a
 scientific claim by themselves.
 
+## YAML mathematics and TeX projection
+
+`ModelSpec` may carry an optional, typed `mathematics` block: named notation,
+ordered equations, and falsifiable invariants. `render_model_tex` turns that block
+into deterministic standalone TeX while escaping prose and preserving authored
+formula LaTeX.
+
+See [`docs/architecture/yaml-mathematics.md`](./docs/architecture/yaml-mathematics.md).
+The existing `tabu.cell.base@0.2.0` YAML is intentionally unchanged; adding
+mathematics to that immutable contract requires a reviewed version decision.
+
 ## Stage 2: bounded composability
 
 The next gate checks whether the existing tokenizer, dynamics, and readout

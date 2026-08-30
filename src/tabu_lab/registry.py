@@ -20,6 +20,8 @@ from typing import Any, Literal
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 
+from tabu_lab.mathspec import Mathematics
+
 
 class BuildStatus(StrEnum):
     """Typed runtime outcome of a registry build request."""
@@ -176,6 +178,7 @@ class ModelSpec(BaseModel):
     capabilities: tuple[str, ...] = Field(min_length=1)
     maturity: Maturity
     maturity_evidence: MaturityEvidence | None = None
+    mathematics: Mathematics | None = None
     experimental_defaults: dict[str, Any] = Field(min_length=1)
     known_open: tuple[OpenItem, ...]
     alternatives: tuple[Alternative, ...]
