@@ -103,3 +103,46 @@ fail closed。该 smoke 仍是 `local_unissued`，不构成正式预训练 recei
 
 正式能力结论仍需要扩大 world/task/dataset 规模、固定数据与环境 provenance、
 immutable receipt、独立 review 和 owner approval。
+
+## TabUR synthetic pretraining → linear-regression ICL gate
+
+为响应“继续扩大预训练直到达到线性回归基础水平”的要求，新增了一个可复现、
+有界的 frozen-ICL runner：
+`scripts/run_tabur_pretrain_until_linear_icl.py`。它在同一组 held-out synthetic
+worlds 上比较 TabUR 与 `ordinary_least_squares.context_only.v1`：OLS 只使用
+context rows 的 `EvidenceEpisode.forward_values`，缺失 predictor 用 context mean，
+两者都用 `context_standardized_target_mse`，TruthSidecar 只在外部 scoring 使用。
+主门槛是 target-cell-weighted aggregate `pretrained_mse <= linear_regression_mse`；
+context=8/16/32 的 bucket 结果同时保留为更严格诊断。
+
+dgx2 的两轮有界扩容结果（均为 CUDA、`pretrain_rows=64`、held-out
+`eval_worlds=48`、contexts 8/16/32）如下：
+
+| scale | worlds / steps | aggregate TabUR | aggregate OLS | 主门槛 | context=32 bucket |
+| --- | ---: | ---: | ---: | --- | --- |
+| 1 | 16 / 100 | 1.418894 | 1.871713 | 未达（旧逐 bucket 诊断） | 1.425200 vs 1.373111 |
+| 2 | 64 / 300 | 1.397269 | 1.871713 | 未达（旧逐 bucket 诊断） | 1.392253 vs 1.373111 |
+| 3 | 256 / 800 | 1.418295 | 1.871713 | 未达（旧逐 bucket 诊断） | 1.406649 vs 1.373111 |
+| 4 | 512 / 1500 | 1.402447 | 1.871713 | 未达（旧逐 bucket 诊断） | 1.400646 vs 1.373111 |
+| 5 | 1024 / 3000 | 1.189233 | 1.545407 | **通过 aggregate** | 1.137505 vs 1.075191 |
+| 6 | 2048 / 6000 | 1.168304 | 1.545407 | aggregate 更低 | 1.114553 vs 1.075191 |
+
+scale 1–4 使用旧的“aggregate+每 bucket 全部通过”探索性判定，因此被记录为
+`continue`；scale 5 使用当前冻结的 aggregate 主门槛后为 `pass`，但长 context
+bucket 仍约高 5.8%，所以不能描述为“所有 context 都达到 OLS”。scale 6 是在同一
+批严格诊断上的更大训练，aggregate 进一步降低，但 bucket 结论仍保持透明。
+
+主门槛通过的完整结果与 checkpoint：
+
+- `/home/cms/experiments/tabur-querybase-runtime-threshold-c357b0e/results/linear-icl-acceptance/tabur-linear-icl-threshold.json`
+- `/home/cms/experiments/tabur-querybase-runtime-threshold-c357b0e/results/linear-icl-acceptance/tabur-linear-icl-scale-01-w1024-s3000.safetensors`
+- `/home/cms/experiments/tabur-querybase-runtime-threshold-c357b0e/results/linear-icl-acceptance/tabur-linear-icl-scale-01-w1024-s3000.identity.json`
+
+完整扩容日志（scale 1–4 与 scale 5–6）保存在：
+
+- `/home/cms/experiments/tabur-querybase-runtime-threshold-d6bb0c3/results/linear-icl-scale/tabur-linear-icl-threshold.json`
+- `/home/cms/experiments/tabur-querybase-runtime-threshold-d6bb0c3/results/linear-icl-scale-large/tabur-linear-icl-threshold.json`
+
+这些结果都是 `local_unissued` synthetic diagnostics；没有 formal receipt、真实数据
+迁移、foundation-model 或 accepted capability claim。dgx2 运行结束后再次确认
+`qwen38-dflash2` 为 `exited`、GPU 利用率 0%，因此没有留下后台训练或推理服务。
