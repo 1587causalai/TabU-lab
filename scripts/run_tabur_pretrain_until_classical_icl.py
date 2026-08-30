@@ -38,6 +38,11 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--context-rows", default="8,16,32")
     parser.add_argument("--row-token-count", type=int, default=4)
     parser.add_argument("--learning-rate", type=float, default=1.0e-2)
+    parser.add_argument(
+        "--continue-after-pass",
+        action="store_true",
+        help="Run every requested scale even after the aggregate gate passes.",
+    )
     parser.add_argument("--output-dir", type=Path, required=True)
     return parser
 
@@ -96,7 +101,7 @@ def main(argv: list[str] | None = None) -> int:
             ),
             flush=True,
         )
-        if result.threshold_met:
+        if result.threshold_met and not args.continue_after_pass:
             break
 
     threshold_met = any(item["threshold_met"] for item in attempts)
