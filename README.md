@@ -2,6 +2,31 @@
 
 An open research lab for tabular foundation models, inspired by [Marin](https://github.com/marin-community/marin).
 
+## Current model anchor
+
+The first executable contract in this repository is `tabu.cell.base@0.2.0`, also
+called **TabUBase**. It treats each table cell as one Unit and exposes two explicit
+forward profiles:
+
+- `completion.artificial_mask.v1` for artificial-mask completion;
+- `supervised.label_broadcast.v1` for a single declared response column.
+
+This anchor establishes a buildable, identity-bound, truth-free reference forward.
+It does **not** claim useful fitting, real-data prediction, frozen ICL, fine-tuning
+lift, or foundation-model evidence. Those are separate evaluation gates.
+
+The public and packaged ModelSpec files are byte-identical:
+
+- `specs/models/tabu.cell.base.yaml`
+- `src/tabu_lab/specs/models/tabu.cell.base.yaml`
+
+Run the focused contract gate with:
+
+```bash
+uv sync --frozen --extra dev
+uv run pytest
+```
+
 ## Website
 
 - Public entrance: https://research.wehub.us/tabu-lab/
@@ -19,9 +44,11 @@ The website is a public research surface, not a source of model or benchmark evi
 
 ## Layout
 
-- `experiments/` — one file/directory per experiment; hypothesis, gate, command, results, receipt
-- `docs/reports/` — consolidated learnings and retrospectives
-- `lib/` — model / data / evaluation code
+- `src/tabu_lab/` — typed contracts, model kernel, registry, and reference implementation
+- `specs/models/` — public ModelSpec source
+- `tests/contract/` — correctness and boundary tests for the model anchor
+- `experiments/` — future preregistered evaluation work; not evidence by itself
+- `docs/reports/` — reviewed findings and retrospectives when evidence exists
 
 ## Related
 
