@@ -146,3 +146,38 @@ bucket 仍约高 5.8%，所以不能描述为“所有 context 都达到 OLS”�
 这些结果都是 `local_unissued` synthetic diagnostics；没有 formal receipt、真实数据
 迁移、foundation-model 或 accepted capability claim。dgx2 运行结束后再次确认
 `qwen38-dflash2` 为 `exited`、GPU 利用率 0%，因此没有留下后台训练或推理服务。
+
+## TabUR vs MLP/XGBoost synthetic ICL
+
+随后将“同级性能”落实为同一 synthetic ICL episode 的 classical 对照：每个
+held-out world、每个 target feature，MLP 与 XGBoost 只在前 `context_rows` 个完整行上
+拟合；query 行中被 mask 的 predictor 统一填充为 context mean。TabUR、OLS、MLP、XGBoost
+只在同一 query target cells 上计分，指标仍为 `context_standardized_target_mse`。
+MLP/XGBoost 的配置 hash 固定，dgx2 runtime 版本为 scikit-learn `1.8.0`、XGBoost
+`3.3.0`。
+
+24 个 held-out worlds 的 scale sweep：
+
+| pretrain worlds / steps | TabUR | MLP | XGBoost | TabUR / MLP | TabUR / XGBoost |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 256 / 800 | 1.226172 | 2.205809 | 1.426185 | 0.5559 | 0.8598 |
+| 1024 / 3000 | 1.227099 | 2.205809 | 1.426185 | 0.5563 | 0.8604 |
+| 2048 / 6000 | 1.207661 | 2.205809 | 1.426185 | 0.5475 | 0.8468 |
+
+最终用 48 个 held-out worlds 对 2048/6000 配置复核：TabUR `1.168304`、MLP
+`2.167919`、XGBoost `1.386660`，即相对 MLP 比值 `0.5389`，相对 XGBoost 比值
+`0.8425`。分 context bucket 的结果也保持同方向：
+
+- context=8：TabUR `1.217558`，MLP `2.219853`，XGBoost `1.540592`；
+- context=16：TabUR `1.146098`，MLP `2.300577`，XGBoost `1.343763`；
+- context=32：TabUR `1.114553`，MLP `1.872336`，XGBoost `1.178110`。
+
+因此当前 bounded synthetic frozen-ICL gate 在 aggregate 和三个 context bucket 上
+均通过（`threshold_met=true`）。原始结果：
+
+- `/home/cms/experiments/tabur-querybase-runtime-classical-f91df66/results/large-eval48/tabur-classical-icl-threshold.json`
+- `/home/cms/experiments/tabur-querybase-runtime-classical-f91df66/results/scales/tabur-classical-icl-threshold.json`
+
+这证明的是当前 synthetic world family、context policy 和预算下的相对性能，尚不能
+外推到真实数据、独立 benchmark 或 foundation-model 能力；正式结论仍需要固定数据
+authority、immutable receipt、独立 review 与 owner approval。
