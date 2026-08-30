@@ -10,6 +10,7 @@ private machine detail.
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping, Sequence
 
 # ``\w`` is intentionally Unicode-aware.  An ASCII-only left boundary would
 # treat ordinary prose such as ``输入/输出`` as if ``/输出`` started a path,
@@ -164,9 +165,30 @@ def contains_private_identity_or_secret(value: str) -> bool:
     )
 
 
+def require_public_evidence_safe(value: object) -> None:
+    """Recursively reject local paths, private identities, and likely secrets."""
+
+    if isinstance(value, Mapping):
+        for key, item in value.items():
+            if is_sensitive_public_key(key):
+                raise ValueError("public evidence contains a sensitive mapping key")
+            require_public_evidence_safe(item)
+        return
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
+        for item in value:
+            require_public_evidence_safe(item)
+        return
+    if isinstance(value, str):
+        if contains_absolute_local_path(value):
+            raise ValueError("public evidence contains an absolute local path")
+        if contains_private_identity_or_secret(value):
+            raise ValueError("public evidence contains a private identity or likely secret")
+
+
 __all__ = [
     "contains_absolute_local_path",
     "contains_local_file_uri",
     "contains_private_identity_or_secret",
     "is_sensitive_public_key",
+    "require_public_evidence_safe",
 ]

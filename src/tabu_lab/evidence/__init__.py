@@ -43,6 +43,7 @@ from .source_identity import (
     SourceIdentity,
     distribution_source_identity,
     git_source_identity,
+    git_source_tree_hash,
 )
 
 __all__ = [
@@ -79,6 +80,7 @@ __all__ = [
     "distribution_source_identity",
     "generate_public_schema",
     "git_source_identity",
+    "git_source_tree_hash",
     "read_receipt",
     "require_sha256",
     "to_canonical_data",

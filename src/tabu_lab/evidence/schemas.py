@@ -25,6 +25,7 @@ from .canonical import require_sha256, to_canonical_data
 from .public_safety import (
     contains_absolute_local_path,
     contains_private_identity_or_secret,
+    require_public_evidence_safe,
 )
 
 Sha256 = Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
@@ -43,7 +44,9 @@ class EvidenceSchema(BaseModel):
 
     @model_validator(mode="after")
     def _is_canonicalizable(self) -> EvidenceSchema:
-        to_canonical_data(self.model_dump(mode="python", by_alias=False))
+        payload = self.model_dump(mode="python", by_alias=False)
+        to_canonical_data(payload)
+        require_public_evidence_safe(payload)
         return self
 
     @property

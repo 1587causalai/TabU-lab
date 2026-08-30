@@ -18,6 +18,8 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from tabu_lab.contracts import canonical_hash
 
+from .public_safety import require_public_evidence_safe
+
 _SHA256_PATTERN = r"^[0-9a-f]{64}$"
 _GIT_OBJECT_PATTERN = r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$"
 _SCP_REMOTE = re.compile(r"^(?:[^@/]+@)?(?P<host>[^:/]+):(?P<path>.+)$")
@@ -126,6 +128,19 @@ class SourceIdentity(BaseModel):
         else:
             raise ValueError("local source kind cannot be promoted to formal")
         return self
+
+    @model_validator(mode="after")
+    def _public_and_canonical(self) -> SourceIdentity:
+        require_public_evidence_safe(self.model_dump(mode="python"))
+        return self
+
+    @property
+    def content_hash(self) -> str:
+        return canonical_hash(self.model_dump(mode="python"))
+
+    @property
+    def schema_hash(self) -> str:
+        return self.content_hash
 
 
 def _sha256_bytes(payload: bytes) -> str:
@@ -511,6 +526,57 @@ def _installed_source_tree_hash(files: Sequence[Mapping[str, object]]) -> str:
     )
 
 
+def _normalized_git_source_files(
+    source_files: Sequence[Mapping[str, object]],
+) -> tuple[dict[str, object], ...]:
+    normalized: list[dict[str, object]] = []
+    seen: set[str] = set()
+    for entry in source_files:
+        relative_path = entry.get("path")
+        expected_sha256 = entry.get("sha256")
+        expected_size = entry.get("size")
+        if (
+            not isinstance(relative_path, str)
+            or not relative_path
+            or relative_path.startswith(("/", "\\"))
+            or "\\" in relative_path
+            or relative_path != Path(relative_path).as_posix()
+            or "." in Path(relative_path).parts
+            or ".." in Path(relative_path).parts
+            or not isinstance(expected_sha256, str)
+            or re.fullmatch(_SHA256_PATTERN, expected_sha256) is None
+            or not isinstance(expected_size, int)
+            or isinstance(expected_size, bool)
+            or expected_size < 0
+            or relative_path in seen
+        ):
+            raise ValueError("source_files must contain unique normalized digest entries")
+        seen.add(relative_path)
+        normalized.append(
+            {
+                "path": relative_path,
+                "sha256": expected_sha256,
+                "size": expected_size,
+            }
+        )
+    if not normalized:
+        raise ValueError("source_files cannot be empty")
+    return tuple(sorted(normalized, key=lambda item: str(item["path"])))
+
+
+def git_source_tree_hash(source_files: Sequence[Mapping[str, object]]) -> str:
+    """Hash the verified repository source-manifest preimage."""
+
+    return canonical_hash(
+        {
+            "schema_version": "tabu.source-tree-preimage.v1",
+            "mode": "repository",
+            "root_label": "repository",
+            "files": _normalized_git_source_files(source_files),
+        }
+    )
+
+
 def git_source_identity(
     repository: str | Path,
     *,
@@ -588,6 +654,20 @@ def git_source_identity(
                 source_files=source_files,
             )
         )
+        try:
+            normalized_source_files = _normalized_git_source_files(source_files or ())
+        except ValueError:
+            normalized_source_files = ()
+        if normalized_source_files:
+            if git_source_tree_hash(normalized_source_files) != source_tree_hash:
+                reasons.append("source_tree_hash_mismatch")
+            lock_entries = tuple(
+                entry for entry in normalized_source_files if entry["path"] == "uv.lock"
+            )
+            if len(lock_entries) != 1:
+                reasons.append("dependency_lock_not_in_source_manifest")
+            elif lock_hash != lock_entries[0]["sha256"]:
+                reasons.append("dependency_lock_digest_mismatch")
 
     if preregistration is None:
         reasons.append("preregistration_not_provided")
@@ -772,4 +852,5 @@ __all__ = [
     "SourceIdentity",
     "distribution_source_identity",
     "git_source_identity",
+    "git_source_tree_hash",
 ]

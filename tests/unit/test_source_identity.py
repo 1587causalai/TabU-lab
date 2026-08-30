@@ -19,6 +19,7 @@ from tabu_lab.evidence.source_identity import (
     SourceIdentity,
     distribution_source_identity,
     git_source_identity,
+    git_source_tree_hash,
 )
 
 
@@ -50,12 +51,7 @@ def _reviewed_repository(tmp_path: Path) -> tuple[Path, Path, str, str]:
     _git(repository, "remote", "add", "origin", "https://example.test/wehub/tabu-lab.git")
     _git(repository, "update-ref", "refs/remotes/origin/main", "HEAD")
     _git(repository, "branch", "--set-upstream-to=origin/main", "main")
-    tree_hash = canonical_hash(
-        {
-            "schema_version": "test.source-tree.v1",
-            "files": ("src/tabu_lab/__init__.py",),
-        }
-    )
+    tree_hash = git_source_tree_hash(_source_files(repository))
     lock_hash = hashlib.sha256(lock.read_bytes()).hexdigest()
     return repository, preregistration, tree_hash, lock_hash
 
@@ -194,7 +190,7 @@ def test_nested_source_scope_ignores_unrelated_parent_dirt_but_binds_subtree(
     identity = git_source_identity(
         scope,
         preregistration=preregistration,
-        source_tree_hash=canonical_hash(files),
+        source_tree_hash=git_source_tree_hash(files),
         lock_hash=hashlib.sha256(lock.read_bytes()).hexdigest(),
         request_formal=True,
         reviewed=True,
@@ -521,3 +517,48 @@ def test_schema_rejects_manual_formal_promotion_without_reviewed_bindings() -> N
             issuance_status="formal",
             reviewed=False,
         )
+
+
+@pytest.mark.parametrize(
+    ("tree_hash", "lock_hash", "reason"),
+    (
+        ("a" * 64, None, "source_tree_hash_mismatch"),
+        (None, "b" * 64, "dependency_lock_digest_mismatch"),
+    ),
+)
+def test_formal_git_identity_rejects_arbitrary_tree_or_lock_hash(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    tree_hash: str | None,
+    lock_hash: str | None,
+    reason: str,
+) -> None:
+    repository, preregistration, expected_tree_hash, expected_lock_hash = (
+        _reviewed_repository(tmp_path)
+    )
+    commit = _git(repository, "rev-parse", "HEAD")
+    monkeypatch.setattr(source_identity_module, "_remote_ref_oid", lambda *args: commit)
+
+    identity = git_source_identity(
+        repository,
+        preregistration=preregistration,
+        source_tree_hash=tree_hash or expected_tree_hash,
+        lock_hash=lock_hash or expected_lock_hash,
+        request_formal=True,
+        reviewed=True,
+        source_files=_source_files(repository),
+    )
+
+    assert identity.issuance_status == "local_unissued"
+    assert reason in identity.reasons
+
+
+def test_source_identity_has_deterministic_content_hash() -> None:
+    identity = SourceIdentity(
+        source_kind="local",
+        issuance_status="local_unissued",
+        reasons=("formal_issuance_not_requested",),
+    )
+
+    assert identity.content_hash == identity.schema_hash
+    assert len(identity.content_hash) == 64

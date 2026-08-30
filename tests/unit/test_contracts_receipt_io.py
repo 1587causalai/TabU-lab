@@ -10,6 +10,7 @@ from threading import Barrier
 import pytest
 
 from tabu_lab.evidence import (
+    ArtifactRef,
     EnvironmentDisclosure,
     Receipt,
     ReceiptIntegrityError,
@@ -149,3 +150,33 @@ def test_concurrent_publish_has_exactly_one_immutable_winner(
     assert sorted(status for status, _ in results) == ["exists", "written"]
     assert read_receipt(path) in (first, second)
     assert not tuple(tmp_path.glob("*.lock"))
+
+
+def test_public_evidence_rejects_local_artifact_uri() -> None:
+    with pytest.raises(ValueError, match="absolute local path"):
+        ArtifactRef(
+            artifact_id="private-log",
+            kind="log",
+            uri="file:///Users/alice/private.log",
+            sha256="a" * 64,
+            size_bytes=1,
+        )
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    (
+        ("command", ("python", "/Users/alice/run.py"), "absolute local path"),
+        ("metadata", {"access_token": "redacted"}, "sensitive mapping key"),
+    ),
+)
+def test_receipt_recursively_rejects_private_public_fields(
+    field: str,
+    value: object,
+    message: str,
+) -> None:
+    payload = _receipt().model_dump(mode="python")
+    payload[field] = value
+
+    with pytest.raises(ValueError, match=message):
+        Receipt.model_validate(payload)
