@@ -73,6 +73,14 @@ from .query_row_r5_pretraining import (
     R5_RUNG_SPECS,
     run_query_row_r5_bounded_pretraining,
 )
+from .query_row_r5_classical_icl import (
+    CLASSICAL_R5_BASELINE_CONFIG,
+    CLASSICAL_R5_BASELINE_IDS,
+    QueryRowR5ClassicalCheckpointResult,
+    QueryRowR5ClassicalRecord,
+    QueryRowR5ClassicalResult,
+    run_query_row_r5_classical_icl,
+)
 from .query_row_synthetic_fit import (
     QueryRowSyntheticEpisode,
     QueryRowSyntheticFitResult,
@@ -137,6 +145,12 @@ __all__ = [
     "R5_LEARNING_RATES",
     "R5_RUNG_SPECS",
     "run_query_row_r5_bounded_pretraining",
+    "CLASSICAL_R5_BASELINE_CONFIG",
+    "CLASSICAL_R5_BASELINE_IDS",
+    "QueryRowR5ClassicalCheckpointResult",
+    "QueryRowR5ClassicalRecord",
+    "QueryRowR5ClassicalResult",
+    "run_query_row_r5_classical_icl",
     "QueryRowFinetuneLiftRecord",
     "QueryRowFinetuneLiftResult",
     "run_query_row_finetune_lift",

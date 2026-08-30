@@ -1,0 +1,96 @@
+schema_version: tabu.query-row.r5-v2-frozen-classical-panel.v1
+experiment_id: tabur-r5-v2-frozen-classical-panel-2026-08-31
+status: proposed
+created_at: '2026-08-31'
+contract:
+  contract_id: tabu.query.row
+  contract_version: '0.1.0'
+  model_spec_hash: 24f9ddae70b116b2ac88d2ccc833870ca351de8148774fe8b9fbf72a0c58d1c0
+generator:
+  generator_id: tabur.supervised-query-row-diverse-v2
+  generator_schema: tabu.query-row.supervised-synthetic-v2.recipe.v1
+  partition: validation
+  root_seed_offset: 500000
+  worlds: 512
+  world_plan: frozen_before_evaluation
+  train_validation_world_ids_disjoint: true
+checkpoint_set:
+  source_run: r5-b0-b1-20260830
+  rungs: [B0, B1]
+  seeds: [1729, 2718, 31415]
+  checkpoint_identity_required: true
+  checkpoint_load_must_fail_closed: true
+panel:
+  context_rows: generator_plan
+  rows: two_times_context_rows
+  target: response_column_on_query_rows
+  predictors: all_visible_predictor_columns
+  target_truth_visibility: sidecar_only
+  missing_predictor_policy: context_mean
+  primary_metric: raw_response_mse
+  diagnostic_metric: context_standardized_response_mse
+arms:
+  - id: tabur_pretrained_frozen
+    fit_scope: none
+    optimizer_created: false
+    parameter_updates: false
+  - id: ordinary_least_squares_context_only
+    fit_scope: context_rows_only
+    ridge: 0.0001
+  - id: mlp_regressor_context_only
+    fit_scope: context_rows_only
+    hidden_layer_sizes: [64, 64]
+    activation: relu
+    solver: adam
+    alpha: 0.0001
+    learning_rate_init: 0.001
+    max_iter: 500
+    early_stopping: false
+    shuffle: true
+  - id: xgboost_regressor_context_only
+    fit_scope: context_rows_only
+    n_estimators: 300
+    max_depth: 6
+    learning_rate: 0.05
+    subsample: 0.8
+    colsample_bytree: 0.8
+    tree_method: hist
+    objective: reg:squarederror
+    n_jobs: 8
+controls:
+  parameter_hash_before_after: required
+  frozen_optimizer_created: false
+  frozen_parameter_update_attempted: false
+  target_truth_substitution_must_not_change_frozen_prediction: true
+pass_conditions:
+  - every checkpoint loads with matching sidecar and embedded identity
+  - every arm has finite raw and standardized response MSE on the same target cells
+  - every frozen checkpoint has identical before and after parameter hashes
+  - baseline fits use context rows only and score identical target counts
+kill_conditions:
+  - any checkpoint identity mismatch or tensor load before identity validation
+  - any target truth enters a model input or baseline fit
+  - any frozen optimizer creation or parameter mutation
+  - any non-finite prediction, loss, or baseline metric
+  - any arm scores a different target mask
+evaluation:
+  comparison_is_descriptive: true
+  no_threshold_promotion: true
+  no_foundation_model_claim: true
+  no_real_data_claim: true
+  no_b2_promotion: true
+evidence:
+  level: local_unissued
+  required_artifacts:
+    - result_json
+    - checkpoint_identity_hashes
+    - baseline_config_hash
+    - source_commit
+    - environment_lock
+claim_boundary: >-
+  Matched v2 synthetic held-out frozen-ICL diagnostic comparing a loaded TabUR
+  checkpoint with context-only linear, MLP, and XGBoost fits; no formal receipt,
+  real-data transfer claim, or accepted capability claim.
+review:
+  developer_and_reviewer_must_differ: true
+  gong_approval_required_for_release: true
