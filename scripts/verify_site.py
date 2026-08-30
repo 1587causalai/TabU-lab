@@ -7,7 +7,6 @@ from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urlparse
 
-
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC = ROOT / "site" / "public"
 REQUIRED = {
@@ -66,7 +65,10 @@ def fail(message: str) -> None:
 
 
 def main() -> None:
-    missing = sorted(REQUIRED - {str(path.relative_to(PUBLIC)) for path in PUBLIC.rglob("*") if path.is_file()})
+    missing = sorted(
+        REQUIRED
+        - {str(path.relative_to(PUBLIC)) for path in PUBLIC.rglob("*") if path.is_file()}
+    )
     if missing:
         fail(f"missing required files: {', '.join(missing)}")
 
@@ -131,7 +133,10 @@ def main() -> None:
     if card.get("project", {}).get("public_url") != "https://research.wehub.us/tabu-lab/":
         fail("agent card public URL mismatch")
 
-    print(f"PASS: {len(REQUIRED)} required files, {len(PAGES)} language pages, {total_ids} ids, {total_refs} references")
+    print(
+        f"PASS: {len(REQUIRED)} required files, {len(PAGES)} language pages, "
+        f"{total_ids} ids, {total_refs} references"
+    )
     print(f"PASS: marker={MARKER}")
     print("PASS: claim boundary remains lab_bootstrap / zero public training receipts")
 

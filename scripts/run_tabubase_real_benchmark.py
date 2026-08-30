@@ -43,6 +43,7 @@ def main() -> int:
         default=512,
         help="Maximum held-out rows; pass 0 to evaluate every held-out row.",
     )
+    parser.add_argument("--query-readout-chunk-rows", type=int, default=64)
     parser.add_argument("--checkpoint-phase", choices=("PT-S1", "PT-S2"), default="PT-S1")
     parser.add_argument("--seeds", default="1729,2718,31415")
     parser.add_argument(
@@ -72,6 +73,7 @@ def main() -> int:
         checkpoint_run_suffix=args.checkpoint_run_suffix,
         panel_manifest=args.panel_manifest,
         test_limit=None if args.test_limit == 0 else args.test_limit,
+        query_readout_chunk_rows=args.query_readout_chunk_rows,
     )
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0

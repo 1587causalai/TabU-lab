@@ -146,6 +146,8 @@ def _fixture_receipts() -> tuple[dict[str, Any], dict[str, Any]]:
     frozen = {
         "schema_version": FROZEN_SCHEMA,
         "status": "local_unissued",
+        "git_commit": "a" * 40,
+        "source_tree_sha256": "b" * 64,
         "context_policy": "full_train",
         "context_sizes": None,
         "query_limit": None,
@@ -181,6 +183,8 @@ def _fixture_receipts() -> tuple[dict[str, Any], dict[str, Any]]:
     baseline = {
         "schema_version": BASELINE_SCHEMA,
         "status": "local_unissued",
+        "git_commit": "a" * 40,
+        "source_tree_sha256": "b" * 64,
         "context_policy": "full_train",
         "train_policy": "all_train_partition_rows",
         "query_policy": "all_heldout_rows",
@@ -242,6 +246,7 @@ def test_comparison_reports_checkpoint_means_pooled_mean_and_inductive_baselines
     assert result["all_compatibility_and_frozen_gates_passed"] is True
     assert result["compatibility"]["all_heldout_query_rows_identical"] is True
     assert result["compatibility"]["frozen_optimizer_created"] is False
+    assert result["compatibility"]["producer_source_identity_equal"] is True
     dataset = result["datasets"]["classification-fixture"]
     assert dataset["common_metrics"] == [
         "accuracy",
@@ -341,6 +346,24 @@ def test_comparison_rejects_panel_manifest_content_identity_drift(tmp_path: Path
     frozen_path, baseline_path = _write_receipts(tmp_path, frozen, baseline)
 
     with pytest.raises(FullContextComparisonValidationError, match="panel_manifest_identity"):
+        compare_full_context_receipts(frozen_path, baseline_path)
+
+
+def test_comparison_rejects_producer_source_identity_drift(tmp_path: Path) -> None:
+    frozen, baseline = _fixture_receipts()
+    baseline["source_tree_sha256"] = "c" * 64
+    frozen_path, baseline_path = _write_receipts(tmp_path, frozen, baseline)
+
+    with pytest.raises(FullContextComparisonValidationError, match="producer_source_identity"):
+        compare_full_context_receipts(frozen_path, baseline_path)
+
+
+def test_comparison_rejects_missing_producer_source_identity(tmp_path: Path) -> None:
+    frozen, baseline = _fixture_receipts()
+    del frozen["git_commit"]
+    frozen_path, baseline_path = _write_receipts(tmp_path, frozen, baseline)
+
+    with pytest.raises(FullContextComparisonValidationError, match="frozen/git_commit"):
         compare_full_context_receipts(frozen_path, baseline_path)
 
 

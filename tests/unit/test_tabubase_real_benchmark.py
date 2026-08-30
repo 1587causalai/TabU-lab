@@ -7,14 +7,17 @@ import pytest
 import torch
 
 from tabu_lab.contracts import OriginState, origin_code
+from tabu_lab.experiments import tabubase_real_benchmark as real_benchmark
 from tabu_lab.experiments.tabubase_real_benchmark import (
     RealDataset,
     _real_episode,
+    evaluate_tabubase_on_indices,
     evaluation_context_indices,
     prepare_real_task,
     temperature_scale_probabilities,
     training_episode_indices,
 )
+from tabu_lab.experiments.tabubase_scale import build_tabubase_scale_model
 
 
 def test_real_preparation_is_paired_and_train_only() -> None:
@@ -98,6 +101,50 @@ def test_classification_evaluation_fails_closed_without_class_support() -> None:
     )
     with pytest.raises(ValueError, match="lacks response-class support"):
         evaluation_context_indices(incomplete)
+
+
+def test_evaluation_chunking_does_not_rebuild_transductive_episode(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    pytest.importorskip("sklearn")
+    rng = np.random.default_rng(23)
+    dataset = RealDataset(
+        dataset_id="single-episode-fixture",
+        task="classification",
+        features=rng.normal(size=(240, 5)).astype(np.float32),
+        response=np.tile(np.arange(2), 120),
+        source="fixture",
+    )
+    task = prepare_real_task(dataset, budget=64, seed=1729, test_limit=None)
+    model = build_tabubase_scale_model(seed=1729, device=torch.device("cpu"))
+    calls = 0
+    original = real_benchmark._real_episode
+
+    def traced_episode(*args: object, **kwargs: object):
+        nonlocal calls
+        calls += 1
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(real_benchmark, "_real_episode", traced_episode)
+    wide_chunks = evaluate_tabubase_on_indices(
+        model,
+        task,
+        device=torch.device("cpu"),
+        query_indices=task.test_indices,
+        query_partition="test",
+        query_readout_chunk_rows=64,
+    )
+    row_chunks = evaluate_tabubase_on_indices(
+        model,
+        task,
+        device=torch.device("cpu"),
+        query_indices=task.test_indices,
+        query_partition="test",
+        query_readout_chunk_rows=1,
+    )
+
+    assert calls == 2
+    assert wide_chunks == pytest.approx(row_chunks)
 
 
 def test_temperature_scaling_preserves_class_ranking_and_normalization() -> None:

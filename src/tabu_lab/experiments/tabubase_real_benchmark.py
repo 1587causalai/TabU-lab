@@ -27,6 +27,7 @@ from tabu_lab.contracts import (
     origin_code,
 )
 
+from .tabubase_response_readout import query_response_readout
 from .tabubase_scale import (
     ROOT_SEEDS,
     _train_one,
@@ -35,6 +36,7 @@ from .tabubase_scale import (
 )
 
 TaskKind = Literal["classification", "regression"]
+QUERY_READOUT_SEMANTICS = "response_readout_only_after_one_full_transductive_evidence_episode"
 
 
 def _source_tree_hash() -> str:
@@ -485,6 +487,7 @@ def evaluate_tabubase(
     task: PreparedRealTask,
     *,
     device: torch.device,
+    query_readout_chunk_rows: int = 64,
 ) -> dict[str, float]:
     return evaluate_tabubase_on_indices(
         model,
@@ -492,6 +495,7 @@ def evaluate_tabubase(
         device=device,
         query_indices=task.test_indices,
         query_partition="test",
+        query_readout_chunk_rows=query_readout_chunk_rows,
     )
 
 
@@ -502,36 +506,35 @@ def evaluate_tabubase_on_indices(
     device: torch.device,
     query_indices: np.ndarray,
     query_partition: Literal["validation", "test"],
+    query_readout_chunk_rows: int = 64,
 ) -> dict[str, float]:
-    """Evaluate a frozen model on one explicitly named non-training partition."""
+    """Evaluate one partition in one transductive episode with bounded readout only."""
 
     context = evaluation_context_indices(task)
-    predictions: list[np.ndarray] = []
+    if len(query_indices) < 1:
+        raise ValueError("query_indices must contain at least one row")
+    evidence, _ = _real_episode(
+        task,
+        context_indices=context,
+        query_indices=query_indices,
+        episode_id=f"{task.dataset.dataset_id}-{query_partition}",
+    )
     model.eval()
     with torch.no_grad():
-        for offset in range(0, len(query_indices), 64):
-            query = query_indices[offset : offset + 64]
-            evidence, _ = _real_episode(
-                task,
-                context_indices=context,
-                query_indices=query,
-                episode_id=(f"{task.dataset.dataset_id}-{query_partition}-{offset:04d}"),
-            )
-            output = model(evidence.to(device))
-            response_feature = len(evidence.feature_specs) - 1
-            query_start = len(context)
-            if task.dataset.task == "classification":
-                distribution = output.entries["distribution"].values
-                if distribution is None:
-                    raise RuntimeError("TabUBase omitted a classification distribution")
-                values = distribution[query_start:, response_feature].detach().cpu().numpy()
-            else:
-                numeric = output.entries["numeric"].values
-                if numeric is None:
-                    raise RuntimeError("TabUBase omitted a numeric prediction")
-                values = numeric[query_start:, response_feature].detach().cpu().numpy()
-            predictions.append(values)
-    predicted = np.concatenate(predictions)
+        readout = query_response_readout(
+            model,
+            evidence.to(device),
+            context_rows=len(context),
+            query_readout_chunk_rows=query_readout_chunk_rows,
+        )
+    if task.dataset.task == "classification":
+        if readout.probabilities is None:
+            raise RuntimeError("TabUBase omitted a classification distribution")
+        predicted = readout.probabilities[0].detach().cpu().numpy()
+    else:
+        if readout.numeric_values is None:
+            raise RuntimeError("TabUBase omitted a numeric prediction")
+        predicted = readout.numeric_values[0].detach().cpu().numpy()
     truth = task.response[query_indices]
     if task.dataset.task == "classification":
         from sklearn.metrics import accuracy_score, log_loss
@@ -597,6 +600,7 @@ def evaluate_temperature_calibration(
     *,
     device: torch.device,
     temperatures: tuple[float, ...] = (0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 5.0, 10.0),
+    query_readout_chunk_rows: int = 64,
 ) -> dict[str, Any]:
     """Select one temperature on validation and evaluate it once on test."""
 
@@ -606,24 +610,25 @@ def evaluate_temperature_calibration(
 
     def probabilities(indices: np.ndarray, partition: Literal["validation", "test"]) -> np.ndarray:
         context = evaluation_context_indices(task)
-        chunks: list[np.ndarray] = []
+        if len(indices) < 1:
+            raise ValueError(f"{partition} indices must contain at least one row")
+        evidence, _ = _real_episode(
+            task,
+            context_indices=context,
+            query_indices=indices,
+            episode_id=f"{task.dataset.dataset_id}-{partition}-cal",
+        )
         model.eval()
         with torch.no_grad():
-            for offset in range(0, len(indices), 64):
-                query = indices[offset : offset + 64]
-                evidence, _ = _real_episode(
-                    task,
-                    context_indices=context,
-                    query_indices=query,
-                    episode_id=f"{task.dataset.dataset_id}-{partition}-cal-{offset:04d}",
-                )
-                output = model(evidence.to(device))
-                distribution = output.entries["distribution"].values
-                if distribution is None:
-                    raise RuntimeError("TabUBase omitted a classification distribution")
-                response_feature = len(evidence.feature_specs) - 1
-                chunks.append(distribution[len(context) :, response_feature].cpu().numpy())
-        values = np.concatenate(chunks)
+            readout = query_response_readout(
+                model,
+                evidence.to(device),
+                context_rows=len(context),
+                query_readout_chunk_rows=query_readout_chunk_rows,
+            )
+        if readout.probabilities is None:
+            raise RuntimeError("TabUBase omitted a classification distribution")
+        values = readout.probabilities[0].cpu().numpy()
         return values / np.maximum(values.sum(axis=1, keepdims=True), 1.0e-12)
 
     validation_probabilities = probabilities(task.validation_indices, "validation")
@@ -764,6 +769,7 @@ def run_real_benchmark(
     checkpoint_run_suffix: str = "",
     panel_manifest: Path | None = None,
     test_limit: int | None = 512,
+    query_readout_chunk_rows: int = 64,
 ) -> dict[str, Any]:
     import sklearn
     import xgboost
@@ -810,13 +816,19 @@ def run_real_benchmark(
                 )
                 arm_result: dict[str, Any] = {
                     "training": training,
-                    "metrics": evaluate_tabubase(model, task, device=device),
+                    "metrics": evaluate_tabubase(
+                        model,
+                        task,
+                        device=device,
+                        query_readout_chunk_rows=query_readout_chunk_rows,
+                    ),
                 }
                 if temperature_calibration and dataset.task == "classification":
                     arm_result["temperature_calibration"] = evaluate_temperature_calibration(
                         model,
                         task,
                         device=device,
+                        query_readout_chunk_rows=query_readout_chunk_rows,
                     )
                 arms[arm] = arm_result
             results.append(
@@ -839,6 +851,12 @@ def run_real_benchmark(
                         else None
                     ),
                     "test_rows": len(task.test_indices),
+                    "evaluation_estimand": QUERY_READOUT_SEMANTICS,
+                    "query_readout_chunk_rows": query_readout_chunk_rows,
+                    "evaluation_context_indices_sha256": canonical_hash(
+                        evaluation_context_indices(task).tolist()
+                    ),
+                    "test_indices_sha256": canonical_hash(task.test_indices.tolist()),
                     "split_sha256": canonical_hash(
                         {
                             "schema": "tabubase-real-split.v1",
@@ -921,6 +939,8 @@ def run_real_benchmark(
         "checkpoint_run_suffix": checkpoint_run_suffix,
         "panel_manifest": str(panel_manifest) if panel_manifest is not None else None,
         "test_limit": test_limit,
+        "evaluation_estimand": QUERY_READOUT_SEMANTICS,
+        "query_readout_chunk_rows": query_readout_chunk_rows,
         "results": results,
         "summaries": summaries,
         "elapsed_seconds": time.monotonic() - started,
@@ -947,6 +967,7 @@ def run_real_benchmark(
 
 
 __all__ = [
+    "QUERY_READOUT_SEMANTICS",
     "PreparedRealTask",
     "RealDataset",
     "evaluate_classical_baselines",
