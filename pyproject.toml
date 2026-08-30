@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools==84.0.0", "wheel==0.48.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tabu-lab"
+version = "0.1.0.dev0"
+description = "Contract-first TabUBase reference implementation."
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [{name = "WeHub Research"}]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+  "numpy>=2.0,<3; sys_platform != 'darwin' or platform_machine != 'x86_64'",
+  "numpy>=1.26,<2; sys_platform == 'darwin' and platform_machine == 'x86_64'",
+  "pydantic>=2.10,<3",
+  "PyYAML>=6.0,<7",
+  "torch>=2.5,<3; sys_platform != 'darwin' or platform_machine != 'x86_64'",
+  "torch>=2.2,<2.3; sys_platform == 'darwin' and platform_machine == 'x86_64'",
+]
+
+[project.optional-dependencies]
+dev = [
+  "build>=1.2,<2",
+  "hypothesis>=6.120,<7",
+  "pytest>=8.3,<9",
+  "pytest-cov>=6,<7",
+  "ruff>=0.11,<1",
+]
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+tabu_lab = [
+  "py.typed",
+  "specs/*.json",
+  "specs/models/*.yaml",
+]
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-config --strict-markers"
+testpaths = ["tests"]
+markers = [
+  "gate0: deterministic local sanity gates",
+  "gate1: clean-environment reproducibility gates",
+  "legacy_parity: behavior-only comparisons with frozen donor fixtures",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
