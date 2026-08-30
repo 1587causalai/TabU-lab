@@ -26,6 +26,9 @@ def test_query_row_linear_threshold_is_bounded_and_context_bucketed() -> None:
     assert result.baseline_id == LINEAR_REGRESSION_BASELINE_ID
     assert result.threshold_ratio == 1.0
     assert result.parameter_hash_unchanged
+    assert result.all_context_buckets_threshold_met is all(
+        summary.threshold_met for summary in result.context_summaries
+    )
     assert result.context_rows == (4, 8)
     assert tuple(summary.context_rows for summary in result.context_summaries) == (4, 8)
     assert len(result.records) == 4

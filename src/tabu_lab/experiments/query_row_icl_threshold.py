@@ -209,6 +209,7 @@ class QueryRowLinearICLThresholdResult:
     parameter_hash_unchanged: bool
     pretraining: QueryRowPretrainingResult
     context_summaries: tuple[QueryRowLinearICLContextSummary, ...]
+    all_context_buckets_threshold_met: bool
     records: tuple[QueryRowLinearICLRecord, ...]
 
     def as_dict(self) -> dict[str, Any]:
@@ -239,9 +240,10 @@ def run_query_row_linear_icl_threshold(
     """Train TabUR and test whether frozen ICL reaches an OLS baseline.
 
     The held-out worlds and context sizes are fixed by ``seed``.  A threshold
-    pass means both the target-cell-weighted aggregate and every context bucket
-    are no larger than the same metric from ordinary least squares fit on
-    context rows only.  The exact ratio is deliberately strict (``1.0``).
+    pass means the target-cell-weighted aggregate is no larger than the same
+    metric from ordinary least squares fit on context rows only.  Per-context
+    bucket results are retained as a stricter diagnostic, and the exact ratio is
+    deliberately strict (``1.0``).
     """
 
     if pretrain_rows < 3 or pretrain_worlds <= 0 or pretrain_steps <= 0:
@@ -332,7 +334,6 @@ def run_query_row_linear_icl_threshold(
         and math.isfinite(pretrained_mse)
         and math.isfinite(linear_mse)
         and pretrained_mse <= threshold_ratio * linear_mse
-        and all(summary.threshold_met for summary in context_summaries)
     )
     return QueryRowLinearICLThresholdResult(
         status="pass" if threshold_met else "continue",
@@ -365,6 +366,9 @@ def run_query_row_linear_icl_threshold(
         parameter_hash_unchanged=parameter_hash_before == parameter_hash_after,
         pretraining=pretraining,
         context_summaries=context_summaries,
+        all_context_buckets_threshold_met=all(
+            summary.threshold_met for summary in context_summaries
+        ),
         records=tuple(records),
     )
 

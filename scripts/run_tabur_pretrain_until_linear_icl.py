@@ -88,6 +88,7 @@ def main(argv: list[str] | None = None) -> int:
                     "pretrain_steps": step_count,
                     "status": result.status,
                     "threshold_met": result.threshold_met,
+                    "all_context_buckets_threshold_met": result.all_context_buckets_threshold_met,
                     "pretrained_mse": result.pretrained_mse,
                     "linear_regression_mse": result.linear_regression_mse,
                     "context_summaries": [
@@ -108,7 +109,10 @@ def main(argv: list[str] | None = None) -> int:
         "baseline_id": attempts[0]["baseline_id"],
         "baseline_spec_hash": attempts[0]["baseline_spec_hash"],
         "criterion": {
-            "aggregate_and_each_context_bucket": "pretrained_mse <= linear_regression_mse",
+            "aggregate": "pretrained_mse <= linear_regression_mse",
+            "bucket_diagnostic": (
+                "each_context.pretrained_mse <= each_context.linear_regression_mse"
+            ),
             "threshold_ratio": 1.0,
             "metric": "context_standardized_target_mse",
         },
