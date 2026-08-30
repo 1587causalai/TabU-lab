@@ -27,6 +27,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--checkpoint", type=Path, required=True)
     parser.add_argument("--rows", type=int, default=64)
     parser.add_argument("--context-rows", type=_ints, default=(8, 16, 32))
+    parser.add_argument("--eval-worlds", type=int, default=48)
     parser.add_argument("--row-token-count", type=int, default=4)
     parser.add_argument("--seed", type=int, default=1729)
     parser.add_argument("--device", default="auto", choices=("auto", "cpu", "mps", "cuda"))
@@ -41,6 +42,7 @@ def main(argv: list[str] | None = None) -> int:
         row_token_count=args.row_token_count,
         device=args.device,
         checkpoint=args.checkpoint,
+        eval_worlds=args.eval_worlds,
     )
     payload = {
         "schema_version": "tabu.query-row.checkpoint-frozen-icl-result.v1",

@@ -124,5 +124,6 @@ def test_tabur_frozen_icl_can_bind_a_completion_checkpoint(tmp_path: Path) -> No
 
     assert result.status == "pass"
     assert result.checkpoint == str(checkpoint)
+    assert result.eval_worlds == 1
     assert all(record.parameter_hash_unchanged for record in result.records)
     assert all(not record.optimizer_created for record in result.records)

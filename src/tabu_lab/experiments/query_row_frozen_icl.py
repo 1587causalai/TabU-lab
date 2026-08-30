@@ -78,6 +78,7 @@ def _shuffled_sidecar(episode: QueryRowSyntheticEpisode) -> QueryRowSyntheticEpi
 
 @dataclass(frozen=True, slots=True)
 class QueryRowFrozenICLRecord:
+    world_id: str
     context_rows: int
     arm: str
     mse: float
@@ -105,6 +106,7 @@ class QueryRowFrozenICLResult:
     row_token_count: int
     device: str
     seed: int
+    eval_worlds: int
     records: tuple[QueryRowFrozenICLRecord, ...]
     checkpoint: str | None = None
 
@@ -135,10 +137,11 @@ def run_query_row_frozen_icl(
     learning_rate: float = 1.0e-2,
     device: str | torch.device = "cpu",
     checkpoint: Path | None = None,
+    eval_worlds: int = 1,
 ) -> QueryRowFrozenICLResult:
     """Run frozen synthetic ICL with explicit no-optimizer controls."""
 
-    if pretrain_steps <= 0 or pretrain_worlds <= 0 or rows < 3:
+    if pretrain_steps <= 0 or pretrain_worlds <= 0 or rows < 3 or eval_worlds <= 0:
         raise ValueError("pretrain_steps, pretrain_worlds and rows must be positive")
     if learning_rate <= 0.0:
         raise ValueError("learning_rate must be positive")
@@ -180,42 +183,46 @@ def run_query_row_frozen_icl(
 
     records: list[QueryRowFrozenICLRecord] = []
     model_spec_hash = pretrained.model_spec_hash
-    for context_size in context_rows:
-        episode = make_query_row_synthetic_episode(
-            seed=seed + 100 + context_size,
-            rows=rows,
-            row_token_count=row_token_count,
-            context_rows=context_size,
-            world_id=f"heldout-context-{context_size}",
-            world_family="row_latent_periodic",
-        )
-        random_init = _row_model(
-            seed=seed + 1000 + context_size,
-            row_token_count=row_token_count,
-            device=resolved_device,
-            max_features=256 if checkpointed else 4,
-        )
-        shuffled = _shuffled_sidecar(episode)
-        arms = (
-            ("pretrained_frozen", pretrained, episode),
-            ("random_init_frozen", random_init, episode),
-            ("pretrained_shuffled", pretrained, shuffled),
-        )
-        for arm, model, arm_episode in arms:
-            before = _state_hash(model)
-            value = _evaluate_frozen(model, arm_episode)
-            after = _state_hash(model)
-            records.append(
-                QueryRowFrozenICLRecord(
-                    context_rows=context_size,
-                    arm=arm,
-                    mse=value,
-                    target_count=arm_episode.sidecar.target_count,
-                    parameter_hash_before=before,
-                    parameter_hash_after=after,
-                    optimizer_created=False,
-                )
+    families = ("row_latent_periodic", "row_latent_linear", "row_latent_polynomial")
+    for world_index in range(eval_worlds):
+        family = families[world_index % len(families)]
+        for context_size in context_rows:
+            episode = make_query_row_synthetic_episode(
+                seed=seed + 100 + world_index * 101,
+                rows=rows,
+                row_token_count=row_token_count,
+                context_rows=context_size,
+                world_id=f"heldout-context-{world_index}-{context_size}",
+                world_family=family,
             )
+            random_init = _row_model(
+                seed=seed + 1000 + world_index * 101 + context_size,
+                row_token_count=row_token_count,
+                device=resolved_device,
+                max_features=256 if checkpointed else 4,
+            )
+            shuffled = _shuffled_sidecar(episode)
+            arms = (
+                ("pretrained_frozen", pretrained, episode),
+                ("random_init_frozen", random_init, episode),
+                ("pretrained_shuffled", pretrained, shuffled),
+            )
+            for arm, model, arm_episode in arms:
+                before = _state_hash(model)
+                value = _evaluate_frozen(model, arm_episode)
+                after = _state_hash(model)
+                records.append(
+                    QueryRowFrozenICLRecord(
+                        world_id=episode.world_id,
+                        context_rows=context_size,
+                        arm=arm,
+                        mse=value,
+                        target_count=arm_episode.sidecar.target_count,
+                        parameter_hash_before=before,
+                        parameter_hash_after=after,
+                        optimizer_created=False,
+                    )
+                )
 
     status = "pass" if all(
         record.parameter_hash_unchanged
@@ -236,6 +243,7 @@ def run_query_row_frozen_icl(
         row_token_count=row_token_count,
         device=str(resolved_device),
         seed=seed,
+        eval_worlds=eval_worlds,
         records=tuple(records),
         checkpoint=str(checkpoint) if checkpoint is not None else None,
     )
