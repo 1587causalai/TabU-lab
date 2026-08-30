@@ -13,14 +13,14 @@ PYTHONPATH=src python scripts/run_tabur_evaluation_ladder.py --device cpu
 占用 GPU，因此没有抢占式长跑。
 
 已准备远端独立快照：
-`/home/cms/experiments/tabur-querybase-runtime-9499f6e`（commit `9499f6e`）。
+`/home/cms/experiments/tabur-querybase-runtime-ee7d9b8`（commit `ee7d9b8`）。
 远端应使用 host-owned `~/.local/bin/wehub-python` 的 Docker GPU backend；native
 CPU venv 缺少 `pydantic`，不能作为本项目实验环境。GPU 服务释放后可直接运行：
 
 ```bash
-ssh dgx2 'cd /home/cms/experiments/tabur-querybase-runtime-9499f6e && \
+ssh dgx2 'cd /home/cms/experiments/tabur-querybase-runtime-ee7d9b8 && \
   ~/.local/bin/wehub-python scripts/run_tabur_evaluation_ladder.py --device cuda \
-  --output /home/cms/experiments/tabur-querybase-runtime-9499f6e/results/ladder.json'
+  --output /home/cms/experiments/tabur-querybase-runtime-ee7d9b8/results/ladder.json'
 ```
 
 ## 结果摘要
