@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -31,6 +32,11 @@ def main(argv: list[str] | None = None) -> int:
         help="Optional comma-separated subset for a smoke run; full panel is the default.",
     )
     parser.add_argument("--openml-data-home", type=Path, default=None)
+    parser.add_argument(
+        "--source-commit",
+        default=None,
+        help="Immutable source commit to record when the minimal runtime has no git binary.",
+    )
     parser.add_argument("--device", default="cuda", choices=("auto", "cpu", "mps", "cuda"))
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args(argv)
@@ -39,6 +45,8 @@ def main(argv: list[str] | None = None) -> int:
             raise SystemExit(f"checkpoint does not exist: {path}")
     if args.output.exists():
         raise SystemExit(f"refusing to overwrite existing output: {args.output}")
+    if args.source_commit:
+        os.environ["TABU_SOURCE_COMMIT"] = args.source_commit
     dataset_ids = None
     if args.datasets:
         dataset_ids = tuple(item.strip() for item in args.datasets.split(",") if item.strip())
