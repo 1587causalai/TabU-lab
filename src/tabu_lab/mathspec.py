@@ -23,7 +23,11 @@ class MathSymbol(BaseModel):
     id: str = Field(pattern=_ID)
     symbol: str = Field(min_length=1)
     meaning: str = Field(min_length=1)
-    domain: str | None = Field(default=None, min_length=1)
+    domain: str | None = Field(
+        default=None,
+        min_length=1,
+        description="Optional raw LaTeX domain expression.",
+    )
 
 
 class MathEquation(BaseModel):
@@ -61,8 +65,9 @@ class MathInvariant(BaseModel):
 class Mathematics(BaseModel):
     """Structured mathematical narrative for one model contract.
 
-    The renderer intentionally accepts raw LaTeX only in ``symbol`` and ``latex``.
-    Human-facing prose is escaped before it enters the generated TeX document.
+    The renderer intentionally accepts raw LaTeX only in ``symbol``, ``domain``,
+    and ``latex``. Human-facing prose is escaped before it enters the generated
+    TeX document.
     """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
@@ -81,9 +86,7 @@ class Mathematics(BaseModel):
         namespaces = {
             "notation": [item.id for item in self.notation],
             "steps": [item.id for item in self.steps],
-            "equations": [
-                equation.id for step in self.steps for equation in step.equations
-            ],
+            "equations": [equation.id for step in self.steps for equation in step.equations],
             "invariants": [item.id for item in self.invariants],
         }
         for namespace, identifiers in namespaces.items():

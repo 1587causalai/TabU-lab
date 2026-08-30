@@ -140,13 +140,13 @@ def build_from_spec(spec: Any, **kwargs: Any) -> Any:
     """
 
     from tabu_lab.contracts import canonical_hash
-    from tabu_lab.registry import ModelSpec, get_model_spec
+    from tabu_lab.registry import ModelSpec, get_model_spec, model_spec_identity_payload
 
     if not isinstance(spec, ModelSpec):
         raise TypeError("spec must be a typed ModelSpec")
     registered = get_model_spec(spec.contract_id, spec.contract_version)
-    supplied_hash = canonical_hash(spec.model_dump(mode="json"))
-    registered_hash = canonical_hash(registered.model_dump(mode="json"))
+    supplied_hash = canonical_hash(model_spec_identity_payload(spec))
+    registered_hash = canonical_hash(model_spec_identity_payload(registered))
     if supplied_hash != registered_hash:
         raise ValueError("ModelSpec does not exactly match the registered contract")
 

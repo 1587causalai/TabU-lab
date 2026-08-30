@@ -32,6 +32,7 @@ from tabu_lab.registry import (
     BuildStatus,
     ModelVersionNotFoundError,
     get_model_spec,
+    model_spec_identity_payload,
     validate_registry_source_parity,
 )
 from tabu_lab.registry import build_model as build_contract
@@ -156,13 +157,13 @@ def test_registry_build_is_typed_versioned_and_yaml_bound() -> None:
     assert result.status is BuildStatus.READY
     assert result.executable
     assert isinstance(result.model, TabUCellBaseModel)
-    assert result.model.model_spec_hash == canonical_hash(spec.model_dump(mode="json"))
+    assert result.model.model_spec_hash == canonical_hash(model_spec_identity_payload(spec))
     exact = build_from_spec(
         spec,
         config=_small_config(),
         profile="completion.artificial_mask.v1",
     )
-    assert exact.model_spec_hash == canonical_hash(spec.model_dump(mode="json"))
+    assert exact.model_spec_hash == canonical_hash(model_spec_identity_payload(spec))
     with pytest.raises(TypeError, match="typed ModelSpec"):
         build_from_spec(
             spec.model_dump(mode="json"),

@@ -295,11 +295,11 @@ class DenseReferenceModel(nn.Module):
         super().__init__()
         self.config = config
         from tabu_lab.contracts import canonical_hash
-        from tabu_lab.registry import get_model_spec
+        from tabu_lab.registry import get_model_spec, model_spec_identity_payload
 
         model_spec = get_model_spec(self.model_id)
         self.contract_version = model_spec.contract_version
-        self.model_spec_hash = canonical_hash(model_spec.model_dump(mode="json"))
+        self.model_spec_hash = canonical_hash(model_spec_identity_payload(model_spec))
         self.symbolizer = Symbolizer()
 
     def forward(self, episode: EvidenceEpisode) -> PredictionBundle:

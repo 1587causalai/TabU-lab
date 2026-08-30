@@ -45,6 +45,11 @@ class CatalogEntry(EvidenceSchema):
     def _content_identity_matches(self) -> CatalogEntry:
         if self.object_hash != canonical_hash(self.data):
             raise ValueError("catalog entry object_hash does not match data")
+        if self.kind is CatalogObjectKind.MODEL_CONTRACT and (
+            self.data.get("contract_id") != self.object_id
+            or self.data.get("contract_version") != self.version
+        ):
+            raise ValueError("catalog entry wrapper identity does not match ModelSpec data")
         return self
 
     @property
@@ -54,7 +59,7 @@ class CatalogEntry(EvidenceSchema):
 
 class CatalogIndex(EvidenceSchema):
     schema_version: Literal["tabu.catalog-index.v1"] = "tabu.catalog-index.v1"
-    entries: tuple[CatalogEntry, ...]
+    entries: tuple[CatalogEntry, ...] = Field(min_length=1)
     source_tree_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
     formal_receipt_count: Literal[0] = 0
     accepted_claim_count: Literal[0] = 0
@@ -74,9 +79,7 @@ class CatalogIndex(EvidenceSchema):
             raise ValueError("catalog entries must be sorted by entry_id")
         if len(ids) != len(set(ids)):
             raise ValueError("catalog entry ids must be unique")
-        expected = canonical_hash(
-            tuple(entry.model_dump(mode="python") for entry in self.entries)
-        )
+        expected = canonical_hash(tuple(entry.model_dump(mode="python") for entry in self.entries))
         if self.source_tree_hash != expected:
             raise ValueError("catalog source_tree_hash does not match entries")
         return self

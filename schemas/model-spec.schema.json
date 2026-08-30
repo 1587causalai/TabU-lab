@@ -182,6 +182,7 @@
             }
           ],
           "default": null,
+          "description": "Optional raw LaTeX domain expression.",
           "title": "Domain"
         },
         "id": {
@@ -210,7 +211,7 @@
     },
     "Mathematics": {
       "additionalProperties": false,
-      "description": "Structured mathematical narrative for one model contract.\n\nThe renderer intentionally accepts raw LaTeX only in ``symbol`` and ``latex``.\nHuman-facing prose is escaped before it enters the generated TeX document.",
+      "description": "Structured mathematical narrative for one model contract.\n\nThe renderer intentionally accepts raw LaTeX only in ``symbol``, ``domain``,\nand ``latex``. Human-facing prose is escaped before it enters the generated\nTeX document.",
       "properties": {
         "abstract": {
           "minLength": 1,

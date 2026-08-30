@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import pytest
 
+from tabu_lab.contracts import canonical_hash
 from tabu_lab.mathspec import Mathematics
 from tabu_lab.mathtex import render_model_tex
-from tabu_lab.registry import ModelSpec, get_model_spec
+from tabu_lab.registry import ModelSpec, get_model_spec, model_spec_identity_payload
 
 
 def _mathematics() -> Mathematics:
@@ -76,6 +77,29 @@ def test_math_projection_escapes_prose_but_preserves_formula_latex() -> None:
 
     assert r"source\_truth \%" in rendered
     assert r"\operatorname{OAttention}" in rendered
+    assert r"\(\mathbb{R}^d\)" in rendered
+    assert r"\textbackslash\{\}mathbb" not in rendered
+
+
+def test_math_projection_uses_injective_equation_labels() -> None:
+    payload = _mathematics().model_dump(mode="python")
+    first = dict(payload["steps"][0])
+    first_equation = dict(first["equations"][0])
+    first_equation["id"] = "a_b"
+    first["equations"] = (first_equation,)
+    second = dict(first)
+    second["id"] = "decode"
+    second_equation = dict(first_equation)
+    second_equation["id"] = "a-b"
+    second["equations"] = (second_equation,)
+    payload["steps"] = (first, second)
+
+    spec_payload = get_model_spec("tabu.cell.base").model_dump(mode="python")
+    spec_payload["mathematics"] = payload
+    rendered = render_model_tex(ModelSpec.model_validate(spec_payload))
+
+    assert r"\label{eq:id-615f62}" in rendered
+    assert r"\label{eq:id-612d62}" in rendered
 
 
 def test_mathematics_rejects_duplicate_equation_ids() -> None:
@@ -90,5 +114,18 @@ def test_mathematics_rejects_duplicate_equation_ids() -> None:
 
 def test_existing_modelspec_identity_is_not_rewritten() -> None:
     spec = get_model_spec("tabu.cell.base", "0.2.0")
+    legacy_payload = spec.model_dump(mode="json")
+    legacy_payload.pop("mathematics")
 
     assert spec.mathematics is None
+    assert model_spec_identity_payload(spec) == legacy_payload
+    assert canonical_hash(model_spec_identity_payload(spec)) == canonical_hash(legacy_payload)
+
+
+def test_populated_mathematics_is_identity_bound() -> None:
+    spec = _spec_with_mathematics()
+
+    assert model_spec_identity_payload(spec)["mathematics"] is not None
+    assert canonical_hash(model_spec_identity_payload(spec)) != canonical_hash(
+        model_spec_identity_payload(get_model_spec("tabu.cell.base"))
+    )
