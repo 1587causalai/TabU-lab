@@ -69,6 +69,10 @@ the consolidation phase.
   runners were authored against the donor's combined dirty tree, including overlapping
   edits to existing registry, builder, CLI, catalog, and evidence modules. They are not
   used as current-main test evidence.
+- **HIST-010 — preserved donor whitespace:** `registered_unresolved`. Three historical
+  F0 preregistration YAML files contain an extra blank line at EOF, so
+  `git diff --check` reports those imported paths. The bytes are intentionally preserved
+  during consolidation; formatting is deferred to governance.
 
 Independent-review findings for this batch are appended without repairing imported
 code during consolidation.
