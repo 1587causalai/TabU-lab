@@ -181,3 +181,45 @@ MLP/XGBoost 的配置 hash 固定，dgx2 runtime 版本为 scikit-learn `1.8.0`�
 这证明的是当前 synthetic world family、context policy 和预算下的相对性能，尚不能
 外推到真实数据、独立 benchmark 或 foundation-model 能力；正式结论仍需要固定数据
 authority、immutable receipt、独立 review 与 owner approval。
+
+## 大规模 Stage 5/6 复核
+
+使用 2048 worlds / 6000 steps 的 profile-bound checkpoint，重新执行了两项后续阶梯：
+
+### 1. Synthetic pretraining + frozen ICL
+
+Stage 5 改为直接加载 completion checkpoint，并在 48 个 held-out worlds、context
+8/16/32 上执行三臂比较：`pretrained_frozen`、`random_init_frozen`、
+`pretrained_shuffled`。432 条 arm records 全部 finite；没有创建 optimizer，
+pretrained 参数 hash 在每个 context/world 前后均保持不变。
+
+target-cell-weighted MSE：
+
+| arm | context=8 | context=16 | context=32 | aggregate |
+| --- | ---: | ---: | ---: | ---: |
+| pretrained_frozen | 1.186904 | 1.189403 | 1.258062 | **1.204848** |
+| random_init_frozen | 1.879080 | 1.839948 | 1.769132 | 1.839033 |
+| pretrained_shuffled | 1.861789 | 1.838857 | 1.955444 | 1.876247 |
+
+结果文件：
+`/home/cms/experiments/tabur-querybase-runtime-stages-2e44bf7/results/stage5-frozen-icl-world48.json`。
+
+### 2. Synthetic pretraining + real-task fine-tuning lift
+
+Stage 6 使用 profile-compatible 的 `supervised.label_broadcast.v1` synthetic
+pretraining（2048 worlds / 6000 steps，final synthetic loss `1.024741`），再在相同
+Iris/Diabetes split、label budget=64、20 updates 下比较 pretrained 与 scratch：
+
+| dataset | scratch loss | pretrained loss | $g_t=L_{scratch}-L_{pretrained}$ |
+| --- | ---: | ---: | ---: |
+| Iris (log-loss) | 0.966266 | 24.029102 | -23.062836 |
+| Diabetes (RMSE) | 69.360475 | 79.190333 | -9.829858 |
+
+本轮没有观察到正向 fine-tuning lift；这表示当前 synthetic supervised generator
+与这两个真实任务的对齐不足，不能据此宣称预训练无价值，也不能形成 transfer claim。
+结果文件：
+`/home/cms/experiments/tabur-querybase-runtime-stages-d45009a/results/stage6-finetune-lift.json`。
+
+Stage 5/6 仍均为 `local_unissued`。实验期间 dgx2 的 `qwen38-dflash2` 曾按
+`unless-stopped` 策略自动恢复，已再次显式停止；最终状态为 `exited`、GPU 利用率
+0%。
