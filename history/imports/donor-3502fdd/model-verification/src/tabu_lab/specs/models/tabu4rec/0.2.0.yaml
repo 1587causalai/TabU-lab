@@ -1,0 +1,184 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "tabu4rec",
+  "contract_version": "0.2.0",
+  "display_name": "TabU4Rec",
+  "upstream": {
+    "repository": "TabU/latex/model-factory",
+    "path": "../latex/model-factory/TabU4Rec/main.tex",
+    "sha256": "9e8b6ec6272cfbc94c159f6f387220a38d7f8119172ad1d0a20dbeb065892e22",
+    "readonly": true,
+    "observed_at": "2026-08-27",
+    "license_boundary": "Metadata-only reference: upstream TeX remains readonly and is not redistributed by this manifest."
+  },
+  "carrier": {
+    "input_unit": "rows are user addresses; every schema-declared RESPONSE column belongs to one typed item-interaction family",
+    "input_axes": [
+      "user",
+      "item",
+      "hidden"
+    ],
+    "shape": "(N+K) x (M+K) x d",
+    "context_query": {
+      "context": "visible interactions are input evidence",
+      "query": "no query rows; masked interactions are receiver targets"
+    },
+    "tokenization": {
+      "visible_interaction": "type-specific value encoder",
+      "artificial_mask": "learned e_mask",
+      "natural_missing": "fixed e_null = 0_d",
+      "query_label": "absent"
+    },
+    "specials": {
+      "user": "K per user row",
+      "item": "K per item column",
+      "corner": "K x K fixed zero"
+    },
+    "truth_boundary": "masked interaction truth enters only at Step 5"
+  },
+  "dynamics": {
+    "family": "dual-axis O-closed inducing Transformer",
+    "entry": "no OInject",
+    "operations": [
+      "user_axis_slot_omab",
+      "user_axis_writeback_omab",
+      "item_axis_slot_omab",
+      "item_axis_writeback_omab"
+    ],
+    "inducing": "S_U and S_I transient slots per block; both distinct from K",
+    "source_contract": "only visible interactions source either axis; masked and natural-missing cells cannot source",
+    "null_contract": "four OMAB operations preserve exact zero"
+  },
+  "readout": {
+    "geometry": "matched User-special/Item-special diagonal inner products in R^K",
+    "support": "user arm = same RESPONSE column over other rows; item arm = other RESPONSE columns in the same row",
+    "arm_gating": "active arms receive equal mass; one active arm renormalizes to one; a single-RESPONSE episode is explicitly user-arm-only",
+    "numeric_terminal": "LL or NW; source does not freeze a primary choice",
+    "categorical_terminal": "NW probability mass on declared domain",
+    "no_support": "inactive empty arm; explicit no-support if both arms are empty"
+  },
+  "loss": {
+    "truth_entry": "Step 5 only",
+    "numeric": "MSE on source-normalized masked interaction",
+    "categorical": "NLL on declared-domain PMF",
+    "target_families": [
+      "artificial_mask_completion"
+    ],
+    "weighting": "equal across active types by default"
+  },
+  "interfaces": {
+    "compile": "typed user-item interaction table whose item columns are explicitly declared as one homogeneous RESPONSE family; natural missing is never compiled as a target",
+    "forward": "truth-free interaction predictions with two support-arm traces",
+    "train": "supply masked interaction truth only as a loss sidecar",
+    "infer": "declare interaction targets and explicit observation/exposure roles when estimand-relevant"
+  },
+  "capabilities": [
+    "interaction_completion",
+    "recommendation",
+    "dual_axis_inducing",
+    "bilinear_two_arm_support",
+    "multi_response_interaction_family",
+    "mixed_numeric_categorical",
+    "exact_zero_closure"
+  ],
+  "maturity": {
+    "source_contract": "factory_source",
+    "stage": "experimental",
+    "contract": "specified",
+    "implementation": "experimental",
+    "evidence": "specified",
+    "build_state": "buildable_contract"
+  },
+  "experimental_defaults": {
+    "active_arm_weights": "equal",
+    "response_family": "all and only schema-declared RESPONSE columns; columns share kind, domain, and codebook",
+    "single_response_boundary": "valid degenerate user-arm-only geometry; never reported as two active arms",
+    "completion_target_origin": "artificial_mask_of_observed_interaction_only",
+    "observation_role": "generic_visible_interaction",
+    "matched_width": "same_K_on_both_axes",
+    "numeric_terminal": null,
+    "reference_backend": {
+      "backend": "dense_reference_v0",
+      "provenance": "tabu_lab.models.ReferenceConfig; these are implementation experiment defaults, not upstream factory invariants",
+      "d_model": 32,
+      "n_heads": 4,
+      "d_ff": 64,
+      "n_blocks": 2,
+      "inducing_slots": 4,
+      "matched_slots": 4,
+      "max_features": 256,
+      "dropout": 0,
+      "presence_tau": 0.000001,
+      "denominator_epsilon": 1e-8,
+      "routing_bandwidth": 1
+    }
+  },
+  "known_open": [
+    {
+      "id": "numeric_terminal_choice",
+      "question": "Freeze LL versus NW for numeric interactions.",
+      "blocking_build": false
+    },
+    {
+      "id": "arm_gate_estimand",
+      "question": "Choose equal, learned, exposure-aware, or recency-aware arm gating together with the estimand.",
+      "blocking_build": false
+    },
+    {
+      "id": "observation_semantics",
+      "question": "Separate click, rating, exposure, and negative-feedback roles when the task requires it.",
+      "blocking_build": false
+    },
+    {
+      "id": "axis_width_matching",
+      "question": "Decide whether user/item widths differ or matching is permutation-invariant.",
+      "blocking_build": false
+    },
+    {
+      "id": "missingness_output",
+      "question": "Define abstention versus missingness prediction for natural-missing inference.",
+      "blocking_build": false
+    }
+  ],
+  "alternatives": [
+    {
+      "id": "learned_arm_gate",
+      "description": "Use a declared typed gate instead of equal active-arm weights.",
+      "status": "deferred"
+    }
+  ],
+  "kill": [
+    {
+      "id": "truth_leakage",
+      "condition": "Changing completion truth changes any Step 1-4 result.",
+      "evidence": "truth-substitution invariance test"
+    },
+    {
+      "id": "implicit_support_count_gate",
+      "condition": "Arm weights change merely because one arm has more supports without a declared gate.",
+      "evidence": "routing trace"
+    },
+    {
+      "id": "null_drift",
+      "condition": "A natural-missing or corner position leaves exact zero.",
+      "evidence": "layerwise exact-zero trace"
+    }
+  ],
+  "exit": [
+    {
+      "id": "dual_axis_trace",
+      "condition": "Every block executes four independent user/item slot and writeback OMAB operations.",
+      "evidence": "operation trace"
+    },
+    {
+      "id": "bilinear_support",
+      "condition": "Predictions expose separate user-arm and item-arm supports and normalized arm weights.",
+      "evidence": "readout trace"
+    },
+    {
+      "id": "carrier_shape",
+      "condition": "Every layer preserves (N+K) x (M+K) x d.",
+      "evidence": "shape trace"
+    }
+  ]
+}

@@ -1,0 +1,268 @@
+{
+  "$defs": {
+    "AssessmentOutcome": {
+      "enum": [
+        "not_applicable",
+        "blocked",
+        "not_run",
+        "failed",
+        "passed"
+      ],
+      "title": "AssessmentOutcome",
+      "type": "string"
+    },
+    "EvidenceLevel": {
+      "enum": [
+        "none",
+        "local_unissued",
+        "formal",
+        "reviewed"
+      ],
+      "title": "EvidenceLevel",
+      "type": "string"
+    },
+    "JsonValue": {},
+    "ModelCompositionDescriptor": {
+      "additionalProperties": false,
+      "description": "The concrete composition used by one model build.",
+      "properties": {
+        "components": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "minProperties": 1,
+          "title": "Components",
+          "type": "object"
+        },
+        "configuration": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Configuration",
+          "type": "object"
+        },
+        "contract_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.@-]*$",
+          "title": "Contract Id",
+          "type": "string"
+        },
+        "contract_version": {
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "implementation_modules": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Implementation Modules",
+          "type": "object"
+        },
+        "schema_version": {
+          "const": "tabu.model-composition.v1",
+          "default": "tabu.model-composition.v1",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "contract_id",
+        "contract_version",
+        "components"
+      ],
+      "title": "ModelCompositionDescriptor",
+      "type": "object"
+    },
+    "VerificationAxis": {
+      "enum": [
+        "component_correctness",
+        "architecture_evolvability"
+      ],
+      "title": "VerificationAxis",
+      "type": "string"
+    },
+    "VerificationCheckResult": {
+      "additionalProperties": false,
+      "description": "One deterministic probe outcome.",
+      "properties": {
+        "check_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.@-]*$",
+          "title": "Check Id",
+          "type": "string"
+        },
+        "detail": {
+          "minLength": 1,
+          "title": "Detail",
+          "type": "string"
+        },
+        "metrics": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Metrics",
+          "type": "object"
+        },
+        "outcome": {
+          "$ref": "#/$defs/AssessmentOutcome"
+        },
+        "references": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "References",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "tabu.verification-check-result.v1",
+          "default": "tabu.verification-check-result.v1",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "check_id",
+        "outcome",
+        "detail"
+      ],
+      "title": "VerificationCheckResult",
+      "type": "object"
+    }
+  },
+  "$id": "https://research.wehub.us/schemas/verification-result.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Hash-bound result for one suite and one exact ModelSpec.",
+  "properties": {
+    "axis": {
+      "$ref": "#/$defs/VerificationAxis"
+    },
+    "blockers": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Blockers",
+      "type": "array"
+    },
+    "checks": {
+      "items": {
+        "$ref": "#/$defs/VerificationCheckResult"
+      },
+      "minItems": 1,
+      "title": "Checks",
+      "type": "array"
+    },
+    "claim_boundary": {
+      "minLength": 1,
+      "title": "Claim Boundary",
+      "type": "string"
+    },
+    "composition": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ModelCompositionDescriptor"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "contract_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.@-]*$",
+      "title": "Contract Id",
+      "type": "string"
+    },
+    "contract_version": {
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "evidence_level": {
+      "$ref": "#/$defs/EvidenceLevel",
+      "default": "local_unissued"
+    },
+    "limitations": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Limitations",
+      "type": "array"
+    },
+    "model_spec_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Model Spec Hash",
+      "type": "string"
+    },
+    "outcome": {
+      "$ref": "#/$defs/AssessmentOutcome"
+    },
+    "receipt_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Receipt Ref"
+    },
+    "result_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.@-]*$",
+      "title": "Result Id",
+      "type": "string"
+    },
+    "review_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Review Ref"
+    },
+    "schema_version": {
+      "const": "tabu.verification-result.v1",
+      "default": "tabu.verification-result.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "suite_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Suite Hash",
+      "type": "string"
+    },
+    "suite_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.@-]*$",
+      "title": "Suite Id",
+      "type": "string"
+    },
+    "suite_version": {
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "title": "Suite Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "result_id",
+    "suite_id",
+    "suite_version",
+    "suite_hash",
+    "axis",
+    "contract_id",
+    "contract_version",
+    "model_spec_hash",
+    "outcome",
+    "checks",
+    "claim_boundary"
+  ],
+  "title": "VerificationResult",
+  "type": "object"
+}

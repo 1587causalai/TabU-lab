@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "tabu.cell.rec",
+  "contract_version": "0.1.0",
+  "display_name": "TabU4Rec (table-cell-as-Unit, axis-B)",
+  "upstream": {
+    "repository": "TabU/latex/model-factory",
+    "path": "../latex/model-factory/table-cell-as-unit-models/TabU4Rec/main.tex",
+    "sha256": "68ba6e287533088878707e6689047b3caf7379c668a458bfbf9cde0d5e9040d9",
+    "readonly": true,
+    "observed_at": "2026-08-28",
+    "license_boundary": "Metadata-only reference: upstream TeX remains readonly and is not redistributed by this manifest."
+  },
+  "carrier": {"family": "tabu.table_cell_as_unit", "unit": "cell", "shape": "profile-dependent", "specials": "user/item parameter tokens"},
+  "dynamics": {"family": "cell_family_three_omab", "source_contract": "ordinary three-stage OMAB; not root axis-A dual-axis dynamics", "null_contract": "profile-dependent"},
+  "readout": {"geometry": "M matched; W Wc plus kernel; RC concat plus kernel", "support": "profile-dependent", "numeric_terminal": "profile-dependent", "no_support": "typed no-support"},
+  "loss": {"truth_entry": "Step 5 only", "target_families": ["interaction_completion"]},
+  "interfaces": {"compile": "typed interaction table with cell Units", "forward": "truth-free recommendation predictions plus trace"},
+  "capabilities": ["table_cell_as_unit", "recommendation", "explicit_m_w_rc_profiles", "typed_no_support"],
+  "maturity": {"source_contract": "factory_source", "stage": "design_open", "contract": "design_open", "implementation": "design_open", "evidence": "design_open", "build_state": "design_open"},
+  "experimental_defaults": {"family_id": "tabu.table_cell_as_unit", "required_profile": "recommendation.m|recommendation.w|recommendation.rc", "feature_identity": "forbidden", "continuous_tokenizer": "context_only_standardization_then_shared_learnable_fourier", "nominal_tokenizer": "episode_random_sphere", "scale_epsilon": "1e-6", "label_broadcast": "not_applicable_no_query"},
+  "known_open": [{"id": "rec_realization_lineage", "question": "Freeze M/W/RC checkpoint lineage and support geometry before implementation.", "blocking_build": true}],
+  "alternatives": [],
+  "kill": [{"id": "axis_a_alias", "condition": "Axis-B Rec is reconstructed as root axis-A tabu4rec.", "evidence": "composition identity test"}],
+  "exit": [{"id": "profile_identity", "condition": "Every run records exactly one M/W/RC profile.", "evidence": "receipt identity test"}]
+}
