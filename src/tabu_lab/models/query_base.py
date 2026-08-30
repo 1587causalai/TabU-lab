@@ -1424,7 +1424,13 @@ class TabUQueryBaseModel(QueryFamilyModelBase):
         if unexpected:
             raise ValueError(f"checkpoint identity has unexpected fields: {unexpected}")
         for key, value in expected.items():
-            if identity.get(key) != value:
+            # Checkpoint identities cross a JSON sidecar boundary.  JSON turns
+            # tuple-valued topology fields (for example token banks and source
+            # origins) into lists, while both representations have the same
+            # contract meaning.  Compare through the repository canonical
+            # encoder so serialization does not make a valid checkpoint fail
+            # closed; semantic changes still produce a different hash.
+            if canonical_hash(identity.get(key)) != canonical_hash(value):
                 raise ValueError(f"checkpoint identity mismatch at {key}: expected {value!r}")
 
     def load_checkpoint_state(

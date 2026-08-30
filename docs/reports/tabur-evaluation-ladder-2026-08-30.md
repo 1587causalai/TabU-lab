@@ -43,12 +43,35 @@ completion checkpoint → supervised profile 的隐式迁移。$g_t>0$ 才表示
 ## 运行实现
 
 - `scripts/run_tabur_evaluation_ladder.py`：一次性执行六层并生成四维 ladder 状态。
+- `scripts/pretrain_tabur_synthetic.py`：显式执行 profile-bound 合成预训练并输出
+  query-specific `.safetensors` + `.identity.json` checkpoint；默认使用
+  `completion.artificial_mask.v1`，第 6 层兼容的监督预训练使用
+  `supervised.label_broadcast.v1`。
 - `scripts/run_tabur_finetune_lift.py`：单独执行第 6 层 paired diagnostic。
+- `src/tabu_lab/experiments/query_row_pretraining.py`：按 world 采样 linear/periodic/
+  polynomial row-latent 机制；输入是 truth-free `EvidenceEpisode`，目标只在
+  `TruthSidecar`，并在加载 tensor 前校验 contract/profile/component identity。
 - `src/tabu_lab/experiments/query_row_supervised_synthetic.py`：profile-compatible
   合成监督数据生成器，truth 只在 `TruthSidecar`。
 - `src/tabu_lab/experiments/query_row_finetune_lift.py`：同一 split、episode schedule、
   optimizer、update budget 的 pretrained/scratch 配对微调。
 - 所有 runner 支持 `--device cpu|mps|cuda|auto`；本机 MPS Stage 3 smoke 通过。
+
+### 当前预训练 smoke
+
+CPU 上的最小预训练命令：
+
+```bash
+python scripts/pretrain_tabur_synthetic.py \
+  --profile completion.artificial_mask.v1 \
+  --rows 8 --worlds 2 --steps 8 --device cpu \
+  --output /tmp/tabur-pretrain-completion.safetensors
+```
+
+本地 smoke 的 loss 从 `1.6936` 降到 `0.6390`，checkpoint 与 sidecar 均可由同
+profile 模型加载；换成 `supervised.label_broadcast.v1` 会在 tensor loading 前因
+profile identity 不匹配而 fail closed。该 smoke 仍是 `local_unissued`，不构成正式
+预训练 receipt。
 
 正式能力结论仍需要扩大 world/task/dataset 规模、固定数据与环境 provenance、
 immutable receipt、独立 review 和 owner approval。

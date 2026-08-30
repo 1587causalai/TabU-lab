@@ -68,6 +68,25 @@ model = build_model(
 )
 ```
 
+Run the explicit, profile-bound synthetic pretraining diagnostic and write a
+query-specific checkpoint:
+
+```bash
+python scripts/pretrain_tabur_synthetic.py \
+  --profile completion.artificial_mask.v1 \
+  --device cpu \
+  --output /tmp/tabur-pretrain-completion.safetensors
+```
+
+The runner samples independent row-latent worlds (linear, periodic, and
+polynomial), emits truth-free `EvidenceEpisode` inputs, and keeps target truth
+in a `TruthSidecar`.  `supervised.label_broadcast.v1` is a separate profile and
+therefore produces a checkpoint that cannot be loaded into the completion
+profile.  Checkpoint tensors are identity-bound to the QueryBase contract,
+component composition, source topology, profile, and model configuration.
+The result is a bounded `local_unissued` diagnostic, not a foundation-model or
+transfer claim.
+
 Run the focused contract gate with:
 
 ```bash

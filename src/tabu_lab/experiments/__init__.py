@@ -10,6 +10,12 @@ from .query_row_frozen_icl import (
     QueryRowFrozenICLResult,
     run_query_row_frozen_icl,
 )
+from .query_row_pretraining import (
+    QueryRowPretrainingResult,
+    load_query_row_pretrain_checkpoint,
+    run_query_row_synthetic_pretraining,
+    save_query_row_pretrain_checkpoint,
+)
 from .query_row_real_benchmark import (
     QueryRowRealBenchmarkResult,
     QueryRowRealDatasetResult,
@@ -58,4 +64,8 @@ __all__ = [
     "QueryRowFinetuneLiftRecord",
     "QueryRowFinetuneLiftResult",
     "run_query_row_finetune_lift",
+    "QueryRowPretrainingResult",
+    "load_query_row_pretrain_checkpoint",
+    "run_query_row_synthetic_pretraining",
+    "save_query_row_pretrain_checkpoint",
 ]
