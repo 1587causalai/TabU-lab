@@ -6,7 +6,7 @@ This register captures findings intentionally deferred under the owner-approved
 ## PR8 — consolidated real evaluation stack follow-up
 
 Reviewed commit: `1364761b5b4668658c371ce504c555db4ccfe6a8`; follow-up is
-implemented in the isolated `codex/pr8-debt-followup` worktree.
+merged from the isolated `codex/pr8-debt-followup` worktree at `1c4299e`.
 
 - **P1 — fine-tune held-out estimand:** **resolved in implementation.** Held-out
   evaluation now constructs one transductive evidence episode and applies the
@@ -26,8 +26,7 @@ implemented in the isolated `codex/pr8-debt-followup` worktree.
   preserved until portable artifact manifests are introduced; they are not
   treated as formal authority or public evidence.
 
-The follow-up changes are local and unissued. No private freeze, checkpoint, or
-scientific evaluation was run by this follow-up.
+The follow-up did not run a private freeze, checkpoint, or scientific evaluation.
 
 ## PR5 — typed YAML mathematics projection
 
@@ -59,13 +58,15 @@ Reviewed commit: `7733b8d`.
 
 Reviewed commit: `45a9c815119b67a73d5efef42dba24295c25d0f9`.
 
-- **P1 — checkpoint identity:** `load_pretrain_checkpoint` treats the adjacent
-  identity sidecar as optional and does not cross-check it with identity embedded
-  in safetensors metadata.
-- **P2 — source hash scope:** `source_tree_sha256` omits runner, config, schema,
-  and dependency-lock inputs used by promotion checks.
+- **P1 — checkpoint identity:** **resolved in implementation.** Loading now
+  requires both the adjacent identity sidecar and embedded safetensors identity,
+  requires their JSON payloads to match, and validates the bound model identity
+  before loading tensor state.
+- **P2 — source hash scope:** **resolved in implementation.** Promotion source
+  identity now covers package code, ModelSpecs, the invoked runner, transfer YAML,
+  synthetic-world schemas, `pyproject.toml`, and `uv.lock`.
 - **P3 — imported history hygiene:** historical reports retain trailing whitespace
   and host-local evidence paths. Preserve them for now; later project evidence
   through portable artifact manifests.
 
-All entries remain deferred until the owner closes the consolidation sequence.
+Only entries not explicitly marked resolved remain deferred.
