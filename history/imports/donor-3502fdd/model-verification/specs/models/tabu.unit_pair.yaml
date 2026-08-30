@@ -1,0 +1,183 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "tabu.unit_pair",
+  "contract_version": "0.1.0",
+  "display_name": "TabU (unit-as-cell)",
+  "upstream": {
+    "repository": "TabU/latex/model-factory",
+    "path": "../latex/model-factory/TabU/unit-as-cell.tex",
+    "sha256": "b6d9321f69bb8aa5e185110162d3a1349a1082f69e71d455841a8e4b1671acc5",
+    "readonly": true,
+    "observed_at": "2026-08-28",
+    "license_boundary": "Metadata-only reference: upstream TeX remains readonly and is not redistributed by this manifest."
+  },
+  "carrier": {
+    "input_unit": "each cell address pair (row, feature) is a semantic Unit",
+    "input_axes": [
+      "source_row_address",
+      "feature_address",
+      "hidden"
+    ],
+    "shape": "N x M x d",
+    "context_query": {
+      "context": "all cell-Units share a completion role",
+      "query": "no query rows and no label columns"
+    },
+    "tokenization": {
+      "visible_value": "type-specific value encoder plus learned feature identity",
+      "artificial_mask": "learned e_mask plus feature identity",
+      "natural_missing": "fixed e_null = 0_d with no feature-identity add"
+    },
+    "specials": {
+      "unit": "absent",
+      "feature": "absent as a dynamic token; compile-time identity only",
+      "corner": "absent"
+    },
+    "truth_boundary": "masked cell-Unit truth enters only at Step 5"
+  },
+  "dynamics": {
+    "family": "cell-Unit O-closed Transformer",
+    "entry": "no OInject",
+    "operations": [
+      "slot_from_col_mates_omab",
+      "cell_unit_from_slot_omab",
+      "row_mates_omab"
+    ],
+    "inducing": "S transient slots per feature; K is only readout projection width",
+    "source_contract": "visible cell-Units source; artificial masks are receiver-only by current default",
+    "null_contract": "three OMAB operations preserve exact zero"
+  },
+  "readout": {
+    "geometry": "global learned projection W h_(r,a) in R^K",
+    "support": "same-feature other visible cell-Units",
+    "numeric_terminal": "default local-linear ridge; NW is nested baseline",
+    "categorical_terminal": "NW probability mass on declared domain",
+    "no_support": "explicit no-support and terminal exit"
+  },
+  "loss": {
+    "truth_entry": "Step 5 only",
+    "numeric": "MSE on source-normalized masked cell-Unit",
+    "categorical": "NLL on declared-domain PMF",
+    "target_families": [
+      "artificial_mask_completion"
+    ],
+    "weighting": "equal across active types by default"
+  },
+  "interfaces": {
+    "compile": "typed partially observed table where each (row, feature) cell is one Unit",
+    "forward": "truth-free cell-Unit predictions from projected coordinates plus trace",
+    "train": "supply artificial-mask truth only as a loss sidecar",
+    "infer": "artificial-mask completion targets only; natural-missing targets return typed unsupported in frozen v0"
+  },
+  "capabilities": [
+    "unit_as_cell",
+    "artificial_mask_completion",
+    "mixed_numeric_categorical",
+    "same_feature_support",
+    "exact_zero_closure"
+  ],
+  "maturity": {
+    "source_contract": "factory_source",
+    "stage": "experimental",
+    "contract": "specified",
+    "implementation": "experimental",
+    "evidence": "specified",
+    "build_state": "buildable_contract"
+  },
+  "experimental_defaults": {
+    "feature_identity": "compile_time_add",
+    "projection": "global_shared_W",
+    "masked_row_mates_source": false,
+    "numeric_terminal": "local_linear",
+    "active_type_weights": "equal",
+    "reference_backend": {
+      "backend": "dense_reference_v0",
+      "provenance": "tabu_lab.models.ReferenceConfig; these are implementation experiment defaults, not upstream factory invariants",
+      "d_model": 32,
+      "n_heads": 4,
+      "d_ff": 64,
+      "n_blocks": 2,
+      "inducing_slots": 4,
+      "matched_slots": 4,
+      "max_features": 256,
+      "dropout": 0,
+      "presence_tau": 0.000001,
+      "denominator_epsilon": 1e-8,
+      "routing_bandwidth": 1
+    },
+    "inference_targets": "artificial_masks_only"
+  },
+  "known_open": [
+    {
+      "id": "dynamic_feature_identity",
+      "question": "Decide whether feature identity becomes an independently updated dynamics object.",
+      "blocking_build": false
+    },
+    {
+      "id": "masked_row_mates_source",
+      "question": "Revisit the current receiver-only mask rule on the row-mates axis.",
+      "blocking_build": false
+    },
+    {
+      "id": "feature_specific_projection",
+      "question": "Decide whether W is global or feature-specific.",
+      "blocking_build": false
+    },
+    {
+      "id": "natural_missing_inference",
+      "question": "Future proposal only: define a new contract before natural-missing inference; frozen v0 returns typed unsupported.",
+      "blocking_build": false
+    },
+    {
+      "id": "type_loss_weighting",
+      "question": "Freeze non-equal numeric/categorical weights if used.",
+      "blocking_build": false
+    }
+  ],
+  "alternatives": [
+    {
+      "id": "feature_specific_projection",
+      "description": "Use one projection W_a per feature.",
+      "status": "deferred"
+    },
+    {
+      "id": "numeric_local_linear",
+      "description": "Use local-linear ridge with the same routing weights.",
+      "status": "first_alternative"
+    }
+  ],
+  "kill": [
+    {
+      "id": "truth_leakage",
+      "condition": "Changing completion truth changes any Step 1-4 result.",
+      "evidence": "truth-substitution invariance test"
+    },
+    {
+      "id": "row_unit_special_present",
+      "condition": "A per-row Unit-special or Feature-special dynamic token is introduced.",
+      "evidence": "carrier-role audit"
+    },
+    {
+      "id": "null_gets_feature_identity",
+      "condition": "Natural missing receives a feature-identity add and leaves fixed zero.",
+      "evidence": "compiled-token exact-value test"
+    }
+  ],
+  "exit": [
+    {
+      "id": "carrier_shape",
+      "condition": "Every layer preserves N x M x d with no persistent special row or column.",
+      "evidence": "shape trace"
+    },
+    {
+      "id": "pair_projection",
+      "condition": "Every target coordinate is W times its evolved cell-Unit state.",
+      "evidence": "readout trace"
+    },
+    {
+      "id": "unit_definition_separation",
+      "condition": "No configuration silently mixes unit-as-row and unit-as-cell carriers.",
+      "evidence": "contract-id and carrier audit"
+    }
+  ]
+}

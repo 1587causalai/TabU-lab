@@ -1,0 +1,190 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "tabufl",
+  "contract_version": "0.1.0",
+  "display_name": "TabUFL",
+  "upstream": {
+    "repository": "TabU/latex/model-factory",
+    "path": "../latex/model-factory/TabUFL/main.tex",
+    "sha256": "5e81b7fa608bdd8b82b0b8e96f88132473648f27e4aad42edd5da01b82b8cf94",
+    "readonly": true,
+    "observed_at": "2026-08-27",
+    "license_boundary": "Metadata-only reference: upstream TeX remains readonly and is not redistributed by this manifest."
+  },
+  "carrier": {
+    "input_unit": "row-linked carrier address; semantic Unit mapping is task-declared",
+    "input_axes": [
+      "row",
+      "feature_or_label",
+      "hidden"
+    ],
+    "shape": "(N+K) x (M+K) x d",
+    "context_query": {
+      "context": "visible context cells may source cross-row memory",
+      "query": "query features are local evidence; query labels are receiver-only and query rows never source cross-row slots"
+    },
+    "tokenization": {
+      "visible_value": "type-specific value encoder",
+      "artificial_mask": "learned e_mask",
+      "query_label": "independent learned e_query",
+      "natural_missing": "fixed e_null = 0_d",
+      "structural_corner": "fixed 0_d"
+    },
+    "specials": {
+      "unit": "K per carrier row",
+      "feature": "K per feature/label column",
+      "corner": "K x K fixed zero"
+    },
+    "truth_boundary": "feature-completion and query-label truth enter only at Step 5"
+  },
+  "dynamics": {
+    "family": "O-closed augmented-table Transformer",
+    "entry": "multi-label OInject over ordinary cells",
+    "operations": [
+      "slot_from_context_omab",
+      "token_from_slot_omab",
+      "row_axis_omab"
+    ],
+    "inducing": "S transient slots per block; S is distinct from persistent matched K",
+    "source_contract": "context-visible source only for cross-row inducing; query receivers cannot write cross-row memory",
+    "null_contract": "OInject, OAttention, and OFFN preserve exact zero"
+  },
+  "readout": {
+    "geometry": "matched Unit-special/Feature-special diagonal inner products in R^K",
+    "feature_completion_support": "same-column visible context cells",
+    "query_label_support": "per-label visible context supports",
+    "numeric_terminal": "LL or NW; selection is not frozen by source",
+    "categorical_terminal": "NW probability mass on declared domain",
+    "no_support": "explicit no-support; target omitted from loss"
+  },
+  "loss": {
+    "truth_entry": "Step 5 only",
+    "numeric": "MSE on source-normalized target",
+    "categorical": "NLL on declared-domain PMF",
+    "target_families": [
+      "feature_completion",
+      "query_label"
+    ],
+    "weighting": "equal across active types and active families unless a run contract overrides both weights and sampling"
+  },
+  "interfaces": {
+    "compile": "typed context/query episode with schema, visibility, artificial context-feature masks, and query-label roles",
+    "forward": "truth-free feature-completion and per-label query predictions plus trace",
+    "train": "supply feature and query-label truth as separate loss sidecars",
+    "infer": "declare feature targets and/or query-label targets; preserve per-target no-support"
+  },
+  "capabilities": [
+    "feature_completion",
+    "supervised_multi_label_prediction",
+    "mixed_numeric_categorical",
+    "query_label_blind",
+    "exact_zero_closure"
+  ],
+  "maturity": {
+    "source_contract": "factory_source",
+    "stage": "experimental",
+    "contract": "specified",
+    "implementation": "experimental",
+    "evidence": "specified",
+    "build_state": "buildable_contract"
+  },
+  "experimental_defaults": {
+    "context_feature_masking": true,
+    "context_label_masking": false,
+    "active_family_weights": "equal",
+    "active_type_weights": "equal",
+    "shared_geometry": true,
+    "numeric_terminal": null,
+    "reference_backend": {
+      "backend": "dense_reference_v0",
+      "provenance": "tabu_lab.models.ReferenceConfig; these are implementation experiment defaults, not upstream factory invariants",
+      "d_model": 32,
+      "n_heads": 4,
+      "d_ff": 64,
+      "n_blocks": 2,
+      "inducing_slots": 4,
+      "matched_slots": 4,
+      "max_features": 256,
+      "dropout": 0,
+      "presence_tau": 0.000001,
+      "denominator_epsilon": 1e-8,
+      "routing_bandwidth": 1
+    },
+    "label_columns": [
+      -1
+    ]
+  },
+  "known_open": [
+    {
+      "id": "numeric_terminal_choice",
+      "question": "Freeze LL versus NW for numeric targets.",
+      "blocking_build": false
+    },
+    {
+      "id": "label_completion_contract",
+      "question": "Context-label masking requires a separate target contract.",
+      "blocking_build": false
+    },
+    {
+      "id": "feature_support_scope",
+      "question": "Decide whether query features or cross-column typed relations may support feature completion.",
+      "blocking_build": false
+    },
+    {
+      "id": "family_weighting",
+      "question": "Jointly freeze target sampling and non-equal F/L weights if one family is auxiliary.",
+      "blocking_build": false
+    },
+    {
+      "id": "response_specific_geometry",
+      "question": "Decide whether F and L require separate geometry heads.",
+      "blocking_build": false
+    }
+  ],
+  "alternatives": [
+    {
+      "id": "numeric_nw",
+      "description": "Use NW rather than local-linear for numeric targets.",
+      "status": "deferred"
+    },
+    {
+      "id": "response_specific_head",
+      "description": "Use response-family-specific readout geometry.",
+      "status": "deferred"
+    }
+  ],
+  "kill": [
+    {
+      "id": "truth_leakage",
+      "condition": "Changing only loss-side truth changes any Step 1-4 state, support, or prediction.",
+      "evidence": "truth-substitution invariance test"
+    },
+    {
+      "id": "null_drift",
+      "condition": "A natural-missing or structural-zero position leaves exact zero through a declared O-closed path.",
+      "evidence": "layerwise exact-zero trace"
+    },
+    {
+      "id": "query_writes_context",
+      "condition": "A query row contributes K/V to cross-row contextual slots.",
+      "evidence": "source-mask trace"
+    }
+  ],
+  "exit": [
+    {
+      "id": "carrier_shape",
+      "condition": "Every layer preserves (N+K) x (M+K) x d and keeps S distinct from K.",
+      "evidence": "shape trace for every block"
+    },
+    {
+      "id": "dual_target_routes",
+      "condition": "Feature completion and query-label prediction use separate typed target ledgers and losses.",
+      "evidence": "forward trace plus loss ledger"
+    },
+    {
+      "id": "query_truth_isolation",
+      "condition": "Query-label truth is first read in Step 5.",
+      "evidence": "truth-dependency audit"
+    }
+  ]
+}

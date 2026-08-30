@@ -1,0 +1,180 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "tabul",
+  "contract_version": "0.1.0",
+  "display_name": "TabUL",
+  "upstream": {
+    "repository": "TabU/latex/model-factory",
+    "path": "../latex/model-factory/TabUL/main.tex",
+    "sha256": "a4025980b4be232507d86727add6fae2b6e156ce89079eee66e70e0a7846c8d7",
+    "readonly": true,
+    "observed_at": "2026-08-27",
+    "license_boundary": "Metadata-only reference: upstream TeX remains readonly and is not redistributed by this manifest."
+  },
+  "carrier": {
+    "input_unit": "row-linked carrier address; semantic Unit mapping is task-declared",
+    "input_axes": [
+      "row",
+      "feature_or_label",
+      "hidden"
+    ],
+    "shape": "(N+K) x (M+K) x d",
+    "context_query": {
+      "context": "naturally visible context feature/label cells are evidence",
+      "query": "query features are local evidence; query labels use receiver-only markers and never source cross-row slots"
+    },
+    "tokenization": {
+      "visible_value": "type-specific value encoder",
+      "artificial_mask": "absent",
+      "query_label": "learned e_query",
+      "natural_missing": "fixed e_null = 0_d",
+      "structural_corner": "fixed 0_d"
+    },
+    "specials": {
+      "unit": "K per row",
+      "feature": "K per feature/label column",
+      "corner": "K x K fixed zero"
+    },
+    "truth_boundary": "query-label truth enters only at Step 5"
+  },
+  "dynamics": {
+    "family": "O-closed augmented-table Transformer",
+    "entry": "multi-label OInject over ordinary cells",
+    "operations": [
+      "slot_from_context_omab",
+      "token_from_slot_omab",
+      "row_axis_omab"
+    ],
+    "inducing": "S transient slots per block; S is distinct from K",
+    "source_contract": "naturally visible context only; query rows are receiver-only for cross-row memory",
+    "null_contract": "OInject, OAttention, and OFFN preserve exact zero"
+  },
+  "readout": {
+    "geometry": "matched Unit-special/label-Feature-special diagonal inner products in R^K",
+    "support": "per-label naturally visible context rows",
+    "numeric_terminal": "LL or NW; selection is not frozen by source",
+    "categorical_terminal": "NW probability mass on declared domain",
+    "no_support": "explicit no-support; target omitted from loss"
+  },
+  "loss": {
+    "truth_entry": "Step 5 only",
+    "numeric": "MSE on source-normalized query label",
+    "categorical": "NLL on declared-domain PMF",
+    "target_families": [
+      "query_label"
+    ],
+    "weighting": "equal across active types by default"
+  },
+  "interfaces": {
+    "compile": "typed context/query episode with natural visibility and query-label roles; no context artificial mask",
+    "forward": "truth-free per-label query predictions plus trace",
+    "train": "supply query-label truth only as a loss sidecar",
+    "infer": "declare query rows and label targets; preserve per-label no-support"
+  },
+  "capabilities": [
+    "supervised_multi_label_prediction",
+    "mixed_numeric_categorical",
+    "query_label_blind",
+    "exact_zero_closure"
+  ],
+  "maturity": {
+    "source_contract": "factory_source",
+    "stage": "experimental",
+    "contract": "specified",
+    "implementation": "experimental",
+    "evidence": "specified",
+    "build_state": "buildable_contract"
+  },
+  "experimental_defaults": {
+    "context_value_masking": false,
+    "query_marker": "global_shared_e_query",
+    "active_type_weights": "equal",
+    "numeric_terminal": null,
+    "reference_backend": {
+      "backend": "dense_reference_v0",
+      "provenance": "tabu_lab.models.ReferenceConfig; these are implementation experiment defaults, not upstream factory invariants",
+      "d_model": 32,
+      "n_heads": 4,
+      "d_ff": 64,
+      "n_blocks": 2,
+      "inducing_slots": 4,
+      "matched_slots": 4,
+      "max_features": 256,
+      "dropout": 0,
+      "presence_tau": 0.000001,
+      "denominator_epsilon": 1e-8,
+      "routing_bandwidth": 1
+    },
+    "label_columns": [
+      -1
+    ]
+  },
+  "known_open": [
+    {
+      "id": "numeric_terminal_choice",
+      "question": "Freeze LL versus NW for numeric labels.",
+      "blocking_build": false
+    },
+    {
+      "id": "unit_query_cardinality",
+      "question": "Define aggregation if multiple query rows refer to one semantic Unit.",
+      "blocking_build": false
+    },
+    {
+      "id": "typed_query_marker",
+      "question": "Decide whether time, query type, or intervention role needs an additional typed marker.",
+      "blocking_build": false
+    },
+    {
+      "id": "loss_weighting_and_abstention",
+      "question": "Freeze class weighting, calibration, and abstention as an output/loss contract.",
+      "blocking_build": false
+    },
+    {
+      "id": "closure_host_scope",
+      "question": "Revalidate exact-zero closure whenever normalization, attention host, or readout changes.",
+      "blocking_build": false
+    }
+  ],
+  "alternatives": [
+    {
+      "id": "typed_query_role",
+      "description": "Add declared query-type/time/intervention tokens without exposing label truth.",
+      "status": "deferred"
+    }
+  ],
+  "kill": [
+    {
+      "id": "truth_leakage",
+      "condition": "Changing query truth changes any Step 1-4 state, support, or prediction.",
+      "evidence": "truth-substitution invariance test"
+    },
+    {
+      "id": "query_writes_context",
+      "condition": "A query row contributes K/V to cross-row contextual slots.",
+      "evidence": "source-mask trace"
+    },
+    {
+      "id": "context_mask_present",
+      "condition": "An artificial context-value mask or e_mask is introduced into the TabUL contract.",
+      "evidence": "compiled-role audit"
+    }
+  ],
+  "exit": [
+    {
+      "id": "supervised_only",
+      "condition": "The target ledger contains only query-label targets and no feature reconstruction route.",
+      "evidence": "target-ledger snapshot"
+    },
+    {
+      "id": "carrier_shape",
+      "condition": "Every layer preserves (N+K) x (M+K) x d.",
+      "evidence": "shape trace"
+    },
+    {
+      "id": "query_truth_isolation",
+      "condition": "Query truth is first read in Step 5.",
+      "evidence": "truth-dependency audit"
+    }
+  ]
+}

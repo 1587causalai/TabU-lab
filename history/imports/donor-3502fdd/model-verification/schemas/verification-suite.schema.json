@@ -1,0 +1,102 @@
+{
+  "$defs": {
+    "VerificationAxis": {
+      "enum": [
+        "component_correctness",
+        "architecture_evolvability"
+      ],
+      "title": "VerificationAxis",
+      "type": "string"
+    },
+    "VerificationCheck": {
+      "additionalProperties": false,
+      "description": "An allow-listed, semantic check declaration.",
+      "properties": {
+        "axis": {
+          "$ref": "#/$defs/VerificationAxis"
+        },
+        "check_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.@-]*$",
+          "title": "Check Id",
+          "type": "string"
+        },
+        "description": {
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "required": {
+          "default": true,
+          "title": "Required",
+          "type": "boolean"
+        },
+        "schema_version": {
+          "const": "tabu.verification-check.v1",
+          "default": "tabu.verification-check.v1",
+          "title": "Schema Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "check_id",
+        "axis",
+        "description"
+      ],
+      "title": "VerificationCheck",
+      "type": "object"
+    }
+  },
+  "$id": "https://research.wehub.us/schemas/verification-suite.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A closed suite whose checks are resolved through the check registry.",
+  "properties": {
+    "axis": {
+      "$ref": "#/$defs/VerificationAxis"
+    },
+    "checks": {
+      "items": {
+        "$ref": "#/$defs/VerificationCheck"
+      },
+      "minItems": 1,
+      "title": "Checks",
+      "type": "array"
+    },
+    "claim_boundary": {
+      "minLength": 1,
+      "title": "Claim Boundary",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "tabu.verification-suite.v1",
+      "default": "tabu.verification-suite.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "suite_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.@-]*$",
+      "title": "Suite Id",
+      "type": "string"
+    },
+    "suite_version": {
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "title": "Suite Version",
+      "type": "string"
+    },
+    "title": {
+      "minLength": 1,
+      "title": "Title",
+      "type": "string"
+    }
+  },
+  "required": [
+    "suite_id",
+    "suite_version",
+    "title",
+    "axis",
+    "checks",
+    "claim_boundary"
+  ],
+  "title": "VerificationSuite",
+  "type": "object"
+}

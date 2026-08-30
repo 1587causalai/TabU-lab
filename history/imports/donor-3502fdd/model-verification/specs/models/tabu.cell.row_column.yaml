@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "tabu.cell.row_column",
+  "contract_version": "0.1.0",
+  "display_name": "TabURC (table-cell-as-Unit)",
+  "upstream": {
+    "repository": "TabU/latex/model-factory",
+    "path": "../latex/model-factory/table-cell-as-unit-models/TabURC/main.tex",
+    "sha256": "d77e61c47ae93f0549bee5ee2d7a0cbcfb22385a3d4ed9436c356c1dc1d8349f",
+    "readonly": true,
+    "observed_at": "2026-08-28",
+    "license_boundary": "Metadata-only reference: upstream TeX remains readonly and is not redistributed by this manifest."
+  },
+  "carrier": {"family": "tabu.table_cell_as_unit", "unit": "cell", "shape": "(N+K) x (M+K) x d", "specials": "row and column parameter tokens; zero corner"},
+  "dynamics": {"family": "cell_family_three_omab", "source_contract": "both special role policies require owner freeze", "null_contract": "exact-zero closure"},
+  "readout": {"geometry": "concat(U_r c_ra, F_a c_ra)", "support": "same-feature visible cells", "numeric_terminal": "local-linear or NW", "no_support": "typed no-support"},
+  "loss": {"truth_entry": "Step 5 only", "target_families": ["artificial_mask_completion"]},
+  "interfaces": {"compile": "typed table with cell Units, row/column specials and zero corner", "forward": "truth-free predictions plus trace"},
+  "capabilities": ["table_cell_as_unit", "row_column_sharing", "direct_sum_readout", "artificial_mask_completion", "exact_zero_closure"],
+  "maturity": {"source_contract": "factory_source", "stage": "experimental", "contract": "experimental", "implementation": "experimental", "evidence": "specified", "build_state": "buildable_contract"},
+  "experimental_defaults": {"family_id": "tabu.table_cell_as_unit", "profile_id": "completion.artificial_mask", "feature_identity": "forbidden", "continuous_tokenizer": "context_only_standardization_then_shared_learnable_fourier", "nominal_tokenizer": "episode_random_sphere", "label_broadcast": "optional_step_3_disabled_by_default", "label_broadcast_tau": "1e-6"},
+  "known_open": [{"id": "row_column_special_policy", "question": "Owner may revise special source policy or split row/column widths in a later contract version.", "blocking_build": false}],
+  "alternatives": [],
+  "kill": [{"id": "matched_alias", "condition": "RC concat is replaced with a matched inner product.", "evidence": "Z-constructor oracle test"}],
+  "exit": [{"id": "corner_zero", "condition": "The structural corner remains exact zero in every block.", "evidence": "carrier-role audit"}]
+}
