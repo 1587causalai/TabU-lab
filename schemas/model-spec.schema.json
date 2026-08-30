@@ -67,6 +67,202 @@
       "title": "Gate",
       "type": "object"
     },
+    "MathEquation": {
+      "additionalProperties": false,
+      "description": "One display equation with a stable reference and plain-language meaning.",
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "latex": {
+          "minLength": 1,
+          "title": "Latex",
+          "type": "string"
+        },
+        "meaning": {
+          "minLength": 1,
+          "title": "Meaning",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "latex",
+        "meaning"
+      ],
+      "title": "MathEquation",
+      "type": "object"
+    },
+    "MathInvariant": {
+      "additionalProperties": false,
+      "description": "A falsifiable statement attached to the mathematical projection.",
+      "properties": {
+        "evidence": {
+          "minLength": 1,
+          "title": "Evidence",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "statement": {
+          "minLength": 1,
+          "title": "Statement",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "statement",
+        "evidence"
+      ],
+      "title": "MathInvariant",
+      "type": "object"
+    },
+    "MathStep": {
+      "additionalProperties": false,
+      "description": "An ordered mathematical stage in the generated model explanation.",
+      "properties": {
+        "equations": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/MathEquation"
+          },
+          "title": "Equations",
+          "type": "array"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "invariants": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Invariants",
+          "type": "array"
+        },
+        "purpose": {
+          "minLength": 1,
+          "title": "Purpose",
+          "type": "string"
+        },
+        "title": {
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "purpose"
+      ],
+      "title": "MathStep",
+      "type": "object"
+    },
+    "MathSymbol": {
+      "additionalProperties": false,
+      "description": "One named symbol in the contract's notation table.",
+      "properties": {
+        "domain": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Domain"
+        },
+        "id": {
+          "pattern": "^[a-z][a-z0-9_.-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "meaning": {
+          "minLength": 1,
+          "title": "Meaning",
+          "type": "string"
+        },
+        "symbol": {
+          "minLength": 1,
+          "title": "Symbol",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "symbol",
+        "meaning"
+      ],
+      "title": "MathSymbol",
+      "type": "object"
+    },
+    "Mathematics": {
+      "additionalProperties": false,
+      "description": "Structured mathematical narrative for one model contract.\n\nThe renderer intentionally accepts raw LaTeX only in ``symbol`` and ``latex``.\nHuman-facing prose is escaped before it enters the generated TeX document.",
+      "properties": {
+        "abstract": {
+          "minLength": 1,
+          "title": "Abstract",
+          "type": "string"
+        },
+        "invariants": {
+          "items": {
+            "$ref": "#/$defs/MathInvariant"
+          },
+          "minItems": 1,
+          "title": "Invariants",
+          "type": "array"
+        },
+        "notation": {
+          "items": {
+            "$ref": "#/$defs/MathSymbol"
+          },
+          "minItems": 1,
+          "title": "Notation",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "1.0.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/MathStep"
+          },
+          "minItems": 1,
+          "title": "Steps",
+          "type": "array"
+        },
+        "unit_semantics": {
+          "minLength": 1,
+          "title": "Unit Semantics",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "abstract",
+        "unit_semantics",
+        "notation",
+        "steps",
+        "invariants"
+      ],
+      "title": "Mathematics",
+      "type": "object"
+    },
     "Maturity": {
       "additionalProperties": false,
       "properties": {
@@ -327,6 +523,17 @@
       "additionalProperties": true,
       "title": "Loss",
       "type": "object"
+    },
+    "mathematics": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Mathematics"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
     },
     "maturity": {
       "$ref": "#/$defs/Maturity"
