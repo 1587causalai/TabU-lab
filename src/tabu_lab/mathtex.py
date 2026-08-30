@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import re
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -31,7 +30,7 @@ def _text(value: object) -> str:
 
 
 def _ref(value: str) -> str:
-    return re.sub(r"[^a-zA-Z0-9:.+-]+", "-", value)
+    return "id-" + value.encode("utf-8").hex()
 
 
 def _itemize(items: list[str]) -> str:
@@ -95,11 +94,7 @@ def render_model_tex(spec: ModelSpec) -> str:
         rf"\title{{\textbf{{{_text(spec.display_name)}}}\\[4pt]",
         r"\large Generated mathematical contract}",
         r"\author{TabU model-factory}",
-        r"\date{contract "
-        + contract_id
-        + r" · version "
-        + contract_version
-        + "}",
+        r"\date{contract " + contract_id + r" · version " + contract_version + "}",
         "",
         r"\begin{document}",
         r"\maketitle",
@@ -126,7 +121,7 @@ def render_model_tex(spec: ModelSpec) -> str:
         r"\midrule",
     ]
     for symbol in mathematics.notation:
-        domain = _text(symbol.domain) if symbol.domain is not None else "--"
+        domain = rf"\({symbol.domain}\)" if symbol.domain is not None else "--"
         lines.append(f"{symbol.symbol} & {domain} & {_text(symbol.meaning)} " + r"\\")
     lines.extend(
         [

@@ -32,27 +32,27 @@ The follow-up did not run a private freeze, checkpoint, or scientific evaluation
 
 Reviewed commit: `2672034dfc6b2854b9522e2860fd3ace759fc5de`.
 
-- **P1 — ModelSpec identity policy:** adding optional `mathematics=None` changes
-  default serialized shape and may change legacy canonical hashes even when YAML
-  bytes are unchanged. Define a stable canonical serialization policy or an
-  explicit version migration.
-- **P2 — TeX label collisions:** current label normalization maps distinct ids such
-  as `a_b` and `a-b` to the same label. Add rendered-label uniqueness or reversible
-  encoding.
-- **P2 — domain semantics:** decide whether notation `domain` is prose or raw LaTeX,
-  then use a matching single-pass renderer and regression fixture.
-
-No item above is repaired in PR5 or PR6. Governance starts after the consolidation
-sequence is complete.
+- **P1 — ModelSpec identity policy:** **resolved in implementation.**
+  `model_spec_identity_payload` preserves the legacy serialized payload when an
+  optional `mathematics` projection is absent, while binding populated
+  mathematics into model, builder, and catalog identity.
+- **P2 — TeX label collisions:** **resolved in implementation.** Equation ids use
+  a reversible UTF-8 hexadecimal label encoding, with a regression covering
+  distinct `a_b` and `a-b` ids.
+- **P2 — domain semantics:** **resolved in implementation.** Notation `domain` is
+  explicitly raw LaTeX and is rendered once in inline math delimiters; prose
+  remains escaped.
 
 ## PR6 — bounded catalog projection
 
 Reviewed commit: `7733b8d`.
 
-- **P1 — wrapper/payload identity:** the catalog wrapper identity is not
-  cryptographically cross-bound to the projected payload identity.
-- **P2 — empty catalog policy:** the projection currently fails open when the
-  bounded catalog contains no models.
+- **P1 — wrapper/payload identity:** **resolved in implementation.** A model
+  catalog entry now requires wrapper `object_id` and `version` to match payload
+  `contract_id` and `contract_version`; the index hash continues to bind the
+  validated wrapper and payload together.
+- **P2 — empty catalog policy:** **resolved in implementation.** Both catalog
+  source discovery and the typed catalog index reject an empty model set.
 
 ## PR7 — synthetic pretraining implementation history
 

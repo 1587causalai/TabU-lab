@@ -225,6 +225,20 @@ class ModelSpec(BaseModel):
         return self.contract_id
 
 
+def model_spec_identity_payload(spec: ModelSpec) -> dict[str, Any]:
+    """Return the versioned semantic payload used for ModelSpec identity.
+
+    Optional projection blocks must not rewrite the identity of legacy contracts
+    when they are absent.  Once populated, ``mathematics`` remains part of the
+    identity like every other contract field.
+    """
+
+    payload = spec.model_dump(mode="json", by_alias=False)
+    if payload.get("mathematics") is None:
+        payload.pop("mathematics", None)
+    return payload
+
+
 class ValidationIssue(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -570,6 +584,7 @@ __all__ = [
     "list_model_specs",
     "list_model_versions",
     "list_models",
+    "model_spec_identity_payload",
     "show_model",
     "validate_model_spec",
     "validate_models",

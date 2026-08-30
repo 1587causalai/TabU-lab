@@ -9,7 +9,7 @@ import yaml
 from pydantic import ValidationError
 
 from tabu_lab.contracts.canonical import canonical_hash, canonical_json
-from tabu_lab.registry import ModelSpec
+from tabu_lab.registry import ModelSpec, model_spec_identity_payload
 
 from .models import CatalogEntry, CatalogIndex, CatalogObjectKind
 
@@ -22,11 +22,14 @@ def _model_sources(root: Path) -> tuple[Path, ...]:
     directory = root / "specs" / "models"
     if not directory.is_dir():
         raise CatalogBuildError("specs/models is missing")
-    return tuple(
+    sources = tuple(
         path
         for path in sorted(directory.iterdir())
         if path.is_file() and path.suffix in {".yaml", ".yml"}
     )
+    if not sources:
+        raise CatalogBuildError("specs/models contains no canonical ModelSpec sources")
+    return sources
 
 
 def _require_packaged_parity(root: Path, public_sources: tuple[Path, ...]) -> None:
@@ -54,7 +57,7 @@ def build_catalog(repository: str | Path) -> CatalogIndex:
             spec = ModelSpec.model_validate(raw)
         except (OSError, yaml.YAMLError, ValidationError) as exc:
             raise CatalogBuildError(f"invalid ModelSpec source {path.name}: {exc}") from exc
-        data = spec.model_dump(mode="json", by_alias=False)
+        data = model_spec_identity_payload(spec)
         entries.append(
             CatalogEntry(
                 kind=CatalogObjectKind.MODEL_CONTRACT,
