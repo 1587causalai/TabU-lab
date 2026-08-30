@@ -1,0 +1,170 @@
+schema_version: tabu.transfer-base-real-full-context-frozen-icl.v1
+status: candidate_preregistered_not_run
+experiment_id: tabubase-real-full-context-frozen-icl-old6-3x3-v1
+supersedes_as_primary_estimand: tabubase-real-frozen-icl-6datasets-3x3-v1
+historical_low_shot_role: auxiliary_context_scaling_diagnostic_only
+model:
+  contract_id: tabu.cell.base
+  contract_version: 0.2.0
+  profile_id: supervised.label_broadcast.v1
+tokenizer:
+  version: cell-tokenizer.v2
+  nominal_plan: source_scoped_frozen_codebook.v2
+  codebook_size: 100
+  codebook_seed: 1729
+checkpoint_line:
+  phase: PT-S1
+  seeds: [1729, 2718, 31415]
+datasets:
+  classification: [iris, wine, breast_cancer, digits]
+  regression: [diabetes, california_housing]
+dataset_status: sklearn loader snapshots; content hashed but not independently reviewed authority
+split:
+  seeds: [1729, 2718, 31415]
+  train_fraction: 0.7
+context:
+  policy: full_train
+  rows: all_train_partition_rows
+  label_visibility: every train response is visible to the frozen model
+  simultaneous_visibility: >-
+    Every train-partition predictor row and its response are present together in
+    the same model invocation; no train row may be sampled, truncated, or
+    replaced by a K<=64 subset.
+query:
+  policy: all_heldout_rows
+  query_limit: null
+  predictor_visibility: >-
+    Every held-out predictor row is present jointly with every other held-out
+    predictor row in the same single transductive episode.
+  response_visibility: >-
+    Held-out responses are absent from model inputs and are available only to
+    the TruthSidecar/common scorer after prediction.
+  single_transductive_episode: true
+  no_query_sampling_or_truncation: true
+  query_readout_chunk_rows: 64
+  query_chunk_rows: 64
+  query_chunk_rows_compatibility: >-
+    Loader-compatible alias for query_readout_chunk_rows; it is not an episode,
+    context, or query-set size limit.
+  chunking_semantics: >-
+    Shared dynamics run once over the complete labeled train context and all
+    held-out predictors. Chunks are a response-readout computation detail after
+    those shared dynamics. A chunk must not rebuild dynamics, split the
+    transductive episode, omit a query, or change any prediction.
+feature_rule: split first; if required, select at most 63 predictors by train-only variance
+frozen_arms: [pretrained_frozen, random_init_frozen, pretrained_shuffled]
+optimizer_created: false
+parameter_hash_gate:
+  algorithm: SHA-256 over the complete model state
+  scope: >-
+    One before/after hash pair per checkpoint seed and frozen arm, enclosing that
+    arm's complete six-dataset, three-split invocation.
+  timing: >-
+    Immediately adjacent to the complete frozen-arm invocation: hash once before
+    its first dataset/split and once after its final dataset/split.
+  not_claimed: per-dataset or per-split adjacent hashing
+  acceptance: before and after hashes must be byte-identical for every frozen arm
+  aggregate_gate: all_frozen_arm_parameter_hashes_unchanged must be true
+primary_metrics:
+  classification: [normalized_nll, accuracy]
+  regression: [scaled_rmse, scaled_mae, r2]
+reported_common_metrics:
+  scorer_contract: >-
+    Frozen arms and supervised baselines use the same held-out row order, label
+    mapping, probability alignment, target scale, and metric implementation.
+  classification:
+    [accuracy, balanced_accuracy, macro_f1, log_loss, normalized_nll, roc_auc_ovr_macro]
+  regression: [rmse, mae, scaled_rmse, scaled_mae, r2]
+
+baseline_protocol:
+  role: supervised_fitted_inductive_comparators_not_frozen_icl_arms
+  estimators: [xgboost, mlp]
+  exact_split_contract:
+    train_rows: all_train_partition_rows
+    query_rows: all_heldout_rows
+    predictor_indices: identical_to_the_paired_Tabu_split
+    row_and_feature_hashes: must_match_the_paired_Tabu_split_manifest
+    tuning_or_validation_rows: none
+    heldout_labels_used_for_fit_or_selection: false
+  seed_policy:
+    fit_unit: one fit per dataset, split_seed, and estimator
+    estimator_seed: equals_split_seed
+    checkpoint_seed_replication: >-
+      None. A baseline fit is checkpoint-independent and the same split receipt
+      is compared descriptively with each TabU checkpoint on that split.
+  xgboost:
+    package: xgboost
+    common_config:
+      n_estimators: 300
+      max_depth: 6
+      learning_rate: 0.05
+      subsample: 0.8
+      colsample_bytree: 0.8
+      n_jobs: 8
+      tree_method: hist
+      random_state: split_seed
+    classification:
+      estimator: XGBClassifier
+      eval_metric: logloss
+      objective_selection: classifier wrapper selects binary or multiclass from labels
+    regression:
+      estimator: XGBRegressor
+      objective: reg:squarederror
+      eval_metric: rmse
+    preprocessing: none_after_the_registered_train_only_feature_selection
+    early_stopping: false
+  mlp:
+    package: scikit-learn
+    estimators:
+      classification: MLPClassifier
+      regression: MLPRegressor
+    config:
+      hidden_layer_sizes: [64, 64]
+      activation: relu
+      solver: adam
+      alpha: 0.0001
+      batch_size: min(64, train_rows)
+      learning_rate_init: 0.001
+      max_iter: 500
+      early_stopping: false
+      shuffle: true
+      tol: 0.0001
+      random_state: split_seed
+    predictor_preprocessing: train-only StandardScaler applied to train and query
+    regression_target_preprocessing: >-
+      Standardize by the train-only mean and max(population standard deviation,
+      1e-6), then invert before computing held-out metrics in source units.
+    convergence_policy: record warnings, n_iter, and whether convergence preceded max_iter
+  receipt_requirements:
+    - exact estimator and preprocessing configuration
+    - scikit-learn and xgboost versions
+    - estimator seed and convergence warnings
+    - train, query, predictor, and split-manifest hashes
+comparison: paired full-context metrics on identical dataset, split, complete context, and query rows
+acceptance_boundary: >-
+  A runtime that cannot evaluate all train rows as context is blocked; it must not
+  truncate context, truncate/split the query episode, or substitute a historical
+  low-shot curve. Response-readout chunking must preserve predictions exactly.
+comparability_disclosure:
+  tabu_estimand: >-
+    Transductive frozen inference: all held-out predictors are jointly visible
+    and may interact through the shared episode dynamics.
+  baseline_estimand: >-
+    Inductive supervised fitting: MLP/XGBoost see only labeled train rows during
+    fit, and each held-out prediction has no test-test interaction.
+  interpretation: >-
+    Side-by-side metrics are descriptive performance comparisons, not a claim of
+    identical inference semantics or an architecture-only causal effect.
+context_length_extrapolation:
+  synthetic_pretraining_K: [2, 4, 8, 16, 32, 64]
+  maximum_pretraining_K: 64
+  evaluation_context: every train-partition row, including datasets with more than 64 rows
+  boundary: >-
+    Full-context evaluation is explicit length extrapolation beyond the observed
+    pretraining support whenever train_rows > 64. query_readout_chunk_rows=64 is
+    not a context cap and does not make this in-distribution. Successful execution
+    or a positive metric also does not prove that every supplied context row had
+    effective influence.
+claim_boundary: >-
+  Optimizer-free full-context real-data ICL diagnostic only. No task fine-tuning,
+  formal receipt, SOTA, benchmark, or foundation-model claim.

@@ -112,6 +112,18 @@ accepted claims, or evidence that synthetic pretraining improves a real task.
 See
 [`docs/architecture/tabubase-expanded-synthetic-pretraining-data.md`](./docs/architecture/tabubase-expanded-synthetic-pretraining-data.md).
 
+## Real-data evaluation implementation history
+
+The latest local real-data stack is preserved for optimizer-free frozen ICL,
+pinned OpenML panels, exact-split classical baselines, and paired TabUBase
+fine-tuning. Its YAML registrations and reports remain `local_unissued` inputs
+and historical observations. Checked-in code and reports do not by themselves
+establish a benchmark, a formal receipt, a foundation-model claim, or a causal
+effect from synthetic pretraining.
+
+The eight-dataset cached OpenML panel records pinned source hashes and historical
+cache paths; those paths are provenance references, not portable bundled data.
+
 ## Website
 
 - Public entrance: https://research.wehub.us/tabu-lab/

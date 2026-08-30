@@ -1,0 +1,218 @@
+{
+  "$defs": {
+    "FreezeOutputRef": {
+      "additionalProperties": false,
+      "description": "Content identity of one create-once file in the private freeze bundle.",
+      "properties": {
+        "content_sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Content Sha256"
+        },
+        "media_type": {
+          "minLength": 1,
+          "title": "Media Type",
+          "type": "string"
+        },
+        "relative_path": {
+          "minLength": 1,
+          "title": "Relative Path",
+          "type": "string"
+        },
+        "role": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+          "title": "Role",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "tabu.eval-data-freeze-output.v1",
+          "default": "tabu.eval-data-freeze-output.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "size_bytes": {
+          "exclusiveMinimum": 0,
+          "maximum": 134217728,
+          "title": "Size Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "role",
+        "relative_path",
+        "sha256",
+        "size_bytes",
+        "media_type"
+      ],
+      "title": "FreezeOutputRef",
+      "type": "object"
+    },
+    "FreezeSourceRef": {
+      "additionalProperties": false,
+      "description": "Path-free identity of one source consumed by the exporter.",
+      "properties": {
+        "media_type": {
+          "minLength": 1,
+          "title": "Media Type",
+          "type": "string"
+        },
+        "provenance_status": {
+          "const": "retained_candidate_unreviewed",
+          "default": "retained_candidate_unreviewed",
+          "title": "Provenance Status",
+          "type": "string"
+        },
+        "retained_name": {
+          "minLength": 1,
+          "title": "Retained Name",
+          "type": "string"
+        },
+        "role": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+          "title": "Role",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "tabu.eval-data-freeze-source.v1",
+          "default": "tabu.eval-data-freeze-source.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "size_bytes": {
+          "exclusiveMinimum": 0,
+          "maximum": 134217728,
+          "title": "Size Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "role",
+        "retained_name",
+        "sha256",
+        "size_bytes",
+        "media_type"
+      ],
+      "title": "FreezeSourceRef",
+      "type": "object"
+    },
+    "JsonValue": {}
+  },
+  "$id": "https://research.wehub.us/schemas/eval-data-authority-freeze.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Review subject for one offline, explicitly unreviewed data freeze.",
+  "properties": {
+    "authority_status": {
+      "const": "self_consistent_unreviewed",
+      "default": "self_consistent_unreviewed",
+      "title": "Authority Status",
+      "type": "string"
+    },
+    "blockers": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Blockers",
+      "type": "array"
+    },
+    "dataset_id": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+      "title": "Dataset Id",
+      "type": "string"
+    },
+    "decisions": {
+      "additionalProperties": {
+        "$ref": "#/$defs/JsonValue"
+      },
+      "title": "Decisions",
+      "type": "object"
+    },
+    "exporter_sha256": {
+      "default": "b89222fc690f45ee07d98f3500a42a8b86150b327acdc82bde3b5ffd131a88e8",
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Exporter Sha256",
+      "type": "string"
+    },
+    "freeze_id": {
+      "pattern": "^eval-data-freeze-[0-9a-f]{64}$",
+      "title": "Freeze Id",
+      "type": "string"
+    },
+    "network_access": {
+      "const": false,
+      "default": false,
+      "title": "Network Access",
+      "type": "boolean"
+    },
+    "outputs": {
+      "items": {
+        "$ref": "#/$defs/FreezeOutputRef"
+      },
+      "minItems": 2,
+      "title": "Outputs",
+      "type": "array"
+    },
+    "publication_eligible": {
+      "const": false,
+      "default": false,
+      "title": "Publication Eligible",
+      "type": "boolean"
+    },
+    "review_ids": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Review Ids",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "tabu.eval-data-authority-freeze.v1",
+      "default": "tabu.eval-data-authority-freeze.v1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_inputs": {
+      "items": {
+        "$ref": "#/$defs/FreezeSourceRef"
+      },
+      "minItems": 1,
+      "title": "Source Inputs",
+      "type": "array"
+    },
+    "source_version": {
+      "minLength": 1,
+      "title": "Source Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "freeze_id",
+    "dataset_id",
+    "source_version",
+    "source_inputs",
+    "decisions",
+    "outputs"
+  ],
+  "title": "EvalDataAuthorityFreezeManifest",
+  "type": "object"
+}
