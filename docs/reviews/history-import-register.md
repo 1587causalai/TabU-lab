@@ -109,3 +109,44 @@ code during consolidation.
 
 Independent review checks snapshot integrity and registration only; it does not select
 conflict resolutions.
+
+## Consolidation checkpoint after PR14
+
+The file-expanded donor audit classified 275 dirty paths in the core implementation
+and evidence roots (`src`, `scripts`, `experiments`, `tests`, `specs`, `schemas`,
+`datasets`, `evaluations`, and `verification`):
+
+- 49 paths were already byte-identical to active main;
+- 167 donor-only core paths were preserved by PR12 and PR13;
+- 18 additional dataset/evaluation/verification paths were preserved by PR13;
+- 41 same-path conflicts were preserved by PR14 without overwriting active main.
+
+Together, PR12–PR14 preserve 226 selected donor files in history snapshots, plus the
+donor `MIGRATION_PROVENANCE.md`. The active implementations consolidated by PR7–PR11
+remain in their canonical paths.
+
+This checkpoint closes **core implementation history collection**, not donor-tree
+cleanup and not semantic integration. Governance remains paused.
+
+### Residual non-core donor surface
+
+The same audit still reports 187 dirty paths outside the roots above:
+
+- 157 under `site/`, including 156 generated/public projection paths;
+- 23 under `docs/`;
+- 2 under `.github/`;
+- one each at `pyproject.toml`, `catalog.json`, `ROADMAP.md`, `README.md`, and
+  `MIGRATION_PROVENANCE.md`.
+
+The migration provenance file is already preserved by PR12, leaving 186 residual paths
+to classify if broader donor closure is required.
+
+- **HIST-016 — public projection authority:** `registered_unresolved`. Generated
+  `site/public` output must not be bulk-imported before its canonical source and current
+  projection status are identified.
+- **HIST-017 — residual docs/workflow/top-level history:** `registered_unresolved`.
+  These paths are outside the completed core-code collection. They require a separate
+  importance and provenance decision, not automatic migration.
+
+No HIST finding is repaired at this checkpoint. Semantic governance begins only after
+the owner accepts the consolidation scope or requests additional history batches.
