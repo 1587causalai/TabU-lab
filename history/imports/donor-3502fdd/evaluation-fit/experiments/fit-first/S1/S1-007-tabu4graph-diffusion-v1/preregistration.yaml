@@ -1,0 +1,312 @@
+schema_version: tabu.fit-experiment.v1
+experiment_id: S1-007-tabu4graph-diffusion-v1
+supersedes_experiment_ids: []
+revision_rationale: null
+stage: S1
+contract_id: tabu4graph
+contract_version: 0.1.0
+model_spec:
+  schema_version: 1.0.0
+  contract_id: tabu4graph
+  contract_version: 0.1.0
+  display_name: TabU4Graph
+  upstream:
+    repository: TabU/latex/model-factory
+    path: ../latex/model-factory/TabU4Graph/main.tex
+    sha256: 76db675d065592b8dbf374dd12a2a9bfcfa2f4adbcebbb978bf287ad76d3cb62
+    readonly: true
+    observed_at: '2026-08-27'
+    license_boundary: 'Metadata-only reference: upstream TeX remains readonly and is not redistributed by this manifest.'
+  carrier:
+    input_unit: graph-linked row address; node-to-Unit mapping is task-declared
+    input_axes:
+    - unit
+    - feature
+    - hidden
+    shape: (N+K) x (M+K) x d
+    context_query:
+      context: visible cells plus declared graph topology are input evidence
+      query: no query rows; masked cells are receivers
+    tokenization:
+      visible_value: type-specific value encoder
+      artificial_mask: learned e_mask
+      natural_missing: fixed e_null = 0_d
+      target_feature: one declared feature tau
+    specials:
+      unit: K per row
+      feature: K per column; currently global prototype
+      corner: K x K fixed zero
+    truth_boundary: masked completion truth enters only at Step 5
+  dynamics:
+    family: graph-constrained O-closed augmented-table Transformer
+    entry: zero-preserving gated broadcast-add from visible target feature tau
+    operations:
+    - graph_local_slot_from_neighborhood
+    - ordinary_token_from_graph_slots
+    - unit_special_from_closed_neighborhood
+    - within_row_feature_axis
+    documented_count: source prose also calls this three OMAB; operation accounting is unresolved
+    inducing: neighborhood-conditioned transient slots S_(r,a), distinct from K
+    source_contract: cross-Unit sources are restricted to the declared closed neighborhood; row axis remains within Unit
+    null_contract: broadcast-add and OMAB paths claim exact-zero preservation
+  readout:
+    geometry: matched Unit-special/Feature-special diagonal inner products in R^K
+    support: same-column visible cells, inherited from TabUF and not graph-local
+    numeric_terminal: LL/NW wording drifts from TabUF's frozen NW default; not frozen here
+    categorical_terminal: NW probability mass on declared domain
+    no_support: explicit no-support and terminal exit
+  loss:
+    truth_entry: Step 5 only
+    numeric: MSE on source-normalized masked cell
+    categorical: NLL on declared-domain PMF
+    target_families:
+    - artificial_mask_completion
+    weighting: equal across active types by default
+  interfaces:
+    compile: typed Unit-Feature table, declared graph/node mapping, target feature tau, visibility, and masks
+    forward: truth-free cell predictions with graph-source and readout-support traces
+    train: supply masked cell truth only as a loss sidecar
+    infer: declare targets, graph direction semantics, and target feature without broadcasting hidden truth
+  capabilities:
+  - graph_conditioned_completion
+  - target_feature_broadcast
+  - mixed_numeric_categorical
+  - same_column_readout
+  - exact_zero_closure_claim
+  maturity:
+    source_contract: factory_source
+    stage: experimental
+    contract: specified
+    implementation: experimental
+    evidence: specified
+    build_state: buildable_contract
+  maturity_evidence: null
+  mathematics: null
+  experimental_defaults:
+    neighborhood: symmetrized_closed_with_self
+    target_feature_count: 1
+    feature_special_scope: global_column
+    numeric_terminal: null
+    broadcast_gate: fixed_rho_ba
+    reference_backend:
+      backend: dense_reference_v0
+      provenance: tabu_lab.models.ReferenceConfig; these are implementation experiment defaults, not upstream factory invariants
+      d_model: 32
+      n_heads: 4
+      d_ff: 64
+      n_blocks: 2
+      inducing_slots: 4
+      matched_slots: 4
+      max_features: 256
+      dropout: 0
+      presence_tau: 1.0e-06
+      denominator_epsilon: 1e-8
+      routing_bandwidth: 1
+    target_feature_index: 0
+  known_open:
+  - id: omab_count_conflict
+    question: Resolve the prose claim of three OMAB against four separately specified operations.
+    blocking_build: false
+  - id: empty_neighborhood_zero_conflict
+    question: Resolve exact-zero behavior when learned nonzero inducing seeds meet an empty eligible neighborhood.
+    blocking_build: false
+  - id: numeric_default_drift
+    question: Freeze whether TabUF's NW default carries over or LL/NW is a run choice.
+    blocking_build: false
+  - id: directed_edge_semantics
+    question: Choose incoming, outgoing, or symmetrized sources for directed graphs.
+    blocking_build: false
+  - id: global_feature_special_locality
+    question: Decide whether global Feature-special prototypes violate the intended graph locality.
+    blocking_build: false
+  - id: broadcast_gate_semantics
+    question: Freeze the differentiable zero-preserving gate versus a true ungated add.
+    blocking_build: false
+  - id: multiple_target_features
+    question: Specify selection and semantics before supporting more than one target feature.
+    blocking_build: false
+  alternatives:
+  - id: graph_local_feature_prototype
+    description: Replace global Feature-special prototypes with neighborhood-local prototypes.
+    status: deferred
+  - id: directed_neighborhood
+    description: Use declared incoming or outgoing edge semantics.
+    status: deferred
+  kill:
+  - id: truth_leakage
+    condition: Changing completion truth changes any Step 1-4 result.
+    evidence: truth-substitution invariance test
+  - id: edge_escape
+    condition: A cross-Unit source outside the declared neighborhood changes a receiver.
+    evidence: edge-deletion and Jacobian test
+  - id: masked_tau_broadcast
+    condition: Masked or natural-missing target-feature truth is broadcast.
+    evidence: entry source-mask trace
+  exit:
+  - id: topology_sensitivity
+    condition: Changing an allowed graph edge can change relevant states while deleting all incident evidence removes that
+      path.
+    evidence: paired graph perturbation trace
+  - id: operation_accounting
+    condition: Runtime traces name and count every graph-local and row-axis operation without collapsing distinct source masks.
+    evidence: operation trace
+  - id: locality_boundary
+    condition: Reports separately identify graph-local dynamics and the potentially global same-column readout.
+    evidence: forward trace plus readout support ledger
+model_spec_hash: 36679df9cb9465364586225146a7118f15ea023c71189b70ba0d015754f2f190
+dataset:
+  dataset_id: s1-graph-sbm-numeric_diffusion-v1
+  origin: generated
+  source_uri: pkg://tabu_lab.experiments.s1_topology#build_s1_graph_corpus
+  source_sha256: b8664fc377cb2819e70ef8c63fa11ea74fa838a0375ab3f36b20c64e41c8d7b0
+  dataset_hash: 820366d412731128891e62b6949e9b2962d930a3f1987735edc0fcd9a67431bd
+  license_id: Apache-2.0
+  redistribution: allowed
+  adapter:
+    adapter_id: tabu-s1-topology-synthetic
+    adapter_version: 1.0.0
+  raw_files_in_git: false
+  split_before_compile: true
+split:
+  schema_version: tabu.fit-split.v1
+  dataset_id: s1-graph-sbm-numeric_diffusion-v1
+  dataset_hash: 820366d412731128891e62b6949e9b2962d930a3f1987735edc0fcd9a67431bd
+  split_id: s1-graph-sbm-6-1-1-v1
+  fit_partition: train
+  strategy: fixed_graph_6_1_1
+  seed: 130363
+  require_complete: true
+  kind: graph
+  scope: graph
+  partitions:
+  - name: train
+    elements:
+    - graph_id: sbm-00
+      node_id: null
+    - graph_id: sbm-01
+      node_id: null
+    - graph_id: sbm-02
+      node_id: null
+    - graph_id: sbm-03
+      node_id: null
+    - graph_id: sbm-04
+      node_id: null
+    - graph_id: sbm-05
+      node_id: null
+  - name: validation
+    elements:
+    - graph_id: sbm-06
+      node_id: null
+  - name: test
+    elements:
+    - graph_id: sbm-07
+      node_id: null
+episode_schedule:
+  schedule_id: s1-graph-numeric_diffusion-schedule-v1
+  sampling: deterministic_shuffle
+  episode_count: 8
+  targets_per_episode: 16
+  target_families:
+  - completion
+  target_origins:
+  - artificial_mask
+  sampler_seed: 104729
+  order_seed: 130363
+  recipe_hashes: []
+semantic:
+  reference:
+    backend: dense_reference_v0
+    d_model: 32
+    n_heads: 4
+    d_ff: 64
+    n_blocks: 2
+    inducing_slots: 4
+    matched_slots: 4
+    max_features: 256
+    dropout: 0.0
+    presence_tau: 1.0e-06
+    denominator_epsilon: 1.0e-08
+    routing_bandwidth: 1.0
+    geometry_normalization: none
+  numeric_terminal: nadaraya_watson
+  categorical_terminal: nadaraya_watson
+  augmented_readout_geometry: null
+  label_columns: []
+  label_address_plan: null
+  target_feature: 2
+  graph_unit_receiver_plan: same_row_visible_cells
+  response_family: null
+  recommendation_address_plan: null
+  rec_axis_summary_dim: null
+  rec_matched_residual_scale: null
+training:
+  optimizer: adamw
+  learning_rate: 0.001
+  weight_decay: 0.0
+  gradient_clip_norm: 1.0
+  max_updates: 3000
+  max_epochs: null
+  wall_clock_budget_minutes: 15
+  episode_batch_size: 1
+  scheduler: none
+  exact_resume: true
+  warm_start: false
+  pretraining: false
+execution:
+  device: cuda
+  device_index: 0
+  dtype: float32
+  deterministic_algorithms: true
+  evidence_mode: gate
+  compile_on_cpu: true
+  backend: dense_reference_v0
+seeds:
+  model_seeds:
+  - 1729
+  - 2718
+  - 31415
+  data_seed: 104729
+  split_seed: 130363
+  episode_order_seed: 130363
+target_families:
+- completion
+baselines:
+- baseline_id: exact-support-mean-mode
+  role: trivial
+  max_updates: null
+- baseline_id: frozen-initialization
+  role: diagnostic
+  max_updates: null
+pass_gate:
+  stage: S1
+  required_coverage: 1.0
+  max_loss_ratio: 0.1
+  max_trivial_baseline_ratio: 0.5
+  max_numeric_mse: null
+  max_numeric_nrmse: 0.05
+  min_categorical_accuracy: 0.98
+  max_categorical_nll: 0.1
+  require_all_seeds: true
+kill_conditions:
+  fail_on_nonfinite: true
+  require_nonzero_gradient_by_step: 10
+  require_nonzero_parameter_delta: true
+  stop_model_after_stage_failure: true
+  preserve_failed_receipt: true
+heldout_policy: diagnostic_only
+required_artifacts:
+- preregistration.yaml
+- resolved-configs
+- dataset-manifest.json
+- split-manifest.json
+- compiler-manifest.json
+- feasibility.json
+- metrics.jsonl
+- evaluation.json
+- forward-traces.json
+- baselines.json
+- checkpoint
+- environment.json
+- artifacts.sha256
+- receipt.json
+- verdict.md

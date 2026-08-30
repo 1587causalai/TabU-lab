@@ -1,0 +1,314 @@
+schema_version: tabu.fit-experiment.v1
+experiment_id: F0-010-tabu-unit-pair-identifiable-v2
+supersedes_experiment_ids:
+- F0-003-tabu-unit-pair-v1
+revision_rationale: Replace the representation-degenerate v1 completion fixture with the representation-identifiable v2 fixture.
+stage: F0
+contract_id: tabu.unit_pair
+contract_version: 0.1.0
+model_spec:
+  schema_version: 1.0.0
+  contract_id: tabu.unit_pair
+  contract_version: 0.1.0
+  display_name: TabU (unit-as-cell)
+  upstream:
+    repository: TabU/latex/model-factory
+    path: ../latex/model-factory/TabU/unit-as-cell.tex
+    sha256: 7ac86d89b677e3fa97e785b229dad13793f1b950991047f490c6df9b15cbf7bc
+    readonly: true
+    observed_at: '2026-08-28'
+    license_boundary: 'Metadata-only reference: upstream TeX remains readonly and is not redistributed by this manifest.'
+  carrier:
+    input_unit: each cell address pair (row, feature) is a semantic Unit
+    input_axes:
+    - source_row_address
+    - feature_address
+    - hidden
+    shape: N x M x d
+    context_query:
+      context: all cell-Units share a completion role
+      query: no query rows and no label columns
+    tokenization:
+      visible_value: type-specific value encoder plus learned feature identity
+      artificial_mask: learned e_mask plus feature identity
+      natural_missing: fixed e_null = 0_d with no feature-identity add
+    specials:
+      unit: absent
+      feature: absent as a dynamic token; compile-time identity only
+      corner: absent
+    truth_boundary: masked cell-Unit truth enters only at Step 5
+  dynamics:
+    family: cell-Unit O-closed Transformer
+    entry: no OInject
+    operations:
+    - slot_from_col_mates_omab
+    - cell_unit_from_slot_omab
+    - row_mates_omab
+    inducing: S transient slots per feature; K is only readout projection width
+    source_contract: visible cell-Units source; artificial masks are receiver-only by current default
+    null_contract: three OMAB operations preserve exact zero
+  readout:
+    geometry: global learned projection W h_(r,a) in R^K
+    support: same-feature other visible cell-Units
+    numeric_terminal: default NW; local-linear ridge is first alternative
+    categorical_terminal: NW probability mass on declared domain
+    no_support: explicit no-support and terminal exit
+  loss:
+    truth_entry: Step 5 only
+    numeric: MSE on source-normalized masked cell-Unit
+    categorical: NLL on declared-domain PMF
+    target_families:
+    - artificial_mask_completion
+    weighting: equal across active types by default
+  interfaces:
+    compile: typed partially observed table where each (row, feature) cell is one Unit
+    forward: truth-free cell-Unit predictions from projected coordinates plus trace
+    train: supply artificial-mask truth only as a loss sidecar
+    infer: artificial-mask completion targets only; natural-missing targets return typed unsupported in frozen v0
+  capabilities:
+  - unit_as_cell
+  - artificial_mask_completion
+  - mixed_numeric_categorical
+  - same_feature_support
+  - exact_zero_closure
+  maturity:
+    source_contract: factory_source
+    stage: experimental
+    contract: specified
+    implementation: experimental
+    evidence: specified
+    build_state: buildable_contract
+  maturity_evidence: null
+  mathematics: null
+  experimental_defaults:
+    feature_identity: compile_time_add
+    projection: global_shared_W
+    masked_row_mates_source: false
+    numeric_terminal: nadaraya_watson
+    active_type_weights: equal
+    reference_backend:
+      backend: dense_reference_v0
+      provenance: tabu_lab.models.ReferenceConfig; these are implementation experiment defaults, not upstream factory invariants
+      d_model: 32
+      n_heads: 4
+      d_ff: 64
+      n_blocks: 2
+      inducing_slots: 4
+      matched_slots: 4
+      max_features: 256
+      dropout: 0
+      presence_tau: 1.0e-06
+      denominator_epsilon: 1e-8
+      routing_bandwidth: 1
+    inference_targets: artificial_masks_only
+  known_open:
+  - id: dynamic_feature_identity
+    question: Decide whether feature identity becomes an independently updated dynamics object.
+    blocking_build: false
+  - id: masked_row_mates_source
+    question: Revisit the current receiver-only mask rule on the row-mates axis.
+    blocking_build: false
+  - id: feature_specific_projection
+    question: Decide whether W is global or feature-specific.
+    blocking_build: false
+  - id: natural_missing_inference
+    question: 'Future proposal only: define a new contract before natural-missing inference; frozen v0 returns typed unsupported.'
+    blocking_build: false
+  - id: type_loss_weighting
+    question: Freeze non-equal numeric/categorical weights if used.
+    blocking_build: false
+  alternatives:
+  - id: feature_specific_projection
+    description: Use one projection W_a per feature.
+    status: deferred
+  - id: numeric_local_linear
+    description: Use local-linear ridge with the same routing weights.
+    status: first_alternative
+  kill:
+  - id: truth_leakage
+    condition: Changing completion truth changes any Step 1-4 result.
+    evidence: truth-substitution invariance test
+  - id: row_unit_special_present
+    condition: A per-row Unit-special or Feature-special dynamic token is introduced.
+    evidence: carrier-role audit
+  - id: null_gets_feature_identity
+    condition: Natural missing receives a feature-identity add and leaves fixed zero.
+    evidence: compiled-token exact-value test
+  exit:
+  - id: carrier_shape
+    condition: Every layer preserves N x M x d with no persistent special row or column.
+    evidence: shape trace
+  - id: pair_projection
+    condition: Every target coordinate is W times its evolved cell-Unit state.
+    evidence: readout trace
+  - id: unit_definition_separation
+    condition: No configuration silently mixes unit-as-row and unit-as-cell carriers.
+    evidence: contract-id and carrier audit
+model_spec_hash: 63b8124a71e302ceb3e16f13664c817953e20426c84566426ffc1ad1fba525ae
+dataset:
+  dataset_id: f0-completion-mixed-identifiable-v2
+  origin: generated
+  source_uri: pkg://tabu_lab.experiments.fixtures
+  source_sha256: f01ef5345df1126e0dda7957b6d8cd2c2f6fecd3f5158449fdb5aca7739b9ddf
+  dataset_hash: 4e09d46e63bbdee653a8d08e961d54bb394d6296df2557c97fa9965a5ae6097b
+  license_id: Apache-2.0
+  redistribution: allowed
+  adapter:
+    adapter_id: tabu-f0-fixtures
+    adapter_version: 2.0.0
+  raw_files_in_git: false
+  split_before_compile: true
+split:
+  schema_version: tabu.fit-split.v1
+  dataset_id: f0-completion-mixed-identifiable-v2
+  dataset_hash: 4e09d46e63bbdee653a8d08e961d54bb394d6296df2557c97fa9965a5ae6097b
+  split_id: F0-010-tabu-unit-pair-identifiable-v2-fit-split-v1
+  fit_partition: train
+  strategy: fixed_f0_episode
+  seed: 130363
+  require_complete: true
+  kind: row
+  partitions:
+  - name: train
+    row_ids:
+    - row-00
+    - row-01
+    - row-02
+    - row-03
+    - row-04
+    - row-05
+    - row-06
+    - row-07
+    - row-08
+    - row-09
+    - row-10
+    - row-11
+    - row-12
+    - row-13
+    - row-14
+    - row-15
+    - row-16
+    - row-17
+    - row-18
+    - row-19
+    - row-20
+    - row-21
+    - row-22
+    - row-23
+    - row-24
+    - row-25
+    - row-26
+    - row-27
+    - row-28
+    - row-29
+    - row-30
+    - row-31
+episode_schedule:
+  schedule_id: F0-001-completion-shared-v2-schedule-v1
+  sampling: fixed
+  episode_count: 1
+  targets_per_episode: 16
+  target_families:
+  - completion
+  target_origins:
+  - artificial_mask
+  sampler_seed: 104729
+  order_seed: 130363
+  recipe_hashes:
+  - 6b4e869e39e52b29d19d8176acb86c694dc9e906fc66b68feb2c574f8791c175
+semantic:
+  reference:
+    backend: dense_reference_v0
+    d_model: 32
+    n_heads: 4
+    d_ff: 64
+    n_blocks: 2
+    inducing_slots: 4
+    matched_slots: 4
+    max_features: 256
+    dropout: 0.0
+    presence_tau: 1.0e-06
+    denominator_epsilon: 1.0e-08
+    routing_bandwidth: 1.0
+    geometry_normalization: none
+  numeric_terminal: nadaraya_watson
+  categorical_terminal: nadaraya_watson
+  augmented_readout_geometry: null
+  label_columns: []
+  label_address_plan: null
+  target_feature: null
+  graph_unit_receiver_plan: null
+  response_family: null
+  recommendation_address_plan: null
+  rec_axis_summary_dim: null
+  rec_matched_residual_scale: null
+training:
+  optimizer: adamw
+  learning_rate: 0.01
+  weight_decay: 0.0
+  gradient_clip_norm: 1.0
+  max_updates: 1200
+  max_epochs: null
+  wall_clock_budget_minutes: 10
+  episode_batch_size: 1
+  scheduler: none
+  exact_resume: true
+  warm_start: false
+  pretraining: false
+execution:
+  device: cuda
+  device_index: 0
+  dtype: float32
+  deterministic_algorithms: true
+  compile_on_cpu: true
+  backend: dense_reference_v0
+seeds:
+  model_seeds:
+  - 1729
+  - 2718
+  - 31415
+  data_seed: 104729
+  split_seed: 130363
+  episode_order_seed: 130363
+target_families:
+- completion
+baselines:
+- baseline_id: exact-support-mean-mode
+  role: trivial
+  max_updates: null
+- baseline_id: frozen-initialization
+  role: diagnostic
+  max_updates: null
+pass_gate:
+  stage: F0
+  required_coverage: 1.0
+  max_loss_ratio: 0.01
+  max_trivial_baseline_ratio: null
+  max_numeric_mse: 0.001
+  max_numeric_nrmse: null
+  min_categorical_accuracy: 1.0
+  max_categorical_nll: 0.05
+  require_all_seeds: true
+kill_conditions:
+  fail_on_nonfinite: true
+  require_nonzero_gradient_by_step: 10
+  require_nonzero_parameter_delta: true
+  stop_model_after_stage_failure: true
+  preserve_failed_receipt: true
+heldout_policy: diagnostic_only
+required_artifacts:
+- preregistration.yaml
+- resolved-configs
+- dataset-manifest.json
+- split-manifest.json
+- compiler-manifest.json
+- feasibility.json
+- metrics.jsonl
+- evaluation.json
+- forward-traces.json
+- baselines.json
+- checkpoint
+- environment.json
+- artifacts.sha256
+- receipt.json
+- verdict.md

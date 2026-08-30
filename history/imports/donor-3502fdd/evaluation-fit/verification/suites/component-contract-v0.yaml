@@ -1,0 +1,28 @@
+schema_version: tabu.verification-suite.v1
+suite_id: component-contract-v0
+suite_version: 0.1.0
+title: Component and Contract Verification v0
+axis: component_correctness
+claim_boundary: "Local component probes only; this result does not promote ModelSpec maturity or create a predictive claim."
+checks:
+  - check_id: component.build_interface
+    axis: component_correctness
+    description: Build the declared contract and inspect its interface shape.
+  - check_id: component.finite_forward
+    axis: component_correctness
+    description: Run the frozen truth-free fixture and require finite outputs.
+  - check_id: component.gradient_reachability
+    axis: component_correctness
+    description: Confirm that declared trainable parameters are reachable.
+  - check_id: component.seed_dtype_checkpoint
+    axis: component_correctness
+    description: Check fixed-seed output equivalence under the repository dtype policy.
+  - check_id: component.invalid_config_fail_closed
+    axis: component_correctness
+    description: Reject an invalid reference configuration.
+  - check_id: component.truth_sidecar_abstention
+    axis: component_correctness
+    description: Keep TruthSidecar outside forward inputs and preserve typed boundaries.
+  - check_id: component.profile_matrix
+    axis: component_correctness
+    description: Exercise both public TabUBase 0.2 profiles through the same forward boundary.

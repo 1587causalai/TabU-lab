@@ -1,0 +1,16 @@
+schema_version: tabu.transfer-base-icl.v2
+transfer_id: transfer-base-v1
+model:
+  contract_id: tabu.cell.base
+  contract_version: 0.2.0
+  profile_id: supervised.label_broadcast.v1
+world_split_before_episode_compile: true
+heldout_worlds: 512
+classification_worlds: 256
+regression_worlds: 256
+context_sizes: [0, 1, 2, 4, 8, 16, 32]
+arms: [pretrained_frozen, random_init_frozen, pretrained_shuffled, scratch_finetune]
+frozen_arm_optimizer: false
+primary_metrics: [paired_aulc, endpoint_k32, normalized_nll, scaled_rmse]
+bootstrap: world_id_clustered_95_percent
+claim_boundary: normal context must beat shuffled control and pretrained must beat random; no aggregate transfer score.

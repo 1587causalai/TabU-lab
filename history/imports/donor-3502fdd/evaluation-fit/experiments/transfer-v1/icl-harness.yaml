@@ -1,0 +1,11 @@
+schema_version: tabu.icl-harness.v1
+harness_id: icl-harness-tabul-v1
+model_id: tabul
+pretrain_spec_sha256: 5153b746f6f0d954c1e8897c6f85cbf75934ae19cad38f4160bfecd703845621
+context_sizes: [0, 1, 2, 4, 8, 16, 32]
+arms: [icl_pretrained, icl_no_pretrain, finetune_scratch]
+heldout_world_families:
+  - heteroscedastic_missingness_shift
+heldout_real_task_ids: [43, 3, 14969, 45]
+root_seed: 1729
+claim_boundary: "icl_after_synthetic_pretraining_only"

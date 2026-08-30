@@ -1,0 +1,726 @@
+schema_version: tabu.fit-experiment.v1
+experiment_id: R1-001-tabul-sklearn-diabetes-regression-v1
+supersedes_experiment_ids: []
+revision_rationale: null
+stage: R1
+contract_id: tabul
+contract_version: 0.1.0
+model_spec:
+  schema_version: 1.0.0
+  contract_id: tabul
+  contract_version: 0.1.0
+  display_name: TabUL
+  upstream:
+    repository: TabU/latex/model-factory
+    path: ../latex/model-factory/TabUL/main.tex
+    sha256: a4025980b4be232507d86727add6fae2b6e156ce89079eee66e70e0a7846c8d7
+    readonly: true
+    observed_at: '2026-08-27'
+    license_boundary: 'Metadata-only reference: upstream TeX remains readonly and is not redistributed by this manifest.'
+  carrier:
+    input_unit: row-linked carrier address; semantic Unit mapping is task-declared
+    input_axes:
+    - row
+    - feature_or_label
+    - hidden
+    shape: (N+K) x (M+K) x d
+    context_query:
+      context: naturally visible context feature/label cells are evidence
+      query: query features are local evidence; query labels use receiver-only markers and never source cross-row slots
+    tokenization:
+      visible_value: type-specific value encoder
+      artificial_mask: absent
+      query_label: learned e_query
+      natural_missing: fixed e_null = 0_d
+      structural_corner: fixed 0_d
+    specials:
+      unit: K per row
+      feature: K per feature/label column
+      corner: K x K fixed zero
+    truth_boundary: query-label truth enters only at Step 5
+  dynamics:
+    family: O-closed augmented-table Transformer
+    entry: multi-label OInject over ordinary cells
+    operations:
+    - slot_from_context_omab
+    - token_from_slot_omab
+    - row_axis_omab
+    inducing: S transient slots per block; S is distinct from K
+    source_contract: naturally visible context only; query rows are receiver-only for cross-row memory
+    null_contract: OInject, OAttention, and OFFN preserve exact zero
+  readout:
+    geometry: matched Unit-special/label-Feature-special diagonal inner products in R^K
+    support: per-label naturally visible context rows
+    numeric_terminal: LL or NW; selection is not frozen by source
+    categorical_terminal: NW probability mass on declared domain
+    no_support: explicit no-support; target omitted from loss
+  loss:
+    truth_entry: Step 5 only
+    numeric: MSE on source-normalized query label
+    categorical: NLL on declared-domain PMF
+    target_families:
+    - query_label
+    weighting: equal across active types by default
+  interfaces:
+    compile: typed context/query episode with natural visibility and query-label roles; no context artificial mask
+    forward: truth-free per-label query predictions plus trace
+    train: supply query-label truth only as a loss sidecar
+    infer: declare query rows and label targets; preserve per-label no-support
+  capabilities:
+  - supervised_multi_label_prediction
+  - mixed_numeric_categorical
+  - query_label_blind
+  - exact_zero_closure
+  maturity:
+    source_contract: factory_source
+    stage: experimental
+    contract: specified
+    implementation: experimental
+    evidence: specified
+    build_state: buildable_contract
+  maturity_evidence: null
+  mathematics: null
+  experimental_defaults:
+    context_value_masking: false
+    query_marker: global_shared_e_query
+    active_type_weights: equal
+    numeric_terminal: null
+    reference_backend:
+      backend: dense_reference_v0
+      provenance: tabu_lab.models.ReferenceConfig; these are implementation experiment defaults, not upstream factory invariants
+      d_model: 32
+      n_heads: 4
+      d_ff: 64
+      n_blocks: 2
+      inducing_slots: 4
+      matched_slots: 4
+      max_features: 256
+      dropout: 0
+      presence_tau: 1.0e-06
+      denominator_epsilon: 1e-8
+      routing_bandwidth: 1
+    label_columns:
+    - -1
+  known_open:
+  - id: numeric_terminal_choice
+    question: Freeze LL versus NW for numeric labels.
+    blocking_build: false
+  - id: unit_query_cardinality
+    question: Define aggregation if multiple query rows refer to one semantic Unit.
+    blocking_build: false
+  - id: typed_query_marker
+    question: Decide whether time, query type, or intervention role needs an additional typed marker.
+    blocking_build: false
+  - id: loss_weighting_and_abstention
+    question: Freeze class weighting, calibration, and abstention as an output/loss contract.
+    blocking_build: false
+  - id: closure_host_scope
+    question: Revalidate exact-zero closure whenever normalization, attention host, or readout changes.
+    blocking_build: false
+  alternatives:
+  - id: typed_query_role
+    description: Add declared query-type/time/intervention tokens without exposing label truth.
+    status: deferred
+  kill:
+  - id: truth_leakage
+    condition: Changing query truth changes any Step 1-4 state, support, or prediction.
+    evidence: truth-substitution invariance test
+  - id: query_writes_context
+    condition: A query row contributes K/V to cross-row contextual slots.
+    evidence: source-mask trace
+  - id: context_mask_present
+    condition: An artificial context-value mask or e_mask is introduced into the TabUL contract.
+    evidence: compiled-role audit
+  exit:
+  - id: supervised_only
+    condition: The target ledger contains only query-label targets and no feature reconstruction route.
+    evidence: target-ledger snapshot
+  - id: carrier_shape
+    condition: Every layer preserves (N+K) x (M+K) x d.
+    evidence: shape trace
+  - id: query_truth_isolation
+    condition: Query truth is first read in Step 5.
+    evidence: truth-dependency audit
+model_spec_hash: c12a9e4290416fa315d4ec7a86b6480c43ced3aca9e3aa5d8f8136d894db93f4
+dataset:
+  dataset_id: sklearn-diabetes
+  origin: classic
+  source_uri: sklearn.datasets.load_diabetes
+  source_sha256: 0ea9e8f5a8f0c85548add40324bdab3d49e73fe335689556e233fbf09b3f2d3a
+  dataset_hash: 9de43a4c610d77e0bda81bfd524c92a8ebb7c9bf53deb56f2e84d9f0511e187c
+  license_id: BSD-3-Clause
+  redistribution: metadata_only
+  adapter:
+    adapter_id: sklearn-diabetes-frozen
+    adapter_version: 1.0.0
+  raw_files_in_git: false
+  split_before_compile: true
+split:
+  schema_version: tabu.fit-split.v1
+  dataset_id: sklearn-diabetes
+  dataset_hash: 9de43a4c610d77e0bda81bfd524c92a8ebb7c9bf53deb56f2e84d9f0511e187c
+  split_id: R1-001-tabul-sklearn-diabetes-regression-v1-split
+  fit_partition: train
+  strategy: frozen_diabetes_split_v1
+  seed: 130363
+  require_complete: true
+  kind: row
+  partitions:
+  - name: train
+    row_ids:
+    - '0'
+    - '1'
+    - '2'
+    - '3'
+    - '4'
+    - '5'
+    - '6'
+    - '7'
+    - '8'
+    - '9'
+    - '10'
+    - '11'
+    - '12'
+    - '13'
+    - '14'
+    - '15'
+    - '16'
+    - '17'
+    - '18'
+    - '19'
+    - '20'
+    - '21'
+    - '22'
+    - '23'
+    - '24'
+    - '25'
+    - '26'
+    - '27'
+    - '28'
+    - '29'
+    - '30'
+    - '31'
+    - '32'
+    - '33'
+    - '34'
+    - '35'
+    - '36'
+    - '37'
+    - '38'
+    - '39'
+    - '40'
+    - '41'
+    - '42'
+    - '43'
+    - '44'
+    - '45'
+    - '46'
+    - '47'
+    - '48'
+    - '49'
+    - '50'
+    - '51'
+    - '52'
+    - '53'
+    - '54'
+    - '55'
+    - '56'
+    - '57'
+    - '58'
+    - '59'
+    - '60'
+    - '61'
+    - '62'
+    - '63'
+    - '64'
+    - '65'
+    - '66'
+    - '67'
+    - '68'
+    - '69'
+    - '70'
+    - '71'
+    - '72'
+    - '73'
+    - '74'
+    - '75'
+    - '76'
+    - '77'
+    - '78'
+    - '79'
+    - '80'
+    - '81'
+    - '82'
+    - '83'
+    - '84'
+    - '85'
+    - '86'
+    - '87'
+    - '88'
+    - '89'
+    - '90'
+    - '91'
+    - '92'
+    - '93'
+    - '94'
+    - '95'
+    - '96'
+    - '97'
+    - '98'
+    - '99'
+    - '100'
+    - '101'
+    - '102'
+    - '103'
+    - '104'
+    - '105'
+    - '106'
+    - '107'
+    - '108'
+    - '109'
+    - '110'
+    - '111'
+    - '112'
+    - '113'
+    - '114'
+    - '115'
+    - '116'
+    - '117'
+    - '118'
+    - '119'
+    - '120'
+    - '121'
+    - '122'
+    - '123'
+    - '124'
+    - '125'
+    - '126'
+    - '127'
+    - '128'
+    - '129'
+    - '130'
+    - '131'
+    - '132'
+    - '133'
+    - '134'
+    - '135'
+    - '136'
+    - '137'
+    - '138'
+    - '139'
+    - '140'
+    - '141'
+    - '142'
+    - '143'
+    - '144'
+    - '145'
+    - '146'
+    - '147'
+    - '148'
+    - '149'
+    - '150'
+    - '151'
+    - '152'
+    - '153'
+    - '154'
+    - '155'
+    - '156'
+    - '157'
+    - '158'
+    - '159'
+    - '160'
+    - '161'
+    - '162'
+    - '163'
+    - '164'
+    - '165'
+    - '166'
+    - '167'
+    - '168'
+    - '169'
+    - '170'
+    - '171'
+    - '172'
+    - '173'
+    - '174'
+    - '175'
+    - '176'
+    - '177'
+    - '178'
+    - '179'
+    - '180'
+    - '181'
+    - '182'
+    - '183'
+    - '184'
+    - '185'
+    - '186'
+    - '187'
+    - '188'
+    - '189'
+    - '190'
+    - '191'
+    - '192'
+    - '193'
+    - '194'
+    - '195'
+    - '196'
+    - '197'
+    - '198'
+    - '199'
+    - '200'
+    - '201'
+    - '202'
+    - '203'
+    - '204'
+    - '205'
+    - '206'
+    - '207'
+    - '208'
+    - '209'
+    - '210'
+    - '211'
+    - '212'
+    - '213'
+    - '214'
+    - '215'
+    - '216'
+    - '217'
+    - '218'
+    - '219'
+    - '220'
+    - '221'
+    - '222'
+    - '223'
+    - '224'
+    - '225'
+    - '226'
+    - '227'
+    - '228'
+    - '229'
+    - '230'
+    - '231'
+    - '232'
+    - '233'
+    - '234'
+    - '235'
+    - '236'
+    - '237'
+    - '238'
+    - '239'
+    - '240'
+    - '241'
+    - '242'
+    - '243'
+    - '244'
+    - '245'
+    - '246'
+    - '247'
+    - '248'
+    - '249'
+    - '250'
+    - '251'
+    - '252'
+    - '253'
+    - '254'
+    - '255'
+  - name: validation
+    row_ids:
+    - '256'
+    - '257'
+    - '258'
+    - '259'
+    - '260'
+    - '261'
+    - '262'
+    - '263'
+    - '264'
+    - '265'
+    - '266'
+    - '267'
+    - '268'
+    - '269'
+    - '270'
+    - '271'
+    - '272'
+    - '273'
+    - '274'
+    - '275'
+    - '276'
+    - '277'
+    - '278'
+    - '279'
+    - '280'
+    - '281'
+    - '282'
+    - '283'
+    - '284'
+    - '285'
+    - '286'
+    - '287'
+    - '288'
+    - '289'
+    - '290'
+    - '291'
+    - '292'
+    - '293'
+    - '294'
+    - '295'
+    - '296'
+    - '297'
+    - '298'
+    - '299'
+    - '300'
+    - '301'
+    - '302'
+    - '303'
+    - '304'
+    - '305'
+    - '306'
+    - '307'
+    - '308'
+    - '309'
+    - '310'
+    - '311'
+    - '312'
+    - '313'
+    - '314'
+    - '315'
+    - '316'
+    - '317'
+    - '318'
+    - '319'
+  - name: test
+    row_ids:
+    - '320'
+    - '321'
+    - '322'
+    - '323'
+    - '324'
+    - '325'
+    - '326'
+    - '327'
+    - '328'
+    - '329'
+    - '330'
+    - '331'
+    - '332'
+    - '333'
+    - '334'
+    - '335'
+    - '336'
+    - '337'
+    - '338'
+    - '339'
+    - '340'
+    - '341'
+    - '342'
+    - '343'
+    - '344'
+    - '345'
+    - '346'
+    - '347'
+    - '348'
+    - '349'
+    - '350'
+    - '351'
+    - '352'
+    - '353'
+    - '354'
+    - '355'
+    - '356'
+    - '357'
+    - '358'
+    - '359'
+    - '360'
+    - '361'
+    - '362'
+    - '363'
+    - '364'
+    - '365'
+    - '366'
+    - '367'
+    - '368'
+    - '369'
+    - '370'
+    - '371'
+    - '372'
+    - '373'
+    - '374'
+    - '375'
+    - '376'
+    - '377'
+    - '378'
+    - '379'
+    - '380'
+    - '381'
+    - '382'
+    - '383'
+    - '384'
+    - '385'
+    - '386'
+    - '387'
+    - '388'
+    - '389'
+    - '390'
+    - '391'
+    - '392'
+    - '393'
+    - '394'
+    - '395'
+    - '396'
+    - '397'
+    - '398'
+    - '399'
+    - '400'
+    - '401'
+    - '402'
+    - '403'
+    - '404'
+    - '405'
+    - '406'
+    - '407'
+    - '408'
+    - '409'
+    - '410'
+    - '411'
+    - '412'
+    - '413'
+    - '414'
+    - '415'
+    - '416'
+    - '417'
+    - '418'
+    - '419'
+    - '420'
+    - '421'
+    - '422'
+    - '423'
+    - '424'
+    - '425'
+    - '426'
+    - '427'
+    - '428'
+    - '429'
+    - '430'
+    - '431'
+    - '432'
+    - '433'
+    - '434'
+    - '435'
+    - '436'
+    - '437'
+    - '438'
+    - '439'
+    - '440'
+    - '441'
+episode_schedule:
+  schedule_id: R1-001-tabul-sklearn-diabetes-regression-v1-schedule
+  sampling: deterministic_shuffle
+  episode_count: 1
+  targets_per_episode: 1
+  target_families:
+  - label
+  target_origins:
+  - query
+  sampler_seed: 104729
+  order_seed: 130363
+  recipe_hashes: []
+semantic:
+  reference:
+    backend: dense_reference_v0
+    d_model: 32
+    n_heads: 4
+    d_ff: 64
+    n_blocks: 2
+    inducing_slots: 4
+    matched_slots: 4
+    max_features: 256
+    dropout: 0.0
+    presence_tau: 1.0e-06
+    denominator_epsilon: 1.0e-08
+    routing_bandwidth: 1.0
+    geometry_normalization: none
+  numeric_terminal: nadaraya_watson
+  categorical_terminal: nadaraya_watson
+  augmented_readout_geometry: matched_uf
+  label_columns:
+  - -1
+  label_address_plan: matched_uf
+  target_feature: null
+  graph_unit_receiver_plan: null
+  response_family: null
+  recommendation_address_plan: null
+  rec_axis_summary_dim: null
+  rec_matched_residual_scale: null
+training:
+  optimizer: adamw
+  learning_rate: 0.001
+  weight_decay: 0.0
+  gradient_clip_norm: 1.0
+  max_updates: 10000
+  max_epochs: 100
+  wall_clock_budget_minutes: 120
+  episode_batch_size: 1
+  scheduler: none
+  exact_resume: true
+  warm_start: false
+  pretraining: false
+execution:
+  device: cpu
+  device_index: null
+  dtype: float32
+  deterministic_algorithms: true
+  evidence_mode: gate
+  compile_on_cpu: true
+  backend: dense_reference_v0
+seeds:
+  model_seeds:
+  - 1729
+  - 2718
+  - 31415
+  data_seed: 104729
+  split_seed: 130363
+  episode_order_seed: 130363
+target_families:
+- label
+baselines:
+- baseline_id: train-mean
+  role: trivial
+  max_updates: null
+- baseline_id: standardized-ridge
+  role: diagnostic
+  max_updates: null
+pass_gate:
+  stage: R1
+  required_coverage: 1.0
+  max_loss_ratio: 0.25
+  max_trivial_baseline_ratio: 0.8
+  max_numeric_mse: null
+  max_numeric_nrmse: null
+  min_categorical_accuracy: null
+  max_categorical_nll: null
+  require_all_seeds: true
+kill_conditions:
+  fail_on_nonfinite: true
+  require_nonzero_gradient_by_step: 10
+  require_nonzero_parameter_delta: true
+  stop_model_after_stage_failure: true
+  preserve_failed_receipt: true
+heldout_policy: diagnostic_only
+required_artifacts:
+- preregistration.yaml
+- resolved-configs
+- dataset-manifest.json
+- split-manifest.json
+- compiler-manifest.json
+- feasibility.json
+- metrics.jsonl
+- evaluation.json
+- forward-traces.json
+- baselines.json
+- checkpoint
+- environment.json
+- artifacts.sha256
+- receipt.json
+- verdict.md

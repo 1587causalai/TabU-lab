@@ -1,0 +1,552 @@
+schema_version: tabu.fit-experiment.v1
+experiment_id: F0-007-tabu4rec-v1
+stage: F0
+contract_id: tabu4rec
+contract_version: 0.2.0
+model_spec:
+  schema_version: 1.0.0
+  contract_id: tabu4rec
+  contract_version: 0.2.0
+  display_name: TabU4Rec
+  upstream:
+    repository: TabU/latex/model-factory
+    path: ../latex/model-factory/TabU4Rec/main.tex
+    sha256: 9e8b6ec6272cfbc94c159f6f387220a38d7f8119172ad1d0a20dbeb065892e22
+    readonly: true
+    observed_at: '2026-08-27'
+    license_boundary: 'Metadata-only reference: upstream TeX remains readonly and is not redistributed by this manifest.'
+  carrier:
+    input_unit: rows are user addresses; every schema-declared RESPONSE column belongs to one typed item-interaction family
+    input_axes:
+    - user
+    - item
+    - hidden
+    shape: (N+K) x (M+K) x d
+    context_query:
+      context: visible interactions are input evidence
+      query: no query rows; masked interactions are receiver targets
+    tokenization:
+      visible_interaction: type-specific value encoder
+      artificial_mask: learned e_mask
+      natural_missing: fixed e_null = 0_d
+      query_label: absent
+    specials:
+      user: K per user row
+      item: K per item column
+      corner: K x K fixed zero
+    truth_boundary: masked interaction truth enters only at Step 5
+  dynamics:
+    family: dual-axis O-closed inducing Transformer
+    entry: no OInject
+    operations:
+    - user_axis_slot_omab
+    - user_axis_writeback_omab
+    - item_axis_slot_omab
+    - item_axis_writeback_omab
+    inducing: S_U and S_I transient slots per block; both distinct from K
+    source_contract: only visible interactions source either axis; masked and natural-missing cells cannot source
+    null_contract: four OMAB operations preserve exact zero
+  readout:
+    geometry: matched User-special/Item-special diagonal inner products in R^K
+    support: user arm = same RESPONSE column over other rows; item arm = other RESPONSE columns in the same row
+    arm_gating: active arms receive equal mass; one active arm renormalizes to one; a single-RESPONSE episode is explicitly
+      user-arm-only
+    numeric_terminal: LL or NW; source does not freeze a primary choice
+    categorical_terminal: NW probability mass on declared domain
+    no_support: inactive empty arm; explicit no-support if both arms are empty
+  loss:
+    truth_entry: Step 5 only
+    numeric: MSE on source-normalized masked interaction
+    categorical: NLL on declared-domain PMF
+    target_families:
+    - artificial_mask_completion
+    weighting: equal across active types by default
+  interfaces:
+    compile: typed user-item interaction table whose item columns are explicitly declared as one homogeneous RESPONSE family;
+      natural missing is never compiled as a target
+    forward: truth-free interaction predictions with two support-arm traces
+    train: supply masked interaction truth only as a loss sidecar
+    infer: declare interaction targets and explicit observation/exposure roles when estimand-relevant
+  capabilities:
+  - interaction_completion
+  - recommendation
+  - dual_axis_inducing
+  - bilinear_two_arm_support
+  - multi_response_interaction_family
+  - mixed_numeric_categorical
+  - exact_zero_closure
+  maturity:
+    source_contract: factory_source
+    stage: experimental
+    contract: specified
+    implementation: experimental
+    evidence: specified
+    build_state: buildable_contract
+  maturity_evidence: null
+  mathematics: null
+  experimental_defaults:
+    active_arm_weights: equal
+    response_family: all and only schema-declared RESPONSE columns; columns share kind, domain, and codebook
+    single_response_boundary: valid degenerate user-arm-only geometry; never reported as two active arms
+    completion_target_origin: artificial_mask_of_observed_interaction_only
+    observation_role: generic_visible_interaction
+    matched_width: same_K_on_both_axes
+    numeric_terminal: null
+    reference_backend:
+      backend: dense_reference_v0
+      provenance: tabu_lab.models.ReferenceConfig; these are implementation experiment defaults, not upstream factory invariants
+      d_model: 32
+      n_heads: 4
+      d_ff: 64
+      n_blocks: 2
+      inducing_slots: 4
+      matched_slots: 4
+      max_features: 256
+      dropout: 0
+      presence_tau: 1.0e-06
+      denominator_epsilon: 1e-8
+      routing_bandwidth: 1
+  known_open:
+  - id: numeric_terminal_choice
+    question: Freeze LL versus NW for numeric interactions.
+    blocking_build: false
+  - id: arm_gate_estimand
+    question: Choose equal, learned, exposure-aware, or recency-aware arm gating together with the estimand.
+    blocking_build: false
+  - id: observation_semantics
+    question: Separate click, rating, exposure, and negative-feedback roles when the task requires it.
+    blocking_build: false
+  - id: axis_width_matching
+    question: Decide whether user/item widths differ or matching is permutation-invariant.
+    blocking_build: false
+  - id: missingness_output
+    question: Define abstention versus missingness prediction for natural-missing inference.
+    blocking_build: false
+  alternatives:
+  - id: learned_arm_gate
+    description: Use a declared typed gate instead of equal active-arm weights.
+    status: deferred
+  kill:
+  - id: truth_leakage
+    condition: Changing completion truth changes any Step 1-4 result.
+    evidence: truth-substitution invariance test
+  - id: implicit_support_count_gate
+    condition: Arm weights change merely because one arm has more supports without a declared gate.
+    evidence: routing trace
+  - id: null_drift
+    condition: A natural-missing or corner position leaves exact zero.
+    evidence: layerwise exact-zero trace
+  exit:
+  - id: dual_axis_trace
+    condition: Every block executes four independent user/item slot and writeback OMAB operations.
+    evidence: operation trace
+  - id: bilinear_support
+    condition: Predictions expose separate user-arm and item-arm supports and normalized arm weights.
+    evidence: readout trace
+  - id: carrier_shape
+    condition: Every layer preserves (N+K) x (M+K) x d.
+    evidence: shape trace
+model_spec_hash: c4c2a6e7fced014388ef4aaa7af7f64bda061fb5dfe918c3c36331ccc61df716
+dataset:
+  dataset_id: f0-recommendation-low-rank-v1
+  origin: generated
+  source_uri: pkg://tabu_lab.experiments.fixtures
+  source_sha256: f01ef5345df1126e0dda7957b6d8cd2c2f6fecd3f5158449fdb5aca7739b9ddf
+  dataset_hash: bac4beb312541f7c8f96715df6e4317349a772c952e08582c2bc753674dba012
+  license_id: Apache-2.0
+  redistribution: allowed
+  adapter:
+    adapter_id: tabu-f0-fixtures
+    adapter_version: 1.0.0
+  raw_files_in_git: false
+  split_before_compile: true
+split:
+  schema_version: tabu.fit-split.v1
+  dataset_id: f0-recommendation-low-rank-v1
+  dataset_hash: bac4beb312541f7c8f96715df6e4317349a772c952e08582c2bc753674dba012
+  split_id: F0-007-tabu4rec-v1-fit-split-v1
+  fit_partition: train
+  strategy: fixed_f0_episode
+  seed: 130363
+  require_complete: true
+  kind: interaction
+  partitions:
+  - name: train
+    interactions:
+    - user_id: user-00
+      item_id: item-00
+    - user_id: user-00
+      item_id: item-01
+    - user_id: user-00
+      item_id: item-03
+    - user_id: user-00
+      item_id: item-04
+    - user_id: user-00
+      item_id: item-05
+    - user_id: user-00
+      item_id: item-06
+    - user_id: user-00
+      item_id: item-08
+    - user_id: user-00
+      item_id: item-09
+    - user_id: user-00
+      item_id: item-11
+    - user_id: user-01
+      item_id: item-00
+    - user_id: user-01
+      item_id: item-01
+    - user_id: user-01
+      item_id: item-02
+    - user_id: user-01
+      item_id: item-04
+    - user_id: user-01
+      item_id: item-05
+    - user_id: user-01
+      item_id: item-07
+    - user_id: user-01
+      item_id: item-09
+    - user_id: user-01
+      item_id: item-10
+    - user_id: user-02
+      item_id: item-00
+    - user_id: user-02
+      item_id: item-01
+    - user_id: user-02
+      item_id: item-03
+    - user_id: user-02
+      item_id: item-05
+    - user_id: user-02
+      item_id: item-06
+    - user_id: user-02
+      item_id: item-08
+    - user_id: user-02
+      item_id: item-09
+    - user_id: user-02
+      item_id: item-10
+    - user_id: user-02
+      item_id: item-11
+    - user_id: user-03
+      item_id: item-01
+    - user_id: user-03
+      item_id: item-02
+    - user_id: user-03
+      item_id: item-04
+    - user_id: user-03
+      item_id: item-05
+    - user_id: user-03
+      item_id: item-06
+    - user_id: user-03
+      item_id: item-07
+    - user_id: user-03
+      item_id: item-09
+    - user_id: user-03
+      item_id: item-10
+    - user_id: user-04
+      item_id: item-00
+    - user_id: user-04
+      item_id: item-01
+    - user_id: user-04
+      item_id: item-02
+    - user_id: user-04
+      item_id: item-03
+    - user_id: user-04
+      item_id: item-05
+    - user_id: user-04
+      item_id: item-06
+    - user_id: user-04
+      item_id: item-08
+    - user_id: user-04
+      item_id: item-10
+    - user_id: user-04
+      item_id: item-11
+    - user_id: user-05
+      item_id: item-01
+    - user_id: user-05
+      item_id: item-02
+    - user_id: user-05
+      item_id: item-04
+    - user_id: user-05
+      item_id: item-06
+    - user_id: user-05
+      item_id: item-07
+    - user_id: user-05
+      item_id: item-09
+    - user_id: user-05
+      item_id: item-10
+    - user_id: user-05
+      item_id: item-11
+    - user_id: user-06
+      item_id: item-00
+    - user_id: user-06
+      item_id: item-02
+    - user_id: user-06
+      item_id: item-03
+    - user_id: user-06
+      item_id: item-05
+    - user_id: user-06
+      item_id: item-06
+    - user_id: user-06
+      item_id: item-07
+    - user_id: user-06
+      item_id: item-08
+    - user_id: user-06
+      item_id: item-10
+    - user_id: user-06
+      item_id: item-11
+    - user_id: user-07
+      item_id: item-01
+    - user_id: user-07
+      item_id: item-02
+    - user_id: user-07
+      item_id: item-03
+    - user_id: user-07
+      item_id: item-04
+    - user_id: user-07
+      item_id: item-06
+    - user_id: user-07
+      item_id: item-07
+    - user_id: user-07
+      item_id: item-09
+    - user_id: user-07
+      item_id: item-11
+    - user_id: user-08
+      item_id: item-00
+    - user_id: user-08
+      item_id: item-02
+    - user_id: user-08
+      item_id: item-03
+    - user_id: user-08
+      item_id: item-05
+    - user_id: user-08
+      item_id: item-07
+    - user_id: user-08
+      item_id: item-08
+    - user_id: user-08
+      item_id: item-10
+    - user_id: user-08
+      item_id: item-11
+    - user_id: user-09
+      item_id: item-00
+    - user_id: user-09
+      item_id: item-01
+    - user_id: user-09
+      item_id: item-03
+    - user_id: user-09
+      item_id: item-04
+    - user_id: user-09
+      item_id: item-06
+    - user_id: user-09
+      item_id: item-07
+    - user_id: user-09
+      item_id: item-08
+    - user_id: user-09
+      item_id: item-09
+    - user_id: user-09
+      item_id: item-11
+    - user_id: user-10
+      item_id: item-00
+    - user_id: user-10
+      item_id: item-02
+    - user_id: user-10
+      item_id: item-03
+    - user_id: user-10
+      item_id: item-04
+    - user_id: user-10
+      item_id: item-05
+    - user_id: user-10
+      item_id: item-07
+    - user_id: user-10
+      item_id: item-08
+    - user_id: user-10
+      item_id: item-10
+    - user_id: user-11
+      item_id: item-00
+    - user_id: user-11
+      item_id: item-01
+    - user_id: user-11
+      item_id: item-03
+    - user_id: user-11
+      item_id: item-04
+    - user_id: user-11
+      item_id: item-06
+    - user_id: user-11
+      item_id: item-08
+    - user_id: user-11
+      item_id: item-09
+    - user_id: user-11
+      item_id: item-11
+    - user_id: user-12
+      item_id: item-00
+    - user_id: user-12
+      item_id: item-02
+    - user_id: user-12
+      item_id: item-04
+    - user_id: user-12
+      item_id: item-05
+    - user_id: user-12
+      item_id: item-07
+    - user_id: user-12
+      item_id: item-08
+    - user_id: user-12
+      item_id: item-09
+    - user_id: user-12
+      item_id: item-10
+    - user_id: user-13
+      item_id: item-00
+    - user_id: user-13
+      item_id: item-01
+    - user_id: user-13
+      item_id: item-03
+    - user_id: user-13
+      item_id: item-04
+    - user_id: user-13
+      item_id: item-05
+    - user_id: user-13
+      item_id: item-06
+    - user_id: user-13
+      item_id: item-08
+    - user_id: user-13
+      item_id: item-09
+    - user_id: user-13
+      item_id: item-11
+    - user_id: user-14
+      item_id: item-01
+    - user_id: user-14
+      item_id: item-02
+    - user_id: user-14
+      item_id: item-04
+    - user_id: user-14
+      item_id: item-05
+    - user_id: user-14
+      item_id: item-07
+    - user_id: user-14
+      item_id: item-09
+    - user_id: user-14
+      item_id: item-10
+    - user_id: user-15
+      item_id: item-00
+    - user_id: user-15
+      item_id: item-01
+    - user_id: user-15
+      item_id: item-03
+    - user_id: user-15
+      item_id: item-05
+    - user_id: user-15
+      item_id: item-06
+    - user_id: user-15
+      item_id: item-08
+    - user_id: user-15
+      item_id: item-09
+    - user_id: user-15
+      item_id: item-10
+    - user_id: user-15
+      item_id: item-11
+episode_schedule:
+  schedule_id: F0-005-tabu4rec-dual-arm-v1-schedule-v1
+  sampling: fixed
+  episode_count: 1
+  targets_per_episode: 24
+  target_families:
+  - completion
+  target_origins:
+  - artificial_mask
+  sampler_seed: 104729
+  order_seed: 130363
+  recipe_hashes:
+  - 0702e864d68efcd2c076379ddf2e5f8d1459967cbf7ced992d2cd933342d45f2
+semantic:
+  reference:
+    backend: dense_reference_v0
+    d_model: 32
+    n_heads: 4
+    d_ff: 64
+    n_blocks: 2
+    inducing_slots: 4
+    matched_slots: 4
+    max_features: 256
+    dropout: 0.0
+    presence_tau: 1.0e-06
+    denominator_epsilon: 1.0e-08
+    routing_bandwidth: 1.0
+    geometry_normalization: none
+  numeric_terminal: nadaraya_watson
+  categorical_terminal: nadaraya_watson
+  augmented_readout_geometry: matched_uf
+  label_columns: []
+  label_address_plan: null
+  target_feature: null
+  graph_unit_receiver_plan: null
+  response_family: ratings
+  recommendation_address_plan: matched_uf
+  rec_axis_summary_dim: null
+  rec_matched_residual_scale: null
+training:
+  optimizer: adamw
+  learning_rate: 0.01
+  weight_decay: 0.0
+  gradient_clip_norm: 1.0
+  max_updates: 1200
+  max_epochs: null
+  wall_clock_budget_minutes: 10
+  episode_batch_size: 1
+  scheduler: none
+  exact_resume: true
+  warm_start: false
+  pretraining: false
+execution:
+  device: cuda
+  device_index: 0
+  dtype: float32
+  deterministic_algorithms: true
+  compile_on_cpu: true
+  backend: dense_reference_v0
+seeds:
+  model_seeds:
+  - 1729
+  - 2718
+  - 31415
+  data_seed: 104729
+  split_seed: 130363
+  episode_order_seed: 130363
+target_families:
+- completion
+baselines:
+- baseline_id: exact-support-mean-mode
+  role: trivial
+  max_updates: null
+- baseline_id: frozen-initialization
+  role: diagnostic
+  max_updates: null
+pass_gate:
+  stage: F0
+  required_coverage: 1.0
+  max_loss_ratio: 0.01
+  max_trivial_baseline_ratio: null
+  max_numeric_mse: 0.001
+  max_numeric_nrmse: null
+  min_categorical_accuracy: 1.0
+  max_categorical_nll: 0.05
+  require_all_seeds: true
+kill_conditions:
+  fail_on_nonfinite: true
+  require_nonzero_gradient_by_step: 10
+  require_nonzero_parameter_delta: true
+  stop_model_after_stage_failure: true
+  preserve_failed_receipt: true
+heldout_policy: diagnostic_only
+required_artifacts:
+- preregistration.yaml
+- resolved-configs
+- dataset-manifest.json
+- split-manifest.json
+- compiler-manifest.json
+- feasibility.json
+- metrics.jsonl
+- evaluation.json
+- forward-traces.json
+- baselines.json
+- checkpoint
+- environment.json
+- artifacts.sha256
+- receipt.json
+- verdict.md

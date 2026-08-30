@@ -1,0 +1,67 @@
+schema_version: tabu.eval-data-passport.v1
+passport_id: tabubase-real-data-v1
+status: candidate_frozen_pending_independent_review
+datasets:
+  - dataset_id: openml-adult-v2-task-7592
+    tasks: [adult_feature_completion, adult_classification]
+    license_id: CC-BY-4.0
+    raw_snapshot_sha256: ee01944ba0b86b3353e268984cac3b482fbb2f1269960db73b334f852f4fa61d
+    row_universe_sha256: 19edb62f24118f6c33447e93f8c2592a70c4520634565e9ccd4d547283eec1e1
+    split_sha256: c29e2b27d3a1429416798b6490b74122e14723671bfcac7d8ae725708410cb05
+    truth_sidecar_sha256: 3eb34cad4954e6562f1b2aa9297b4c80d0681bb0f7184cfdbfd67b5fc954cb96
+    authority_status: self_consistent_unreviewed
+    candidate_freeze_id: eval-data-freeze-6b72d3ab05f0959dc593ad4177af4590b83f9ff64f8e4b93363bb01ac3fdd2d3
+    candidate_freeze_manifest_sha256: e0075c9761afb34c280e6ae98ed1c7cf99e3219618c0cf08a6c6bc74c89a9a11
+    candidate_snapshot_ids:
+      - openml-adult-v2-task-7592-adult-v2-task-7592-classification-micro-base-f15a8e858b23d5fc
+      - openml-adult-v2-task-7592-adult-v2-feature-completion-micro-base-8ecfce76041b0110
+    scenario_bindings:
+      - scenario_id: adult-v2-task-7592-classification-micro-base
+        suite_id: table-supervised-micro-v1
+        snapshot_sha256: 7b9f1ce68f901bad84309c448b81ea5f07c2675d522609093b0af2b3c8b2b4e9
+        authority_status: self_consistent_unreviewed
+        split_sha256: d2f7b162ebaecd378c028dd1b2122cfe3579dcc0ed2560990b188fb8268fa46c
+        truth_sidecar_sha256: 568ea791961f4e92a32bae326602ef9d64cc5777683ea9b0fe62aa5c64049809
+        authority_review_subject_sha256: 7b9f1ce68f901bad84309c448b81ea5f07c2675d522609093b0af2b3c8b2b4e9
+      - scenario_id: adult-v2-feature-completion-micro-base
+        suite_id: table-completion-micro-v1
+        snapshot_sha256: 2c978e5747bd07846cd24c9801844439a6633c5120c799fc07c03dfa2d27f347
+        authority_status: self_consistent_unreviewed
+        split_sha256: 0f1e7659cd527b854d0e47e2f38fa8eaae7f8bf30227bd8aad2c6a3f858c8be7
+        truth_sidecar_sha256: 19729ac606c6d2b02de5950b25914cfc6c5dcc2397ef0ab7761adb5063484c0c
+        authority_review_subject_sha256: 2c978e5747bd07846cd24c9801844439a6633c5120c799fc07c03dfa2d27f347
+  - dataset_id: sklearn-diabetes
+    tasks: [diabetes_feature_completion, diabetes_regression]
+    license_id: BSD-3-Clause
+    raw_snapshot_sha256: 0ea9e8f5a8f0c85548add40324bdab3d49e73fe335689556e233fbf09b3f2d3a
+    row_universe_sha256: aa0995430856f7f28db48e8bec70cfc8c3ea829b7d25446528549ef9b830d66c
+    split_sha256: 5f03bd3b33049e66533256a0e392d78253d8625974aa69fa93adc9c1ba88845d
+    truth_sidecar_sha256: 9b62ca3d92791002af907ff13e22a6cd52d38fb6c4ab1961db0d3b10b9fa48c1
+    authority_status: self_consistent_unreviewed
+    candidate_freeze_id: eval-data-freeze-88dd7260e5da5a9856f88f7de004a177801b7071dcc944adb24c8517fd247857
+    candidate_freeze_manifest_sha256: 9449f13b4ae7b69de079ef766477c5cbb74cbf5766d96c787212026a25aa5e46
+    candidate_snapshot_ids:
+      - sklearn-diabetes-sklearn-diabetes-regression-micro-base-6d91fe17958f67cb
+      - sklearn-diabetes-sklearn-diabetes-feature-completion-micro-base-0577f05ca93db62a
+    scenario_bindings:
+      - scenario_id: sklearn-diabetes-regression-micro-base
+        suite_id: table-supervised-micro-v1
+        snapshot_sha256: 9f03d0257ee68f2b5f0c10f2db49cd26cfbd30b61e401d5b1f252586384feecc
+        authority_status: self_consistent_unreviewed
+        split_sha256: 905944d77cd7d5cebcdf45bdf4a0aa3cdab4eeb9ee12930e27c1d4d99da6d13c
+        truth_sidecar_sha256: 1c9041d03968f87500f12b9919962c770058dd3d5cc72938ece0fe8bb521a1b0
+        authority_review_subject_sha256: 9f03d0257ee68f2b5f0c10f2db49cd26cfbd30b61e401d5b1f252586384feecc
+      - scenario_id: sklearn-diabetes-feature-completion-micro-base
+        suite_id: table-completion-micro-v1
+        snapshot_sha256: 8ed15731ff5df1d7fb5fb572f023a06255f69db2b797c1b6130b68788edfcd10
+        authority_status: self_consistent_unreviewed
+        split_sha256: e067742be73a73df8d1c30abe92041d188e1acd3ead7aa7bd1137dbfd9d05468
+        truth_sidecar_sha256: 4cf547bb6ba6b606a5c679fd0aaf67d356c3574ada202103d908915f9402687c
+        authority_review_subject_sha256: 8ed15731ff5df1d7fb5fb572f023a06255f69db2b797c1b6130b68788edfcd10
+requirements:
+  split_before_compile: true
+  preprocessing_fit_partition: train
+  natural_missing_excluded_from_mask: true
+  response_columns_for_supervised_v1: 1
+  formal_receipt_requires_all_hashes: true
+claim_boundary: Candidate freezes close local bytes and materialization only; independent authority review is still required before Link 4 formal evaluation and downstream links.

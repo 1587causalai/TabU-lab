@@ -1,0 +1,75 @@
+schema_version: tabu.eval-suite.v1
+suite_id: table-completion-micro-v1
+suite_version: 0.2.0
+status: preregistered
+description: >-
+  Two-dataset feature completion protocol for TabUBase 0.2.0. Adult and
+  Diabetes remain independent scenarios; no composite score is produced.
+variable_under_test: model_contract_or_artifact
+frozen_variables: [data_snapshot, split_recipe, mask_recipe, preprocessing, evaluation_budget, suite_version, metrics]
+budget:
+  schema_version: tabu.eval-budget.v1
+  model_seeds: [1729, 2718, 31415]
+  max_fit_iterations: 400
+  max_adapter_seconds: 600
+  device_class: single_device
+  deterministic: true
+allowed_pilot: one_train_validation_unissued
+test_sweeps_allowed: false
+retain_raw_predictions: true
+retain_per_example_scores: true
+report_per_seed: true
+report_mean_std: true
+composite_score: false
+claim_boundary: bounded two-snapshot completion evidence for the Base completion profile; not a tabular benchmark or SOTA claim.
+scenarios:
+  - schema_version: tabu.eval-scenario.v1
+    scenario_id: adult-v2-feature-completion-micro-base
+    task: table_completion
+    dataset:
+      schema_version: tabu.eval-dataset-requirement.v1
+      dataset_id: openml-adult-v2-task-7592
+      source_uri: https://www.openml.org/t/7592
+      source_version: OpenML-task-7592-feature-table
+      task_id: "7592"
+      license_id: CC-BY-4.0
+      redistribution: metadata_only
+      network_required: true
+      snapshot_hash_policy: require_sha256_at_run
+      required_partitions: [train, validation, test]
+    selection: {schema_version: tabu.eval-selection.v1, method: sha256_rank, fit_partition: train, stable_id_tiebreak: true, partition_limits: {train: 512, validation: 128, test: 256}}
+    mask: {schema_version: tabu.eval-mask.v1, fraction: 0.15, applied_after_split: true, independent_seed_role: mask_seed, statistics_partition: train, truth_sidecar_required: true, natural_missing_excluded: true}
+    target_kinds: [numeric, categorical]
+    applicable_contracts: [tabu.cell.base]
+    applicable_profiles: [completion.artificial_mask.v1]
+    baselines:
+      - {schema_version: tabu.eval-baseline.v1, baseline_id: train-mean-mode, family: mean_mode, hyperparameters: {laplace_alpha: 1.0}, fit_partition: train}
+      - {schema_version: tabu.eval-baseline.v1, baseline_id: numeric-knn-imputation, family: numeric_knn, hyperparameters: {k: 5, laplace_alpha: 1.0}, fit_partition: train}
+    metrics:
+      - {schema_version: tabu.eval-metric.v1, metric_id: numeric_nrmse, direction: lower, primary: true, target_kind: numeric, train_only_normalization: true}
+      - {schema_version: tabu.eval-metric.v1, metric_id: categorical_nll, direction: lower, primary: true, target_kind: categorical}
+      - {schema_version: tabu.eval-metric.v1, metric_id: categorical_accuracy, direction: higher, target_kind: categorical}
+      - {schema_version: tabu.eval-metric.v1, metric_id: coverage, direction: higher}
+    truth_partition: test
+    checkpoint_selection_partition: validation
+    preprocessing_fit_partition: train
+    statistics_fit_scope: full_train_partition
+  - schema_version: tabu.eval-scenario.v1
+    scenario_id: sklearn-diabetes-feature-completion-micro-base
+    task: table_completion
+    dataset: {schema_version: tabu.eval-dataset-requirement.v1, dataset_id: sklearn-diabetes, source_uri: sklearn.datasets.load_diabetes, source_version: scikit-learn-1.x-bundled-feature-table, license_id: BSD-3-Clause, redistribution: allowed, network_required: false, snapshot_hash_policy: require_sha256_at_run, required_partitions: [train, validation, test]}
+    selection: {schema_version: tabu.eval-selection.v1, method: sha256_rank, fit_partition: train, stable_id_tiebreak: true, partition_limits: {train: 256, validation: 64, test: 122}}
+    mask: {schema_version: tabu.eval-mask.v1, fraction: 0.15, applied_after_split: true, independent_seed_role: mask_seed, statistics_partition: train, truth_sidecar_required: true, natural_missing_excluded: true}
+    target_kinds: [numeric]
+    applicable_contracts: [tabu.cell.base]
+    applicable_profiles: [completion.artificial_mask.v1]
+    baselines:
+      - {schema_version: tabu.eval-baseline.v1, baseline_id: train-mean-mode, family: mean_mode, fit_partition: train}
+      - {schema_version: tabu.eval-baseline.v1, baseline_id: numeric-knn-imputation, family: numeric_knn, hyperparameters: {k: 5}, fit_partition: train}
+    metrics:
+      - {schema_version: tabu.eval-metric.v1, metric_id: numeric_nrmse, direction: lower, primary: true, target_kind: numeric, train_only_normalization: true}
+      - {schema_version: tabu.eval-metric.v1, metric_id: coverage, direction: higher}
+    truth_partition: test
+    checkpoint_selection_partition: validation
+    preprocessing_fit_partition: train
+    statistics_fit_scope: full_train_partition

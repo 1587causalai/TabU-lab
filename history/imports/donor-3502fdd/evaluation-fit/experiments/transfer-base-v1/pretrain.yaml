@@ -1,0 +1,29 @@
+schema_version: tabu.transfer-base-pretrain.v2
+transfer_id: transfer-base-v1
+model:
+  contract_id: tabu.cell.base
+  contract_version: 0.2.0
+  profile_id: supervised.label_broadcast.v1
+world_split_before_episode_compile: true
+world_split_before_masking: true
+world_split_before_statistics: true
+predictor_kinds: [numeric, ordinal, nominal]
+category_threshold_source: generator_or_train_context_only
+pilot:
+  phase: PT-S0
+  worlds: 2048
+  updates: 2000
+  seeds: [1729]
+  gates: [finite, exact_resume, validation_improvement]
+worlds: 20000
+updates: 20000
+seeds: [1729, 2718, 31415]
+optimizer: AdamW
+learning_rate: 0.0003
+weight_decay: 0.0001
+batch_size: 64
+dtype: float32
+checkpoints: [0, 2000, 5000, 10000, 20000]
+families: [sparse_scm, tree_threshold, latent_factor]
+heldout_families: [heteroscedastic, missingness]
+claim_boundary: synthetic pretraining receipt only; no S2, no foundation-model claim.

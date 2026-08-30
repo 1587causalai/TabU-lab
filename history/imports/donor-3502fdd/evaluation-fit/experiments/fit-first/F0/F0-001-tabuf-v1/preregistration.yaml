@@ -1,0 +1,453 @@
+schema_version: tabu.fit-experiment.v1
+experiment_id: F0-001-tabuf-v1
+supersedes_experiment_ids:
+- G000-tabuf-artificial-mask
+revision_rationale: Replace the historical untyped one-seed G000 draft with the decision-complete three-seed fit-first contract.
+stage: F0
+contract_id: tabuf
+contract_version: 0.1.0
+model_spec:
+  schema_version: 1.0.0
+  contract_id: tabuf
+  contract_version: 0.1.0
+  display_name: TabUF
+  upstream:
+    repository: TabU/latex/model-factory
+    path: ../latex/model-factory/TabUF/main.tex
+    sha256: 239babbc60c42507d882abf427dfb7da8c8c2de8cca8c0f060fbeee6085d98a0
+    readonly: true
+    observed_at: '2026-08-27'
+    license_boundary: 'Metadata-only reference: upstream TeX remains readonly and is not redistributed by this manifest.'
+  carrier:
+    input_unit: row-linked carrier address; semantic Unit mapping is task-declared
+    input_axes:
+    - row
+    - feature
+    - hidden
+    shape: (N+K) x (M+K) x d
+    context_query:
+      context: all rows share one completion role
+      query: no query rows and no label columns
+    tokenization:
+      visible_value: type-specific value encoder
+      artificial_mask: learned e_mask receiver
+      query_label: absent
+      natural_missing: fixed e_null = 0_d
+      structural_corner: fixed 0_d
+    specials:
+      unit: K per row
+      feature: K per column
+      corner: K x K fixed zero
+    truth_boundary: masked completion truth enters only at Step 5
+  dynamics:
+    family: O-closed augmented-table Transformer
+    entry: no OInject
+    operations:
+    - slot_from_visible_cells_omab
+    - token_from_slot_omab
+    - row_axis_omab
+    inducing: S transient slots per block; S is distinct from K
+    source_contract: only visible typed values source K/V; artificial masks are receiver-only
+    null_contract: three OMAB operations preserve exact zero
+  readout:
+    geometry: default matched Unit-special/Feature-special inner products; cell-token three-term sum is first alternative
+    support: same-column other visible cells
+    numeric_terminal: default NW; local-linear ridge is first alternative
+    categorical_terminal: NW probability mass on declared domain
+    no_support: explicit no-support and terminal exit
+  loss:
+    truth_entry: Step 5 only
+    numeric: MSE on source-normalized masked cell
+    categorical: NLL on declared-domain PMF
+    target_families:
+    - artificial_mask_completion
+    weighting: equal across active types by default
+  interfaces:
+    compile: typed partially observed table with visible, artificial-mask, and natural-missing roles
+    forward: truth-free cell predictions plus support/trace
+    train: supply artificial-mask truth only as a loss sidecar
+    infer: artificial-mask completion targets only; natural-missing targets return typed unsupported in frozen v0
+  capabilities:
+  - artificial_mask_completion
+  - mixed_numeric_categorical
+  - same_column_support
+  - exact_zero_closure
+  maturity:
+    source_contract: factory_source
+    stage: experimental
+    contract: specified
+    implementation: experimental
+    evidence: specified
+    build_state: buildable_contract
+  maturity_evidence: null
+  mathematics:
+    schema_version: 1.0.0
+    abstract: TabUF is a five-step typed completion contract. The generated derivation makes the carrier, token roles, O-closed
+      dynamics, same-column readout, and loss-only truth boundary explicit.
+    unit_semantics: A carrier row is a Unit-linked address only when the task declares that relation; a row index, a semantic
+      Unit, and a Unit token are not interchangeable.
+    notation:
+    - id: raw_table
+      symbol: T=(x_{ra})
+      meaning: The raw typed table before target masking.
+      domain: row and column address
+    - id: visible_evidence
+      symbol: \mathcal E_{\mathrm{in}}
+      meaning: The values allowed to enter Steps 1--4.
+      domain: input side
+    - id: completion_mask
+      symbol: m^c_{ra}
+      meaning: The artificial completion target marker; it is not target truth.
+      domain: binary role
+    - id: carrier_state
+      symbol: H^{(m)}
+      meaning: The persistent augmented carrier at dynamics depth m.
+      domain: augmented hidden carrier
+    - id: matched_geometry
+      symbol: \mathbf z_{ra}
+      meaning: The Unit--Feature matched readout coordinate for target cell (r,a).
+      domain: K-dimensional coordinate
+    - id: support
+      symbol: \mathcal C_{r,a}
+      meaning: The same-column visible support for target cell (r,a).
+      domain: row-index subset
+    - id: prediction
+      symbol: \widehat x_{ra},\widehat p_{ra}
+      meaning: The numeric prediction or categorical probability mass produced before loss.
+      domain: typed output
+    steps:
+    - id: carrier
+      title: Typed carrier and truth isolation
+      purpose: Compile raw observation roles into input-side evidence while keeping completion truth outside the forward computation.
+      equations:
+      - id: visible_indicator
+        latex: v_{ra}=o_{ra}(1-m^c_{ra}),\qquad m^c_{ra}\le o_{ra},
+        meaning: Only naturally observed cells that were not selected as artificial targets become visible value evidence.
+      - id: evidence_set
+        latex: \mathcal E_{\mathrm{in}}=\{(r,a):v_{ra}=1\},\qquad \mathcal T=\{(r,a):m^c_{ra}=1\},
+        meaning: The input evidence set and the loss target set are distinct sets.
+      invariants:
+      - Natural missingness, artificial masking, and structural zero are distinct raw roles.
+      - Changing loss-side target truth does not change the input evidence set.
+    - id: tokens
+      title: Typed token compilation
+      purpose: Map typed values and structural roles into a common hidden width without merging their semantics.
+      equations:
+      - id: value_encoder
+        latex: e_{ra}=f_{t_a}^{\mathrm{val}}(\xi_{ra})\in\mathbb R^d,\qquad e_{\mathrm{null}}:=\mathbf 0_d,
+        meaning: Visible typed values use a type-specific encoder, while natural missingness is a fixed exact-zero token.
+      - id: initial_carrier
+        latex: H^{(0)}=\begin{bmatrix}[h_{ra}^{(0)}]_{N\times M}&[u_{rk}^{(0)}]_{N\times K}\\{}[f_{ka}^{(0)}]_{K\times M}&[\mathbf
+          0_d]_{K\times K}\end{bmatrix},
+        meaning: The full augmented carrier keeps ordinary cells, Unit specials, Feature specials, and zero-closed corners
+          in one shape.
+      invariants:
+      - The learned mask token is not the fixed null token.
+      - Unit and Feature special coordinates are shared at initialization but may evolve by row and column context.
+    - id: dynamics
+      title: O-closed token dynamics
+      purpose: Evolve the persistent carrier through visible-source restricted inducing, token, and row-axis updates.
+      equations:
+      - id: attention_mass
+        latex: u_{ij}=\mathbf 1\{j\in\mathcal J_i\}p(x_j)\exp(s_{ij}),\qquad Z_i=\varepsilon_{\mathrm{den}}+\sum_j u_{ij},
+        meaning: Source eligibility and presence jointly determine the attention mass.
+      - id: oattention
+        latex: \operatorname{OAttention}(H;X)_i=p(h_i)\frac{\sum_j u_{ij}v_j}{Z_i},\qquad p(h)=\frac{\lVert h\rVert_2^2}{\tau_O+\lVert
+          h\rVert_2^2},
+        meaning: The carrier-presence gate makes zero receivers and zero sources remain closed.
+      - id: omab
+        latex: \operatorname{OMAB}(H;X)_i=r_i+p(r_i)\operatorname{FFN}(N(r_i)),\qquad r_i=h_i+\operatorname{OAttention}(H;X)_i,
+        meaning: Each O-closed module combines attention and gated FFN residuals without injecting loss truth.
+      - id: block_update
+        latex: H^{(m)}\xrightarrow{\mathrm{slot}\leftarrow\mathrm{visible}}\{S_a^{(m)}\}\xrightarrow{\mathrm{token}\leftarrow\mathrm{slot}}\widetilde
+          H^{(m)}\xrightarrow{\mathrm{row\ axis}}H^{(m+1)},
+        meaning: One block preserves the augmented carrier shape and its source restrictions.
+      invariants:
+      - Artificial-mask receivers may update but never contribute hidden payload as inducing K/V evidence.
+      - Exact-zero natural-missing and structural-corner states remain zero under the declared O-closed operations.
+      - The persistent carrier shape is (N+K) x (M+K) x d; inducing width S is a different quantity from matched width K.
+    - id: readout
+      title: Matched geometry and typed readout
+      purpose: Turn final Unit and Feature special states into a target-specific geometry, then route only over same-column
+        visible support.
+      equations:
+      - id: matched_coordinate
+        latex: u_{rk}^{(L)}:=h_{r,M+k}^{(L)},\quad f_{ka}^{(L)}:=h_{N+k,a}^{(L)},\quad z_{ra,k}=\langle u_{rk}^{(L)},f_{ka}^{(L)}\rangle,
+        meaning: The default geometry pairs the same Unit and Feature slot index.
+      - id: same_column_support
+        latex: \mathcal C_{r,a}=\{s\in[N]:s\ne r,\ v_{sa}=1\},\qquad \alpha_{ra}^{(s)}=\frac{\exp(-\lVert\mathbf z_{ra}-\mathbf
+          z_{sa}\rVert_2^2/(2\tau_{\mathrm{route}}^2))}{\sum_{t\in\mathcal C_{r,a}}\exp(-\lVert\mathbf z_{ra}-\mathbf z_{ta}\rVert_2^2/(2\tau_{\mathrm{route}}^2))},
+        meaning: The prediction support contains other visible cells in the same column, never masked receivers.
+      - id: local_linear_terminal
+        latex: \boldsymbol\beta_{ra}=(Z_{r,a}^{\top}W_{ra}Z_{r,a}+\Lambda_a)^{-1}Z_{r,a}^{\top}W_{ra}\widetilde{\mathbf x}_{r,a},\qquad
+          \widehat x_{ra}=\mu_a+s_a[1\;\mathbf z_{ra}^{\top}]\boldsymbol\beta_{ra},
+        meaning: The numeric terminal is a local-linear fit over the same routed support, with a ridge penalty on slopes.
+      - id: typed_predictions
+        latex: \widehat x_{ra}=\mu_a+s_a[1\;\mathbf z_{ra}^{\top}]\boldsymbol\beta_{ra},\qquad \widehat p_{ra}(b)=\frac{\varepsilon_{\mathrm{cat}}+\sum_{s\in\mathcal
+          C_{r,a}}\alpha_{ra}^{(s)}\mathbf 1\{x_{sa}=b\}}{|\mathcal D_a|\varepsilon_{\mathrm{cat}}+\sum_{s\in\mathcal C_{r,a}}\alpha_{ra}^{(s)}},
+        meaning: Numeric and categorical terminals use typed output laws over the same declared support.
+      invariants:
+      - No-support is an explicit terminal outcome rather than an invented prediction.
+      - Readout geometry does not change the support membership rule.
+    - id: loss
+      title: Loss-side truth and learning signal
+      purpose: Pair predictions with completion truth only after the forward computation has produced its typed outputs.
+      equations:
+      - id: numeric_loss
+        latex: \mathcal L_{\mathrm{num}}=\frac{1}{|\mathcal T_{\mathrm{num}}|}\sum_{(r,a)\in\mathcal T_{\mathrm{num}}}(\widehat{\widetilde
+          x}_{ra}-\widetilde x_{ra})^2,
+        meaning: Numeric completion truth is first read at the loss boundary.
+      - id: categorical_loss
+        latex: \mathcal L_{\mathrm{cat}}=-\frac{1}{|\mathcal T_{\mathrm{cat}}|}\sum_{(r,a)\in\mathcal T_{\mathrm{cat}}}\log\widehat
+          p_{ra}(x_{ra}),
+        meaning: Categorical completion truth supervises the declared-domain probability mass.
+      - id: joint_loss
+        latex: \mathcal L=\sum_{b\in\{\mathrm{num},\mathrm{cat}\}:|\mathcal T_b|>0}\lambda_b\mathcal L_b,\qquad \lambda_b>0,\quad\sum_b\lambda_b=1,
+        meaning: Active typed branches combine only at the loss boundary under declared weights.
+      invariants:
+      - Completion truth is absent from Steps 1--4.
+      - A passing loss or local test does not promote maturity or create an evidence-backed claim.
+    invariants:
+    - id: truth_isolation
+      statement: Holding input-side evidence fixed while changing loss-side truth leaves Steps 1--4 states, support, and predictions
+        unchanged.
+      evidence: truth-substitution invariance test
+    - id: zero_closure
+      statement: Declared exact-zero sources and receivers remain zero through every O-closed dynamics stage.
+      evidence: layerwise exact-zero trace
+    - id: source_boundary
+      statement: Artificial-mask positions are receivers but cannot write hidden payload into the inducing source set.
+      evidence: source-mask trace
+    - id: carrier_shape
+      statement: Every dynamics stage preserves the augmented carrier shape and the distinction between persistent K coordinates
+        and transient S slots.
+      evidence: shape trace
+  experimental_defaults:
+    geometry: unit_feature_matched
+    numeric_terminal: nadaraya_watson
+    categorical_terminal: nadaraya_watson
+    training_targets: artificial_masks_only
+    active_type_weights: equal
+    reference_backend:
+      backend: dense_reference_v0
+      provenance: tabu_lab.models.ReferenceConfig; these are implementation experiment defaults, not upstream factory invariants
+      d_model: 32
+      n_heads: 4
+      d_ff: 64
+      n_blocks: 2
+      inducing_slots: 4
+      matched_slots: 4
+      max_features: 256
+      dropout: 0
+      presence_tau: 1.0e-06
+      denominator_epsilon: 1e-8
+      routing_bandwidth: 1
+    inference_targets: artificial_masks_only
+  known_open:
+  - id: semantic_unit_multiplicity
+    question: Decide whether multiple rows may represent one semantic Unit and where aggregation occurs.
+    blocking_build: false
+  - id: natural_missing_inference
+    question: 'Future proposal only: define a new contract before natural-missing inference; frozen v0 returns typed unsupported.'
+    blocking_build: false
+  - id: type_loss_weighting
+    question: Jointly freeze non-equal numeric/categorical weights and target sampling.
+    blocking_build: false
+  - id: slot_matching
+    question: Decide whether K coordinates need permutation-invariant matching or multiple-token representation.
+    blocking_build: false
+  alternatives:
+  - id: cell_token_three_term_geometry
+    description: Add Unit-cell and Feature-cell terms to the default Unit-Feature coordinate.
+    status: first_alternative
+  - id: numeric_local_linear
+    description: Fit a local-linear ridge terminal using the same routing weights.
+    status: first_alternative
+  kill:
+  - id: truth_leakage
+    condition: Changing masked completion truth changes any Step 1-4 result.
+    evidence: truth-substitution invariance test
+  - id: mask_as_source
+    condition: An artificial-mask receiver contributes its hidden payload as K/V evidence.
+    evidence: source-mask trace
+  - id: null_drift
+    condition: A natural-missing or structural corner leaves exact zero.
+    evidence: layerwise exact-zero trace
+  exit:
+  - id: carrier_shape
+    condition: Every layer preserves (N+K) x (M+K) x d.
+    evidence: shape trace
+  - id: default_readout
+    condition: Default experiments use Unit-Feature geometry plus NW and label alternatives explicitly.
+    evidence: run configuration receipt
+  - id: completion_truth_isolation
+    condition: Completion truth is first read in Step 5.
+    evidence: truth-dependency audit
+model_spec_hash: 8add2b4ed330491460e6e5615deac2b6c06ea142c8af2fd193e00d75362cbe89
+dataset:
+  dataset_id: f0-completion-mixed-v1
+  origin: generated
+  source_uri: pkg://tabu_lab.experiments.fixtures
+  source_sha256: f01ef5345df1126e0dda7957b6d8cd2c2f6fecd3f5158449fdb5aca7739b9ddf
+  dataset_hash: 95d812d551970e6d9187e81cab42f18e5caa096eb72aedd866b3d6db567cba81
+  license_id: Apache-2.0
+  redistribution: allowed
+  adapter:
+    adapter_id: tabu-f0-fixtures
+    adapter_version: 1.0.0
+  raw_files_in_git: false
+  split_before_compile: true
+split:
+  schema_version: tabu.fit-split.v1
+  dataset_id: f0-completion-mixed-v1
+  dataset_hash: 95d812d551970e6d9187e81cab42f18e5caa096eb72aedd866b3d6db567cba81
+  split_id: F0-001-tabuf-v1-fit-split-v1
+  fit_partition: train
+  strategy: fixed_f0_episode
+  seed: 130363
+  require_complete: true
+  kind: row
+  partitions:
+  - name: train
+    row_ids:
+    - row-00
+    - row-01
+    - row-02
+    - row-03
+    - row-04
+    - row-05
+    - row-06
+    - row-07
+    - row-08
+    - row-09
+    - row-10
+    - row-11
+    - row-12
+    - row-13
+    - row-14
+    - row-15
+    - row-16
+    - row-17
+    - row-18
+    - row-19
+    - row-20
+    - row-21
+    - row-22
+    - row-23
+    - row-24
+    - row-25
+    - row-26
+    - row-27
+    - row-28
+    - row-29
+    - row-30
+    - row-31
+episode_schedule:
+  schedule_id: F0-001-completion-shared-v1-schedule-v1
+  sampling: fixed
+  episode_count: 1
+  targets_per_episode: 16
+  target_families:
+  - completion
+  target_origins:
+  - artificial_mask
+  sampler_seed: 104729
+  order_seed: 130363
+  recipe_hashes:
+  - bdcf4fede791c715c5f820fddc04d1f0a646083f941d39c0947a2b7d562ddbc7
+semantic:
+  reference:
+    backend: dense_reference_v0
+    d_model: 32
+    n_heads: 4
+    d_ff: 64
+    n_blocks: 2
+    inducing_slots: 4
+    matched_slots: 4
+    max_features: 256
+    dropout: 0.0
+    presence_tau: 1.0e-06
+    denominator_epsilon: 1.0e-08
+    routing_bandwidth: 1.0
+    geometry_normalization: none
+  numeric_terminal: nadaraya_watson
+  categorical_terminal: nadaraya_watson
+  augmented_readout_geometry: matched_uf
+  label_columns: []
+  label_address_plan: null
+  target_feature: null
+  graph_unit_receiver_plan: null
+  response_family: null
+  recommendation_address_plan: null
+  rec_axis_summary_dim: null
+  rec_matched_residual_scale: null
+training:
+  optimizer: adamw
+  learning_rate: 0.01
+  weight_decay: 0.0
+  gradient_clip_norm: 1.0
+  max_updates: 1200
+  max_epochs: null
+  wall_clock_budget_minutes: 10
+  episode_batch_size: 1
+  scheduler: none
+  exact_resume: true
+  warm_start: false
+  pretraining: false
+execution:
+  device: cuda
+  device_index: 0
+  dtype: float32
+  deterministic_algorithms: true
+  compile_on_cpu: true
+  backend: dense_reference_v0
+seeds:
+  model_seeds:
+  - 1729
+  - 2718
+  - 31415
+  data_seed: 104729
+  split_seed: 130363
+  episode_order_seed: 130363
+target_families:
+- completion
+baselines:
+- baseline_id: exact-support-mean-mode
+  role: trivial
+  max_updates: null
+- baseline_id: frozen-initialization
+  role: diagnostic
+  max_updates: null
+pass_gate:
+  stage: F0
+  required_coverage: 1.0
+  max_loss_ratio: 0.01
+  max_trivial_baseline_ratio: null
+  max_numeric_mse: 0.001
+  max_numeric_nrmse: null
+  min_categorical_accuracy: 1.0
+  max_categorical_nll: 0.05
+  require_all_seeds: true
+kill_conditions:
+  fail_on_nonfinite: true
+  require_nonzero_gradient_by_step: 10
+  require_nonzero_parameter_delta: true
+  stop_model_after_stage_failure: true
+  preserve_failed_receipt: true
+heldout_policy: diagnostic_only
+required_artifacts:
+- preregistration.yaml
+- resolved-configs
+- dataset-manifest.json
+- split-manifest.json
+- compiler-manifest.json
+- feasibility.json
+- metrics.jsonl
+- evaluation.json
+- forward-traces.json
+- baselines.json
+- checkpoint
+- environment.json
+- artifacts.sha256
+- receipt.json
+- verdict.md

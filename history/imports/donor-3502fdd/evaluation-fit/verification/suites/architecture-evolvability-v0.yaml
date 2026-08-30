@@ -1,0 +1,19 @@
+schema_version: tabu.verification-suite.v1
+suite_id: architecture-evolvability-v0
+suite_version: 0.2.0
+title: Architecture Evolvability Verification v0
+axis: architecture_evolvability
+claim_boundary: "Controlled substitution and extension probes only; no architecture quality score or automatic promotion is emitted."
+checks:
+  - check_id: architecture.controlled_substitution
+    axis: architecture_evolvability
+    description: Exercise explicit local substitutions where the model family exposes them.
+  - check_id: architecture.substitution_nonregression
+    axis: architecture_evolvability
+    description: Re-run the component oracle on every substituted variant so a swap cannot silently regress component correctness.
+  - check_id: architecture.composition_checkpoint_identity
+    axis: architecture_evolvability
+    description: Bind composition and checkpoint identity to the exact semantic configuration.
+  - check_id: architecture.builder_registry_extension
+    axis: architecture_evolvability
+    description: Register, resolve, and duplicate-reject a probe builder without disturbing built-in registrations.
