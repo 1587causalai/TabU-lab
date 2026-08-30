@@ -69,6 +69,17 @@ See [`docs/architecture/yaml-mathematics.md`](./docs/architecture/yaml-mathemati
 The existing `tabu.cell.base@0.2.0` YAML is intentionally unchanged; adding
 mathematics to that immutable contract requires a reviewed version decision.
 
+## Current catalog projection
+
+The bounded catalog indexes only canonical ModelSpecs already consolidated on the
+current branch, checks public/package byte parity, and produces deterministic JSON
+and HTML projections. Its public boundary explicitly remains at zero formal
+receipts and zero accepted claims.
+
+See [`docs/architecture/catalog-projection.md`](./docs/architecture/catalog-projection.md).
+The larger donor catalog still depends on evaluation and verification contracts
+that are outside this consolidation sequence.
+
 ## Stage 2: bounded composability
 
 The next gate checks whether the existing tokenizer, dynamics, and readout
