@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import json
+
+import pytest
 import torch
 
 from tabu_lab.contracts import FeatureKind, FeatureRole
@@ -14,7 +17,10 @@ from tabu_lab.experiments.tabubase_scale import (
     _train_one,
     build_synthetic_episode,
     build_tabubase_scale_model,
+    load_pretrain_checkpoint,
     pretrain_run_id,
+    save_pretrain_checkpoint,
+    source_tree_sha256,
 )
 
 
@@ -223,6 +229,60 @@ def test_missing_git_binary_does_not_destroy_local_unissued_receipt(
 
     monkeypatch.setattr("tabu_lab.experiments.tabubase_scale.subprocess.run", missing_git)
     assert _git_commit_or_none() is None
+
+
+def test_checkpoint_load_requires_matching_embedded_and_sidecar_identity(tmp_path) -> None:
+    model = build_tabubase_scale_model(seed=1729, device=torch.device("cpu"))
+    identity = {
+        "schema_version": "tabu.transfer-base-local-unissued-checkpoint.v1",
+        "model_identity": model.checkpoint_identity(),
+        "update": 0,
+    }
+    path = tmp_path / "checkpoint.safetensors"
+    save_pretrain_checkpoint(model, path, identity=identity)
+    target = build_tabubase_scale_model(seed=2718, device=torch.device("cpu"))
+    load_pretrain_checkpoint(target, path)
+
+    sidecar = path.with_suffix(".identity.json")
+    drifted = json.loads(sidecar.read_text(encoding="utf-8"))
+    drifted["update"] = 1
+    sidecar.write_text(json.dumps(drifted), encoding="utf-8")
+    with pytest.raises(ValueError, match="does not match embedded identity"):
+        load_pretrain_checkpoint(target, path)
+
+
+def test_checkpoint_load_rejects_missing_identity_sidecar(tmp_path) -> None:
+    model = build_tabubase_scale_model(seed=1729, device=torch.device("cpu"))
+    path = tmp_path / "checkpoint.safetensors"
+    save_pretrain_checkpoint(
+        model,
+        path,
+        identity={"model_identity": model.checkpoint_identity()},
+    )
+    path.with_suffix(".identity.json").unlink()
+    with pytest.raises(FileNotFoundError, match="identity sidecar is required"):
+        load_pretrain_checkpoint(model, path)
+
+
+def test_source_tree_identity_binds_runner_config_schema_and_lock(tmp_path) -> None:
+    paths = (
+        tmp_path / "src/tabu_lab/module.py",
+        tmp_path / "specs/models/model.yaml",
+        tmp_path / "scripts/run_tabubase_scale_transfer.py",
+        tmp_path / "experiments/transfer-base-v2/protocol.yaml",
+        tmp_path / "schemas/tabubase-synthetic-world.schema.json",
+        tmp_path / "pyproject.toml",
+        tmp_path / "uv.lock",
+    )
+    for index, path in enumerate(paths):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(f"source-{index}\n", encoding="utf-8")
+    expected = source_tree_sha256(tmp_path)
+    for path in paths:
+        original = path.read_text(encoding="utf-8")
+        path.write_text(original + "drift\n", encoding="utf-8")
+        assert source_tree_sha256(tmp_path) != expected
+        path.write_text(original, encoding="utf-8")
 
 
 def test_episode_prefetcher_preserves_world_order_and_hashes() -> None:
