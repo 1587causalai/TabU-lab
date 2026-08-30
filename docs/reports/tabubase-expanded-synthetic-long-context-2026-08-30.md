@@ -1,9 +1,9 @@
 # TabUBase expanded synthetic long-context pretraining and frozen full-context ICL
 
-Date: 2026-08-30  
-Evidence status: `local_unissued`  
-Model contract: `tabu.cell.base@0.2.0`  
-Profile: `supervised.label_broadcast.v1`  
+Date: 2026-08-30
+Evidence status: `local_unissued`
+Model contract: `tabu.cell.base@0.2.0`
+Profile: `supervised.label_broadcast.v1`
 Tokenizer: `cell-tokenizer.v2`, source-scoped frozen nominal codebook,
 `B=100`, seed `1729`
 
@@ -256,15 +256,14 @@ optimizer-free context use, but still checkpoint-sensitive rather than universal
 
 ## Runtime and provenance
 
-The live workspace and Git top level resolve to
-`/Users/cms/.openclaw/workspace/projects/causal-superintelligence/TabU/tabu-lab`.
+The live workspace and Git top level resolved to the same historical donor
+workspace; its machine-local path is intentionally omitted.
 The inspected branch is `codex/tabubase-eval-chain` at commit
 `3502fdd80539f2a8b9703cc4e4546fd01f3826ce`. The pre-existing dirty worktree was
 preserved; no unrelated file was reset or cleaned.
 
 The `dgx2` alias resolves to physical host `spark-b5b3`. The accepted runs used
-the isolated root
-`/home/cms/tabubase-eval/20260830-expanded-synthetic-long-context-v1`, runtime
+isolated execution ID `tabubase-expanded-synthetic-long-context-v1`, runtime
 image `wehub/ml-gpu:20260712`, Python 3.12.3, torch
 `2.12.0.dev20260322+cu130`, CUDA 13.0, and an offline pinned
 scikit-learn 1.8.0 wheel. The wheel SHA-256 is
@@ -286,11 +285,10 @@ Python file.
 
 ## Artifact index
 
-The local artifact directory is
-[`3checkpoints`](../../.local-runs/tabubase-codebook-b100-v1/expanded-synthetic-long-context-v1/3checkpoints/).
-Its machine-readable
-[`artifact-manifest.json`](../../.local-runs/tabubase-codebook-b100-v1/expanded-synthetic-long-context-v1/3checkpoints/artifact-manifest.json)
-has SHA-256
+The machine-readable artifact ID
+`expanded-synthetic-long-context-3checkpoints-manifest` is registered in the
+[portable local-artifact index](local-artifact-index.json), is not bundled with
+this repository, and has SHA-256
 `d8dee96db081e4b5aa8597069f9c18d6c6d3aacdfdcdbdfdab4338a7a72cd0ac`.
 
 | Artifact | SHA-256 |

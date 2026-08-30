@@ -1,8 +1,8 @@
 # TabUBase real-data low-shot frozen ICL diagnostic
 
-Date: 2026-08-29  
-Evidence status: `local_unissued`  
-Contract: `tabu.cell.base@0.2.0`  
+Date: 2026-08-29
+Evidence status: `local_unissued`
+Contract: `tabu.cell.base@0.2.0`
 Profile: `supervised.label_broadcast.v1`
 
 ## Correction notice (2026-08-30)
@@ -100,11 +100,11 @@ either model on the task is a different estimand. The appropriate next
 algorithmic controls are context-only kNN and ridge/logistic learners, reported
 separately from the pretrained-vs-random mechanism test.
 
-Remote run root:
-`/home/cms/tabubase-eval/20260829-codebook-b100-v1`
+Execution ID: `tabubase-codebook-b100-v1`.
 
-Local result:
-`.local-runs/tabubase-codebook-b100-v1/real-icl/real-frozen-icl-6datasets-3x3-v2.json`
+Artifact ID: `real-frozen-icl-6datasets-3x3-v2`; see the
+[portable local-artifact index](local-artifact-index.json). Machine-local paths
+are intentionally omitted, and the artifact is not bundled with this repository.
 
 Result SHA-256:
 `7e9e3aa4944f9efdf65211b8034a69377ebae18fb8657bd71699d7c7027c4b09`

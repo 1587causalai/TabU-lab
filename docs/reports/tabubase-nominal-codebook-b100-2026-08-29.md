@@ -1,8 +1,8 @@
 # TabUBase frozen nominal codebook B=100 ablation
 
-Date: 2026-08-29  
-Evidence status: `local_unissued`  
-Contract: `tabu.cell.base@0.2.0`  
+Date: 2026-08-29
+Evidence status: `local_unissued`
+Contract: `tabu.cell.base@0.2.0`
 Profile: `supervised.label_broadcast.v1`
 
 ## Question
@@ -189,11 +189,10 @@ superiority. The immediate open gates are the pending scratch-finetune ICL
 reference, independent replay, and a preregistered calibration policy. Breast
 Cancer still requires a separate calibration/generalization diagnosis.
 
-Remote run root:
-`/home/cms/tabubase-eval/20260829-codebook-b100-v1`
-
-Local mirrors:
-`.local-runs/tabubase-codebook-b100-v1/`
+Execution ID: `tabubase-codebook-b100-v1`. Logical artifact IDs and content
+hashes are recorded in the [portable local-artifact index](local-artifact-index.json).
+Machine-local paths are intentionally omitted, and artifacts are not bundled
+with this repository.
 
 Result SHA-256:
 

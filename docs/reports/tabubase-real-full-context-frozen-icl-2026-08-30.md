@@ -1,9 +1,9 @@
 # TabUBase real full-context frozen ICL with exact-split baselines
 
-Date: 2026-08-30  
-Evidence status: `local_unissued`  
-Model contract: `tabu.cell.base@0.2.0`  
-Profile: `supervised.label_broadcast.v1`  
+Date: 2026-08-30
+Evidence status: `local_unissued`
+Model contract: `tabu.cell.base@0.2.0`
+Profile: `supervised.label_broadcast.v1`
 Tokenizer: `cell-tokenizer.v2`, source-scoped frozen nominal codebook,
 `B=100`, seed `1729`
 
@@ -288,9 +288,9 @@ tests, metric tests, and baseline preprocessing/probability-alignment tests.
 
 ## Execution and resource evidence
 
-The live project path and Git top level both resolved to:
-
-`/Users/cms/.openclaw/workspace/projects/causal-superintelligence/TabU/tabu-lab`
+The live project path and Git top level both resolved to the same historical
+donor workspace. Its machine-local path is intentionally omitted from this
+portable report.
 
 The inspected branch was `codex/tabubase-eval-chain` at
 `3502fdd80539f2a8b9703cc4e4546fd01f3826ce`. The pre-existing worktree was
@@ -299,9 +299,8 @@ No unrelated user change was cleaned, reset, or committed.
 
 The `dgx2` alias resolved to physical host `spark-b5b3`. Before execution it had
 no TabUBase process and no GPU compute process. The historical PT-S1 root was
-left intact and a new isolated root was used:
-
-`/home/cms/tabubase-eval/20260830-real-full-context-v1`
+left intact and isolated execution ID `tabubase-real-full-context-v1` was used;
+the machine-local root is intentionally omitted.
 
 The post-run check again found zero TabUBase jobs. The expanded `v4` and
 baseline source snapshot has tree SHA-256
@@ -324,12 +323,10 @@ routing difference tensor; the target-only path avoids that allocation.
 
 ## Artifact index
 
-The local artifact directory is
-[`real-full-context-v4`](../../.local-runs/tabubase-codebook-b100-v1/real-full-context-v4/).
-Its machine-readable
-[`artifact-manifest.json`](../../.local-runs/tabubase-codebook-b100-v1/real-full-context-v4/artifact-manifest.json)
-records the environment, source snapshot, gates, artifact paths, and hashes.
-The manifest SHA-256 is
+The machine-readable artifact ID `real-full-context-v4-manifest` records the
+environment, source snapshot, gates, logical artifact names, and hashes. It is
+registered in the [portable local-artifact index](local-artifact-index.json) and
+is not bundled with this repository. The manifest SHA-256 is
 `9448bbf5010077a5316295fe0d06aeed0607e1dc229a64ad4be1fd02ed98b690`.
 
 Main result hashes are:
