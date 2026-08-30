@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 import math
 from dataclasses import asdict, dataclass
 from typing import Any, Literal
@@ -13,6 +15,7 @@ from tabu_lab.models.types import ReferenceConfig
 from tabu_lab.training.objective import Objective
 
 from .query_row_real_benchmark import _metrics, _model_prediction
+from .query_row_real_coordinates import query_row_real_regression_loss
 from .query_row_supervised_synthetic import (
     make_query_row_supervised_synthetic_episode,
     supervised_synthetic_episode_loss,
@@ -26,6 +29,26 @@ from .tabubase_real_benchmark import (
 from .tabubase_scale import resolve_device
 
 TaskKind = Literal["classification", "regression"]
+
+
+def _parameter_sha256(model: torch.nn.Module) -> str:
+    digest = hashlib.sha256()
+    for name, tensor in model.state_dict().items():
+        digest.update(name.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(tensor.detach().cpu().contiguous().numpy().tobytes())
+        digest.update(b"\0")
+    return digest.hexdigest()
+
+
+def _episode_schedule_sha256(task: Any, *, seed: int, updates: int) -> str:
+    schedule = []
+    for update in range(updates):
+        context, query = training_episode_indices(task, seed=seed, update=update)
+        schedule.append({"update": update, "context": context.tolist(), "query": query.tolist()})
+    return hashlib.sha256(
+        json.dumps(schedule, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
 
 
 def _new_row_model(
@@ -64,6 +87,15 @@ class QueryRowFinetuneLiftRecord:
     updates: int
     label_budget: int
     seed: int
+    scratch_initial_parameter_sha256: str
+    pretrain_initial_parameter_sha256: str
+    pretrained_initial_parameter_sha256: str
+    pretrained_checkpoint_parameter_sha256: str
+    scratch_final_parameter_sha256: str
+    pretrained_final_parameter_sha256: str
+    scratch_episode_schedule_sha256: str
+    pretrained_episode_schedule_sha256: str
+    exact_same_init: bool
 
     def as_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -72,6 +104,8 @@ class QueryRowFinetuneLiftRecord:
 @dataclass(frozen=True, slots=True)
 class QueryRowFinetuneLiftResult:
     status: str
+    execution_status: str
+    capability_gate: str
     evidence_status: str
     claim_boundary: str
     model_id: str
@@ -155,7 +189,10 @@ def _train_real_arm(
         model.train()
         optimizer.zero_grad(set_to_none=True)
         prediction = model._forward_dense(evidence.to(device), emit_trace=False)
-        loss = Objective()(prediction, truth.to(device)).total
+        if task.dataset.task == "regression":
+            loss = query_row_real_regression_loss(prediction, truth.to(device)).total
+        else:
+            loss = Objective()(prediction, truth.to(device)).total
         if not bool(torch.isfinite(loss)):
             raise RuntimeError("non-finite Stage-6 fine-tuning loss")
         loss.backward()
@@ -203,6 +240,11 @@ def run_query_row_finetune_lift(
         row_token_count=row_token_count,
         device=resolved_device,
     )
+    # Freeze the paired-control origin before any optimizer is constructed.
+    theta0_state = {
+        name: tensor.detach().cpu().clone() for name, tensor in pretrained.state_dict().items()
+    }
+    theta0_hash = _parameter_sha256(pretrained)
     pretrain_final_loss = _pretrain_supervised_profile(
         pretrained,
         seed=seed + 10_000,
@@ -221,6 +263,7 @@ def run_query_row_finetune_lift(
         name: tensor.detach().cpu().clone()
         for name, tensor in pretrained.state_dict().items()
     }
+    pretrained_checkpoint_hash = _parameter_sha256(pretrained)
     for offset, dataset_id in enumerate(dataset_ids):
         task_seed = seed + offset
         task = prepare_real_task(
@@ -238,10 +281,18 @@ def run_query_row_finetune_lift(
         )
         pretrained_arm.load_state_dict(pretrained_state)
         scratch_arm = _new_row_model(
-            seed=seed + 1000 + offset,
+            seed=seed,
             row_token_count=row_token_count,
             device=resolved_device,
         )
+        scratch_arm.load_state_dict(theta0_state)
+        scratch_initial_hash = _parameter_sha256(scratch_arm)
+        pretrained_initial_hash = _parameter_sha256(pretrained_arm)
+        if scratch_initial_hash != theta0_hash:
+            raise RuntimeError("scratch arm did not load exact theta0 bytes")
+        if pretrained_initial_hash != pretrained_checkpoint_hash:
+            raise RuntimeError("pretrained arm did not load exact checkpoint bytes")
+        schedule_hash = _episode_schedule_sha256(task, seed=task_seed, updates=updates)
         _train_real_arm(
             pretrained_arm,
             task,
@@ -278,10 +329,24 @@ def run_query_row_finetune_lift(
                 updates=updates,
                 label_budget=label_budget,
                 seed=task_seed,
+                scratch_initial_parameter_sha256=scratch_initial_hash,
+                pretrain_initial_parameter_sha256=theta0_hash,
+                pretrained_initial_parameter_sha256=pretrained_initial_hash,
+                pretrained_checkpoint_parameter_sha256=pretrained_checkpoint_hash,
+                scratch_final_parameter_sha256=_parameter_sha256(scratch_arm),
+                pretrained_final_parameter_sha256=_parameter_sha256(pretrained_arm),
+                scratch_episode_schedule_sha256=schedule_hash,
+                pretrained_episode_schedule_sha256=schedule_hash,
+                exact_same_init=(scratch_initial_hash == theta0_hash),
             )
         )
+    execution_status = "succeeded" if records else "killed"
     return QueryRowFinetuneLiftResult(
-        status="pass" if records else "kill",
+        # ``status`` is retained as a compatibility projection for existing
+        # local scripts; new consumers must use the explicit status fields.
+        status="pass" if execution_status == "succeeded" else "kill",
+        execution_status=execution_status,
+        capability_gate="not_applicable",
         evidence_status="local_unissued",
         claim_boundary=(
             "TabUR paired bounded fine-tuning lift diagnostic with profile-compatible "

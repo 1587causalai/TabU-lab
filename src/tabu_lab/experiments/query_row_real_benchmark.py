@@ -29,6 +29,11 @@ from .tabubase_real_benchmark import (
     training_episode_indices,
 )
 from .tabubase_scale import resolve_device
+from .query_row_real_coordinates import (
+    numeric_raw_prediction_from_public,
+    query_row_real_regression_loss,
+    task_scale_to_raw,
+)
 
 TaskKind = Literal["classification", "regression"]
 
@@ -78,7 +83,10 @@ def _train_one(
     model.train()
     optimizer.zero_grad(set_to_none=True)
     prediction = model._forward_dense(evidence.to(device), emit_trace=False)
-    loss = Objective()(prediction, truth.to(device)).total
+    if evidence.feature_specs[-1].kind.value == "numeric":
+        loss = query_row_real_regression_loss(prediction, truth.to(device)).total
+    else:
+        loss = Objective()(prediction, truth.to(device)).total
     if not bool(torch.isfinite(loss)):
         raise RuntimeError("non-finite TabUR real scratch loss")
     loss.backward()
@@ -112,11 +120,15 @@ def _model_prediction(
         else:
             raise RuntimeError("unexpected TabUR classification distribution shape")
         return probabilities, task.response[query]
-    values = prediction["numeric"]
+    values = numeric_raw_prediction_from_public(prediction)
     if values.ndim == 2:
         values = values.unsqueeze(0)
-    predicted_scaled = values[0, query_start:, -1].detach().cpu().numpy()
-    predicted_raw = predicted_scaled * task.response_scale + task.response_mean
+    predicted_task_scale = values[0, query_start:, -1].detach().cpu().numpy()
+    predicted_raw = task_scale_to_raw(
+        predicted_task_scale,
+        response_mean=task.response_mean,
+        response_scale=task.response_scale,
+    )
     truth_raw = task.dataset.response[query]
     return predicted_raw, truth_raw
 

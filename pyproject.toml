@@ -27,6 +27,9 @@ dependencies = [
   "torch>=2.2,<2.3; sys_platform == 'darwin' and platform_machine == 'x86_64'",
 ]
 
+[project.scripts]
+tabu-lab = "tabu_lab.cli:main"
+
 [project.optional-dependencies]
 dev = [
   "build>=1.2,<2",

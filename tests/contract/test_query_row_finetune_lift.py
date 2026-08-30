@@ -15,6 +15,8 @@ def test_tabur_stage6_paired_finetune_lift_is_finite_and_profile_compatible() ->
         test_limit=8,
     )
     assert result.status == "pass"
+    assert result.execution_status == "succeeded"
+    assert result.capability_gate == "not_applicable"
     assert result.evidence_status == "local_unissued"
     assert result.profile_id == "supervised.label_broadcast.v1"
     assert math.isfinite(result.pretrain_final_loss)
@@ -25,3 +27,13 @@ def test_tabur_stage6_paired_finetune_lift_is_finite_and_profile_compatible() ->
         assert math.isfinite(record.gain_scratch_minus_pretrained)
         assert all(math.isfinite(value) for value in record.scratch_metrics.values())
         assert all(math.isfinite(value) for value in record.pretrained_metrics.values())
+        assert record.exact_same_init
+        assert (
+            record.scratch_initial_parameter_sha256
+            == record.pretrain_initial_parameter_sha256
+        )
+        assert (
+            record.pretrained_initial_parameter_sha256
+            == record.pretrained_checkpoint_parameter_sha256
+        )
+        assert record.scratch_episode_schedule_sha256 == record.pretrained_episode_schedule_sha256

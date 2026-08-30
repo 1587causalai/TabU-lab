@@ -37,6 +37,12 @@ from .query_row_real_benchmark import (
     QueryRowRealDatasetResult,
     run_query_row_real_scratch_benchmark,
 )
+from .query_row_real_coordinates import (
+    numeric_raw_prediction,
+    numeric_raw_prediction_from_public,
+    query_row_real_regression_loss,
+    task_scale_to_raw,
+)
 from .query_row_supervised_synthetic import (
     QueryRowSupervisedSyntheticEpisode,
     make_query_row_supervised_synthetic_episode,
@@ -71,6 +77,10 @@ __all__ = [
     "QueryRowRealBenchmarkResult",
     "QueryRowRealDatasetResult",
     "run_query_row_real_scratch_benchmark",
+    "numeric_raw_prediction",
+    "numeric_raw_prediction_from_public",
+    "query_row_real_regression_loss",
+    "task_scale_to_raw",
     "QueryRowFrozenICLRecord",
     "QueryRowFrozenICLResult",
     "run_query_row_frozen_icl",
