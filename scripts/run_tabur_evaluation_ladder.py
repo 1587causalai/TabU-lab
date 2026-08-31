@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Run the six-step TabUR evaluation ladder as one local diagnostic bundle."""
+"""Run the six-step TabUR evaluation ladder as one local diagnostic bundle.
+
+Real-data stages use every train-partition row and every held-out row by
+default; finite label/test limits are explicit bounded diagnostics.
+"""
 
 from __future__ import annotations
 
@@ -74,8 +78,18 @@ def main() -> None:
     parser.add_argument("--updates", type=int, default=20)
     parser.add_argument("--pretrain-steps", type=int, default=20)
     parser.add_argument("--pretrain-worlds", type=int, default=4)
-    parser.add_argument("--label-budget", type=int, default=64)
-    parser.add_argument("--test-limit", type=int, default=64)
+    parser.add_argument(
+        "--label-budget",
+        type=int,
+        default=None,
+        help="Optional bounded context override; default uses every train-partition row.",
+    )
+    parser.add_argument(
+        "--test-limit",
+        type=int,
+        default=None,
+        help="Optional bounded query override; default evaluates every held-out row.",
+    )
     parser.add_argument("--device", default="cpu")
     args = parser.parse_args()
 

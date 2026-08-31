@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the bounded TabUR Stage-4 scratch-only real-data diagnostic."""
+"""Run the TabUR Stage-4 scratch-only diagnostic on the full train/test split."""
 
 from __future__ import annotations
 
@@ -16,9 +16,19 @@ from tabu_lab.experiments import run_query_row_real_scratch_benchmark
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--datasets", default="iris,wine,diabetes")
-    parser.add_argument("--label-budget", type=int, default=64)
+    parser.add_argument(
+        "--label-budget",
+        type=int,
+        default=None,
+        help="Optional bounded context override; default uses every train-partition row.",
+    )
     parser.add_argument("--updates", type=int, default=20)
-    parser.add_argument("--test-limit", type=int, default=64)
+    parser.add_argument(
+        "--test-limit",
+        type=int,
+        default=None,
+        help="Optional bounded query override; default evaluates every held-out row.",
+    )
     parser.add_argument("--row-token-count", type=int, default=4)
     parser.add_argument("--seed", type=int, default=1729)
     parser.add_argument("--device", default="cpu")

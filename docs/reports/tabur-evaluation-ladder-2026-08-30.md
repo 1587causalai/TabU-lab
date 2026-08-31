@@ -1,5 +1,11 @@
 # TabUR evaluation ladder — 2026-08-30
 
+> **Superseded evaluation scope.** This historical report predates the
+> full-train/full-test default. Its Stage 4 and Stage 6 numbers are bounded
+> diagnostics from the invocation recorded below, not the canonical real-data
+> estimand. Use [`real-evaluation-default-protocol.md`](../architecture/real-evaluation-default-protocol.md)
+> and rerun with no finite label/query limits for current results.
+
 这是一次本地 bounded diagnostic，不是 formal receipt、benchmark 或 accepted
 capability claim。运行入口是：
 

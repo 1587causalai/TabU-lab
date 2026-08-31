@@ -21,7 +21,13 @@ pretraining_extension:
 datasets:
   classification: [iris, wine, breast_cancer]
   regression: [diabetes, california_housing]
-label_budget: 128
+evaluation_protocol:
+  context_policy: full_train
+  query_policy: all_heldout_rows
+  label_budget: null
+  test_limit: null
+  chunking: terminal_readout_only
+  estimand: full_train_test
 fine_tune:
   arms: [pretrained, scratch]
   updates: 400
@@ -30,11 +36,12 @@ r0_validation_selection:
   learning_rates: [0.0001, 0.0003, 0.001]
   checkpoint_updates: [400, 1200]
   partition: validation
-  objective: dataset_macro_mean_log_loss_across_paired_seeds_and_arms
+  objective: task_stratified_primary_metric
+  metric_by_task: {classification: log_loss, regression: nrmse}
   selects: one_global_schedule_for_both_arms
   test_evaluations_during_selection: 0
 baselines: [xgboost, mlp]
-paired_controls: [split, label_subset, test_rows, seed]
+paired_controls: [split, train_rows, test_rows, seed]
 primary_metrics:
   classification: log_loss
   regression: nrmse

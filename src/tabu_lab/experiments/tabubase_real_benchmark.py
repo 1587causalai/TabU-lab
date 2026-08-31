@@ -1,4 +1,8 @@
-"""Paired real-data transfer benchmark for scaled TabUBase checkpoints."""
+"""Paired full-train/full-test real-data transfer for scaled TabUBase checkpoints.
+
+Finite label or query limits remain available only as explicit bounded
+diagnostic overrides; they are never the default estimand.
+"""
 
 from __future__ import annotations
 
@@ -155,11 +159,13 @@ def _label_subset(
     dataset: RealDataset,
     train_indices: np.ndarray,
     *,
-    budget: int,
+    budget: int | None,
     seed: int,
 ) -> np.ndarray:
-    if budget >= len(train_indices):
+    if budget is None or budget >= len(train_indices):
         return train_indices.copy()
+    if budget <= 0:
+        raise ValueError("label budget must be positive or None")
     rng = np.random.default_rng(seed)
     if dataset.task == "regression":
         return np.sort(rng.choice(train_indices, size=budget, replace=False))
@@ -239,10 +245,18 @@ class PreparedRealTask:
 def prepare_real_task(
     dataset: RealDataset,
     *,
-    budget: int,
+    budget: int | None = None,
     seed: int,
-    test_limit: int | None = 512,
+    test_limit: int | None = None,
 ) -> PreparedRealTask:
+    """Prepare the canonical real-data split.
+
+    The default is the table-foundation-model estimand: every row in the
+    train partition is labeled context and every row in the test partition is
+    evaluated.  A finite ``budget`` or ``test_limit`` is retained only as an
+    explicit bounded diagnostic override.
+    """
+
     train_indices, validation_indices, test_indices = _split_indices(dataset)
     label_indices = _label_subset(dataset, train_indices, budget=budget, seed=seed)
     mean = dataset.features[label_indices].mean(axis=0, keepdims=True)
@@ -337,7 +351,13 @@ def _real_episode(
         forward_values=forward_values,
         origin_states=origins,
         forward_roles=roles,
-        metadata={"statistics_scope": "label_subset_only"},
+        metadata={
+            "statistics_scope": (
+                "train_partition_only" if len(task.label_indices) == len(task.train_indices)
+                else "label_subset_only"
+            ),
+            "evaluation_protocol": "full_train_test_default",
+        },
     )
     truth_values = torch.zeros_like(forward_values)
     truth_values[query_start:, -1] = truth_response[query_start:]
@@ -757,7 +777,7 @@ def run_real_benchmark(
     checkpoint_root: Path,
     output_path: Path,
     device: torch.device,
-    budget: int = 128,
+    budget: int | None = None,
     updates: int = 400,
     learning_rate: float = 3.0e-4,
     checkpoint_phase: Literal["PT-S1", "PT-S2"] = "PT-S1",
@@ -768,7 +788,7 @@ def run_real_benchmark(
     temperature_calibration: bool = False,
     checkpoint_run_suffix: str = "",
     panel_manifest: Path | None = None,
-    test_limit: int | None = 512,
+    test_limit: int | None = None,
     query_readout_chunk_rows: int = 64,
 ) -> dict[str, Any]:
     import sklearn

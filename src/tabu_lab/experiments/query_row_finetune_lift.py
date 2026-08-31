@@ -85,7 +85,7 @@ class QueryRowFinetuneLiftRecord:
     scratch_metrics: dict[str, float]
     pretrained_metrics: dict[str, float]
     updates: int
-    label_budget: int
+    label_budget: int | None
     seed: int
     scratch_initial_parameter_sha256: str
     pretrain_initial_parameter_sha256: str
@@ -212,13 +212,13 @@ def _evaluation_loss(model: torch.nn.Module, task: Any) -> tuple[float, dict[str
 def run_query_row_finetune_lift(
     *,
     dataset_ids: tuple[str, ...] = ("iris", "diabetes"),
-    label_budget: int = 64,
+    label_budget: int | None = None,
     updates: int = 20,
     pretrain_steps: int = 20,
     pretrain_worlds: int = 4,
     learning_rate: float = 3.0e-4,
     pretrain_learning_rate: float = 1.0e-2,
-    test_limit: int = 64,
+    test_limit: int | None = None,
     row_token_count: int = 4,
     device: str | torch.device = "cpu",
     seed: int = 1729,
@@ -227,12 +227,16 @@ def run_query_row_finetune_lift(
 
     if not dataset_ids:
         raise ValueError("dataset_ids must not be empty")
-    if label_budget <= 0 or updates <= 0 or pretrain_steps <= 0 or pretrain_worlds <= 0:
-        raise ValueError("budgets and step counts must be positive")
+    if label_budget is not None and label_budget <= 0:
+        raise ValueError("label_budget must be positive or None")
+    if updates <= 0 or pretrain_steps <= 0 or pretrain_worlds <= 0:
+        raise ValueError("step counts and pretrain_worlds must be positive")
     if learning_rate <= 0.0 or pretrain_learning_rate <= 0.0:
         raise ValueError("learning rates must be positive")
-    if test_limit <= 0 or row_token_count <= 0:
-        raise ValueError("test_limit and row_token_count must be positive")
+    if test_limit is not None and test_limit <= 0:
+        raise ValueError("test_limit must be positive or None")
+    if row_token_count <= 0:
+        raise ValueError("row_token_count must be positive")
     resolved_device = resolve_device(str(device))
 
     pretrained = _new_row_model(
@@ -349,7 +353,9 @@ def run_query_row_finetune_lift(
         capability_gate="not_applicable",
         evidence_status="local_unissued",
         claim_boundary=(
-            "TabUR paired bounded fine-tuning lift diagnostic with profile-compatible "
+            "TabUR paired fine-tuning lift diagnostic on the canonical full train/test split "
+            "by default; finite label/test limits are explicit bounded overrides. "
+            "Profile-compatible "
             "synthetic pretraining; no formal receipt, benchmark, accepted transfer, "
             "or causal capability claim"
         ),

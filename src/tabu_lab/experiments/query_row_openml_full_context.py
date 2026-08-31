@@ -28,15 +28,14 @@ from tabu_lab.models.types import DenseModelInput
 from tabu_lab.primitives import RoutingOutput, masked_rbf_weights
 from tabu_lab.primitives.routing import _local_linear_values
 
-from .query_row_openml_frozen_transfer import (
+from .query_row_transfer_common import (
     BASELINE_CONFIG,
     BASELINE_IDS,
     QUERY_BASE_MODEL_SPEC_HASH,
-    _build_model_from_checkpoint,
-    _build_random_model,
-    _file_sha256,
-    _fit_baseline,
-    _source_commit,
+    build_model_from_checkpoint,
+    build_random_model,
+    fit_baseline,
+    source_commit,
 )
 from .query_row_r5_classical_icl import _state_hash
 from .tabubase_openml_new6 import OPENML_NEW6_SPECS, fetch_openml_new6_dataset
@@ -53,6 +52,14 @@ from .tabubase_scale import ROOT_SEEDS, resolve_device
 QUERY_OPENML_FULL_PANEL_SCHEMA = "tabu.query-row.openml-new6-full-context-panel.v1"
 QUERY_OPENML_FULL_RESULT_SCHEMA = "tabu.query-row.openml-full-context-result.v1"
 QUERY_OPENML_FULL_PANEL_ID = "tabur-query-row-openml-new6-full-context-2026-08-31"
+
+
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def _require_equal(field: str, expected: Any, observed: Any) -> None:
@@ -471,7 +478,7 @@ def run_query_row_openml_full_context(
             split = splits[(dataset_id, split_seed)]
             context_rows = len(split.train_indices)
             for estimator in ("linear", "mlp", "xgboost"):
-                fit = _fit_baseline(
+                fit = fit_baseline(
                     split,
                     context_size=context_rows,
                     estimator=estimator,
@@ -501,15 +508,15 @@ def run_query_row_openml_full_context(
     for checkpoint_path in checkpoint_paths:
         if not checkpoint_path.is_file():
             raise FileNotFoundError(f"missing TabUR checkpoint: {checkpoint_path}")
-        pretrained, identity = _build_model_from_checkpoint(
+        pretrained, identity = build_model_from_checkpoint(
             checkpoint_path, device=resolved_device
         )
-        shuffled_model, shuffled_identity = _build_model_from_checkpoint(
+        shuffled_model, shuffled_identity = build_model_from_checkpoint(
             checkpoint_path, device=resolved_device
         )
         if identity != shuffled_identity:
             raise RuntimeError("duplicate shuffled checkpoint identity drifted")
-        random_model = _build_random_model(
+        random_model = build_random_model(
             identity,
             seed=int(identity["metadata"]["root_seed"]) + 900_000,
             device=resolved_device,
@@ -681,7 +688,7 @@ def run_query_row_openml_full_context(
             "runtime_backend": os.environ.get("WEHUB_RUNTIME_BACKEND"),
             "runtime_image": os.environ.get("WEHUB_RUNTIME_IMAGE"),
         },
-        "source_commit": _source_commit(),
+        "source_commit": source_commit(),
         "source_tree_sha256": _source_tree_hash(),
         "elapsed_seconds": time.monotonic() - started,
     }

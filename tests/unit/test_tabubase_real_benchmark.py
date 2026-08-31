@@ -37,6 +37,21 @@ def test_real_preparation_is_paired_and_train_only() -> None:
     assert not set(first.label_indices) & set(first.test_indices)
 
 
+def test_real_preparation_defaults_to_all_train_and_all_test_rows() -> None:
+    rng = np.random.default_rng(8)
+    dataset = RealDataset(
+        dataset_id="full-default-fixture",
+        task="regression",
+        features=rng.normal(size=(120, 4)).astype(np.float32),
+        response=rng.normal(size=120).astype(np.float32),
+        source="fixture",
+    )
+    task = prepare_real_task(dataset, seed=1729)
+    assert np.array_equal(task.label_indices, task.train_indices)
+    assert len(task.test_indices) == 24
+    assert not np.intersect1d(task.label_indices, task.test_indices).size
+
+
 def test_classification_evaluation_uses_full_budget_and_covers_every_class() -> None:
     rng = np.random.default_rng(11)
     dataset = RealDataset(

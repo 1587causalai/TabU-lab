@@ -1,9 +1,10 @@
 """Stage-4 scratch-only real-data diagnostic for the TabUR row family.
 
-This runner intentionally accepts no checkpoint.  It trains a fresh TabUR
-instance on a bounded labeled context and compares held-out predictions with
-the declared majority/uniform or train-mean baselines.  Results are local,
-unissued diagnostics, not a benchmark receipt or transfer claim.
+This runner intentionally accepts no checkpoint.  By default it trains a fresh
+TabUR instance with the canonical real train/test split and evaluates every
+held-out row; finite context/query limits are explicit bounded diagnostics.
+Results are local, unissued diagnostics, not a benchmark receipt or transfer
+claim.
 """
 
 from __future__ import annotations
@@ -45,7 +46,7 @@ class QueryRowRealDatasetResult:
     status: str
     model_metrics: dict[str, float]
     baseline_metrics: dict[str, dict[str, float]]
-    label_budget: int
+    label_budget: int | None
     updates: int
     test_rows: int
     seed: int
@@ -190,10 +191,10 @@ def _baselines(task: PreparedRealTask) -> dict[str, dict[str, float]]:
 def run_query_row_real_scratch_benchmark(
     *,
     dataset_ids: tuple[str, ...] = ("iris", "wine", "diabetes"),
-    label_budget: int = 64,
+    label_budget: int | None = None,
     updates: int = 20,
     learning_rate: float = 3.0e-4,
-    test_limit: int = 64,
+    test_limit: int | None = None,
     row_token_count: int = 4,
     device: str | torch.device = "cpu",
     seed: int = 1729,
@@ -202,8 +203,12 @@ def run_query_row_real_scratch_benchmark(
 
     if not dataset_ids:
         raise ValueError("dataset_ids must not be empty")
-    if label_budget <= 0 or updates <= 0 or test_limit <= 0:
-        raise ValueError("label_budget, updates and test_limit must be positive")
+    if label_budget is not None and label_budget <= 0:
+        raise ValueError("label_budget must be positive or None")
+    if updates <= 0:
+        raise ValueError("updates must be positive")
+    if test_limit is not None and test_limit <= 0:
+        raise ValueError("test_limit must be positive or None")
     if learning_rate <= 0.0:
         raise ValueError("learning_rate must be positive")
     resolved_device = resolve_device(str(device))
@@ -267,7 +272,8 @@ def run_query_row_real_scratch_benchmark(
         status=status,
         evidence_status="local_unissued",
         claim_boundary=(
-            "TabUR scratch-only bounded real-data diagnostic; no checkpoint transfer, "
+            "TabUR scratch-only real-data diagnostic on the canonical full train/test split "
+            "by default; finite label/test limits are explicit bounded overrides. No checkpoint transfer, "
             "frozen ICL, fine-tuning lift, benchmark, or accepted claim"
         ),
         model_id="tabu.query.row",

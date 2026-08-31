@@ -145,7 +145,7 @@ def run_query_row_r3_diagnosis(
     dataset_ids: tuple[str, ...] = DEFAULT_R3_DATASETS,
     seeds: tuple[int, ...] = DEFAULT_R3_SEEDS,
     update_checkpoints: tuple[int, ...] = DEFAULT_R3_UPDATES,
-    label_budget: int = 128,
+    label_budget: int | None = None,
     test_limit: int | None = None,
     row_token_count: int = 4,
     learning_rate: float = 3.0e-4,
@@ -159,8 +159,10 @@ def run_query_row_r3_diagnosis(
         raise ValueError("R3 datasets, seeds and update checkpoints must not be empty")
     if tuple(sorted(set(update_checkpoints))) != update_checkpoints or update_checkpoints[0] != 0:
         raise ValueError("R3 update checkpoints must be sorted, unique and start at zero")
-    if label_budget <= 0 or learning_rate <= 0.0:
-        raise ValueError("R3 label_budget and learning_rate must be positive")
+    if label_budget is not None and label_budget <= 0:
+        raise ValueError("R3 label_budget must be positive or None")
+    if learning_rate <= 0.0:
+        raise ValueError("R3 learning_rate must be positive")
     resolved_device = resolve_device(str(device))
     records: list[dict[str, Any]] = []
     for seed in seeds:

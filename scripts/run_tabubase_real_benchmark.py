@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the paired TabUBase/XGBoost/MLP real-data panel."""
+"""Run the paired TabUBase/XGBoost/MLP full-train/full-test real-data panel."""
 
 from __future__ import annotations
 
@@ -34,14 +34,19 @@ def main() -> int:
         help="Explicit checked-in cached OpenML panel manifest for real-data runs.",
     )
     parser.add_argument("--device", default="auto")
-    parser.add_argument("--label-budget", type=int, default=128)
+    parser.add_argument(
+        "--label-budget",
+        type=int,
+        default=None,
+        help="Optional bounded context override; default uses every train-partition row.",
+    )
     parser.add_argument("--updates", type=int, default=400)
     parser.add_argument("--learning-rate", type=float, default=3.0e-4)
     parser.add_argument(
         "--test-limit",
         type=int,
-        default=512,
-        help="Maximum held-out rows; pass 0 to evaluate every held-out row.",
+        default=None,
+        help="Optional bounded query override; default evaluates every held-out row.",
     )
     parser.add_argument("--query-readout-chunk-rows", type=int, default=64)
     parser.add_argument("--checkpoint-phase", choices=("PT-S1", "PT-S2"), default="PT-S1")
