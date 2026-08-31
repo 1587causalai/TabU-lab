@@ -1,0 +1,94 @@
+schema_version: tabu.openml-data-panel.v1
+panel_id: tabu.openml.numeric-nomissing-new6
+version: 1.0.0
+status: active_for_local_unissued_evaluation
+description: >-
+  Immutable data-only identity for the six numeric, no-missing OpenML datasets
+  used by query-family frozen full-context ICL. Model, checkpoint, and evaluator
+  identities are deliberately outside this panel.
+source_contract:
+  provider: OpenML
+  api: sklearn.datasets.fetch_openml
+  identity_key: data_id
+  target_column: default-target
+  as_frame: false
+  parser: liac-arff
+  cache: true
+datasets:
+  - dataset_id: banknote_authentication
+    openml_name: banknote-authentication
+    data_id: 1462
+    version: 1
+    upstream_md5: baa2dc5b745775a943ebeb9c276401f8
+    license: Public
+    task: classification
+    rows: 1372
+    predictors: 4
+    classes: 2
+    missing_values: 0
+  - dataset_id: segment
+    openml_name: segment
+    data_id: 36
+    version: 1
+    upstream_md5: 037621812203bfd85c8dab1d7f16ebc6
+    license: Public
+    task: classification
+    rows: 2310
+    predictors: 19
+    classes: 7
+    missing_values: 0
+  - dataset_id: spambase
+    openml_name: spambase
+    data_id: 44
+    version: 1
+    upstream_md5: d9ace01aeac3461e326a8e1b2d53fd84
+    license: Public
+    task: classification
+    rows: 4601
+    predictors: 57
+    classes: 2
+    missing_values: 0
+  - dataset_id: airfoil_self_noise
+    openml_name: airfoil_self_noise
+    data_id: 43919
+    version: 1
+    upstream_md5: 79f7daecfdeb6457ba37fd8982966048
+    license: CC BY 4.0
+    task: regression
+    rows: 1503
+    predictors: 5
+    classes: null
+    missing_values: 0
+  - dataset_id: concrete_compressive_strength
+    openml_name: concrete_compressive_strength
+    data_id: 44959
+    version: 7
+    upstream_md5: 1906eae71bd8b8142d079a4b966549ac
+    license: CC BY 4.0
+    task: regression
+    rows: 1030
+    predictors: 8
+    classes: null
+    missing_values: 0
+  - dataset_id: qsar_fish_toxicity
+    openml_name: QSAR_fish_toxicity
+    data_id: 44970
+    version: 7
+    upstream_md5: 4900e250afcfee9d523aba87895260fe
+    license: CC BY 4.0
+    task: regression
+    rows: 908
+    predictors: 6
+    classes: null
+    missing_values: 0
+split_protocol:
+  split_seeds: [1729, 2718, 31415]
+  train_fraction: 0.7
+  context_policy: full_train
+  context_rows: all_train_partition_rows
+  query_policy: all_heldout_rows
+  query_limit: null
+  split_before_feature_selection: true
+  max_predictors: 63
+  feature_selection: train_only_variance_if_needed
+  target_truth_visibility: scorer_only_sidecar
