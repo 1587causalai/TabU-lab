@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import math
 
+import pytest
+
 from tabu_lab.experiments import run_query_row_real_scratch_benchmark
+
+pytest.importorskip("sklearn")
 
 
 def test_tabur_stage4_is_scratch_only_and_reports_declared_baselines() -> None:

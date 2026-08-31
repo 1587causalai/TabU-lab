@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import math
 
+import pytest
+
 from tabu_lab.experiments import run_query_row_finetune_lift
+
+pytest.importorskip("sklearn")
 
 
 def test_tabur_stage6_paired_finetune_lift_is_finite_and_profile_compatible() -> None:

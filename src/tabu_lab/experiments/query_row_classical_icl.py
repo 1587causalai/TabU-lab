@@ -153,7 +153,7 @@ def _fit_predictions(
             model.fit(train_x, train_y, verbose=False)
             predicted = model.predict(query_x)
         prediction[context_rows:, feature] = torch.as_tensor(predicted, dtype=torch.float32)
-    mean, scale = _context_standardization(episode)
+    _mean, scale = _context_standardization(episode)
     return prediction, scale
 
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import replace
 
 import numpy as np
+import pytest
 import torch
 
 from tabu_lab.experiments.query_row_real_benchmark import _model_prediction
@@ -18,6 +19,8 @@ from tabu_lab.experiments.tabubase_real_benchmark import (
 )
 from tabu_lab.models import build_model
 from tabu_lab.models.types import ReferenceConfig
+
+pytest.importorskip("sklearn")
 
 
 def _row_model(seed: int = 1729) -> torch.nn.Module:

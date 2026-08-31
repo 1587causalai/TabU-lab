@@ -414,7 +414,7 @@ def test_query_row_readout_parameter_and_gradient_boundaries() -> None:
 
 @pytest.mark.parametrize("mode", ("homogeneous", "free"))
 def test_non_anchored_readout_rejects_irrelevant_gamma_variants(mode: str) -> None:
-    with pytest.raises(ValueError, match="anchored_gamma_initial is fixed at 0.01"):
+    with pytest.raises(ValueError, match=r"anchored_gamma_initial is fixed at 0\.01"):
         build_model(
             "tabu.query.row",
             config=_config(),

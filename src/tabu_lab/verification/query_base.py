@@ -130,11 +130,7 @@ class TabUQueryEvaluationLadder(EvidenceSchema):
                         if implemented
                         else QueryHarnessStatus.NOT_IMPLEMENTED
                     ),
-                    run_status=(
-                        QueryRunStatus.NOT_RUN
-                        if not implemented
-                        else QueryRunStatus.NOT_RUN
-                    ),
+                    run_status=QueryRunStatus.NOT_RUN,
                     evidence_level=(
                         QueryEvidenceLevel.LOCAL_UNISSUED
                         if implemented
@@ -527,9 +523,9 @@ __all__ = [
     "QueryEvaluationStageResult",
     "QueryEvidenceLevel",
     "QueryFamilyGrowthAssessment",
-    "QueryRuntimeGrowthAssessment",
     "QueryHarnessStatus",
     "QueryRunStatus",
+    "QueryRuntimeGrowthAssessment",
     "QueryVerificationCheck",
     "TabUQueryEvaluationLadder",
     "assess_query_family_growth",

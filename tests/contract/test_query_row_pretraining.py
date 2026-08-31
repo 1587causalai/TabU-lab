@@ -203,7 +203,7 @@ def test_tabur_checkpoint_embedded_readout_is_required_before_tensor_load(
 
     monkeypatch.setattr(pretraining_module, "load_file", fail_if_called)
     monkeypatch.setattr(model, "load_state_dict", fail_if_called)
-    with pytest.raises(ValueError, match="model_identity.row_readout is required"):
+    with pytest.raises(ValueError, match=r"model_identity\.row_readout is required"):
         load_query_row_pretrain_checkpoint(model, checkpoint)
 
 
@@ -243,7 +243,7 @@ def test_tabur_nonanchored_identity_rejects_noncanonical_gamma_sentinel() -> Non
     identity["row_readout"] = dict(identity["row_readout"])
     identity["row_readout"]["anchored_gamma_initial"] = 0.125
 
-    with pytest.raises(ValueError, match="canonical anchored_gamma_initial=0.01"):
+    with pytest.raises(ValueError, match=r"canonical anchored_gamma_initial=0\.01"):
         require_query_row_readout_identity(identity)
 
 

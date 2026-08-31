@@ -94,7 +94,7 @@ def test_legacy_full_context_panel_rejects_v2_before_data_access(tmp_path: Path)
     checkpoint = tmp_path / "row-v2.safetensors"
     checkpoint.touch()
 
-    with pytest.raises(RuntimeError, match="frozen at tabu.query.row@0.1.0"):
+    with pytest.raises(RuntimeError, match=r"frozen at tabu\.query\.row@0\.1\.0"):
         full_context.run_query_row_openml_full_context(
             panel_manifest=Path(
                 "experiments/transfer-query-v2/openml-full-context-2026-08-31.yaml"
