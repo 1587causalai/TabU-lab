@@ -21,7 +21,12 @@ def test_r5_runner_is_non_overwriting_and_records_frozen_controls(
         device="cpu",
     )
     assert result["status"] == "passed"
+    assert result["contract_version"] == "0.2.0"
+    assert result["row_readout_mode"] == "anchored"
+    assert result["row_readout_identity"]["mode"] == "anchored"
+    assert len(result["variant_hash"]) == 64
     record = result["records"][0]
+    assert record["variant_hash"] == result["variant_hash"]
     controls = record["synthetic_frozen_controls"]
     assert controls["hash_controls"]["pretrained_frozen"]["optimizer_created"] is False
     assert controls["hash_controls"]["same_init_random_frozen"]["parameter_hash_unchanged"]

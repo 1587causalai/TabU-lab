@@ -13,6 +13,7 @@ from torch import Tensor
 from tabu_lab.contracts import canonical_hash
 
 from .query_row_frozen_icl import _state_hash
+from .query_row_identity import query_row_result_identity
 from .query_row_pretraining import (
     QueryRowPretrainingResult,
     train_query_row_synthetic_pretraining_model,
@@ -192,6 +193,9 @@ class QueryRowLinearICLThresholdResult:
     contract_version: str
     model_spec_hash: str
     profile_id: str
+    variant_hash: str
+    row_readout_mode: str
+    row_readout_identity: dict[str, Any]
     device: str
     seed: int
     pretrain_rows: int
@@ -335,6 +339,7 @@ def run_query_row_linear_icl_threshold(
         and math.isfinite(linear_mse)
         and pretrained_mse <= threshold_ratio * linear_mse
     )
+    result_identity = query_row_result_identity(model.checkpoint_identity())
     return QueryRowLinearICLThresholdResult(
         status="pass" if threshold_met else "continue",
         threshold_met=threshold_met,
@@ -345,10 +350,7 @@ def run_query_row_linear_icl_threshold(
         ),
         baseline_id=LINEAR_REGRESSION_BASELINE_ID,
         baseline_spec_hash=canonical_hash(LINEAR_REGRESSION_BASELINE_SPEC),
-        model_id=model.model_id,
-        contract_version=model.contract_version,
-        model_spec_hash=model.model_spec_hash,
-        profile_id="completion.artificial_mask.v1",
+        **result_identity,
         device=str(resolved_device),
         seed=seed,
         pretrain_rows=pretrain_rows,

@@ -187,10 +187,13 @@ def main() -> None:
     ladder = TabUQueryEvaluationLadder.with_stage_results(
         stages,
         contract_id="tabu.query.row",
-        contract_version="0.1.0",
+        contract_version="0.2.0",
     )
     payload = {
         "schema_version": "tabu.query-row.evaluation-ladder-result.v1",
+        "row_readout": row.geometry.readout_identity(),
+        "model_spec_hash": row.model_spec_hash,
+        "variant_hash": row.variant_ref.semantic_hash,
         "ladder": ladder.model_dump(mode="json"),
         "stage_results": [stage.model_dump(mode="json") for stage in stages],
         "stage_3_synthetic_fit": {"f0_fixed_world": f0.as_dict(), "s1_multi_world": s1.as_dict()},

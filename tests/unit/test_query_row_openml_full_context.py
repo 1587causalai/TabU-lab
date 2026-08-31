@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-import numpy as np
-import torch
 from pathlib import Path
 
-from tabu_lab.models import build_model
-from tabu_lab.models.types import ReferenceConfig
+import numpy as np
+import pytest
+import torch
+
+import tabu_lab.experiments.query_row_openml_full_context as full_context
 from tabu_lab.experiments.query_row_openml_full_context import (
     _forward_query_response_only,
     load_query_openml_full_context_panel_manifest,
@@ -15,6 +16,8 @@ from tabu_lab.experiments.tabubase_real_icl import (
     build_real_icl_episode,
     prepare_real_icl_split,
 )
+from tabu_lab.models import build_model
+from tabu_lab.models.types import ReferenceConfig
 
 
 def _toy_episode(task: str):
@@ -85,3 +88,17 @@ def test_query_response_readout_matches_dense_terminal_for_full_context() -> Non
                 rtol=1.0e-5,
                 atol=1.0e-5,
             )
+
+
+def test_legacy_full_context_panel_rejects_v2_before_data_access(tmp_path: Path) -> None:
+    checkpoint = tmp_path / "row-v2.safetensors"
+    checkpoint.touch()
+
+    with pytest.raises(RuntimeError, match="frozen at tabu.query.row@0.1.0"):
+        full_context.run_query_row_openml_full_context(
+            panel_manifest=Path(
+                "experiments/transfer-query-v2/openml-full-context-2026-08-31.yaml"
+            ),
+            checkpoint_paths=(checkpoint,),
+            device="cpu",
+        )

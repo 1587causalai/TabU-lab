@@ -16,6 +16,10 @@ def test_tabur_stage4_is_scratch_only_and_reports_declared_baselines() -> None:
     assert result.status == "pass"
     assert result.evidence_status == "local_unissued"
     assert result.model_id == "tabu.query.row"
+    assert result.contract_version == "0.2.0"
+    assert result.row_readout_mode == "anchored"
+    assert result.row_readout_identity["mode"] == "anchored"
+    assert len(result.variant_hash) == 64
     assert all(record.status == "pass" for record in result.datasets)
     iris = next(record for record in result.datasets if record.dataset_id == "iris")
     diabetes = next(record for record in result.datasets if record.dataset_id == "diabetes")

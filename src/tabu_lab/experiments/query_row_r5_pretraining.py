@@ -21,6 +21,7 @@ from tabu_lab.contracts import canonical_hash
 from tabu_lab.models import build_model
 from tabu_lab.models.types import ReferenceConfig
 
+from .query_row_identity import query_row_result_identity
 from .query_row_pretraining import save_query_row_pretrain_checkpoint
 from .query_row_supervised_synthetic_v2 import (
     build_query_row_supervised_synthetic_v2_plan,
@@ -93,7 +94,9 @@ def _mean_loss(
     model.eval()
     with torch.no_grad():
         for spec in selected:
-            values.append(float(supervised_synthetic_v2_episode_loss(model, _episode(root_seed, spec))))
+            values.append(
+                float(supervised_synthetic_v2_episode_loss(model, _episode(root_seed, spec)))
+            )
     value = sum(values) / len(values)
     if not math.isfinite(value):
         raise RuntimeError("non-finite v2 synthetic validation loss")
@@ -111,7 +114,9 @@ def _label_shuffled(episode: Any) -> Any:
 def _context_row_shuffled(episode: Any) -> Any:
     context_rows = episode.context_rows
     permutation = torch.randperm(context_rows, generator=torch.Generator().manual_seed(17))
-    row_order = torch.cat((permutation, torch.arange(context_rows, episode.evidence.forward_values.shape[0])))
+    row_order = torch.cat(
+        (permutation, torch.arange(context_rows, episode.evidence.forward_values.shape[0]))
+    )
     evidence = replace(
         episode.evidence,
         row_ids=tuple(episode.evidence.row_ids[int(index)] for index in row_order),
@@ -206,9 +211,7 @@ def _train_rung(
         name: value.detach().cpu().clone() for name, value in model.state_dict().items()
     }
     optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=1.0e-4)
-    initial_validation = _mean_loss(
-        model, root_seed=root_seed + 500_000, plan=validation_plan
-    )
+    initial_validation = _mean_loss(model, root_seed=root_seed + 500_000, plan=validation_plan)
     model.train()
     losses: list[float] = []
     for update in range(spec["updates"]):
@@ -222,9 +225,7 @@ def _train_rung(
         optimizer.step()
         if update == 0 or (update + 1) % max(1, spec["updates"] // 10) == 0:
             losses.append(float(loss.detach().item()))
-    final_validation = _mean_loss(
-        model, root_seed=root_seed + 500_000, plan=validation_plan
-    )
+    final_validation = _mean_loss(model, root_seed=root_seed + 500_000, plan=validation_plan)
     controls = _frozen_controls(
         model,
         root_seed=root_seed + 700_000,
@@ -254,7 +255,9 @@ def _train_rung(
             "validation_plan_hash": _plan_hash(validation_plan),
         },
     )
+    result_identity = query_row_result_identity(model.checkpoint_identity())
     return {
+        **result_identity,
         "rung": rung,
         "root_seed": root_seed,
         "worlds": spec["worlds"],
@@ -297,9 +300,7 @@ def _pilot(
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
-        validation_loss = _mean_loss(
-            model, root_seed=root_seed + 500_000, plan=validation_plan
-        )
+        validation_loss = _mean_loss(model, root_seed=root_seed + 500_000, plan=validation_plan)
         records.append({"learning_rate": learning_rate, "validation_loss": validation_loss})
     selected = min(records, key=lambda item: (item["validation_loss"], item["learning_rate"]))
     return float(selected["learning_rate"]), tuple(records)
@@ -351,17 +352,44 @@ def run_query_row_r5_bounded_pretraining(
                     validation_worlds=validation_worlds,
                 )
             )
+    identity_fields = (
+        "model_id",
+        "contract_version",
+        "profile_id",
+        "model_spec_hash",
+        "variant_hash",
+        "row_readout_mode",
+        "row_readout_identity",
+    )
+    result_identity = {field: rung_records[0][field] for field in identity_fields}
+    if any(
+        {field: record[field] for field in identity_fields} != result_identity
+        for record in rung_records[1:]
+    ):
+        raise RuntimeError("R5 rungs produced different TabUR result identities")
     result = {
-        "schema_version": "tabu.query-row.r5-bounded-pretraining.v1",
+        **result_identity,
+        "schema_version": "tabu.query-row.r5-bounded-pretraining.v2",
         "generator_id": "tabur.supervised-query-row-diverse-v2",
         "device": str(resolved_device),
         "seeds": list(seeds),
         "rungs": list(rungs),
-        "pilot": {"learning_rates": list(learning_rates), "records": list(pilot), "selected_learning_rate": selected_lr},
+        "pilot": {
+            "learning_rates": list(learning_rates),
+            "records": list(pilot),
+            "selected_learning_rate": selected_lr,
+        },
         "records": rung_records,
-        "status": "passed" if all(item["status"] == "passed" for item in rung_records) else "failed",
+        "status": "passed"
+        if all(item["status"] == "passed" for item in rung_records)
+        else "failed",
         "evidence_status": "local_unissued",
-        "claim_boundary": "R5 bounded v2 pretraining and synthetic frozen controls; no accepted capability claim",
+        "checkpoint_kind": "weights_only_transfer_snapshot",
+        "training_resume_supported": False,
+        "claim_boundary": (
+            "R5 bounded v2 pretraining and synthetic frozen controls; "
+            "weights snapshots are not training-resume states; no accepted capability claim"
+        ),
     }
     result_path = output_root / "r5-bounded-pretraining.json"
     if result_path.exists():

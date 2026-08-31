@@ -8,7 +8,6 @@ becoming an accidental default.
 
 from __future__ import annotations
 
-import json
 import os
 import subprocess
 import warnings
@@ -21,7 +20,11 @@ import torch
 from tabu_lab.models import build_model
 from tabu_lab.models.types import ReferenceConfig
 
-from .query_row_pretraining import load_query_row_pretrain_checkpoint
+from .query_row_identity import require_query_row_readout_identity
+from .query_row_pretraining import (
+    load_query_row_pretrain_checkpoint,
+    read_query_row_pretrain_checkpoint_identity,
+)
 from .tabubase_real_metrics import classification_metrics, regression_metrics
 
 QUERY_BASE_MODEL_SPEC_HASH = "24f9ddae70b116b2ac88d2ccc833870ca351de8148774fe8b9fbf72a0c58d1c0"
@@ -105,8 +108,16 @@ def _no_context_metrics(split: Any) -> dict[str, float]:
 def fit_baseline(split: Any, *, context_size: int, estimator: str, seed: int) -> dict[str, Any]:
     truth = split.response[split.query_indices]
     if context_size == 0:
-        return {"status": "not_applicable", "metrics": _no_context_metrics(split), "fit": {"fit_rows": 0}}
-    if split.dataset.task == "classification" and split.classes is not None and context_size < split.classes:
+        return {
+            "status": "not_applicable",
+            "metrics": _no_context_metrics(split),
+            "fit": {"fit_rows": 0},
+        }
+    if (
+        split.dataset.task == "classification"
+        and split.classes is not None
+        and context_size < split.classes
+    ):
         return {
             "status": "not_applicable",
             "metrics": None,
@@ -137,12 +148,19 @@ def fit_baseline(split: Any, *, context_size: int, estimator: str, seed: int) ->
         if split.dataset.task == "classification":
             assert split.classes is not None
             if estimator == "linear":
-                model = LogisticRegression(**BASELINE_CONFIG["logistic_regression"], random_state=seed)
+                model = LogisticRegression(
+                    **BASELINE_CONFIG["logistic_regression"], random_state=seed
+                )
                 train_features, query_features = x_train, x_query
-                fit["estimator_config"] = BASELINE_CONFIG["logistic_regression"] | {"random_state": seed}
+                fit["estimator_config"] = BASELINE_CONFIG["logistic_regression"] | {
+                    "random_state": seed
+                }
             elif estimator == "mlp":
                 scaler = StandardScaler().fit(x_train)
-                train_features, query_features = scaler.transform(x_train), scaler.transform(x_query)
+                train_features, query_features = (
+                    scaler.transform(x_train),
+                    scaler.transform(x_query),
+                )
                 config = BASELINE_CONFIG["mlp"]
                 model = MLPClassifier(
                     hidden_layer_sizes=tuple(config["hidden_layer_sizes"]),
@@ -180,7 +198,10 @@ def fit_baseline(split: Any, *, context_size: int, estimator: str, seed: int) ->
                 train_features, query_features, train_target = x_train, x_query, y_train
             elif estimator == "mlp":
                 scaler = StandardScaler().fit(x_train)
-                train_features, query_features = scaler.transform(x_train), scaler.transform(x_query)
+                train_features, query_features = (
+                    scaler.transform(x_train),
+                    scaler.transform(x_query),
+                )
                 target_mean = float(y_train.mean())
                 target_scale = max(float(y_train.std()), 1.0e-6)
                 train_target = (y_train - target_mean) / target_scale
@@ -217,33 +238,26 @@ def fit_baseline(split: Any, *, context_size: int, estimator: str, seed: int) ->
     fit["warnings"] = [str(item.message) for item in caught]
     if estimator == "mlp":
         fit["n_iter"] = int(model.n_iter_)
-        fit["converged_before_max_iter"] = int(model.n_iter_) < int(BASELINE_CONFIG["mlp"]["max_iter"])
+        fit["converged_before_max_iter"] = int(model.n_iter_) < int(
+            BASELINE_CONFIG["mlp"]["max_iter"]
+        )
     return {"status": "passed", "metrics": metrics, "fit": fit}
 
 
 def build_model_from_checkpoint(
     path: Path, *, device: torch.device
 ) -> tuple[torch.nn.Module, dict[str, Any]]:
-    identity_path = path.with_suffix(".identity.json")
-    if not identity_path.is_file():
-        raise FileNotFoundError(f"checkpoint identity sidecar is required: {identity_path}")
-    identity = json.loads(identity_path.read_text(encoding="utf-8"))
+    identity = read_query_row_pretrain_checkpoint_identity(path)
     model_identity = identity["model_identity"]
-    ref = model_identity["reference_config"]
-    config = ReferenceConfig(
-        d_model=int(ref["d_model"]),
-        n_heads=int(ref["n_heads"]),
-        d_ff=int(ref["d_ff"]),
-        n_blocks=int(ref["n_blocks"]),
-        inducing_slots=int(ref["inducing_slots"]),
-        matched_slots=int(ref["matched_slots"]),
-        max_features=int(ref["max_features"]),
-    )
+    readout = require_query_row_readout_identity(model_identity)
+    config = _reference_config_from_identity(model_identity)
     model = build_model(
         "tabu.query.row",
         config=config,
         profile=str(model_identity["profile_id"]),
         row_token_count=int(model_identity["row_token_count"]),
+        row_readout_mode=str(readout["mode"]),
+        anchored_gamma_initial=float(readout["anchored_gamma_initial"]),
     ).to(device)
     load_query_row_pretrain_checkpoint(model, path)
     model.eval()
@@ -255,26 +269,35 @@ def build_random_model(
     identity: dict[str, Any], *, seed: int, device: torch.device
 ) -> torch.nn.Module:
     model_identity = identity["model_identity"]
-    ref = model_identity["reference_config"]
-    config = ReferenceConfig(
-        d_model=int(ref["d_model"]),
-        n_heads=int(ref["n_heads"]),
-        d_ff=int(ref["d_ff"]),
-        n_blocks=int(ref["n_blocks"]),
-        inducing_slots=int(ref["inducing_slots"]),
-        matched_slots=int(ref["matched_slots"]),
-        max_features=int(ref["max_features"]),
-    )
+    readout = require_query_row_readout_identity(model_identity)
+    config = _reference_config_from_identity(model_identity)
     torch.manual_seed(seed)
     model = build_model(
         "tabu.query.row",
         config=config,
         profile=str(model_identity["profile_id"]),
         row_token_count=int(model_identity["row_token_count"]),
+        row_readout_mode=str(readout["mode"]),
+        anchored_gamma_initial=float(readout["anchored_gamma_initial"]),
     ).to(device)
     model.eval()
     model.requires_grad_(False)
     return model
+
+
+def _reference_config_from_identity(model_identity: dict[str, Any]) -> ReferenceConfig:
+    reference = model_identity.get("reference_config")
+    if not isinstance(reference, dict):
+        raise ValueError("checkpoint model_identity.reference_config is required")
+    expected = set(ReferenceConfig.__dataclass_fields__)
+    missing = sorted(expected - set(reference))
+    unexpected = sorted(set(reference) - expected)
+    if missing or unexpected:
+        raise ValueError(
+            "checkpoint reference_config must be exact; "
+            f"missing={missing}, unexpected={unexpected}"
+        )
+    return ReferenceConfig(**reference)
 
 
 __all__ = [

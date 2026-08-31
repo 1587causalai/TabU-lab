@@ -11,11 +11,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import math
-import os
-import platform
-import time
-from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -23,31 +18,17 @@ import numpy as np
 import torch
 import yaml
 
-from tabu_lab.contracts import FeatureKind, FeatureRole, canonical_hash
+from tabu_lab.contracts import FeatureKind, FeatureRole
 from tabu_lab.models.types import DenseModelInput
 from tabu_lab.primitives import RoutingOutput, masked_rbf_weights
 from tabu_lab.primitives.routing import _local_linear_values
 
 from .query_row_transfer_common import (
-    BASELINE_CONFIG,
-    BASELINE_IDS,
     QUERY_BASE_MODEL_SPEC_HASH,
-    build_model_from_checkpoint,
-    build_random_model,
-    fit_baseline,
-    source_commit,
 )
-from .query_row_r5_classical_icl import _state_hash
-from .tabubase_openml_new6 import OPENML_NEW6_SPECS, fetch_openml_new6_dataset
-from .tabubase_real_benchmark import _source_tree_hash
-from .tabubase_real_icl import (
-    FULL_CONTEXT_POLICY,
-    build_real_icl_episode,
-    prepare_real_icl_split,
-    real_icl_split_manifest,
-)
+from .tabubase_openml_new6 import OPENML_NEW6_SPECS
 from .tabubase_real_metrics import classification_metrics, regression_metrics
-from .tabubase_scale import ROOT_SEEDS, resolve_device
+from .tabubase_scale import ROOT_SEEDS
 
 QUERY_OPENML_FULL_PANEL_SCHEMA = "tabu.query-row.openml-new6-full-context-panel.v1"
 QUERY_OPENML_FULL_RESULT_SCHEMA = "tabu.query-row.openml-full-context-result.v1"
@@ -215,7 +196,9 @@ def _forward_query_response_only(
     declared_classes = len(spec.domain) if response_kind is not FeatureKind.NUMERIC else 0
     if classes is None and response_kind is not FeatureKind.NUMERIC:
         raise RuntimeError("categorical response requires a declared class count")
-    if classes is not None and (response_kind is FeatureKind.NUMERIC or declared_classes != classes):
+    if classes is not None and (
+        response_kind is FeatureKind.NUMERIC or declared_classes != classes
+    ):
         raise RuntimeError("response feature kind/domain does not match the split")
     expected_query_targets = torch.zeros_like(resolved.query_target_mask)
     expected_query_targets[:, context_rows:, response_feature] = True
@@ -258,8 +241,8 @@ def _forward_query_response_only(
                     support_available=routing.support_available.unsqueeze(2),
                     support_count=routing.support_count.unsqueeze(2),
                 )
-                expanded_values = support_values.unsqueeze(1).unsqueeze(2).expand(
-                    -1, query.shape[1], 1, -1
+                expanded_values = (
+                    support_values.unsqueeze(1).unsqueeze(2).expand(-1, query.shape[1], 1, -1)
                 )
                 values = _local_linear_values(
                     expanded,
@@ -318,8 +301,9 @@ def _tabur_full_metrics(
             probabilities = probabilities[0]
         if probabilities.shape != (len(truth), split.classes):
             raise RuntimeError("full-context TabUR classification query shape mismatch")
-        return classification_metrics(truth, probabilities, classes=split.classes), torch.from_numpy(
-            probabilities
+        return (
+            classification_metrics(truth, probabilities, classes=split.classes),
+            torch.from_numpy(probabilities),
         )
     assert predicted is not None
     if predicted.ndim == 2 and predicted.shape[0] == 1:
@@ -336,8 +320,7 @@ def _mean_metric_records(rows: list[dict[str, Any]]) -> dict[str, float]:
         return {}
     metric_names = tuple(rows[0]["metrics"])
     return {
-        name: float(np.mean([float(row["metrics"][name]) for row in rows]))
-        for name in metric_names
+        name: float(np.mean([float(row["metrics"][name]) for row in rows])) for name in metric_names
     }
 
 
@@ -371,7 +354,9 @@ def _summary(
         ("classification", "normalized_nll"),
         ("regression", "scaled_rmse"),
     ):
-        selected = [output[dataset_id] for dataset_id in dataset_ids if output[dataset_id]["task"] == task]
+        selected = [
+            output[dataset_id] for dataset_id in dataset_ids if output[dataset_id]["task"] == task
+        ]
         macro: dict[str, Any] = {"dataset_count": len(selected), "primary_metric": primary}
         for arm in ("pretrained_frozen", "random_init_frozen", "pretrained_shuffled"):
             values = [item["frozen"][arm].get(primary) for item in selected]
@@ -380,7 +365,9 @@ def _summary(
         for estimator in ("linear", "mlp", "xgboost"):
             values = [item["baselines"][estimator].get(primary) for item in selected]
             values = [float(value) for value in values if value is not None]
-            macro[estimator] = {"dataset_macro_mean_primary": float(np.mean(values)) if values else None}
+            macro[estimator] = {
+                "dataset_macro_mean_primary": float(np.mean(values)) if values else None
+            }
         output[f"_{task}_macro"] = macro
     return output
 
@@ -395,303 +382,23 @@ def run_query_row_openml_full_context(
     device: str | torch.device = "cuda",
     openml_data_home: Path | None = None,
 ) -> dict[str, Any]:
-    """Run full-train-context TabUR frozen ICL against matched classical fits."""
+    """Refuse the frozen 0.1 panel under the current 0.2 readout runtime."""
 
+    del dataset_ids, device, openml_data_home
     if not checkpoint_paths:
         raise ValueError("at least one TabUR checkpoint is required")
     if tuple(checkpoint_seeds) != ROOT_SEEDS or tuple(split_seeds) != ROOT_SEEDS:
         raise ValueError("full-context OpenML panel requires the preregistered three seeds")
-    panel = load_query_openml_full_context_panel_manifest(panel_manifest)
-    selected_ids = tuple(dataset_ids or panel["dataset_ids"])
-    if not selected_ids or not set(selected_ids).issubset(set(panel["dataset_ids"])):
-        raise ValueError("dataset_ids must be a non-empty subset of the full-context panel")
-    resolved_device = resolve_device(str(device))
-    started = time.monotonic()
-    fetched = [
-        fetch_openml_new6_dataset(dataset_id, cache=True, data_home=openml_data_home)
-        for dataset_id in selected_ids
-    ]
-    datasets = {item.spec.dataset_id: item.dataset for item in fetched}
-    provenance = {
-        item.spec.dataset_id: {
-            "source_manifest": item.source_manifest,
-            "source_manifest_sha256": item.source_manifest_sha256,
-        }
-        for item in fetched
-    }
-    splits = {
-        (dataset_id, split_seed): prepare_real_icl_split(
-            datasets[dataset_id], split_seed=split_seed, query_limit=None
-        )
-        for dataset_id in selected_ids
-        for split_seed in split_seeds
-    }
-    episodes: dict[tuple[str, int], tuple[Any, Any, Any]] = {}
-    for dataset_id in selected_ids:
-        for split_seed in split_seeds:
-            split = splits[(dataset_id, split_seed)]
-            context_rows = len(split.train_indices)
-            evidence, truth = build_real_icl_episode(
-                split,
-                context_size=context_rows,
-                query_indices=split.query_indices,
-                shuffled_context=False,
-                context_policy=FULL_CONTEXT_POLICY,
-            )
-            shuffled, _ = build_real_icl_episode(
-                split,
-                context_size=context_rows,
-                query_indices=split.query_indices,
-                shuffled_context=True,
-                context_policy=FULL_CONTEXT_POLICY,
-            )
-            evidence = replace(
-                evidence,
-                metadata={
-                    **dict(evidence.metadata),
-                    "model_contract": "tabu.query.row@0.1.0",
-                    "query_family": "TabUR",
-                    "context_policy": "full_train",
-                },
-            )
-            shuffled = replace(
-                shuffled,
-                metadata={
-                    **dict(shuffled.metadata),
-                    "model_contract": "tabu.query.row@0.1.0",
-                    "query_family": "TabUR",
-                    "context_policy": "full_train",
-                },
-            )
-            episodes[(dataset_id, split_seed)] = (evidence, shuffled, truth)
-    split_manifests = {
-        dataset_id: {
-            str(seed): real_icl_split_manifest(splits[(dataset_id, seed)])
-            for seed in split_seeds
-        }
-        for dataset_id in selected_ids
-    }
-
-    baseline_records: list[dict[str, Any]] = []
-    for dataset_id in selected_ids:
-        for split_seed in split_seeds:
-            split = splits[(dataset_id, split_seed)]
-            context_rows = len(split.train_indices)
-            for estimator in ("linear", "mlp", "xgboost"):
-                fit = fit_baseline(
-                    split,
-                    context_size=context_rows,
-                    estimator=estimator,
-                    seed=split_seed,
-                )
-                baseline_records.append(
-                    {
-                        "dataset_id": dataset_id,
-                        "task": split.dataset.task,
-                        "split_seed": split_seed,
-                        "context_policy": FULL_CONTEXT_POLICY,
-                        "context_size": context_rows,
-                        "train_rows_total": context_rows,
-                        "query_rows": len(split.query_indices),
-                        "predictor_count": split.features.shape[1],
-                        "split_manifest": split_manifests[dataset_id][str(split_seed)],
-                        "estimator": estimator,
-                        "status": fit["status"],
-                        "metrics": fit["metrics"],
-                        "fit": fit["fit"],
-                    }
-                )
-
-    frozen_records: list[dict[str, Any]] = []
-    frozen_controls: list[dict[str, Any]] = []
-    checkpoint_results: list[dict[str, Any]] = []
+    load_query_openml_full_context_panel_manifest(panel_manifest)
     for checkpoint_path in checkpoint_paths:
         if not checkpoint_path.is_file():
             raise FileNotFoundError(f"missing TabUR checkpoint: {checkpoint_path}")
-        pretrained, identity = build_model_from_checkpoint(
-            checkpoint_path, device=resolved_device
-        )
-        shuffled_model, shuffled_identity = build_model_from_checkpoint(
-            checkpoint_path, device=resolved_device
-        )
-        if identity != shuffled_identity:
-            raise RuntimeError("duplicate shuffled checkpoint identity drifted")
-        random_model = build_random_model(
-            identity,
-            seed=int(identity["metadata"]["root_seed"]) + 900_000,
-            device=resolved_device,
-        )
-        models = {
-            "pretrained_frozen": pretrained,
-            "random_init_frozen": random_model,
-            "pretrained_shuffled": shuffled_model,
-        }
-        before = {arm: _state_hash(model) for arm, model in models.items()}
-        substitution_ok = True
-        for dataset_id in selected_ids:
-            for split_seed in split_seeds:
-                split = splits[(dataset_id, split_seed)]
-                evidence, shuffled_evidence, truth = episodes[(dataset_id, split_seed)]
-                context_rows = len(split.train_indices)
-                metadata = {
-                    "dataset_id": dataset_id,
-                    "task": split.dataset.task,
-                    "checkpoint_seed": int(identity["metadata"]["root_seed"]),
-                    "split_seed": split_seed,
-                    "context_policy": FULL_CONTEXT_POLICY,
-                    "context_size": context_rows,
-                    "train_rows_total": context_rows,
-                    "query_rows": len(split.query_indices),
-                    "predictor_count": split.features.shape[1],
-                    "full_context": True,
-                    "split_manifest": split_manifests[dataset_id][str(split_seed)],
-                }
-                pretrained_metrics, pretrained_prediction = _tabur_full_metrics(
-                    pretrained,
-                    evidence,
-                    split,
-                    context_rows=context_rows,
-                    device=resolved_device,
-                )
-                random_metrics, _ = _tabur_full_metrics(
-                    random_model,
-                    evidence,
-                    split,
-                    context_rows=context_rows,
-                    device=resolved_device,
-                )
-                shuffled_metrics, _ = _tabur_full_metrics(
-                    shuffled_model,
-                    shuffled_evidence,
-                    split,
-                    context_rows=context_rows,
-                    device=resolved_device,
-                )
-                for arm, metrics in (
-                    ("pretrained_frozen", pretrained_metrics),
-                    ("random_init_frozen", random_metrics),
-                    ("pretrained_shuffled", shuffled_metrics),
-                ):
-                    frozen_records.append(metadata | {"arm": arm, "status": "passed", "metrics": metrics})
-                # The scorer-side TruthSidecar is deliberately changed but is
-                # never passed into the model.  A duplicate forward on the
-                # same evidence must therefore produce the same public slice.
-                if dataset_id == selected_ids[0] and split_seed == split_seeds[0]:
-                    altered_values = truth.target_values.clone()
-                    altered_values[truth.target_mask] += 123.456
-                    altered_truth = replace(
-                        truth,
-                        target_values=altered_values,
-                    )
-                    del altered_truth
-                    substituted_prediction = _tabur_full_metrics(
-                        pretrained,
-                        evidence,
-                        split,
-                        context_rows=context_rows,
-                        device=resolved_device,
-                    )[1]
-                    substitution_ok = substitution_ok and bool(
-                        torch.equal(pretrained_prediction, substituted_prediction)
-                    )
-        after = {arm: _state_hash(model) for arm, model in models.items()}
-        control = {
-            "checkpoint": str(checkpoint_path),
-            "checkpoint_sha256": _file_sha256(checkpoint_path),
-            "identity": str(checkpoint_path.with_suffix(".identity.json")),
-            "identity_sha256": _file_sha256(checkpoint_path.with_suffix(".identity.json")),
-            "model_id": identity["model_identity"]["model_id"],
-            "contract_version": identity["model_identity"]["contract_version"],
-            "rung": identity["metadata"]["rung"],
-            "root_seed": identity["metadata"]["root_seed"],
-            "parameter_hashes": {
-                arm: {
-                    "before": before[arm],
-                    "after": after[arm],
-                    "unchanged": before[arm] == after[arm],
-                }
-                for arm in models
-            },
-            "optimizer_created": False,
-            "parameter_update_attempted": False,
-            "truth_substitution_prediction_unchanged": substitution_ok,
-            "status": "passed"
-            if all(before[arm] == after[arm] for arm in models) and substitution_ok
-            else "failed",
-        }
-        frozen_controls.append(control)
-        checkpoint_results.append(control)
-
-    all_finite = all(
-        row["metrics"] is not None
-        and all(math.isfinite(float(value)) for value in row["metrics"].values())
-        for row in baseline_records + frozen_records
+    raise RuntimeError(
+        "the supplied full-context preregistration is frozen at "
+        "tabu.query.row@0.1.0 and is superseded by the 0.2.0 symmetric-readout contract; "
+        "this historical runner intentionally performs no data access or tensor loading. "
+        "A new 0.2.0 preregistration is required before the anchored model may be evaluated."
     )
-    status = (
-        "passed"
-        if all_finite and all(item["status"] == "passed" for item in frozen_controls)
-        else "failed"
-    )
-    return {
-        "schema_version": QUERY_OPENML_FULL_RESULT_SCHEMA,
-        "status": status,
-        "evidence_status": "local_unissued",
-        "claim_boundary": (
-            "R4 v2 synthetic-pretrained TabUR query-row full-train-context frozen OpenML "
-            "diagnostic versus classical fits on the identical train/test split; no formal "
-            "receipt, benchmark, SOTA, causal, or accepted capability claim"
-        ),
-        "contract_id": "tabu.query.row",
-        "contract_version": "0.1.0",
-        "model_spec_hash": QUERY_BASE_MODEL_SPEC_HASH,
-        "profile_id": "supervised.label_broadcast.v1",
-        "generator_id": "tabur.supervised-query-row-diverse-v2",
-        "panel_id": QUERY_OPENML_FULL_PANEL_ID,
-        "panel_manifest": panel,
-        "datasets": list(selected_ids),
-        "dataset_provenance": provenance,
-        "dataset_hashes": {
-            dataset_id: datasets[dataset_id].content_hash for dataset_id in selected_ids
-        },
-        "checkpoint_seeds": list(checkpoint_seeds),
-        "split_seeds": list(split_seeds),
-        "context_policy": FULL_CONTEXT_POLICY,
-        "context_sizes": None,
-        "query_policy": "all_heldout_rows",
-        "query_limit": None,
-        "query_chunk_rows": 64,
-        "baseline_ids": list(BASELINE_IDS),
-        "baseline_config": BASELINE_CONFIG,
-        "baseline_config_hash": canonical_hash(BASELINE_CONFIG),
-        "split_manifests": split_manifests,
-        "context_rows_by_dataset_split": {
-            dataset_id: {
-                str(seed): len(splits[(dataset_id, seed)].train_indices)
-                for seed in split_seeds
-            }
-            for dataset_id in selected_ids
-        },
-        "checkpoints": checkpoint_results,
-        "frozen_controls": frozen_controls,
-        "baseline_records": baseline_records,
-        "frozen_records": frozen_records,
-        "summary": _summary(baseline_records, frozen_records, dataset_ids=selected_ids),
-        "environment": {
-            "hostname": platform.node(),
-            "physical_hostname": os.environ.get("WEHUB_PHYSICAL_HOST") or platform.node(),
-            "architecture": platform.machine(),
-            "platform": platform.platform(),
-            "python": platform.python_version(),
-            "torch": torch.__version__,
-            "device": str(resolved_device),
-            "cuda": torch.version.cuda,
-            "runtime_backend": os.environ.get("WEHUB_RUNTIME_BACKEND"),
-            "runtime_image": os.environ.get("WEHUB_RUNTIME_IMAGE"),
-        },
-        "source_commit": source_commit(),
-        "source_tree_sha256": _source_tree_hash(),
-        "elapsed_seconds": time.monotonic() - started,
-    }
 
 
 __all__ = [

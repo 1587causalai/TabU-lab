@@ -26,6 +26,8 @@ from tabu_lab.contracts import (
     canonical_hash,
 )
 
+from .query_row_identity import query_row_result_identity
+
 GeneratorPartition = Literal["train", "validation"]
 GENERATOR_ID = "tabur.supervised-query-row-diverse-v2"
 WORLD_FAMILIES = (
@@ -148,7 +150,9 @@ def _resolve_plan(
     index = index_seed % len(WORLD_FAMILIES)
     resolved_family = family or WORLD_FAMILIES[index]
     resolved_width = width or WIDTH_BUCKETS[index_seed % len(WIDTH_BUCKETS)]
-    resolved_regime = predictor_regime or PREDICTOR_REGIMES[(index_seed // 7) % len(PREDICTOR_REGIMES)]
+    resolved_regime = (
+        predictor_regime or PREDICTOR_REGIMES[(index_seed // 7) % len(PREDICTOR_REGIMES)]
+    )
     resolved_noise = noise_level or NOISE_LEVELS[(index_seed // 17) % len(NOISE_LEVELS)]
     resolved_context = context_rows or CONTEXT_ANCHORS[(index_seed // 31) % len(CONTEXT_ANCHORS)]
     if resolved_family not in WORLD_FAMILIES:
@@ -224,7 +228,8 @@ def make_query_row_supervised_synthetic_v2_episode(
     ]
     roles = [
         [
-            ForwardRole.RECEIVER | (ForwardRole.TARGET if target_mask[row, col] else ForwardRole.SOURCE)
+            ForwardRole.RECEIVER
+            | (ForwardRole.TARGET if target_mask[row, col] else ForwardRole.SOURCE)
             for col in range(width + 1)
         ]
         for row in range(rows)
@@ -416,18 +421,25 @@ def validate_query_row_supervised_synthetic_v2(
     )
     with torch.no_grad():
         public_prediction = model(sample.evidence)
-        dense_prediction = model._forward_dense(sample.evidence.to(resolved_device), emit_trace=False)
+        dense_prediction = model._forward_dense(
+            sample.evidence.to(resolved_device), emit_trace=False
+        )
     dense_parity = torch.allclose(
         public_prediction["numeric_raw_prediction"],
         dense_prediction["numeric_raw_prediction"],
         atol=1.0e-6,
         rtol=1.0e-6,
     )
-    oracle_error = torch.where(
-        sample.sidecar.target_mask,
-        sample.sidecar.target_values - sample.sidecar.target_values,
-        torch.zeros_like(sample.sidecar.target_values),
-    ).square().sum().item()
+    oracle_error = (
+        torch.where(
+            sample.sidecar.target_mask,
+            sample.sidecar.target_values - sample.sidecar.target_values,
+            torch.zeros_like(sample.sidecar.target_values),
+        )
+        .square()
+        .sum()
+        .item()
+    )
     exits = {
         "deterministic_replay": replay_ok,
         "truth_substitution_isolation": truth_isolated,
@@ -437,8 +449,10 @@ def validate_query_row_supervised_synthetic_v2(
         "finite_forward_backward": bool(torch.isfinite(loss)) and finite_gradients,
         "disjoint_train_validation_world_ids": train_ids.isdisjoint(validation_ids),
     }
+    result_identity = query_row_result_identity(model.checkpoint_identity())
     return {
-        "schema_version": "tabu.query-row.supervised-synthetic-v2-validation.v1",
+        **result_identity,
+        "schema_version": "tabu.query-row.supervised-synthetic-v2-validation.v2",
         "generator_id": GENERATOR_ID,
         "root_seed": root_seed,
         "worlds_per_partition": worlds,
@@ -468,7 +482,9 @@ def supervised_synthetic_v2_episode_loss(
     if not bool(scored.any()):
         raise RuntimeError("v2 episode has no supported supervised target")
     error = raw - truth.to(dtype=raw.dtype)
-    return torch.where(scored, error.square(), torch.zeros_like(error)).sum() / scored.sum().clamp_min(1)
+    return torch.where(
+        scored, error.square(), torch.zeros_like(error)
+    ).sum() / scored.sum().clamp_min(1)
 
 
 def substitute_query_truth(

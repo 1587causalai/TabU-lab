@@ -2,7 +2,10 @@
 
 Status: one-shot implementation and experiment guidance  
 Evidence status: `none` (`planning_only`)  
-Applies to: `tabu.query.row@0.1.0`, `supervised.label_broadcast.v1`  
+Applies to: legacy `tabu.query.row@0.1.0` free readout only,
+`supervised.label_broadcast.v1`
+Supersession boundary: do not execute this guide against anchored
+`tabu.query.row@0.2.0`; create a new preregistration and rerun every model arm.
 Baseline source: commit `709206987562e9920656957823f22464da156999` and
 [`tabur-evaluation-ladder-2026-08-30.md`](../reports/tabur-evaluation-ladder-2026-08-30.md)  
 Primary comparison target: TabUBase cached OpenML regression-8 protocol  

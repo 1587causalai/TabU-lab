@@ -12,6 +12,13 @@ from tabu_lab.experiments import (
 )
 
 
+def _assert_tabur_result_identity(result: object) -> None:
+    assert result.contract_version == "0.2.0"
+    assert result.row_readout_mode == "anchored"
+    assert result.row_readout_identity["mode"] == "anchored"
+    assert len(result.variant_hash) == 64
+
+
 def test_synthetic_world_keeps_masked_truth_out_of_forward_values() -> None:
     batch = make_linear_world_batch(seed=1730)
     hidden_response = batch.target_mask
@@ -45,6 +52,7 @@ def test_tabur_fixed_world_keeps_masked_truth_out_of_public_evidence() -> None:
 def test_tabur_fixed_world_f0_fit_gate_passes() -> None:
     result = run_query_row_fixed_world_fit(seed=1729, steps=20, rows=32, row_token_count=4)
     assert result.status == "pass"
+    _assert_tabur_result_identity(result)
     assert result.evidence_status == "local_unissued"
     assert result.final_train_loss < result.initial_train_loss
     assert torch.isfinite(torch.tensor(result.final_validation_loss))
@@ -60,6 +68,7 @@ def test_tabur_multi_world_s1_fit_gate_passes_without_real_data() -> None:
         row_token_count=4,
     )
     assert result.status == "pass"
+    _assert_tabur_result_identity(result)
     assert result.evidence_status == "local_unissued"
     assert result.final_train_loss < result.initial_train_loss
     assert torch.isfinite(torch.tensor(result.final_validation_loss))
@@ -75,6 +84,7 @@ def test_tabur_stage5_frozen_icl_has_no_optimizer_or_parameter_mutation() -> Non
         row_token_count=4,
     )
     assert result.status == "pass"
+    _assert_tabur_result_identity(result)
     assert result.evidence_status == "local_unissued"
     assert result.records
     assert all(record.parameter_hash_unchanged for record in result.records)

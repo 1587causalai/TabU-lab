@@ -10,7 +10,6 @@ of independently selected test worlds.
 from __future__ import annotations
 
 import hashlib
-import json
 import math
 import warnings
 from dataclasses import asdict, dataclass
@@ -22,15 +21,22 @@ import torch
 
 from tabu_lab.contracts import canonical_hash
 from tabu_lab.models import build_model
-from tabu_lab.models.types import ReferenceConfig
 
-from .query_row_pretraining import load_query_row_pretrain_checkpoint
+from .query_row_identity import (
+    query_row_result_identity,
+    require_query_row_readout_identity,
+)
+from .query_row_pretraining import (
+    load_query_row_pretrain_checkpoint,
+    read_query_row_pretrain_checkpoint_identity,
+)
 from .query_row_supervised_synthetic_v2 import (
     GENERATOR_ID,
     build_query_row_supervised_synthetic_v2_plan,
     make_query_row_supervised_synthetic_v2_episode,
     substitute_query_truth,
 )
+from .query_row_transfer_common import _reference_config_from_identity
 from .tabubase_scale import resolve_device
 
 CLASSICAL_R5_BASELINE_IDS = (
@@ -284,6 +290,13 @@ class QueryRowR5ClassicalCheckpointResult:
     checkpoint_sha256: str
     identity: str
     identity_sha256: str
+    model_id: str
+    contract_version: str
+    profile_id: str
+    model_spec_hash: str
+    variant_hash: str
+    row_readout_mode: str
+    row_readout_identity: dict[str, Any]
     rung: str
     root_seed: int
     worlds: int
@@ -332,26 +345,17 @@ def _checkpoint_model(
     *,
     device: torch.device,
 ) -> tuple[torch.nn.Module, dict[str, Any]]:
-    identity_path = path.with_suffix(".identity.json")
-    if not identity_path.is_file():
-        raise FileNotFoundError(f"checkpoint identity sidecar is required: {identity_path}")
-    identity = json.loads(identity_path.read_text(encoding="utf-8"))
-    model_identity = identity.get("model_identity", {})
-    reference = model_identity.get("reference_config", {})
-    config = ReferenceConfig(
-        d_model=int(reference["d_model"]),
-        n_heads=int(reference["n_heads"]),
-        d_ff=int(reference["d_ff"]),
-        n_blocks=int(reference["n_blocks"]),
-        inducing_slots=int(reference["inducing_slots"]),
-        matched_slots=int(reference["matched_slots"]),
-        max_features=int(reference["max_features"]),
-    )
+    identity = read_query_row_pretrain_checkpoint_identity(path)
+    model_identity = identity["model_identity"]
+    readout = require_query_row_readout_identity(model_identity)
+    config = _reference_config_from_identity(model_identity)
     model = build_model(
         "tabu.query.row",
         config=config,
         profile=str(model_identity["profile_id"]),
         row_token_count=int(model_identity["row_token_count"]),
+        row_readout_mode=str(readout["mode"]),
+        anchored_gamma_initial=float(readout["anchored_gamma_initial"]),
     ).to(device)
     load_query_row_pretrain_checkpoint(model, path)
     return model, identity
@@ -420,6 +424,9 @@ def run_query_row_r5_classical_icl(
             raise FileNotFoundError(f"checkpoint does not exist: {checkpoint_path}")
         model, identity = _checkpoint_model(checkpoint_path, device=resolved_device)
         metadata = identity["metadata"]
+        model_identity = identity["model_identity"]
+        result_identity = query_row_result_identity(model_identity)
+        readout_identity = result_identity["row_readout_identity"]
         parameter_hash_before = _state_hash(model)
         records: list[QueryRowR5ClassicalRecord] = []
         substitution_ok = True
@@ -475,6 +482,13 @@ def run_query_row_r5_classical_icl(
             checkpoint_sha256=_sha256(checkpoint_path),
             identity=str(identity_path),
             identity_sha256=_sha256(identity_path),
+            model_id=result_identity["model_id"],
+            contract_version=result_identity["contract_version"],
+            profile_id=result_identity["profile_id"],
+            model_spec_hash=result_identity["model_spec_hash"],
+            variant_hash=result_identity["variant_hash"],
+            row_readout_mode=result_identity["row_readout_mode"],
+            row_readout_identity=readout_identity,
             rung=str(metadata["rung"]),
             root_seed=int(metadata["root_seed"]),
             worlds=int(metadata["worlds"]),
@@ -497,7 +511,7 @@ def run_query_row_r5_classical_icl(
         checkpoint_results.append(checkpoint_result)
 
     return QueryRowR5ClassicalResult(
-        schema_version="tabu.query-row.r5-v2-frozen-classical-panel.v1",
+        schema_version="tabu.query-row.r5-v2-frozen-classical-panel.v2",
         generator_id=GENERATOR_ID,
         evidence_status="local_unissued",
         claim_boundary=(

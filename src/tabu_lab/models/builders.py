@@ -219,12 +219,12 @@ def build_tabu_query_base(**kwargs: Any) -> TabUQueryBaseModel:
 
 
 def build_tabu_query_row(**kwargs: Any) -> TabUQueryRowModel:
-    """Build ``tabu.query.row@0.1.0`` with explicit row-token geometry."""
+    """Build ``tabu.query.row@0.2.0`` with an explicit Step-4 readout."""
 
     options = dict(kwargs)
     config = _config_from_kwargs(options)
     if "profile" not in options:
-        raise TypeError("tabu.query.row@0.1.0 requires an explicit profile")
+        raise TypeError("tabu.query.row@0.2.0 requires an explicit profile")
     profile = options.pop("profile")
     row_token_count = int(options.pop("row_token_count", 4))
     row_token_bank = options.pop("row_token_bank", None)
@@ -236,6 +236,8 @@ def build_tabu_query_row(**kwargs: Any) -> TabUQueryRowModel:
         if component_registry is not None:
             raise TypeError("component_registry requires an explicit component_manifest")
         numeric_terminal = options.pop("numeric_terminal", "local_linear")
+        row_readout_mode = options.pop("row_readout_mode", "anchored")
+        anchored_gamma_initial = float(options.pop("anchored_gamma_initial", 1.0e-2))
         nominal_tokenizer = options.pop("nominal_tokenizer", "episode_random_sphere")
         nominal_codebook_size = options.pop("nominal_codebook_size", 100)
         nominal_codebook_seed = options.pop("nominal_codebook_seed", 1729)
@@ -243,6 +245,8 @@ def build_tabu_query_row(**kwargs: Any) -> TabUQueryRowModel:
             raise TypeError(f"unknown query-row builder options: {sorted(options)}")
         component_manifest = canonical_query_row_manifest(
             token_count=row_token_count,
+            row_readout_mode=row_readout_mode,
+            anchored_gamma_initial=anchored_gamma_initial,
             numeric_terminal=numeric_terminal,
             nominal_tokenizer=nominal_tokenizer,
             nominal_codebook_size=nominal_codebook_size,
@@ -253,6 +257,8 @@ def build_tabu_query_row(**kwargs: Any) -> TabUQueryRowModel:
             set(options)
             & {
                 "numeric_terminal",
+                "row_readout_mode",
+                "anchored_gamma_initial",
                 "nominal_tokenizer",
                 "nominal_codebook_size",
                 "nominal_codebook_seed",
@@ -267,6 +273,21 @@ def build_tabu_query_row(**kwargs: Any) -> TabUQueryRowModel:
             raise TypeError(f"unknown query-row builder options: {sorted(options)}")
     if not isinstance(component_manifest, QueryComponentManifest):
         raise TypeError("component_manifest must be a typed QueryComponentManifest")
+    geometry_config = dict(component_manifest.geometry.config)
+    required_readout_config = {
+        "token_count",
+        "row_readout_mode",
+        "anchored_gamma_initial",
+        "axis_transform_normalization",
+    }
+    missing_readout_config = sorted(required_readout_config - set(geometry_config))
+    if missing_readout_config:
+        raise ValueError(
+            "TabUR component_manifest is missing required readout config: "
+            f"{missing_readout_config}"
+        )
+    row_readout_mode = geometry_config["row_readout_mode"]
+    anchored_gamma_initial = float(geometry_config["anchored_gamma_initial"])
     registry = CANONICAL_QUERY_ROW_COMPONENTS if component_registry is None else component_registry
     if not isinstance(registry, QueryComponentRegistry):
         raise TypeError("component_registry must be a QueryComponentRegistry")
@@ -276,6 +297,8 @@ def build_tabu_query_row(**kwargs: Any) -> TabUQueryRowModel:
         profile=profile,
         row_token_count=row_token_count,
         row_token_bank=row_token_bank,
+        row_readout_mode=row_readout_mode,
+        anchored_gamma_initial=anchored_gamma_initial,
         label_broadcast=label_broadcast,
         label_broadcast_tau=label_broadcast_tau,
         component_manifest=component_manifest,

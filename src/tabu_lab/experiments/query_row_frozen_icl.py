@@ -18,11 +18,20 @@ import torch
 from tabu_lab.models import build_model
 from tabu_lab.models.types import ReferenceConfig
 
+from .query_row_identity import (
+    query_row_result_identity,
+    require_query_row_readout_identity,
+)
+from .query_row_pretraining import (
+    load_query_row_pretrain_checkpoint,
+    read_query_row_pretrain_checkpoint_identity,
+)
 from .query_row_synthetic_fit import (
     QueryRowSyntheticEpisode,
     _episode_loss,
     make_query_row_synthetic_episode,
 )
+from .query_row_transfer_common import _reference_config_from_identity
 from .tabubase_scale import resolve_device
 
 
@@ -43,11 +52,16 @@ def _row_model(
     row_token_count: int,
     device: torch.device,
     max_features: int = 4,
+    config: ReferenceConfig | None = None,
+    profile: str = "completion.artificial_mask.v1",
+    row_readout_mode: str = "anchored",
+    anchored_gamma_initial: float = 1.0e-2,
 ) -> torch.nn.Module:
     torch.manual_seed(seed)
     return build_model(
         "tabu.query.row",
-        config=ReferenceConfig(
+        config=config
+        or ReferenceConfig(
             d_model=8,
             n_heads=2,
             d_ff=16,
@@ -56,8 +70,10 @@ def _row_model(
             matched_slots=row_token_count,
             max_features=max_features,
         ),
-        profile="completion.artificial_mask.v1",
+        profile=profile,
         row_token_count=row_token_count,
+        row_readout_mode=row_readout_mode,
+        anchored_gamma_initial=anchored_gamma_initial,
     ).to(device)
 
 
@@ -97,13 +113,17 @@ class QueryRowFrozenICLRecord:
 
 @dataclass(frozen=True, slots=True)
 class QueryRowFrozenICLResult:
+    schema_version: str
     status: str
     evidence_status: str
     claim_boundary: str
     model_id: str
     contract_version: str
     model_spec_hash: str
+    variant_hash: str
     row_token_count: int
+    row_readout_mode: str
+    row_readout_identity: dict[str, Any]
     device: str
     seed: int
     eval_worlds: int
@@ -150,17 +170,38 @@ def run_query_row_frozen_icl(
         raise ValueError("context_rows must be non-empty and smaller than rows")
 
     checkpointed = checkpoint is not None
-    pretrained = _row_model(
-        seed=seed,
-        row_token_count=row_token_count,
-        device=resolved_device,
-        max_features=256 if checkpointed else 4,
-    )
     if checkpointed:
-        from .query_row_pretraining import load_query_row_pretrain_checkpoint
-
+        assert checkpoint is not None
+        checkpoint_identity = read_query_row_pretrain_checkpoint_identity(checkpoint)
+        checkpoint_model_identity = checkpoint_identity["model_identity"]
+        checkpoint_readout = require_query_row_readout_identity(checkpoint_model_identity)
+        checkpoint_token_count = int(checkpoint_model_identity["row_token_count"])
+        if row_token_count != checkpoint_token_count:
+            raise ValueError(
+                "row_token_count must match the checkpoint identity; "
+                "checkpoint reconstruction never applies a caller default"
+            )
+        pretrained = _row_model(
+            seed=seed,
+            row_token_count=checkpoint_token_count,
+            device=resolved_device,
+            config=_reference_config_from_identity(checkpoint_model_identity),
+            profile=str(checkpoint_model_identity["profile_id"]),
+            row_readout_mode=str(checkpoint_readout["mode"]),
+            anchored_gamma_initial=float(
+                checkpoint_readout["anchored_gamma_initial"]
+            ),
+        )
         load_query_row_pretrain_checkpoint(pretrained, checkpoint)
     else:
+        pretrained = _row_model(
+            seed=seed,
+            row_token_count=row_token_count,
+            device=resolved_device,
+            max_features=4,
+            row_readout_mode="anchored",
+            anchored_gamma_initial=1.0e-2,
+        )
         train_episodes = tuple(
             make_query_row_synthetic_episode(
                 seed=seed + 10 + index,
@@ -182,7 +223,11 @@ def run_query_row_frozen_icl(
             optimizer.step()
 
     records: list[QueryRowFrozenICLRecord] = []
-    model_spec_hash = pretrained.model_spec_hash
+    pretrained_identity = pretrained.checkpoint_identity()
+    result_identity = query_row_result_identity(pretrained_identity)
+    readout_identity = result_identity["row_readout_identity"]
+    reference_config = _reference_config_from_identity(pretrained_identity)
+    profile_id = str(pretrained_identity["profile_id"])
     families = ("row_latent_periodic", "row_latent_linear", "row_latent_polynomial")
     for world_index in range(eval_worlds):
         family = families[world_index % len(families)]
@@ -199,7 +244,12 @@ def run_query_row_frozen_icl(
                 seed=seed + 1000 + world_index * 101 + context_size,
                 row_token_count=row_token_count,
                 device=resolved_device,
-                max_features=256 if checkpointed else 4,
+                config=reference_config,
+                profile=profile_id,
+                row_readout_mode=str(readout_identity["mode"]),
+                anchored_gamma_initial=float(
+                    readout_identity["anchored_gamma_initial"]
+                ),
             )
             shuffled = _shuffled_sidecar(episode)
             arms = (
@@ -231,16 +281,20 @@ def run_query_row_frozen_icl(
         for record in records
     ) else "kill"
     return QueryRowFrozenICLResult(
+        schema_version="tabu.query-row.frozen-icl-result.v2",
         status=status,
         evidence_status="local_unissued",
         claim_boundary=(
             "TabUR frozen synthetic ICL diagnostic only; no real-data transfer, "
             "fine-tuning lift, benchmark, or accepted claim"
         ),
-        model_id=pretrained.model_id,
-        contract_version=pretrained.contract_version,
-        model_spec_hash=model_spec_hash,
+        model_id=result_identity["model_id"],
+        contract_version=result_identity["contract_version"],
+        model_spec_hash=result_identity["model_spec_hash"],
+        variant_hash=result_identity["variant_hash"],
         row_token_count=row_token_count,
+        row_readout_mode=str(readout_identity["mode"]),
+        row_readout_identity=readout_identity,
         device=str(resolved_device),
         seed=seed,
         eval_worlds=eval_worlds,

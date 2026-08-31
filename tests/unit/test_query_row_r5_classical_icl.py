@@ -7,7 +7,9 @@ from pathlib import Path
 import torch
 
 
-def test_r5_classical_runner_reuses_panel_and_keeps_frozen_controls(monkeypatch, tmp_path: Path) -> None:
+def test_r5_classical_runner_reuses_panel_and_keeps_frozen_controls(
+    monkeypatch, tmp_path: Path
+) -> None:
     module = importlib.import_module("tabu_lab.experiments.query_row_r5_classical_icl")
     checkpoint = tmp_path / "model.safetensors"
     identity = checkpoint.with_suffix(".identity.json")
@@ -41,6 +43,29 @@ def test_r5_classical_runner_reuses_panel_and_keeps_frozen_controls(monkeypatch,
 
     def fake_checkpoint_model(path, *, device):
         return torch.nn.Identity(), {
+            "model_identity": {
+                "model_id": "tabu.query.row",
+                "contract_version": "0.2.0",
+                "profile_id": "supervised.label_broadcast.v1",
+                "variant_hash": "b" * 64,
+                "variant_ref": {
+                    "contract_id": "tabu.query.row",
+                    "contract_version": "0.2.0",
+                    "profile_id": "supervised.label_broadcast.v1",
+                    "model_spec_hash": "a" * 64,
+                },
+                "row_token_count": 4,
+                "reference_config": {"matched_slots": 4},
+                "row_readout": {
+                    "schema_version": "tabu.query-row-readout.v1",
+                    "mode": "anchored",
+                    "beta": 1.0,
+                    "anchored_gamma_initial": 0.01,
+                    "axis_transform_normalization": "exact_spectral_norm_v1",
+                    "row_token_count": 4,
+                    "global_w_rows": 4,
+                },
+            },
             "metadata": {
                 "rung": "B1",
                 "root_seed": 1729,
@@ -77,6 +102,11 @@ def test_r5_classical_runner_reuses_panel_and_keeps_frozen_controls(monkeypatch,
     assert checkpoint_result.truth_substitution_prediction_unchanged
     assert checkpoint_result.optimizer_created is False
     assert checkpoint_result.parameter_update_attempted is False
+    assert checkpoint_result.contract_version == "0.2.0"
+    assert checkpoint_result.model_spec_hash == "a" * 64
+    assert checkpoint_result.variant_hash == "b" * 64
+    assert checkpoint_result.row_readout_mode == "anchored"
+    assert checkpoint_result.row_readout_identity["anchored_gamma_initial"] == 0.01
     assert checkpoint_result.aggregate_metrics["tabur"]["raw_response_mse"] == 1.0
     payload = result.as_dict()
     assert payload["baseline_ids"] == [

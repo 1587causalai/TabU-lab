@@ -18,11 +18,15 @@ from .query_row_icl_threshold import (
     _linear_regression_mse,
     _model_mse,
 )
+from .query_row_identity import query_row_result_identity
 from .query_row_pretraining import (
     QueryRowPretrainingResult,
     train_query_row_synthetic_pretraining_model,
 )
-from .query_row_synthetic_fit import QueryRowSyntheticEpisode, make_query_row_synthetic_episode
+from .query_row_synthetic_fit import (
+    QueryRowSyntheticEpisode,
+    make_query_row_synthetic_episode,
+)
 from .tabubase_scale import resolve_device
 
 CLASSICAL_ICL_BASELINE_IDS = (
@@ -203,6 +207,9 @@ class QueryRowClassicalICLResult:
     contract_version: str
     model_spec_hash: str
     profile_id: str
+    variant_hash: str
+    row_readout_mode: str
+    row_readout_identity: dict[str, Any]
     device: str
     seed: int
     pretrain_rows: int
@@ -339,6 +346,7 @@ def run_query_row_classical_icl_benchmark(
         and metrics["tabur"] <= metrics["mlp"]
         and metrics["tabur"] <= metrics["xgboost"]
     )
+    result_identity = query_row_result_identity(model.checkpoint_identity())
     return QueryRowClassicalICLResult(
         status="pass" if threshold_met else "continue",
         threshold_met=threshold_met,
@@ -349,10 +357,7 @@ def run_query_row_classical_icl_benchmark(
         ),
         baseline_ids=CLASSICAL_ICL_BASELINE_IDS,
         baseline_config_hash=canonical_hash(CLASSICAL_ICL_CONFIG),
-        model_id=model.model_id,
-        contract_version=model.contract_version,
-        model_spec_hash=model.model_spec_hash,
-        profile_id="completion.artificial_mask.v1",
+        **result_identity,
         device=str(resolved_device),
         seed=seed,
         pretrain_rows=pretrain_rows,

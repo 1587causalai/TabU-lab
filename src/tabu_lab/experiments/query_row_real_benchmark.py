@@ -21,6 +21,12 @@ from tabu_lab.models import build_model
 from tabu_lab.models.types import ReferenceConfig
 from tabu_lab.training.objective import Objective
 
+from .query_row_identity import query_row_result_identity
+from .query_row_real_coordinates import (
+    numeric_raw_prediction_from_public,
+    query_row_real_regression_loss,
+    task_scale_to_raw,
+)
 from .tabubase_real_benchmark import (
     PreparedRealTask,
     _real_episode,
@@ -30,11 +36,6 @@ from .tabubase_real_benchmark import (
     training_episode_indices,
 )
 from .tabubase_scale import resolve_device
-from .query_row_real_coordinates import (
-    numeric_raw_prediction_from_public,
-    query_row_real_regression_loss,
-    task_scale_to_raw,
-)
 
 TaskKind = Literal["classification", "regression"]
 
@@ -62,7 +63,11 @@ class QueryRowRealBenchmarkResult:
     claim_boundary: str
     model_id: str
     contract_version: str
+    profile_id: str
     model_spec_hash: str
+    variant_hash: str
+    row_readout_mode: str
+    row_readout_identity: dict[str, Any]
     row_token_count: int
     device: str
     seed: int
@@ -214,7 +219,7 @@ def run_query_row_real_scratch_benchmark(
     resolved_device = resolve_device(str(device))
     torch.manual_seed(seed)
     records: list[QueryRowRealDatasetResult] = []
-    model_spec_hash = ""
+    result_identity: dict[str, Any] | None = None
     for offset, dataset_id in enumerate(dataset_ids):
         task = prepare_real_task(
             load_real_dataset(dataset_id),
@@ -236,7 +241,11 @@ def run_query_row_real_scratch_benchmark(
             profile="supervised.label_broadcast.v1",
             row_token_count=row_token_count,
         ).to(resolved_device)
-        model_spec_hash = model.model_spec_hash
+        current_identity = query_row_result_identity(model.checkpoint_identity())
+        if result_identity is None:
+            result_identity = current_identity
+        elif current_identity != result_identity:
+            raise RuntimeError("TabUR real scratch datasets used different model identities")
         optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=1.0e-4)
         for update in range(updates):
             context, query = training_episode_indices(task, seed=seed + offset, update=update)
@@ -268,17 +277,18 @@ def run_query_row_real_scratch_benchmark(
             )
         )
     status = "pass" if all(item.status == "pass" for item in records) else "kill"
+    if result_identity is None:
+        raise RuntimeError("TabUR real scratch produced no model identity")
     return QueryRowRealBenchmarkResult(
         status=status,
         evidence_status="local_unissued",
         claim_boundary=(
             "TabUR scratch-only real-data diagnostic on the canonical full train/test split "
-            "by default; finite label/test limits are explicit bounded overrides. No checkpoint transfer, "
+            "by default; finite label/test limits are explicit bounded overrides. No checkpoint "
+            "transfer, "
             "frozen ICL, fine-tuning lift, benchmark, or accepted claim"
         ),
-        model_id="tabu.query.row",
-        contract_version="0.1.0",
-        model_spec_hash=model_spec_hash,
+        **result_identity,
         row_token_count=row_token_count,
         device=str(resolved_device),
         seed=seed,

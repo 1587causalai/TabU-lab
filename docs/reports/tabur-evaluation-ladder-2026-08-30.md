@@ -6,6 +6,11 @@
 > estimand. Use [`real-evaluation-default-protocol.md`](../architecture/real-evaluation-default-protocol.md)
 > and rerun with no finite label/query limits for current results.
 
+> **Legacy model identity.** Every TabUR checkpoint and number in this report
+> belongs to `tabu.query.row@0.1.0` with the free readout $z=U_rc$. It is retained
+> as `legacy_free / local_unissued` history and does not count as evidence for
+> the anchored `tabu.query.row@0.2.0` contract.
+
 这是一次本地 bounded diagnostic，不是 formal receipt、benchmark 或 accepted
 capability claim。运行入口是：
 

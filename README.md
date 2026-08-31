@@ -34,8 +34,10 @@ The query-role family is registered under independent contract IDs:
 
 - `tabu.query.base@0.1.0` — the first executable QueryBase anchor; both axes are
   homogeneous and the response geometry is global $z=Wc$.
-- `tabu.query.row@0.1.0` — the first heterogeneous row concrete family
-  (TabUR), with explicit row-unit token bank and row projection geometry.
+- `tabu.query.row@0.2.0` — the first heterogeneous row concrete family
+  (TabUR), with explicit row-unit token bank and a symmetric anchored readout
+  $z=(W+\gamma\widehat U_rA^\top)c$. The global, bias-free $W$ is the same
+  response parameterization as QueryBase; it is not a Unit.
 - `tabu.query.column@0.1.0` and `tabu.query.row_column@0.1.0` — source-bound
   `design_open` contracts. They remain fail-closed until their axis carrier,
   token-bank, and source/receiver policies are frozen.
@@ -65,8 +67,17 @@ model = build_model(
     "tabu.query.row",
     profile="supervised.label_broadcast.v1",
     row_token_count=4,
+    row_readout_mode="anchored",
+    anchored_gamma_initial=1.0e-2,
 )
 ```
+
+`anchored` is the default. `homogeneous` gives the exact QueryBase readout
+$z=Wc$; `free` gives the historical ablation $z=U_rc$. In every mode, $K$ must
+simultaneously equal `row_token_count`, `ReferenceConfig.matched_slots`, the
+number of rows in $W$, and the coordinate width. Readout mode and normalization
+policy are checkpoint-bound; `tabu.query.row@0.1.0` checkpoints are deliberately
+not loadable as `0.2.0`.
 
 Run the explicit, profile-bound synthetic pretraining diagnostic and write a
 query-specific checkpoint:
@@ -82,8 +93,14 @@ The runner samples independent row-latent worlds (linear, periodic, and
 polynomial), emits truth-free `EvidenceEpisode` inputs, and keeps target truth
 in a `TruthSidecar`.  `supervised.label_broadcast.v1` is a separate profile and
 therefore produces a checkpoint that cannot be loaded into the completion
-profile.  Checkpoint tensors are identity-bound to the QueryBase contract,
-component composition, source topology, profile, and model configuration.
+profile. Checkpoint tensors are identity-bound to the query-row contract,
+component composition, source topology, profile, model configuration, and
+readout mode.
+These `.safetensors` files are explicitly `weights_only_transfer_snapshot`
+artifacts: they omit optimizer state, update/world cursors, and RNG state, so
+they cannot resume an interrupted long-running pretraining job. The DGX
+long-run lane needs a separate deterministic training-state schema before it
+may claim exact resume.
 The result is a bounded `local_unissued` diagnostic, not a foundation-model or
 transfer claim.
 

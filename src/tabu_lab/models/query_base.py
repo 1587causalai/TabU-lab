@@ -47,6 +47,14 @@ class AxisMode(StrEnum):
     HETEROGENEOUS = "heterogeneous"
 
 
+class RowReadoutMode(StrEnum):
+    """Step-4 TabUR readout arms frozen by ``tabu.query.row@0.2.0``."""
+
+    HOMOGENEOUS = "homogeneous"
+    ANCHORED = "anchored"
+    FREE = "free"
+
+
 @dataclass(frozen=True, slots=True)
 class AxisRoleSpec:
     """One row/column role in the query family generator."""
@@ -99,6 +107,7 @@ class QueryFamilyPlan:
         if self.response_mechanism not in {
             "shared_W_fallback",
             "row_unit_projection",
+            "row_readout",
         }:
             raise ValueError("unknown QueryFamilyPlan response mechanism")
 
@@ -605,26 +614,151 @@ class QueryGeometryAdapter(nn.Module):
 
 
 class QueryRowGeometryAdapter(QueryGeometryAdapter):
-    """Row-unit projection geometry for the heterogeneous row family."""
+    r"""Symmetric TabUR readout with a global Base anchor.
 
-    geometry = "row_unit_projection"
+    The default arm implements
 
-    def __init__(self, config: ReferenceConfig, *, token_count: int = 4) -> None:
-        nn.Module.__init__(self)
+    .. math:: z_{ra}=(W+\gamma\widehat U_r A^\top)c_{ra}.
+
+    ``homogeneous`` is the exact Base readout ``Wc`` and ``free`` retains the
+    old ``Uc`` geometry as an explicitly selected ablation.  LayerNorm has no
+    affine parameters, so the only anchored-only learned parameters are
+    ``A0`` and ``gamma`` in addition to the Base-compatible global ``W``.
+    """
+
+    geometry = "row_readout"
+    axis_transform_normalization = "exact_spectral_norm_v1"
+
+    def __init__(
+        self,
+        config: ReferenceConfig,
+        *,
+        token_count: int = 4,
+        row_readout_mode: RowReadoutMode | str = RowReadoutMode.ANCHORED,
+        anchored_gamma_initial: float = 1.0e-2,
+        axis_transform_normalization: str = "exact_spectral_norm_v1",
+    ) -> None:
         if isinstance(token_count, bool) or not isinstance(token_count, int) or token_count <= 0:
             raise ValueError("token_count must be a positive integer")
+        if token_count != config.matched_slots:
+            raise ValueError(
+                "TabUR requires K to equal row_token_count, W rows, and matched_slots"
+            )
+        mode = RowReadoutMode(row_readout_mode)
+        gamma_initial = float(anchored_gamma_initial)
+        if not math.isfinite(gamma_initial):
+            raise ValueError("anchored_gamma_initial must be finite")
+        if mode is not RowReadoutMode.ANCHORED and gamma_initial != 1.0e-2:
+            raise ValueError(
+                "anchored_gamma_initial is fixed at 0.01 when row_readout_mode "
+                "is homogeneous or free"
+            )
+        if axis_transform_normalization != self.axis_transform_normalization:
+            raise ValueError(
+                "axis_transform_normalization must be exact_spectral_norm_v1"
+            )
+
+        # Construct W in every arm. This preserves Base parameterization and
+        # matched-initialization order even when an ablation does not consume W.
+        super().__init__(config)
         self.token_count = token_count
-        # Geometry is an inner product between row-unit states and ordinary
-        # query-cell states; it has no private decoder parameters.
+        self.row_readout_mode = mode
+        self.anchored_gamma_initial = gamma_initial
+
+        identity = torch.eye(config.d_model, dtype=DEFAULT_FLOAT_DTYPE)
+        if mode is RowReadoutMode.ANCHORED:
+            self.raw_axis_transform = nn.Parameter(identity)
+            self.gamma = nn.Parameter(
+                torch.tensor(gamma_initial, dtype=DEFAULT_FLOAT_DTYPE)
+            )
+        else:
+            self.register_buffer("raw_axis_transform", identity, persistent=True)
+            fixed_gamma = 0.0 if mode is RowReadoutMode.HOMOGENEOUS else 1.0
+            self.register_buffer(
+                "gamma",
+                torch.tensor(fixed_gamma, dtype=DEFAULT_FLOAT_DTYPE),
+                persistent=True,
+            )
+        if mode is RowReadoutMode.FREE:
+            self.projection.weight.requires_grad_(False)
+
+    @property
+    def beta(self) -> float:
+        return 0.0 if self.row_readout_mode is RowReadoutMode.FREE else 1.0
+
+    @staticmethod
+    def _exact_spectral_norm(value: Tensor) -> Tensor:
+        # PyTorch MPS does not currently implement SVD.  A cross-device copy is
+        # autograd-visible, so computing this small dxd norm on CPU preserves
+        # the exact contract and propagates its gradient back to the MPS A0.
+        if value.device.type == "mps":
+            return torch.linalg.matrix_norm(value.to("cpu"), ord=2).to(value.device)
+        return torch.linalg.matrix_norm(value, ord=2)
+
+    def effective_axis_transform(self) -> Tensor:
+        raw = self.raw_axis_transform.to(dtype=DEFAULT_FLOAT_DTYPE)
+        norm = self._exact_spectral_norm(raw)
+        detached_norm = norm.detach()
+        if not bool(torch.isfinite(detached_norm)) or float(detached_norm) <= 0.0:
+            raise ValueError("TabUR axis transform must have finite non-zero spectral norm")
+        return raw / norm
+
+    def readout_identity(self) -> dict[str, Any]:
+        return {
+            "schema_version": "tabu.query-row-readout.v1",
+            "mode": self.row_readout_mode.value,
+            "beta": self.beta,
+            "anchored_gamma_initial": self.anchored_gamma_initial,
+            "axis_transform_normalization": self.axis_transform_normalization,
+            "row_token_count": self.token_count,
+            "global_w_rows": self.projection.out_features,
+        }
+
+    def trace_metadata(self) -> dict[str, Any]:
+        return {
+            **self.readout_identity(),
+            "gamma": float(self.gamma.detach()),
+            # A successful anchored forward has already validated A0 and
+            # divided by its exact norm.  Report the invariant without running
+            # a second SVD merely to construct trace metadata.
+            "effective_axis_transform_spectral_norm": 1.0,
+        }
 
     def forward(self, carrier: Tensor) -> Tensor:
         if carrier.ndim != 4:
             raise ValueError("row geometry carrier must be [B,N,M+K,D]")
         if carrier.shape[2] <= self.token_count:
             raise ValueError("row geometry carrier is missing ordinary cells")
+        if carrier.shape[-1] != self.projection.in_features:
+            raise ValueError("row geometry carrier width does not match W")
         cells = carrier[:, :, :-self.token_count, :]
         row_units = carrier[:, :, -self.token_count :, :]
-        return torch.einsum("bnkd,bnmd->bnmk", row_units, cells)
+
+        if self.row_readout_mode is RowReadoutMode.HOMOGENEOUS:
+            coordinates = super().forward(cells)
+        elif self.row_readout_mode is RowReadoutMode.FREE:
+            coordinates = torch.einsum("bnkd,bnmd->bnmk", row_units, cells)
+        else:
+            normalized_units = F.layer_norm(
+                row_units.to(dtype=DEFAULT_FLOAT_DTYPE),
+                (row_units.shape[-1],),
+            )
+            transformed_units = F.linear(
+                normalized_units,
+                self.effective_axis_transform(),
+            )
+            anchored = torch.einsum(
+                "bnkd,bnmd->bnmk",
+                transformed_units,
+                cells.to(dtype=DEFAULT_FLOAT_DTYPE),
+            )
+            coordinates = super().forward(cells) + self.gamma.to(
+                dtype=DEFAULT_FLOAT_DTYPE
+            ) * anchored
+
+        if coordinates.shape[-1] != self.token_count:
+            raise RuntimeError("TabUR coordinate width must equal K")
+        return coordinates
 
 
 class QueryTerminalAdapter(nn.Module):
@@ -711,9 +845,21 @@ def _query_row_geometry_factory(
     config: ReferenceConfig,
     settings: Mapping[str, Any],
 ) -> QueryRowGeometryAdapter:
+    required = {
+        "token_count",
+        "row_readout_mode",
+        "anchored_gamma_initial",
+        "axis_transform_normalization",
+    }
+    missing = sorted(required - set(settings))
+    if missing:
+        raise ValueError(f"TabUR row readout manifest is missing required config: {missing}")
     return QueryRowGeometryAdapter(
         config,
-        token_count=int(settings.get("token_count", 4)),
+        token_count=int(settings["token_count"]),
+        row_readout_mode=str(settings["row_readout_mode"]),
+        anchored_gamma_initial=float(settings["anchored_gamma_initial"]),
+        axis_transform_normalization=str(settings["axis_transform_normalization"]),
     )
 
 
@@ -735,12 +881,13 @@ def _query_component_spec(
     factory: QueryComponentFactory,
     configurable_fields: tuple[str, ...],
     compatible_models: tuple[str, ...] = ("tabu.query.base@0.1.0",),
+    component_version: str = "0.1.0",
 ) -> QueryComponentSpec:
     implementation_ref, implementation_sha256 = implementation_source_identity(implementation)
     factory_ref, factory_sha256 = implementation_source_identity(factory)
     return QueryComponentSpec(
         component_id=component_id,
-        component_version="0.1.0",
+        component_version=component_version,
         role=role,
         interface_id=f"tabu.query-{role.value}.v1",
         implementation_ref=implementation_ref,
@@ -803,14 +950,14 @@ def _query_component_specs() -> dict[str, QueryComponentSpec]:
 
 
 def _query_row_component_specs() -> dict[str, QueryComponentSpec]:
-    """Canonical components for ``tabu.query.row@0.1.0``.
+    """Canonical components for ``tabu.query.row@0.2.0``.
 
     Tokenization, source policy and terminal semantics are shared with QueryBase,
     while dynamics and geometry receive distinct identities because the carrier
     and readout topology are different.
     """
 
-    shared_models = ("tabu.query.base@0.1.0", "tabu.query.row@0.1.0")
+    shared_models = ("tabu.query.base@0.1.0", "tabu.query.row@0.2.0")
     specs = (
         _query_component_spec(
             component_id="tabu.query.tokenizer",
@@ -842,15 +989,22 @@ def _query_row_component_specs() -> dict[str, QueryComponentSpec]:
             implementation=QueryRowDynamicsAdapter,
             factory=_query_row_dynamics_factory,
             configurable_fields=(),
-            compatible_models=("tabu.query.row@0.1.0",),
+            compatible_models=("tabu.query.row@0.2.0",),
+            component_version="0.2.0",
         ),
         _query_component_spec(
-            component_id="tabu.query.geometry.row_unit_projection",
+            component_id="tabu.query.geometry.row_readout",
             role=QueryComponentRole.GEOMETRY,
             implementation=QueryRowGeometryAdapter,
             factory=_query_row_geometry_factory,
-            configurable_fields=("token_count",),
-            compatible_models=("tabu.query.row@0.1.0",),
+            configurable_fields=(
+                "token_count",
+                "row_readout_mode",
+                "anchored_gamma_initial",
+                "axis_transform_normalization",
+            ),
+            compatible_models=("tabu.query.row@0.2.0",),
+            component_version="0.2.0",
         ),
         _query_component_spec(
             component_id="tabu.query.terminal",
@@ -899,6 +1053,8 @@ def canonical_query_base_manifest(
 def canonical_query_row_manifest(
     *,
     token_count: int = 4,
+    row_readout_mode: RowReadoutMode | str = RowReadoutMode.ANCHORED,
+    anchored_gamma_initial: float = 1.0e-2,
     numeric_terminal: str = "local_linear",
     nominal_tokenizer: str = CellTokenizer.EPISODE_RANDOM_SPHERE_V1,
     nominal_codebook_size: int = 100,
@@ -906,12 +1062,21 @@ def canonical_query_row_manifest(
 ) -> QueryComponentManifest:
     """Return the independent TabUR component manifest.
 
-    ``token_count`` is deliberately explicit because it changes both the
-    augmented carrier and the row-projection coordinate width.
+    ``token_count`` is deliberately explicit because it changes the augmented
+    carrier, global-W row count, and coordinate width simultaneously.
     """
 
     if isinstance(token_count, bool) or not isinstance(token_count, int) or token_count <= 0:
         raise ValueError("token_count must be a positive integer")
+    mode = RowReadoutMode(row_readout_mode)
+    gamma_initial = float(anchored_gamma_initial)
+    if not math.isfinite(gamma_initial):
+        raise ValueError("anchored_gamma_initial must be finite")
+    if mode is not RowReadoutMode.ANCHORED and gamma_initial != 1.0e-2:
+        raise ValueError(
+            "anchored_gamma_initial is fixed at 0.01 when row_readout_mode "
+            "is homogeneous or free"
+        )
     specs = _query_row_component_specs()
     return QueryComponentManifest(
         tokenizer=_ref(
@@ -923,10 +1088,15 @@ def canonical_query_row_manifest(
             },
         ),
         axis_source=_ref(specs["tabu.query.axis_source@0.1.0"], {}),
-        dynamics=_ref(specs["tabu.query.row.dynamics@0.1.0"], {}),
+        dynamics=_ref(specs["tabu.query.row.dynamics@0.2.0"], {}),
         geometry=_ref(
-            specs["tabu.query.geometry.row_unit_projection@0.1.0"],
-            {"token_count": token_count},
+            specs["tabu.query.geometry.row_readout@0.2.0"],
+            {
+                "token_count": token_count,
+                "row_readout_mode": mode.value,
+                "anchored_gamma_initial": gamma_initial,
+                "axis_transform_normalization": "exact_spectral_norm_v1",
+            },
         ),
         terminal=_ref(
             specs["tabu.query.terminal@0.1.0"],
@@ -956,8 +1126,8 @@ def _build_canonical_query_row_registry() -> QueryComponentRegistry:
     factories: dict[str, tuple[QueryComponentFactory, type[Any]]] = {
         "tabu.query.tokenizer@0.1.0": (_query_tokenizer_factory, QueryTokenizerAdapter),
         "tabu.query.axis_source@0.1.0": (_query_axis_source_factory, QueryAxisSourceAdapter),
-        "tabu.query.row.dynamics@0.1.0": (_query_row_dynamics_factory, QueryRowDynamicsAdapter),
-        "tabu.query.geometry.row_unit_projection@0.1.0": (
+        "tabu.query.row.dynamics@0.2.0": (_query_row_dynamics_factory, QueryRowDynamicsAdapter),
+        "tabu.query.geometry.row_readout@0.2.0": (
             _query_row_geometry_factory,
             QueryRowGeometryAdapter,
         ),
@@ -1046,6 +1216,9 @@ class TabUQueryBaseModel(QueryFamilyModelBase):
 
     def _geometry_trace(self) -> tuple[str, ...]:
         return ("global_W",)
+
+    def _geometry_metadata(self) -> dict[str, Any]:
+        return {}
 
     @property
     def unit_semantics(self) -> str:
@@ -1320,6 +1493,7 @@ class TabUQueryBaseModel(QueryFamilyModelBase):
                     geometry=self.geometry.geometry,
                     response_mechanism=self.family_plan.response_mechanism,
                     numeric_prediction_scale="context_standardized",
+                    **self._geometry_metadata(),
                 ),
                 _shape_event(
                     "prediction_boundary",
@@ -1361,6 +1535,7 @@ class TabUQueryBaseModel(QueryFamilyModelBase):
                 "column_axis_mode": self.family_plan.column_axis.mode.value,
                 "geometry": self.geometry.geometry,
                 "response_mechanism": self.family_plan.response_mechanism,
+                **self._geometry_metadata(),
                 "axis_source_plan": self.source_plan.as_dict(),
                 "numeric_terminal": self.terminal.numeric_terminal,
                 "numeric_prediction_scale": "context_standardized",
@@ -1458,6 +1633,8 @@ class TabUQueryRowModel(TabUQueryBaseModel):
         profile: TabUQueryProfile | str,
         row_token_count: int = 4,
         row_token_bank: tuple[str, ...] | None = None,
+        row_readout_mode: RowReadoutMode | str = RowReadoutMode.ANCHORED,
+        anchored_gamma_initial: float = 1.0e-2,
         numeric_terminal: str = "local_linear",
         label_broadcast: bool | None = None,
         label_broadcast_tau: float = 1.0e-6,
@@ -1467,12 +1644,17 @@ class TabUQueryRowModel(TabUQueryBaseModel):
         component_manifest: QueryComponentManifest | None = None,
         component_registry: QueryComponentRegistry | None = None,
     ) -> None:
+        config = config or ReferenceConfig()
         if (
             isinstance(row_token_count, bool)
             or not isinstance(row_token_count, int)
             or row_token_count <= 0
         ):
             raise ValueError("row_token_count must be a positive integer")
+        if row_token_count != config.matched_slots:
+            raise ValueError(
+                "TabUR requires K to equal row_token_count, W rows, and matched_slots"
+            )
         bank = (
             tuple(row_token_bank)
             if row_token_bank is not None
@@ -1484,6 +1666,8 @@ class TabUQueryRowModel(TabUQueryBaseModel):
         self.row_token_bank = bank
         manifest = component_manifest or canonical_query_row_manifest(
             token_count=row_token_count,
+            row_readout_mode=row_readout_mode,
+            anchored_gamma_initial=anchored_gamma_initial,
             numeric_terminal=numeric_terminal,
             nominal_tokenizer=nominal_tokenizer,
             nominal_codebook_size=nominal_codebook_size,
@@ -1509,6 +1693,10 @@ class TabUQueryRowModel(TabUQueryBaseModel):
         geometry_token_count = getattr(self.geometry, "token_count", None)
         if geometry_token_count != self.row_token_count:
             raise ValueError("row geometry token_count must match row_token_count")
+        if not isinstance(self.geometry, QueryRowGeometryAdapter):
+            raise TypeError("TabUR geometry must be a QueryRowGeometryAdapter")
+        self.row_readout_mode = self.geometry.row_readout_mode
+        self.anchored_gamma_initial = self.geometry.anchored_gamma_initial
         self.row_unit_markers = nn.Parameter(
             torch.empty(
                 self.row_token_count,
@@ -1525,19 +1713,22 @@ class TabUQueryRowModel(TabUQueryBaseModel):
                 AxisMode.HETEROGENEOUS,
                 self.row_token_bank,
             ),
-            response_mechanism="row_unit_projection",
+            response_mechanism="row_readout",
         )
 
     @property
     def expected_geometry(self) -> str:
-        return "row_unit_projection"
+        return "row_readout"
 
     @property
     def unit_semantics(self) -> str:
         return "abstract_axis_roles_with_row_unit_tokens"
 
     def _geometry_trace(self) -> tuple[str, ...]:
-        return ("row_unit_projection",)
+        return ("row_readout", f"row_readout_{self.row_readout_mode.value}")
+
+    def _geometry_metadata(self) -> dict[str, Any]:
+        return {"row_readout": self.geometry.trace_metadata()}
 
     def _prepare_dynamics(
         self,
@@ -1596,6 +1787,7 @@ class TabUQueryRowModel(TabUQueryBaseModel):
             {
                 "row_token_count": self.row_token_count,
                 "row_token_bank": self.row_token_bank,
+                "row_readout": self.geometry.readout_identity(),
             }
         )
         return identity
@@ -1603,6 +1795,7 @@ class TabUQueryRowModel(TabUQueryBaseModel):
 
 __all__ = [
     "AxisMode",
+    "RowReadoutMode",
     "AxisRoleSpec",
     "AxisSourcePlan",
     "CANONICAL_QUERY_COMPONENTS",

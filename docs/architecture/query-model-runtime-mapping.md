@@ -112,13 +112,51 @@ response        = z = W c
   component manifest/registry、public builder 和 query-specific trace/checkpoint identity 已实现。
 - Checkpoint 2：Base/R/C/RC 以 test-only `QueryFamilyPlan` probes 验证；只允许目标 axis 变化，未打开的
   homogeneous axis 不产生坐标或 token；匿名/旧 Axis B component 不能伪装为 query component。
-- Query family registration：`tabu.query.row@0.1.0` 已作为首个可构建的异构 row family
+- Query family registration：`tabu.query.row@0.2.0` 已作为首个可构建的异构 row family
   （TabUR）登记；`tabu.query.column@0.1.0`、`tabu.query.row_column@0.1.0` 仍是独立
   `design_open` ModelSpec，不继承 Base 的 checkpoint、receipt 或 claim。
-- 评估阶梯 1–6 的 bounded harness 均已实现并通过本地 CPU 回归：每一层为
-  `implemented / passed / local_unissued / none`。这包括 F0/S1 合成拟合、scratch-only
-  真实数据诊断、无 optimizer 的 frozen ICL，以及同一 supervised profile 的 paired
-  synthetic-pretrain → real fine-tuning lift。它们仍不是 formal receipt、benchmark 或
-  accepted capability claim。
+- 历史 `tabu.query.row@0.1.0` free-readout 的评估阶梯结果保持 append-only
+  `legacy_free / local_unissued`；它们不继承给 `0.2.0`。新 anchored 合同首批只关闭
+  阶梯 1–2；阶梯 3–6 重置为 `not_run`，待重新预训练与真实任务评估。
 - 运行入口为 `scripts/run_tabur_evaluation_ladder.py`；`--device cpu|mps|cuda|auto` 会绑定
   到同一份协议。`dgx2` CUDA 环境已确认可用，但长跑须避开当前正在运行的 SGLang 服务。
+
+## 9. TabUR 0.2 对称 readout（2026-08-31）
+
+TabUR 保持 Steps 1–3、carrier、source mask 和 terminal 不变，只把 Step 4 冻结为：
+
+$$
+z_{ra}=(\beta W+\gamma\widetilde U_rA^\top)c_{ra}.
+$$
+
+三种 typed mode 共用一个 public forward envelope：
+
+| mode | $(\beta,\gamma,A)$ | coordinate |
+| --- | --- | --- |
+| `homogeneous` | $(1,0,-)$ | $z=Wc$ |
+| `anchored`（默认） | $(1,\mathrm{learnable},A_0/\lVert A_0\rVert_2)$ | $z=(W+\gamma\operatorname{LN}(U_r)A^\top)c$ |
+| `free` | $(0,1,I)$ | $z=U_rc$ |
+
+其中 $W\in\mathbb R^{K\times d}$ 无 bias；`LayerNorm` 无 affine parameter；
+$A_0$ 默认单位阵，effective $A$ 使用可微 exact spectral normalization；
+$\gamma_0=10^{-2}$。runtime 在构造时强制
+$K=\text{row-token count}=\text{rows}(W)=\text{coordinate width}=\texttt{matched_slots}$。
+
+mode、$\gamma$ 初始化策略、$A$ 归一化策略、K topology、component source/factory/
+composition hash 都进入 variant/checkpoint identity。缺少这些字段的旧 `0.1.0`
+checkpoint 必须在 tensor load 前失败，不能把“字段缺失”解释为 `anchored` 默认值。
+
+TeX 附录中的“扰动 row token 必须改变 ordinary $h$”与正文同时要求的
+“mode 不改变 Steps 1–3”及“$\gamma=0$ whole-forward 精确退化为 Base”无法在
+receiver-only topology 下同时成立。runtime 以正文公式和 Base degeneration 为准：
+row token 不写 ordinary feature slots，只通过 anchored/free Step-4 readout 改变坐标。
+
+退化恒等式的规范验收设备是 CPU float32 reference backend，要求 bitwise equality。
+CUDA/MPS 只执行 finite forward/backward 与数值容差 smoke（`atol=1e-6`,
+`rtol=1e-5`）；不同 accelerator reduction kernel 不承担 bitwise equality 合同。
+
+当前 `tabu.query-row-pretraining-checkpoint.v2` 明确是
+`weights_only_transfer_snapshot`：只保存 model tensors 和 identity，用于 frozen transfer/
+evaluation，不含 optimizer、update/world cursor 或 RNG state，不能作为 DGX 长跑的
+deterministic resume 点。启动更大规模预训练前必须另立 training-state/resume schema；
+本批不声称已实现 exact resume。

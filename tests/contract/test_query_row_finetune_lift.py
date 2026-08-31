@@ -19,6 +19,10 @@ def test_tabur_stage6_paired_finetune_lift_is_finite_and_profile_compatible() ->
     assert result.capability_gate == "not_applicable"
     assert result.evidence_status == "local_unissued"
     assert result.profile_id == "supervised.label_broadcast.v1"
+    assert result.contract_version == "0.2.0"
+    assert result.row_readout_mode == "anchored"
+    assert result.row_readout_identity["mode"] == "anchored"
+    assert len(result.variant_hash) == 64
     assert math.isfinite(result.pretrain_final_loss)
     assert len(result.records) == 2
     for record in result.records:

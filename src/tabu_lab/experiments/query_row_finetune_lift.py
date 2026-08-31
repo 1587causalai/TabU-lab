@@ -14,6 +14,7 @@ from tabu_lab.models import build_model
 from tabu_lab.models.types import ReferenceConfig
 from tabu_lab.training.objective import Objective
 
+from .query_row_identity import query_row_result_identity
 from .query_row_real_benchmark import _metrics, _model_prediction
 from .query_row_real_coordinates import query_row_real_regression_loss
 from .query_row_supervised_synthetic import (
@@ -112,6 +113,9 @@ class QueryRowFinetuneLiftResult:
     contract_version: str
     profile_id: str
     model_spec_hash: str
+    variant_hash: str
+    row_readout_mode: str
+    row_readout_identity: dict[str, Any]
     row_token_count: int
     device: str
     seed: int
@@ -259,7 +263,6 @@ def run_query_row_finetune_lift(
         learning_rate=pretrain_learning_rate,
     )
     records: list[QueryRowFinetuneLiftRecord] = []
-    model_spec_hash = pretrained.model_spec_hash
     # Keep a detached CPU snapshot as the transfer boundary.  Loading an MPS
     # state_dict directly into a second MPS module is not stable across
     # repeated runs on current PyTorch builds.
@@ -345,6 +348,7 @@ def run_query_row_finetune_lift(
             )
         )
     execution_status = "succeeded" if records else "killed"
+    result_identity = query_row_result_identity(pretrained.checkpoint_identity())
     return QueryRowFinetuneLiftResult(
         # ``status`` is retained as a compatibility projection for existing
         # local scripts; new consumers must use the explicit status fields.
@@ -359,10 +363,7 @@ def run_query_row_finetune_lift(
             "synthetic pretraining; no formal receipt, benchmark, accepted transfer, "
             "or causal capability claim"
         ),
-        model_id=pretrained.model_id,
-        contract_version=pretrained.contract_version,
-        profile_id=pretrained.profile.value,
-        model_spec_hash=model_spec_hash,
+        **result_identity,
         row_token_count=row_token_count,
         device=str(resolved_device),
         seed=seed,

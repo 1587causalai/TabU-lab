@@ -1,16 +1,16 @@
 {
   "schema_version": "1.0.0",
   "contract_id": "tabu.query.row",
-  "contract_version": "0.1.0",
-  "display_name": "TabUR (table-cell-as-query, heterogeneous row axis)",
+  "contract_version": "0.2.0",
+  "display_name": "TabUR (table-cell-as-query, symmetric anchored row readout)",
   "upstream": {
     "repository": "TabU/latex/model-factory",
     "path": "../latex/model-factory/table-cell-as-query-models/TabUR/main.tex",
-    "sha256": "086ff42d7cdb227c975ac7e3a302d7c7ac62c249385e8482fbe23d2756ef2b9e",
-    "semantic_source_tree_sha256": "ced5d941dffde16da15b105d33fd3e55a286fb3430325301473efea0f2227dc0",
+    "sha256": "3376171ae1a9e6cbf4cdd42f4a19964e1dda804e99e8f830fc09f3d701bd3440",
+    "semantic_source_tree_sha256": "39cd927cdebac7e2531bfbc01561697ecb4ef01610e5b3acd2036aa9f353a0a5",
     "source_manifest": "pkg://tabu_lab.specs/model-factory-source-manifest.json#contracts/tabu.query.row",
     "readonly": true,
-    "observed_at": "2026-08-30",
+    "observed_at": "2026-08-31",
     "license_boundary": "Metadata-only reference: upstream TeX remains readonly and is not redistributed by this manifest."
   },
   "carrier": {
@@ -29,8 +29,11 @@
     "label_broadcast": "supervised profile only; label marker is not truth"
   },
   "readout": {
-    "geometry": "z_ra,k = inner product(row-unit token u_rk, query state c_ra)",
-    "response_mechanism": "row_unit_projection",
+    "geometry": "z_ra = (beta W + gamma U_tilde_r A^T)c_ra",
+    "response_mechanism": "row_readout",
+    "modes": "homogeneous: beta=1,gamma=0; anchored(default): beta=1,gamma learnable; free: beta=0,A=I,gamma=1",
+    "global_anchor": "W is the same bias-free global projection used by TabUBase and is not a Unit",
+    "axis_transform": "anchored mode uses parameter-free LayerNorm(U_r) and differentiable A=A0/||A0||_2",
     "support": "same-feature completion or same-label context query cells",
     "numeric_terminal": "default local-linear; NW nested baseline",
     "numeric_prediction_scale": "context-standardized hat-tilde-y; raw-unit inverse projection is auxiliary only",
@@ -52,7 +55,10 @@
     "table_cell_as_query",
     "heterogeneous_row_axis",
     "homogeneous_column_axis",
-    "row_unit_projection",
+    "symmetric_row_readout",
+    "global_w_response_anchor",
+    "anchored_base_transition",
+    "free_readout_ablation",
     "artificial_mask_completion",
     "supervised_single_response",
     "mixed_numeric_categorical",
@@ -71,8 +77,15 @@
     "cell_role": "query",
     "row_axis_mode": "heterogeneous",
     "column_axis_mode": "homogeneous",
-    "geometry": "row_heterogeneous",
-    "response_mechanism": "row_unit_projection",
+    "geometry": "row_heterogeneous_symmetric",
+    "response_mechanism": "row_readout",
+    "row_readout_mode": "anchored",
+    "readout_formula": "z_ra=(W+gamma*LayerNorm(U_r)*A^T)c_ra",
+    "readout_modes": {
+      "homogeneous": {"beta": 1, "gamma": 0, "formula": "z=Wc"},
+      "anchored": {"beta": 1, "gamma": "learnable", "formula": "z=(W+gamma*LayerNorm(U_r)*A^T)c"},
+      "free": {"beta": 0, "gamma": 1, "axis_transform": "identity_frozen", "formula": "z=U_r c"}
+    },
     "profile_id": "completion.artificial_mask.v1",
     "profiles": {
       "completion.artificial_mask.v1": {"target_origin": "artificial_mask", "label_broadcast": false, "response_columns": 0, "natural_missing_inference": false},
@@ -85,26 +98,38 @@
     "label_broadcast": "explicit step_3 module profile-gated",
     "reference_backend": "dense_reference_v0",
     "row_token_count": 4,
+    "coordinate_width": "K",
+    "global_w_rows": "K",
+    "k_constraint": "row_token_count == global_w_rows == coordinate_width == matched_slots",
     "row_token_initialization": "shared_marker_per_token_index",
+    "global_w_bias": false,
+    "axis_transform_raw_initialization": "identity",
+    "axis_transform_normalization": "exact_spectral_norm_v1",
+    "anchored_gamma_initial": 0.01,
     "row_token_source_policy": "receiver_only",
     "row_token_writes_feature_slots": false
   },
   "known_open": [
     {"id": "row_token_carrier_runtime", "question": "Future contract versions may revise the augmented carrier or row-token source/receiver policy.", "blocking_build": false},
-    {"id": "row_token_width", "question": "Future contract versions may change the row-unit token count K and its relationship to response width.", "blocking_build": false},
+    {"id": "axis_transform_parameterization", "question": "Future contract versions may evaluate lower-rank or structured A after the full-rank spectral-normalized anchor.", "blocking_build": false},
     {"id": "row_special_policy", "question": "Owner may revise the default receiver-only row-special policy in a later contract version.", "blocking_build": false}
   ],
   "alternatives": [
-    {"id": "query_specific_row_adapter", "description": "Implement the row-unit carrier and projection through query-specific adapters without inheriting Axis-B identity.", "status": "first_alternative"}
+    {"id": "query_specific_row_adapter", "description": "Implement the row-unit carrier and symmetric readout through query-specific adapters without inheriting Axis-B identity.", "status": "first_alternative"},
+    {"id": "legacy_free_readout", "description": "The 0.1.0 U_r c implementation remains a historical free-mode result only and is not checkpoint- or evidence-compatible with this contract.", "status": "deferred"}
   ],
   "kill": [
     {"id": "truth_leakage", "condition": "Changing query truth changes Steps 1-4.", "evidence": "truth-substitution invariance test"},
     {"id": "query_unit_reversal", "condition": "Runtime identifies a cell as semantic Unit or W as Unit.", "evidence": "query-role and identity-bound trace inspection"},
-    {"id": "feature_identity", "condition": "Cell encoding receives a feature-identity embedding outside the declared query contract.", "evidence": "compiled-token exact-value and permutation test"}
+    {"id": "feature_identity", "condition": "Cell encoding receives a feature-identity embedding outside the declared query contract.", "evidence": "compiled-token exact-value and permutation test"},
+    {"id": "readout_identity", "condition": "A checkpoint or result omits or mismatches row_readout mode, K topology, gamma initialization policy, or A normalization policy.", "evidence": "pre-tensor checkpoint identity validation"}
   ],
   "exit": [
     {"id": "carrier_shape", "condition": "Every row-special dynamics layer preserves N x (M+K) x d.", "evidence": "shape trace"},
-    {"id": "row_projection", "condition": "Every target coordinate is produced by the row-unit projection against c_ra.", "evidence": "geometry and readout trace"},
-    {"id": "axis_growth_seam", "condition": "The public forward envelope remains identical to QueryBase while only the row axis changes.", "evidence": "Base/R typed family probe"}
+    {"id": "readout_formulas", "condition": "The homogeneous, anchored, and free modes exactly implement Wc, (W+gamma*LayerNorm(U_r)*A^T)c, and U_r c respectively while leaving Steps 1-3 unchanged.", "evidence": "fixed-tensor formula tests and trace readback"},
+    {"id": "base_transition", "condition": "Homogeneous mode and anchored mode with gamma=0 exactly equal TabUBase readout under matched shared state.", "evidence": "whole-forward degeneration test"},
+    {"id": "axis_transform_norm", "condition": "Anchored effective A has finite spectral norm one and finite gradients.", "evidence": "forward/backward parameter test"},
+    {"id": "k_triad", "condition": "K simultaneously equals token count, W rows, matched slots, and coordinate width.", "evidence": "constructor rejection and shape trace"},
+    {"id": "axis_growth_seam", "condition": "The public forward envelope remains identical to QueryBase while only the row axis and Step-4 readout contract change.", "evidence": "Base/R typed family probe"}
   ]
 }

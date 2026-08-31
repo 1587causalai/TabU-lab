@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the preregistered full-train-context TabUR OpenML panel."""
+"""Run the legacy preregistered full-train-context TabUR OpenML panel."""
 
 from __future__ import annotations
 
@@ -24,7 +24,10 @@ def main(argv: list[str] | None = None) -> int:
         type=Path,
         action="append",
         required=True,
-        help="Profile-bound tabu.query.row@0.1.0 checkpoint; repeat for each B1 seed.",
+        help=(
+            "Path retained only to identify the frozen tabu.query.row@0.1.0 protocol; "
+            "the current runner refuses execution until a 0.2.0 preregistration exists."
+        ),
     )
     parser.add_argument(
         "--datasets",

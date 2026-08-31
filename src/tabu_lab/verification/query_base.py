@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Literal
 
+import torch
 from pydantic import Field, model_validator
 
 from tabu_lab.evidence.schemas import EvidenceSchema
@@ -14,6 +15,7 @@ from tabu_lab.models.query_base import (
     AxisRoleSpec,
     QueryFamilyModelBase,
     QueryFamilyPlan,
+    RowReadoutMode,
     TabUQueryBaseModel,
     TabUQueryRowModel,
 )
@@ -294,7 +296,6 @@ def assess_query_runtime_growth(
     public_stable = (
         tuple(reference_output.entries) == tuple(candidate_output.entries)
         and reference_shapes == candidate_shapes
-        and reference_output.contract_version == candidate_output.contract_version
     )
     input_stable = (
         reference_output.trace is not None
@@ -440,7 +441,7 @@ def verify_tabu_query_row_component_correctness(
     checks = (
         QueryVerificationCheck(
             check_id="contract_identity",
-            passed=(model.model_id, model.contract_version) == ("tabu.query.row", "0.1.0"),
+            passed=(model.model_id, model.contract_version) == ("tabu.query.row", "0.2.0"),
         ),
         QueryVerificationCheck(
             check_id="cell_role_query",
@@ -458,11 +459,39 @@ def verify_tabu_query_row_component_correctness(
             passed=model.family_plan.column_axis.mode is AxisMode.HOMOGENEOUS,
         ),
         QueryVerificationCheck(
-            check_id="row_projection_geometry",
+            check_id="anchored_row_readout",
             passed=(
                 model.family_plan.geometry == "row_heterogeneous"
-                and model.family_plan.response_mechanism == "row_unit_projection"
-                and model.geometry.geometry == "row_unit_projection"
+                and model.family_plan.response_mechanism == "row_readout"
+                and model.geometry.geometry == "row_readout"
+                and model.row_readout_mode is RowReadoutMode.ANCHORED
+                and abs(float(model.geometry.gamma.detach()) - 1.0e-2) < 1.0e-8
+            ),
+        ),
+        QueryVerificationCheck(
+            check_id="spectral_normalized_axis_transform",
+            passed=(
+                model.geometry.axis_transform_normalization
+                == "exact_spectral_norm_v1"
+                and abs(
+                    float(
+                        torch.linalg.matrix_norm(
+                            model.geometry.effective_axis_transform().detach(),
+                            ord=2,
+                        )
+                    )
+                    - 1.0
+                )
+                < 1.0e-5
+            ),
+        ),
+        QueryVerificationCheck(
+            check_id="k_triad",
+            passed=(
+                model.row_token_count
+                == model.config.matched_slots
+                == model.geometry.projection.out_features
+                == len(model.row_token_bank)
             ),
         ),
         QueryVerificationCheck(

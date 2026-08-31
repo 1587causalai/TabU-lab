@@ -27,6 +27,7 @@ from tabu_lab.contracts import (
 from tabu_lab.models import build_model
 from tabu_lab.models.types import ReferenceConfig
 
+from .query_row_identity import query_row_result_identity
 from .tabubase_scale import resolve_device
 
 
@@ -47,6 +48,9 @@ class QueryRowSyntheticFitResult:
     contract_version: str
     profile_id: str
     model_spec_hash: str
+    variant_hash: str
+    row_readout_mode: str
+    row_readout_identity: dict[str, Any]
     generator_id: str
     world_id: str
     row_token_count: int
@@ -74,6 +78,9 @@ class QueryRowSyntheticMultiWorldFitResult:
     contract_version: str
     profile_id: str
     model_spec_hash: str
+    variant_hash: str
+    row_readout_mode: str
+    row_readout_identity: dict[str, Any]
     generator_id: str
     train_worlds: int
     validation_worlds: int
@@ -323,6 +330,7 @@ def run_query_row_fixed_world_fit(
         if torch.isfinite(torch.tensor(final_train)) and final_train < initial_train
         else "kill"
     )
+    result_identity = query_row_result_identity(model.checkpoint_identity())
     return QueryRowSyntheticFitResult(
         status=status,
         evidence_status="local_unissued",
@@ -330,10 +338,7 @@ def run_query_row_fixed_world_fit(
             "TabUR fixed-world synthetic realizability only; no multi-world fit, "
             "real-data, frozen ICL, or fine-tuning claim"
         ),
-        model_id=model.model_id,
-        contract_version=model.contract_version,
-        profile_id=model.profile.value,
-        model_spec_hash=model.model_spec_hash,
+        **result_identity,
         generator_id=train.generator_id,
         world_id=train.world_id,
         row_token_count=row_token_count,
@@ -431,6 +436,7 @@ def run_query_row_multi_world_fit(
         and torch.isfinite(torch.tensor(final_validation))
         else "kill"
     )
+    result_identity = query_row_result_identity(model.checkpoint_identity())
     return QueryRowSyntheticMultiWorldFitResult(
         status=status,
         evidence_status="local_unissued",
@@ -438,10 +444,7 @@ def run_query_row_multi_world_fit(
             "TabUR bounded multi-world synthetic fit only; no real-data, frozen ICL, "
             "or fine-tuning claim"
         ),
-        model_id=model.model_id,
-        contract_version=model.contract_version,
-        profile_id=model.profile.value,
-        model_spec_hash=model.model_spec_hash,
+        **result_identity,
         generator_id="tabur.row-latent-multi-world.v1",
         train_worlds=train_worlds,
         validation_worlds=validation_worlds,

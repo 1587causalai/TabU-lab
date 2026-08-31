@@ -25,7 +25,7 @@ def test_current_catalog_indexes_consolidated_model_sources() -> None:
         "model_contract:tabu.cell.base@0.2.0",
         "model_contract:tabu.query.base@0.1.0",
         "model_contract:tabu.query.column@0.1.0",
-        "model_contract:tabu.query.row@0.1.0",
+        "model_contract:tabu.query.row@0.2.0",
         "model_contract:tabu.query.row_column@0.1.0",
     ]
     assert catalog.formal_receipt_count == 0
@@ -41,7 +41,7 @@ def test_catalog_json_and_html_are_deterministic_bounded_projections() -> None:
     assert "Formal receipts: 0;\naccepted claims: 0" in html
     assert "tabu.cell.base@0.2.0" in html
     assert "tabu.query.base@0.1.0" in html
-    assert "tabu.query.row@0.1.0" in html
+    assert "tabu.query.row@0.2.0" in html
     assert "tabu.query.column@0.1.0" in html
     assert "tabu.query.row_column@0.1.0" in html
 

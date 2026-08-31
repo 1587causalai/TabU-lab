@@ -27,6 +27,10 @@ def test_query_row_classical_icl_requires_optional_xgboost() -> None:
     assert result.status in {"pass", "continue"}
     assert result.threshold_met is (result.status == "pass")
     assert result.evidence_status == "local_unissued"
+    assert result.contract_version == "0.2.0"
+    assert result.row_readout_mode == "anchored"
+    assert result.row_readout_identity["mode"] == "anchored"
+    assert len(result.variant_hash) == 64
     assert result.parameter_hash_unchanged
     assert len(result.records) == 1
     assert result.records[0].target_count > 0
