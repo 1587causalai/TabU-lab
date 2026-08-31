@@ -1,0 +1,12 @@
+schema_version: tabu.evolution-node.v1
+kind: training_recipe
+node_id: tabu.training.dgx2-grow-continuation
+version: 1.0.0
+maturity: experimental
+description: Adds 18,500 warm-start updates after the completed v3.1 terminal checkpoint, reaching 20,000 cumulative model updates without metric-based checkpoint selection.
+optimizer: adamw
+learning_rate: 0.003
+max_steps: 18500
+checkpoint_interval: 500
+scheduler: none
+episode_options: {}

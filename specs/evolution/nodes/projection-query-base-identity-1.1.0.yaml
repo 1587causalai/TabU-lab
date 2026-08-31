@@ -1,0 +1,19 @@
+schema_version: tabu.evolution-node.v1
+kind: state_projection
+node_id: tabu.projection.query-base-identity
+version: 1.1.0
+maturity: canonical
+description: Strict weights-only identity projection between v3-scale TabUBase snapshots; optimizer, policy, RNG, and evidence status never transfer.
+source_model: {node_id: tabu.query.base, version: 0.1.0}
+source_graph: {node_id: tabu.graph.query.base, version: 1.1.0}
+target_model: {node_id: tabu.query.base, version: 0.1.0}
+target_graph: {node_id: tabu.graph.query.base, version: 1.1.0}
+implementation:
+  source_path: src/tabu_lab/evolution/runtime.py
+  sha256: 6adb4b92b430d01bc0c345ea5026090cf1a2a47163a73db81e2b359de7862ae2
+  symbol_ref: tabu_lab.evolution.runtime:identity_state_projection
+  hash_mode: python_symbol
+validation_ref: tests/unit/test_evolution_runtime.py::test_identity_projection_is_strict
+verified: true
+transfers_optimizer_state: false
+transfers_evidence_status: false

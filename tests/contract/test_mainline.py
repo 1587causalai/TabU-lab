@@ -25,8 +25,8 @@ def test_mainline_selects_exact_independent_program_snapshots() -> None:
         for item in selected
     }
     assert refs == {
-        "tabu.pretraining.query-base@1.3.0",
-        "tabu.pretraining.query-row@1.3.0",
+        "tabu.pretraining.query-base@1.4.0",
+        "tabu.pretraining.query-row@1.4.0",
     }
     resolved = [repository.resolve(ref) for ref in sorted(refs)]
     assert len({snapshot.snapshot_hash for snapshot in resolved}) == 2
@@ -41,3 +41,15 @@ def test_mainline_selects_exact_independent_program_snapshots() -> None:
     assert {
         snapshot.slots["world_mixture"].ref for snapshot in resolved
     } == {"tabu.mixture.supervised-v3@1.1.0"}
+    assert {
+        snapshot.slots["training_recipe"].ref for snapshot in resolved
+    } == {"tabu.training.dgx2-grow-continuation@1.0.0"}
+    assert {
+        snapshot.slots["evaluation_protocol"].ref for snapshot in resolved
+    } == {"tabu.eval.transfer-lanes-terminal@1.0.0"}
+    assert {
+        snapshot.slots["state_projection"].ref for snapshot in resolved
+    } == {
+        "tabu.projection.query-base-identity@1.1.0",
+        "tabu.projection.query-row-identity@1.1.0",
+    }
