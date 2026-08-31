@@ -75,6 +75,22 @@ def test_checked_in_request_binds_independent_current_query_siblings() -> None:
     ]
 
 
+def test_terminal20k_request_binds_terminal_only_lineage() -> None:
+    request = load_program_openml_full_context_request(
+        ROOT
+        / "experiments/evolution/v3.1-terminal20k-frozen-full-context-new6-1.0.0.yaml"
+    )
+
+    assert {arm.program_ref for arm in request.arms} == {
+        "tabu.pretraining.query-base@1.4.0",
+        "tabu.pretraining.query-row@1.4.0",
+    }
+    assert {arm.checkpoint_step for arm in request.arms} == {18500}
+    assert request.split_protocol.context_policy == "full_train"
+    assert request.split_protocol.query_policy == "all_heldout_rows"
+    assert request.data_panel.ref == "tabu.openml.numeric-nomissing-new6@1.0.0"
+
+
 @pytest.mark.parametrize("model_id", ["tabu.query.base", "tabu.query.row"])
 @pytest.mark.parametrize("task", ["classification", "regression"])
 def test_response_only_adapter_matches_dense_current_query_family(

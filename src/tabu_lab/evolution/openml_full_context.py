@@ -269,21 +269,32 @@ class FrozenProgramArm(StrictModel):
 
     @model_validator(mode="after")
     def _arm_family_is_explicit(self) -> FrozenProgramArm:
-        expected = {
+        expected_family = {
             "tabu_base": (
-                "tabu.pretraining.query-base@1.3.0",
                 "tabu.query.base@0.1.0",
                 "tabu.graph.query.base@1.1.0",
             ),
             "tabu_row": (
-                "tabu.pretraining.query-row@1.3.0",
                 "tabu.query.row@0.2.0",
                 "tabu.graph.query.row@1.1.0",
             ),
         }[self.arm_id]
-        observed = (self.program_ref, self.model_contract_ref, self.component_graph_ref)
-        if observed != expected:
-            raise ValueError(f"{self.arm_id} family refs drifted: {observed!r} != {expected!r}")
+        allowed_programs = {
+            "tabu_base": {
+                "tabu.pretraining.query-base@1.3.0",
+                "tabu.pretraining.query-base@1.4.0",
+            },
+            "tabu_row": {
+                "tabu.pretraining.query-row@1.3.0",
+                "tabu.pretraining.query-row@1.4.0",
+            },
+        }[self.arm_id]
+        observed_family = (self.model_contract_ref, self.component_graph_ref)
+        if self.program_ref not in allowed_programs or observed_family != expected_family:
+            raise ValueError(
+                f"{self.arm_id} family refs drifted: "
+                f"{(self.program_ref, *observed_family)!r}"
+            )
         if Path(self.checkpoint_name).name != self.checkpoint_name:
             raise ValueError("checkpoint_name must be a basename")
         return self

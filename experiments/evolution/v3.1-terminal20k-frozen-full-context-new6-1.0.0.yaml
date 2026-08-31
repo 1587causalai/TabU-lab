@@ -1,0 +1,70 @@
+schema_version: tabu.program-openml-full-context-request.v1
+request_id: tabu.eval.v3.1-terminal20k-frozen-full-context-new6
+version: 1.0.0
+evidence_status: local_unissued
+claim_boundary: >-
+  Optimizer-free Grow-lane comparison of the preregistered 20k-cumulative
+  terminal checkpoints on six pinned OpenML datasets. This is neither formal
+  evidence nor an accepted capability claim.
+source_repository_hash: 29d639e50b0b359c7afb2c89274ed24e972c601e8bf84bd1e79a92a316cdeb26
+data_panel:
+  ref: tabu.openml.numeric-nomissing-new6@1.0.0
+  path: experiments/evolution/openml-new6-data-panel-1.0.0.yaml
+  canonical_payload_sha256: 050eb99f88c540082e3bea7b54aaa3ea47bb60f3fcfad10b22abe9079b975380
+split_protocol:
+  split_seeds: [1729, 2718, 31415]
+  train_fraction: 0.7
+  context_policy: full_train
+  query_policy: all_heldout_rows
+  query_chunk_rows: 64
+linear_baseline:
+  classification:
+    estimator: sklearn.linear_model.LogisticRegression
+    C: 1.0
+    max_iter: 500
+    solver: lbfgs
+    preprocessing: none
+    random_state: split_seed
+  regression:
+    estimator: sklearn.linear_model.Ridge
+    alpha: 0.0001
+    preprocessing: none
+capability_rule:
+  lower_is_better: true
+  classification_primary_metric: normalized_nll
+  regression_primary_metric: scaled_rmse
+  panel_success: >-
+    An arm must be lower than the matched Linear baseline on both the
+    classification dataset-macro normalized_nll and the regression
+    dataset-macro scaled_rmse. Per-dataset wins are reported separately.
+arms:
+  - arm_id: tabu_base
+    program_ref: tabu.pretraining.query-base@1.4.0
+    model_contract_ref: tabu.query.base@0.1.0
+    component_graph_ref: tabu.graph.query.base@1.1.0
+    snapshot_hash: c5d71f1768c6dee70b121cea3ac246553ed4df59ba9789c4a479ef46620bd330
+    run_identity_hash: 62579be40f2ad3bad307f131b4cd25691914bd3dd37e050c4404c79c6cc1594c
+    training_run_receipt_hash: ddd13f8a0338e3429b36a4056b427d7561c42e4c4322b75accada2e1b7b6a3c1
+    source_training_commit: ad1c62030a7912afe06f934d4d9be63eec17c817
+    checkpoint_name: checkpoint-step-00018500.safetensors
+    checkpoint_step: 18500
+    checkpoint_sha256: 7344d8f52e84c22d5fb26f84fd904b30339007e02b4056d8b035a60ed3349f16
+    checkpoint_sidecar_sha256: 5b9453d4d2665cc7da3a4b7a2dfda3f7d68c288dec4443016e403e1dc50e9d77
+    checkpoint_metadata_hash: 63ac617682895b8c24b9248dcc4ac0a63576221bc4b234fd8b114cd585ac6ea9
+    selection_evaluation_request_hash: a6f86a834e6c6520851634e139c0860113df66b7590b7a45cbc9bdfdc4e23a17
+    selection_evaluation_receipt_hash: 363be1dfae3bd170644aa9fbc27b141b1cf60e2b4e3f20288db403a35dec5223
+  - arm_id: tabu_row
+    program_ref: tabu.pretraining.query-row@1.4.0
+    model_contract_ref: tabu.query.row@0.2.0
+    component_graph_ref: tabu.graph.query.row@1.1.0
+    snapshot_hash: 7eaf865dc1d009fd1506be123d26179ed25e5a143e2b49ebd2fab21d91b59b49
+    run_identity_hash: 547ad2f3ec98d42bbb54663432d7dca1ad4dc80ca8282071e15dce2f46f86be0
+    training_run_receipt_hash: 72bf3910a02d2a342199c06b51c352ddf4365f7e098915b674da9a10753a5a1c
+    source_training_commit: ad1c62030a7912afe06f934d4d9be63eec17c817
+    checkpoint_name: checkpoint-step-00018500.safetensors
+    checkpoint_step: 18500
+    checkpoint_sha256: 1dbf1ef08010b440064b170624539c1b2b51e780cb071ba3873ba80cdb3d5ea3
+    checkpoint_sidecar_sha256: 84a2ad94b2b8857eedd82734412a69eb52ef195311ff8a93951e19bc2d1ffd0d
+    checkpoint_metadata_hash: c9639553d171f077decdd09f6ca3ab435cb203a900e6f97b188d870e32c9e5a7
+    selection_evaluation_request_hash: a970c95a4681af8b769e1b78720e56f500bf196cbde98b3f26ae81c832104bb0
+    selection_evaluation_receipt_hash: 4fe23411844352320f95e04d82101f258328c653269ad22dc2253678384e430a
