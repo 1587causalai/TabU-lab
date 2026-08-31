@@ -25,12 +25,38 @@ from .query_row_icl_threshold import (
     QueryRowLinearICLThresholdResult,
     run_query_row_linear_icl_threshold,
 )
+from .query_row_openml_full_context import (
+    QUERY_OPENML_FULL_PANEL_ID,
+    QUERY_OPENML_FULL_PANEL_SCHEMA,
+    QUERY_OPENML_FULL_RESULT_SCHEMA,
+    load_query_openml_full_context_panel_manifest,
+    run_query_row_openml_full_context,
+)
 from .query_row_pretraining import (
     QueryRowPretrainingResult,
     load_query_row_pretrain_checkpoint,
     run_query_row_synthetic_pretraining,
     save_query_row_pretrain_checkpoint,
     train_query_row_synthetic_pretraining_model,
+)
+from .query_row_r3_diagnosis import (
+    DEFAULT_R3_DATASETS,
+    DEFAULT_R3_SEEDS,
+    DEFAULT_R3_UPDATES,
+    run_query_row_r3_diagnosis,
+)
+from .query_row_r5_classical_icl import (
+    CLASSICAL_R5_BASELINE_CONFIG,
+    CLASSICAL_R5_BASELINE_IDS,
+    QueryRowR5ClassicalCheckpointResult,
+    QueryRowR5ClassicalRecord,
+    QueryRowR5ClassicalResult,
+    run_query_row_r5_classical_icl,
+)
+from .query_row_r5_pretraining import (
+    R5_LEARNING_RATES,
+    R5_RUNG_SPECS,
+    run_query_row_r5_bounded_pretraining,
 )
 from .query_row_real_benchmark import (
     QueryRowRealBenchmarkResult,
@@ -43,12 +69,6 @@ from .query_row_real_coordinates import (
     query_row_real_regression_loss,
     task_scale_to_raw,
 )
-from .query_row_r3_diagnosis import (
-    DEFAULT_R3_DATASETS,
-    DEFAULT_R3_SEEDS,
-    DEFAULT_R3_UPDATES,
-    run_query_row_r3_diagnosis,
-)
 from .query_row_supervised_synthetic import (
     QueryRowSupervisedSyntheticEpisode,
     make_query_row_supervised_synthetic_episode,
@@ -59,34 +79,42 @@ from .query_row_supervised_synthetic_v2 import (
     GENERATOR_ID,
     NOISE_LEVELS,
     PREDICTOR_REGIMES,
-    QueryRowSupervisedSyntheticV2Episode,
-    WORLD_FAMILIES,
     WIDTH_BUCKETS,
+    WORLD_FAMILIES,
+    QueryRowSupervisedSyntheticV2Episode,
     build_query_row_supervised_synthetic_v2_plan,
     make_query_row_supervised_synthetic_v2_episode,
     substitute_query_truth,
     supervised_synthetic_v2_episode_loss,
     validate_query_row_supervised_synthetic_v2,
 )
-from .query_row_r5_pretraining import (
-    R5_LEARNING_RATES,
-    R5_RUNG_SPECS,
-    run_query_row_r5_bounded_pretraining,
+from .query_row_supervised_synthetic_v3 import (
+    BROAD_MAX_CELLS,
+    BROAD_MAX_FEATURES,
+    BROAD_MAX_ROWS,
+    BROAD_MIN_CELLS,
+    BROAD_MIN_FEATURES,
+    BROAD_MIN_ROWS,
+    BROAD_SCALE_PRIOR_ID,
+    DISCOSCM_DEFAULT_MISSING_FRAC,
+    DISCOSCM_FAMILY,
+    DISCOSCM_SOURCE_BLOB,
+    STRUCTURED_SCM_FAMILY,
+    STRUCTURED_SCM_MECHANISMS,
+    TABUR_V3_MODEL_MAX_FEATURES,
+    BroadEpisodeShape,
+    QueryRowSupervisedSyntheticV3Episode,
+    build_query_row_supervised_synthetic_v3_plan,
+    make_query_row_supervised_synthetic_v3_episode,
+    sample_broad_episode_shape,
+    supervised_synthetic_v3_episode_loss,
+    validate_query_row_supervised_synthetic_v3,
 )
-from .query_row_r5_classical_icl import (
-    CLASSICAL_R5_BASELINE_CONFIG,
-    CLASSICAL_R5_BASELINE_IDS,
-    QueryRowR5ClassicalCheckpointResult,
-    QueryRowR5ClassicalRecord,
-    QueryRowR5ClassicalResult,
-    run_query_row_r5_classical_icl,
+from .query_row_supervised_synthetic_v3 import (
+    GENERATOR_ID as QUERY_ROW_SUPERVISED_V3_GENERATOR_ID,
 )
-from .query_row_openml_full_context import (
-    QUERY_OPENML_FULL_PANEL_ID,
-    QUERY_OPENML_FULL_PANEL_SCHEMA,
-    QUERY_OPENML_FULL_RESULT_SCHEMA,
-    load_query_openml_full_context_panel_manifest,
-    run_query_row_openml_full_context,
+from .query_row_supervised_synthetic_v3 import (
+    WORLD_FAMILIES as QUERY_ROW_SUPERVISED_V3_WORLD_FAMILIES,
 )
 from .query_row_synthetic_fit import (
     QueryRowSyntheticEpisode,
@@ -149,6 +177,28 @@ __all__ = [
     "substitute_query_truth",
     "supervised_synthetic_v2_episode_loss",
     "validate_query_row_supervised_synthetic_v2",
+    "DISCOSCM_DEFAULT_MISSING_FRAC",
+    "BROAD_MAX_CELLS",
+    "BROAD_MAX_FEATURES",
+    "BROAD_MAX_ROWS",
+    "BROAD_MIN_CELLS",
+    "BROAD_MIN_FEATURES",
+    "BROAD_MIN_ROWS",
+    "BROAD_SCALE_PRIOR_ID",
+    "BroadEpisodeShape",
+    "DISCOSCM_FAMILY",
+    "DISCOSCM_SOURCE_BLOB",
+    "STRUCTURED_SCM_FAMILY",
+    "STRUCTURED_SCM_MECHANISMS",
+    "TABUR_V3_MODEL_MAX_FEATURES",
+    "QUERY_ROW_SUPERVISED_V3_GENERATOR_ID",
+    "QUERY_ROW_SUPERVISED_V3_WORLD_FAMILIES",
+    "QueryRowSupervisedSyntheticV3Episode",
+    "build_query_row_supervised_synthetic_v3_plan",
+    "make_query_row_supervised_synthetic_v3_episode",
+    "sample_broad_episode_shape",
+    "supervised_synthetic_v3_episode_loss",
+    "validate_query_row_supervised_synthetic_v3",
     "R5_LEARNING_RATES",
     "R5_RUNG_SPECS",
     "run_query_row_r5_bounded_pretraining",
