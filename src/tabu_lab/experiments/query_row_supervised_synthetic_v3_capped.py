@@ -289,11 +289,11 @@ def validate_query_row_supervised_synthetic_v3_capped(
 
 
 __all__ = [
-    "ComputeCappedShape",
     "DEFAULT_MAX_ROUTING_PAIRS",
     "GENERATOR_ID",
     "GENERATOR_VERSION",
     "ROUTING_BUDGET_ID",
+    "ComputeCappedShape",
     "build_query_row_supervised_synthetic_v3_capped_plan",
     "cap_same_column_routing_shape",
     "make_query_row_supervised_synthetic_v3_capped_episode",
