@@ -1,0 +1,25 @@
+schema_version: tabu.program-checkpoint-evaluation-request.v1
+request_id: tabu.eval.query-base-v3.1-terminal-step18500
+version: 1.0.0
+evidence_status: local_unissued
+claim_boundary: Independent terminal-checkpoint validation diagnostic; not checkpoint selection, formal evidence, transfer evidence, or an accepted capability claim.
+program_ref: tabu.pretraining.query-base@1.4.0
+snapshot_hash: c5d71f1768c6dee70b121cea3ac246553ed4df59ba9789c4a479ef46620bd330
+run_identity_hash: 62579be40f2ad3bad307f131b4cd25691914bd3dd37e050c4404c79c6cc1594c
+training_run_receipt_hash: ddd13f8a0338e3429b36a4056b427d7561c42e4c4322b75accada2e1b7b6a3c1
+source_training_commit: ad1c62030a7912afe06f934d4d9be63eec17c817
+source_repository_hash: 29d639e50b0b359c7afb2c89274ed24e972c601e8bf84bd1e79a92a316cdeb26
+checkpoint_name: checkpoint-step-00018500.safetensors
+checkpoint_step: 18500
+checkpoint_sha256: 7344d8f52e84c22d5fb26f84fd904b30339007e02b4056d8b035a60ed3349f16
+checkpoint_sidecar_sha256: 5b9453d4d2665cc7da3a4b7a2dfda3f7d68c288dec4443016e403e1dc50e9d77
+selection_receipt_hash: 10e3037f443c1f0bd96fe4db362f1e5c6189ff99056b56c4b577843cf58d95f4
+selection_panel_addresses_hash: 4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945
+selection_rule: Terminal step 18500 was preregistered before training; no metric-based checkpoint selection and no selection-panel addresses exist.
+evaluation_protocol_ref: tabu.eval.transfer-lanes-terminal@1.0.0
+evaluation_mode: synthetic_fit
+metric: loss
+partition: validation
+root_seed: 271828182
+worlds: 256
+address_prefix: program-terminal-independent-eval-v1

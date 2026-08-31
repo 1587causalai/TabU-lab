@@ -42,6 +42,25 @@ def test_checked_in_best_checkpoint_requests_freeze_a_new_shared_panel() -> None
     assert base.evidence_status is EvidenceStatus.LOCAL_UNISSUED
 
 
+def test_checked_in_terminal_requests_forbid_metric_based_selection() -> None:
+    base = load_program_evaluation_request(
+        ROOT
+        / "experiments/evolution/query-base-v3.1-terminal-step18500-eval-1.0.0.yaml"
+    )
+    row = load_program_evaluation_request(
+        ROOT
+        / "experiments/evolution/query-row-v3.1-terminal-step18500-eval-1.0.0.yaml"
+    )
+
+    assert base.request_hash != row.request_hash
+    assert base.checkpoint_step == row.checkpoint_step == 18500
+    assert base.address_prefix == row.address_prefix
+    assert base.selection_panel_addresses_hash == row.selection_panel_addresses_hash
+    assert base.selection_rule == row.selection_rule
+    assert "no metric-based checkpoint selection" in base.selection_rule
+    assert base.evaluation_protocol_ref == "tabu.eval.transfer-lanes-terminal@1.0.0"
+
+
 def test_program_checkpoint_evaluation_is_independent_and_non_overwriting(
     tmp_path: Path,
 ) -> None:

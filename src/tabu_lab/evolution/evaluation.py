@@ -374,7 +374,13 @@ def evaluate_program_checkpoint(
         raise ValueError("resolved evaluation protocol does not match frozen request")
     if request.evaluation_mode not in evaluation.modes or request.metric not in evaluation.metrics:
         raise ValueError("frozen evaluation mode or metric is absent from protocol")
-    if "validation" not in evaluation.split_authority:
+    validation_authorities = {
+        "terminal_checkpoint_only_no_metric_selection",
+    }
+    if (
+        "validation" not in evaluation.split_authority
+        and evaluation.split_authority not in validation_authorities
+    ):
         raise ValueError("evaluation protocol does not authorize validation partition")
 
     generator = repository.node(mixture.entries[0].generator.ref)
