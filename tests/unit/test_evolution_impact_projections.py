@@ -17,6 +17,8 @@ def test_checked_evolution_impact_projections_match_manifests() -> None:
         "evaluation-vnext.json",
         "generator-vnext.json",
         "math-contract-vnext.json",
+        "query-base-v3-mainline.json",
+        "query-row-v3-mainline.json",
     }
     for filename, report in reports.items():
         expected = canonical_json(report.model_dump(mode="python")) + "\n"

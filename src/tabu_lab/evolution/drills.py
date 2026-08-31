@@ -24,6 +24,14 @@ EVOLUTION_DRILLS = {
         BASE_PROGRAM,
         "tabu.pretraining.query-base-math-exercise@1.1.0-exercise",
     ),
+    "query-base-v3-mainline.json": (
+        "tabu.pretraining.query-base@1.1.0",
+        "tabu.pretraining.query-base@1.2.0",
+    ),
+    "query-row-v3-mainline.json": (
+        "tabu.pretraining.query-row@1.1.0",
+        "tabu.pretraining.query-row@1.2.0",
+    ),
 }
 
 

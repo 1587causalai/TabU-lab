@@ -12,9 +12,12 @@ readout, moving through:
 4. full-train/full-test real-data frozen ICL;
 5. same-initialization pretrained-vs-scratch real-task fine-tuning.
 
-Only the first item has a candidate implementation. It has targeted local smoke
-evidence but is not yet the standard long-run data source. Items 2–5 must not
-inherit v1/v2 or `tabu.query.row@0.1.0` results.
+The first item has a candidate implementation and item 2 now has immutable
+scratch-first `1.2.0` Grow snapshots with a 1024-feature capacity guard. Neither
+becomes evidence until execution, held-out readback, and review close. Items
+2–5 must not inherit v1/v2 or `tabu.query.row@0.1.0` results. A separately
+labeled weights-only warm-start arm may be compared, but it is never continuation
+of a v2 run.
 
 ## Default real-data estimand
 

@@ -88,3 +88,23 @@ def test_gpu_pilot_recipe_change_retrains_without_changing_model_or_data() -> No
     assert actions["slot:world_mixture"] is ImpactDisposition.UNCHANGED
     assert actions["slot:training_recipe"] is ImpactDisposition.RETRAIN
     assert actions["training_run"] is ImpactDisposition.RETRAIN
+
+
+def test_v3_scale_and_generator_change_requires_new_runs_but_allows_warm_start() -> None:
+    for source, target in (
+        (
+            "tabu.pretraining.query-base@1.1.0",
+            "tabu.pretraining.query-base@1.2.0",
+        ),
+        (
+            "tabu.pretraining.query-row@1.1.0",
+            "tabu.pretraining.query-row@1.2.0",
+        ),
+    ):
+        actions = _actions(target, source=source)
+        assert actions["slot:model_contract"] is ImpactDisposition.UNCHANGED
+        assert actions["slot:component_graph"] is ImpactDisposition.RETRAIN
+        assert actions["slot:world_mixture"] is ImpactDisposition.RETRAIN
+        assert actions["slot:training_recipe"] is ImpactDisposition.UNCHANGED
+        assert actions["initialization"] is ImpactDisposition.WARM_START_AVAILABLE
+        assert actions["training_run"] is ImpactDisposition.RETRAIN

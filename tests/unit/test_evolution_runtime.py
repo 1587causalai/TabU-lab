@@ -21,12 +21,37 @@ from tabu_lab.evolution import (
 )
 from tabu_lab.evolution.checkpoint import read_checkpoint_model_state
 from tabu_lab.evolution.models import ProgramRunReceipt
-from tabu_lab.evolution.runtime import identity_state_projection
+from tabu_lab.evolution.runtime import _build_runtime_model, identity_state_projection
 
 ROOT = Path(__file__).resolve().parents[2]
 BASE = "tabu.pretraining.query-base@1.0.0"
 ROW = "tabu.pretraining.query-row@1.0.0"
 GENERATOR_VNEXT = "tabu.pretraining.query-base-generator-v3@1.1.0-exercise"
+
+
+@pytest.mark.parametrize(
+    ("source_graph_ref", "target_graph_ref"),
+    (
+        ("tabu.graph.query.base@1.0.0", "tabu.graph.query.base@1.1.0"),
+        ("tabu.graph.query.row@1.0.0", "tabu.graph.query.row@1.1.0"),
+    ),
+)
+def test_v3_scale_projection_preserves_full_model_state(
+    source_graph_ref: str,
+    target_graph_ref: str,
+) -> None:
+    repository = EvolutionRepository.load(ROOT)
+    source = _build_runtime_model(repository.node(source_graph_ref), "cpu")
+    target = _build_runtime_model(repository.node(target_graph_ref), "cpu")
+
+    assert source.config.max_features == 64
+    assert target.config.max_features == 1024
+    source_state = source.state_dict()
+    target_state = target.state_dict()
+    projected = identity_state_projection(source_state, target_state)
+    assert set(projected) == set(target_state)
+    assert all(projected[name].shape == target_state[name].shape for name in projected)
+    assert all(torch.equal(projected[name], source_state[name]) for name in projected)
 
 
 def test_tiny_base_exact_resume_is_byte_identical_to_uninterrupted_run(

@@ -1,0 +1,17 @@
+schema_version: tabu.compatibility-edge.v1
+edge_id: tabu.compat.query-row-scale-64-to-1024-warm-start
+version: 1.0.0
+source: {node_id: tabu.graph.query.row, version: 1.0.0}
+target: {node_id: tabu.graph.query.row, version: 1.1.0}
+disposition: warm_start_available
+verifier:
+  source_path: src/tabu_lab/evolution/runtime.py
+  sha256: 6adb4b92b430d01bc0c345ea5026090cf1a2a47163a73db81e2b359de7862ae2
+  symbol_ref: tabu_lab.evolution.runtime:identity_state_projection
+  hash_mode: python_symbol
+verified: true
+constraints:
+  state_projection: tabu.projection.query-row-scale-64-to-1024@1.0.0
+  optimizer_state: forbidden
+  evidence_status: forbidden
+description: Allows an explicit weights-only v2-to-v3-scale TabUR warm start; it is never exact resume.

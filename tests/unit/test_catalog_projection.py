@@ -22,7 +22,7 @@ def test_current_catalog_indexes_consolidated_model_sources() -> None:
     catalog = build_catalog(ROOT)
 
     entry_ids = {entry.entry_id for entry in catalog.entries}
-    assert len(entry_ids) == 48
+    assert len(entry_ids) == 56
     assert {
         "model_contract:tabu.cell.base@0.2.0",
         "model_contract:tabu.query.base@0.1.0",
@@ -33,8 +33,11 @@ def test_current_catalog_indexes_consolidated_model_sources() -> None:
         "evolution_node:tabu.graph.query.row@1.0.0",
         "program_snapshot:tabu.pretraining.query-base@1.0.0",
         "program_snapshot:tabu.pretraining.query-row@1.0.0",
+        "program_snapshot:tabu.pretraining.query-base@1.2.0",
+        "program_snapshot:tabu.pretraining.query-row@1.2.0",
         "program_snapshot:tabu.pretraining.query-base-generator-v2-projectable@1.0.0-exercise",
         "compatibility_edge:tabu.compat.query-base-identity-warm-start@1.0.0",
+        "compatibility_edge:tabu.compat.query-base-scale-64-to-1024-warm-start@1.0.0",
     }.issubset(entry_ids)
     assert catalog.formal_receipt_count == 0
     assert catalog.accepted_claim_count == 0
@@ -54,6 +57,8 @@ def test_catalog_json_and_html_are_deterministic_bounded_projections() -> None:
     assert "tabu.query.row_column@0.1.0" in html
     assert "tabu.pretraining.query-base@1.0.0" in html
     assert "tabu.pretraining.query-row@1.0.0" in html
+    assert "tabu.pretraining.query-base@1.2.0" in html
+    assert "tabu.pretraining.query-row@1.2.0" in html
 
 
 def test_catalog_rejects_tampered_source_tree_hash() -> None:

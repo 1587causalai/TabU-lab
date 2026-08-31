@@ -193,6 +193,13 @@ adds a bounded CUDA Grow pilot without rewriting the completed tiny milestone:
   snapshots and change only the training-recipe slot from their 1.0.0 parents;
 - fixed, piecewise, and adaptive policies have serializable deterministic
   state;
+- `tabu.pretraining.query-base@1.2.0` and
+  `tabu.pretraining.query-row@1.2.0` select the immutable v3 mixture and new
+  1024-feature-capacity graph versions while keeping the 1500-update recipe
+  fixed for a controlled scratch-first comparison;
+- v2-to-v3 weights may cross only through model-specific verified scale
+  projections; optimizer, scheduler, policy, RNG, and evidence status remain
+  forbidden;
 - math, generator, component, and evaluation evolution reports have golden
   tests;
 - exact resume and warm-start boundaries have executable tests;

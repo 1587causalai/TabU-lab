@@ -25,7 +25,7 @@ pretraining produces useful frozen ICL and then improves real-task fine-tuning.
 | TabUR contract and runtime | implemented under `tabu.query.row@0.2.0` |
 | Evolvable program kernel | implemented with immutable manifests, typed DAG validation, impact analysis, freeze, exact resume, and explicit warm start |
 | Broad supervised synthetic prior v3 | candidate implementation selectable through versioned Generator/Mixture manifests |
-| v3 long-run pretraining | not activated; tiny exact-resume is closed, but the full recipe, compute envelope, and evidence freeze are not |
+| v3 long-run pretraining | activated as scratch-first Grow snapshots `tabu.pretraining.query-{base,row}@1.2.0`; execution remains `local_unissued` until a run receipt exists |
 | frozen ICL for the 0.2/v3 lane | `not_run` |
 | real-task pretrained-vs-scratch fine-tuning for the 0.2/v3 lane | `not_run` |
 | formal evidence / accepted capability claim | none |
@@ -104,7 +104,7 @@ compute:
 
 ```bash
 tabu-lab program validate
-tabu-lab program resolve --program tabu.pretraining.query-row@1.1.0
+tabu-lab program resolve --program tabu.pretraining.query-row@1.2.0
 tabu-lab program impact \
   --from-program tabu.pretraining.query-base@1.0.0 \
   --to-program tabu.pretraining.query-base-generator-v3@1.1.0-exercise
@@ -133,10 +133,12 @@ model = build_model(
 )
 ```
 
-The existing `scripts/run_tabur_r5_pretraining.py` is v2-bound. Do not describe
-it as a v3 long-run entry until the generator ID, plan hash, loss coordinate,
-checkpoint identity, and exact-resume training state are wired through one
-standard runner.
+The existing `scripts/run_tabur_r5_pretraining.py` is v2-bound. V3 execution
+instead goes through `tabu-lab program run`, which binds the generator,
+1024-feature capacity graph, loss coordinate, checkpoint identity, policy
+state, and exact-resume state in one snapshot. A v2 checkpoint may initialize
+an explicit `warm_start` arm through the checked projection, but cannot resume
+or inherit the v3 run identity.
 
 ## Evaluation default
 

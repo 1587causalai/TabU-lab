@@ -25,10 +25,19 @@ def test_mainline_selects_exact_independent_program_snapshots() -> None:
         for item in selected
     }
     assert refs == {
-        "tabu.pretraining.query-base@1.1.0",
-        "tabu.pretraining.query-row@1.1.0",
+        "tabu.pretraining.query-base@1.2.0",
+        "tabu.pretraining.query-row@1.2.0",
     }
     resolved = [repository.resolve(ref) for ref in sorted(refs)]
     assert len({snapshot.snapshot_hash for snapshot in resolved}) == 2
     assert len({snapshot.slots["model_contract"].ref for snapshot in resolved}) == 2
-    assert all("state_projection" not in snapshot.slots for snapshot in resolved)
+    assert all("state_projection" in snapshot.slots for snapshot in resolved)
+    assert {
+        snapshot.slots["component_graph"].ref for snapshot in resolved
+    } == {
+        "tabu.graph.query.base@1.1.0",
+        "tabu.graph.query.row@1.1.0",
+    }
+    assert {
+        snapshot.slots["world_mixture"].ref for snapshot in resolved
+    } == {"tabu.mixture.supervised-v3@1.0.0"}
