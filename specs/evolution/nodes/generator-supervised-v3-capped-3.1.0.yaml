@@ -1,0 +1,17 @@
+schema_version: tabu.evolution-node.v1
+kind: generator
+node_id: tabu.generator.supervised-query-row-broad
+version: 3.1.0
+maturity: candidate
+description: Immutable supervised-v3 successor that caps the current same-column routing cost by rows-squared times features.
+generator_ref: tabur.supervised-query-row-broad-v3-compute-capped
+output_interface: tabu.evidence-truth-pair@1
+implementation:
+  source_path: src/tabu_lab/experiments/query_row_supervised_synthetic_v3_capped.py
+  sha256: b86e41523edbf7dbf62811e36ead3d9911ecee4f675fd0809e9f462b2da41676
+  symbol_ref: tabu_lab.experiments.query_row_supervised_synthetic_v3_capped:make_query_row_supervised_synthetic_v3_capped_episode
+  hash_mode: python_symbol
+runtime_ref: tabu_lab.experiments.query_row_supervised_synthetic_v3_capped:make_query_row_supervised_synthetic_v3_capped_episode
+immutable_config:
+  missing_frac: 0.0
+  max_routing_pairs: 8000000

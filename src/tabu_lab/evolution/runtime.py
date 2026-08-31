@@ -619,6 +619,11 @@ def run_program(
                 initialization=initialization,
                 target_steps=recipe.max_steps,
             )
+        # ``TrainStep`` intentionally exposes prediction/loss tensors for local
+        # diagnostics.  Keeping the previous result alive while constructing
+        # the next quadratic routing ledger doubles peak memory on broad-row
+        # episodes, so the program runner releases its step-local graph here.
+        del result, evidence, truth
 
     invocation_checkpoint = destination / f"checkpoint-step-{trainer.step:08d}.safetensors"
     if checkpoint != invocation_checkpoint:

@@ -25,8 +25,8 @@ def test_mainline_selects_exact_independent_program_snapshots() -> None:
         for item in selected
     }
     assert refs == {
-        "tabu.pretraining.query-base@1.2.0",
-        "tabu.pretraining.query-row@1.2.0",
+        "tabu.pretraining.query-base@1.3.0",
+        "tabu.pretraining.query-row@1.3.0",
     }
     resolved = [repository.resolve(ref) for ref in sorted(refs)]
     assert len({snapshot.snapshot_hash for snapshot in resolved}) == 2
@@ -40,4 +40,4 @@ def test_mainline_selects_exact_independent_program_snapshots() -> None:
     }
     assert {
         snapshot.slots["world_mixture"].ref for snapshot in resolved
-    } == {"tabu.mixture.supervised-v3@1.0.0"}
+    } == {"tabu.mixture.supervised-v3@1.1.0"}

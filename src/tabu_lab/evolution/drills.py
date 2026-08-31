@@ -32,6 +32,14 @@ EVOLUTION_DRILLS = {
         "tabu.pretraining.query-row@1.1.0",
         "tabu.pretraining.query-row@1.2.0",
     ),
+    "query-base-v3-compute-capped.json": (
+        "tabu.pretraining.query-base@1.2.0",
+        "tabu.pretraining.query-base@1.3.0",
+    ),
+    "query-row-v3-compute-capped.json": (
+        "tabu.pretraining.query-row@1.2.0",
+        "tabu.pretraining.query-row@1.3.0",
+    ),
 }
 
 

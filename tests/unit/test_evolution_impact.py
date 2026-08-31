@@ -108,3 +108,22 @@ def test_v3_scale_and_generator_change_requires_new_runs_but_allows_warm_start()
         assert actions["slot:training_recipe"] is ImpactDisposition.UNCHANGED
         assert actions["initialization"] is ImpactDisposition.WARM_START_AVAILABLE
         assert actions["training_run"] is ImpactDisposition.RETRAIN
+
+
+def test_v3_compute_cap_and_recovery_recipe_restart_without_model_change() -> None:
+    for source, target in (
+        (
+            "tabu.pretraining.query-base@1.2.0",
+            "tabu.pretraining.query-base@1.3.0",
+        ),
+        (
+            "tabu.pretraining.query-row@1.2.0",
+            "tabu.pretraining.query-row@1.3.0",
+        ),
+    ):
+        actions = _actions(target, source=source)
+        assert actions["slot:model_contract"] is ImpactDisposition.UNCHANGED
+        assert actions["slot:component_graph"] is ImpactDisposition.UNCHANGED
+        assert actions["slot:world_mixture"] is ImpactDisposition.RETRAIN
+        assert actions["slot:training_recipe"] is ImpactDisposition.RETRAIN
+        assert actions["training_run"] is ImpactDisposition.RETRAIN
