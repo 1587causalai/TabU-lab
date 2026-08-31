@@ -1,0 +1,17 @@
+schema_version: tabu.evolution-node.v1
+kind: sampling_policy
+node_id: tabu.policy.adaptive
+version: 1.0.0
+maturity: candidate
+description: Deterministic loss-EMA policy whose complete decision state is checkpointed.
+policy_kind: adaptive
+implementation:
+  source_path: src/tabu_lab/evolution/policy.py
+  sha256: 6995415cf045df06c2b8e35815a9d7e206acded35a7067b475b7378583f83bcb
+  symbol_ref: tabu_lab.evolution.policy:SamplingPolicyEngine
+  hash_mode: python_symbol
+deterministic: true
+serializable_state: true
+state_interface: tabu.sampling-policy-state@1
+adaptive_ema: 0.9
+adaptive_temperature: 1.0

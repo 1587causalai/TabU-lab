@@ -1460,7 +1460,7 @@ class TabUQueryBaseModel(QueryFamilyModelBase):
                     dynamics_input,
                     input_tensor=symbols.values,
                     source_mask=resolved.visible_mask,
-                    null_mask=resolved.natural_missing_mask,
+                    null_mask=self._event_null_mask(resolved, dynamics_input),
                     **self.tokenizer_metadata,
                     label_broadcast=self.label_broadcast,
                     label_broadcast_tau=self.label_broadcast_tau,

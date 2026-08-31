@@ -124,6 +124,17 @@ from .query_row_synthetic_fit import (
     run_query_row_fixed_world_fit,
     run_query_row_multi_world_fit,
 )
+from .scm_missingness import (
+    SCM_MISSINGNESS_COMPONENT_ID,
+    SCM_MISSINGNESS_FAMILIES,
+    SCM_MISSINGNESS_FAMILY_PROBABILITIES,
+    SCM_MISSINGNESS_RATE_RANGE,
+    SCMMissingnessFamily,
+    SCMMissingnessManifest,
+    SCMMissingnessResult,
+    apply_scm_missingness,
+    sample_scm_missingness_manifest,
+)
 from .synthetic_fit import (
     SyntheticFitResult,
     SyntheticWorldBatch,
@@ -132,6 +143,15 @@ from .synthetic_fit import (
 )
 
 __all__ = [
+    "SCM_MISSINGNESS_COMPONENT_ID",
+    "SCM_MISSINGNESS_FAMILIES",
+    "SCM_MISSINGNESS_FAMILY_PROBABILITIES",
+    "SCM_MISSINGNESS_RATE_RANGE",
+    "SCMMissingnessFamily",
+    "SCMMissingnessManifest",
+    "SCMMissingnessResult",
+    "apply_scm_missingness",
+    "sample_scm_missingness_manifest",
     "SyntheticFitResult",
     "SyntheticWorldBatch",
     "make_linear_world_batch",

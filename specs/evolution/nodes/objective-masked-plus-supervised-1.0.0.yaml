@@ -1,0 +1,14 @@
+schema_version: tabu.evolution-node.v1
+kind: objective_bundle
+node_id: tabu.objectives.masked-plus-supervised
+version: 1.0.0
+maturity: candidate
+description: Additive objective identity without baking task choice into the model runtime.
+objectives:
+  - objective_id: tabu.objective.masked-cell-mse
+    weight: 1.0
+    target_origin: artificial_mask
+  - objective_id: tabu.objective.supervised-response-mse
+    weight: 1.0
+    target_origin: query
+truth_entry: loss_only

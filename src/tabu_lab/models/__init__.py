@@ -52,6 +52,12 @@ from .query_base import (
     canonical_query_base_manifest,
     canonical_query_row_manifest,
 )
+from .query_task_adapters import (
+    QueryTaskAdapterBase,
+    QueryTaskAdapterInsertion,
+    QueryTaskAdapterSpec,
+    SupervisedResponseAdapter,
+)
 from .table_cell import LabelColumnBroadcast, TabUCellBaseModel
 from .types import (
     DenseModelInput,
@@ -104,6 +110,10 @@ __all__ = [
     "RowReadoutMode",
     "QueryTerminalAdapter",
     "QueryTokenizerAdapter",
+    "QueryTaskAdapterBase",
+    "QueryTaskAdapterInsertion",
+    "QueryTaskAdapterSpec",
+    "SupervisedResponseAdapter",
     "build_from_spec",
     "build_model",
     "build_tabu_cell_base",

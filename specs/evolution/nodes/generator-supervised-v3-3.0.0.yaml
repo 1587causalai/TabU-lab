@@ -1,0 +1,16 @@
+schema_version: tabu.evolution-node.v1
+kind: generator
+node_id: tabu.generator.supervised-query-row-broad
+version: 3.0.0
+maturity: candidate
+description: Immutable broad supervised synthetic generator v3 candidate.
+generator_ref: tabur.supervised-query-row-broad-v3
+output_interface: tabu.evidence-truth-pair@1
+implementation:
+  source_path: src/tabu_lab/experiments/query_row_supervised_synthetic_v3.py
+  sha256: 933aecdb0f3e2129fe1e6b4df9949c7341a1eeffaf9cd75437271be57c4400b3
+  symbol_ref: tabu_lab.experiments.query_row_supervised_synthetic_v3:make_query_row_supervised_synthetic_v3_episode
+  hash_mode: python_symbol
+runtime_ref: tabu_lab.experiments.query_row_supervised_synthetic_v3:make_query_row_supervised_synthetic_v3_episode
+immutable_config:
+  missing_frac: 0.0

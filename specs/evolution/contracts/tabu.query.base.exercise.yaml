@@ -1,0 +1,11 @@
+schema_version: tabu.model-contract-exercise.v1
+contract_id: tabu.query.base.exercise
+contract_version: 0.2.0-exercise
+status: exercise_only
+authority: none
+purpose: Verify that a future owner-selected mathematical law creates a new immutable node.
+semantic_delta:
+  current: z_ra = W c_ra
+  exercise_placeholder: z_ra = f_next(c_ra; theta_next)
+  constraint: f_next is deliberately unspecified and cannot be executed or cited as TabU design.
+claim_boundary: Evolution drill only; not an accepted mathematical contract, runtime, or result.

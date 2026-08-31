@@ -1,0 +1,16 @@
+schema_version: tabu.evolution-node.v1
+kind: model_contract
+node_id: tabu.query.base
+version: 0.1.0
+maturity: experimental
+description: Current executable homogeneous-axis table-cell-as-query contract.
+contract_ref: tabu.query.base@0.1.0
+contract_hash: 1aeeb418be56003c15794bc61d7fa476182d16a0c4110c33f8a6186b367b4c9d
+source:
+  source_path: specs/models/tabu.query.base.yaml
+  sha256: 58aad04399c158fd2f8ae4f0d208837e2cd5c6988f6d7c0150ef1bab0f45b075
+  hash_mode: file
+episode_interface: tabu.evidence-episode@3
+prediction_interface: tabu.prediction-bundle@1
+truth_interface: tabu.truth-sidecar@1
+executable: true

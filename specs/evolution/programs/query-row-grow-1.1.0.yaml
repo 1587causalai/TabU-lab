@@ -1,0 +1,14 @@
+schema_version: tabu.program-snapshot.v1
+program_id: tabu.pretraining.query-row
+version: 1.1.0
+research_question: Does anchored row heterogeneity improve reusable query behavior under matched protocols?
+lane: grow
+evidence_status: local_unissued
+model_contract: {node_id: tabu.query.row, version: 0.2.0}
+component_graph: {node_id: tabu.graph.query.row, version: 1.0.0}
+world_mixture: {node_id: tabu.mixture.supervised-v2, version: 1.0.0}
+sampling_policy: {node_id: tabu.policy.fixed, version: 1.0.0}
+objective_bundle: {node_id: tabu.objectives.supervised-response, version: 1.0.0}
+training_recipe: {node_id: tabu.training.dgx2-grow-pilot, version: 1.0.0}
+evaluation_protocol: {node_id: tabu.eval.transfer-lanes, version: 1.0.0}
+description: Independent dgx2 Grow pilot for TabUR; no TabUBase checkpoint dependency.

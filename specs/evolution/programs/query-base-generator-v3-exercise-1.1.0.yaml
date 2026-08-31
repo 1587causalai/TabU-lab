@@ -1,0 +1,16 @@
+schema_version: tabu.program-snapshot.v1
+program_id: tabu.pretraining.query-base-generator-v3
+version: 1.1.0-exercise
+research_question: What is the minimum rerun set when synthetic-world generation changes?
+lane: grow
+evidence_status: local_unissued
+model_contract: {node_id: tabu.query.base, version: 0.1.0}
+component_graph: {node_id: tabu.graph.query.base, version: 1.0.0}
+world_mixture: {node_id: tabu.mixture.supervised-v3, version: 1.0.0}
+sampling_policy: {node_id: tabu.policy.fixed, version: 1.0.0}
+objective_bundle: {node_id: tabu.objectives.supervised-response, version: 1.0.0}
+training_recipe: {node_id: tabu.training.tiny-evolution-smoke, version: 1.0.0}
+evaluation_protocol: {node_id: tabu.eval.transfer-lanes, version: 1.0.0}
+state_projection: {node_id: tabu.projection.query-base-identity, version: 1.0.0}
+parent: {program_id: tabu.pretraining.query-base, version: 1.0.0}
+description: New run identity; explicit weights-only warm start is available but never exact resume.

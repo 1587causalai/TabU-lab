@@ -1,0 +1,12 @@
+schema_version: tabu.evolution-node.v1
+kind: evaluation_protocol
+node_id: tabu.eval.transfer-lanes
+version: 2.0.0-exercise
+maturity: exercise_only
+description: Evaluation-only drill adding diagnostics while retaining prediction compatibility.
+prediction_interface: tabu.prediction-bundle@1
+prediction_compatibility_key: tabu.eval.predictions.openml8-split-v1
+split_authority: validation_only_until_final_evidence
+modes: [synthetic_fit, real_scratch, frozen_icl, fine_tune_transfer]
+metrics: [loss, scratch_minus_pretrained_gain, paired_seed_dispersion]
+can_rescore_from_predictions: true

@@ -13,6 +13,9 @@ from tabu_lab.evidence.schemas import EvidenceSchema
 
 class CatalogObjectKind(StrEnum):
     MODEL_CONTRACT = "model_contract"
+    EVOLUTION_NODE = "evolution_node"
+    COMPATIBILITY_EDGE = "compatibility_edge"
+    PROGRAM_SNAPSHOT = "program_snapshot"
 
 
 class CatalogEntry(EvidenceSchema):
@@ -50,6 +53,18 @@ class CatalogEntry(EvidenceSchema):
             or self.data.get("contract_version") != self.version
         ):
             raise ValueError("catalog entry wrapper identity does not match ModelSpec data")
+        identity_fields = {
+            CatalogObjectKind.EVOLUTION_NODE: ("node_id", "version"),
+            CatalogObjectKind.COMPATIBILITY_EDGE: ("edge_id", "version"),
+            CatalogObjectKind.PROGRAM_SNAPSHOT: ("program_id", "version"),
+        }
+        if self.kind in identity_fields:
+            object_field, version_field = identity_fields[self.kind]
+            if (
+                self.data.get(object_field) != self.object_id
+                or self.data.get(version_field) != self.version
+            ):
+                raise ValueError("catalog entry wrapper identity does not match manifest data")
         return self
 
     @property

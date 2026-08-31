@@ -1,0 +1,44 @@
+schema_version: tabu.evolution-node.v1
+kind: component_graph
+node_id: tabu.graph.query.base
+version: 1.0.0
+maturity: experimental
+description: Open typed-DAG projection of the current executable TabUBase query runtime.
+model_contract: {node_id: tabu.query.base, version: 0.1.0}
+external_inputs:
+  - {name: evidence, interface_id: tabu.evidence-episode@3}
+external_outputs:
+  - {name: prediction, interface_id: tabu.prediction-bundle@1}
+components:
+  - instance_id: tokenizer
+    component: {node_id: tabu.query.tokenizer, version: 0.1.0}
+  - instance_id: axis_source
+    component: {node_id: tabu.query.axis_source, version: 0.1.0}
+  - instance_id: dynamics
+    component: {node_id: tabu.query.dynamics, version: 0.1.0}
+  - instance_id: geometry
+    component: {node_id: tabu.query.geometry.global_w, version: 0.1.0}
+  - instance_id: terminal
+    component: {node_id: tabu.query.terminal, version: 0.1.0}
+connections:
+  - {source_instance: "$input", source_port: evidence, target_instance: tokenizer, target_port: evidence}
+  - {source_instance: "$input", source_port: evidence, target_instance: axis_source, target_port: evidence}
+  - {source_instance: tokenizer, source_port: carrier, target_instance: dynamics, target_port: carrier}
+  - {source_instance: axis_source, source_port: source_plan, target_instance: dynamics, target_port: source_plan}
+  - {source_instance: dynamics, source_port: carrier, target_instance: geometry, target_port: carrier}
+  - {source_instance: geometry, source_port: coordinates, target_instance: terminal, target_port: coordinates}
+  - {source_instance: "$input", source_port: evidence, target_instance: terminal, target_port: evidence}
+  - {source_instance: terminal, source_port: prediction, target_instance: "$output", target_port: prediction}
+builder_id: tabu.query.base
+builder_options:
+  profile: supervised.label_broadcast.v1
+  reference_config:
+    d_model: 8
+    n_heads: 2
+    d_ff: 16
+    n_blocks: 1
+    inducing_slots: 2
+    matched_slots: 4
+    max_features: 64
+    dropout: 0.0
+executable: true

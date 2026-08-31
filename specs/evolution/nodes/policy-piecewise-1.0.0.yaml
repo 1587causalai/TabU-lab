@@ -1,0 +1,24 @@
+schema_version: tabu.evolution-node.v1
+kind: sampling_policy
+node_id: tabu.policy.piecewise
+version: 1.0.0
+maturity: candidate
+description: Deterministic versioned curriculum over the v2/v3 mixture.
+policy_kind: piecewise
+implementation:
+  source_path: src/tabu_lab/evolution/policy.py
+  sha256: 6995415cf045df06c2b8e35815a9d7e206acded35a7067b475b7378583f83bcb
+  symbol_ref: tabu_lab.evolution.policy:SamplingPolicyEngine
+  hash_mode: python_symbol
+deterministic: true
+serializable_state: true
+state_interface: tabu.sampling-policy-state@1
+segments:
+  - start_step: 0
+    weights:
+      tabu.generator.supervised-query-row-diverse@2.0.0: 0.8
+      tabu.generator.supervised-query-row-broad@3.0.0: 0.2
+  - start_step: 100
+    weights:
+      tabu.generator.supervised-query-row-diverse@2.0.0: 0.2
+      tabu.generator.supervised-query-row-broad@3.0.0: 0.8

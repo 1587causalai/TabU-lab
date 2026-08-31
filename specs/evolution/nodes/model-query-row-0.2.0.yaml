@@ -1,0 +1,16 @@
+schema_version: tabu.evolution-node.v1
+kind: model_contract
+node_id: tabu.query.row
+version: 0.2.0
+maturity: experimental
+description: Current executable anchored symmetric TabUR contract.
+contract_ref: tabu.query.row@0.2.0
+contract_hash: ae04f1f4532de220a08039b1f17c824e3e635d4933d29d8dbed06368a5584587
+source:
+  source_path: specs/models/tabu.query.row.yaml
+  sha256: 6f6652e6116ed5ef3e81c3b5131deb8476fabdbcf6bf90060446452799cdb2d8
+  hash_mode: file
+episode_interface: tabu.evidence-episode@3
+prediction_interface: tabu.prediction-bundle@1
+truth_interface: tabu.truth-sidecar@1
+executable: true

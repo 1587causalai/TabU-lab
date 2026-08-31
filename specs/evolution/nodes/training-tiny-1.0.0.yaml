@@ -1,0 +1,17 @@
+schema_version: tabu.evolution-node.v1
+kind: training_recipe
+node_id: tabu.training.tiny-evolution-smoke
+version: 1.0.0
+maturity: experimental
+description: Two-update CPU-capable recipe; not a performance or evidence budget.
+optimizer: adamw
+learning_rate: 0.001
+max_steps: 2
+checkpoint_interval: 1
+scheduler: step
+scheduler_step_size: 1
+scheduler_gamma: 0.99
+episode_options:
+  width: 6
+  context_rows: 8
+  rows: 16

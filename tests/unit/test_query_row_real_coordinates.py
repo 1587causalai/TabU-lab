@@ -12,7 +12,6 @@ from tabu_lab.experiments.query_row_real_coordinates import (
 )
 from tabu_lab.experiments.tabubase_real_benchmark import (
     _real_episode,
-    evaluation_context_indices,
     load_real_dataset,
     prepare_real_task,
     training_episode_indices,
@@ -44,8 +43,12 @@ def test_numeric_raw_identity_uses_episode_context_statistics() -> None:
     model = _row_model()
     context_a, query = training_episode_indices(task, seed=1729, update=0)
     context_b = np.roll(context_a, 1)
-    evidence_a, _ = _real_episode(task, context_indices=context_a, query_indices=query, episode_id="a")
-    evidence_b, _ = _real_episode(task, context_indices=context_b, query_indices=query, episode_id="b")
+    evidence_a, _ = _real_episode(
+        task, context_indices=context_a, query_indices=query, episode_id="a"
+    )
+    evidence_b, _ = _real_episode(
+        task, context_indices=context_b, query_indices=query, episode_id="b"
+    )
     with torch.no_grad():
         prediction_a = model(evidence_a)
         prediction_b = model(evidence_b)
@@ -66,7 +69,9 @@ def test_numeric_raw_identity_uses_episode_context_statistics() -> None:
 def test_oracle_task_scale_prediction_has_zero_real_regression_error() -> None:
     task = prepare_real_task(load_real_dataset("diabetes"), budget=32, seed=2718, test_limit=8)
     context, query = training_episode_indices(task, seed=2718, update=0)
-    evidence, truth = _real_episode(task, context_indices=context, query_indices=query, episode_id="oracle")
+    evidence, truth = _real_episode(
+        task, context_indices=context, query_indices=query, episode_id="oracle"
+    )
     model = _row_model(2718)
     prediction = model._forward_dense(evidence.to("cpu"), emit_trace=False)
     auxiliaries = dict(prediction.auxiliaries)
@@ -81,7 +86,10 @@ def test_task_scale_inverse_is_affine_invariant_and_matches_eval_boundary() -> N
     model = _row_model(31415)
     predicted_raw, _ = _model_prediction(model, task)
     context, query = training_episode_indices(task, seed=31415, update=0)
-    task_scale = np.asarray(predicted_raw - task.response_mean, dtype=np.float64) / task.response_scale
+    task_scale = (
+        np.asarray(predicted_raw - task.response_mean, dtype=np.float64)
+        / task.response_scale
+    )
     assert np.allclose(
         task_scale_to_raw(
             task_scale,

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import torch
 
-from tabu_lab.contracts import FeatureKind
+from tabu_lab.contracts import FeatureKind, OriginState, origin_mask
 from tabu_lab.experiments.query_row_supervised_synthetic_v3 import (
     BROAD_MAX_CELLS,
     BROAD_MAX_FEATURES,
@@ -51,6 +51,16 @@ def test_v3_broad_scale_prior_is_continuous_bounded_and_family_balanced() -> Non
     assert all(16 <= item["rows"] <= BROAD_MAX_ROWS for item in plan)
     assert all(1 <= item["context_rows"] < item["rows"] for item in plan)
     assert all((item["width"] + 1) * item["rows"] <= BROAD_MAX_CELLS for item in plan)
+    scm_items = [item for item in plan if item["family"] == STRUCTURED_SCM_FAMILY]
+    assert all("scm_missingness_family" in item for item in scm_items)
+    assert all(0.01 <= item["scm_missingness_rate"] <= 0.35 for item in scm_items)
+    assert {item["scm_missingness_family"] for item in scm_items} == {
+        "mcar",
+        "mar",
+        "mnar",
+        "block",
+        "censoring",
+    }
 
 
 def test_discoscm_episode_is_typed_masked_and_deterministic() -> None:
@@ -124,6 +134,13 @@ def test_structured_scm_generates_observed_columns_from_a_dag_without_units() ->
     assert metadata["non_root_predictor_count"] > 0
     assert metadata["response_parent_count"] > 0
     assert metadata["edge_count"] >= metadata["response_parent_count"]
+    natural_missing = origin_mask(
+        episode.evidence.origin_states, OriginState.NATURAL_MISSING
+    )
+    assert bool(natural_missing.any())
+    assert bool((episode.evidence.forward_values[natural_missing] == 0).all())
+    assert metadata["missingness_component_id"] == "tabur.scm-missingness.v1"
+    assert metadata["raw_missing_representation"] == "nan_before_evidence_compilation"
     assert bool((episode.evidence.forward_values[episode.sidecar.target_mask] == 0).all())
 
 
@@ -156,6 +173,51 @@ def test_discoscm_mixed_type_episode_runs_public_forward_and_backward() -> None:
             inducing_slots=2,
             matched_slots=4,
             max_features=TABUR_V3_MODEL_MAX_FEATURES,
+        ),
+        profile="supervised.label_broadcast.v1",
+        row_token_count=4,
+    )
+    prediction = model(episode.evidence)
+    raw = prediction["numeric_raw_prediction"]
+    support = prediction["numeric_support_available"].to(torch.bool)
+    truth = episode.sidecar.target_values.unsqueeze(0)
+    target = episode.sidecar.target_mask.unsqueeze(0)
+    scored = target & support
+    loss = torch.where(scored, (raw - truth).square(), torch.zeros_like(raw)).sum() / scored.sum()
+    loss.backward()
+    assert bool(torch.isfinite(loss))
+    assert all(
+        parameter.grad is None or bool(torch.isfinite(parameter.grad).all())
+        for parameter in model.parameters()
+    )
+
+
+def test_structured_scm_natural_missing_runs_public_forward_and_backward() -> None:
+    from tabu_lab.models import build_model
+    from tabu_lab.models.types import ReferenceConfig
+
+    episode = make_query_row_supervised_synthetic_v3_episode(
+        root_seed=57721,
+        world_id="structured-scm-missing-public-forward",
+        family=STRUCTURED_SCM_FAMILY,
+        predictor_regime="gaussian",
+        width=17,
+        noise_level="medium",
+        context_rows=16,
+        rows=32,
+        scm_missingness_family="mnar",
+        scm_missingness_rate=0.2,
+    )
+    model = build_model(
+        "tabu.query.row",
+        config=ReferenceConfig(
+            d_model=8,
+            n_heads=2,
+            d_ff=16,
+            n_blocks=1,
+            inducing_slots=2,
+            matched_slots=4,
+            max_features=256,
         ),
         profile="supervised.label_broadcast.v1",
         row_token_count=4,

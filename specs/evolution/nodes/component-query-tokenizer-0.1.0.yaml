@@ -1,0 +1,19 @@
+schema_version: tabu.evolution-node.v1
+kind: component
+node_id: tabu.query.tokenizer
+version: 0.1.0
+maturity: canonical
+description: Query-family tokenizer adapter exposed through typed evolution ports.
+component_ref: tabu.query.tokenizer@0.1.0
+inputs:
+  - name: evidence
+    interface_id: tabu.evidence-episode@3
+outputs:
+  - name: carrier
+    interface_id: tabu.query-cell-carrier@1
+implementation:
+  source_path: src/tabu_lab/models/query_base.py
+  sha256: b30f29d23539548154271a5c60c9f47f1c50f8e963cfb307e54535fb50f685bf
+  symbol_ref: tabu_lab.models.query_base:QueryTokenizerAdapter
+  hash_mode: python_symbol
+truth_visible: false

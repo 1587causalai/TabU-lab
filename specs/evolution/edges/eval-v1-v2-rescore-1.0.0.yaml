@@ -1,0 +1,15 @@
+schema_version: tabu.compatibility-edge.v1
+edge_id: tabu.compat.eval-transfer-v1-v2-rescore
+version: 1.0.0
+source: {node_id: tabu.eval.transfer-lanes, version: 1.0.0}
+target: {node_id: tabu.eval.transfer-lanes, version: 2.0.0-exercise}
+disposition: rescore
+verifier:
+  source_path: src/tabu_lab/evolution/impact.py
+  sha256: 13fd259b30c540e4a5bb4f9596039e4e67298b4c3aa9e9ec17cb983a55589766
+  symbol_ref: tabu_lab.evolution.impact:impact_report
+  hash_mode: python_symbol
+verified: true
+constraints:
+  prediction_compatibility_key: tabu.eval.predictions.openml8-split-v1
+description: Stored PredictionBundle artifacts may be rescored under v2 diagnostics.

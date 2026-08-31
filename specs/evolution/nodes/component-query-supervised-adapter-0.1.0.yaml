@@ -1,0 +1,21 @@
+schema_version: tabu.evolution-node.v1
+kind: component
+node_id: tabu.query.adapter.supervised_response
+version: 0.1.0
+maturity: exercise_only
+description: Existing but not ModelSpec-integrated supervised residual adapter seam.
+component_ref: tabu.query.adapter.supervised_response@0.1.0
+inputs:
+  - name: carrier
+    interface_id: tabu.query-cell-carrier@1
+  - name: evidence
+    interface_id: tabu.evidence-episode@3
+outputs:
+  - name: carrier
+    interface_id: tabu.query-cell-carrier@1
+implementation:
+  source_path: src/tabu_lab/models/query_task_adapters.py
+  sha256: befa53f96a99bfe3feafe12a91a348c818919f65db9617b0c63a31da3e993c1d
+  symbol_ref: tabu_lab.models.query_task_adapters:SupervisedResponseAdapter
+  hash_mode: python_symbol
+truth_visible: false

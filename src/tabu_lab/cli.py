@@ -62,6 +62,9 @@ def _run_optimize(args: argparse.Namespace) -> int:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="tabu-lab")
     subparsers = parser.add_subparsers(dest="command", required=True)
+    from tabu_lab.evolution.cli import add_program_commands
+
+    add_program_commands(subparsers)
     tabu = subparsers.add_parser("tabur", help="TabUR experiment commands")
     tabu_subparsers = tabu.add_subparsers(dest="tabur_command", required=True)
     optimize = tabu_subparsers.add_parser(

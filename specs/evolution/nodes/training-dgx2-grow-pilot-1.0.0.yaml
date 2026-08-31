@@ -1,0 +1,12 @@
+schema_version: tabu.evolution-node.v1
+kind: training_recipe
+node_id: tabu.training.dgx2-grow-pilot
+version: 1.0.0
+maturity: experimental
+description: Bounded 1500-update CUDA Grow pilot over the immutable supervised-v2 world prior.
+optimizer: adamw
+learning_rate: 0.003
+max_steps: 1500
+checkpoint_interval: 500
+scheduler: none
+episode_options: {}

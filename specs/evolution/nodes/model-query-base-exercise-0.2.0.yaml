@@ -1,0 +1,16 @@
+schema_version: tabu.evolution-node.v1
+kind: model_contract
+node_id: tabu.query.base.exercise
+version: 0.2.0-exercise
+maturity: exercise_only
+description: Non-authoritative math-vNext identity used only by the evolution drill.
+contract_ref: tabu.query.base.exercise@0.2.0-exercise
+contract_hash: 8446a8aff2ca3dde20842b5044fc2ae3d29ca0613f8099af14b6422514b3aea7
+source:
+  source_path: specs/evolution/contracts/tabu.query.base.exercise.yaml
+  sha256: 97a2b8e97800fbb48313e00008bb3d0c901a798088726a18426e0437c9bd712d
+  hash_mode: file
+episode_interface: tabu.evidence-episode@3
+prediction_interface: tabu.prediction-bundle@1
+truth_interface: tabu.truth-sidecar@1
+executable: false

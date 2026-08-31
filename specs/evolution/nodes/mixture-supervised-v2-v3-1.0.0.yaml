@@ -1,0 +1,11 @@
+schema_version: tabu.evolution-node.v1
+kind: world_mixture
+node_id: tabu.mixture.supervised-v2-v3
+version: 1.0.0
+maturity: candidate
+description: Immutable two-generator mixture for policy contract tests.
+entries:
+  - generator: {node_id: tabu.generator.supervised-query-row-diverse, version: 2.0.0}
+    weight: 0.5
+  - generator: {node_id: tabu.generator.supervised-query-row-broad, version: 3.0.0}
+    weight: 0.5

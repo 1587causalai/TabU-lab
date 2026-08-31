@@ -557,9 +557,14 @@ class Trainer:
         optimizer = state["optimizer"]
         optimizer_scalars: dict[str, dict[str, Any]] = {}
         optimizer_tensors: list[dict[str, str | int]] = []
-        for parameter_id, parameter_state in optimizer["state"].items():
+        # Optimizer state dict insertion order can change after load_state_dict.
+        # Canonical checkpoint bytes must not depend on whether the same state
+        # was reached uninterrupted or through an exact resume.
+        for parameter_id in sorted(optimizer["state"]):
+            parameter_state = optimizer["state"][parameter_id]
             scalars: dict[str, Any] = {}
-            for field_name, value in parameter_state.items():
+            for field_name in sorted(parameter_state):
+                value = parameter_state[field_name]
                 if isinstance(value, torch.Tensor):
                     tensor_name = f"optimizer.{len(optimizer_tensors)}"
                     tensors[tensor_name] = value.detach().cpu().contiguous()

@@ -1,0 +1,11 @@
+schema_version: tabu.evolution-node.v1
+kind: objective_bundle
+node_id: tabu.objectives.supervised-response
+version: 1.0.0
+maturity: experimental
+description: Numeric supervised query objective used by the tiny vertical slice.
+objectives:
+  - objective_id: tabu.objective.numeric_mse
+    weight: 1.0
+    target_origin: query
+truth_entry: loss_only

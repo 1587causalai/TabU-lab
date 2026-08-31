@@ -1,0 +1,21 @@
+schema_version: tabu.evolution-node.v1
+kind: component
+node_id: tabu.query.row.dynamics
+version: 0.2.0
+maturity: canonical
+description: Row-special TabUR dynamics adapter.
+component_ref: tabu.query.row.dynamics@0.2.0
+inputs:
+  - name: carrier
+    interface_id: tabu.query-cell-carrier@1
+  - name: source_plan
+    interface_id: tabu.query-axis-source-plan@1
+outputs:
+  - name: carrier
+    interface_id: tabu.query-cell-carrier@1
+implementation:
+  source_path: src/tabu_lab/models/query_base.py
+  sha256: b9394eb7a22fd6b277d3c3bc8bf654e3dd334fed741385f6278d6e827025c8f7
+  symbol_ref: tabu_lab.models.query_base:QueryRowDynamicsAdapter
+  hash_mode: python_symbol
+truth_visible: false

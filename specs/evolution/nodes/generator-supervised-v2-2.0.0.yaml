@@ -1,0 +1,15 @@
+schema_version: tabu.evolution-node.v1
+kind: generator
+node_id: tabu.generator.supervised-query-row-diverse
+version: 2.0.0
+maturity: experimental
+description: Immutable diverse supervised synthetic generator v2.
+generator_ref: tabur.supervised-query-row-diverse-v2
+output_interface: tabu.evidence-truth-pair@1
+implementation:
+  source_path: src/tabu_lab/experiments/query_row_supervised_synthetic_v2.py
+  sha256: adbd251b6725a96f2948a76f0f025732660f9e5ed0d9dafcdb49370397128317
+  symbol_ref: tabu_lab.experiments.query_row_supervised_synthetic_v2:make_query_row_supervised_synthetic_v2_episode
+  hash_mode: python_symbol
+runtime_ref: tabu_lab.experiments.query_row_supervised_synthetic_v2:make_query_row_supervised_synthetic_v2_episode
+immutable_config: {}

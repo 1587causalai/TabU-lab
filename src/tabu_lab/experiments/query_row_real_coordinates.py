@@ -90,7 +90,13 @@ def query_row_real_regression_loss(
     truth_targets = _batch(truth.target_mask.to(device=raw.device), name="truth.target_mask").to(
         dtype=torch.bool
     )
-    if not (raw.shape == model_targets.shape == support.shape == truth_values.shape == truth_targets.shape):
+    if not (
+        raw.shape
+        == model_targets.shape
+        == support.shape
+        == truth_values.shape
+        == truth_targets.shape
+    ):
         raise ValueError("query-row real regression tensors must have identical dense shapes")
     if bool((truth_targets & ~model_targets).any()):
         raise ValueError("TruthSidecar target_mask must be a subset of model targets")

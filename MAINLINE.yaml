@@ -1,0 +1,9 @@
+# Direction pointer only. It is not a runtime default or an evidence claim.
+schema_version: tabu.mainline.v2
+scope: pretraining
+primary_program:
+  program_id: tabu.pretraining.query-row
+  version: 1.1.0
+sibling_programs:
+  - program_id: tabu.pretraining.query-base
+    version: 1.1.0

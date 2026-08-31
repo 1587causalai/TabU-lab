@@ -1,0 +1,19 @@
+schema_version: tabu.evolution-node.v1
+kind: component
+node_id: tabu.query.geometry.row_readout
+version: 0.2.0
+maturity: canonical
+description: TabUR anchored symmetric row-readout geometry.
+component_ref: tabu.query.geometry.row_readout@0.2.0
+inputs:
+  - name: carrier
+    interface_id: tabu.query-cell-carrier@1
+outputs:
+  - name: coordinates
+    interface_id: tabu.query-coordinates@1
+implementation:
+  source_path: src/tabu_lab/models/query_base.py
+  sha256: d20e828d55b0dc76182e0a3de39a970dd2a9a6760e55be5f8e7cfffec5f144bd
+  symbol_ref: tabu_lab.models.query_base:QueryRowGeometryAdapter
+  hash_mode: python_symbol
+truth_visible: false

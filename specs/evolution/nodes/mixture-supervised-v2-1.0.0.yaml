@@ -1,0 +1,9 @@
+schema_version: tabu.evolution-node.v1
+kind: world_mixture
+node_id: tabu.mixture.supervised-v2
+version: 1.0.0
+maturity: experimental
+description: One-generator baseline mixture; generator identity remains independently replaceable.
+entries:
+  - generator: {node_id: tabu.generator.supervised-query-row-diverse, version: 2.0.0}
+    weight: 1.0

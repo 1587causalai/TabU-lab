@@ -30,6 +30,7 @@ from tabu_lab.contracts import (
     OriginState,
     TruthSidecar,
     canonical_hash,
+    origin_mask,
 )
 
 from .query_row_supervised_synthetic_v2 import (
@@ -41,6 +42,12 @@ from .query_row_supervised_synthetic_v2 import (
 )
 from .query_row_supervised_synthetic_v2 import (
     WORLD_FAMILIES as V2_WORLD_FAMILIES,
+)
+from .scm_missingness import (
+    SCM_MISSINGNESS_FAMILIES,
+    SCMMissingnessFamily,
+    apply_scm_missingness,
+    sample_scm_missingness_manifest,
 )
 
 GeneratorPartition = Literal["train", "validation"]
@@ -662,6 +669,8 @@ def _make_structured_scm_episode(
     noise_level: str,
     context_rows: int,
     rows: int | None,
+    missingness_family: SCMMissingnessFamily | str | None,
+    missingness_rate: float | None,
 ) -> QueryRowSupervisedSyntheticV3Episode:
     total_rows = rows or context_rows * 2
     if total_rows <= context_rows or context_rows < 1:
@@ -674,22 +683,48 @@ def _make_structured_scm_episode(
         predictor_regime=predictor_regime,
         noise_level=noise_level,
     )
+    missingness_manifest = sample_scm_missingness_manifest(
+        root_seed=root_seed,
+        world_id=world_id,
+        partition=partition,
+        family=missingness_family,
+        rate=missingness_rate,
+    )
+    missingness = apply_scm_missingness(
+        world.values,
+        missingness_manifest,
+        eligible_columns=tuple(range(width)),
+        driver_columns=tuple(range(width)),
+    )
     values = torch.as_tensor(world.values, dtype=torch.float32)
+    missing = torch.as_tensor(missingness.missing_mask, dtype=torch.bool)
     target_mask = torch.zeros_like(values, dtype=torch.bool)
     target_mask[context_rows:, -1] = True
-    forward_values = values.masked_fill(target_mask, 0.0)
+    forward_values = values.masked_fill(missing | target_mask, 0.0)
     origins = [
         [
-            OriginState.QUERY if target_mask[row, column] else OriginState.OBSERVED
+            OriginState.QUERY
+            if target_mask[row, column]
+            else (
+                OriginState.NATURAL_MISSING
+                if missing[row, column]
+                else OriginState.OBSERVED
+            )
             for column in range(width + 1)
         ]
         for row in range(total_rows)
     ]
     roles = [
         [
-            ForwardRole.RECEIVER | ForwardRole.TARGET
-            if target_mask[row, column]
-            else ForwardRole.RECEIVER | ForwardRole.SOURCE
+            (
+                ForwardRole.RECEIVER | ForwardRole.TARGET
+                if target_mask[row, column]
+                else (
+                    ForwardRole.RECEIVER
+                    if missing[row, column]
+                    else ForwardRole.RECEIVER | ForwardRole.SOURCE
+                )
+            )
             for column in range(width + 1)
         ]
         for row in range(total_rows)
@@ -746,6 +781,13 @@ def _make_structured_scm_episode(
             ),
             "response_parent_count": len(world.parents[-1]),
             "mechanism_counts": mechanism_counts,
+            "missingness_component_id": missingness_manifest.component_id,
+            "missingness_family": missingness_manifest.family.value,
+            "missingness_rate": missingness_manifest.rate,
+            "missingness_actual_rate": float(missingness.missing_mask[:, :width].mean()),
+            "missingness_count": missingness.missing_count,
+            "missingness_manifest_hash": missingness_manifest.manifest_hash,
+            "raw_missing_representation": "nan_before_evidence_compilation",
         },
     )
     sidecar = TruthSidecar(
@@ -765,6 +807,7 @@ def _make_structured_scm_episode(
                 "context_rows": context_rows,
                 "rows": total_rows,
                 "graph_hash": graph_hash,
+                "missingness_manifest_hash": missingness_manifest.manifest_hash,
             }
         ),
         row_ids=evidence.row_ids,
@@ -953,6 +996,8 @@ def make_query_row_supervised_synthetic_v3_episode(
     context_rows: int | None = None,
     rows: int | None = None,
     missing_frac: float = DISCOSCM_DEFAULT_MISSING_FRAC,
+    scm_missingness_family: SCMMissingnessFamily | str | None = None,
+    scm_missingness_rate: float | None = None,
 ) -> QueryRowSupervisedSyntheticV3Episode:
     """Generate one deterministic v3 world from the broad family mixture."""
 
@@ -974,6 +1019,10 @@ def make_query_row_supervised_synthetic_v3_episode(
         noise_level=noise_level,
         context_rows=context_rows,
     )
+    if family != STRUCTURED_SCM_FAMILY and (
+        scm_missingness_family is not None or scm_missingness_rate is not None
+    ):
+        raise ValueError("SCM missingness controls require the sparse_dag_scm family")
     if family == DISCOSCM_FAMILY:
         return _make_discoscm_episode(
             root_seed=root_seed,
@@ -997,6 +1046,8 @@ def make_query_row_supervised_synthetic_v3_episode(
             noise_level=noise_level,
             context_rows=context_rows,
             rows=rows,
+            missingness_family=scm_missingness_family,
+            missingness_rate=scm_missingness_rate,
         )
     if missing_frac != DISCOSCM_DEFAULT_MISSING_FRAC:
         raise ValueError("missing_frac is currently a DiscoSCM-only v3 control")
@@ -1021,6 +1072,7 @@ def build_query_row_supervised_synthetic_v3_plan(
     if worlds <= 0:
         raise ValueError("worlds must be positive")
     plan = []
+    scm_index = 0
     for index in range(worlds):
         world_id = f"{partition}-world-{index:06d}"
         block = index // len(WORLD_FAMILIES)
@@ -1044,18 +1096,40 @@ def build_query_row_supervised_synthetic_v3_plan(
         noise = str(
             _rng(root_seed, partition, world_id, "noise-level").choice(NOISE_LEVELS)
         )
-        plan.append(
-            {
-                "world_id": world_id,
-                "partition": partition,
-                "family": family,
-                "width": shape.width,
-                "predictor_regime": regime,
-                "noise_level": noise,
-                "context_rows": shape.context_rows,
-                "rows": shape.rows,
-            }
-        )
+        item: dict[str, Any] = {
+            "world_id": world_id,
+            "partition": partition,
+            "family": family,
+            "width": shape.width,
+            "predictor_regime": regime,
+            "noise_level": noise,
+            "context_rows": shape.context_rows,
+            "rows": shape.rows,
+        }
+        if family == STRUCTURED_SCM_FAMILY:
+            missingness_order = _rng(
+                root_seed,
+                partition,
+                scm_index // len(SCM_MISSINGNESS_FAMILIES),
+                "missingness-coverage-block",
+            ).permutation(tuple(item.value for item in SCM_MISSINGNESS_FAMILIES))
+            missingness_family = str(
+                missingness_order[scm_index % len(SCM_MISSINGNESS_FAMILIES)]
+            )
+            missingness = sample_scm_missingness_manifest(
+                root_seed=root_seed,
+                world_id=world_id,
+                partition=partition,
+                family=missingness_family,
+            )
+            item.update(
+                {
+                    "scm_missingness_family": missingness.family.value,
+                    "scm_missingness_rate": missingness.rate,
+                }
+            )
+            scm_index += 1
+        plan.append(item)
     return tuple(plan)
 
 
@@ -1133,6 +1207,9 @@ def validate_query_row_supervised_synthetic_v3(
         rows=16,
     )
     substituted = substitute_query_truth(sample, value=123.0)
+    structured_missing = origin_mask(
+        structured.evidence.origin_states, OriginState.NATURAL_MISSING
+    )
     widths = [int(item["width"]) for item in train]
     rows = [int(item["rows"]) for item in train]
     contexts = [int(item["context_rows"]) for item in train]
@@ -1170,6 +1247,16 @@ def validate_query_row_supervised_synthetic_v3(
         ),
         "structured_scm_has_no_latent_units": (
             structured.evidence.metadata["latent_unit_representation"] == "absent"
+        ),
+        "structured_scm_missingness_component": (
+            structured.evidence.metadata["missingness_component_id"]
+            == "tabur.scm-missingness.v1"
+            and structured.evidence.metadata["missingness_count"] > 0
+        ),
+        "natural_missing_compiled_without_nan": (
+            bool(structured_missing.any())
+            and bool((structured.evidence.forward_values[structured_missing] == 0).all())
+            and bool(torch.isfinite(structured.evidence.forward_values).all())
         ),
         "query_truth_physically_hidden": bool(
             (sample.evidence.forward_values[sample.sidecar.target_mask] == 0).all()
