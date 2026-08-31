@@ -65,5 +65,5 @@ def test_program_help_lists_the_evolution_surface(
         main(["program", "--help"])
     assert exc.value.code == 0
     output = capsys.readouterr().out
-    for command in ("validate", "resolve", "diff", "impact", "freeze", "run"):
+    for command in ("validate", "resolve", "diff", "impact", "freeze", "run", "evaluate"):
         assert command in output

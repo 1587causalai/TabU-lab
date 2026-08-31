@@ -1,0 +1,25 @@
+schema_version: tabu.program-checkpoint-evaluation-request.v1
+request_id: tabu.eval.query-row-v3.1-best-step1500
+version: 1.0.0
+evidence_status: local_unissued
+claim_boundary: Independent validation-panel Grow evaluation; not formal evidence, transfer evidence, or an accepted capability claim.
+program_ref: tabu.pretraining.query-row@1.3.0
+snapshot_hash: 78a8069045384804d4fc45682f492a2f5bea2fc51d96d263388528e60b4d1be3
+run_identity_hash: 8c4014d8e00f0d6eedcff18b7d4fc7f34041411ea07c0adfabda779630b98629
+training_run_receipt_hash: ff60eeeab9eaa704f77c00d81008308ca16fb5722c1b8bf1df0577ca848acfd8
+source_training_commit: 7e4b4138ae588fd4d6dfc0ed4a52229073368a6d
+source_repository_hash: 64336ec9dc4c5ba8021964f09765cd8c2de7934b4aa0deacfcd2aa05954760af
+checkpoint_name: checkpoint-step-00001500.safetensors
+checkpoint_step: 1500
+checkpoint_sha256: b1919cc959f9358794d886580c1916a99838982882caf2d891da668be15f7ac4
+checkpoint_sidecar_sha256: 6d97919df007a9ccae022a78f2fd9a414ad22e17f2768601d12c8def4660bea4
+selection_receipt_hash: f52bb565faa88e58b6ecb0a71ac477df7062d932064454c1299ed1f4b53c90c5
+selection_panel_addresses_hash: d08ca4c2b769512a0126e29a3116b89c1388c249303e635d74681b35c03f98dc
+selection_rule: Lowest mean loss among steps 1, 10, 50, 500, 1000, and 1500 on the frozen 64-world selection panel.
+evaluation_protocol_ref: tabu.eval.transfer-lanes@1.0.0
+evaluation_mode: synthetic_fit
+metric: loss
+partition: validation
+root_seed: 271828182
+worlds: 256
+address_prefix: program-independent-eval-v1

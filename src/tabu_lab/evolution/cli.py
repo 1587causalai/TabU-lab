@@ -7,6 +7,7 @@ from pathlib import Path
 
 from tabu_lab.contracts import canonical_json
 
+from .evaluation import evaluate_program_checkpoint, load_program_evaluation_request
 from .impact import diff_snapshots, impact_report
 from .models import ProgramLane
 from .repository import EvolutionRepository, check_or_write_lock
@@ -122,6 +123,35 @@ def _run(args: argparse.Namespace) -> int:
     return 0
 
 
+def _evaluate(args: argparse.Namespace) -> int:
+    repository = _repository(args)
+    request = load_program_evaluation_request(args.request)
+    result = evaluate_program_checkpoint(
+        repository,
+        request=request,
+        checkpoint=args.checkpoint,
+        training_run_receipt=args.training_run_receipt,
+        output=args.output,
+        device=args.device,
+        evaluation_source_revision=args.evaluation_source_revision,
+        evaluation_source_archive_sha256=args.evaluation_source_archive_sha256,
+    )
+    _print(
+        {
+            "schema_version": "tabu.program-checkpoint-evaluation-result.v1",
+            "request_ref": request.ref,
+            "request_hash": request.request_hash,
+            "receipt_hash": result.receipt.receipt_hash,
+            "output": result.receipt_path.name,
+            "mean_loss": result.receipt.metrics.mean_loss,
+            "scored_targets": result.receipt.metrics.scored_targets,
+            "abstained_targets": result.receipt.metrics.abstained_targets,
+            "evidence_status": result.receipt.evidence_status,
+        }
+    )
+    return 0
+
+
 def _lock(args: argparse.Namespace) -> int:
     check_or_write_lock(args.repository, write=args.write)
     _print(
@@ -192,6 +222,20 @@ def add_program_commands(subparsers: argparse._SubParsersAction[argparse.Argumen
     run.add_argument("--device", default="cpu")
     run.add_argument("--max-updates-this-invocation", type=int)
     run.set_defaults(handler=_run)
+
+    evaluate = commands.add_parser(
+        "evaluate",
+        help="issue an independent local-unissued receipt for one selected checkpoint",
+    )
+    add_repository(evaluate)
+    evaluate.add_argument("--request", type=Path, required=True)
+    evaluate.add_argument("--checkpoint", type=Path, required=True)
+    evaluate.add_argument("--training-run-receipt", type=Path, required=True)
+    evaluate.add_argument("--output", type=Path, required=True)
+    evaluate.add_argument("--device", default="cpu")
+    evaluate.add_argument("--evaluation-source-revision", required=True)
+    evaluate.add_argument("--evaluation-source-archive-sha256", required=True)
+    evaluate.set_defaults(handler=_evaluate)
 
     lock = commands.add_parser("lock", help="check or append the immutable manifest lock")
     add_repository(lock)

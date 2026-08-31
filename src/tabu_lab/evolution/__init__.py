@@ -5,6 +5,12 @@ from .checkpoint import (
     program_sidecar_path,
     read_program_checkpoint,
 )
+from .evaluation import (
+    ProgramCheckpointEvaluationReceipt,
+    ProgramCheckpointEvaluationRequest,
+    evaluate_program_checkpoint,
+    load_program_evaluation_request,
+)
 from .impact import diff_snapshots, impact_report
 from .models import (
     CompatibilityEdge,
@@ -31,6 +37,8 @@ __all__ = [
     "EvolutionRepository",
     "ImpactDisposition",
     "ImpactReport",
+    "ProgramCheckpointEvaluationReceipt",
+    "ProgramCheckpointEvaluationRequest",
     "ProgramLane",
     "ProgramRunStatus",
     "ProgramSnapshot",
@@ -41,9 +49,11 @@ __all__ = [
     "WorldMixtureNode",
     "check_or_write_lock",
     "diff_snapshots",
+    "evaluate_program_checkpoint",
     "file_sha256",
     "freeze_program",
     "impact_report",
+    "load_program_evaluation_request",
     "program_sidecar_path",
     "read_program_checkpoint",
     "run_program",
