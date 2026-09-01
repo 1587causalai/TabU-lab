@@ -182,7 +182,16 @@ def _build_runtime_model(graph: ComponentGraphNode, device: str) -> torch.nn.Mod
 
 def _objective(bundle: ObjectiveBundleNode) -> Objective:
     weights = {term.objective_id: term.weight for term in bundle.objectives}
-    mse = weights.get("tabu.objective.numeric_mse", 1.0)
+    raw_mse_id = "tabu.objective.numeric_mse"
+    standardized_mse_id = "tabu.objective.context_standardized_numeric_mse"
+    if raw_mse_id in weights and standardized_mse_id in weights:
+        raise ValueError("objective bundle cannot mix raw and context-standardized numeric MSE")
+    if standardized_mse_id in weights:
+        mse = weights[standardized_mse_id]
+        numeric_target_coordinate = "context_standardized"
+    else:
+        mse = weights.get(raw_mse_id, 1.0)
+        numeric_target_coordinate = "raw"
     mae = weights.get("tabu.objective.numeric_mae", 0.0)
     categorical = weights.get("tabu.objective.categorical_nll", 1.0)
     return Objective(
@@ -190,6 +199,7 @@ def _objective(bundle: ObjectiveBundleNode) -> Objective:
         mae_weight=mae,
         categorical_nll_weight=categorical,
         include_categorical="tabu.objective.categorical_nll" in weights,
+        numeric_target_coordinate=numeric_target_coordinate,
     )
 
 

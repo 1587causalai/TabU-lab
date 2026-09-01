@@ -22,7 +22,7 @@ def test_current_catalog_indexes_consolidated_model_sources() -> None:
     catalog = build_catalog(ROOT)
 
     entry_ids = {entry.entry_id for entry in catalog.entries}
-    assert len(entry_ids) == 69
+    assert len(entry_ids) == 73
     assert {
         "model_contract:tabu.cell.base@0.2.0",
         "model_contract:tabu.query.base@0.1.0",
@@ -37,6 +37,10 @@ def test_current_catalog_indexes_consolidated_model_sources() -> None:
         "program_snapshot:tabu.pretraining.query-row@1.2.0",
         "program_snapshot:tabu.pretraining.query-base@1.4.0",
         "program_snapshot:tabu.pretraining.query-row@1.4.0",
+        "program_snapshot:tabu.pretraining.query-base@1.5.0",
+        "program_snapshot:tabu.pretraining.query-row@1.5.0",
+        "evolution_node:tabu.objectives.context-standardized-supervised-response@1.0.0",
+        "evolution_node:tabu.training.dgx2-coordinate-fix-smoke@1.0.0",
         "program_snapshot:tabu.pretraining.query-base-generator-v2-projectable@1.0.0-exercise",
         "compatibility_edge:tabu.compat.query-base-identity-warm-start@1.0.0",
         "compatibility_edge:tabu.compat.query-base-scale-64-to-1024-warm-start@1.0.0",

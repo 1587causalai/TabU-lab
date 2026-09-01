@@ -16,7 +16,7 @@ def test_program_validate_and_impact_commands_are_machine_readable(
     assert main(["program", "validate", "--repository", str(ROOT)]) == 0
     validation = json.loads(capsys.readouterr().out)
     assert validation["status"] == "valid"
-    assert validation["node_count"] == 42
+    assert validation["node_count"] == 44
     assert validation["edge_count"] == 7
 
     assert main(

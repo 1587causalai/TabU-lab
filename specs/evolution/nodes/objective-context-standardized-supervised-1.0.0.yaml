@@ -1,0 +1,11 @@
+schema_version: tabu.evolution-node.v1
+kind: objective_bundle
+node_id: tabu.objectives.context-standardized-supervised-response
+version: 1.0.0
+maturity: experimental
+description: Numeric supervised query objective that projects raw TruthSidecar values into each prediction's declared context-standardized coordinate system before loss.
+objectives:
+  - objective_id: tabu.objective.context_standardized_numeric_mse
+    weight: 1.0
+    target_origin: query
+truth_entry: loss_only

@@ -35,9 +35,9 @@ def test_repository_resolves_machine_independent_snapshot_identities(tmp_path: P
     copied_root = _copy_evolution_specs(tmp_path)
     copied = EvolutionRepository.load(copied_root, verify_sources=False)
 
-    assert len(repository.nodes) == 42
+    assert len(repository.nodes) == 44
     assert len(repository.edges) == 7
-    assert len(repository.programs) == 15
+    assert len(repository.programs) == 17
     assert repository.repository_hash == copied.repository_hash
     for program_ref in repository.programs:
         assert repository.resolve(program_ref).snapshot_hash == copied.resolve(

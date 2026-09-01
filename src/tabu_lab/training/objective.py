@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
 import torch
 from torch import Tensor, nn
 from torch.nn import functional as F
 
 from tabu_lab.contracts import LossBundle, PredictionBundle, TruthSidecar
+
+NumericTargetCoordinate = Literal["raw", "context_standardized"]
 
 
 def _required_auxiliary(prediction: PredictionBundle, name: str) -> Tensor:
@@ -52,6 +56,46 @@ def _masked_mean(values: Tensor, mask: Tensor) -> Tensor:
     return torch.where(mask, values, torch.zeros_like(values)).sum() / count.clamp_min(1)
 
 
+def _numeric_truth_in_prediction_coordinates(
+    prediction: PredictionBundle,
+    truth_values: Tensor,
+    *,
+    coordinate: NumericTargetCoordinate,
+) -> Tensor:
+    """Project raw sidecar truth into the numeric prediction coordinate system."""
+
+    if coordinate == "raw":
+        return truth_values
+
+    numeric_entry = prediction.entries.get("numeric")
+    value_space = None if numeric_entry is None else numeric_entry.metadata.get("value_space")
+    if value_space != "context_standardized":
+        raise ValueError(
+            "context-standardized objective requires a numeric prediction entry "
+            "declared in context_standardized value space"
+        )
+    mean = _required_auxiliary(prediction, "numeric_context_mean").to(
+        device=truth_values.device,
+        dtype=truth_values.dtype,
+    )
+    scale = _required_auxiliary(prediction, "numeric_context_scale").to(
+        device=truth_values.device,
+        dtype=truth_values.dtype,
+    )
+    try:
+        mean = torch.broadcast_to(mean, truth_values.shape)
+        scale = torch.broadcast_to(scale, truth_values.shape)
+    except RuntimeError as exc:
+        raise ValueError(
+            "numeric context mean/scale must broadcast to TruthSidecar target values"
+        ) from exc
+    if not bool(torch.isfinite(mean).all()) or not bool(torch.isfinite(scale).all()):
+        raise ValueError("numeric context mean/scale must be finite")
+    if bool((scale <= 0).any()):
+        raise ValueError("numeric context scale must be strictly positive")
+    return (truth_values - mean) / scale
+
+
 class MixedObjective(nn.Module):
     """Equal-weight active-family objective for numeric and categorical cells.
 
@@ -68,6 +112,7 @@ class MixedObjective(nn.Module):
         categorical_nll_weight: float = 1.0,
         categorical_epsilon: float = 1.0e-8,
         include_categorical: bool = True,
+        numeric_target_coordinate: NumericTargetCoordinate = "raw",
     ) -> None:
         super().__init__()
         if mse_weight < 0.0 or mae_weight < 0.0:
@@ -78,14 +123,19 @@ class MixedObjective(nn.Module):
             raise ValueError("categorical_nll_weight must be positive")
         if not 0.0 < categorical_epsilon < 1.0:
             raise ValueError("categorical_epsilon must be in (0, 1)")
+        if numeric_target_coordinate not in {"raw", "context_standardized"}:
+            raise ValueError(
+                "numeric_target_coordinate must be raw or context_standardized"
+            )
         self.mse_weight = float(mse_weight)
         self.mae_weight = float(mae_weight)
         self.categorical_nll_weight = float(categorical_nll_weight)
         self.categorical_epsilon = float(categorical_epsilon)
         self.include_categorical = bool(include_categorical)
+        self.numeric_target_coordinate = numeric_target_coordinate
 
     @property
-    def resume_config(self) -> dict[str, float | bool]:
+    def resume_config(self) -> dict[str, float | bool | str]:
         """Immutable scalar configuration bound into exact-resume checkpoints."""
 
         return {
@@ -94,6 +144,7 @@ class MixedObjective(nn.Module):
             "include_categorical": self.include_categorical,
             "mae_weight": self.mae_weight,
             "mse_weight": self.mse_weight,
+            "numeric_target_coordinate": self.numeric_target_coordinate,
         }
 
     def forward(
@@ -140,8 +191,14 @@ class MixedObjective(nn.Module):
             raise ValueError("numeric/categorical target masks must partition model targets")
 
         numeric = _family_tensor(prediction, "numeric", shape=model_targets.shape)
-        numeric_truth = truth_values.to(device=numeric.device, dtype=numeric.dtype)
         numeric_scored = truth_targets & numeric_targets & numeric_support
+        numeric_truth = truth_values.to(device=numeric.device, dtype=numeric.dtype)
+        if bool(numeric_scored.any()):
+            numeric_truth = _numeric_truth_in_prediction_coordinates(
+                prediction,
+                numeric_truth,
+                coordinate=self.numeric_target_coordinate,
+            )
         numeric_error_cells = numeric - numeric_truth
         if bool(numeric_scored.any()):
             mse = _masked_mean(numeric_error_cells.square(), numeric_scored)
@@ -353,6 +410,7 @@ class MixedObjective(nn.Module):
                 "type_reduction": "equal_within_each_active_family",
                 "mae_weight": self.mae_weight,
                 "mse_weight": self.mse_weight,
+                "numeric_target_coordinate": self.numeric_target_coordinate,
                 "status": (
                     "no_truth" if target_count == 0 else "no_support" if scored_count == 0 else "ok"
                 ),
@@ -364,15 +422,22 @@ class MixedObjective(nn.Module):
 class NumericObjective(MixedObjective):
     """Compatibility specialization that scores only the numeric family."""
 
-    def __init__(self, *, mse_weight: float = 1.0, mae_weight: float = 0.0) -> None:
+    def __init__(
+        self,
+        *,
+        mse_weight: float = 1.0,
+        mae_weight: float = 0.0,
+        numeric_target_coordinate: NumericTargetCoordinate = "raw",
+    ) -> None:
         super().__init__(
             mse_weight=mse_weight,
             mae_weight=mae_weight,
             include_categorical=False,
+            numeric_target_coordinate=numeric_target_coordinate,
         )
 
 
 Objective = MixedObjective
 
 
-__all__ = ["MixedObjective", "NumericObjective", "Objective"]
+__all__ = ["MixedObjective", "NumericObjective", "NumericTargetCoordinate", "Objective"]

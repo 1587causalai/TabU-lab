@@ -21,12 +21,28 @@ from tabu_lab.evolution import (
 )
 from tabu_lab.evolution.checkpoint import read_checkpoint_model_state
 from tabu_lab.evolution.models import ProgramRunReceipt
-from tabu_lab.evolution.runtime import _build_runtime_model, identity_state_projection
+from tabu_lab.evolution.runtime import _build_runtime_model, _objective, identity_state_projection
 
 ROOT = Path(__file__).resolve().parents[2]
 BASE = "tabu.pretraining.query-base@1.0.0"
 ROW = "tabu.pretraining.query-row@1.0.0"
 GENERATOR_VNEXT = "tabu.pretraining.query-base-generator-v3@1.1.0-exercise"
+
+
+def test_versioned_objective_selects_context_standardized_truth_coordinates() -> None:
+    repository = EvolutionRepository.load(ROOT)
+    objective = _objective(
+        repository.node("tabu.objectives.context-standardized-supervised-response@1.0.0")
+    )
+
+    assert objective.resume_config["numeric_target_coordinate"] == "context_standardized"
+
+
+def test_legacy_objective_keeps_raw_truth_coordinates() -> None:
+    repository = EvolutionRepository.load(ROOT)
+    objective = _objective(repository.node("tabu.objectives.supervised-response@1.0.0"))
+
+    assert objective.resume_config["numeric_target_coordinate"] == "raw"
 
 
 @pytest.mark.parametrize(
