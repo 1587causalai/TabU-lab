@@ -132,6 +132,7 @@ def _run(args: argparse.Namespace) -> int:
                     "receipt_file": result.telemetry.receipt_path.name,
                     "wandb_run_id": result.telemetry.wandb_run_id,
                     "wandb_url": result.telemetry.wandb_url,
+                    "wandb_sync_mode": result.telemetry.wandb_sync_mode,
                 }
             ),
         }

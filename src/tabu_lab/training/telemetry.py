@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import math
+import os
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
@@ -187,6 +188,7 @@ class TelemetryResult:
     status: str
     wandb_run_id: str | None
     wandb_url: str | None
+    wandb_sync_mode: str | None
 
 
 class TrainingTelemetry:
@@ -221,6 +223,7 @@ class TrainingTelemetry:
         self._wandb: Any = None
         self._wandb_run: Any = None
         self._wandb_error: str | None = None
+        self._wandb_sync_mode = os.environ.get("WANDB_MODE", "online") if mode == "wandb" else None
         self._logged_steps = 0
         if mode == "wandb":
             try:
@@ -240,7 +243,6 @@ class TrainingTelemetry:
                         "telemetry_protocol_ref": protocol.ref,
                         "telemetry_protocol_hash": protocol.protocol_hash,
                     },
-                    reinit=True,
                 )
             except Exception as exc:  # pragma: no cover - external observer boundary
                 self._wandb_error = f"{type(exc).__name__}: {exc}"
@@ -276,14 +278,21 @@ class TrainingTelemetry:
         wandb_run_id = None
         wandb_url = None
         if self._wandb_run is not None:
-            wandb_run_id = str(getattr(self._wandb_run, "id", "")) or None
-            wandb_url = str(getattr(self._wandb_run, "url", "")) or None
+            raw_run_id = getattr(self._wandb_run, "id", None)
+            raw_url = getattr(self._wandb_run, "url", None)
+            wandb_run_id = raw_run_id if isinstance(raw_run_id, str) and raw_run_id else None
+            wandb_url = raw_url if isinstance(raw_url, str) and raw_url else None
             try:
                 self._wandb_run.finish()
             except Exception as exc:  # pragma: no cover - external observer boundary
                 self._wandb_error = f"{type(exc).__name__}: {exc}"
         self._stream.close()
-        status = "ok" if self._wandb_error is None else "local_only_degraded"
+        if self._wandb_error is not None:
+            status = "local_only_degraded"
+        elif self.mode == "wandb" and self._wandb_sync_mode == "offline":
+            status = "offline_ready_for_sync"
+        else:
+            status = "ok"
         receipt = {
             "schema_version": "tabu.telemetry-receipt.v1",
             "observer_semantics": "non_authoritative_projection",
@@ -299,6 +308,7 @@ class TrainingTelemetry:
             "metrics_sha256": _file_sha256(self.metrics_path),
             "wandb_run_id": wandb_run_id,
             "wandb_url": wandb_url,
+            "wandb_sync_mode": self._wandb_sync_mode,
             "wandb_error": self._wandb_error,
         }
         receipt["receipt_hash"] = canonical_hash(receipt)
@@ -309,6 +319,7 @@ class TrainingTelemetry:
             status=status,
             wandb_run_id=wandb_run_id,
             wandb_url=wandb_url,
+            wandb_sync_mode=self._wandb_sync_mode,
         )
 
 
