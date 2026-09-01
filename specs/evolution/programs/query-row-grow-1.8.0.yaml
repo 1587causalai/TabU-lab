@@ -1,0 +1,16 @@
+schema_version: tabu.program-snapshot.v1
+program_id: tabu.pretraining.query-row
+version: 1.8.0
+research_question: Does a d_model-64, four-block TabUR acquire basic synthetic fitting ability and improve mixed-response learning relative to the tiny capacity anchor?
+lane: grow
+evidence_status: local_unissued
+model_contract: {node_id: tabu.query.row, version: 0.2.0}
+component_graph: {node_id: tabu.graph.query.row, version: 1.2.0}
+world_mixture: {node_id: tabu.mixture.supervised-v3, version: 1.2.0}
+sampling_policy: {node_id: tabu.policy.fixed, version: 1.0.0}
+objective_bundle: {node_id: tabu.objectives.mixed-response-supervised, version: 1.0.0}
+training_recipe: {node_id: tabu.training.mixed-response-online-pilot, version: 1.0.0}
+evaluation_protocol: {node_id: tabu.eval.transfer-lanes, version: 1.0.0}
+state_projection: {node_id: tabu.projection.query-row-capacity64, version: 1.0.0}
+parent: {program_id: tabu.pretraining.query-row, version: 1.7.0}
+description: Capacity-vNext scratch Grow candidate; independent from TabUBase and without inherited evidence status.
