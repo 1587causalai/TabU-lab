@@ -70,6 +70,10 @@ def test_context_standardized_objective_projects_raw_truth_before_loss() -> None
     assert loss.components["mse"].item() == pytest.approx(0.25)
     assert loss.metadata["numeric_target_coordinate"] == "context_standardized"
     assert loss.total.item() == pytest.approx(0.25)
+    assert loss.components["numeric_context_mean_mse"].item() == pytest.approx(4.0)
+    assert loss.components["numeric_skill_vs_context_mean"].item() == pytest.approx(
+        1.0 - 0.25 / 4.0
+    )
 
 
 def test_context_standardized_objective_is_affine_invariant() -> None:

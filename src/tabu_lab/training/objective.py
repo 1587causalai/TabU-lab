@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Any, Literal
 
 import torch
 from torch import Tensor, nn
@@ -54,6 +54,55 @@ def _masked_mean(values: Tensor, mask: Tensor) -> Tensor:
         raise ValueError("masked mean requires matching values and bool mask")
     count = mask.sum().to(dtype=values.dtype)
     return torch.where(mask, values, torch.zeros_like(values)).sum() / count.clamp_min(1)
+
+
+def _masked_std(values: Tensor, mask: Tensor) -> Tensor:
+    mean = _masked_mean(values, mask)
+    return _masked_mean((values - mean).square(), mask).sqrt()
+
+
+def _safe_skill(candidate: Tensor, baseline: Tensor) -> Tensor:
+    epsilon = torch.finfo(candidate.dtype).eps
+    return torch.where(
+        baseline > epsilon,
+        1.0 - candidate / baseline.clamp_min(epsilon),
+        torch.zeros_like(candidate),
+    )
+
+
+def _categorical_context_prior(
+    prediction: PredictionBundle,
+    evidence: Any,
+    *,
+    probabilities: Tensor,
+) -> Tensor | None:
+    """Build a truth-free empirical class prior at the objective boundary."""
+
+    values = getattr(evidence, "forward_values", None)
+    source_mask = getattr(evidence, "source_mask", None)
+    domain_values = prediction.auxiliaries.get("categorical_domain_values")
+    domain_mask = prediction.auxiliaries.get("categorical_domain_mask")
+    if any(value is None for value in (values, source_mask, domain_values, domain_mask)):
+        return None
+    values = values.to(device=probabilities.device, dtype=probabilities.dtype)
+    source_mask = source_mask.to(device=probabilities.device, dtype=torch.bool)
+    domain_values = domain_values.to(device=probabilities.device, dtype=probabilities.dtype)
+    domain_mask = domain_mask.to(device=probabilities.device, dtype=torch.bool)
+    if (
+        values.ndim != 2
+        or values.shape != probabilities.shape[:-1]
+        or source_mask.shape != values.shape
+        or domain_values.shape != probabilities.shape[-2:]
+        or domain_mask.shape != domain_values.shape
+    ):
+        return None
+    matches = torch.isclose(
+        values.unsqueeze(-1), domain_values.unsqueeze(0), rtol=0.0, atol=0.0
+    )
+    matches = matches & source_mask.unsqueeze(-1) & domain_mask.unsqueeze(0)
+    counts = matches.sum(dim=0).to(dtype=probabilities.dtype)
+    prior = counts / counts.sum(dim=-1, keepdim=True).clamp_min(1.0)
+    return prior.unsqueeze(0).expand(values.shape[0], -1, -1)
 
 
 def _numeric_truth_in_prediction_coordinates(
@@ -151,6 +200,8 @@ class MixedObjective(nn.Module):
         self,
         prediction: PredictionBundle,
         truth: TruthSidecar,
+        *,
+        evidence: Any = None,
     ) -> LossBundle:
         if prediction.episode_id != truth.episode_id:
             raise ValueError("prediction and TruthSidecar episode ids must match")
@@ -203,10 +254,50 @@ class MixedObjective(nn.Module):
         if bool(numeric_scored.any()):
             mse = _masked_mean(numeric_error_cells.square(), numeric_scored)
             mae = _masked_mean(numeric_error_cells.abs(), numeric_scored)
+            if self.numeric_target_coordinate == "context_standardized":
+                numeric_context_baseline = torch.zeros_like(numeric_truth)
+            else:
+                numeric_context_baseline = _required_auxiliary(
+                    prediction, "numeric_context_mean"
+                ).to(device=numeric_truth.device, dtype=numeric_truth.dtype)
+                numeric_context_baseline = torch.broadcast_to(
+                    numeric_context_baseline, numeric_truth.shape
+                )
+            numeric_context_mean_mse = _masked_mean(
+                (numeric_context_baseline - numeric_truth).square(), numeric_scored
+            )
+            numeric_skill_vs_context_mean = _safe_skill(mse, numeric_context_mean_mse)
+            numeric_prediction_std = _masked_std(numeric, numeric_scored)
+            numeric_target_std = _masked_std(numeric_truth, numeric_scored)
+            numeric_prediction_std_ratio = torch.where(
+                numeric_target_std > torch.finfo(numeric.dtype).eps,
+                numeric_prediction_std / numeric_target_std.clamp_min(
+                    torch.finfo(numeric.dtype).eps
+                ),
+                torch.zeros_like(numeric_prediction_std),
+            )
+            centered_prediction = numeric - _masked_mean(numeric, numeric_scored)
+            centered_truth = numeric_truth - _masked_mean(numeric_truth, numeric_scored)
+            covariance = _masked_mean(
+                centered_prediction * centered_truth, numeric_scored
+            )
+            correlation_denominator = numeric_prediction_std * numeric_target_std
+            numeric_prediction_target_correlation = torch.where(
+                correlation_denominator > torch.finfo(numeric.dtype).eps,
+                covariance
+                / correlation_denominator.clamp_min(torch.finfo(numeric.dtype).eps),
+                torch.zeros_like(covariance),
+            )
         else:
             zero = numeric.sum() * 0.0
             mse = zero
             mae = zero
+            numeric_context_mean_mse = zero
+            numeric_skill_vs_context_mean = zero
+            numeric_prediction_std = zero
+            numeric_target_std = zero
+            numeric_prediction_std_ratio = zero
+            numeric_prediction_target_correlation = zero
         numeric_loss = self.mse_weight * mse + self.mae_weight * mae
 
         distribution_entry = prediction.entries.get("distribution")
@@ -218,6 +309,15 @@ class MixedObjective(nn.Module):
         categorical_scored = truth_targets & categorical_targets & categorical_support
         categorical_accuracy = numeric.sum() * 0.0
         categorical_nll = numeric.sum() * 0.0
+        categorical_normalized_nll = numeric.sum() * 0.0
+        categorical_context_prior_nll = numeric.sum() * 0.0
+        categorical_skill_vs_context_prior = numeric.sum() * 0.0
+        categorical_prediction_entropy = numeric.sum() * 0.0
+        categorical_context_prior_entropy = numeric.sum() * 0.0
+        categorical_max_probability = numeric.sum() * 0.0
+        categorical_kl_from_context_prior = numeric.sum() * 0.0
+        categorical_brier = numeric.sum() * 0.0
+        categorical_balanced_accuracy = numeric.sum() * 0.0
         categorical_nll_cells = torch.zeros_like(numeric)
         if bool(categorical_scored.any()):
             if not self.include_categorical:
@@ -300,6 +400,80 @@ class MixedObjective(nn.Module):
                             epsilon_nll,
                         )
                 categorical_nll = _masked_mean(selected_nll, categorical_scored)
+                class_count = expanded_domain.sum(dim=-1).to(probabilities.dtype)
+                categorical_normalized_nll = _masked_mean(
+                    selected_nll / class_count.clamp_min(2.0).log(), categorical_scored
+                )
+                context_prior = _categorical_context_prior(
+                    prediction,
+                    evidence,
+                    probabilities=probabilities,
+                )
+                valid_probabilities = torch.where(
+                    expanded_domain, probabilities, torch.zeros_like(probabilities)
+                )
+                model_entropy_cells = -(
+                    valid_probabilities
+                    * valid_probabilities.clamp_min(self.categorical_epsilon).log()
+                ).sum(dim=-1)
+                categorical_prediction_entropy = _masked_mean(
+                    model_entropy_cells, categorical_scored
+                )
+                categorical_max_probability = _masked_mean(
+                    valid_probabilities.max(dim=-1).values, categorical_scored
+                )
+                if context_prior is not None:
+                    prior_selected = (
+                        context_prior * selected_classes.to(context_prior.dtype)
+                    ).sum(dim=-1)
+                    prior_nll_cells = -prior_selected.clamp_min(
+                        self.categorical_epsilon
+                    ).log()
+                    categorical_context_prior_nll = _masked_mean(
+                        prior_nll_cells, categorical_scored
+                    )
+                    categorical_skill_vs_context_prior = _safe_skill(
+                        categorical_nll, categorical_context_prior_nll
+                    )
+                    valid_prior = torch.where(
+                        expanded_domain, context_prior, torch.zeros_like(context_prior)
+                    )
+                    prior_entropy_cells = -(
+                        valid_prior * valid_prior.clamp_min(self.categorical_epsilon).log()
+                    ).sum(dim=-1)
+                    categorical_context_prior_entropy = _masked_mean(
+                        prior_entropy_cells, categorical_scored
+                    )
+                    kl_cells = (
+                        valid_probabilities
+                        * (
+                            valid_probabilities.clamp_min(self.categorical_epsilon).log()
+                            - valid_prior.clamp_min(self.categorical_epsilon).log()
+                        )
+                    ).sum(dim=-1)
+                    categorical_kl_from_context_prior = _masked_mean(
+                        kl_cells, categorical_scored
+                    )
+                one_hot = selected_classes.to(probabilities.dtype)
+                categorical_brier = _masked_mean(
+                    (valid_probabilities - one_hot).square().sum(dim=-1),
+                    categorical_scored,
+                )
+                predicted_classes = F.one_hot(
+                    probabilities.argmax(dim=-1), num_classes=probabilities.shape[-1]
+                ).to(torch.bool)
+                scored_classes = categorical_scored.unsqueeze(-1) & selected_classes
+                reduction_dims = tuple(range(scored_classes.ndim - 1))
+                class_totals = scored_classes.sum(dim=reduction_dims).to(probabilities.dtype)
+                class_correct = (
+                    scored_classes & predicted_classes
+                ).sum(dim=reduction_dims).to(probabilities.dtype)
+                active_classes = class_totals > 0
+                categorical_balanced_accuracy = torch.where(
+                    active_classes,
+                    class_correct / class_totals.clamp_min(1.0),
+                    torch.zeros_like(class_correct),
+                ).sum() / active_classes.sum().clamp_min(1)
                 categorical_nll_cells = torch.where(
                     categorical_scored,
                     selected_nll.to(numeric.dtype),
@@ -371,12 +545,29 @@ class MixedObjective(nn.Module):
             total=total,
             components={
                 "categorical_accuracy": categorical_accuracy,
+                "categorical_balanced_accuracy": categorical_balanced_accuracy,
+                "categorical_brier": categorical_brier,
+                "categorical_context_prior_entropy": categorical_context_prior_entropy,
+                "categorical_context_prior_nll": categorical_context_prior_nll,
+                "categorical_kl_from_context_prior": categorical_kl_from_context_prior,
+                "categorical_max_probability": categorical_max_probability,
                 "categorical_nll": categorical_nll,
+                "categorical_normalized_nll": categorical_normalized_nll,
+                "categorical_prediction_entropy": categorical_prediction_entropy,
+                "categorical_skill_vs_context_prior": categorical_skill_vs_context_prior,
                 "completion_loss": completion_loss,
                 "label_loss": label_loss,
                 "mae": mae,
                 "mse": mse,
+                "numeric_context_mean_mse": numeric_context_mean_mse,
                 "numeric_loss": numeric_loss,
+                "numeric_prediction_std": numeric_prediction_std,
+                "numeric_prediction_std_ratio": numeric_prediction_std_ratio,
+                "numeric_prediction_target_correlation": (
+                    numeric_prediction_target_correlation
+                ),
+                "numeric_skill_vs_context_mean": numeric_skill_vs_context_mean,
+                "numeric_target_std": numeric_target_std,
             },
             counts={
                 "abstained_targets": target_count - scored_count,

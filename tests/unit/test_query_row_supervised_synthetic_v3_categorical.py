@@ -118,11 +118,15 @@ def test_categorical_response_activates_nll_and_backpropagates(
     loss = Objective(
         numeric_target_coordinate="context_standardized",
         include_categorical=True,
-    )(prediction, episode.sidecar)
+    )(prediction, episode.sidecar, evidence=episode.evidence)
 
     assert loss.counts["numeric_scored_targets"] == 0
     assert loss.counts["categorical_scored_targets"] == episode.sidecar.target_count
     assert loss.components["categorical_nll"].item() > 0.0
+    assert torch.isfinite(loss.components["categorical_normalized_nll"])
+    assert torch.isfinite(loss.components["categorical_context_prior_nll"])
+    assert torch.isfinite(loss.components["categorical_skill_vs_context_prior"])
+    assert 0.0 <= loss.components["categorical_balanced_accuracy"].item() <= 1.0
     assert loss.metadata["label_active_types"] == ("categorical",)
     assert torch.isfinite(loss.total)
     loss.total.backward()

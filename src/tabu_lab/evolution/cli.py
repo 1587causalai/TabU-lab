@@ -110,6 +110,11 @@ def _run(args: argparse.Namespace) -> int:
         warm_start_checkpoint=args.warm_start_checkpoint,
         warm_start_source_program=args.warm_start_source_program,
         max_updates_this_invocation=args.max_updates_this_invocation,
+        telemetry_mode=args.telemetry_mode,
+        telemetry_protocol=args.telemetry_protocol,
+        wandb_project=args.wandb_project,
+        wandb_entity=args.wandb_entity,
+        wandb_run_name=args.wandb_run_name,
     )
     _print(
         {
@@ -118,6 +123,17 @@ def _run(args: argparse.Namespace) -> int:
             "checkpoint": result.checkpoint.name,
             "checkpoint_sidecar": result.checkpoint_sidecar.name,
             "receipt_file": result.receipt_path.name,
+            "telemetry": (
+                None
+                if result.telemetry is None
+                else {
+                    "status": result.telemetry.status,
+                    "metrics_file": result.telemetry.metrics_path.name,
+                    "receipt_file": result.telemetry.receipt_path.name,
+                    "wandb_run_id": result.telemetry.wandb_run_id,
+                    "wandb_url": result.telemetry.wandb_url,
+                }
+            ),
         }
     )
     return 0
@@ -221,6 +237,20 @@ def add_program_commands(subparsers: argparse._SubParsersAction[argparse.Argumen
     run.add_argument("--output-root", type=Path, required=True)
     run.add_argument("--device", default="cpu")
     run.add_argument("--max-updates-this-invocation", type=int)
+    run.add_argument(
+        "--telemetry-mode",
+        choices=("disabled", "local", "wandb"),
+        default="disabled",
+        help="passive observer backend; never changes ProgramSnapshot identity",
+    )
+    run.add_argument(
+        "--telemetry-protocol",
+        type=Path,
+        help="versioned observer protocol (default: checked-in pretraining core v1)",
+    )
+    run.add_argument("--wandb-project", default="tabu-pretraining")
+    run.add_argument("--wandb-entity")
+    run.add_argument("--wandb-run-name")
     run.set_defaults(handler=_run)
 
     evaluate = commands.add_parser(

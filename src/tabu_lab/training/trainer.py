@@ -226,7 +226,11 @@ class Trainer:
         prediction = self.model(execution_evidence)
         if not isinstance(prediction, PredictionBundle):
             raise TypeError("trainable model forward must return PredictionBundle")
-        loss = self.objective(prediction, execution_truth)
+        loss = self.objective(
+            prediction,
+            execution_truth,
+            evidence=execution_evidence,
+        )
         if not isinstance(loss, LossBundle):
             raise TypeError("objective must return LossBundle")
         loss.total.backward()
