@@ -1,0 +1,17 @@
+schema_version: tabu.evolution-node.v1
+kind: generator
+node_id: tabu.generator.supervised-query-row-broad
+version: 3.2.0
+maturity: experimental
+description: Immutable categorical-response capsule over v3.1; context-only thresholds discretize the response while query truth remains sidecar-only.
+generator_ref: tabur.supervised-query-row-broad-v3-categorical-response
+output_interface: tabu.evidence-truth-pair@1
+implementation:
+  source_path: src/tabu_lab/experiments/query_row_supervised_synthetic_v3_categorical.py
+  sha256: 7fdf4a38726f57a454c32bd5db5ea8246ad6394ff1034dcb013c928b5f62cf8d
+  symbol_ref: tabu_lab.experiments.query_row_supervised_synthetic_v3_categorical:make_query_row_supervised_synthetic_v3_categorical_episode
+  hash_mode: python_symbol
+runtime_ref: tabu_lab.experiments.query_row_supervised_synthetic_v3_categorical:make_query_row_supervised_synthetic_v3_categorical_episode
+immutable_config:
+  missing_frac: 0.0
+  max_routing_pairs: 8000000
