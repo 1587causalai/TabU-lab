@@ -12,8 +12,10 @@ Loss and evaluation remain outside this module at the typed objective boundary.
 
 from __future__ import annotations
 
+import json
 from collections.abc import Mapping
 from dataclasses import replace
+from hashlib import sha256
 from typing import Any
 
 import torch
@@ -53,11 +55,7 @@ class TabUV2CellAsQueryModel(DenseReferenceModel):
         super().__init__(config)
 
         resolved_k = config.matched_slots if k is None else k
-        if (
-            isinstance(resolved_k, bool)
-            or not isinstance(resolved_k, int)
-            or resolved_k <= 0
-        ):
+        if isinstance(resolved_k, bool) or not isinstance(resolved_k, int) or resolved_k <= 0:
             raise ValueError("k must be a positive integer")
         if lambda_F < 0.0 or lambda_U < 0.0:
             raise ValueError("lambda_F and lambda_U must be non-negative")
@@ -151,7 +149,7 @@ class TabUV2CellAsQueryModel(DenseReferenceModel):
                 batch,
                 n_rows,
                 n_features,
-                class_count,
+                max(len(getattr(spec, "domain", ())) for spec in inputs.feature_specs),
                 dtype=inputs.values.dtype,
                 device=inputs.values.device,
             )
@@ -174,14 +172,13 @@ class TabUV2CellAsQueryModel(DenseReferenceModel):
             # ICL, so restore the provenance order inside this explicit
             # classical adapter; the canonical learned terminal is unaffected.
             if inputs.row_ids:
+
                 def row_number(position: int) -> int:
                     value = inputs.row_ids[position].rsplit("-", 1)[-1]
                     return int(value) if value.isdigit() else position
 
                 fit_order = (
-                    inputs.metadata.get("context_fit_row_order")
-                    if inputs.metadata
-                    else None
+                    inputs.metadata.get("context_fit_row_order") if inputs.metadata else None
                 )
                 if isinstance(fit_order, list | tuple):
                     fit_rank = {int(row): rank for rank, row in enumerate(fit_order)}
@@ -196,21 +193,21 @@ class TabUV2CellAsQueryModel(DenseReferenceModel):
                 context_positions, dtype=torch.long, device=inputs.values.device
             )
             x_train = (
-                inputs.values[batch_index, context_index][:, predictors]
-                .detach()
-                .cpu()
-                .numpy()
+                inputs.values[batch_index, context_index][:, predictors].detach().cpu().numpy()
             )
             x_query = inputs.values[batch_index, target_rows][:, predictors].detach().cpu().numpy()
             y_train = (
-                inputs.values[batch_index, context_index, response_index]
-                .detach()
-                .cpu()
-                .numpy()
+                inputs.values[batch_index, context_index, response_index].detach().cpu().numpy()
             )
             estimator_name = self.context_terminal
             if is_categorical:
                 y_train = y_train.astype(np.int64)
+                observed_classes = np.unique(y_train)
+                if len(observed_classes) == 1:
+                    label = int(observed_classes[0])
+                    categorical_override[batch_index, target_rows, response_index, label] = 1.0
+                    override_mask[batch_index, target_rows, response_index] = True
+                    continue
                 if estimator_name == "linear":
                     scaler = StandardScaler().fit(x_train)
                     estimator = LogisticRegression(
@@ -261,8 +258,8 @@ class TabUV2CellAsQueryModel(DenseReferenceModel):
                     aligned[:, label] = probabilities[:, column]
                 aligned = np.clip(aligned, 1.0e-12, None)
                 aligned /= aligned.sum(axis=1, keepdims=True)
-                categorical_override[batch_index, target_rows, response_index] = torch.as_tensor(
-                    aligned, device=inputs.values.device, dtype=inputs.values.dtype
+                categorical_override[batch_index, target_rows, response_index, :class_count] = (
+                    torch.as_tensor(aligned, device=inputs.values.device, dtype=inputs.values.dtype)
                 )
             else:
                 if estimator_name == "linear":
@@ -350,9 +347,7 @@ class TabUV2CellAsQueryModel(DenseReferenceModel):
             dtype=cells.dtype,
         ).view(1, self.k, 1, d_model)
         carrier[:, :n_rows, n_features:] = unit_queries.expand(batch, n_rows, -1, -1)
-        carrier[:, n_rows:, :n_features] = feature_queries.expand(
-            batch, -1, n_features, -1
-        )
+        carrier[:, n_rows:, :n_features] = feature_queries.expand(batch, -1, n_features, -1)
 
         # This is the only factual source gate.  Unit Query, Feature Query,
         # Cell Query and Null positions are receiver-only structural states.
@@ -381,9 +376,7 @@ class TabUV2CellAsQueryModel(DenseReferenceModel):
             raise ValueError("carrier is smaller than the ordinary table")
         cells = carrier[:, :n_rows, :n_features]
         unit_states = carrier[:, :n_rows, n_features : n_features + self.k]
-        feature_states = carrier[:, n_rows : n_rows + self.k, :n_features].permute(
-            0, 2, 1, 3
-        )
+        feature_states = carrier[:, n_rows : n_rows + self.k, :n_features].permute(0, 2, 1, 3)
         base = self.response_base.to(device=carrier.device, dtype=carrier.dtype).view(
             1, 1, 1, self.k, carrier.shape[-1]
         )
@@ -414,9 +407,7 @@ class TabUV2CellAsQueryModel(DenseReferenceModel):
             target_feature=kwargs.get("target_feature"),
             episode_id=kwargs.get("episode_id"),
         )
-        symbols, tokens, carrier_input, source_mask = self._compile_extended_carrier(
-            resolved
-        )
+        symbols, tokens, carrier_input, source_mask = self._compile_extended_carrier(resolved)
         carrier = self.dynamics(carrier_input, source_mask=source_mask)
         n_rows, n_features = resolved.values.shape[1:]
         response_field = self._response_field(
@@ -460,6 +451,9 @@ class TabUV2CellAsQueryModel(DenseReferenceModel):
             "feature_address": self.feature_address,
         }
         common_metadata: Mapping[str, Any] = {
+            "variant_hash": sha256(
+                json.dumps(self.checkpoint_identity(), sort_keys=True).encode()
+            ).hexdigest(),
             "dynamics_plan": self._dynamics_plan_name(self.dynamics),
             "unit": "cell_query",
             "family_id": "tabu.v2.cell_as_query",
@@ -598,9 +592,7 @@ class TabUV2CellAsQueryModel(DenseReferenceModel):
         expected = self.checkpoint_identity()
         for key, value in expected.items():
             if identity.get(key) != value:
-                raise ValueError(
-                    f"checkpoint identity mismatch at {key}: expected {value!r}"
-                )
+                raise ValueError(f"checkpoint identity mismatch at {key}: expected {value!r}")
 
 
 __all__ = ["TabUV2CellAsQueryModel"]

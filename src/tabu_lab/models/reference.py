@@ -429,30 +429,44 @@ class DenseReferenceModel(nn.Module):
                     or categorical_override_mask.dtype is not torch.bool
                 ):
                     raise ValueError("categorical override tensors do not match the readout")
+                override = categorical_probabilities_override.to(
+                    device=categorical_readout.probabilities.device,
+                    dtype=categorical_readout.probabilities.dtype,
+                )
+                domain_mask = layout.domain_mask.to(override.device).view(1, 1, n_features, -1)
+                selected_override = override[categorical_override_mask]
+                if not bool(torch.isfinite(selected_override).all()) or bool(
+                    (selected_override < 0).any()
+                ):
+                    raise ValueError("categorical override must be finite and nonnegative")
+                override = torch.where(domain_mask, override, torch.zeros_like(override))
+                mass = override.sum(dim=-1, keepdim=True)
+                if bool((mass.squeeze(-1)[categorical_override_mask] <= 0).any()):
+                    raise ValueError("categorical override requires positive declared-domain mass")
+                override = override / mass.clamp_min(torch.finfo(override.dtype).tiny)
                 probabilities = torch.where(
                     categorical_override_mask.unsqueeze(-1),
-                    categorical_probabilities_override.to(
-                        device=categorical_readout.probabilities.device,
-                        dtype=categorical_readout.probabilities.dtype,
-                    ),
+                    override,
                     categorical_readout.probabilities,
                 )
-                probabilities = probabilities.clamp_min(torch.finfo(probabilities.dtype).tiny)
-                probabilities = probabilities / probabilities.sum(dim=-1, keepdim=True).clamp_min(
-                    torch.finfo(probabilities.dtype).tiny
-                )
                 selected = probabilities.argmax(dim=-1)
-                expanded_domains = layout.domain_values.view(
-                    1, 1, n_features, -1
-                ).to(device=probabilities.device, dtype=probabilities.dtype).expand(
-                    *probabilities.shape[:-1], -1
+                expanded_domains = (
+                    layout.domain_values.view(1, 1, n_features, -1)
+                    .to(device=probabilities.device, dtype=probabilities.dtype)
+                    .expand(*probabilities.shape[:-1], -1)
                 )
                 values = expanded_domains.gather(-1, selected.unsqueeze(-1)).squeeze(-1)
                 categorical_readout = replace(
                     categorical_readout,
-                    values=values,
+                    values=torch.where(
+                        categorical_override_mask, values, categorical_readout.values
+                    ),
                     probabilities=probabilities,
-                    log_probabilities=probabilities.log(),
+                    log_probabilities=torch.where(
+                        categorical_override_mask.unsqueeze(-1),
+                        override.clamp_min(torch.finfo(override.dtype).tiny).log(),
+                        categorical_readout.log_probabilities,
+                    ),
                 )
 
         if emit_trace:

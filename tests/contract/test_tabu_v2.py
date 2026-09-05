@@ -183,8 +183,9 @@ def test_v2_public_forward_is_typed_and_truth_sidecar_only() -> None:
         target_values=torch.tensor([[0.0, 0.0], [0.0, 0.0], [0.0, 1.0], [9.0, 0.0]]),
         target_mask=truth_a.target_mask,
     )
-    first_loss = MixedObjective()(prediction, truth_a)
-    second_loss = MixedObjective()(prediction, truth_b)
+    objective = MixedObjective(numeric_target_coordinate="context_standardized")
+    first_loss = objective(prediction, truth_a)
+    second_loss = objective(prediction, truth_b)
     assert first_loss.total.item() != second_loss.total.item()
     assert prediction.prediction_hash == model(episode).prediction_hash
 
@@ -213,13 +214,56 @@ def test_v2_training_objective_has_a_finite_backward_path() -> None:
             [[False, False], [False, False], [False, True], [True, False]]
         ),
     )
-    loss = MixedObjective()(prediction, truth)
+    loss = MixedObjective(numeric_target_coordinate="context_standardized")(prediction, truth)
     assert torch.isfinite(loss.total)
     loss.total.backward()
     assert model.response_base.grad is not None
     assert torch.isfinite(model.response_base.grad).all()
     assert model.tokenizer.query_token.grad is not None
     assert torch.isfinite(model.tokenizer.query_token.grad).all()
+
+
+def test_v2_trace_identity_distinguishes_response_regimes() -> None:
+    baseline = TabUV2CellAsQueryModel(_config())(_episode())
+    adjusted = TabUV2CellAsQueryModel(_config(), lambda_F=1.0)(_episode())
+    assert baseline.metadata["variant_hash"] != adjusted.metadata["variant_hash"]
+    assert baseline.trace.model_hash != adjusted.trace.model_hash
+
+
+def test_v2_context_override_preserves_other_features_and_domain_padding() -> None:
+    pytest.importorskip("sklearn")
+    episode = replace(
+        _episode(),
+        feature_specs=(
+            FeatureSpec(
+                name="numeric", kind=FeatureKind.CATEGORICAL,
+                domain=("zero", "one", "two", "three"), codebook_id="predictor-domain",
+            ),
+            _episode().feature_specs[1],
+        ),
+    )
+    canonical = TabUV2CellAsQueryModel(_config()).eval()
+    adapter = TabUV2CellAsQueryModel(_config(), context_terminal="linear").eval()
+    adapter.load_state_dict(canonical.state_dict())
+    before = canonical(episode).entries["distribution"].values
+    after = adapter(episode).entries["distribution"].values
+    assert torch.equal(before[:, 0], after[:, 0])
+    assert torch.equal(after[:, 1, 3], torch.zeros_like(after[:, 1, 3]))
+    assert torch.allclose(after[2, 1].sum(), torch.tensor(1.0))
+
+
+def test_v2_linear_context_accepts_single_observed_response_class() -> None:
+    pytest.importorskip("sklearn")
+    episode = _episode()
+    values = episode.forward_values.clone()
+    values[:, 1] = 1.0
+    values[2, 1] = 0.0  # The held-out response remains physically absent from forward.
+    prediction = TabUV2CellAsQueryModel(_config(), context_terminal="linear")(
+        replace(episode, forward_values=values)
+    )
+    assert torch.equal(
+        prediction.entries["distribution"].values[2, 1], torch.tensor([0.0, 1.0, 0.0])
+    )
 
 
 def test_v2_empty_same_column_support_is_typed_no_support() -> None:

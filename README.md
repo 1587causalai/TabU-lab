@@ -44,7 +44,8 @@ checkpoint identity, or capability claim.
 
 ## Five-step runtime contract
 
-The mathematical authority is the Axis-C TabUR source. Runtime preserves the
+The mathematical authority for the default is the TabU-v2 source closure.
+The historical Axis-C TabUR source binds only the explicit legacy contract. Runtime preserves the
 same five-step boundary:
 
 1. **Compile evidence.** An `EvidenceEpisode` contains only model-visible table
@@ -70,7 +71,7 @@ same five-step boundary:
    coordinate is context-standardized. `numeric_raw_prediction` is an auxiliary
    inverse projection, not the Step-5 training target.
 
-The construction enforces $K=\texttt{matched\_slots}$ and keeps the numeric
+The construction defaults to $K=\texttt{matched\_slots}$ (an explicit `k` overrides it) and keeps the numeric
 terminal in context-standardized coordinates; `numeric_raw_prediction` is an
 auxiliary inverse projection. See the [TabU-v2 ModelSpec](./specs/models/tabu.v2.tabur.yaml)
 and the historical [query runtime mapping](./docs/architecture/query-model-runtime-mapping.md).
@@ -136,6 +137,10 @@ model = build_model(
 )
 # model.model_id == "tabu.v2.tabur"
 
+# Pair v2 predictions with truth in the same numeric coordinate:
+from tabu_lab.training import MixedObjective
+objective = MixedObjective(numeric_target_coordinate="context_standardized")
+
 # Historical TabUR remains an explicit compatibility choice:
 legacy = build_model(
     "tabu.query.row",
@@ -146,7 +151,9 @@ legacy = build_model(
 )
 ```
 
-The existing `scripts/run_tabur_r5_pretraining.py` is v2-bound. V3 execution
+The existing `scripts/run_tabur_r5_pretraining.py` is bound to synthetic prior v2
+(not the TabU-v2 model family). Those historical training programs remain explicitly
+pinned; changing the model-factory default does not rewrite their identities. Prior-v3 execution
 instead goes through `tabu-lab program run`, which binds the generator,
 1024-feature capacity graph, loss coordinate, checkpoint identity, policy
 state, and exact-resume state in one snapshot. A v2 checkpoint may initialize

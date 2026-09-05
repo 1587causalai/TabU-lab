@@ -10,6 +10,7 @@ from typing import Any, TypeVar
 from torch import nn
 
 from tabu_lab.numerics import DEFAULT_FLOAT_DTYPE
+from tabu_lab.registry import DEFAULT_MODEL_ID
 
 from .query_base import (
     CANONICAL_QUERY_COMPONENTS,
@@ -398,7 +399,6 @@ _CANONICAL_MODEL_BUILDERS: Mapping[str, Callable[..., Any]] = MappingProxyType(
         "tabu.query.row": build_tabu_query_row,
     }
 )
-DEFAULT_MODEL_ID = "tabu.v2.tabur"
 MODEL_BUILDERS = BuilderRegistry(
     _CANONICAL_MODEL_BUILDERS,
     protected_ids=frozenset(_CANONICAL_MODEL_BUILDERS),
@@ -450,9 +450,7 @@ def build_from_spec(spec: Any, **kwargs: Any) -> Any:
         raise RuntimeError("canonical query builder returned the wrong model type")
     if registered.contract_id == "tabu.query.row" and not isinstance(model, TabUQueryRowModel):
         raise RuntimeError("canonical query-row builder returned the wrong model type")
-    if registered.contract_id == "tabu.v2.tabur" and not isinstance(
-        model, TabUV2CellAsQueryModel
-    ):
+    if registered.contract_id == "tabu.v2.tabur" and not isinstance(model, TabUV2CellAsQueryModel):
         raise RuntimeError("canonical TabU-v2 builder returned the wrong model type")
     if getattr(model, "contract_version", None) != registered.contract_version:
         raise RuntimeError("builder returned the wrong contract version")

@@ -99,7 +99,9 @@ def content_hash(value: object) -> str:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
-def build_payload(*, refresh_existing: bool = False) -> dict[str, object]:
+def build_payload(
+    *, refresh_existing: bool = False, contract: str | None = None
+) -> dict[str, object]:
     if not FACTORY.is_dir():
         raise FileNotFoundError(
             "readonly model-factory source is unavailable; checked manifests remain usable"
@@ -115,6 +117,8 @@ def build_payload(*, refresh_existing: bool = False) -> dict[str, object]:
             existing_contracts = {}
     contracts: dict[str, object] = {}
     for contract_id, entrypoint_name in ENTRYPOINTS.items():
+        if contract is not None and contract_id != contract:
+            continue
         if contract_id in existing_contracts:
             # Existing contract identities are immutable by default.  The
             # owner must explicitly refresh a source binding after reviewing
@@ -144,6 +148,7 @@ def serialize(value: dict[str, object]) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
+    parser.add_argument("--contract", choices=tuple(ENTRYPOINTS), help="check one source binding")
     parser.add_argument(
         "--refresh-existing",
         action="store_true",
@@ -155,22 +160,39 @@ def main() -> None:
         help="skip source rehashing when the owner workspace is not mounted",
     )
     args = parser.parse_args()
+    if args.contract and not args.check:
+        parser.error(
+            "--contract requires --check; partial manifests must not replace full manifests"
+        )
     if args.if_available and not FACTORY.is_dir():
         print("SKIP: readonly model-factory source is unavailable")
         return
-    expected = serialize(build_payload(refresh_existing=args.refresh_existing))
+    payload = build_payload(
+        refresh_existing=args.check or args.refresh_existing, contract=args.contract
+    )
+    expected = serialize(payload)
     if args.check:
-        stale = [
-            path.relative_to(ROOT).as_posix()
-            for path in OUTPUTS
-            if not path.exists() or path.read_text(encoding="utf-8") != expected
-        ]
+
+        def matches(path: Path) -> bool:
+            if not path.is_file():
+                return False
+            if args.contract is None:
+                return path.read_text(encoding="utf-8") == expected
+            actual = json.loads(path.read_text(encoding="utf-8"))
+            return (
+                actual.get("contracts", {}).get(args.contract)
+                == payload["contracts"][args.contract]
+            )
+
+        stale = [path.relative_to(ROOT).as_posix() for path in OUTPUTS if not matches(path)]
         if stale:
             raise SystemExit(
                 f"model-factory source closure manifests are stale: {', '.join(stale)}; "
-                "run `python scripts/build_model_source_manifest.py`"
+                "review upstream changes before explicitly refreshing registered source bindings"
             )
-        print("PASS: model-factory source closure manifests are current")
+        print(
+            f"PASS: model-factory source closure manifests are current ({args.contract or 'all'})"
+        )
         return
     for path in OUTPUTS:
         path.write_text(expected, encoding="utf-8")
