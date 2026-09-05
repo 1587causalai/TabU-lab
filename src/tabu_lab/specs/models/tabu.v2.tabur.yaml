@@ -1,0 +1,353 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "tabu.v2.tabur",
+  "contract_version": "0.1.0",
+  "display_name": "TabU-v2 / TabUR (cell-as-query structural)",
+  "upstream": {
+    "repository": "TabU/latex/model-factory",
+    "path": "../latex/model-factory/TabU-v2/main.tex",
+    "sha256": "087c63c5686e6549f29b147354fa3e4a2b1b400db429b11b8a339758729fb9df",
+    "semantic_source_tree_sha256": "58b726db65106415344adc7f02e98905ce72058558062aa5faef1a9804623159",
+    "source_manifest": "pkg://tabu_lab.specs/model-factory-source-manifest.json#contracts/tabu.v2.tabur",
+    "readonly": true,
+    "observed_at": "2026-09-04",
+    "license_boundary": "Metadata-only reference: upstream TeX remains readonly and is not redistributed by this manifest."
+  },
+  "carrier": {
+    "family": "tabu.v2.cell_as_query",
+    "semantic_unit": "row",
+    "query": "cell",
+    "input_axes": [
+      "row_unit",
+      "feature",
+      "cell_query",
+      "unit_query",
+      "feature_query",
+      "null_corner"
+    ],
+    "shape": "(N+K) x (M+K) x d",
+    "blocks": {
+      "cell_plane": "N x M",
+      "unit_query_columns": "N x K",
+      "feature_query_rows": "K x M",
+      "null_corner": "K x K"
+    },
+    "source_contract": "Only naturally observed cells that remain input-visible provide factual K/V source.",
+    "receiver_contract": "Cell queries, Unit Query slots, and Feature Query slots may receive; Query and Null slots are excluded from the factual source lane.",
+    "parameterization": "Query banks are shared by sub-token index k; row and column addresses do not create parameter copies.",
+    "truth_boundary": "Query-cell truth enters only through TruthSidecar in Step 5."
+  },
+  "dynamics": {
+    "family": "whole_table_column_then_row_omab",
+    "operations": [
+      "typed_preprocess",
+      "shared_value_encoder",
+      "column_omab",
+      "row_omab"
+    ],
+    "output": "One complete H^(L) over the extended carrier; Unit, Feature, and Cell states are address-indexed views.",
+    "source_contract": "M_src is compiled from the visible set at episode start and reused by both OMAB axes; changing Query or Null roles does not add a factual source.",
+    "null_contract": "Exact-zero OAttention and final writeback preserve Null as zero; a fully empty source domain returns zero without NaN or bias-only pseudo-facts."
+  },
+  "readout": {
+    "geometry": "A_ra = W + lambda_F (F_a + lambda_U U_r); z_ra = A_ra c_ra with d_z = K.",
+    "regimes": {
+      "shared_across_datasets": "lambda_F = 0, lambda_U = 0, A_ra = W",
+      "dataset_specific": "lambda_F > 0, lambda_U = 0, A_ra = W + lambda_F F_a",
+      "unit_adjusted_dataset_specific": "lambda_F > 0, lambda_U > 0, A_ra = W + lambda_F (F_a + lambda_U U_r)"
+    },
+    "support": "Declared same-column visible support for each queried cell.",
+    "numeric_terminal": "Local-linear terminal in the context-standardized space.",
+    "categorical_terminal": "Nadaraya-Watson probability mass on the declared nominal/ordinal domain.",
+    "no_support": "Explicit typed no-support state; insufficient support is not silently converted to a prediction."
+  },
+  "loss": {
+    "truth_entry": "Step 5 only, after typed prediction is formed.",
+    "numeric": "Context-standardized MSE with an explicit empty-target-set branch.",
+    "categorical": "Declared-domain NLL with an explicit empty-target-set branch.",
+    "target_families": [
+      "artificial_mask_completion",
+      "optional_supervised_single_response"
+    ],
+    "objective": "Masked completion is the foundation objective; the supervised route is an additive, explicitly registered wedge."
+  },
+  "interfaces": {
+    "compile": "Typed partially observed table with cell queries, visible-value evidence, shared query seeds, and a compiled source mask.",
+    "forward": "Executable truth-free typed query predictions plus source/support trace; evidence and maturity claims remain open.",
+    "train": "Truth is supplied only through TruthSidecar; masked-cell completion remains active when the optional supervised wedge is enabled.",
+    "infer": "Declared query-cell predictions with typed support or typed no-support."
+  },
+  "capabilities": [
+    "cell_as_query",
+    "whole_table_masked_parallelism",
+    "row_axis_response_heterogeneity",
+    "exact_zero_oattention",
+    "truth_sidecar_isolation",
+    "typed_numeric_categorical_terminal"
+  ],
+  "maturity": {
+    "source_contract": "factory_source",
+    "stage": "experimental",
+    "contract": "specified",
+    "implementation": "experimental",
+    "evidence": "design_open",
+    "build_state": "buildable_contract"
+  },
+  "experimental_defaults": {
+    "series": "TabU-v2",
+    "model": "TabUR",
+    "response_regime": "shared_across_datasets",
+    "lambda_F": 0,
+    "lambda_U": 0,
+    "objective_mode": "masked_cell",
+    "source_policy": "visible_value_cells_only",
+    "numeric_terminal": "local_linear",
+    "categorical_terminal": "nadaraya_watson",
+    "reference_backend": "torch_dense_reference"
+  },
+  "known_open": [
+    {
+      "id": "runtime_carrier_and_masks",
+      "question": "Complete conformance review of the executable carrier implementation, source/receiver masks, and exact-zero writeback.",
+      "blocking_build": false
+    },
+    {
+      "id": "runtime_otransformer",
+      "question": "Complete independent conformance testing of the whole-table column-then-row OAttention/OMAB composition.",
+      "blocking_build": false
+    },
+    {
+      "id": "runtime_typed_terminal",
+      "question": "Complete independent conformance review of numeric/categorical terminal signatures, support accounting, and no-support state.",
+      "blocking_build": false
+    },
+    {
+      "id": "response_regime_receipts",
+      "question": "Bind response-regime gates and bank views to separate ModelVariantRef/checkpoint/receipt identities.",
+      "blocking_build": false
+    },
+    {
+      "id": "supervised_wedge",
+      "question": "Specify the optional supervised adapter and its objective composition without changing the TabU-v2 structural identity.",
+      "blocking_build": false
+    }
+  ],
+  "alternatives": [
+    {
+      "id": "dataset_specific_response",
+      "description": "Enable the Feature-bank response field with lambda_F > 0 while keeping lambda_U = 0.",
+      "status": "deferred"
+    },
+    {
+      "id": "unit_adjusted_response",
+      "description": "Enable the hierarchical Unit adjustment with lambda_U > 0.",
+      "status": "deferred"
+    },
+    {
+      "id": "free_response_field",
+      "description": "Let learned Unit/Feature banks replace the shared W matrix; this is not the current default.",
+      "status": "deferred"
+    }
+  ],
+  "kill": [
+    {
+      "id": "truth_leakage",
+      "condition": "Changing query-cell truth changes any Step 1-4 state, source mask, support trace, or prediction.",
+      "evidence": "TruthSidecar substitution invariance test"
+    },
+    {
+      "id": "query_or_null_source",
+      "condition": "A Query or Null slot contributes factual K/V content or normalization mass.",
+      "evidence": "source-lane and exact-zero OAttention audit"
+    },
+    {
+      "id": "null_drift",
+      "condition": "A Null slot leaves exact zero after any OMAB axis or final writeback.",
+      "evidence": "layerwise exact-zero trace"
+    },
+    {
+      "id": "query_unit_reversal",
+      "condition": "A cell is treated as a semantic Unit or W is treated as a semantic Unit.",
+      "evidence": "role and identity trace inspection"
+    },
+    {
+      "id": "address_lookup",
+      "condition": "Physical row or column addresses create hidden learned parameter copies.",
+      "evidence": "row/column permutation equivariance test"
+    }
+  ],
+  "exit": [
+    {
+      "id": "source_contract_frozen",
+      "condition": "The canonical source, carrier blocks, roles, source mask, readout regimes, typed terminal, and loss boundary are review-frozen.",
+      "evidence": "owner-reviewed source and manifest"
+    },
+    {
+      "id": "runtime_shapes",
+      "condition": "The runtime preserves (N+K) x (M+K) x d, emits one H^(L), and exposes only declared address-indexed views.",
+      "evidence": "shape and forward-contract receipt"
+    },
+    {
+      "id": "exact_zero_and_truth_isolation",
+      "condition": "Exact-zero closure, visible-only source eligibility, query-label isolation, and row/column equivariance all pass.",
+      "evidence": "conformance suite receipt"
+    },
+    {
+      "id": "independent_review",
+      "condition": "A non-developer review confirms that the new identity does not inherit old TabUR/axis-B receipts or implementation claims.",
+      "evidence": "independent review report"
+    }
+  ],
+  "mathematics": {
+    "schema_version": "1.0.0",
+    "abstract": "TabU-v2 / TabUR is a five-step cell-as-query structural contract whose extended carrier, visible-only source lane, exact-zero dynamics, hierarchical response field, typed terminal, and loss-only truth boundary are explicit.",
+    "unit_semantics": "The table row is the semantic Unit, the table column is a Feature, and a cell is a query address; Unit tokens, Feature tokens, and the shared W matrix are not semantic Units.",
+    "notation": [
+      {
+        "id": "visible_evidence",
+        "symbol": "\\mathcal E_{\\mathrm{in}}",
+        "domain": "input-side episode",
+        "meaning": "The typed visible evidence allowed to enter Steps 1--4."
+      },
+      {
+        "id": "query_set",
+        "symbol": "\\mathcal Q",
+        "domain": "cell addresses",
+        "meaning": "The query cells whose values are withheld from the forward path."
+      },
+      {
+        "id": "initial_carrier",
+        "symbol": "\\bm H^{(0)}",
+        "domain": "(N+K) x (M+K) x d",
+        "meaning": "The extended four-block carrier produced after typed preprocessing and encoding."
+      },
+      {
+        "id": "final_carrier",
+        "symbol": "\\bm H^{(L)}",
+        "domain": "(N+K) x (M+K) x d",
+        "meaning": "The single complete output of whole-table OTransformer dynamics."
+      },
+      {
+        "id": "response_field",
+        "symbol": "A_{ra}=W+\\lambda_{\\mathrm F}(F_a+\\lambda_{\\mathrm U}U_r)",
+        "domain": "cell address (r,a)",
+        "meaning": "The canonical hierarchical response field used by the TabUR readout."
+      },
+      {
+        "id": "truth_sidecar",
+        "symbol": "\\TruthSidecar",
+        "domain": "Step 5 only",
+        "meaning": "The loss-only store for query-cell truth."
+      }
+    ],
+    "steps": [
+      {
+        "id": "typed_episode",
+        "title": "Typed episode and truth isolation",
+        "purpose": "Compile visible evidence, query addresses, support, and loss-only truth without allowing target truth into the forward path.",
+        "equations": [
+          {
+            "id": "evidence_partition",
+            "latex": "\\mathcal O=\\mathcal V\\mathbin{\\dot\\cup}\\mathcal Q,\\qquad \\mathcal E_{\\mathrm{in}}=\\mathcal V",
+            "meaning": "Visible value cells and query cells are separate episode roles."
+          }
+        ],
+        "invariants": [
+          "Changing loss-side truth does not change input-side evidence."
+        ]
+      },
+      {
+        "id": "typed_carrier",
+        "title": "Typed preprocessing and four-block carrier",
+        "purpose": "Encode visible typed values and shared query seeds into one extended table.",
+        "equations": [
+          {
+            "id": "carrier_shape",
+            "latex": "\\bm H^{(0)}\\in\\mathbb R^{(N+K)\\times(M+K)\\times d}",
+            "meaning": "The carrier contains the cell plane, Unit Query columns, Feature Query rows, and Null corner."
+          }
+        ],
+        "invariants": [
+          "Query and Null slots add receiver positions but do not add factual source values."
+        ]
+      },
+      {
+        "id": "whole_table_dynamics",
+        "title": "Whole-table OTransformer dynamics",
+        "purpose": "Propagate information through the declared column-then-row OMAB topology under one episode-compiled source mask.",
+        "equations": [
+          {
+            "id": "transformer_output",
+            "latex": "\\bm H^{(L)}=\\operatorname{OTransformer}_{\\theta}(\\bm H^{(0)};\\mathsf M^{\\mathrm{src}})",
+            "meaning": "The dynamics expose one complete extended-table output."
+          }
+        ],
+        "invariants": [
+          "The source mask is visible-only and Query/Null source contribution is exactly zero."
+        ]
+      },
+      {
+        "id": "hierarchical_readout",
+        "title": "Hierarchical response field and typed terminal",
+        "purpose": "Read Unit, Feature, and Cell views from the same final carrier and form typed response states.",
+        "equations": [
+          {
+            "id": "response_geometry",
+            "latex": "A_{ra}=W+\\lambda_{\\mathrm F}(F_a+\\lambda_{\\mathrm U}U_r),\\qquad \\bm z_{ra}=A_{ra}\\bm c_{ra}",
+            "meaning": "Address-broadcast response gates combine shared, Feature, and Unit structure."
+          }
+        ],
+        "invariants": [
+          "Changing response gates does not change Steps 1--3, source masks, or the target set."
+        ]
+      },
+      {
+        "id": "loss_sidecar",
+        "title": "Cell-completion loss",
+        "purpose": "Pair typed predictions with query-cell truth only after the forward prediction exists.",
+        "equations": [
+          {
+            "id": "masked_objective",
+            "latex": "\\mathcal L_{\\mathrm{mask}}=\\mathcal L_{\\mathrm{num}}+\\mathcal L_{\\mathrm{disc}}",
+            "meaning": "Masked-cell restoration is the foundation objective; supervised loss is additive when explicitly enabled."
+          }
+        ],
+        "invariants": [
+          "Truth enters only at Step 5 through the TruthSidecar."
+        ]
+      }
+    ],
+    "invariants": [
+      {
+        "id": "single_final_carrier",
+        "statement": "OTransformer returns one complete H^(L), and all Step 4 views are slices of that carrier.",
+        "evidence": "forward output and shape trace"
+      },
+      {
+        "id": "visible_only_source",
+        "statement": "Only input-visible value cells can provide factual K/V source.",
+        "evidence": "source-mask trace"
+      },
+      {
+        "id": "exact_zero_closure",
+        "statement": "Null and fully empty source domains remain exact zero through attention and writeback.",
+        "evidence": "layerwise exact-zero test"
+      },
+      {
+        "id": "truth_isolation",
+        "statement": "Replacing query truth changes only the Step 5 loss.",
+        "evidence": "TruthSidecar substitution test"
+      },
+      {
+        "id": "address_equivariance",
+        "statement": "Row and column permutations jointly permute states and predictions without address lookup parameters.",
+        "evidence": "permutation equivariance test"
+      },
+      {
+        "id": "axis_b_noninheritance",
+        "statement": "Similarity to old axis-B or legacy TabUR formulas does not imply receipt or checkpoint inheritance.",
+        "evidence": "identity and lineage audit"
+      }
+    ]
+  }
+}

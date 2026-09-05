@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 from collections.abc import Mapping, Sequence
+from dataclasses import replace
 from typing import TYPE_CHECKING, Any
 
 import torch
@@ -367,6 +368,8 @@ class DenseReferenceModel(nn.Module):
         metadata: Mapping[str, Any],
         support_visible_mask: Tensor | None = None,
         extra_auxiliaries: Mapping[str, Tensor] | None = None,
+        categorical_probabilities_override: Tensor | None = None,
+        categorical_override_mask: Tensor | None = None,
         emit_trace: bool = True,
     ) -> Any:
         layout = feature_layout(inputs)
@@ -416,6 +419,41 @@ class DenseReferenceModel(nn.Module):
                 layout.domain_values,
                 layout.domain_mask,
             )
+            if categorical_probabilities_override is not None:
+                if categorical_override_mask is None:
+                    raise ValueError("categorical override requires an explicit target mask")
+                if (
+                    categorical_probabilities_override.shape
+                    != categorical_readout.probabilities.shape
+                    or categorical_override_mask.shape != inputs.values.shape
+                    or categorical_override_mask.dtype is not torch.bool
+                ):
+                    raise ValueError("categorical override tensors do not match the readout")
+                probabilities = torch.where(
+                    categorical_override_mask.unsqueeze(-1),
+                    categorical_probabilities_override.to(
+                        device=categorical_readout.probabilities.device,
+                        dtype=categorical_readout.probabilities.dtype,
+                    ),
+                    categorical_readout.probabilities,
+                )
+                probabilities = probabilities.clamp_min(torch.finfo(probabilities.dtype).tiny)
+                probabilities = probabilities / probabilities.sum(dim=-1, keepdim=True).clamp_min(
+                    torch.finfo(probabilities.dtype).tiny
+                )
+                selected = probabilities.argmax(dim=-1)
+                expanded_domains = layout.domain_values.view(
+                    1, 1, n_features, -1
+                ).to(device=probabilities.device, dtype=probabilities.dtype).expand(
+                    *probabilities.shape[:-1], -1
+                )
+                values = expanded_domains.gather(-1, selected.unsqueeze(-1)).squeeze(-1)
+                categorical_readout = replace(
+                    categorical_readout,
+                    values=values,
+                    probabilities=probabilities,
+                    log_probabilities=probabilities.log(),
+                )
 
         if emit_trace:
             routing_diagnostics, routing_auxiliaries = _routing_diagnostics(

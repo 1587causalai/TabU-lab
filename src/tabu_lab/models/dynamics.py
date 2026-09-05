@@ -152,3 +152,76 @@ class CellUnitDynamics(AugmentedDynamics):
         self.blocks = nn.ModuleList(
             InducedCarrierBlock(config, exclude_row_self=False) for _ in range(config.n_blocks)
         )
+
+
+class WholeTableBlock(nn.Module):
+    """One column-then-row OMAB pass over the extended TabU-v2 carrier."""
+
+    def __init__(self, config: ReferenceConfig) -> None:
+        super().__init__()
+        self.config = config
+        self.column = _block(config)
+        self.row = _block(config)
+
+    def forward(self, carrier: Tensor, *, source_mask: Tensor) -> Tensor:
+        if carrier.ndim != 4:
+            raise ValueError("carrier must be [B,R,C,D]")
+        batch, n_rows, n_columns, d_model = carrier.shape
+        expected = (batch, n_rows, n_columns)
+        if source_mask.shape != expected or source_mask.dtype is not torch.bool:
+            raise ValueError("source_mask must be bool [B,R,C] and match carrier")
+
+        columns = carrier.permute(0, 2, 1, 3).reshape(
+            batch * n_columns, n_rows, d_model
+        )
+        column_sources = source_mask.permute(0, 2, 1).reshape(
+            batch * n_columns, n_rows
+        )
+        columns = self.column(
+            columns,
+            columns,
+            source_mask=column_sources,
+        ).state
+        state = columns.reshape(batch, n_columns, n_rows, d_model).permute(
+            0, 2, 1, 3
+        ).contiguous()
+
+        rows = state.reshape(batch * n_rows, n_columns, d_model)
+        row_sources = source_mask.reshape(batch * n_rows, n_columns)
+        rows = self.row(
+            rows,
+            rows,
+            source_mask=row_sources,
+        ).state
+        return rows.reshape(batch, n_rows, n_columns, d_model)
+
+
+class WholeTableDynamics(nn.Module):
+    """Canonical TabU-v2 whole-table masked-parallel dynamics."""
+
+    plan = DynamicsPlan(
+        name="whole_table_column_then_row_omab",
+        stages=("column_omab", "row_omab"),
+        carrier="(N+K)x(M+K)",
+    )
+
+    def __init__(self, config: ReferenceConfig) -> None:
+        super().__init__()
+        self.blocks = nn.ModuleList(
+            WholeTableBlock(config) for _ in range(config.n_blocks)
+        )
+
+    def forward(self, carrier: Tensor, *, source_mask: Tensor) -> Tensor:
+        for block in self.blocks:
+            carrier = block(carrier, source_mask=source_mask)
+        return carrier
+
+
+__all__ = [
+    "AugmentedDynamics",
+    "CellUnitDynamics",
+    "DynamicsPlan",
+    "InducedCarrierBlock",
+    "WholeTableBlock",
+    "WholeTableDynamics",
+]

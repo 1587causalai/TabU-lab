@@ -9,10 +9,17 @@ It selects a complete immutable `ProgramSnapshot`: model contract, component
 graph, data mixture and policy, objective, training recipe, and evaluation
 protocol. Generated catalogs are query projections, not the source of truth.
 
-## Current focus: pretrain TabUBase and TabUR
+## Current focus: TabU-v2 / TabUR
 
-The primary experimental candidate is **TabUR** under
-`tabu.query.row@0.2.0`, using
+The executable model-factory default is **TabU-v2 / TabUR** under
+`tabu.v2.tabur@0.1.0`. It implements the cell-as-query structural design in
+the readonly `TabU-v2` source closure. Historical query-family models remain
+available through explicit contract ids and are not silently aliased to v2.
+TabU-v2 is still experimental: selecting it as the default is a routing
+decision, not an evidence-backed capability claim.
+
+The historical **TabUR** contract under `tabu.query.row@0.2.0` remains an
+explicit compatibility model, using
 `supervised.label_broadcast.v1` and the default symmetric `anchored` readout.
 **TabUBase** under `tabu.query.base@0.1.0` is an independently trainable sibling,
 not a prerequisite checkpoint. Both share the Episode/Prediction and evaluation
@@ -22,7 +29,8 @@ pretraining produces useful frozen ICL and then improves real-task fine-tuning.
 
 | Surface | Current status |
 | --- | --- |
-| TabUR contract and runtime | implemented under `tabu.query.row@0.2.0` |
+| TabU-v2 / TabUR contract and runtime | default via `tabu.v2.tabur@0.1.0` |
+| historical TabUR compatibility runtime | explicit `tabu.query.row@0.2.0` |
 | Evolvable program kernel | implemented with immutable manifests, typed DAG validation, impact analysis, freeze, exact resume, and explicit warm start |
 | Broad supervised synthetic prior v3 | candidate implementation selectable through versioned Generator/Mixture manifests |
 | v3 long-run pretraining | activated as scratch-first Grow snapshots `tabu.pretraining.query-{base,row}@1.2.0`; execution remains `local_unissued` until a run receipt exists |
@@ -43,41 +51,41 @@ same five-step boundary:
    evidence. Query truth is held outside the model in `TruthSidecar`.
 2. **Tokenize query cells.** Visible values, roles, masks, and null state produce
    typed initial cell states $h^{(0)}_{ra}$; target truth is absent.
-3. **Run typed dynamics.** The declared row/column source plan updates the
-   carrier to $h^{(L)}_{ra}$. Query labels, artificial masks, and null cells are
-   receiver-only where the contract requires it.
-4. **Read out coordinates.** With $c_{ra}=h^{(L)}_{ra}$, default TabUR uses
+3. **Run typed dynamics.** The visible-only source mask updates one extended
+   carrier of shape $(N+K)\times(M+K)\times d$ by column OMAB and then row OMAB.
+   Cell Query, Unit Query, Feature Query, and Null slots are receiver-only.
+4. **Read out coordinates.** With $c_{ra}=h^{(L)}_{ra}$, canonical TabU-v2 uses
 
    $$
-   z_{ra}=\left(W+\gamma\widehat U_rA^\top\right)c_{ra},
-   \qquad
-   \widehat U_r=\operatorname{LN}(U_r).
+   A_{ra}=W+\lambda_F(F_a+\lambda_U U_r),
+   \qquad z_{ra}=A_{ra}c_{ra}.
    $$
 
-   The general typed form is
-   $z_{ra}=(\beta W+\gamma\widehat U_rA^\top)c_{ra}$:
-   `homogeneous` gives $Wc$, `anchored` gives the expression above, and `free`
-   gives $U_rc$. Here $W$ is a global response parameter, not a Unit; $U_r$ is
-   the row-token bank; and effective $A$ has spectral norm one.
+   The default regime sets $\lambda_F=\lambda_U=0$, so the response field is
+   shared across datasets. Feature- and Unit-adjusted regimes are explicit
+   ablations. $W$ is a shared response parameter, not a semantic Unit; $F_a$
+   and $U_r$ are address-indexed views of the final carrier.
 5. **Score externally.** The typed terminal returns a `PredictionBundle`; the
    evaluator alone pairs it with `TruthSidecar`. The canonical numeric loss
    coordinate is context-standardized. `numeric_raw_prediction` is an auxiliary
    inverse projection, not the Step-5 training target.
 
-The construction enforces
-$K=\text{row-token count}=\text{rows}(W)=\text{coordinate width}=\texttt{matched_slots}$.
-See the complete [query runtime mapping](./docs/architecture/query-model-runtime-mapping.md)
-and the [TabUR ModelSpec](./specs/models/tabu.query.row.yaml).
+The construction enforces $K=\texttt{matched\_slots}$ and keeps the numeric
+terminal in context-standardized coordinates; `numeric_raw_prediction` is an
+auxiliary inverse projection. See the [TabU-v2 ModelSpec](./specs/models/tabu.v2.tabur.yaml)
+and the historical [query runtime mapping](./docs/architecture/query-model-runtime-mapping.md).
 
 ## Active defaults
 
 | Decision | Default |
 | --- | --- |
-| contract | `tabu.query.row@0.2.0` |
-| profile | `supervised.label_broadcast.v1` |
-| row readout | `anchored` |
-| $K$ | `row_token_count=4`, `matched_slots=4` |
-| anchored initialization | $\gamma_0=10^{-2}$ |
+| contract | `tabu.v2.tabur@0.1.0` |
+| historical compatibility contract | `tabu.query.row@0.2.0` (explicit only) |
+| response regime | shared across datasets, `lambda_F=0`, `lambda_U=0` |
+| numeric terminal | `local_linear` in context-standardized coordinates |
+| nominal tokenizer | `source_scoped_frozen_codebook.v2` |
+| $K$ | `matched_slots=4` |
+| pretraining direction | `MAINLINE.yaml` remains the existing query-base/query-row program pointer |
 | synthetic data | broad supervised synthetic prior v3 candidate |
 | v3 model capacity | `max_features=1024` for this lane only |
 | real-data estimand | all labeled train rows as context; all held-out test rows as queries |
@@ -114,18 +122,23 @@ See [evolvable pretraining programs](./docs/architecture/evolvable-pretraining-p
 for manifest ownership, lane semantics, resume rules, and the three evolution
 exercises.
 
-Build the current model explicitly:
+Build the current default model explicitly (the model id may be omitted):
 
 ```python
 from tabu_lab.models import build_model
 from tabu_lab.models.types import ReferenceConfig
 
 model = build_model(
-    "tabu.query.row",
     config=ReferenceConfig(
         matched_slots=4,
         max_features=1024,
     ),
+)
+# model.model_id == "tabu.v2.tabur"
+
+# Historical TabUR remains an explicit compatibility choice:
+legacy = build_model(
+    "tabu.query.row",
     profile="supervised.label_broadcast.v1",
     row_token_count=4,
     row_readout_mode="anchored",
@@ -158,8 +171,8 @@ See the [experiment ledger](./experiments/README.md) and
 
 ## Navigation
 
-- Model/runtime authority: [TabUR ModelSpec](./specs/models/tabu.query.row.yaml)
-  and [query runtime mapping](./docs/architecture/query-model-runtime-mapping.md)
+- Default model/runtime authority: [TabU-v2 ModelSpec](./specs/models/tabu.v2.tabur.yaml)
+  and the historical [query runtime mapping](./docs/architecture/query-model-runtime-mapping.md)
 - Current synthetic-prior candidate:
   [`query_row_supervised_synthetic_v3.py`](./src/tabu_lab/experiments/query_row_supervised_synthetic_v3.py)
 - Current evaluation routing: [experiments/README.md](./experiments/README.md)
