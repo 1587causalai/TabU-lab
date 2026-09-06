@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 import json
 import math
 import os
@@ -104,6 +105,21 @@ class Trainer:
             raise ValueError("max_gradient_norm must be positive when provided")
         self.model = model
         self.objective = objective or Objective()
+        # A named keyword is an explicit opt-in to the optional evidence adapter.
+        # Legacy two-argument objectives keep their original call contract.
+        try:
+            evidence_parameter = inspect.signature(self.objective.forward).parameters.get(
+                "evidence"
+            )
+        except (TypeError, ValueError):
+            evidence_parameter = None
+        self._objective_accepts_evidence = evidence_parameter is not None and (
+            evidence_parameter.kind
+            in (
+                inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                inspect.Parameter.KEYWORD_ONLY,
+            )
+        )
         self.optimizer = optimizer or torch.optim.AdamW(
             model.parameters(), lr=float(learning_rate)
         )
@@ -226,11 +242,10 @@ class Trainer:
         prediction = self.model(execution_evidence)
         if not isinstance(prediction, PredictionBundle):
             raise TypeError("trainable model forward must return PredictionBundle")
-        loss = self.objective(
-            prediction,
-            execution_truth,
-            evidence=execution_evidence,
-        )
+        if self._objective_accepts_evidence:
+            loss = self.objective(prediction, execution_truth, evidence=execution_evidence)
+        else:
+            loss = self.objective(prediction, execution_truth)
         if not isinstance(loss, LossBundle):
             raise TypeError("objective must return LossBundle")
         loss.total.backward()

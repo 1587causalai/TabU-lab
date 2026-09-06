@@ -250,6 +250,7 @@ class MixedObjective(nn.Module):
                 numeric_truth,
                 coordinate=self.numeric_target_coordinate,
             )
+        numeric_context_available = False
         numeric_error_cells = numeric - numeric_truth
         if bool(numeric_scored.any()):
             mse = _masked_mean(numeric_error_cells.square(), numeric_scored)
@@ -257,16 +258,19 @@ class MixedObjective(nn.Module):
             if self.numeric_target_coordinate == "context_standardized":
                 numeric_context_baseline = torch.zeros_like(numeric_truth)
             else:
-                numeric_context_baseline = _required_auxiliary(
-                    prediction, "numeric_context_mean"
-                ).to(device=numeric_truth.device, dtype=numeric_truth.dtype)
+                numeric_context_baseline = prediction.auxiliaries.get("numeric_context_mean")
+            if numeric_context_baseline is not None:
                 numeric_context_baseline = torch.broadcast_to(
-                    numeric_context_baseline, numeric_truth.shape
+                    numeric_context_baseline.to(
+                        device=numeric_truth.device, dtype=numeric_truth.dtype
+                    ),
+                    numeric_truth.shape,
                 )
-            numeric_context_mean_mse = _masked_mean(
-                (numeric_context_baseline - numeric_truth).square(), numeric_scored
-            )
-            numeric_skill_vs_context_mean = _safe_skill(mse, numeric_context_mean_mse)
+                numeric_context_mean_mse = _masked_mean(
+                    (numeric_context_baseline - numeric_truth).square(), numeric_scored
+                )
+                numeric_skill_vs_context_mean = _safe_skill(mse, numeric_context_mean_mse)
+                numeric_context_available = True
             numeric_prediction_std = _masked_std(numeric, numeric_scored)
             numeric_target_std = _masked_std(numeric_truth, numeric_scored)
             numeric_prediction_std_ratio = torch.where(
@@ -559,14 +563,20 @@ class MixedObjective(nn.Module):
                 "label_loss": label_loss,
                 "mae": mae,
                 "mse": mse,
-                "numeric_context_mean_mse": numeric_context_mean_mse,
+                **(
+                    {
+                        "numeric_context_mean_mse": numeric_context_mean_mse,
+                        "numeric_skill_vs_context_mean": numeric_skill_vs_context_mean,
+                    }
+                    if numeric_context_available
+                    else {}
+                ),
                 "numeric_loss": numeric_loss,
                 "numeric_prediction_std": numeric_prediction_std,
                 "numeric_prediction_std_ratio": numeric_prediction_std_ratio,
                 "numeric_prediction_target_correlation": (
                     numeric_prediction_target_correlation
                 ),
-                "numeric_skill_vs_context_mean": numeric_skill_vs_context_mean,
                 "numeric_target_std": numeric_target_std,
             },
             counts={
@@ -602,6 +612,7 @@ class MixedObjective(nn.Module):
                 "mae_weight": self.mae_weight,
                 "mse_weight": self.mse_weight,
                 "numeric_target_coordinate": self.numeric_target_coordinate,
+                "numeric_context_baseline_available": numeric_context_available,
                 "status": (
                     "no_truth" if target_count == 0 else "no_support" if scored_count == 0 else "ok"
                 ),

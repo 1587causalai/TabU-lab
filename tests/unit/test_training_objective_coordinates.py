@@ -130,3 +130,66 @@ def test_context_standardized_objective_requires_declared_prediction_space() -> 
 
     with pytest.raises(ValueError, match="declared in context_standardized"):
         objective(_prediction(value_space="raw"), _truth(14.0))
+
+
+def test_raw_loss_does_not_require_optional_context_baseline_telemetry() -> None:
+    loss = Objective(include_categorical=False)(
+        _prediction(context_mean=None, context_scale=None, value_space="raw"), _truth(14.0)
+    )
+    assert loss.total.item() == pytest.approx((1.5 - 14.0) ** 2)
+    assert loss.metadata["numeric_context_baseline_available"] is False
+    assert "numeric_context_mean_mse" not in loss.components
+    assert "numeric_skill_vs_context_mean" not in loss.components
+    assert all(torch.isfinite(value) for value in loss.components.values())
+
+
+@pytest.mark.parametrize("kind", ["two_argument", "evidence_keyword", "legacy_subclass"])
+def test_trainer_preserves_custom_objective_call_contract(kind: str) -> None:
+    from dataclasses import replace
+
+    from torch import nn
+
+    from tabu_lab.training import Trainer
+
+    evidence = object()
+    seen = []
+
+    class Model(nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.weight = nn.Parameter(torch.tensor(1.5))
+
+        def forward(self, inputs):
+            assert inputs is evidence
+            prediction = _prediction(context_mean=None, context_scale=None, value_space="raw")
+            numeric = prediction.entries["numeric"]
+            return replace(
+                prediction,
+                entries={"numeric": replace(numeric, values=self.weight.expand_as(numeric.values))},
+            )
+
+    class TwoArgumentObjective(nn.Module):
+        def forward(self, prediction, truth):
+            seen.append("two_argument")
+            return Objective(include_categorical=False)(prediction, truth)
+
+    class EvidenceObjective(nn.Module):
+        def forward(self, prediction, truth, *, evidence=None):
+            seen.append(evidence)
+            return Objective(include_categorical=False)(prediction, truth)
+
+    class LegacySubclass(Objective):
+        def forward(self, prediction, truth):
+            seen.append("legacy_subclass")
+            return super().forward(prediction, truth)
+
+    objective = {
+        "two_argument": TwoArgumentObjective,
+        "evidence_keyword": EvidenceObjective,
+        "legacy_subclass": LegacySubclass,
+    }[kind]()
+    model = Model()
+    result = Trainer(model, objective=objective).train_step(evidence, _truth(14.0))
+    assert seen == [evidence if kind == "evidence_keyword" else kind]
+    assert result.step == 1 and torch.isfinite(result.loss.total)
+    assert model.weight.item() != 1.5
