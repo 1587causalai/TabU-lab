@@ -9,7 +9,27 @@ It selects a complete immutable `ProgramSnapshot`: model contract, component
 graph, data mixture and policy, objective, training recipe, and evaluation
 protocol. Generated catalogs are query projections, not the source of truth.
 
-## Current focus: TabU-v2 / TabUR
+## Current research direction: TabU-TAR
+
+The current mathematical and implementation research direction is fourth-generation
+**TabU-TAR (Typed Additive Readout)**. Its additive response has independent
+Feature and Unit gates. The default realization uses fixed single-axis inducing
+slots; the direct, without-inducing realization remains an explicit baseline.
+Recommendation-specific two-axis designs are separate explorations.
+
+TAR integration into this branch is in progress. The existing executable factory
+and pretraining programs below retain their current identities while that work
+is validated. A research-direction change does not reinterpret an old checkpoint.
+
+New TAR validation starts with **Small** for rapid feedback. Standard remains the
+reference model design; important findings require separate larger-size checks.
+The evaluation ladder is: component correctness; decoupling, extension and growth;
+synthetic fitting; real-data prediction; synthetic pretraining with frozen ICL;
+and pretrained-versus-scratch real-task fine-tuning. Each stage needs its own
+evidence. Local fitting results do not establish pretrained or generalization
+capability.
+
+## Existing compatibility runtime: TabU-v2 / TabUR
 
 The executable model-factory default is **TabU-v2 / TabUR** under
 `tabu.v2.tabur@0.1.0`. It implements the cell-as-query structural design in
@@ -42,9 +62,9 @@ Results from Axis-B TabUBase, `tabu.query.row@0.1.0`, or synthetic priors v1/v2
 remain immutable historical evidence. They do not transfer to the current model,
 checkpoint identity, or capability claim.
 
-## Five-step runtime contract
+## Existing TabU-v2 runtime contract
 
-The mathematical authority for the default is the TabU-v2 source closure.
+The mathematical authority for the existing TabU-v2 runtime is its source closure.
 The historical Axis-C TabUR source binds only the explicit legacy contract. Runtime preserves the
 same five-step boundary:
 
@@ -76,7 +96,7 @@ terminal in context-standardized coordinates; `numeric_raw_prediction` is an
 auxiliary inverse projection. See the [TabU-v2 ModelSpec](./specs/models/tabu.v2.tabur.yaml)
 and the historical [query runtime mapping](./docs/architecture/query-model-runtime-mapping.md).
 
-## Active defaults
+## Existing runtime and pretraining defaults
 
 | Decision | Default |
 | --- | --- |
@@ -123,7 +143,7 @@ See [evolvable pretraining programs](./docs/architecture/evolvable-pretraining-p
 for manifest ownership, lane semantics, resume rules, and the three evolution
 exercises.
 
-Build the current default model explicitly (the model id may be omitted):
+Build the existing compatibility default model explicitly (the model id may be omitted):
 
 ```python
 from tabu_lab.models import build_model
