@@ -17,9 +17,13 @@ Feature and Unit gates. The default realization uses fixed single-axis inducing
 slots; the direct, without-inducing realization remains an explicit baseline.
 Recommendation-specific two-axis designs are separate explorations.
 
-TAR integration into this branch is in progress. The existing executable factory
-and pretraining programs below retain their current identities while that work
-is validated. A research-direction change does not reinterpret an old checkpoint.
+The TAR model is available through explicit `build_model("tabu.tar")` and
+`tabu-lab tar inspect` / `tabu-lab tar verify`. The latter validates named Small;
+`--full` explicitly selects Standard. Read the [implementation design snapshot](
+docs/design/README.md) for the mathematical contract and checkpoint identity boundary.
+The existing no-argument model factory and pretraining programs below retain their
+compatibility identities. A research-direction change does not reinterpret an old
+checkpoint.
 
 New TAR validation starts with **Small** for rapid feedback. Standard remains the
 reference model design; important findings require separate larger-size checks.

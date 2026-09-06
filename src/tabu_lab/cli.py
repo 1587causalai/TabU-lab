@@ -59,6 +59,33 @@ def _run_optimize(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_tar(args: argparse.Namespace) -> int:
+    if args.tar_command == "sizes":
+        from tabu_lab.tar_sizes import list_sizes
+
+        print(json.dumps(list_sizes(), indent=2))
+        return 0
+    if args.tar_command == "inspect" and args.size != "standard":
+        from tabu_lab.tar_sizes import inspect_size
+
+        print(json.dumps(inspect_size(args.size), indent=2, sort_keys=True))
+        return 0
+    if args.tar_command == "inspect":
+        from tabu_lab.models.tar.verification import inspect_model
+
+        result = inspect_model()
+    elif args.smoke:
+        from tabu_lab.models.tar.verification import verify_model
+
+        result = dict(verify_model(), model_size="cpu-smoke")
+    else:
+        from tabu_lab.tar_sizes import DEFAULT_VALIDATION_SIZE
+        from tabu_lab.tar_validation import verify_size
+
+        result = verify_size("standard" if args.full else args.size or DEFAULT_VALIDATION_SIZE)
+    print(json.dumps(result, indent=2, sort_keys=True))
+    return 0
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="tabu-lab")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -92,6 +119,23 @@ def build_parser() -> argparse.ArgumentParser:
         help="execute the declared bounded runner after resolving the plan",
     )
     optimize.set_defaults(handler=_run_optimize)
+    tar = subparsers.add_parser("tar", help="TabU-TAR local implementation checks")
+    tar_sub = tar.add_subparsers(dest="tar_command", required=True)
+    inspect = tar_sub.add_parser("inspect", help="inspect allocation-free full model shapes")
+    inspect.add_argument("--size", choices=("small", "medium", "standard"), default="standard")
+    inspect.set_defaults(handler=_run_tar)
+    sizes = tar_sub.add_parser("sizes", help="list named TAR model sizes")
+    sizes.set_defaults(handler=_run_tar)
+    verify = tar_sub.add_parser(
+        "verify", help="forward/backward/update/checkpoint correctness probe"
+    )
+    verify_size = verify.add_mutually_exclusive_group()
+    verify_size.add_argument(
+        "--size", choices=("small", "medium", "standard"), help="validation size (default: small)"
+    )
+    verify_size.add_argument("--full", action="store_true", help="explicit 54M Standard validation")
+    verify_size.add_argument("--smoke", action="store_true", help="legacy tiny CPU plumbing check")
+    verify.set_defaults(handler=_run_tar)
     return parser
 
 
