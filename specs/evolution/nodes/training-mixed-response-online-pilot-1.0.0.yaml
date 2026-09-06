@@ -1,0 +1,12 @@
+schema_version: tabu.evolution-node.v1
+kind: training_recipe
+node_id: tabu.training.mixed-response-online-pilot
+version: 1.0.0
+maturity: experimental
+description: Bounded 2000-update mixed numeric/categorical Grow pilot with 100-step immutable recovery points and online telemetry observation.
+optimizer: adamw
+learning_rate: 0.003
+max_steps: 2000
+checkpoint_interval: 100
+scheduler: none
+episode_options: {}

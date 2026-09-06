@@ -1,0 +1,18 @@
+schema_version: tabu.evolution-node.v1
+kind: training_recipe
+node_id: tabu.training.mixed-response-contract-smoke
+version: 1.0.0
+maturity: experimental
+description: Eight-update bounded contract smoke with fixed small episodes for proving both response generators and both loss families execute.
+optimizer: adamw
+learning_rate: 0.003
+max_steps: 8
+checkpoint_interval: 1
+scheduler: none
+episode_options:
+  width: 8
+  rows: 32
+  context_rows: 16
+  family: sparse_additive
+  predictor_regime: gaussian
+  noise_level: low

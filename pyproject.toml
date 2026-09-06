@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "tabu-lab"
 version = "0.1.0.dev0"
-description = "Contract-first TabUBase reference implementation."
+description = "TabU-TAR reference modeling with explicit legacy runtime compatibility."
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
 license = "Apache-2.0"
@@ -37,6 +37,9 @@ dev = [
   "pytest>=8.3,<9",
   "pytest-cov>=6,<7",
   "ruff>=0.11,<1",
+]
+telemetry = [
+  "wandb>=0.19,<1",
 ]
 [tool.setuptools]
 package-dir = {"" = "src"}

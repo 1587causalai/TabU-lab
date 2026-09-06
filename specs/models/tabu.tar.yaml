@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "tabu.tar",
+  "contract_version": "0.1.0",
+  "display_name": "TabU-TAR / Typed Additive Readout",
+  "upstream": {
+    "repository": "TabU/latex/model-factory",
+    "path": "../latex/model-factory/TabU-TAR/model-design.tex",
+    "sha256": "954c93c58689ea5af0a90c7cf06a2dd36f78c39a8dfa38bc6d09d840dd85e391",
+    "readonly": true,
+    "observed_at": "2026-09-06",
+    "license_boundary": "Metadata reference to owner-authored design; no external implementation is vendored.",
+    "semantic_source_tree_sha256": "50e6a40b52a54e2132dd0f412ec9ff4d73490605b5775eac7e14e611d7222766",
+    "source_manifest": "pkg://tabu_lab.specs/model-factory-source-manifest.json#contracts/tabu.tar"
+  },
+  "carrier": {
+    "family": "tabu.tar",
+    "shape": "(N+K) x (M+K) x d",
+    "factual_sources": "input-visible value cells only"
+  },
+  "dynamics": {
+    "order": "column collect/read, then direct row",
+    "inducing": "fixed single axis, S=128 even for N<S",
+    "normalization": "presence-weighted global softmax; pre-FFN RMSNorm"
+  },
+  "readout": {
+    "response": "W c + lambda_F F w_F + lambda_U U w_U",
+    "gates": "independent",
+    "numeric": "Gaussian local linear, FP64 Cholesky, unpenalized intercept",
+    "discrete": "Gaussian NW with declared-domain smoothing"
+  },
+  "loss": {
+    "foundation": "masked-cell recovery",
+    "composition": "sum of nonempty numeric/discrete branch means; episode batch mean"
+  },
+  "interfaces": {
+    "forward": "TAREpisode; truth excluded and hidden values erased",
+    "train": "TARTrainer.train_step with separate address-to-truth sidecars",
+    "infer": "predict_supervised isolates each test row"
+  },
+  "capabilities": [
+    "typed_additive_response",
+    "fixed_single_axis_inducing",
+    "direct_baseline",
+    "masked_cell_objective",
+    "truth_sidecar_isolation"
+  ],
+  "maturity": {
+    "source_contract": "factory_source",
+    "stage": "experimental",
+    "contract": "specified",
+    "implementation": "experimental",
+    "evidence": "design_open",
+    "build_state": "buildable_contract"
+  },
+  "experimental_defaults": {
+    "width": 384,
+    "blocks": 15,
+    "heads": 8,
+    "ff_width": 768,
+    "semantic_slots": 32,
+    "inducing_slots": 128,
+    "inducing_enabled": true,
+    "lambda_feature": 1.0,
+    "lambda_unit": 1.0,
+    "parameter_count": 54071520,
+    "backend": "torch_dense_reference"
+  },
+  "known_open": [
+    {
+      "id": "pretraining",
+      "question": "Pretraining and generalization have not been evaluated.",
+      "blocking_build": false
+    },
+    {
+      "id": "scaling",
+      "question": "Dense carrier and autograd storage need an optimized implementation for large tables.",
+      "blocking_build": false
+    }
+  ],
+  "alternatives": [
+    {
+      "id": "without_inducing",
+      "description": "Explicit direct-column baseline; no automatic small-N switching.",
+      "status": "first_alternative"
+    }
+  ],
+  "kill": [
+    {
+      "id": "truth_leakage",
+      "condition": "Hidden values influence forward predictions.",
+      "evidence": "truth substitution and masked-source tests"
+    },
+    {
+      "id": "numerical_failure",
+      "condition": "Nonfinite responses, loss, or Cholesky failure.",
+      "evidence": "fail-closed numerical checks"
+    }
+  ],
+  "exit": [
+    {
+      "id": "implementation_review",
+      "condition": "Independent conformance review before public maturity promotion.",
+      "evidence": "review report"
+    },
+    {
+      "id": "evaluated_model",
+      "condition": "Preregistered training/evaluation binds exact code/config/checkpoint.",
+      "evidence": "reviewed experiment receipts"
+    }
+  ]
+}

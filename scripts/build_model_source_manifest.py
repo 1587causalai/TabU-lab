@@ -16,9 +16,11 @@ OUTPUTS = (
     ROOT / "src" / "tabu_lab" / "specs" / "model-factory-source-manifest.json",
 )
 ENTRYPOINTS = {
+    "tabu.tar": "TabU-TAR/model-design.tex",
     "tabu.cell.base": "table-cell-as-unit-models/TabUBase/main.tex",
     "tabu.query.base": "table-cell-as-query-models/TabUBase/main.tex",
     "tabu.query.row": "table-cell-as-query-models/TabUR/main.tex",
+    "tabu.v2.tabur": "TabU-v2/main.tex",
     "tabu.query.column": "table-cell-as-query-models/TabUC/main.tex",
     "tabu.query.row_column": "table-cell-as-query-models/TabURC/main.tex",
 }
@@ -98,13 +100,32 @@ def content_hash(value: object) -> str:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
-def build_payload() -> dict[str, object]:
+def build_payload(
+    *, refresh_existing: bool = False, contract: str | None = None
+) -> dict[str, object]:
     if not FACTORY.is_dir():
         raise FileNotFoundError(
-            "readonly model-factory source is unavailable; the checked manifest remains usable"
+            "readonly model-factory source is unavailable; checked manifests remain usable"
         )
+    existing_contracts: dict[str, object] = {}
+    if not refresh_existing and OUTPUTS[0].is_file():
+        try:
+            existing = json.loads(OUTPUTS[0].read_text(encoding="utf-8"))
+            candidate = existing.get("contracts", {})
+            if isinstance(candidate, dict):
+                existing_contracts = candidate
+        except (OSError, json.JSONDecodeError):
+            existing_contracts = {}
     contracts: dict[str, object] = {}
     for contract_id, entrypoint_name in ENTRYPOINTS.items():
+        if contract is not None and contract_id != contract:
+            continue
+        if contract_id in existing_contracts:
+            # Existing contract identities are immutable by default.  The
+            # owner must explicitly refresh a source binding after reviewing
+            # the corresponding upstream TeX change.
+            contracts[contract_id] = existing_contracts[contract_id]
+            continue
         entrypoint = FACTORY / entrypoint_name
         semantic_sources = source_closure(entrypoint)
         contracts[contract_id] = {
@@ -115,8 +136,8 @@ def build_payload() -> dict[str, object]:
         }
     return {
         "schema_version": "tabu-lab.model-factory-source-manifest.v1",
-        "observed_at": "2026-08-30",
-        "scope": "TabU query-family entrypoints plus recursive TeX and graphics include closures",
+        "observed_at": "2026-09-06",
+        "scope": "TabU model entrypoints plus recursive TeX and graphics include closures",
         "contracts": contracts,
     }
 
@@ -128,28 +149,51 @@ def serialize(value: dict[str, object]) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
+    parser.add_argument("--contract", choices=tuple(ENTRYPOINTS), help="check one source binding")
+    parser.add_argument(
+        "--refresh-existing",
+        action="store_true",
+        help="recompute hashes for already registered contracts after upstream review",
+    )
     parser.add_argument(
         "--if-available",
         action="store_true",
         help="skip source rehashing when the owner workspace is not mounted",
     )
     args = parser.parse_args()
+    if args.contract and not args.check:
+        parser.error(
+            "--contract requires --check; partial manifests must not replace full manifests"
+        )
     if args.if_available and not FACTORY.is_dir():
         print("SKIP: readonly model-factory source is unavailable")
         return
-    expected = serialize(build_payload())
+    payload = build_payload(
+        refresh_existing=args.check or args.refresh_existing, contract=args.contract
+    )
+    expected = serialize(payload)
     if args.check:
-        stale = [
-            path.relative_to(ROOT).as_posix()
-            for path in OUTPUTS
-            if not path.exists() or path.read_text(encoding="utf-8") != expected
-        ]
+
+        def matches(path: Path) -> bool:
+            if not path.is_file():
+                return False
+            if args.contract is None:
+                return path.read_text(encoding="utf-8") == expected
+            actual = json.loads(path.read_text(encoding="utf-8"))
+            return (
+                actual.get("contracts", {}).get(args.contract)
+                == payload["contracts"][args.contract]
+            )
+
+        stale = [path.relative_to(ROOT).as_posix() for path in OUTPUTS if not matches(path)]
         if stale:
             raise SystemExit(
-                f"TabUBase source closure manifests are stale: {', '.join(stale)}; "
-                "run `python scripts/build_model_source_manifest.py`"
+                f"model-factory source closure manifests are stale: {', '.join(stale)}; "
+                "review upstream changes before explicitly refreshing registered source bindings"
             )
-        print("PASS: TabUBase source closure manifest is current")
+        print(
+            f"PASS: model-factory source closure manifests are current ({args.contract or 'all'})"
+        )
         return
     for path in OUTPUTS:
         path.write_text(expected, encoding="utf-8")

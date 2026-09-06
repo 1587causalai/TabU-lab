@@ -1,0 +1,965 @@
+% !TEX program = xelatex
+% Standalone, original figures inline. No parent aux or external TeX required.
+\documentclass[11pt,UTF8,fontset=fandol]{ctexart}
+\usepackage[a4paper,margin=24mm,headheight=16pt]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,bm,booktabs,tabularx,longtable,array}
+\usepackage{tikz,xcolor,enumitem,fancyhdr,graphicx}
+\usetikzlibrary{arrows.meta,positioning,calc,fit,matrix}
+\usepackage[most]{tcolorbox}
+\usepackage[section]{placeins}
+\usepackage[unicode,bookmarksnumbered,colorlinks=true]{hyperref}
+\definecolor{ink}{RGB}{24,53,77}
+\definecolor{teal}{RGB}{26,120,113}
+\definecolor{amber}{RGB}{173,102,35}
+\definecolor{purple}{RGB}{107,75,135}
+\hypersetup{linkcolor=ink,urlcolor=teal,citecolor=teal,
+ pdftitle={TabU-TAR：面向实现的模型设计},pdfauthor={TabU Project}}
+\IfFontExistsTF{lmroman10-regular.otf}{\setmainfont{lmroman10-regular.otf}[
+ BoldFont=lmroman10-bold.otf,ItalicFont=lmroman10-italic.otf,
+ BoldItalicFont=lmroman10-bolditalic.otf]}{}
+\ctexset{section={format=\Large\bfseries\color{ink}},subsection={format=\large\bfseries}}
+\setlength{\parskip}{0.3em}
+\setlength{\emergencystretch}{3em}
+\setlist{leftmargin=2em,itemsep=0.2em}
+\renewcommand{\arraystretch}{1.2}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small TabU-TAR / Model Design}\fancyhead[R]{\small Proposed realization}
+\fancyfoot[C]{\thepage}
+\setcounter{tocdepth}{1}\numberwithin{equation}{section}\allowdisplaybreaks
+\newcommand{\R}{\mathbb R}\newcommand{\V}{\mathcal V}\newcommand{\Q}{\mathcal Q}
+\newcommand{\Nul}{\mathcal N}\newcommand{\ind}{\mathbf 1}
+\newcommand{\sm}{\operatorname{softmax}}\newcommand{\OMAB}{\operatorname{OMAB}}
+\newcommand{\Norm}{\operatorname{RMS}}\newcommand{\FFN}{\operatorname{FFN}}
+\newtheorem{proposition}{命题}[section]\renewcommand{\proofname}{证明}
+\newtcolorbox{decision}{colback=teal!4,colframe=teal!65!black,boxrule=0.5pt,arc=1mm}
+\tikzset{box/.style={draw=ink,fill=ink!3,rounded corners=2pt,align=center,
+ inner sep=5pt,font=\small},fact/.style={box,draw=teal,fill=teal!7},
+ choice/.style={box,draw=amber,fill=amber!7},truth/.style={box,draw=purple,dashed,fill=purple!5},
+ arr/.style={-{Latex[length=2mm]},semithick,draw=ink}}
+\begin{document}
+\hypersetup{pageanchor=false}
+\begin{titlepage}
+\vspace*{17mm}
+{\color{teal}\large TabU / Typed Additive Readout}\par\vspace{8mm}
+{\Huge\bfseries\color{ink} TabU-TAR}\par\vspace{5mm}
+{\LARGE 面向实现的模型设计}\par\vspace{4mm}
+{\large 以 TabPFN-3 为规模参照的首份完整配置}\par\vspace{12mm}
+\begin{decision}
+\textbf{54,071,520 个持久参数}\quad $d=384$，$L=15$，$K=32$，$S=128$。\\
+单轴固定 inducing slots；逐 Cell 表示；类型化加性响应；同列 LL/NW 预测。\\
+保留 without inducing baseline，并分别给出同深度与近似同参数量配置。
+\end{decision}
+\vspace{8mm}
+\textbf{这份稿件的用途}\par
+定义一个可以被实现、检查、训练和比较的具体模型。阅读本文件即可获得输入合同、
+全部前向公式、张量形状、参数共享、初始化、训练起始配方、推理边界及实现验收条件。
+它也作为未来论文的首份骨架：方法部分完整，实验问题已经提出，结果尚待产生。
+\par\vspace{4mm}
+\textbf{状态}\par
+设计提案，2026 年 9 月 6 日。参数量由张量清单计算，尚未构建或训练该模型。
+本文没有性能结果，不承诺达到 TabPFN-3 的精度、容量或速度。
+“首份配置”不构成新 runtime 版本号，也不绑定任何旧 checkpoint。
+\vfill
+\small
+共同数学由 \texttt{MATHEMATICAL\_DESIGN.tex} 维护；本稿选择其中一组 realization。
+\texttt{design/defaults.json} 提供机器可读数值；本稿的数学定义是实现语义依据。
+所有图均为本项目绘制的机制示意，不是实验结果图。
+\end{titlepage}
+\hypersetup{pageanchor=true}
+
+\begin{abstract}
+TabU-TAR 将表格预测表达为：从可见 Cell 构造证据，在表格轴向传播中形成 Cell、Unit、
+Feature 三类表示，再通过共享的类型化线性读出得到加性响应，并以同列可见样本形成数值或离散预测。
+本文把这一结构具体化为约 54M 参数的模型，参考 TabPFN-3 的公开规模与若干工程默认，
+采用固定 128 槽的列内 inducing 通信和直接行内交互。与压缩为单一行表示的路线相比，
+本设计保留逐 Cell 查询接口，同时承担更大的二维激活成本。
+本文完整定义前向、局部线性求解、训练梯度和失败状态；指出默认 terminal 对 Feature 公共平移不敏感，
+并把这一限制作为明确的模型取舍。所列训练配方用于开始实现与验证，尚不是经过实验选定的预训练方案。
+\end{abstract}
+\tableofcontents
+\clearpage
+
+\section{设计目标与参照边界}
+\label{sec:position}
+
+目标是得到一个\textbf{单一、具体、可复现的通用表格模型设计}，能够处理 numeric、nominal、ordinal
+列的 masked-cell recovery，并通过把目标列的待预测值标成 Query 表达监督预测。
+本文不给 RecSys、Causal、Graph 引入场景专属算子；这些设计仍可在共同接口上独立生长。
+
+TabPFN-3 的报告 v2 给出分类约 53M、回归约 58M 参数；其附录 C 明确列出发布模型配置\cite{pfn3}。
+TAR 以这一区间作为\emph{持久参数预算}，没有复制其整套结构，也没有继承其验证过的数据规模。
+表~\ref{tab:reference} 是本稿使用的对照，具体值以报告附录而非可变的 GitHub 默认配置为准。
+
+\begin{table}[htbp]\centering\small
+\caption{规模与少量结构默认的对照。右列是本文的设计选择。}\label{tab:reference}
+\begin{tabularx}{\linewidth}{@{}lYY@{}}\toprule
+维度 & TabPFN-3 报告 v2 & 本文 TAR \\\midrule
+持久参数 & 分类约 53M；回归约 58M & 54.071520M，同一 typed 模型 \\
+载体宽度 & 列编码 128；行 ICL 512 & 全部 Cell/bank/slot 均为 384 \\
+主要深度 & 列 3；聚合 3；ICL 24 & 15 个列后行 block \\
+Attention heads & 列、行与 ICL 均 8 & 8，每头 48 维 \\
+FFN expansion & 2 & 2，即 768 \\
+Inducing 数 & 128 & 128，仅列内样本轴 \\
+行汇聚 & 4 个 CLS 拼接 & 保留 Cell 与 $K=32$ 语义 banks \\
+特征分组 & 循环三元组 & 单 Cell，不做三元组分组 \\
+Normalization & RMSNorm & FFN 前逐 token RMSNorm \\
+输出 & 分类 retrieval；回归分桶分布 & 离散平滑 NW；数值 LL 点预测 \\\bottomrule
+\end{tabularx}
+\end{table}
+
+参考实现的固定 commit 和报告原稿位置见 \texttt{references/tabpfn-3/}。
+代码用于核对 inducing 的收集/回读与小样本路径\cite{pfncode}，不被当作 TAR 的运行依赖。
+优化器、TAR 宽度/深度、$K$、初始化与训练表分布均为\textbf{本文新选的起始默认}，不是复述对方训练配方。
+
+\begin{decision}
+TAR 当前默认的理由：用 $d=384$ 降低逐 Cell 激活宽度，以 15 个 block 达到约 54M 参数；
+用固定 $S=128$ 控制列内通信；用 $K=32$ 限制语义 bank 和 LL 求解成本。
+这些是预算与接口上的选择，其效果必须通过训练验证。
+\end{decision}
+
+\subsection{面向未来论文的中心问题}
+方法贡献应围绕可检查的问题组织：逐 Cell 的类型化接口是否支持跨表共享学习；
+固定槽位是否在压缩成本时保留有用证据；局部 typed estimation 是否能利用学习到的响应几何。
+这三项目前是研究问题。数学上的零元闭合、Query 插入不扰动、LL 唯一性，不能替代预测质量证据。
+后文将完整定义方法；第~\ref{sec:experiments} 节仅给待完成的实验结构。
+
+\section{一张表如何成为一次任务}
+\label{sec:input}
+
+输入是 $N$ 个 Unit（行）和 $M$ 个 Feature（列），$N,M$ 均为正整数。
+地址须唯一且位于声明范围内，schema 按列完整给定。所有下标均是 episode-local 地址，
+不是持久 learned ID。列 schema 声明：numeric 的答案域为 $\R$；nominal 为非空有限集合
+$\mathcal D_a$；ordinal 另带声明的全序。文本、日期需上游显式转成这些类型；本稿不定义文本编码器。
+
+\subsection{输入、可见事实和真值的分离}
+定义自然观测地址 $\mathcal O$、待回答地址 $\Q$、可见事实 $\V$，要求
+$\V\cap\Q=\varnothing$。训练时 $\Q\subseteq\mathcal O$ 且 $\V=\mathcal O\setminus\Q$；
+推理 Query 可以是原来未知的地址。其他原始 Cell 是 Null。
+Forward 只接收
+\begin{equation}
+ E_{\rm in}=(N,M,\text{schema},\V,\{x_{ra}:(r,a)\in\V\},\Q,\xi_{\rm prep}).
+ \label{eq:input}
+\end{equation}
+隐藏值单独存于 $Y^\star_{\Q}$，仅 scorer 读取。输入 tensor 的隐藏位置不能继续存放真值后仅靠
+attention mask 遮挡；应在编译前移除，避免统计量、类别字典或预处理读取它。
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[node distance=7mm and 8mm]
+\node[fact,text width=39mm] (e) {可见值、schema、地址\\$E_{\rm in}$};
+\node[box,text width=39mm,right=of e] (c) {类型预处理与 compiler\\$H^{(0)}$};
+\node[choice,text width=39mm,right=of c] (b) {15 个轴向 block\\$H^{(L)}$};
+\node[box,text width=39mm,below=13mm of b] (r) {Cell / Unit / Feature\\加性响应 $z$};
+\node[fact,text width=39mm,left=of r] (t) {同列可见支持\\typed LL / NW};
+\node[box,text width=39mm,left=of t] (p) {点预测或 PMF\\以及证据状态};
+\node[truth,text width=39mm,below=10mm of p] (y) {隐藏 Query 真值\\$Y^\star_{\Q}$};
+\node[truth,text width=39mm,right=of y] (loss) {训练时唯一汇合点\\scorer / loss};
+\draw[arr] (e)--(c);\draw[arr] (c)--(b);\draw[arr] (b)--(r);
+\draw[arr] (r)--(t);\draw[arr] (t)--(p);\draw[arr] (p.south)--++(0,-3mm)-|(loss.north);
+\draw[arr] (y)--(loss);
+\end{tikzpicture}
+\caption{端到端信息流。绿色是事实及其聚合，橙色是有参数的槽位通信，虚线框是训练边界。
+支持值从 $E_{\rm in}$ 读取；真值不参与任何上游计算。}
+\label{fig:flow}
+\end{figure}
+
+\subsection{证据合同与 API 状态}
+每个目标列的支持地址为 $\mathcal C_a=\{s:(s,a)\in\V\}$，$n_a=|\mathcal C_a|$。
+默认 $n_a\ge2$ 才输出预测。$n_a=0,1$ 对该目标返回 \texttt{insufficient-support}，不自动改用先验或单样本答案；
+同一输入中的其他合法目标可继续返回预测。
+非法类型、非有限 numeric visible value、域外离散值、重叠 masks 返回 \texttt{invalid-input}。
+自然 NaN/Inf 在入口被标为未观测；不得将其视为值零。
+实现内部的非有限激活或求解失败返回 \texttt{numerical-failure}，不输出伪造的有限预测。
+
+分类声明域不得从隐藏 labels 推断。监督分类默认使用训练标签出现的类别作为声明域；
+测试中出现域外类别时，评估明确记录 out-of-domain，不能偷偷扩充输入 schema。
+若任务方提前提供更大的合法域，可以包括未见类别；这些类别只有平滑质量，不凭空产生事实。
+
+\subsection{监督预测的适配}
+把 $(X,y)$ 拼成一张表，目标标签列在训练行可见、测试行是 Query。
+\texttt{predict} 的初始默认为\textbf{逐测试行的独立 episode}：全部训练行加一条测试行，
+测试行已知 covariates 也属于 $\V$。不同测试行分别调用，返回顺序按外部 ID 恢复。
+因此单个预测不依赖其他测试行是否被同批提交；这不意味着测试行自身 covariates 不影响支持表示。
+
+\texttt{predict\_cells} 则可在同一明确的 $E_{\rm in}$ 中回答多个 Cell。
+多测试行联合放入 $\V$ 是另一种 transductive 配置，会改变证据与预测；不能把它当作等价的 batching 优化。
+这一点与后文缓存条件直接相关。
+
+\section{编码：共享表示，不保存行列身份}
+\label{sec:encoding}
+
+\subsection{Numeric 与 ordinal 的连续通道}
+Numeric 仅用同列可见值计算总体均值 $\widehat\mu_a$ 与总体方差 $\widehat\sigma_a^2$：
+\begin{equation}
+ t_{ra}=\frac{x_{ra}-\widehat\mu_a}{\widehat\sigma_a+10^{-6}}.
+ \label{eq:numeric-prep}
+\end{equation}
+常数列得到 $t=0$；无可见值列没有 Value 需要编码。默认不裁剪、不加入 SVD、不使用 quantile ensemble。
+Ordinal 若域大小为 $D_a>1$，取 $t=(\operatorname{rank}(x)-1)/(D_a-1)$；$D_a=1$ 时取零。
+Numeric/ordinal 共用一个 continuous branch，没有额外 learned type embedding。
+
+取 $J=d/4=96$，可学习频率 $\omega\in\R^J$、无 bias 投影 $A\in\R^{d\times2J}$：
+\begin{equation}
+ \phi_\omega(t)=[\sin(\omega_1t),\ldots,\sin(\omega_Jt),
+ \cos(\omega_1t),\ldots,\cos(\omega_Jt)]^\top,
+ \qquad h^{\rm val}_{ra}=A\phi_\omega(t_{ra}).
+ \label{eq:fourier}
+\end{equation}
+$\omega,A$ 跨列、类型与 episode 共享。频率不按列重新拟合。完整初始化见第~\ref{sec:init} 节。
+Fourier lift 恒非零不等于无约束训练后的投影恒非零；实现需检查非 Null 初始 carrier 的有限非零性。
+
+\subsection{Nominal 通道与可复现 codebook}
+对每列的每个\emph{可见类别}抽取 $g_{a,b}\sim\mathcal N(0,I_d)$，令
+\begin{equation}
+ e_{a,b}=g_{a,b}/\|g_{a,b}\|_2,\qquad h^{\rm val}_{ra}=e_{a,x_{ra}}.
+ \label{eq:nominal}
+\end{equation}
+该通道没有 learned category embedding 或额外投影；同列同类别共享 code，不同列独立。
+未见类别只占输出域坐标，不进入 codebook。每个新训练 episode 重抽 codebook；重放、分块和比较时固定。
+保存实际 codebook 可消除不同 RNG 后端的差异。
+实现可按 schema 类别列表的固定编号枚举可见类别，再按稳定列 ID 分配 RNG 子流；
+该列表顺序也用于输出 PMF 坐标和 argmax 并列处理。导入后的 ID 不随 tensor 重排重新编号。
+
+\clearpage
+分配随机数必须绑定稳定的 episode、列与类别外部标识，不能绑定当前 tensor 遍历序号。
+在重排行列或重标类别的等变性检查中，codebook 与对应身份一起移动；重新采样只保证分布意义的对称性。
+Gaussian draw 的零/非有限 norm 应重抽，连续 10 次失败则报错。
+
+\subsection{语义 queries 与增广表}
+持久参数为 $Q^U,Q^F\in\R^{K\times d}$ 和 $q^C\in\R^d$，$K=32$。
+为每行增加 $K$ 个 Unit Query 列，为每列增加 $K$ 个 Feature Query 行：
+\begin{equation}
+ H^{(0)}\in\R^{(N+K)\times(M+K)\times d},\qquad
+ h_i^{(0)}=\begin{cases}
+ h^{\rm val}_{ra},&i=(r,a)\in\V,\\
+ q^C,&i=(r,a)\in\Q,\\
+ Q^U_{k,:},&i=(r,M+k),\ r\le N,\\
+ Q^F_{k,:},&i=(N+k,a),\ a\le M,\\
+ 0,&\text{其他地址。}
+ \end{cases}
+ \label{eq:compiler}
+\end{equation}
+所有非事实 queries \textbf{只接收、不供源}。原始缺失且未被查询的位置，以及右下 $K\times K$ 角都是 Null。
+一个 seed 的第 $k$ 槽跨所有行或列共享，没有每个数据集专属的持久 bank。
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}
+\node[fact,minimum width=78mm,minimum height=31mm] (cells) {原始 Cell 平面 $N\times M$\\Value / Query / Null};
+\node[choice,minimum width=48mm,minimum height=31mm,right=0mm of cells] (u) {Unit Queries\\$N\times K$};
+\node[choice,minimum width=78mm,minimum height=20mm,below=0mm of cells] (f) {Feature Queries $K\times M$};
+\node[box,minimum width=48mm,minimum height=20mm,right=0mm of f] (n) {Null $K\times K$};
+\node[font=\small,align=center,below=6mm of $(f.south)!0.5!(n.south)$]
+ {每个位置存 $d=384$ 维 carrier；$K=32$ 是语义 bank 槽数。\\
+ $S=128$ inducing 摘要位于 block 内部，不是这张表的新行或新列。};
+\end{tikzpicture}
+\caption{表格地址与语义 banks。Null 始终保持向量零；数值为零的真实观测仍是 Value。}
+\label{fig:carrier}
+\end{figure}
+
+\section{一个完整的 OAttention block}
+\label{sec:block}
+
+本节精确定义所有子层。取 receiver $h_i\in\R^d$，候选 source $x_j\in\R^d$，
+资格 mask $m_j\in\{0,1\}$。原始表的 $m_j$ 由固定 $\V$ 决定；摘要回读的 mask 由本层列证据状态决定。
+
+\subsection{Presence、源集合和多头注意力}
+默认 presence 函数与实际 source 集合为
+\begin{equation}
+ \rho(h)=\frac{\|h\|_2^2}{1+\|h\|_2^2},\qquad
+ \mathcal A=\{j:m_j=1,\ \rho(x_j)>0\}.
+ \label{eq:presence}
+\end{equation}
+资格 mask 不能用 $\rho$ 代替。非零 Query 仍不允许供源。
+$\rho$ 读取\emph{投影前} carrier，默认 $\tau_{\rm pres}=1$，不是 norm 与投影后的量。
+
+每个 OMAB 有独立的四个仿射投影 $P_Q,P_K,P_V,P_O$，各含 $d\times d$ 权重与 $d$ bias。
+合并投影输出分成 8 个 head，每头 $d_h=48$：
+\begin{align}
+ q_i^{(h)}&=[P_Q(h_i)]_h,&k_j^{(h)}&=[P_K(x_j)]_h,&v_j^{(h)}&=[P_V(x_j)]_h,\\
+ u_{ij}^{(h)}&=\frac{\langle q_i^{(h)},k_j^{(h)}\rangle}{\sqrt{48}}+\log\rho(x_j),
+ &&j\in\mathcal A.\label{eq:attn-logit}
+\end{align}
+默认直接投影 carrier，\textbf{不另加 Q/K pre-norm、cosine attention、RoPE 或 QASSMax}。
+这些选项会改变函数，不是照搬参考模型时可以隐含加入的细节。
+
+若 $\mathcal A\ne\varnothing$，只在此集合计算稳定 softmax：
+\begin{equation}
+ a_i=\rho(h_i)\,P_O\!\left(\operatorname{Concat}_{h=1}^{8}
+       \sum_{j\in\mathcal A}\sm_{j}(u_{ij}^{(h)})v_j^{(h)}\right).
+ \label{eq:attention}
+\end{equation}
+若 $\mathcal A=\varnothing$，直接置 $a_i=0$，不执行空 softmax，也不保留 $P_O$ 的 bias。
+非空时 receiver gate 位于整个 output projection 之后。
+源质量只通过 $\log\rho$ 进入权重，不再次乘到 $v_j$ 上。
+
+\subsection{Token-local residual 与 FFN}
+每个 OMAB 的唯一归一化位于 FFN 前，有 gain $\gamma\in\R^d$，无可训练 shift：
+\begin{align}
+ r_i&=h_i+a_i,\\
+ \Norm(r_i)&=\gamma\odot\frac{r_i}{\sqrt{d^{-1}\|r_i\|_2^2+10^{-6}}},\\
+ \FFN(t)&=B_2\,\operatorname{GELU}(B_1t+b_1)+b_2,\\
+ \OMAB(h_i;X)&=\begin{cases}
+ r_i+\rho(r_i)\FFN(\Norm(r_i)),&i\notin\Nul,\\
+ 0,&i\in\Nul.
+ \end{cases}\label{eq:omab}
+\end{align}
+$B_1\in\R^{768\times384}$，$B_2\in\R^{384\times768}$，bias 分别为 768、384 维。
+GELU 取精确式 $t\Phi(t)$，dropout 为零；默认没有 block 后额外 normalization。
+Attention receiver gate 读取 $h_i$，FFN gate 读取 $r_i$，两者不可混用。
+空 source 时 attention 为零，但非 Null receiver 的 FFN 仍执行。
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[node distance=7mm]
+\node[box,text width=28mm] (h) {receiver $h$};
+\node[box,text width=34mm,right=of h] (a) {OAttention\\源 mask + presence};
+\node[box,text width=22mm,right=of a] (r) {$r=h+a$};
+\node[box,text width=35mm,below=11mm of a] (ff) {RMSNorm $\to$ FFN\\乘 $\rho(r)$};
+\node[fact,text width=33mm,right=of ff] (o) {residual 相加\\Null 精确写零};
+\node[fact,text width=28mm,above=7mm of a] (s) {合法 sources $X$};
+\draw[arr] (h)--(a);\draw[arr] (s)--(a);\draw[arr] (a)--(r);
+\draw[arr] (r.south)--++(0,-4mm)-|(ff.north);\draw[arr] (ff)--(o);
+\draw[arr,dashed] (r.south)--(o.north);
+\end{tikzpicture}
+\caption{一个 OMAB 的两条 residual 更新。图中 $r$ 同时作为最终 residual 的基底；
+Norm 只沿当前 token 的 384 维归约。所有 projection biases 都包含在数学定义与参数统计中。}
+\label{fig:omab}
+\end{figure}
+
+\subsection{默认：列内固定 inducing，随后直接行内交互}
+第 $\ell$ 层有独立 learned seed $I^{(\ell)}\in\R^{128\times384}$，同层所有列共享。
+令 $X_a^{(\ell)}=(h_{sa}^{(\ell)})_{s\in\mathcal C_a}$，
+$e_a^{(\ell)}=\ind[\exists s\in\mathcal C_a:\rho(h_{sa}^{(\ell)})>0]$。
+先完成全表列更新，再完成全表行更新：
+\begin{align}
+ G_a^{(\ell)}&=\begin{cases}
+ \OMAB_{\ell,c}(I^{(\ell)};X_a^{(\ell)}),&e_a^{(\ell)}=1,\\
+ 0_{S\times d},&e_a^{(\ell)}=0,
+ \end{cases}\label{eq:collect}\\
+ H^{(\ell,\rm col)}_{:,a}&=\OMAB_{\ell,d}(H^{(\ell)}_{:,a};G_a^{(\ell)}),\label{eq:read}\\
+ H^{(\ell+1)}_{r,:}&=\OMAB_{\ell,r}
+ \left(H^{(\ell,\rm col)}_{r,:};(H^{(\ell,\rm col)}_{r,b})_{b:(r,b)\in\V}\right).
+ \label{eq:row}
+\end{align}
+式~\eqref{eq:collect} 的 seeds 都是合法非 Null receivers；空证据列必须覆盖整个 collect 结果为零，
+不能让 seed residual 冒充证据。回读仅使用非零摘要的 presence；摘要不进入 $\V$ 或 terminal 支持集合。
+在右侧 Unit Query 列，原始事实为空，$G=0$；底部 Feature Query 行也没有 row sources。
+这些 receivers 仍可在没有跨地址信息的子层中执行局部 FFN。
+
+同层 collect、read、row 的全部权重相互独立，层间也独立；每个子层跨地址共享权重。
+$G$ 是当前 episode 的 activation，不能保存成 learned parameter。每一层从自己的 $I^{(\ell)}$ 开始收集，
+不把上一 episode 或上一层的 $G$ 当成初始 seed。
+\textbf{即使 $N<128$ 也使用全部 128 个槽位}，不取 $\min(N,S)$，不自动切换 direct attention。
+
+\subsection{保留 without inducing 的两种公平对照}
+Direct baseline 的每层为
+\begin{align}
+ H^{(\ell,\rm col)}_{:,a}&=\OMAB_{\ell,\rm col}
+       (H^{(\ell)}_{:,a};X_a^{(\ell)}),\\
+ H^{(\ell+1)}_{r,:}&=\OMAB_{\ell,\rm row}
+       (H^{(\ell,\rm col)}_{r,:};(H^{(\ell,\rm col)}_{r,b})_{b:(r,b)\in\V}).
+ \label{eq:direct}
+\end{align}
+它没有 inducing seed 参数，语义 banks 和 typed terminal 保留。不是设 $S=0$，也不是从一个
+with-inducing checkpoint 临时跳过两个子层。
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[node distance=6mm]
+\node[font=\bfseries\small,anchor=west] at (-1,1) {Without inducing：直接轴向 baseline};
+\node[fact,text width=25mm] (x) {$H^{(\ell)}$};
+\node[box,text width=42mm,right=of x] (dc) {直接 column OMAB\\同列 visible sources};
+\node[box,text width=42mm,right=of dc] (dr) {直接 row OMAB\\同行 visible sources};
+\draw[arr] (x)--(dc);\draw[arr] (dc)--(dr);
+\node[font=\bfseries\small,anchor=west] at (-1,-1.4) {With inducing：当前默认};
+\node[fact,text width=25mm,below=22mm of x] (xx) {$H^{(\ell)}$};
+\node[choice,text width=27mm,right=of xx] (cc) {Collect\\$X_a\to G_a$};
+\node[choice,text width=27mm,right=of cc] (dd) {Read\\$G_a\to H_{:,a}$};
+\node[box,text width=27mm,right=of dd] (rr) {Row OMAB\\直接行交互};
+\draw[arr] (xx)--(cc);\draw[arr] (cc)--(dd);\draw[arr] (dd)--(rr);
+\node[font=\small,below=6mm of $(xx.south)!0.5!(rr.south)$,align=center]
+ {$S=128$ 是通信瓶颈；$K=32$ 的语义 banks 在两条路径中都存在。};
+\end{tikzpicture}
+\caption{从直接轴向模型到固定槽位模型。下图的 read 同时读取原来的 receiver residual；
+图展示通信路径，不表示串行丢弃原 $H$。两种结构需要分别构建与训练。}
+\label{fig:withwithout}
+\end{figure}
+
+同深度 direct 取 $L=15$，比较结构代价；近似同参数量 direct 取 $L=23$，比较参数预算。
+后者同时增加路径深度，不能宣称是仅改变 inducing 的单因素实验。两条比较应分别报告。
+
+\section{Typed additive readout 与预测}
+\label{sec:readout}
+
+\subsection{从地址读出三个视图}
+从最后一层按地址读取，不增加 token 交互：
+\begin{equation}
+ c_{ra}=H^{(L)}_{r,a,:}\in\R^d,\quad
+ U_r=H^{(L)}_{r,M+1:M+K,:}\in\R^{K\times d},\quad
+ F_a=H^{(L)}_{N+1:N+K,a,:}\in\R^{K\times d}.
+ \label{eq:views}
+\end{equation}
+持久 readout 参数为 $W\in\R^{K\times d}$、$w_F,w_U\in\R^d$，无 bias：
+\begin{equation}
+ \boxed{z_{ra}=Wc_{ra}+\lambda_F F_aw_F+\lambda_U U_rw_U\in\R^{32}.}
+ \label{eq:response}
+\end{equation}
+本文完整配置取固定 gates $\lambda_F=\lambda_U=1$。它们独立，不训练、不作 schedule；
+两个 banks 是当前 forward 的表示，不是作用于 $c$ 的动态权重。
+同一公式用于 Query 与 visible support；不能只为 Query 计算 $z$。
+
+\subsection{匹配：同列 Gaussian 权重}
+对目标 $t=(r,a)\in\Q$ 及 $s\in\mathcal C_a$，定义
+\begin{equation}
+ \delta_s=z_{sa}-z_{ra},\quad
+ \psi_s=-\frac{\|\delta_s\|_2^2}{2\tau_{\rm match}^2},\quad
+ \alpha_s=\sm_{s\in\mathcal C_a}(\psi_s),\qquad\tau_{\rm match}=1.
+ \label{eq:matching}
+\end{equation}
+重复样本按不同地址保留，不能去重；只沿同列合法支持归一化，不跨列、不含 Query 或 Null。
+带宽固定、跨列共享；模型能够改变响应尺度，所以固定带宽并不消除尺度与 conditioning 的训练问题。
+默认不做 top-$k$ 检索、不 detach supports，也不以 attention learned $Q/K$ 替代此式。
+
+\subsection{Numeric：可微的带截距局部线性拟合}
+用可见值定义
+\begin{equation}
+ \mu_a=\frac1{n_a}\sum_s x_{sa},\quad
+ \sigma_a=\sqrt{10^{-12}+\frac1{n_a}\sum_s(x_{sa}-\mu_a)^2},\quad
+ y_s=\frac{x_{sa}-\mu_a}{\sigma_a}.
+ \label{eq:target-scale}
+\end{equation}
+这里的 scale 与 encoder 的 $\widehat\sigma_a+10^{-6}$ 不相同。
+取 $\lambda_{\rm LL}=10^{-2}$，每个 Query 独立求解
+\begin{equation}
+ (\eta,v)=\arg\min_{\eta\in\R,v\in\R^{32}}
+ \sum_s\alpha_s(y_s-\eta-v^\top\delta_s)^2+10^{-2}\|v\|_2^2,
+ \qquad\widehat x_{ra}=\mu_a+\sigma_a\eta.
+ \label{eq:ll}
+\end{equation}
+截距不惩罚。局部 $(\eta,v)$ 是 activation，不是跨 episode 训练的参数。
+实现不求显式矩阵逆，而使用消去截距的形式：
+\begin{align}
+ \bar\delta&=\sum_s\alpha_s\delta_s,&\bar y&=\sum_s\alpha_sy_s,\\
+ e_s&=\delta_s-\bar\delta,&\widetilde y_s&=y_s-\bar y,\\
+ C&=\sum_s\alpha_s e_se_s^\top,&g&=\sum_s\alpha_s e_s\widetilde y_s,\\
+ v&=\operatorname{CholeskySolve}(C+10^{-2}I,g),&
+ \eta&=\bar y-v^\top\bar\delta.
+ \label{eq:solve}
+\end{align}
+FP64 作为首个 correctness 实现的 terminal 精度；参数主干可用 FP32。
+拟合矩阵对称化为 $(C+C^\top)/2$ 以移除求和舍入产生的非对称。
+若 Cholesky 失败，应报告失败及输入统计，不悄悄增大 ridge、切换伪逆或返回 NW。
+这些替代都会改变已经定义的模型。
+
+\begin{proposition}[局部解唯一]
+只要支持权重非负、和为 1 且输入有限，正 ridge 使式~\eqref{eq:ll} 的解唯一。
+这不要求支持数大于 32。
+\end{proposition}
+\begin{proof}
+$C$ 是加权协方差，故 $C\succeq0$，$C+10^{-2}I\succ0$，斜率有唯一解；
+截距由 $\eta=\bar y-v^\top\bar\delta$ 唯一确定。
+这也解释了 $n_a\ge2$ 是本模型的证据策略，而不是矩阵可逆的最低条件。
+\end{proof}
+
+LL 可以外推到支持值域之外；本稿只承诺 numeric 点预测，不定义分位数或不确定性。
+若需要严格正值、整数等输出，应另行设计 domain-safe terminal，不能无声明地裁剪。
+
+\subsection{Nominal 与 ordinal：完整声明域的平滑 NW}
+两类离散列共用概率公式，ordinal 的顺序目前只用于输入编码：
+\begin{equation}
+ m(b)=\sum_s\alpha_s\ind[x_{sa}=b],\qquad
+ \widehat p_{ra}(b)=\frac{m(b)+\varepsilon_{\rm cat}}{1+D_a\varepsilon_{\rm cat}},
+ \quad b\in\mathcal D_a,\quad\varepsilon_{\rm cat}=10^{-6}.
+ \label{eq:pmf}
+\end{equation}
+概率和为 1，各坐标为正；默认点分类为按 schema 顺序打破并列的 argmax。
+未见合法类别获得 $\varepsilon_{\rm cat}/(1+D_a\varepsilon_{\rm cat})$，不能据此声称具有 zero-shot 类别识别能力。
+参数量不随类别数增加，但 PMF 的存储与输出时间仍随 $D_a$ 增长。
+未设置训练外类别数能力上限；初始训练分布的类别数范围在后文单独指定。
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[node distance=7mm and 8mm]
+\node[box,text width=34mm] (c) {Cell $c_{ra}$\\$Wc_{ra}$};
+\node[box,text width=34mm,below=of c] (f) {Feature $F_a$\\$F_aw_F$};
+\node[box,text width=34mm,below=of f] (u) {Unit $U_r$\\$U_rw_U$};
+\node[choice,text width=26mm,right=of f] (z) {相加\\$z_{ra}\in\R^{32}$};
+\node[box,text width=38mm,right=of z] (m) {同列 $z_{sa}-z_{ra}$\\Gaussian 权重 $\alpha_s$};
+\node[fact,text width=38mm,above=of m] (n) {Numeric\\weighted LL 点预测};
+\node[fact,text width=38mm,below=of m] (d) {Nominal / ordinal\\平滑 NW 概率};
+\draw[arr] (c.east)--(z.west);\draw[arr] (f)--(z);\draw[arr] (u.east)--(z.west);
+\draw[arr] (z)--(m);\draw[arr] (m)--(n);\draw[arr] (m)--(d);
+\end{tikzpicture}
+\caption{响应与 terminal 分为两个接口。支持的 $z_{sa}$ 使用完全相同的响应公式；
+LL/NW 的被拟合值是同列原始可见值，不是重新编码后的 value 向量。}
+\label{fig:readout}
+\end{figure}
+
+\subsection{必须面对的取舍：Feature 公共平移不影响当前预测}
+同列 Query 与 supports 使用同一个 $F_a$，因此
+\begin{equation}
+ \delta_s=W(c_{sa}-c_{ra})+\lambda_U(U_s-U_r)w_U.
+ \label{eq:translation}
+\end{equation}
+Feature 项精确抵消。Gaussian 权重和中心化 LL 都只读取这些差值；NW 则只读取权重与可见标签。
+故在\emph{固定其他参数、证据与 codebook} 时，$\lambda_F=0$ 与 1 产生相同预测。
+$\lambda_U$ 不具有一般的同列平移抵消性质。
+
+\begin{decision}
+本稿保留 $\lambda_F=\lambda_U=1$ 和完整 Feature 接口，以忠实表达 TAR 当前共同响应结构；
+但不声称三个分支都已从此损失学到有效功能。默认预测损失对 $Q^F,w_F$ 的梯度为零。
+相应 12,672 个 Feature 专属参数占总量约 0.0234\%。
+可以在实现优化中省略其计算，但必须将完整结构作为对照，并验证预测与其余梯度等价。
+\end{decision}
+
+原因不仅是加法：Feature Queries 没有供源资格，不能借其他路径影响 Cell/Unit；
+它们对共享 block 参数的贡献也在此 terminal 下抵消。共享参数仍由 Cell/Unit 路径训练。
+优化器不能通过 weight decay 制造“Feature 已被监督学习”的假象；本稿不衰减任何 semantic seeds 或 readout vectors。
+
+\texttt{explorations/kernel-attention-readout.tex} 探索的 learned matching 可能改变这一结论。
+那是下一项可单独检验的设计，不在本稿默认中偷偷启用。若未来采用它，必须同时重算参数、梯度、
+对称性和 terminal 行为，不能只替换一个名字。
+
+\section{数值默认、初始化与参数预算}
+\label{sec:init}
+
+表~\ref{tab:defaults} 将影响模型函数的标量全部固定。它们是本稿的可修订起始配置。
+\begin{table}[htbp]\centering\small
+\caption{首份配置的数值默认。}\label{tab:defaults}
+\begin{tabularx}{\linewidth}{@{}l l Y@{}}\toprule
+设置 & 数值 & 作用 \\\midrule
+$d,L,h,d_{\rm ff}$ & $384,15,8,768$ & 同层 collect/read/row 独立参数 \\
+$K,d_z,J$ & $32,32,96$ & 语义 bank、响应宽度、Fourier 频率数 \\
+$S$ & 128 & 每层固定，跨列共享 seeds \\
+$\lambda_F,\lambda_U$ & $1,1$ & 两个固定独立 gates \\
+$\tau_{\rm pres}$ & 1 & $\rho(h)=\|h\|^2/(1+\|h\|^2)$ \\
+$\varepsilon_{\rm norm}$ & $10^{-6}$ & RMS denominator \\
+$\varepsilon_{\rm scale},\sigma_{\min}$ & $10^{-6},10^{-6}$ & encoder 与 terminal 不同公式 \\
+$\tau_{\rm match}$ & 1 & Gaussian 带宽 \\
+$\lambda_{\rm LL}$ & $10^{-2}$ & 只惩罚 LL slope \\
+$\varepsilon_{\rm cat}$ & $10^{-6}$ & 每个声明类别的平滑量 \\
+Dropout / estimators & $0 / 1$ & 单次确定性 forward，固定 codebook \\
+额外位置或长度机制 & 关闭 & 不加 RoPE、QASSMax、feature grouping \\\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{从初始化到第一步反向传播}
+定义 $B=3L=45$ 为默认 OMAB 个数，direct 用 $B=2L$。
+全局初始化 RNG seed 为 20260906；不同模块用独立子流，不同 baseline 单独初始化。
+\begin{enumerate}
+\item 所有 $P_Q,P_K,P_V$ 权重用 Xavier uniform，所有 bias 为零。
+$P_O$ 与 FFN 第二层先 Xavier uniform，再乘 $1/\sqrt{2B}$；FFN 第一层用 Xavier uniform。
+这是 residual 初始尺度选择，不是在每次 forward 额外乘一个 gate。
+\item RMS gain 初始化为 1。无 trainable shift。$Q^U,Q^F,q^C,I^{(\ell)}$ 每个向量独立抽标准 Gaussian 后归一化到 norm 1。
+此后直接作为无约束可学习向量，不每步重新归一化；初始 $\rho=1/2$，避免零 seed 无法激活。
+\item 频率 $\omega_j=2^{-3+6(j-1)/(J-1)}$，直接训练这 $J$ 个实数。
+$A$ 用 Gaussian 矩阵的 thin QR 得到正交列，再除以 $\sqrt J$。
+因此初始化时每个 continuous carrier 的 norm 为 1。QR 的列符号固定为 $R$ 对角线非负，便于重放。
+\item $W,w_F,w_U$ 的每个分量独立取 $\mathcal N(0,1/(Kd))$，不初始化为零。
+同一坐标尺度便于起步，但不保证训练后匹配仍处于良好条件区间。
+\end{enumerate}
+
+这些初值不构成训练稳定性证明。每次编译检查所有非 Null 初始 carrier 有限且非零；
+训练中出现精确零 Value 应记录并停止诊断，不用任意 presence 阈值把它隐藏。
+不要将范数很小误判为精确零；稳定 norm、log-presence 与 FP32/64 累加应先保证数值实现正确。
+
+\subsection{逐张量参数量，而不是按名字估计}
+一个 OMAB 有四个带 bias 的 $d\to d$ 投影、一个仅 gain 的 RMSNorm、两个带 bias 的 FFN 线性层：
+\begin{equation}
+ P_{\rm OMAB}=4d^2+2dd_{\rm ff}+6d+d_{\rm ff}=1,182,720.
+ \label{eq:count-omab}
+\end{equation}
+共享 encoder、semantic seeds 和 readout 合计
+\begin{equation}
+ P_{\rm shared}=J+2Jd+(2K+1)d+(K+2)d=111,840.
+ \label{eq:count-shared}
+\end{equation}
+故默认模型
+\begin{equation}
+ P=L(3P_{\rm OMAB}+Sd)+P_{\rm shared}
+ =\boxed{54,071,520}.
+ \label{eq:parameter-count}
+\end{equation}
+Norm、bias、Fourier 频率、inducing 与语义 seeds 全部计入；codebook、$H,G,F,U$、局部 LL coefficients
+及固定超参数不计入。总量比报告舍入的 53M 高约 2.0\%，比 58M 低约 6.8\%。
+这是标称参数匹配，不是 checkpoint 实测值的精确对齐。
+
+\begin{table}[htbp]\centering\small
+\caption{独立构建的三个配置。}\label{tab:budgets}
+\begin{tabularx}{\linewidth}{@{}l r r Y@{}}\toprule
+配置 & $L$ & 参数 & 比较用途 \\\midrule
+With inducing 默认 & 15 & 54,071,520 & 首份实现目标 \\
+Direct 同深度 & 15 & 35,593,440 & 槽位替换的结构比较 \\
+Direct 近似同参数 & 23 & 54,516,960 & 参数接近，深度同时变化 \\\bottomrule
+\end{tabularx}
+\end{table}
+
+运行 \texttt{python3 design/parameter\_count.py} 会独立枚举 608 个默认参数张量，
+再与上述闭式公式核对。它不加载模型、不声称代码已经实现。
+Feature 专属参数仍计入 declared trainable tensors；其默认 loss 梯度为零已在前节说明。
+
+\section{训练目标与可执行的起始配方}
+\label{sec:training}
+
+\subsection{唯一的监督入口}
+每个训练 Query 的损失为
+\begin{equation}
+ \ell_{ra}=\begin{cases}
+ \frac12[(\widehat x_{ra}-x^\star_{ra})/\sigma_a]^2,&a\text{ numeric},\\
+ -\log\widehat p_{ra}(x^\star_{ra}),&a\text{ nominal 或 ordinal}.
+ \end{cases}
+\end{equation}
+对非空类型分支分别平均，再相加；episode 之间等权平均：
+\begin{equation}
+ \mathcal L(E)=\sum_{b\in\{\rm num,disc\}:|\Q_b|>0}
+       \frac1{|\Q_b|}\sum_{(r,a)\in\Q_b}\ell_{ra},
+ \qquad \mathcal J(\theta)=\mathbb E_{E,\xi_{\rm prep}}\mathcal L(E).
+ \label{eq:loss}
+\end{equation}
+不是把所有 Cell 混成一个均值，也不是把两类分支再次除以 2。
+LL 的 $\alpha,C,g,v,\eta$ 全程保留 autograd；可见统计和 codebook 是常量。
+Query 与 support 的 responses 都有梯度。若 $Av=g$，微分为
+$dv=A^{-1}(dg-dA\,v)$；禁止 detach $A$ 或把求解当作不训练的 sklearn 后处理。
+
+\subsection{Mask sampler 的完整默认}
+对给定自然观测地址 $\mathcal O$，生成只依赖地址的均匀随机排列。
+目标数量为
+\begin{equation}
+ q_{\rm goal}=\min(64,\max(1,\lfloor0.15|\mathcal O|\rfloor)).
+\end{equation}
+按排列扫描：仅当隐藏该 Cell 后所在列仍至少留两条 visible observations 时，才把它加入 $\Q$；
+达到 $q_{\rm goal}$ 或扫描结束即停止。$\Q$ 为空则返回 \texttt{no-valid-episode}，重新抽表。
+最终 $\V=\mathcal O\setminus\Q$；保留未达到目标数量的合法非空 episode。
+该算法完全确定了 sampler，而没有声称它在所有合法 Query 子集中均匀。
+
+自然缺失与人为 mask 分开保存。预处理在 mask 后才拟合；每次 episode 重抽 nominal codes，
+不把隐藏类别加入 codebook。默认只有 masked-cell 训练，不暗中加入监督目标列训练或对比学习辅助损失。
+监督 ICL 转移是否需要结构化 mask，是后续实验问题。
+
+\subsection{一个可从零生成的训练表分布}
+\label{sec:prior}
+为了让实现不依赖尚未选定的数据文件，本文规定一个\textbf{最小 synthetic prior 起始配方}。
+它服务于首个训练循环与数学诊断，不声称复现 TabPFN-3 的预训练 prior，也不声称它足以训练成功的基座模型。
+未来正式预训练可能需要更丰富的表分布及训练规模；模型前向定义不依赖这一选择。
+
+每个 episode 的采样顺序如下；所有 Uniform 离散集合默认等概率，所有连续区间含端点与否不影响实数分布：
+\begin{enumerate}
+\item 独立抽 $N\in\{64,128,256,512\}$、$M\in\{4,8,16,32\}$。
+创建 $H_0=8$ 个隐藏节点和 $M$ 个输出节点，按 $j=1,\ldots,H_0+M$ 的拓扑序生成。
+\item 节点 $j$ 的父节点数 $p_j$ 从 $\{0,\ldots,\min(3,j-1)\}$ 均匀抽取；
+从前 $j-1$ 个节点无放回选父集合。$w_{ji}\sim\mathcal N(0,1/\max(1,p_j))$，
+$b_j\sim U[-0.5,0.5]$，$a_j\sim\operatorname{LogUniform}[0.5,2]$，
+$\nu_j\sim\operatorname{LogUniform}[0.05,0.5]$，函数 $f_j$ 从 identity、tanh、sin、ReLU 均匀选择。
+\item 对每行独立生成 $\epsilon_{rj}\sim\mathcal N(0,1)$。根节点取 $z_{rj}=\epsilon_{rj}$；
+非根节点取
+\begin{equation}
+ z_{rj}=a_j f_j\!\left(b_j+\sum_{i\in\operatorname{pa}(j)}w_{ji}z_{ri}\right)+\nu_j\epsilon_{rj}.
+ \label{eq:synthetic}
+\end{equation}
+表值使用最后 $M$ 个节点，前 8 个节点不进入输入。根节点未用到的随机参数不影响生成。
+\item 每个输出列独立选择 numeric/nominal/ordinal，概率为 $0.5/0.3/0.2$。
+Numeric 取 $x_{ra}=s_a z_{r,H_0+a}+m_a$，$s_a\sim\operatorname{LogUniform}[0.1,10]$、$m_a\sim U[-2,2]$。
+离散列从 $\{2,4,8,16\}$ 选择类别数 $D_a$，用预先固定的标准正态分位点
+$\Phi^{-1}(k/D_a)$，$k=1,\ldots,D_a-1$，把 latent 值分桶。
+Ordinal 保留桶次序；nominal 施加独立随机类别重标。声明域在抽样列值之前由 $D_a$ 给定。
+\item 为每列抽自然缺失概率 $p_a\sim U[0,0.2]$，各 Cell 独立缺失；
+再独立打乱输出行列及其 schema/ID，执行上述 mask sampler。
+分类域允许有本 episode 未出现的类别，不根据 Query 真值重新生成分桶或类别域。
+\end{enumerate}
+
+节点机制参数在同一表的行间共享，每张表重抽；噪声在行间独立。
+训练期 RNG 使用互相独立的 prior、missingness、mask、codebook 子流。
+例如用 NumPy \texttt{SeedSequence([20260906, split\_id, episode\_id])} 派生这些子流并保存参数，
+分布复现以保存生成的 episode/参数为准。验证使用独立 split ID，不能只换 mask 而复用同一潜在生成世界。
+这里的 SCM 仅用于产生合成相关结构，不给 TAR 内部响应赋予因果识别语义。
+
+\subsection{优化器与初始训练预算}
+下列数值是\textbf{待验证的运行起点}，不是已完成实验或已获批准的算力作业：
+\begin{table}[htbp]\centering\small
+\begin{tabularx}{\linewidth}{@{}l l Y@{}}\toprule
+选项 & 默认 & 精确定义 \\\midrule
+Optimizer & AdamW & $\beta=(0.9,0.95)$，$\epsilon=10^{-8}$ \\
+Learning rate & $10^{-4}$ & 前 2,000 optimizer steps 线性 warm-up \\
+总更新数 & 100,000 & warm-up 后 cosine 到 $10^{-5}$ \\
+有效 batch & 16 episodes & microbatch 1，累积 16 次，每次 loss 除以 16 \\
+Weight decay & $10^{-2}$ & 仅 $A,W$、attention/FFN 权重矩阵 \\
+不衰减 & 0 & 所有 bias、norm gain、频率、seeds、$w_F,w_U$ \\
+Gradient clip & 1 & 所有累积梯度 global norm，一次 optimizer step 前执行 \\
+训练精度 & FP32 & terminal FP64；BF16 是验收后的工程选项 \\
+模型随机性 & dropout 0 & 每个 episode 新 codebook；无 augmentation ensemble \\\bottomrule
+\end{tabularx}
+\end{table}
+
+用 $t=1,\ldots,T$ 编号 optimizer steps，$T=100000$、$w=2000$、$\eta_{\max}=10^{-4}$、
+$\eta_{\min}=10^{-5}$：
+\begin{equation}
+ \eta_t=\begin{cases}
+ \eta_{\max}t/w,&t\le w,\\
+ \eta_{\min}+\tfrac12(\eta_{\max}-\eta_{\min})
+ [1+\cos(\pi(t-w)/(T-w))],&t>w.
+ \end{cases}
+\end{equation}
+DDP 时按全局 episode 数 16 配置累积和 loss scaling，不能额外乘一次 world size。
+若资源要求调整 batch，需同时记录新设置，不把未达到的有效 batch 写入配置。
+每次更新若出现非有限 loss/gradient，应停止并保存失败样例；不静默跳步后仍称完成原预算。
+
+初步验证固定 256 个独立 synthetic episodes，每 1,000 步报告 numeric/discrete losses 和失败数量，
+不以训练 best single episode 代替泛化。先做第~\ref{sec:acceptance} 节小规模验收，再决定是否启动上述预算。
+此文件不启动训练、不修改模型 registry，也不产生能力证明。
+
+\section{推理、缓存与资源边界}
+\label{sec:inference}
+
+\subsection{最小正确推理路径}
+固定模型参数与 codebook，按式~\eqref{eq:input} 验证输入并编译整表；
+逐层完成 collect、read、row；只在全部层完成后读出 Query 和支持 responses；
+最后按目标列类型调用 terminal。推理不对当前表进行梯度更新。
+可以只物化需要的最终 $z$，但不能漏算形成这些 $z$ 所依赖的 Value carriers。
+
+默认一个 estimator。分类返回完整声明域 PMF 和预测标签，回归返回点值；
+输出同时包含 target 地址、状态、支持数。调试可返回 $z$、matching entropy、有效支持数
+$n_{\rm eff}=1/\sum_s\alpha_s^2$ 与 LL 系统条件数，但它们不是额外监督输入。
+
+\subsection{分块必须保持全局证据归一化}
+初始 correctness 实现保留完整 $H^{(\ell)}$；默认 receiver row chunk 为 256、collect column chunk 为 4、
+terminal query chunk 为 32、source chunk 为 2048。这些是 TAR 的起始内存参数，不改变数学超参数。
+不足一个 chunk 的尾部按实际长度处理，padding 不进入源集合。
+
+Collect 可沿列分块，因为不同列独立。沿 sources 分块时必须合并\emph{同一个 softmax} 的统计，
+不能先各块归一化再平均。每个 head/query 保存最大 logit $m$、分母 $Z$ 和加权值和 $U$。
+两块 $(m_1,Z_1,U_1)$、$(m_2,Z_2,U_2)$ 合并为
+\begin{equation}
+ m=\max(m_1,m_2),\quad
+ Z=e^{m_1-m}Z_1+e^{m_2-m}Z_2,\quad
+ U=e^{m_1-m}U_1+e^{m_2-m}U_2.
+ \label{eq:stream}
+\end{equation}
+全部合法 sources 合并后才计算 $U/Z$、output projection、receiver gate 和 FFN；
+空块作为恒等空统计跳过，全部为空则执行零更新分支。
+Terminal 的 Gaussian softmax 同样需要全支持归一化。为 LL 计算中心协方差时，首个实现用 FP64 两遍归约，
+避免原始二阶矩相减造成消减误差；优化版需与此参考核对。
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[node distance=7mm]
+\node[fact,text width=37mm] (old) {本层全部 visible carriers\\$H^{(\ell)}_{\V}$};
+\node[choice,text width=37mm,right=of old] (g) {全证据 Collect\\$G^{(\ell)}_a$};
+\node[box,text width=37mm,right=of g] (stream) {按行 Read + Row\\生成 $H^{(\ell+1)}$};
+\draw[arr] (old)--(g);\draw[arr] (g)--(stream);
+\node[box,text width=119mm,below=11mm of g] (barrier)
+ {层间同步：下一层必须收集本层更新后的全部 visible carriers。\\
+ 不能固定第一层摘要，把一个 row chunk 独自跑完 15 层。};
+\draw[arr] (stream.south)|-(barrier.east);
+\draw[arr] (barrier.west)-|([xshift=-5mm]old.west)--(old.west);
+\end{tikzpicture}
+\caption{TAR 的逐层全局摘要与分块回读。交替的行更新会改变下一层列证据，
+所以不能直接套用另一架构的整网两阶段缓存结论。}
+\label{fig:cache}
+\end{figure}
+
+\subsection{缓存何时有效}
+缓存 key 必须包含模型参数、schema、全部可见地址和值、预处理 realization、层状态及数值配置。
+仅在这些不变时，已有 Value/Unit/Feature carriers 与 summaries 才可复用。
+向原来 Null 的位置新增 Query 且不改变 $\V$，只需计算新增 Query 的 receiver 路径；
+已有 queries 不供源，所以不能改写已有响应。批量 Query 拆分需要固定完整可见事实和 codebook。
+
+修改 visible value、加入测试行 covariates、改变 masking、重新抽 codebook 或更新权重都会使相关缓存失效。
+因此第~\ref{sec:input} 节的逐测试行 API 默认不能共享一份“训练表已完成全部层”的 KV cache。
+第一份实现宁可重新前向；若要引入训练表独立缓存，必须另外设计信息边界并证明对应的新合同。
+
+\subsection{参数相近不意味着显存或 FLOPs 相近}
+令 $\widetilde N=N+K$、$\widetilde M=M+K$、$T=\widetilde N\widetilde M$。
+计入线性投影和 FFN，每层 dense reference 的量级为
+\begin{align}
+ C_{\rm induced}&=O\big((T+\widetilde MS)(d^2+dd_{\rm ff})
+                    +T(S+\widetilde M)d\big),\\
+ C_{\rm direct}&=O\big(T(d^2+dd_{\rm ff})+T(\widetilde N+\widetilde M)d\big).
+ \label{eq:cost}
+\end{align}
+这是增广 dense 上界；实际 sparse kernels 可跳过不供源的地址。
+固定 $M,K,S,d$ 时 inducing backbone 关于 $N$ 的 attention 项为线性，但并未消除关于特征数的二次 row attention。
+$N<S$ 时 collect/read 的常数成本可能大于 direct；保留固定槽是模型选择，不是加速保证。
+
+单个 $H$ 就含 $Td$ 个数。默认 $N=512,M=32$ 时，FP32 单份 $H$ 约 51 MiB；
+15 层训练还需要中间量、反向存储、优化器与工作区。
+仅 FP32 参数、梯度和 Adam 两组矩已约 825 MiB，不含 activations。
+若 $N=10^6,M=200$，单份 BF16 dense $H$ 已约 166 GiB。
+所以本稿\textbf{没有百万行单卡运行承诺}。分块 score 可以降低注意力工作区，却不会自动消除保存完整 $H$ 的成本。
+
+可设计逐层 CPU/offload 或重计算，使 accelerator 上只保留当前 chunk 和本层 summaries；
+这仍需要整体状态存储和每层全证据扫描，并产生 I/O 或重算成本。
+当前文档给出等价归约规则，尚未实现这类高性能后端。
+
+对 $Q=|\Q|$ 个目标、每列约 $n$ 条支持，terminal 距离为 $O(QnK)$；
+numeric LL 的协方差与求解为 $O(QnK^2+QK^3)$，离散输出另有类别域存储。
+把所有缺失 cells 都查询时 $Q$ 可随 $NM$ 增长，整体推理不再由 backbone 的线性项决定。
+
+\section{数学性质与实现必须守住的边界}
+\label{sec:properties}
+
+\begin{proposition}[Null 闭合]
+在所有中间量有限时，每一层的 Null carrier 恒等于零。
+\end{proposition}
+\begin{proof}
+初始 Null 为零。式~\eqref{eq:presence} 给出 $\rho(0)=0$，attention receiver gate 删除更新；
+FFN gate 也为零，最后显式 Null write-back 再保持零。逐子层归纳即可。
+投影 bias 无法绕过 projection 后的 gate。
+\end{proof}
+
+\begin{proposition}[固定证据下的 Query 插入不扰动]
+固定 schema、$\V$、可见值、参数及 codebook，把额外 Null 地址改成 Query，已有 carriers 和预测不变。
+\end{proposition}
+\begin{proof}
+新增 Query 只改变自身初值。Collect 与 row sources 只来自 $\V$；其他 receiver 的更新只依赖
+自己的状态与这些 sources。逐层归纳得到原 Value、banks 与旧 Query 状态不变。
+响应公式与支持集合也不变，因此 terminal 输出不变。
+\end{proof}
+
+这个结论不覆盖 Value$\to$Query（那会移除事实），也不覆盖新增可见测试 covariates。
+训练期若启用随机 dropout 或遍历顺序相关的 codebook，则需要共同搬运随机 realization；本稿 dropout 为零。
+
+\begin{proposition}[地址置换等变]
+同时置换行列、schema、masks、values、codebook 和输出地址，不改变对应预测的值。
+\end{proposition}
+\begin{proof}
+编码参数共享且无 learned row/column ID；固定映射下编码随地址移动。
+列/行注意力的合法 sources 随同置换，softmax 加权求和不依赖排列顺序。
+Inducing seeds 跨列共享，语义 bank 的 $k$ 轴保持固定。
+逐层传播、响应、同列 LL/NW 均保持地址对应，得到结论。
+\end{proof}
+
+有限精度下按容差核对，而非默认 bitwise equality。任意重排 ordinal 类别而不携带声明次序，不属于同一输入语义。
+只改变 $K$ 或 $S$ 的值也不是等变变换。
+
+\subsection{压缩与信息限制}
+Collect/read 一般不等价于 direct attention，即使 $S\ge N$ 也没有精确恢复保证。
+固定两次单头 attention 的权重、暂忽略 residual/FFN 时，其行到行混合经过 $S$ 维槽轴，
+混合矩阵的秩至多为 $S$；完整带非线性模型不能简单套用这个线性秩结论。
+这个视角解释了压缩的取舍，却不能证明哪种结构预测更好。
+
+同列 supports 的值在编码中可见，Query 值不可见；两类 Cell 的分布不同。
+共享 $W$ 和直接距离要求模型学出可比较的表示，这需要训练而不是类型检查来保证。
+同样，两个 Query seeds 相近、responses 尺度失控、softmax 过尖或接近均匀，都可能阻碍学习。
+这些现象应测量，不靠静默加温度、detach 或隐藏 gate schedule 消除。
+
+\section{实现者的模块边界与验收}
+\label{sec:acceptance}
+
+\subsection{建议的六个纯接口}
+接口名称是实现建议，输入/输出和信息边界由本文定义：
+\begin{longtable}{@{}p{37mm}p{113mm}@{}}\toprule
+接口 & 合同 \\\midrule\endhead
+\texttt{compile\_episode} & 只读 $E_{\rm in}$，返回 $H^{(0)}$、固定 masks、typed statistics、codebook。
+不可读取 truth sidecar；无效输入给出明确状态。\\
+\texttt{omab} & 输入 receiver、eligible sources、Null receiver mask；按第~\ref{sec:block} 节返回同形 receiver。
+Source 非空判定与 head 共享。\\
+\texttt{axis\_block} & 输入 $H^{(\ell)},\V$；返回完整 $H^{(\ell+1)}$。默认 collect/read/row，
+direct 是独立模块配置。不得循环更新某列后让未更新列读取混合时间状态。\\
+\texttt{response} & 从最终 $H$ 提取三类视图，返回 Query 和 support 的 $z$；同一响应公式，
+不读取原始 truth。\\
+\texttt{typed\_terminal} & 只读 target response、同列 support responses/values 与可见统计；
+返回点预测/PMF/状态。没有持久参数，不写回 $H$。\\
+\texttt{score} & 唯一接收 $Y^\star_\Q$ 的接口；按非空分支均值求和，返回 scalar loss 与类型统计。\\\bottomrule
+\end{longtable}
+
+Batch 可以是不同形状 episode 的列表。若 padding 成矩形，跨 episode attention 永不连通；
+先逐 episode 平均 loss，再对 batch 平均。不能按不同表的 token 数重新加权目标。
+Checkpoint 应包含实际权重、完整配置、code 版本、优化器/scheduler 状态与 RNG 状态；
+具体仓库 ModelSpec 身份待实现时新建，不能借用旧结构 checkpoint 的身份。
+
+\subsection{开始训练前应通过的检查}
+这些是未来实现的验收标准，不是本稿已经完成的模型实验：
+\begin{enumerate}
+\item \textbf{参数合同。}全尺寸实现的参数张量名称/形状能映射到计数脚本，总量 54,071,520；
+没有遗漏 bias，也没有未声明的 norm、projection 或 target embedding。
+\item \textbf{数据隔离。}固定 forward input，任意替换 sidecar labels，predictions 不变；
+更改 visible 值则允许变化。隐藏值不能影响均值、方差、类别域或 RNG 映射。
+\item \textbf{零与空源。}有 bias、空列、空行、真实值零、很小非零 carrier、全 Null corner 均覆盖；
+Null 输出严格零，空源 attention update 零，非 Null 的局部 FFN 不应被错误跳过。
+\item \textbf{固定槽与分块。}$N\in\{2,8,127,128,129\}$ 均使用 $S=128$；
+完整 sources 与不均匀 chunk 的归约结果一致。不能把 chunk 各自 softmax 后平均。
+\item \textbf{置换与 Query 插入。}固定 codebook，置换地址或插入 Null$\to$Query 后核对旧预测；
+同时检查梯度对应关系。新增 visible 事实不是这个测试的等价变换。
+\item \textbf{Terminal 代数。}LL 的中心求解与带截距正规方程一致；公共 Feature 平移不改 LL/NW；
+重复支持保留 multiplicity；PMF 含声明但未见类别且和为 1。
+\item \textbf{梯度。}在小随机表上以 FP64 有限差分检查非退化的 $W,w_U$、Cell seeds、attention 与 LL 求解梯度。
+检查 support 路径不是 detach；Feature 专属梯度应为零，不强求所有参数都非零梯度。
+\item \textbf{训练链。}先在独立小表上确认有限 loss、optimizer 更新、重放和验证分离，再开始预算训练。
+过拟合一张表只证明该训练链在该样例可拟合，不证明 ICL。
+\end{enumerate}
+
+建议 FP64 代数比较 $\texttt{atol}=10^{-9},\texttt{rtol}=10^{-7}$；
+FP32 forward 比较 $10^{-5},10^{-4}$。这些是起始容差，必须同时报告最大误差与输入尺度，
+不能只放宽阈值到测试通过。激活大到误差超界时，应先检查 conditioning 和运算顺序。
+
+\subsection{本稿随附的轻量校验}
+\texttt{design/parameter\_count.py} 检查张量与参数公式；
+\texttt{design/verify\_algebra.py} 仅检查 LL、PMF、平移与流式归约的独立小算例。
+二者都不是训练模型实现，也不代替上述端到端验收。
+\texttt{design/defaults.json} 供实现者加载本稿数值；公式、初始化、sampler 与 prior 的语义仍在本文完整定义。
+
+\section{未来论文的实验骨架与当前开放问题}
+\label{sec:experiments}
+
+本文可以直接生长为论文，但现阶段不填写虚构的结果表、SOTA 摘要或优势曲线。
+未来结果章节应围绕表~\ref{tab:experiments} 的问题补充真实证据，方法章节在配置改变时同步修订。
+
+\begin{table}[htbp]\centering\small
+\caption{待完成实验，不含任何已有性能结果。}\label{tab:experiments}
+\begin{tabularx}{\linewidth}{@{}lYY@{}}\toprule
+问题 & 固定或对照 & 需要报告的量 \\\midrule
+模型是否学会恢复 & 独立生成世界、不同 mask 与 seed & numeric 标准化误差；离散 NLL、准确率；失败比例 \\
+是否迁移到监督 ICL & 固定预处理、数据划分与测试行语义 & 独立真实数据集结果；均值、区间与分任务分布 \\
+Inducing 的取舍 & 同深度 direct；近似同参数 direct 分开 & 效果、参数、FLOPs 估计、显存、延迟 \\
+小样本是否受损 & 固定模型、改变可见 $N$ & $N<S$ 与 $N\ge S$ 下的曲线；固定槽不变 \\
+响应几何能否学习 & Cell-only、Unit 开关；Feature 等价控制 & entropy、$n_{\rm eff}$、响应尺度、梯度与条件数 \\
+读出选择 & Gaussian 固定；单独比较 learned matching & LL/NW 同 estimator 对照；参数与训练预算 \\
+规模能力 & 分别扫 $N,M,Q$、支持数与类别数 & 质量、显存、耗时与 OOM/数值失败边界 \\\bottomrule
+\end{tabularx}
+\end{table}
+
+与 TabPFN-3 比较时应报告具体分类/回归 checkpoint、单 estimator 或 ensemble、预处理和总推理成本，
+不能只比较名义参数量。TAR 初版 numeric 点预测不具备对方分布回归输出；分位数或 calibration 比较要等
+对应输出接口存在后再开展。数据任务的合法可见信息与测试批语义应对齐，否则结论需限定到不同协议。
+
+\subsection{哪些决定可以先固定，哪些结论不能提前写}
+当前可实施的决定是完整 tensor program、54M 预算、单轴固定槽、Gaussian LL/NW 和 masked-cell loss。
+接下来最可能推动修订的是响应尺度稳定性、Cell Query 与 Value 的表示差异、Feature 通道不可辨识、
+synthetic prior 不足以及逐 Cell 状态的内存成本。
+应以实验或推导定位问题，再修改对应接口；无需为了预见一切而在首版同时启用所有候选。
+
+成功的第一轮实现应能准确回答：“运行的每个算子是否对应本文、数据是否正确隔离、有限差分与分块是否一致、
+哪些数据形状可以运行、哪些统计表明模型在学习”。达到这些条件后，再谈训练预算扩大与能力比较。
+
+\appendix
+\section{完整 forward 伪代码}
+\begin{enumerate}
+\item 验证 schema、$\V,\Q$、可见数值及支持数；构造 truth-free $E_{\rm in}$。
+\item 只用 $\V$ 拟合连续统计、创建 nominal codebook；按式~\eqref{eq:compiler} 构造 $H$、Null mask。
+\item 对 $\ell=0,\ldots,L-1$：
+先只从 $H$ 的 visible 地址为各列计算 $G_a$（空源覆盖为零）；
+由同一个旧 $H$ 回读 $G_a$ 得到全部 $H^{\rm col}$；
+再只读取 $H^{\rm col}$ 的 visible 地址完成 row OMAB，得到新 $H$。
+Direct 配置以直接 column OMAB 替换 collect/read。
+\item 从最终 $H$ 读取所有所需的 $c,U,F$，按式~\eqref{eq:response} 为 Query 与 supports 算 $z$。
+\item 对每个 Query：提取同列完整支持；用式~\eqref{eq:matching} 计算权重；
+按类型执行式~\eqref{eq:solve} 或式~\eqref{eq:pmf}，返回地址与状态。
+\item 训练时 scorer 才读取 sidecar，按式~\eqref{eq:loss} 回传；推理直接返回预测。
+\end{enumerate}
+
+\section{文件职责与修订方法}
+\texttt{MATHEMATICAL\_DESIGN.tex} 是共同数学维护稿；
+\texttt{end-to-end-design.tex} 展开通用结构族及完整推导；
+\texttt{model-design.tex} 是本份固定规模、默认值齐备的实现稿，也是未来论文骨架。
+本稿为独立阅读重写必要定义，不复制完整历史附录；无须加载父文档的 aux 或 TeX。
+只有共同底稿使用大写文件名，本文名称不编码模型代际或性能承诺。
+
+若共同 response、OMAB、support、terminal 或 loss 改动，必须同步检查本稿相关公式、
+图~\ref{fig:flow}--\ref{fig:cache}、defaults 和参数/代数校验。
+现有 \texttt{check\_consistency.py} 检查共同底稿与通用端到端稿；它不自动证明本稿所有摘录一致。
+本轮没有改变共同数学、旧结构合同、RecSys 设计或运行代码。
+
+\begin{thebibliography}{9}
+\bibitem{pfn3} Prior Labs Team. \emph{TabPFN-3: Technical Report}. arXiv:2605.13986v2, 2026-05-28.
+\url{https://arxiv.org/abs/2605.13986v2}. 本稿参照其参数规模与附录 C 的架构配置。
+\bibitem{pfncode} Prior Labs. \emph{TabPFN v3 architecture implementation}.
+固定 commit \texttt{bfc3cbb9c5532e610ea01dbdee1f765057b5a8e3}.
+\href{https://github.com/PriorLabs/TabPFN/blob/bfc3cbb9c5532e610ea01dbdee1f765057b5a8e3/src/tabpfn/architectures/tabpfn_v3.py}{官方代码快照}，2026-09-06 核对。
+\end{thebibliography}
+\end{document}

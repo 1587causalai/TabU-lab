@@ -1,4 +1,4 @@
-"""Explicit builder boundary for the TabUBase model anchor."""
+"""Explicit builder boundary for the TabU model factory."""
 
 from __future__ import annotations
 
@@ -10,6 +10,7 @@ from typing import Any, TypeVar
 from torch import nn
 
 from tabu_lab.numerics import DEFAULT_FLOAT_DTYPE
+from tabu_lab.registry import DEFAULT_MODEL_ID
 
 from .query_base import (
     CANONICAL_QUERY_COMPONENTS,
@@ -22,6 +23,7 @@ from .query_base import (
     canonical_query_row_manifest,
 )
 from .table_cell import TabUCellBaseModel
+from .tabu_v2 import TabUV2CellAsQueryModel
 from .types import ReferenceConfig
 
 _ModelT = TypeVar("_ModelT", bound=nn.Module)
@@ -313,6 +315,57 @@ def build_tabu_query_row(**kwargs: Any) -> TabUQueryRowModel:
     return model
 
 
+def build_tabu_v2(**kwargs: Any) -> TabUV2CellAsQueryModel:
+    """Build the default TabU-v2 / TabUR cell-as-query contract."""
+
+    options = dict(kwargs)
+    config = _config_from_kwargs(options)
+    k = options.pop("k", None)
+    lambda_F = float(options.pop("lambda_F", 0.0))
+    lambda_U = float(options.pop("lambda_U", 0.0))
+    numeric_terminal = options.pop("numeric_terminal", "local_linear")
+    nominal_tokenizer = options.pop(
+        "nominal_tokenizer",
+        "source_scoped_frozen_codebook.v2",
+    )
+    nominal_codebook_size = int(options.pop("nominal_codebook_size", 100))
+    nominal_codebook_seed = int(options.pop("nominal_codebook_seed", 1729))
+    feature_address = bool(options.pop("feature_address", False))
+    context_terminal = options.pop("context_terminal", None)
+    if options:
+        raise TypeError(f"unknown tabu.v2.tabur builder options: {sorted(options)}")
+    return _build_float32(
+        TabUV2CellAsQueryModel,
+        config,
+        k=k,
+        lambda_F=lambda_F,
+        lambda_U=lambda_U,
+        numeric_terminal=numeric_terminal,
+        nominal_tokenizer=nominal_tokenizer,
+        nominal_codebook_size=nominal_codebook_size,
+        nominal_codebook_seed=nominal_codebook_seed,
+        feature_address=feature_address,
+        context_terminal=context_terminal,
+    )
+
+
+def build_tabu_tar(**kwargs: Any):
+    """Build the explicit TAR contract without changing compatibility defaults."""
+    from tabu_lab.contracts import canonical_hash
+    from tabu_lab.registry import get_model_spec, model_spec_identity_payload
+
+    from .tar import TabUTARModel, TARConfig
+
+    config = kwargs.pop("config", None)
+    if config is not None and not isinstance(config, TARConfig):
+        raise TypeError("config must be a TARConfig")
+    model = TabUTARModel(config, **kwargs)
+    spec = get_model_spec("tabu.tar")
+    model.contract_version = spec.contract_version
+    model.model_spec_hash = canonical_hash(model_spec_identity_payload(spec))
+    return model
+
+
 class BuilderRegistry:
     """Small duplicate-rejecting extension seam for model builders."""
 
@@ -357,6 +410,8 @@ class BuilderRegistry:
 
 _CANONICAL_MODEL_BUILDERS: Mapping[str, Callable[..., Any]] = MappingProxyType(
     {
+        "tabu.v2.tabur": build_tabu_v2,
+        "tabu.tar": build_tabu_tar,
         "tabu.cell.base": build_tabu_cell_base,
         "tabu.query.base": build_tabu_query_base,
         "tabu.query.row": build_tabu_query_row,
@@ -377,8 +432,11 @@ def register_model_builder(
     MODEL_BUILDERS.register(model_id, builder, replace=replace)
 
 
-def build_model(model_id: str, **kwargs: Any) -> Any:
-    return MODEL_BUILDERS.build(model_id, **kwargs)
+def build_model(model_id: str | None = None, **kwargs: Any) -> Any:
+    """Build a model, retaining the TabU-v2 no-argument compatibility default."""
+
+    resolved_model_id = DEFAULT_MODEL_ID if model_id is None else model_id
+    return MODEL_BUILDERS.build(resolved_model_id, **kwargs)
 
 
 def build_from_spec(spec: Any, **kwargs: Any) -> Any:
@@ -410,6 +468,13 @@ def build_from_spec(spec: Any, **kwargs: Any) -> Any:
         raise RuntimeError("canonical query builder returned the wrong model type")
     if registered.contract_id == "tabu.query.row" and not isinstance(model, TabUQueryRowModel):
         raise RuntimeError("canonical query-row builder returned the wrong model type")
+    if registered.contract_id == "tabu.v2.tabur" and not isinstance(model, TabUV2CellAsQueryModel):
+        raise RuntimeError("canonical TabU-v2 builder returned the wrong model type")
+    if registered.contract_id == "tabu.tar":
+        from .tar import TabUTARModel
+
+        if not isinstance(model, TabUTARModel):
+            raise RuntimeError("canonical TAR builder returned the wrong model type")
     if getattr(model, "contract_version", None) != registered.contract_version:
         raise RuntimeError("builder returned the wrong contract version")
     if getattr(model, "model_spec_hash", None) != registered_hash:
@@ -418,6 +483,7 @@ def build_from_spec(spec: Any, **kwargs: Any) -> Any:
 
 
 __all__ = [
+    "DEFAULT_MODEL_ID",
     "MODEL_BUILDERS",
     "BuilderRegistry",
     "build_from_spec",
@@ -425,5 +491,7 @@ __all__ = [
     "build_tabu_cell_base",
     "build_tabu_query_base",
     "build_tabu_query_row",
+    "build_tabu_tar",
+    "build_tabu_v2",
     "register_model_builder",
 ]

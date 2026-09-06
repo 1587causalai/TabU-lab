@@ -1,6 +1,7 @@
-"""Public TabUBase model and builder boundary."""
+"""Public TabU model and builder boundary."""
 
 from .builders import (
+    DEFAULT_MODEL_ID,
     MODEL_BUILDERS,
     BuilderRegistry,
     build_from_spec,
@@ -8,6 +9,8 @@ from .builders import (
     build_tabu_cell_base,
     build_tabu_query_base,
     build_tabu_query_row,
+    build_tabu_tar,
+    build_tabu_v2,
     register_model_builder,
 )
 from .component_contract import TabUBaseComposition
@@ -59,6 +62,8 @@ from .query_task_adapters import (
     SupervisedResponseAdapter,
 )
 from .table_cell import LabelColumnBroadcast, TabUCellBaseModel
+from .tabu_v2 import TabUV2CellAsQueryModel
+from .tar import TabUTARModel, TARConfig
 from .types import (
     DenseModelInput,
     DynamicsBlockKind,
@@ -71,6 +76,7 @@ __all__ = [
     "CANONICAL_COMPONENTS",
     "CANONICAL_QUERY_COMPONENTS",
     "CANONICAL_QUERY_ROW_COMPONENTS",
+    "DEFAULT_MODEL_ID",
     "MODEL_BUILDERS",
     "AxisMode",
     "AxisRoleSpec",
@@ -107,6 +113,7 @@ __all__ = [
     "ResolvedQueryComponentComposition",
     "RowReadoutMode",
     "SupervisedResponseAdapter",
+    "TARConfig",
     "TabUBaseComponentManifest",
     "TabUBaseComposition",
     "TabUCellBaseModel",
@@ -114,11 +121,15 @@ __all__ = [
     "TabUQueryBaseModel",
     "TabUQueryProfile",
     "TabUQueryRowModel",
+    "TabUTARModel",
+    "TabUV2CellAsQueryModel",
     "build_from_spec",
     "build_model",
     "build_tabu_cell_base",
     "build_tabu_query_base",
     "build_tabu_query_row",
+    "build_tabu_tar",
+    "build_tabu_v2",
     "canonical_query_base_manifest",
     "canonical_query_row_manifest",
     "canonical_tabu_base_manifest",

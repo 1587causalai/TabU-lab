@@ -1,0 +1,41 @@
+{
+  "schema": "tabu.tar.local-fit.1",
+  "status": "local_unissued",
+  "model_id": "tabu.tar",
+  "hypothesis": "The specified full TAR can reduce loss on fixed receiver-only target cells while preserving truth isolation; held-out rows are evaluated separately without checkpoint selection.",
+  "model_configuration": "full design defaults; only initialization_seed varies",
+  "seeds": [
+    1729,
+    2718,
+    31415
+  ],
+  "datasets": {
+    "diabetes": "58944348a7db7ea78d73a1c943a24d62f750d940ea6f20936b0282945a601a80",
+    "iris": "790e4c68fc93caa583232ef81b62913bbdf9463e574fbc0613f0b275ab3fc9dc"
+  },
+  "max_updates": 1200,
+  "max_train_seconds": 600,
+  "learning_rate": 0.0001,
+  "final_learning_rate": 0.0001,
+  "warmup_steps": 0,
+  "effective_episode_batch": 1,
+  "log_every": 10,
+  "pass_criteria": {
+    "fit_loss_ratio_max": 0.1,
+    "diabetes_normalized_mse_max": 0.01,
+    "iris_accuracy_min": 0.99
+  },
+  "kill": [
+    "nonfinite carrier/loss/gradient",
+    "invalid input or insufficient support",
+    "CUDA unavailable",
+    "GPU occupied or host memory below 16 GiB before launch"
+  ],
+  "evaluation": "Final checkpoint only; initial/final held-out rows are separate episodes with context plus one row. No test truth, fit target truth or other test rows enter their forward inputs.",
+  "controls": [
+    "random initialization",
+    "context mean or class-frequency prediction"
+  ],
+  "claim_boundary": "Fixed-episode supervised parameter fitting diagnostic, not pretraining, ICL or a foundation-model result. Each seed reports its own outcome; no best-seed selection.",
+  "budget_boundary": "At most 1200 updates or 600 seconds of training per lane. Time-budget exhaustion is inconclusive, not convergence failure; evaluation time is reported separately."
+}

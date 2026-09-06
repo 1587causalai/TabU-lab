@@ -1,0 +1,11 @@
+schema_version: tabu.evolution-node.v1
+kind: world_mixture
+node_id: tabu.mixture.supervised-v3
+version: 1.2.0
+maturity: experimental
+description: Balanced numeric and categorical response mixture over the unchanged compute-capped v3 world prior.
+entries:
+  - generator: {node_id: tabu.generator.supervised-query-row-broad, version: 3.1.0}
+    weight: 0.5
+  - generator: {node_id: tabu.generator.supervised-query-row-broad, version: 3.2.0}
+    weight: 0.5

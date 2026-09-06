@@ -45,6 +45,33 @@ def test_legacy_objective_keeps_raw_truth_coordinates() -> None:
     assert objective.resume_config["numeric_target_coordinate"] == "raw"
 
 
+def test_mixed_response_objective_activates_standardized_mse_and_categorical_nll() -> None:
+    repository = EvolutionRepository.load(ROOT)
+    objective = _objective(repository.node("tabu.objectives.mixed-response-supervised@1.0.0"))
+
+    assert objective.resume_config["numeric_target_coordinate"] == "context_standardized"
+    assert objective.resume_config["include_categorical"] is True
+
+
+def test_mixed_response_program_samples_both_generators(tmp_path: Path) -> None:
+    repository = EvolutionRepository.load(ROOT)
+    result = run_program(
+        repository,
+        lane=ProgramLane.GROW,
+        program_ref="tabu.pretraining.query-base@1.6.0",
+        output_root=tmp_path / "mixed-response",
+        device="cpu",
+    )
+    metadata = read_program_checkpoint(result.checkpoint)
+
+    assert result.receipt.status is ProgramRunStatus.COMPLETED
+    assert metadata.update_cursor == 8
+    assert metadata.policy_state.counts == {
+        "tabu.generator.supervised-query-row-broad@3.1.0": 5,
+        "tabu.generator.supervised-query-row-broad@3.2.0": 3,
+    }
+
+
 @pytest.mark.parametrize(
     ("source_graph_ref", "target_graph_ref"),
     (

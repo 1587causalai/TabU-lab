@@ -11,3 +11,15 @@ dist/
 results/raw/
 results/openml-full-context-*/
 .env
+
+# TAR checkpoints, observation cache and local TeX compilation
+*.safetensors
+/wandb/
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+/docs/design/*.pdf

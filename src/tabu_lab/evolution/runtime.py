@@ -21,6 +21,13 @@ from tabu_lab.contracts import EvidenceEpisode, TruthSidecar, canonical_hash, ca
 from tabu_lab.evidence import RunIdentity
 from tabu_lab.models import ReferenceConfig, build_model
 from tabu_lab.training import Objective, Trainer
+from tabu_lab.training.telemetry import (
+    TelemetryMode,
+    TelemetryResult,
+    TrainingTelemetry,
+    collect_training_metrics,
+    load_telemetry_protocol,
+)
 
 from .checkpoint import (
     file_sha256,
@@ -413,6 +420,7 @@ class ProgramRunResult:
     checkpoint: Path
     checkpoint_sidecar: Path
     receipt_path: Path
+    telemetry: TelemetryResult | None = None
 
 
 def run_program(
@@ -427,6 +435,11 @@ def run_program(
     warm_start_checkpoint: str | Path | None = None,
     warm_start_source_program: str | None = None,
     max_updates_this_invocation: int | None = None,
+    telemetry_mode: TelemetryMode = "disabled",
+    telemetry_protocol: str | Path | None = None,
+    wandb_project: str = "tabu-pretraining",
+    wandb_entity: str | None = None,
+    wandb_run_name: str | None = None,
 ) -> ProgramRunResult:
     if (program_ref is None) == (frozen_path is None):
         raise ValueError("select exactly one grow program or frozen evidence program")
@@ -592,48 +605,82 @@ def run_program(
         else min(remaining, max_updates_this_invocation)
     )
     destination.mkdir(parents=True)
+    telemetry: TrainingTelemetry | None = None
+    if telemetry_mode != "disabled":
+        protocol_path = (
+            repository.root / "specs/telemetry/training-observer-1.0.0.yaml"
+            if telemetry_protocol is None
+            else Path(telemetry_protocol)
+        )
+        telemetry = TrainingTelemetry(
+            output_root=destination,
+            protocol=load_telemetry_protocol(protocol_path),
+            mode=telemetry_mode,
+            run_identity_hash=identity.identity_hash,
+            snapshot_hash=resolved.snapshot_hash,
+            program_ref=f"{resolved.program_id}@{resolved.version}",
+            wandb_project=wandb_project,
+            wandb_entity=wandb_entity,
+            wandb_run_name=wandb_run_name,
+        )
     checkpoint: Path | None = None
-    for _ in range(invocation_budget):
-        generator_ref = policy.choose(trainer.named_generators["sampler"])
-        generator_node = repository.node(generator_ref)
-        if not isinstance(generator_node, GeneratorNode):
-            raise EvolutionManifestError("sampling policy selected a non-generator node")
-        episode_seed = int(
-            torch.randint(
-                0,
-                2**31 - 1,
-                (1,),
-                generator=trainer.named_generators["episode"],
-            ).item()
-        )
-        evidence, truth = _episode_pair(
-            generator_node,
-            recipe=recipe,
-            root_seed=episode_seed,
-            step=trainer.step,
-        )
-        result = trainer.train_step(evidence, truth)
-        if scheduler is not None:
-            scheduler.step()
-        policy.observe(float(result.loss.total.detach().cpu()))
-        if trainer.step % recipe.checkpoint_interval == 0:
-            checkpoint = destination / f"checkpoint-step-{trainer.step:08d}.safetensors"
-            save_program_checkpoint(
-                trainer,
-                checkpoint,
-                resolved_snapshot=resolved,
-                lane=lane,
-                evidence_status=evidence_status,
-                policy=policy,
-                scheduler=scheduler,
-                initialization=initialization,
-                target_steps=recipe.max_steps,
+    telemetry_result: TelemetryResult | None = None
+    try:
+        for _ in range(invocation_budget):
+            generator_ref = policy.choose(trainer.named_generators["sampler"])
+            generator_node = repository.node(generator_ref)
+            if not isinstance(generator_node, GeneratorNode):
+                raise EvolutionManifestError("sampling policy selected a non-generator node")
+            episode_seed = int(
+                torch.randint(
+                    0,
+                    2**31 - 1,
+                    (1,),
+                    generator=trainer.named_generators["episode"],
+                ).item()
             )
-        # ``TrainStep`` intentionally exposes prediction/loss tensors for local
-        # diagnostics.  Keeping the previous result alive while constructing
-        # the next quadratic routing ledger doubles peak memory on broad-row
-        # episodes, so the program runner releases its step-local graph here.
-        del result, evidence, truth
+            evidence, truth = _episode_pair(
+                generator_node,
+                recipe=recipe,
+                root_seed=episode_seed,
+                step=trainer.step,
+            )
+            learning_rate = float(trainer.optimizer.param_groups[0]["lr"])
+            result = trainer.train_step(evidence, truth)
+            if scheduler is not None:
+                scheduler.step()
+            policy.observe(float(result.loss.total.detach().cpu()))
+            if telemetry is not None:
+                telemetry.log(
+                    collect_training_metrics(
+                        result,
+                        evidence,
+                        generator_ref=generator_ref.ref,
+                        learning_rate=learning_rate,
+                    )
+                )
+            if trainer.step % recipe.checkpoint_interval == 0:
+                checkpoint = destination / f"checkpoint-step-{trainer.step:08d}.safetensors"
+                save_program_checkpoint(
+                    trainer,
+                    checkpoint,
+                    resolved_snapshot=resolved,
+                    lane=lane,
+                    evidence_status=evidence_status,
+                    policy=policy,
+                    scheduler=scheduler,
+                    initialization=initialization,
+                    target_steps=recipe.max_steps,
+                )
+            # ``TrainStep`` intentionally exposes prediction/loss tensors for local
+            # diagnostics.  Keeping the previous result alive while constructing
+            # the next quadratic routing ledger doubles peak memory on broad-row
+            # episodes, so the program runner releases its step-local graph here.
+            del result, evidence, truth
+    except BaseException:
+        if telemetry is not None:
+            telemetry.close()
+        raise
 
     invocation_checkpoint = destination / f"checkpoint-step-{trainer.step:08d}.safetensors"
     if checkpoint != invocation_checkpoint:
@@ -694,11 +741,14 @@ def run_program(
         canonical_json(receipt.model_dump(mode="python")) + "\n",
         encoding="utf-8",
     )
+    if telemetry is not None:
+        telemetry_result = telemetry.close()
     return ProgramRunResult(
         receipt=receipt,
         checkpoint=checkpoint,
         checkpoint_sidecar=sidecar,
         receipt_path=receipt_path,
+        telemetry=telemetry_result,
     )
 
 

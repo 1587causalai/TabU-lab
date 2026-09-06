@@ -22,6 +22,8 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_valida
 
 from tabu_lab.mathspec import Mathematics
 
+DEFAULT_MODEL_ID = "tabu.v2.tabur"
+
 
 class BuildStatus(StrEnum):
     """Typed runtime outcome of a registry build request."""
@@ -506,15 +508,16 @@ def validate_registry(
     )
 
 
-def build_model(contract_id: str, **kwargs: Any) -> BuildResult:
+def build_model(contract_id: str | None = None, **kwargs: Any) -> BuildResult:
     """Build a model lazily, preserving a typed boundary for unavailable designs."""
 
-    spec = get_model_spec(contract_id)
+    resolved_contract_id = DEFAULT_MODEL_ID if contract_id is None else contract_id
+    spec = get_model_spec(resolved_contract_id)
     if spec.maturity.build_state is ContractBuildState.DESIGN_OPEN:
         blockers = "; ".join(item.question for item in spec.known_open if item.blocking_build)
         return BuildResult(
             status=BuildStatus.DESIGN_OPEN,
-            contract_id=contract_id,
+            contract_id=resolved_contract_id,
             spec=spec,
             detail=blockers or "the source contract is explicitly design-open",
         )
@@ -525,7 +528,7 @@ def build_model(contract_id: str, **kwargs: Any) -> BuildResult:
     except (ModuleNotFoundError, AttributeError) as exc:
         return BuildResult(
             status=BuildStatus.BUILDER_UNAVAILABLE,
-            contract_id=contract_id,
+            contract_id=resolved_contract_id,
             spec=spec,
             detail=f"tabu_lab.models.build_from_spec is unavailable: {exc}",
         )
@@ -535,14 +538,19 @@ def build_model(contract_id: str, **kwargs: Any) -> BuildResult:
     except Exception as exc:
         return BuildResult(
             status=BuildStatus.BUILD_ERROR,
-            contract_id=contract_id,
+            contract_id=resolved_contract_id,
             spec=spec,
             detail=f"{type(exc).__name__}: {exc}",
         )
-    return BuildResult(status=BuildStatus.READY, contract_id=contract_id, spec=spec, model=model)
+    return BuildResult(
+        status=BuildStatus.READY,
+        contract_id=resolved_contract_id,
+        spec=spec,
+        model=model,
+    )
 
 
-def instantiate_model(contract_id: str, **kwargs: Any) -> BuildResult:
+def instantiate_model(contract_id: str | None = None, **kwargs: Any) -> BuildResult:
     """Explicit alias for callers that use instantiate terminology."""
 
     return build_model(contract_id, **kwargs)
@@ -558,6 +566,7 @@ instantiate = instantiate_model
 
 __all__ = [
     "Alternative",
+    "DEFAULT_MODEL_ID",
     "BuildResult",
     "BuildStatus",
     "ContractBuildState",

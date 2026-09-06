@@ -1,0 +1,12 @@
+schema_version: tabu.telemetry-protocol.v1
+protocol_id: tabu.telemetry.pretraining-core
+version: 1.0.0
+step_interval: 1
+metric_groups:
+  - typed_loss
+  - baseline_relative_skill
+  - collapse
+  - data_coverage
+  - support_routing
+  - gradient_flow
+description: Passive per-update observer; it is not part of ProgramSnapshot or training identity and may never control optimization.

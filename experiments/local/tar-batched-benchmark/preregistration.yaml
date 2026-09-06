@@ -1,0 +1,31 @@
+{
+  "schema": "tabu.tar.batched-benchmark.1",
+  "status": "local_unissued",
+  "hypothesis": "Batching independent axes with episode masks preserves forward and backward and improves full TAR GPU execution throughput.",
+  "reference_sha256": "cac3643c0dd96e55bb59790329dd4bb31e96a94c68000202e91991d7a07d89be",
+  "configuration": {},
+  "datasets": {
+    "iris": "790e4c68fc93caa583232ef81b62913bbdf9463e574fbc0613f0b275ab3fc9dc",
+    "diabetes": "58944348a7db7ea78d73a1c943a24d62f750d940ea6f20936b0282945a601a80"
+  },
+  "warmup_steps": 2,
+  "timed_steps": 5,
+  "profile": true,
+  "tolerance": {
+    "rtol": 0.0003,
+    "atol": 3e-05
+  },
+  "gradient_tolerance": {
+    "rtol": 0.001,
+    "atol": 0.0001
+  },
+  "pass_criteria": "Forward, response, prediction, loss and all parameter gradients meet declared tolerances; median forward+loss+backward time improves on both fixed shapes.",
+  "kill": [
+    "nonfinite arithmetic",
+    "failed equivalence assertion",
+    "occupied GPU or insufficient memory",
+    "reference or data hash mismatch"
+  ],
+  "evidence": "Immutable resolved protocol, matched initial weights, fixed episode and codebook, 2 warmups and 5 CUDA-synchronized timings per arm, one CPU/CUDA trace per arm, peak allocated memory, checksummed result. No optimizer step or fitting claim.",
+  "budget": "Two fixed small-table shapes, at most 20 timed steps and 4 profiler traces across both implementations; no training or parameter tuning."
+}

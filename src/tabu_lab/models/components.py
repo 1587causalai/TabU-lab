@@ -116,6 +116,7 @@ class CellTokenizer(nn.Module):
         nominal_tokenizer: str = EPISODE_RANDOM_SPHERE_V1,
         nominal_codebook_size: int = 100,
         nominal_codebook_seed: int = 1729,
+        feature_address: bool = False,
     ) -> None:
         super().__init__()
         if marker not in {"mask", "query"}:
@@ -147,6 +148,7 @@ class CellTokenizer(nn.Module):
         self.nominal_tokenizer = nominal_tokenizer
         self.nominal_codebook_size = int(nominal_codebook_size)
         self.nominal_codebook_seed = int(nominal_codebook_seed)
+        self.feature_address_enabled = bool(feature_address)
         self.n_frequencies = max(1, config.d_model // 4)
         frequencies = torch.arange(
             1,
@@ -164,6 +166,13 @@ class CellTokenizer(nn.Module):
         self.query_token = nn.Parameter(torch.empty(config.d_model, dtype=DEFAULT_FLOAT_DTYPE))
         nn.init.normal_(self.mask_token, std=0.02)
         nn.init.normal_(self.query_token, std=0.02)
+        if self.feature_address_enabled:
+            self.feature_address = nn.Parameter(
+                torch.empty(config.max_features, config.d_model, dtype=DEFAULT_FLOAT_DTYPE)
+            )
+            nn.init.normal_(self.feature_address, std=0.02)
+        else:
+            self.register_parameter("feature_address", None)
         if nominal_tokenizer == self.SOURCE_SCOPED_FROZEN_CODEBOOK_V2:
             generator = torch.Generator(device="cpu").manual_seed(self.nominal_codebook_seed)
             frozen_codebook = torch.nn.functional.normalize(
@@ -436,6 +445,11 @@ class CellTokenizer(nn.Module):
             self.query_token.view(1, 1, 1, -1).expand_as(cells),
             cells,
         )
+        if self.feature_address is not None:
+            feature_ids = self.feature_address[:n_features].to(
+                device=values.device, dtype=values.dtype
+            ).view(1, 1, n_features, -1)
+            cells = cells + (visible | symbols.target_mask).unsqueeze(-1) * feature_ids
         cells = torch.where(symbols.natural_missing_mask.unsqueeze(-1), 0.0, cells)
         return TokenTable(
             cells=cells,
