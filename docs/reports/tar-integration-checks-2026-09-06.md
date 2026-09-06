@@ -20,7 +20,7 @@ The work is based on `4dcdb2d`. The integration commits are:
   prediction, bounded fitting, optional W&B and Git source-state records.
 - `c1b2edf`: generated catalog projections and corresponding regression checks.
 
-All 13 TAR core Python files remain byte-identical to the experimental source.
+All 12 TAR core Python files remain byte-identical to the experimental source.
 The bound model-design TeX is unchanged. Source-closure metadata is newly required
 by the integrated registry, so new checkpoints have a different source identity.
 Older checkpoints still require their archived source and ModelSpec; strict
@@ -55,6 +55,10 @@ Both wheel and source distribution built. The source distribution contains exact
 copies of the TAR design/defaults and frozen fitting inputs. The extracted wheel,
 loaded outside the repository, passed real Small verification (721,464 parameters)
 including forward, backward, optimizer update and strict checkpoint recovery.
+A subsequent `tar fit --smoke` CLI check at `7ef6967` completed two CPU plumbing
+updates, wrote a clean Git source identity, and remained `local_unissued` with
+`model_size=cpu-smoke`. That tiny check is distinct from named Small and is not a
+model-fitting capability result.
 
 Ruff passed for the changed runtime, tests and scripts. Whole-repository Ruff has
 79 inherited findings, primarily in historical imports; comparison against the
