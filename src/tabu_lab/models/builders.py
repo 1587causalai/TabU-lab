@@ -433,7 +433,7 @@ def register_model_builder(
 
 
 def build_model(model_id: str | None = None, **kwargs: Any) -> Any:
-    """Build a model, defaulting to the current TabU-v2 mainline model."""
+    """Build a model, retaining the TabU-v2 no-argument compatibility default."""
 
     resolved_model_id = DEFAULT_MODEL_ID if model_id is None else model_id
     return MODEL_BUILDERS.build(resolved_model_id, **kwargs)

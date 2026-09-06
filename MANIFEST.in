@@ -7,3 +7,12 @@ recursive-include schemas *.json
 recursive-include scripts *.py
 recursive-include specs *.json *.yaml
 recursive-include tests *.py
+
+# TAR design snapshot and frozen inputs used by the source-distribution checks
+recursive-include docs/design *.tex *.json
+recursive-include experiments/local/tar-small-validation *.md *.yaml *.json *.py
+recursive-include experiments/local/tar-full-data-fit *.md *.yaml *.json *.py
+recursive-include experiments/local/tar-fixed-fit *.md *.yaml *.json *.py
+recursive-include experiments/local/tar-size-fit *.md *.yaml *.json *.py
+recursive-include experiments/local/tar-lr-diagnostic *.md *.yaml *.json *.py
+recursive-include experiments/local/tar-batched-benchmark *.md *.yaml *.json *.py

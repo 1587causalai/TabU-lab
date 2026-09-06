@@ -25,6 +25,13 @@ The existing no-argument model factory and pretraining programs below retain the
 compatibility identities. A research-direction change does not reinterpret an old
 checkpoint.
 
+The [TAR implementation guide](docs/tutorials/tabu-tar.md) documents full-train-pool
+episodes, fresh label masks and nominal codebooks, joint held-out prediction,
+W&B observation and bounded fitting. Start with the
+[Small validation protocol](experiments/local/tar-small-validation/README.md).
+`tabu-lab tar fit` requires an explicit preregistration and a new output directory;
+adding the command does not activate training or change `MAINLINE.yaml`.
+
 New TAR validation starts with **Small** for rapid feedback. Standard remains the
 reference model design; important findings require separate larger-size checks.
 The evaluation ladder is: component correctness; decoupling, extension and growth;

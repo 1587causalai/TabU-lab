@@ -70,6 +70,19 @@ def _run_tar(args: argparse.Namespace) -> int:
 
         print(json.dumps(inspect_size(args.size), indent=2, sort_keys=True))
         return 0
+    if args.tar_command == "benchmark":
+        from tabu_lab.tar_benchmark import run_benchmark
+
+        result = run_benchmark(args)
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result["outcome"] == "benchmark_completed" else 3
+    if args.tar_command == "fit":
+        from tabu_lab.tar_fit import run_fit
+
+        result = run_fit(args)
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result["outcome"] not in ("blocked_resources", "failed") else 3
+
     if args.tar_command == "inspect":
         from tabu_lab.models.tar.verification import inspect_model
 
@@ -85,6 +98,7 @@ def _run_tar(args: argparse.Namespace) -> int:
         result = verify_size("standard" if args.full else args.size or DEFAULT_VALIDATION_SIZE)
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0
+
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="tabu-lab")
@@ -136,6 +150,22 @@ def build_parser() -> argparse.ArgumentParser:
     verify_size.add_argument("--full", action="store_true", help="explicit 54M Standard validation")
     verify_size.add_argument("--smoke", action="store_true", help="legacy tiny CPU plumbing check")
     verify.set_defaults(handler=_run_tar)
+    bench = tar_sub.add_parser(
+        "benchmark", help="matched serial/batched TAR timing and equivalence"
+    )
+    bench.add_argument("--preregistration", type=Path, required=True)
+    bench.add_argument("--reference", type=Path, required=True)
+    bench.add_argument("--output-root", type=Path, required=True)
+    bench.add_argument("--device", choices=("cpu", "cuda:0"), default="cuda:0")
+    bench.set_defaults(handler=_run_tar)
+    fit = tar_sub.add_parser("fit", help="run a preregistered local TAR fitting diagnostic")
+    fit.add_argument("--preregistration", type=Path, required=True)
+    fit.add_argument("--output-root", type=Path, required=True)
+    fit.add_argument("--dataset", choices=("diabetes", "iris"), required=True)
+    fit.add_argument("--seed", type=int, required=True)
+    fit.add_argument("--device", default="cuda:0")
+    fit.add_argument("--smoke", action="store_true", help="two-step reduced-model plumbing only")
+    fit.set_defaults(handler=_run_tar)
     return parser
 
 
