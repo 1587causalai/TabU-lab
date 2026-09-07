@@ -9,18 +9,18 @@ from torch import nn
 from torch.nn import functional as F
 
 
-def presence(x, tau=1.0):
+def presence(x, tau=1.0, *, fp32=False):
     # FP64 avoids squaring underflow/overflow for finite FP32 carriers. Never use
     # 1-tau/(tau+n): that loses small receivers to catastrophic cancellation.
-    work = x.double()
+    work = x.float() if fp32 else x.double()
     scale = work.abs().amax(-1).clamp_min(1)
     norm = (work / scale.unsqueeze(-1)).square().sum(-1)
     return (norm / ((tau / scale) / scale + norm)).to(x.dtype)
 
 
-def log_presence(x, tau=1.0):
+def log_presence(x, tau=1.0, *, fp32=False):
     # Called only for exact nonzero sources. Work in log space; no source threshold.
-    work = x.double()
+    work = x.float() if fp32 else x.double()
     maximum = work.abs().amax(-1)
     log_norm = 2 * maximum.log() + (work / maximum.unsqueeze(-1)).square().sum(-1).log()
     return (-F.softplus(math.log(tau) - log_norm)).to(x.dtype)
@@ -82,7 +82,11 @@ class TAROMAB(nn.Module):
             eligible = active[..., start : start + cfg.source_chunk]
             # Inactive entries use a finite placeholder ONLY in log_presence;
             # exact eligibility removes them before softmax, including gradients.
-            lp = log_presence(torch.where(eligible[..., None], part, 1), cfg.presence_tau)
+            lp = log_presence(
+                torch.where(eligible[..., None], part, 1),
+                cfg.presence_tau,
+                fp32=cfg.numerical_backend == "experimental_fp32",
+            )
             chunks.append((heads(self.k(part)), heads(self.v(part)), lp, eligible))
         outputs = []
         for start in range(0, receivers.shape[-2], cfg.receiver_chunk_rows):
@@ -114,14 +118,19 @@ class TAROMAB(nn.Module):
                 mix = (u / z.clamp_min(torch.finfo(z.dtype).tiny)).transpose(-3, -2).flatten(-2)
                 # No sources means zero attention update, including output bias.
                 update = torch.where(has_source, self.o(mix), 0)
-                update = presence(x, cfg.presence_tau).unsqueeze(-1) * update
+                update = (
+                    presence(
+                        x, cfg.presence_tau, fp32=cfg.numerical_backend == "experimental_fp32"
+                    ).unsqueeze(-1)
+                    * update
+                )
             else:
                 update = torch.zeros_like(x)
             r = x + update
             rms = r * torch.rsqrt(r.square().mean(-1, keepdim=True) + cfg.rms_epsilon) * self.gain
-            y = r + presence(r, cfg.presence_tau).unsqueeze(-1) * self.ffn2(
-                F.gelu(self.ffn1(rms), approximate="none")
-            )
+            y = r + presence(
+                r, cfg.presence_tau, fp32=cfg.numerical_backend == "experimental_fp32"
+            ).unsqueeze(-1) * self.ffn2(F.gelu(self.ffn1(rms), approximate="none"))
             outputs.append(torch.where(null[..., None], 0, y))
         output = torch.cat(outputs, dim=-2)
         if not bool(torch.isfinite(output).all()):

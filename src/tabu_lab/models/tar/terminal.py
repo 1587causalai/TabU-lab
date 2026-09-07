@@ -32,9 +32,11 @@ def local_linear(delta, alpha, y, ridge):
 def predict_terminal(episode, z, stats, cfg):
     outputs = {}
     device = z.device
+    fp32 = cfg.numerical_backend == "experimental_fp32"
+    work_dtype = torch.float32 if fp32 else torch.float64
     visible = episode.visible.to(device)
     queries = episode.queries.to(device)
-    values = episode.values.detach().to(device=device, dtype=torch.float64)
+    values = episode.values.detach().to(device=device, dtype=work_dtype)
     for a, feature in enumerate(episode.features):
         supports = visible[:, a].nonzero().flatten()
         targets = queries[:, a].nonzero().flatten()
@@ -43,14 +45,21 @@ def predict_terminal(episode, z, stats, cfg):
             for r in targets.tolist():
                 outputs[(r, a)] = TARPrediction((r, a), "insufficient-support", count)
             continue
-        support_z = z[supports, a].double()
+
+        def select_rows(ids, column=a):
+            if fp32:
+                selector = torch.nn.functional.one_hot(ids, z.shape[0]).to(work_dtype)
+                return selector @ z[:, column].to(work_dtype)
+            return z[ids, column].to(work_dtype)
+
+        support_z = select_rows(supports)
         val = values[supports, a]
         mu, scale = stats[a]
         for ts in targets.split(cfg.terminal_query_chunk):
             if not len(ts):
                 continue
             # Deliberately keep both target and support autograd paths.
-            delta = support_z[None, :, :] - z[ts, a].double()[:, None, :]
+            delta = support_z[None, :, :] - select_rows(ts)[:, None, :]
             alpha = gaussian_weights(delta, cfg.match_bandwidth)
             if feature.kind == "numeric":
                 y = (val - mu) / scale
@@ -64,9 +73,13 @@ def predict_terminal(episode, z, stats, cfg):
                     )
             else:
                 domain = len(feature.domain)
-                pmf = torch.zeros(len(ts), domain, device=device, dtype=torch.float64).scatter_add(
-                    1, val.long()[None, :].expand(len(ts), -1), alpha
-                )
+                if fp32:
+                    codes = torch.nn.functional.one_hot(val.long(), domain).to(work_dtype)
+                    pmf = alpha @ codes
+                else:
+                    pmf = torch.zeros(len(ts), domain, device=device, dtype=work_dtype).scatter_add(
+                        1, val.long()[None, :].expand(len(ts), -1), alpha
+                    )
                 eps = cfg.category_smoothing_per_class
                 pmf = (pmf + eps) / (1 + domain * eps)
                 for idx, r in enumerate(ts.tolist()):

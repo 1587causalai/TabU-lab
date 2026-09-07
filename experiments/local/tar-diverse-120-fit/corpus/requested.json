@@ -1,0 +1,3494 @@
+[
+  {
+    "family": "scm_mixed_v1",
+    "profile": "numeric_predictors",
+    "target_type": "numeric",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 8,
+      "sigma": 0.05,
+      "scm_options": {
+        "target_type": "numeric",
+        "max_parents": 1,
+        "type_weights": {
+          "numeric": 100,
+          "ordinal": 0,
+          "binary": 0,
+          "categorical": 0,
+          "high_cardinality": 0
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20260907
+    },
+    "dataset": "scm_mixed_v1_000"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "numeric_predictors",
+    "target_type": "numeric",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 12,
+      "sigma": 0.3,
+      "scm_options": {
+        "target_type": "numeric",
+        "max_parents": 1,
+        "type_weights": {
+          "numeric": 100,
+          "ordinal": 0,
+          "binary": 0,
+          "categorical": 0,
+          "high_cardinality": 0
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20261907
+    },
+    "dataset": "scm_mixed_v1_001"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "numeric_predictors",
+    "target_type": "numeric",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 12,
+      "sigma": 0.05,
+      "scm_options": {
+        "target_type": "numeric",
+        "max_parents": 4,
+        "type_weights": {
+          "numeric": 100,
+          "ordinal": 0,
+          "binary": 0,
+          "categorical": 0,
+          "high_cardinality": 0
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20262907
+    },
+    "dataset": "scm_mixed_v1_002"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "numeric_predictors",
+    "target_type": "numeric",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 20,
+      "sigma": 0.3,
+      "scm_options": {
+        "target_type": "numeric",
+        "max_parents": 4,
+        "type_weights": {
+          "numeric": 100,
+          "ordinal": 0,
+          "binary": 0,
+          "categorical": 0,
+          "high_cardinality": 0
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20263907
+    },
+    "dataset": "scm_mixed_v1_003"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "mixed",
+    "target_type": "numeric",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 12,
+      "sigma": 0.05,
+      "scm_options": {
+        "target_type": "numeric",
+        "max_parents": 1,
+        "type_weights": {
+          "numeric": 55,
+          "ordinal": 15,
+          "binary": 15,
+          "categorical": 10,
+          "high_cardinality": 5
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20264907
+    },
+    "dataset": "scm_mixed_v1_004"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "mixed",
+    "target_type": "numeric",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 20,
+      "sigma": 0.3,
+      "scm_options": {
+        "target_type": "numeric",
+        "max_parents": 1,
+        "type_weights": {
+          "numeric": 55,
+          "ordinal": 15,
+          "binary": 15,
+          "categorical": 10,
+          "high_cardinality": 5
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20265907
+    },
+    "dataset": "scm_mixed_v1_005"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "mixed",
+    "target_type": "numeric",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 20,
+      "sigma": 0.05,
+      "scm_options": {
+        "target_type": "numeric",
+        "max_parents": 4,
+        "type_weights": {
+          "numeric": 55,
+          "ordinal": 15,
+          "binary": 15,
+          "categorical": 10,
+          "high_cardinality": 5
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20266907
+    },
+    "dataset": "scm_mixed_v1_006"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "mixed",
+    "target_type": "numeric",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 8,
+      "sigma": 0.3,
+      "scm_options": {
+        "target_type": "numeric",
+        "max_parents": 4,
+        "type_weights": {
+          "numeric": 55,
+          "ordinal": 15,
+          "binary": 15,
+          "categorical": 10,
+          "high_cardinality": 5
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20267907
+    },
+    "dataset": "scm_mixed_v1_007"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "discrete_rich",
+    "target_type": "numeric",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 20,
+      "sigma": 0.05,
+      "scm_options": {
+        "target_type": "numeric",
+        "max_parents": 1,
+        "type_weights": {
+          "numeric": 20,
+          "ordinal": 20,
+          "binary": 20,
+          "categorical": 25,
+          "high_cardinality": 15
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20268907
+    },
+    "dataset": "scm_mixed_v1_008"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "discrete_rich",
+    "target_type": "numeric",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 8,
+      "sigma": 0.3,
+      "scm_options": {
+        "target_type": "numeric",
+        "max_parents": 1,
+        "type_weights": {
+          "numeric": 20,
+          "ordinal": 20,
+          "binary": 20,
+          "categorical": 25,
+          "high_cardinality": 15
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20269907
+    },
+    "dataset": "scm_mixed_v1_009"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "discrete_rich",
+    "target_type": "numeric",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 8,
+      "sigma": 0.05,
+      "scm_options": {
+        "target_type": "numeric",
+        "max_parents": 4,
+        "type_weights": {
+          "numeric": 20,
+          "ordinal": 20,
+          "binary": 20,
+          "categorical": 25,
+          "high_cardinality": 15
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20270907
+    },
+    "dataset": "scm_mixed_v1_010"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "discrete_rich",
+    "target_type": "numeric",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 12,
+      "sigma": 0.3,
+      "scm_options": {
+        "target_type": "numeric",
+        "max_parents": 4,
+        "type_weights": {
+          "numeric": 20,
+          "ordinal": 20,
+          "binary": 20,
+          "categorical": 25,
+          "high_cardinality": 15
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20271907
+    },
+    "dataset": "scm_mixed_v1_011"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "numeric_predictors",
+    "target_type": "binary",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 12,
+      "sigma": 0.05,
+      "scm_options": {
+        "target_type": "binary",
+        "max_parents": 1,
+        "type_weights": {
+          "numeric": 100,
+          "ordinal": 0,
+          "binary": 0,
+          "categorical": 0,
+          "high_cardinality": 0
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20272907
+    },
+    "dataset": "scm_mixed_v1_012"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "numeric_predictors",
+    "target_type": "binary",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 20,
+      "sigma": 0.3,
+      "scm_options": {
+        "target_type": "binary",
+        "max_parents": 1,
+        "type_weights": {
+          "numeric": 100,
+          "ordinal": 0,
+          "binary": 0,
+          "categorical": 0,
+          "high_cardinality": 0
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20273907
+    },
+    "dataset": "scm_mixed_v1_013"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "numeric_predictors",
+    "target_type": "binary",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 20,
+      "sigma": 0.05,
+      "scm_options": {
+        "target_type": "binary",
+        "max_parents": 4,
+        "type_weights": {
+          "numeric": 100,
+          "ordinal": 0,
+          "binary": 0,
+          "categorical": 0,
+          "high_cardinality": 0
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20274907
+    },
+    "dataset": "scm_mixed_v1_014"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "numeric_predictors",
+    "target_type": "binary",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 8,
+      "sigma": 0.3,
+      "scm_options": {
+        "target_type": "binary",
+        "max_parents": 4,
+        "type_weights": {
+          "numeric": 100,
+          "ordinal": 0,
+          "binary": 0,
+          "categorical": 0,
+          "high_cardinality": 0
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20275907
+    },
+    "dataset": "scm_mixed_v1_015"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "mixed",
+    "target_type": "binary",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 20,
+      "sigma": 0.05,
+      "scm_options": {
+        "target_type": "binary",
+        "max_parents": 1,
+        "type_weights": {
+          "numeric": 55,
+          "ordinal": 15,
+          "binary": 15,
+          "categorical": 10,
+          "high_cardinality": 5
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20276907
+    },
+    "dataset": "scm_mixed_v1_016"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "mixed",
+    "target_type": "binary",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 8,
+      "sigma": 0.3,
+      "scm_options": {
+        "target_type": "binary",
+        "max_parents": 1,
+        "type_weights": {
+          "numeric": 55,
+          "ordinal": 15,
+          "binary": 15,
+          "categorical": 10,
+          "high_cardinality": 5
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20277907
+    },
+    "dataset": "scm_mixed_v1_017"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "mixed",
+    "target_type": "binary",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 8,
+      "sigma": 0.05,
+      "scm_options": {
+        "target_type": "binary",
+        "max_parents": 4,
+        "type_weights": {
+          "numeric": 55,
+          "ordinal": 15,
+          "binary": 15,
+          "categorical": 10,
+          "high_cardinality": 5
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20278907
+    },
+    "dataset": "scm_mixed_v1_018"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "mixed",
+    "target_type": "binary",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 12,
+      "sigma": 0.3,
+      "scm_options": {
+        "target_type": "binary",
+        "max_parents": 4,
+        "type_weights": {
+          "numeric": 55,
+          "ordinal": 15,
+          "binary": 15,
+          "categorical": 10,
+          "high_cardinality": 5
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20279907
+    },
+    "dataset": "scm_mixed_v1_019"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "discrete_rich",
+    "target_type": "binary",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 8,
+      "sigma": 0.05,
+      "scm_options": {
+        "target_type": "binary",
+        "max_parents": 1,
+        "type_weights": {
+          "numeric": 20,
+          "ordinal": 20,
+          "binary": 20,
+          "categorical": 25,
+          "high_cardinality": 15
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20280907
+    },
+    "dataset": "scm_mixed_v1_020"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "discrete_rich",
+    "target_type": "binary",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 12,
+      "sigma": 0.3,
+      "scm_options": {
+        "target_type": "binary",
+        "max_parents": 1,
+        "type_weights": {
+          "numeric": 20,
+          "ordinal": 20,
+          "binary": 20,
+          "categorical": 25,
+          "high_cardinality": 15
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20281907
+    },
+    "dataset": "scm_mixed_v1_021"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "discrete_rich",
+    "target_type": "binary",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 12,
+      "sigma": 0.05,
+      "scm_options": {
+        "target_type": "binary",
+        "max_parents": 4,
+        "type_weights": {
+          "numeric": 20,
+          "ordinal": 20,
+          "binary": 20,
+          "categorical": 25,
+          "high_cardinality": 15
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20282907
+    },
+    "dataset": "scm_mixed_v1_022"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "discrete_rich",
+    "target_type": "binary",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 20,
+      "sigma": 0.3,
+      "scm_options": {
+        "target_type": "binary",
+        "max_parents": 4,
+        "type_weights": {
+          "numeric": 20,
+          "ordinal": 20,
+          "binary": 20,
+          "categorical": 25,
+          "high_cardinality": 15
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20283907
+    },
+    "dataset": "scm_mixed_v1_023"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "numeric_predictors",
+    "target_type": "ordinal",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 20,
+      "sigma": 0.05,
+      "scm_options": {
+        "target_type": "ordinal",
+        "max_parents": 1,
+        "type_weights": {
+          "numeric": 100,
+          "ordinal": 0,
+          "binary": 0,
+          "categorical": 0,
+          "high_cardinality": 0
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20284907
+    },
+    "dataset": "scm_mixed_v1_024"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "numeric_predictors",
+    "target_type": "ordinal",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 8,
+      "sigma": 0.3,
+      "scm_options": {
+        "target_type": "ordinal",
+        "max_parents": 1,
+        "type_weights": {
+          "numeric": 100,
+          "ordinal": 0,
+          "binary": 0,
+          "categorical": 0,
+          "high_cardinality": 0
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20285907
+    },
+    "dataset": "scm_mixed_v1_025"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "numeric_predictors",
+    "target_type": "ordinal",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 8,
+      "sigma": 0.05,
+      "scm_options": {
+        "target_type": "ordinal",
+        "max_parents": 4,
+        "type_weights": {
+          "numeric": 100,
+          "ordinal": 0,
+          "binary": 0,
+          "categorical": 0,
+          "high_cardinality": 0
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20286907
+    },
+    "dataset": "scm_mixed_v1_026"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "numeric_predictors",
+    "target_type": "ordinal",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 12,
+      "sigma": 0.3,
+      "scm_options": {
+        "target_type": "ordinal",
+        "max_parents": 4,
+        "type_weights": {
+          "numeric": 100,
+          "ordinal": 0,
+          "binary": 0,
+          "categorical": 0,
+          "high_cardinality": 0
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20287907
+    },
+    "dataset": "scm_mixed_v1_027"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "mixed",
+    "target_type": "ordinal",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 8,
+      "sigma": 0.05,
+      "scm_options": {
+        "target_type": "ordinal",
+        "max_parents": 1,
+        "type_weights": {
+          "numeric": 55,
+          "ordinal": 15,
+          "binary": 15,
+          "categorical": 10,
+          "high_cardinality": 5
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20288907
+    },
+    "dataset": "scm_mixed_v1_028"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "mixed",
+    "target_type": "ordinal",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 12,
+      "sigma": 0.3,
+      "scm_options": {
+        "target_type": "ordinal",
+        "max_parents": 1,
+        "type_weights": {
+          "numeric": 55,
+          "ordinal": 15,
+          "binary": 15,
+          "categorical": 10,
+          "high_cardinality": 5
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20289907
+    },
+    "dataset": "scm_mixed_v1_029"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "mixed",
+    "target_type": "ordinal",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 12,
+      "sigma": 0.05,
+      "scm_options": {
+        "target_type": "ordinal",
+        "max_parents": 4,
+        "type_weights": {
+          "numeric": 55,
+          "ordinal": 15,
+          "binary": 15,
+          "categorical": 10,
+          "high_cardinality": 5
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20290907
+    },
+    "dataset": "scm_mixed_v1_030"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "mixed",
+    "target_type": "ordinal",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 20,
+      "sigma": 0.3,
+      "scm_options": {
+        "target_type": "ordinal",
+        "max_parents": 4,
+        "type_weights": {
+          "numeric": 55,
+          "ordinal": 15,
+          "binary": 15,
+          "categorical": 10,
+          "high_cardinality": 5
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20291907
+    },
+    "dataset": "scm_mixed_v1_031"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "discrete_rich",
+    "target_type": "ordinal",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 12,
+      "sigma": 0.05,
+      "scm_options": {
+        "target_type": "ordinal",
+        "max_parents": 1,
+        "type_weights": {
+          "numeric": 20,
+          "ordinal": 20,
+          "binary": 20,
+          "categorical": 25,
+          "high_cardinality": 15
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20292907
+    },
+    "dataset": "scm_mixed_v1_032"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "discrete_rich",
+    "target_type": "ordinal",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 20,
+      "sigma": 0.3,
+      "scm_options": {
+        "target_type": "ordinal",
+        "max_parents": 1,
+        "type_weights": {
+          "numeric": 20,
+          "ordinal": 20,
+          "binary": 20,
+          "categorical": 25,
+          "high_cardinality": 15
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20293907
+    },
+    "dataset": "scm_mixed_v1_033"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "discrete_rich",
+    "target_type": "ordinal",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 20,
+      "sigma": 0.05,
+      "scm_options": {
+        "target_type": "ordinal",
+        "max_parents": 4,
+        "type_weights": {
+          "numeric": 20,
+          "ordinal": 20,
+          "binary": 20,
+          "categorical": 25,
+          "high_cardinality": 15
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20294907
+    },
+    "dataset": "scm_mixed_v1_034"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "discrete_rich",
+    "target_type": "ordinal",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 8,
+      "sigma": 0.3,
+      "scm_options": {
+        "target_type": "ordinal",
+        "max_parents": 4,
+        "type_weights": {
+          "numeric": 20,
+          "ordinal": 20,
+          "binary": 20,
+          "categorical": 25,
+          "high_cardinality": 15
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20295907
+    },
+    "dataset": "scm_mixed_v1_035"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "numeric_predictors",
+    "target_type": "categorical",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 8,
+      "sigma": 0.05,
+      "scm_options": {
+        "target_type": "categorical",
+        "max_parents": 1,
+        "type_weights": {
+          "numeric": 100,
+          "ordinal": 0,
+          "binary": 0,
+          "categorical": 0,
+          "high_cardinality": 0
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20296907
+    },
+    "dataset": "scm_mixed_v1_036"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "numeric_predictors",
+    "target_type": "categorical",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 12,
+      "sigma": 0.3,
+      "scm_options": {
+        "target_type": "categorical",
+        "max_parents": 1,
+        "type_weights": {
+          "numeric": 100,
+          "ordinal": 0,
+          "binary": 0,
+          "categorical": 0,
+          "high_cardinality": 0
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20297907
+    },
+    "dataset": "scm_mixed_v1_037"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "numeric_predictors",
+    "target_type": "categorical",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 12,
+      "sigma": 0.05,
+      "scm_options": {
+        "target_type": "categorical",
+        "max_parents": 4,
+        "type_weights": {
+          "numeric": 100,
+          "ordinal": 0,
+          "binary": 0,
+          "categorical": 0,
+          "high_cardinality": 0
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20298907
+    },
+    "dataset": "scm_mixed_v1_038"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "numeric_predictors",
+    "target_type": "categorical",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 20,
+      "sigma": 0.3,
+      "scm_options": {
+        "target_type": "categorical",
+        "max_parents": 4,
+        "type_weights": {
+          "numeric": 100,
+          "ordinal": 0,
+          "binary": 0,
+          "categorical": 0,
+          "high_cardinality": 0
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20299907
+    },
+    "dataset": "scm_mixed_v1_039"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "mixed",
+    "target_type": "categorical",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 12,
+      "sigma": 0.05,
+      "scm_options": {
+        "target_type": "categorical",
+        "max_parents": 1,
+        "type_weights": {
+          "numeric": 55,
+          "ordinal": 15,
+          "binary": 15,
+          "categorical": 10,
+          "high_cardinality": 5
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20300907
+    },
+    "dataset": "scm_mixed_v1_040"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "mixed",
+    "target_type": "categorical",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 20,
+      "sigma": 0.3,
+      "scm_options": {
+        "target_type": "categorical",
+        "max_parents": 1,
+        "type_weights": {
+          "numeric": 55,
+          "ordinal": 15,
+          "binary": 15,
+          "categorical": 10,
+          "high_cardinality": 5
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20301907
+    },
+    "dataset": "scm_mixed_v1_041"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "mixed",
+    "target_type": "categorical",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 20,
+      "sigma": 0.05,
+      "scm_options": {
+        "target_type": "categorical",
+        "max_parents": 4,
+        "type_weights": {
+          "numeric": 55,
+          "ordinal": 15,
+          "binary": 15,
+          "categorical": 10,
+          "high_cardinality": 5
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20302907
+    },
+    "dataset": "scm_mixed_v1_042"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "mixed",
+    "target_type": "categorical",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 8,
+      "sigma": 0.3,
+      "scm_options": {
+        "target_type": "categorical",
+        "max_parents": 4,
+        "type_weights": {
+          "numeric": 55,
+          "ordinal": 15,
+          "binary": 15,
+          "categorical": 10,
+          "high_cardinality": 5
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20303907
+    },
+    "dataset": "scm_mixed_v1_043"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "discrete_rich",
+    "target_type": "categorical",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 20,
+      "sigma": 0.05,
+      "scm_options": {
+        "target_type": "categorical",
+        "max_parents": 1,
+        "type_weights": {
+          "numeric": 20,
+          "ordinal": 20,
+          "binary": 20,
+          "categorical": 25,
+          "high_cardinality": 15
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20304907
+    },
+    "dataset": "scm_mixed_v1_044"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "discrete_rich",
+    "target_type": "categorical",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 8,
+      "sigma": 0.3,
+      "scm_options": {
+        "target_type": "categorical",
+        "max_parents": 1,
+        "type_weights": {
+          "numeric": 20,
+          "ordinal": 20,
+          "binary": 20,
+          "categorical": 25,
+          "high_cardinality": 15
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20305907
+    },
+    "dataset": "scm_mixed_v1_045"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "discrete_rich",
+    "target_type": "categorical",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 8,
+      "sigma": 0.05,
+      "scm_options": {
+        "target_type": "categorical",
+        "max_parents": 4,
+        "type_weights": {
+          "numeric": 20,
+          "ordinal": 20,
+          "binary": 20,
+          "categorical": 25,
+          "high_cardinality": 15
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20306907
+    },
+    "dataset": "scm_mixed_v1_046"
+  },
+  {
+    "family": "scm_mixed_v1",
+    "profile": "discrete_rich",
+    "target_type": "categorical",
+    "request": {
+      "source": "scm",
+      "api_version": "v1",
+      "n_features": 12,
+      "sigma": 0.3,
+      "scm_options": {
+        "target_type": "categorical",
+        "max_parents": 4,
+        "type_weights": {
+          "numeric": 20,
+          "ordinal": 20,
+          "binary": 20,
+          "categorical": 25,
+          "high_cardinality": 15
+        }
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20307907
+    },
+    "dataset": "scm_mixed_v1_047"
+  },
+  {
+    "family": "discoscm",
+    "profile": "numeric_dominant",
+    "target_type": "numeric",
+    "request": {
+      "source": "discoscm",
+      "n_features": 12,
+      "unit_dim": 4,
+      "sigma": 0.05,
+      "graph_family": "sparse",
+      "max_parents": 4,
+      "token_heritability": 0.5,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 80,
+        "ordinal": 7,
+        "binary": 8,
+        "categorical": 5,
+        "high_cardinality": 0
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20308907
+    },
+    "dataset": "discoscm_048"
+  },
+  {
+    "family": "discoscm",
+    "profile": "numeric_dominant",
+    "target_type": "binary",
+    "request": {
+      "source": "discoscm",
+      "n_features": 20,
+      "unit_dim": 4,
+      "sigma": 0.05,
+      "graph_family": "sparse",
+      "max_parents": 4,
+      "token_heritability": 0.5,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 80,
+        "ordinal": 7,
+        "binary": 8,
+        "categorical": 5,
+        "high_cardinality": 0
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20309907
+    },
+    "dataset": "discoscm_049"
+  },
+  {
+    "family": "discoscm",
+    "profile": "numeric_dominant",
+    "target_type": "numeric",
+    "request": {
+      "source": "discoscm",
+      "n_features": 20,
+      "unit_dim": 4,
+      "sigma": 0.3,
+      "graph_family": "sparse",
+      "max_parents": 4,
+      "token_heritability": 0.9,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 80,
+        "ordinal": 7,
+        "binary": 8,
+        "categorical": 5,
+        "high_cardinality": 0
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20310907
+    },
+    "dataset": "discoscm_050"
+  },
+  {
+    "family": "discoscm",
+    "profile": "numeric_dominant",
+    "target_type": "ordinal",
+    "request": {
+      "source": "discoscm",
+      "n_features": 32,
+      "unit_dim": 4,
+      "sigma": 0.3,
+      "graph_family": "sparse",
+      "max_parents": 4,
+      "token_heritability": 0.9,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 80,
+        "ordinal": 7,
+        "binary": 8,
+        "categorical": 5,
+        "high_cardinality": 0
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20311907
+    },
+    "dataset": "discoscm_051"
+  },
+  {
+    "family": "discoscm",
+    "profile": "numeric_dominant",
+    "target_type": "numeric",
+    "request": {
+      "source": "discoscm",
+      "n_features": 20,
+      "unit_dim": 16,
+      "sigma": 0.05,
+      "graph_family": "sparse",
+      "max_parents": 4,
+      "token_heritability": 0.9,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 80,
+        "ordinal": 7,
+        "binary": 8,
+        "categorical": 5,
+        "high_cardinality": 0
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20312907
+    },
+    "dataset": "discoscm_052"
+  },
+  {
+    "family": "discoscm",
+    "profile": "numeric_dominant",
+    "target_type": "ordinal",
+    "request": {
+      "source": "discoscm",
+      "n_features": 32,
+      "unit_dim": 16,
+      "sigma": 0.05,
+      "graph_family": "sparse",
+      "max_parents": 4,
+      "token_heritability": 0.9,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 80,
+        "ordinal": 7,
+        "binary": 8,
+        "categorical": 5,
+        "high_cardinality": 0
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20313907
+    },
+    "dataset": "discoscm_053"
+  },
+  {
+    "family": "discoscm",
+    "profile": "numeric_dominant",
+    "target_type": "numeric",
+    "request": {
+      "source": "discoscm",
+      "n_features": 32,
+      "unit_dim": 16,
+      "sigma": 0.3,
+      "graph_family": "sparse",
+      "max_parents": 4,
+      "token_heritability": 0.5,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 80,
+        "ordinal": 7,
+        "binary": 8,
+        "categorical": 5,
+        "high_cardinality": 0
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20314907
+    },
+    "dataset": "discoscm_054"
+  },
+  {
+    "family": "discoscm",
+    "profile": "numeric_dominant",
+    "target_type": "categorical",
+    "request": {
+      "source": "discoscm",
+      "n_features": 12,
+      "unit_dim": 16,
+      "sigma": 0.3,
+      "graph_family": "sparse",
+      "max_parents": 4,
+      "token_heritability": 0.5,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 80,
+        "ordinal": 7,
+        "binary": 8,
+        "categorical": 5,
+        "high_cardinality": 0
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20315907
+    },
+    "dataset": "discoscm_055"
+  },
+  {
+    "family": "discoscm",
+    "profile": "numeric_dominant",
+    "target_type": "numeric",
+    "request": {
+      "source": "discoscm",
+      "n_features": 12,
+      "unit_dim": 4,
+      "sigma": 0.05,
+      "graph_family": "star",
+      "max_parents": null,
+      "token_heritability": 0.9,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 80,
+        "ordinal": 7,
+        "binary": 8,
+        "categorical": 5,
+        "high_cardinality": 0
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20316907
+    },
+    "dataset": "discoscm_056"
+  },
+  {
+    "family": "discoscm",
+    "profile": "numeric_dominant",
+    "target_type": "ordinal",
+    "request": {
+      "source": "discoscm",
+      "n_features": 20,
+      "unit_dim": 4,
+      "sigma": 0.05,
+      "graph_family": "star",
+      "max_parents": null,
+      "token_heritability": 0.9,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 80,
+        "ordinal": 7,
+        "binary": 8,
+        "categorical": 5,
+        "high_cardinality": 0
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20317907
+    },
+    "dataset": "discoscm_057"
+  },
+  {
+    "family": "discoscm",
+    "profile": "numeric_dominant",
+    "target_type": "numeric",
+    "request": {
+      "source": "discoscm",
+      "n_features": 20,
+      "unit_dim": 4,
+      "sigma": 0.3,
+      "graph_family": "star",
+      "max_parents": null,
+      "token_heritability": 0.5,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 80,
+        "ordinal": 7,
+        "binary": 8,
+        "categorical": 5,
+        "high_cardinality": 0
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20318907
+    },
+    "dataset": "discoscm_058"
+  },
+  {
+    "family": "discoscm",
+    "profile": "numeric_dominant",
+    "target_type": "categorical",
+    "request": {
+      "source": "discoscm",
+      "n_features": 32,
+      "unit_dim": 4,
+      "sigma": 0.3,
+      "graph_family": "star",
+      "max_parents": null,
+      "token_heritability": 0.5,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 80,
+        "ordinal": 7,
+        "binary": 8,
+        "categorical": 5,
+        "high_cardinality": 0
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20319907
+    },
+    "dataset": "discoscm_059"
+  },
+  {
+    "family": "discoscm",
+    "profile": "numeric_dominant",
+    "target_type": "numeric",
+    "request": {
+      "source": "discoscm",
+      "n_features": 20,
+      "unit_dim": 16,
+      "sigma": 0.05,
+      "graph_family": "star",
+      "max_parents": null,
+      "token_heritability": 0.5,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 80,
+        "ordinal": 7,
+        "binary": 8,
+        "categorical": 5,
+        "high_cardinality": 0
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20320907
+    },
+    "dataset": "discoscm_060"
+  },
+  {
+    "family": "discoscm",
+    "profile": "numeric_dominant",
+    "target_type": "categorical",
+    "request": {
+      "source": "discoscm",
+      "n_features": 32,
+      "unit_dim": 16,
+      "sigma": 0.05,
+      "graph_family": "star",
+      "max_parents": null,
+      "token_heritability": 0.5,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 80,
+        "ordinal": 7,
+        "binary": 8,
+        "categorical": 5,
+        "high_cardinality": 0
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20321907
+    },
+    "dataset": "discoscm_061"
+  },
+  {
+    "family": "discoscm",
+    "profile": "numeric_dominant",
+    "target_type": "numeric",
+    "request": {
+      "source": "discoscm",
+      "n_features": 32,
+      "unit_dim": 16,
+      "sigma": 0.3,
+      "graph_family": "star",
+      "max_parents": null,
+      "token_heritability": 0.9,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 80,
+        "ordinal": 7,
+        "binary": 8,
+        "categorical": 5,
+        "high_cardinality": 0
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20322907
+    },
+    "dataset": "discoscm_062"
+  },
+  {
+    "family": "discoscm",
+    "profile": "numeric_dominant",
+    "target_type": "binary",
+    "request": {
+      "source": "discoscm",
+      "n_features": 12,
+      "unit_dim": 16,
+      "sigma": 0.3,
+      "graph_family": "star",
+      "max_parents": null,
+      "token_heritability": 0.9,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 80,
+        "ordinal": 7,
+        "binary": 8,
+        "categorical": 5,
+        "high_cardinality": 0
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20323907
+    },
+    "dataset": "discoscm_063"
+  },
+  {
+    "family": "discoscm",
+    "profile": "mixed",
+    "target_type": "numeric",
+    "request": {
+      "source": "discoscm",
+      "n_features": 20,
+      "unit_dim": 4,
+      "sigma": 0.05,
+      "graph_family": "sparse",
+      "max_parents": 4,
+      "token_heritability": 0.9,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 55,
+        "ordinal": 15,
+        "binary": 15,
+        "categorical": 10,
+        "high_cardinality": 5
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20324907
+    },
+    "dataset": "discoscm_064"
+  },
+  {
+    "family": "discoscm",
+    "profile": "mixed",
+    "target_type": "ordinal",
+    "request": {
+      "source": "discoscm",
+      "n_features": 32,
+      "unit_dim": 4,
+      "sigma": 0.05,
+      "graph_family": "sparse",
+      "max_parents": 4,
+      "token_heritability": 0.9,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 55,
+        "ordinal": 15,
+        "binary": 15,
+        "categorical": 10,
+        "high_cardinality": 5
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20325907
+    },
+    "dataset": "discoscm_065"
+  },
+  {
+    "family": "discoscm",
+    "profile": "mixed",
+    "target_type": "numeric",
+    "request": {
+      "source": "discoscm",
+      "n_features": 32,
+      "unit_dim": 4,
+      "sigma": 0.3,
+      "graph_family": "sparse",
+      "max_parents": 4,
+      "token_heritability": 0.5,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 55,
+        "ordinal": 15,
+        "binary": 15,
+        "categorical": 10,
+        "high_cardinality": 5
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20326907
+    },
+    "dataset": "discoscm_066"
+  },
+  {
+    "family": "discoscm",
+    "profile": "mixed",
+    "target_type": "categorical",
+    "request": {
+      "source": "discoscm",
+      "n_features": 12,
+      "unit_dim": 4,
+      "sigma": 0.3,
+      "graph_family": "sparse",
+      "max_parents": 4,
+      "token_heritability": 0.5,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 55,
+        "ordinal": 15,
+        "binary": 15,
+        "categorical": 10,
+        "high_cardinality": 5
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20327907
+    },
+    "dataset": "discoscm_067"
+  },
+  {
+    "family": "discoscm",
+    "profile": "mixed",
+    "target_type": "numeric",
+    "request": {
+      "source": "discoscm",
+      "n_features": 32,
+      "unit_dim": 16,
+      "sigma": 0.05,
+      "graph_family": "sparse",
+      "max_parents": 4,
+      "token_heritability": 0.5,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 55,
+        "ordinal": 15,
+        "binary": 15,
+        "categorical": 10,
+        "high_cardinality": 5
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20328907
+    },
+    "dataset": "discoscm_068"
+  },
+  {
+    "family": "discoscm",
+    "profile": "mixed",
+    "target_type": "categorical",
+    "request": {
+      "source": "discoscm",
+      "n_features": 12,
+      "unit_dim": 16,
+      "sigma": 0.05,
+      "graph_family": "sparse",
+      "max_parents": 4,
+      "token_heritability": 0.5,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 55,
+        "ordinal": 15,
+        "binary": 15,
+        "categorical": 10,
+        "high_cardinality": 5
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20329907
+    },
+    "dataset": "discoscm_069"
+  },
+  {
+    "family": "discoscm",
+    "profile": "mixed",
+    "target_type": "numeric",
+    "request": {
+      "source": "discoscm",
+      "n_features": 12,
+      "unit_dim": 16,
+      "sigma": 0.3,
+      "graph_family": "sparse",
+      "max_parents": 4,
+      "token_heritability": 0.9,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 55,
+        "ordinal": 15,
+        "binary": 15,
+        "categorical": 10,
+        "high_cardinality": 5
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20330907
+    },
+    "dataset": "discoscm_070"
+  },
+  {
+    "family": "discoscm",
+    "profile": "mixed",
+    "target_type": "binary",
+    "request": {
+      "source": "discoscm",
+      "n_features": 20,
+      "unit_dim": 16,
+      "sigma": 0.3,
+      "graph_family": "sparse",
+      "max_parents": 4,
+      "token_heritability": 0.9,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 55,
+        "ordinal": 15,
+        "binary": 15,
+        "categorical": 10,
+        "high_cardinality": 5
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20331907
+    },
+    "dataset": "discoscm_071"
+  },
+  {
+    "family": "discoscm",
+    "profile": "mixed",
+    "target_type": "numeric",
+    "request": {
+      "source": "discoscm",
+      "n_features": 20,
+      "unit_dim": 4,
+      "sigma": 0.05,
+      "graph_family": "star",
+      "max_parents": null,
+      "token_heritability": 0.5,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 55,
+        "ordinal": 15,
+        "binary": 15,
+        "categorical": 10,
+        "high_cardinality": 5
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20332907
+    },
+    "dataset": "discoscm_072"
+  },
+  {
+    "family": "discoscm",
+    "profile": "mixed",
+    "target_type": "categorical",
+    "request": {
+      "source": "discoscm",
+      "n_features": 32,
+      "unit_dim": 4,
+      "sigma": 0.05,
+      "graph_family": "star",
+      "max_parents": null,
+      "token_heritability": 0.5,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 55,
+        "ordinal": 15,
+        "binary": 15,
+        "categorical": 10,
+        "high_cardinality": 5
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20333907
+    },
+    "dataset": "discoscm_073"
+  },
+  {
+    "family": "discoscm",
+    "profile": "mixed",
+    "target_type": "numeric",
+    "request": {
+      "source": "discoscm",
+      "n_features": 32,
+      "unit_dim": 4,
+      "sigma": 0.3,
+      "graph_family": "star",
+      "max_parents": null,
+      "token_heritability": 0.9,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 55,
+        "ordinal": 15,
+        "binary": 15,
+        "categorical": 10,
+        "high_cardinality": 5
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20334907
+    },
+    "dataset": "discoscm_074"
+  },
+  {
+    "family": "discoscm",
+    "profile": "mixed",
+    "target_type": "binary",
+    "request": {
+      "source": "discoscm",
+      "n_features": 12,
+      "unit_dim": 4,
+      "sigma": 0.3,
+      "graph_family": "star",
+      "max_parents": null,
+      "token_heritability": 0.9,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 55,
+        "ordinal": 15,
+        "binary": 15,
+        "categorical": 10,
+        "high_cardinality": 5
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20335907
+    },
+    "dataset": "discoscm_075"
+  },
+  {
+    "family": "discoscm",
+    "profile": "mixed",
+    "target_type": "numeric",
+    "request": {
+      "source": "discoscm",
+      "n_features": 32,
+      "unit_dim": 16,
+      "sigma": 0.05,
+      "graph_family": "star",
+      "max_parents": null,
+      "token_heritability": 0.9,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 55,
+        "ordinal": 15,
+        "binary": 15,
+        "categorical": 10,
+        "high_cardinality": 5
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20336907
+    },
+    "dataset": "discoscm_076"
+  },
+  {
+    "family": "discoscm",
+    "profile": "mixed",
+    "target_type": "binary",
+    "request": {
+      "source": "discoscm",
+      "n_features": 12,
+      "unit_dim": 16,
+      "sigma": 0.05,
+      "graph_family": "star",
+      "max_parents": null,
+      "token_heritability": 0.9,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 55,
+        "ordinal": 15,
+        "binary": 15,
+        "categorical": 10,
+        "high_cardinality": 5
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20337907
+    },
+    "dataset": "discoscm_077"
+  },
+  {
+    "family": "discoscm",
+    "profile": "mixed",
+    "target_type": "numeric",
+    "request": {
+      "source": "discoscm",
+      "n_features": 12,
+      "unit_dim": 16,
+      "sigma": 0.3,
+      "graph_family": "star",
+      "max_parents": null,
+      "token_heritability": 0.5,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 55,
+        "ordinal": 15,
+        "binary": 15,
+        "categorical": 10,
+        "high_cardinality": 5
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20338907
+    },
+    "dataset": "discoscm_078"
+  },
+  {
+    "family": "discoscm",
+    "profile": "mixed",
+    "target_type": "ordinal",
+    "request": {
+      "source": "discoscm",
+      "n_features": 20,
+      "unit_dim": 16,
+      "sigma": 0.3,
+      "graph_family": "star",
+      "max_parents": null,
+      "token_heritability": 0.5,
+      "independent_frac": 0.0,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 55,
+        "ordinal": 15,
+        "binary": 15,
+        "categorical": 10,
+        "high_cardinality": 5
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20339907
+    },
+    "dataset": "discoscm_079"
+  },
+  {
+    "family": "discoscm",
+    "profile": "discrete_rich",
+    "target_type": "numeric",
+    "request": {
+      "source": "discoscm",
+      "n_features": 32,
+      "unit_dim": 4,
+      "sigma": 0.05,
+      "graph_family": "sparse",
+      "max_parents": 4,
+      "token_heritability": 0.5,
+      "independent_frac": 0.1,
+      "enable_heavy_tails": true,
+      "type_weights": {
+        "numeric": 20,
+        "ordinal": 20,
+        "binary": 20,
+        "categorical": 25,
+        "high_cardinality": 15
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20340907
+    },
+    "dataset": "discoscm_080"
+  },
+  {
+    "family": "discoscm",
+    "profile": "discrete_rich",
+    "target_type": "categorical",
+    "request": {
+      "source": "discoscm",
+      "n_features": 12,
+      "unit_dim": 4,
+      "sigma": 0.05,
+      "graph_family": "sparse",
+      "max_parents": 4,
+      "token_heritability": 0.5,
+      "independent_frac": 0.1,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 20,
+        "ordinal": 20,
+        "binary": 20,
+        "categorical": 25,
+        "high_cardinality": 15
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20341907
+    },
+    "dataset": "discoscm_081"
+  },
+  {
+    "family": "discoscm",
+    "profile": "discrete_rich",
+    "target_type": "numeric",
+    "request": {
+      "source": "discoscm",
+      "n_features": 12,
+      "unit_dim": 4,
+      "sigma": 0.3,
+      "graph_family": "sparse",
+      "max_parents": 4,
+      "token_heritability": 0.9,
+      "independent_frac": 0.1,
+      "enable_heavy_tails": true,
+      "type_weights": {
+        "numeric": 20,
+        "ordinal": 20,
+        "binary": 20,
+        "categorical": 25,
+        "high_cardinality": 15
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20342907
+    },
+    "dataset": "discoscm_082"
+  },
+  {
+    "family": "discoscm",
+    "profile": "discrete_rich",
+    "target_type": "binary",
+    "request": {
+      "source": "discoscm",
+      "n_features": 20,
+      "unit_dim": 4,
+      "sigma": 0.3,
+      "graph_family": "sparse",
+      "max_parents": 4,
+      "token_heritability": 0.9,
+      "independent_frac": 0.1,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 20,
+        "ordinal": 20,
+        "binary": 20,
+        "categorical": 25,
+        "high_cardinality": 15
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20343907
+    },
+    "dataset": "discoscm_083"
+  },
+  {
+    "family": "discoscm",
+    "profile": "discrete_rich",
+    "target_type": "numeric",
+    "request": {
+      "source": "discoscm",
+      "n_features": 12,
+      "unit_dim": 16,
+      "sigma": 0.05,
+      "graph_family": "sparse",
+      "max_parents": 4,
+      "token_heritability": 0.9,
+      "independent_frac": 0.1,
+      "enable_heavy_tails": true,
+      "type_weights": {
+        "numeric": 20,
+        "ordinal": 20,
+        "binary": 20,
+        "categorical": 25,
+        "high_cardinality": 15
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20344907
+    },
+    "dataset": "discoscm_084"
+  },
+  {
+    "family": "discoscm",
+    "profile": "discrete_rich",
+    "target_type": "binary",
+    "request": {
+      "source": "discoscm",
+      "n_features": 20,
+      "unit_dim": 16,
+      "sigma": 0.05,
+      "graph_family": "sparse",
+      "max_parents": 4,
+      "token_heritability": 0.9,
+      "independent_frac": 0.1,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 20,
+        "ordinal": 20,
+        "binary": 20,
+        "categorical": 25,
+        "high_cardinality": 15
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20345907
+    },
+    "dataset": "discoscm_085"
+  },
+  {
+    "family": "discoscm",
+    "profile": "discrete_rich",
+    "target_type": "numeric",
+    "request": {
+      "source": "discoscm",
+      "n_features": 20,
+      "unit_dim": 16,
+      "sigma": 0.3,
+      "graph_family": "sparse",
+      "max_parents": 4,
+      "token_heritability": 0.5,
+      "independent_frac": 0.1,
+      "enable_heavy_tails": true,
+      "type_weights": {
+        "numeric": 20,
+        "ordinal": 20,
+        "binary": 20,
+        "categorical": 25,
+        "high_cardinality": 15
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20346907
+    },
+    "dataset": "discoscm_086"
+  },
+  {
+    "family": "discoscm",
+    "profile": "discrete_rich",
+    "target_type": "ordinal",
+    "request": {
+      "source": "discoscm",
+      "n_features": 32,
+      "unit_dim": 16,
+      "sigma": 0.3,
+      "graph_family": "sparse",
+      "max_parents": 4,
+      "token_heritability": 0.5,
+      "independent_frac": 0.1,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 20,
+        "ordinal": 20,
+        "binary": 20,
+        "categorical": 25,
+        "high_cardinality": 15
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20347907
+    },
+    "dataset": "discoscm_087"
+  },
+  {
+    "family": "discoscm",
+    "profile": "discrete_rich",
+    "target_type": "numeric",
+    "request": {
+      "source": "discoscm",
+      "n_features": 32,
+      "unit_dim": 4,
+      "sigma": 0.05,
+      "graph_family": "star",
+      "max_parents": null,
+      "token_heritability": 0.9,
+      "independent_frac": 0.1,
+      "enable_heavy_tails": true,
+      "type_weights": {
+        "numeric": 20,
+        "ordinal": 20,
+        "binary": 20,
+        "categorical": 25,
+        "high_cardinality": 15
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20348907
+    },
+    "dataset": "discoscm_088"
+  },
+  {
+    "family": "discoscm",
+    "profile": "discrete_rich",
+    "target_type": "binary",
+    "request": {
+      "source": "discoscm",
+      "n_features": 12,
+      "unit_dim": 4,
+      "sigma": 0.05,
+      "graph_family": "star",
+      "max_parents": null,
+      "token_heritability": 0.9,
+      "independent_frac": 0.1,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 20,
+        "ordinal": 20,
+        "binary": 20,
+        "categorical": 25,
+        "high_cardinality": 15
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20349907
+    },
+    "dataset": "discoscm_089"
+  },
+  {
+    "family": "discoscm",
+    "profile": "discrete_rich",
+    "target_type": "numeric",
+    "request": {
+      "source": "discoscm",
+      "n_features": 12,
+      "unit_dim": 4,
+      "sigma": 0.3,
+      "graph_family": "star",
+      "max_parents": null,
+      "token_heritability": 0.5,
+      "independent_frac": 0.1,
+      "enable_heavy_tails": true,
+      "type_weights": {
+        "numeric": 20,
+        "ordinal": 20,
+        "binary": 20,
+        "categorical": 25,
+        "high_cardinality": 15
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20350907
+    },
+    "dataset": "discoscm_090"
+  },
+  {
+    "family": "discoscm",
+    "profile": "discrete_rich",
+    "target_type": "ordinal",
+    "request": {
+      "source": "discoscm",
+      "n_features": 20,
+      "unit_dim": 4,
+      "sigma": 0.3,
+      "graph_family": "star",
+      "max_parents": null,
+      "token_heritability": 0.5,
+      "independent_frac": 0.1,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 20,
+        "ordinal": 20,
+        "binary": 20,
+        "categorical": 25,
+        "high_cardinality": 15
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20351907
+    },
+    "dataset": "discoscm_091"
+  },
+  {
+    "family": "discoscm",
+    "profile": "discrete_rich",
+    "target_type": "numeric",
+    "request": {
+      "source": "discoscm",
+      "n_features": 12,
+      "unit_dim": 16,
+      "sigma": 0.05,
+      "graph_family": "star",
+      "max_parents": null,
+      "token_heritability": 0.5,
+      "independent_frac": 0.1,
+      "enable_heavy_tails": true,
+      "type_weights": {
+        "numeric": 20,
+        "ordinal": 20,
+        "binary": 20,
+        "categorical": 25,
+        "high_cardinality": 15
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20352907
+    },
+    "dataset": "discoscm_092"
+  },
+  {
+    "family": "discoscm",
+    "profile": "discrete_rich",
+    "target_type": "ordinal",
+    "request": {
+      "source": "discoscm",
+      "n_features": 20,
+      "unit_dim": 16,
+      "sigma": 0.05,
+      "graph_family": "star",
+      "max_parents": null,
+      "token_heritability": 0.5,
+      "independent_frac": 0.1,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 20,
+        "ordinal": 20,
+        "binary": 20,
+        "categorical": 25,
+        "high_cardinality": 15
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20353907
+    },
+    "dataset": "discoscm_093"
+  },
+  {
+    "family": "discoscm",
+    "profile": "discrete_rich",
+    "target_type": "numeric",
+    "request": {
+      "source": "discoscm",
+      "n_features": 20,
+      "unit_dim": 16,
+      "sigma": 0.3,
+      "graph_family": "star",
+      "max_parents": null,
+      "token_heritability": 0.9,
+      "independent_frac": 0.1,
+      "enable_heavy_tails": true,
+      "type_weights": {
+        "numeric": 20,
+        "ordinal": 20,
+        "binary": 20,
+        "categorical": 25,
+        "high_cardinality": 15
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20354907
+    },
+    "dataset": "discoscm_094"
+  },
+  {
+    "family": "discoscm",
+    "profile": "discrete_rich",
+    "target_type": "categorical",
+    "request": {
+      "source": "discoscm",
+      "n_features": 32,
+      "unit_dim": 16,
+      "sigma": 0.3,
+      "graph_family": "star",
+      "max_parents": null,
+      "token_heritability": 0.9,
+      "independent_frac": 0.1,
+      "enable_heavy_tails": false,
+      "type_weights": {
+        "numeric": 20,
+        "ordinal": 20,
+        "binary": 20,
+        "categorical": 25,
+        "high_cardinality": 15
+      },
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20355907
+    },
+    "dataset": "discoscm_095"
+  },
+  {
+    "family": "scm_numeric_v0",
+    "profile": "root_noise",
+    "target_type": "numeric",
+    "target_function": "root_noise",
+    "request": {
+      "source": "scm",
+      "api_version": "v0",
+      "n_features": 6,
+      "sigma": 0.1,
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20356907
+    },
+    "dataset": "scm_numeric_v0_096"
+  },
+  {
+    "family": "scm_numeric_v0",
+    "profile": "root_noise",
+    "target_type": "numeric",
+    "target_function": "root_noise",
+    "request": {
+      "source": "scm",
+      "api_version": "v0",
+      "n_features": 6,
+      "sigma": 0.3,
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20357907
+    },
+    "dataset": "scm_numeric_v0_097"
+  },
+  {
+    "family": "scm_numeric_v0",
+    "profile": "root_noise",
+    "target_type": "numeric",
+    "target_function": "root_noise",
+    "request": {
+      "source": "scm",
+      "api_version": "v0",
+      "n_features": 20,
+      "sigma": 0.1,
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20358907
+    },
+    "dataset": "scm_numeric_v0_098"
+  },
+  {
+    "family": "scm_numeric_v0",
+    "profile": "root_noise",
+    "target_type": "numeric",
+    "target_function": "root_noise",
+    "request": {
+      "source": "scm",
+      "api_version": "v0",
+      "n_features": 20,
+      "sigma": 0.3,
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20359907
+    },
+    "dataset": "scm_numeric_v0_099"
+  },
+  {
+    "family": "scm_numeric_v0",
+    "profile": "linear",
+    "target_type": "numeric",
+    "target_function": "linear",
+    "request": {
+      "source": "scm",
+      "api_version": "v0",
+      "n_features": 6,
+      "sigma": 0.1,
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20360907
+    },
+    "dataset": "scm_numeric_v0_100"
+  },
+  {
+    "family": "scm_numeric_v0",
+    "profile": "linear",
+    "target_type": "numeric",
+    "target_function": "linear",
+    "request": {
+      "source": "scm",
+      "api_version": "v0",
+      "n_features": 6,
+      "sigma": 0.3,
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20361907
+    },
+    "dataset": "scm_numeric_v0_101"
+  },
+  {
+    "family": "scm_numeric_v0",
+    "profile": "linear",
+    "target_type": "numeric",
+    "target_function": "linear",
+    "request": {
+      "source": "scm",
+      "api_version": "v0",
+      "n_features": 20,
+      "sigma": 0.1,
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20362907
+    },
+    "dataset": "scm_numeric_v0_102"
+  },
+  {
+    "family": "scm_numeric_v0",
+    "profile": "linear",
+    "target_type": "numeric",
+    "target_function": "linear",
+    "request": {
+      "source": "scm",
+      "api_version": "v0",
+      "n_features": 20,
+      "sigma": 0.3,
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20363907
+    },
+    "dataset": "scm_numeric_v0_103"
+  },
+  {
+    "family": "scm_numeric_v0",
+    "profile": "tanh",
+    "target_type": "numeric",
+    "target_function": "tanh",
+    "request": {
+      "source": "scm",
+      "api_version": "v0",
+      "n_features": 6,
+      "sigma": 0.1,
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20364907
+    },
+    "dataset": "scm_numeric_v0_104"
+  },
+  {
+    "family": "scm_numeric_v0",
+    "profile": "tanh",
+    "target_type": "numeric",
+    "target_function": "tanh",
+    "request": {
+      "source": "scm",
+      "api_version": "v0",
+      "n_features": 6,
+      "sigma": 0.3,
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20365907
+    },
+    "dataset": "scm_numeric_v0_105"
+  },
+  {
+    "family": "scm_numeric_v0",
+    "profile": "tanh",
+    "target_type": "numeric",
+    "target_function": "tanh",
+    "request": {
+      "source": "scm",
+      "api_version": "v0",
+      "n_features": 20,
+      "sigma": 0.1,
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20366907
+    },
+    "dataset": "scm_numeric_v0_106"
+  },
+  {
+    "family": "scm_numeric_v0",
+    "profile": "tanh",
+    "target_type": "numeric",
+    "target_function": "tanh",
+    "request": {
+      "source": "scm",
+      "api_version": "v0",
+      "n_features": 20,
+      "sigma": 0.3,
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20367907
+    },
+    "dataset": "scm_numeric_v0_107"
+  },
+  {
+    "family": "sklearn_synthetic",
+    "profile": "sklearn_make_regression",
+    "target_type": "numeric",
+    "request": {
+      "source": "sklearn_make_regression",
+      "n_features": 6,
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20368907
+    },
+    "dataset": "sklearn_synthetic_108"
+  },
+  {
+    "family": "sklearn_synthetic",
+    "profile": "sklearn_make_regression",
+    "target_type": "numeric",
+    "request": {
+      "source": "sklearn_make_regression",
+      "n_features": 12,
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20369907
+    },
+    "dataset": "sklearn_synthetic_109"
+  },
+  {
+    "family": "sklearn_synthetic",
+    "profile": "sklearn_make_regression",
+    "target_type": "numeric",
+    "request": {
+      "source": "sklearn_make_regression",
+      "n_features": 20,
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20370907
+    },
+    "dataset": "sklearn_synthetic_110"
+  },
+  {
+    "family": "sklearn_synthetic",
+    "profile": "sklearn_make_classification",
+    "target_type": "binary",
+    "request": {
+      "source": "sklearn_make_classification",
+      "n_features": 6,
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20371907
+    },
+    "dataset": "sklearn_synthetic_111"
+  },
+  {
+    "family": "sklearn_synthetic",
+    "profile": "sklearn_make_classification",
+    "target_type": "binary",
+    "request": {
+      "source": "sklearn_make_classification",
+      "n_features": 12,
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20372907
+    },
+    "dataset": "sklearn_synthetic_112"
+  },
+  {
+    "family": "sklearn_synthetic",
+    "profile": "sklearn_make_classification",
+    "target_type": "binary",
+    "request": {
+      "source": "sklearn_make_classification",
+      "n_features": 20,
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20373907
+    },
+    "dataset": "sklearn_synthetic_113"
+  },
+  {
+    "family": "sklearn_synthetic",
+    "profile": "sklearn_friedman1",
+    "target_type": "numeric",
+    "request": {
+      "source": "sklearn_friedman1",
+      "n_features": 6,
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20374907
+    },
+    "dataset": "sklearn_synthetic_114"
+  },
+  {
+    "family": "sklearn_synthetic",
+    "profile": "sklearn_friedman1",
+    "target_type": "numeric",
+    "request": {
+      "source": "sklearn_friedman1",
+      "n_features": 12,
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20375907
+    },
+    "dataset": "sklearn_synthetic_115"
+  },
+  {
+    "family": "sklearn_synthetic",
+    "profile": "sklearn_friedman1",
+    "target_type": "numeric",
+    "request": {
+      "source": "sklearn_friedman1",
+      "n_features": 20,
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20376907
+    },
+    "dataset": "sklearn_synthetic_116"
+  },
+  {
+    "family": "sklearn_synthetic",
+    "profile": "sklearn_low_rank",
+    "target_type": "numeric",
+    "request": {
+      "source": "sklearn_low_rank",
+      "n_features": 6,
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20377907
+    },
+    "dataset": "sklearn_synthetic_117"
+  },
+  {
+    "family": "sklearn_synthetic",
+    "profile": "sklearn_low_rank",
+    "target_type": "numeric",
+    "request": {
+      "source": "sklearn_low_rank",
+      "n_features": 12,
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20378907
+    },
+    "dataset": "sklearn_synthetic_118"
+  },
+  {
+    "family": "sklearn_synthetic",
+    "profile": "sklearn_low_rank",
+    "target_type": "numeric",
+    "request": {
+      "source": "sklearn_low_rank",
+      "n_features": 20,
+      "n_units": 256,
+      "n_episodes": 1,
+      "batch_size": 1,
+      "missing_frac": 0.0,
+      "query_frac": 0.0,
+      "query_mode": "label_cell",
+      "return_mechanism": true,
+      "seed": 20379907
+    },
+    "dataset": "sklearn_synthetic_119"
+  }
+]

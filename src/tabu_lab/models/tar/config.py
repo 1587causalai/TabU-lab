@@ -8,6 +8,10 @@ from dataclasses import asdict, dataclass, fields
 
 @dataclass(frozen=True)
 class TARConfig:
+    numerical_backend: str = "reference_fp64"
+    value_encoding: str = "legacy"
+    encoder_initialization: str = "design"
+    encoder_trainable: bool = True
     width: int = 384
     blocks: int = 15
     heads: int = 8
@@ -32,6 +36,8 @@ class TARConfig:
     initialization_seed: int = 20260906
 
     def __post_init__(self):
+        if self.numerical_backend not in ("reference_fp64", "experimental_fp32"):
+            raise ValueError("unknown numerical_backend")
         for name in (
             "width",
             "blocks",
@@ -48,6 +54,18 @@ class TARConfig:
             v = getattr(self, name)
             if isinstance(v, bool) or not isinstance(v, int) or v <= 0:
                 raise ValueError(f"{name} must be a positive integer")
+        if self.encoder_initialization not in ("design", "identity"):
+            raise ValueError("unknown encoder_initialization")
+        if type(self.encoder_trainable) is not bool:
+            raise ValueError("encoder_trainable must be boolean")
+        if self.value_encoding != "unified_constant_weight" and (
+            self.encoder_initialization != "design" or not self.encoder_trainable
+        ):
+            raise ValueError("encoder ablations require unified_constant_weight")
+        if self.value_encoding not in ("legacy", "constant_weight", "unified_constant_weight"):
+            raise ValueError("unknown value_encoding")
+        if self.value_encoding != "legacy" and self.width != 128:
+            raise ValueError("constant-weight candidates require width=128")
         if self.width < 4 or self.width % self.heads:
             raise ValueError("width must be >= 4 and divisible by heads")
         if self.minimum_support != 2:
@@ -73,7 +91,7 @@ class TARConfig:
 
     @property
     def fourier_frequencies(self):
-        return self.width // 4
+        return self.width // (2 if self.value_encoding == "unified_constant_weight" else 4)
 
     @property
     def parameter_count(self):

@@ -60,6 +60,12 @@ def _run_optimize(args: argparse.Namespace) -> int:
 
 
 def _run_tar(args: argparse.Namespace) -> int:
+    if args.tar_command == "freeze-diverse-corpus":
+        from tabu_lab.tar_diverse_corpus import freeze_corpus
+
+        result = freeze_corpus(args)
+        print(json.dumps({k: v for k, v in result.items() if k != "records"}, indent=2))
+        return 0
     if args.tar_command == "sizes":
         from tabu_lab.tar_sizes import list_sizes
 
@@ -76,6 +82,12 @@ def _run_tar(args: argparse.Namespace) -> int:
         result = run_benchmark(args)
         print(json.dumps(result, indent=2, sort_keys=True))
         return 0 if result["outcome"] == "benchmark_completed" else 3
+    if args.tar_command == "joint-fit":
+        from tabu_lab.tar_joint_fit import run_joint_fit
+
+        result = run_joint_fit(args)
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result["outcome"] not in ("blocked_resources", "failed") else 3
     if args.tar_command == "fit":
         from tabu_lab.tar_fit import run_fit
 
@@ -136,7 +148,9 @@ def build_parser() -> argparse.ArgumentParser:
     tar = subparsers.add_parser("tar", help="TabU-TAR local implementation checks")
     tar_sub = tar.add_subparsers(dest="tar_command", required=True)
     inspect = tar_sub.add_parser("inspect", help="inspect allocation-free full model shapes")
-    inspect.add_argument("--size", choices=("small", "medium", "standard"), default="standard")
+    inspect.add_argument(
+        "--size", choices=("small", "small-128", "medium", "standard"), default="standard"
+    )
     inspect.set_defaults(handler=_run_tar)
     sizes = tar_sub.add_parser("sizes", help="list named TAR model sizes")
     sizes.set_defaults(handler=_run_tar)
@@ -145,7 +159,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     verify_size = verify.add_mutually_exclusive_group()
     verify_size.add_argument(
-        "--size", choices=("small", "medium", "standard"), help="validation size (default: small)"
+        "--size", choices=("small", "small-128", "medium", "standard"),
+        help="validation size (default: small)"
     )
     verify_size.add_argument("--full", action="store_true", help="explicit 54M Standard validation")
     verify_size.add_argument("--smoke", action="store_true", help="legacy tiny CPU plumbing check")
@@ -161,11 +176,28 @@ def build_parser() -> argparse.ArgumentParser:
     fit = tar_sub.add_parser("fit", help="run a preregistered local TAR fitting diagnostic")
     fit.add_argument("--preregistration", type=Path, required=True)
     fit.add_argument("--output-root", type=Path, required=True)
-    fit.add_argument("--dataset", choices=("diabetes", "iris"), required=True)
+    # Dataset identities are bound by the preregistration and its snapshot
+    # digest.  Keep the CLI open to deterministic synthetic recipes and future
+    # datasets instead of coupling the runner to the two historical fixtures.
+    fit.add_argument("--dataset", required=True)
     fit.add_argument("--seed", type=int, required=True)
     fit.add_argument("--device", default="cuda:0")
     fit.add_argument("--smoke", action="store_true", help="two-step reduced-model plumbing only")
     fit.set_defaults(handler=_run_tar)
+    joint = tar_sub.add_parser("joint-fit", help="one-model training-only multi-table fit")
+    joint.add_argument("--preregistration", type=Path, required=True)
+    joint.add_argument("--output-root", type=Path, required=True)
+    joint.add_argument("--device", default="cuda:0")
+    joint.add_argument("--smoke", action="store_true")
+    joint.add_argument("--resume-checkpoint", type=Path)
+    joint.add_argument("--stop-after-round", type=int)
+    joint.set_defaults(handler=_run_tar)
+    corpus = tar_sub.add_parser("freeze-diverse-corpus", help="freeze 120 diverse typed fit tables")
+    corpus.add_argument("--generator-root", type=Path, required=True)
+    corpus.add_argument("--output-root", type=Path, required=True)
+    corpus.add_argument("--rows", type=int, default=256)
+    corpus.add_argument("--seed", type=int, default=20260907)
+    corpus.set_defaults(handler=_run_tar)
     return parser
 
 

@@ -130,3 +130,20 @@ def test_current_validation_prereg_is_small_and_historical_sizes_stay_explicit()
         )
     old = json.loads((root / "tar-full-data-fit/preregistration.yaml").read_text())
     assert fit_model_config(old, 1729)[0].parameter_count == 54071520
+
+
+def test_small_128_encoding_fit_configuration():
+    legacy, name = fit_model_config({"model_size": "small-128"}, 1729)
+    unified, _ = fit_model_config({"model_size": "small-128",
+                                  "value_encoding": "unified_constant_weight"}, 1729)
+    assert name == "small-128"
+    assert legacy.width == unified.width == 128
+    assert legacy.blocks == unified.blocks == 3
+    assert legacy.ff_width == unified.ff_width == 256
+    assert unified.parameter_count - legacy.parameter_count == 8224
+    assert unified.value_encoding == "unified_constant_weight"
+    smoke, _ = fit_model_config({"model_size": "small-128",
+                                "value_encoding": "unified_constant_weight"}, 1729, smoke=True)
+    assert smoke.width == 128 and smoke.value_encoding == unified.value_encoding
+    with pytest.raises(ValueError, match="width=128"):
+        fit_model_config({"model_size": "small", "value_encoding": "constant_weight"}, 1729)

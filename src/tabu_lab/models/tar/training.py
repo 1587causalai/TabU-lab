@@ -18,15 +18,16 @@ def score(output, truth):
             raise ValueError("no-valid-episode: cannot silently discard an unsupported target")
         if pred.address not in truth:
             raise ValueError("truth sidecar is missing a query")
-        target = torch.as_tensor(truth[pred.address], device=pred.value.device, dtype=torch.float64)
-        if target.numel() != 1 or not bool(torch.isfinite(target)):
+        raw = torch.as_tensor(truth[pred.address], device="cpu", dtype=torch.float64)
+        if raw.numel() != 1 or not bool(torch.isfinite(raw)):
             raise ValueError("invalid truth scalar")
         if pred.probabilities is None:
+            target = raw.to(device=pred.value.device, dtype=pred.value.dtype)
             numeric.append(0.5 * ((pred.value - target) / pred.scale).square())
         else:
-            if float(target) != int(target) or not 0 <= int(target) < len(pred.probabilities):
+            if float(raw) != int(raw) or not 0 <= int(raw) < len(pred.probabilities):
                 raise ValueError("out-of-domain: query truth is outside declared classes")
-            discrete.append(-pred.probabilities[int(target)].log())
+            discrete.append(-pred.probabilities[int(raw)].log())
     branches = [torch.stack(xs).mean() for xs in (numeric, discrete) if xs]
     return torch.stack(branches).sum()
 
