@@ -1,5 +1,9 @@
 # Query-model runtime mapping
 
+本文保留历史 query-family 的数学与实现映射，不是当前 TAR 的研究入口。
+当前模型及单 episode / batch episode 两条路线见[仓库入口](../../README.md)
+和[实验入口](../../experiments/README.md)；历史模型与 checkpoint 身份保持独立。
+
 状态：Checkpoint 0（math → runtime mapping）。
 
 本文件是 Axis C `table-cell-as-query-models` 数学合同到 `tabu-lab` runtime 的实现桥梁，不是新的数学 authority，也不是训练或 evidence 结果。语义 authority 是只读的

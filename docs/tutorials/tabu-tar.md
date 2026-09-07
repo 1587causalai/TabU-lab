@@ -1,26 +1,35 @@
-# TabU-TAR: executable first realization
+# TabU-TAR: implementation and training guide
 
 `tabu.tar` implements the fourth-generation **Typed Additive Readout** design in
 [model-design.tex](../design/tar-model-design.tex).
 It is a PyTorch correctness reference with independent weights and configuration.
-Only bounded local scratch-fitting and held-out diagnostics have run; no
-pretraining or broad generalization claim is established. Local implementation
+The published [shared-fit result](../research/tar-shared-fit-20260907/README.md)
+records 768 rounds of single-episode training across 120 tables. Single-episode
+and batch-episode training remain separate, continuing research routes. No
+broad generalization claim follows from those training-fit results. Local implementation
 checks are `local_unissued`, not formal experiment receipts or model releases.
 
 The TAR Standard default is **54,071,520 learned parameters**: width 384, 15 blocks, 8 heads,
 FFN width 768, 32 semantic slots and 128 inducing slots. Every block uses column
 collect/read followed by direct row interaction. The 128 slots remain present for
-small tables. CPU and CUDA accept FP32/FP64; the numeric terminal uses FP64.
+small tables. The default `reference_fp64` backend uses FP64 auxiliary and terminal arithmetic.
+The explicit `experimental_fp32` backend supports the separately recorded MPS
+recipe; it is a distinct numerical configuration.
 CPU correctness and bounded DGX2 CUDA forward/backward have been checked;
 throughput depends on episode size. See the local benchmark protocol below.
 
 ## Named model sizes
 
-The same TAR architecture has three explicit size presets: **Small** (3 blocks,
-width 96, FFN 192; 721,464 parameters), **Medium** (6 blocks, width 192, FFN 384;
+The same TAR architecture has four explicit size presets: **Small** (3 blocks,
+width 96, FFN 192; 721,464 parameters), **Small-128** (3 blocks,
+width 128, FFN 256; 1,258,912 parameters), **Medium** (6 blocks, width 192, FFN 384;
 5,521,008 parameters), and the unchanged **Standard** (15 blocks, width 384,
 FFN 768; 54,071,520 parameters). Heads and semantic/inducing slot counts stay
 8/32/128. `TARConfig()` and the default builder continue to construct Standard.
+
+These counts use `value_encoding="legacy"`. The shared-fit recipe explicitly
+selects Small-128 with `unified_constant_weight` encoding and has 1,267,136
+parameters. Size, encoding and numerical backend all belong to the config identity.
 
 Use `tabu-lab tar sizes` to list them or `tabu-lab tar inspect --size small` to
 inspect a named size without allocating weights. In Python use
@@ -102,6 +111,22 @@ Numerical failures raise rather than silently changing ridge, bandwidth or suppo
 For categorical targets, `value` is an index; `probabilities` follows the full
 declared domain, including unobserved classes with the specified smoothing mass.
 
+## Single-episode and batch-episode training
+
+Both routes remain in the research program. The packaged `tar joint-fit` runner
+explicitly uses one episode per optimizer update; its 768-round shared-fit
+baseline remains a reference for continued single-episode research.
+
+In this checkout, `TARTrainer` accepts an explicit episode batch and accumulates
+its average loss serially before one optimizer update. Its dataclass default is
+16 episodes, but that does not activate parallel execution. The parallel
+batch-episode runner is a separate implementation awaiting integration here.
+Select batch size explicitly in every experiment and retain each route's own
+configuration, source and optimizer identity. See [experiment routes](../../experiments/README.md#tar-training-routes).
+
+The example below demonstrates serial accumulation. It is not the parallel
+batch implementation or the 768-round training recipe.
+
 ## Training boundary and synthetic starting prior
 
 ```python
@@ -158,7 +183,7 @@ by importing these helpers.
 
 ## Full train context and joint test prediction
 
-For the current real-data diagnostic, every training episode contains the entire
+For the bounded real-data diagnostic described below, every training episode contains the entire
 fixed train split with a fresh partial label mask. At test time all train labels
 are visible and all test labels are hidden; predict the complete test set in one
 episode. Do not reuse a sampled training context as the test context.

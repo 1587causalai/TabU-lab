@@ -1,23 +1,38 @@
 # Experiments ledger
 
-## Current lane
+## TAR training routes
 
-The active research lane is
-`tabu.query.row@0.2.0` + `supervised.label_broadcast.v1` + symmetric anchored
-readout, moving through:
+The current research model is **TabU-TAR**, explicitly selected as `tabu.tar`.
+Single-episode and batch-episode training are both continuing research routes.
+Preserve their separate configurations, source snapshots, optimizer states and
+results as each route develops.
 
-1. broad supervised synthetic prior v3 validation;
-2. identity-bound, resumable TabUR pretraining;
-3. held-out synthetic frozen ICL;
-4. full-train/full-test real-data frozen ICL;
-5. same-initialization pretrained-vs-scratch real-task fine-tuning.
+| Route | Available entry in this checkout | Evidence and development scope |
+| --- | --- | --- |
+| Single episode | `uv run tabu-lab tar joint-fit` with explicit preregistration | One episode and one update per table per round; published 120-table baseline completed 768 rounds. |
+| Batch episodes | `TARTrainer` with an explicit `effective_episode_batch` accumulates episodes serially | The separate parallel episode runner is not yet integrated here. Batch construction, optimization and execution remain active research questions. |
 
-The first item has a candidate implementation and item 2 now has immutable
-scratch-first `1.2.0` Grow snapshots with a 1024-feature capacity guard. Neither
-becomes evidence until execution, held-out readback, and review close. Items
-2–5 must not inherit v1/v2 or `tabu.query.row@0.1.0` results. A separately
-labeled weights-only warm-start arm may be compared, but it is never continuation
-of a v2 run.
+The existing `forward_batch` and trainer loops do not establish parallel episode
+execution. Row/column batching inside one episode is a separate implementation
+feature. Integrate a parallel runner with its own reviewed recipe and evidence;
+do not relabel the existing accumulation API or overwrite the single-episode route.
+
+Current entries:
+
+- [120-table recipe](local/tar-diverse-120-fit/README.md): frozen corpus,
+  same-model fitting and source-bound segments.
+- [Completed 768-round result](../docs/research/tar-shared-fit-20260907/README.md):
+  fixed-training-table evaluation, curves and next research questions.
+- [Eight-table shared-fit recipe](local/tar-unified-joint-fit/README.md).
+- [TAR guide](../docs/tutorials/tabu-tar.md): size/encoding selection, objective
+  and the distinction between accumulation and parallel execution.
+- [Small validation](local/tar-small-validation/README.md): bounded component
+  and real-data diagnostics, separate from the shared-fit baseline.
+
+For cross-route comparisons, report both episode and optimizer-update budgets,
+wall-clock time, the exact episode/evaluation streams, precision and initial
+weights. Equal episode counts do not imply equal optimizer trajectories. A
+batch-size result describes its recipe, not the entire batch training route.
 
 ## Default real-data estimand
 
@@ -50,7 +65,11 @@ Every experiment surface must declare one of these roles:
 YAML parseability, a completed process, or a summary score never promotes an
 experiment between these roles by itself.
 
-## Current routing
+## Historical query-family routing
+
+The entries below preserve the query-row/query-base program lane. They do not
+select the TAR research model. `MAINLINE.yaml` continues to bind that separate
+program system; see the [compatibility guide](../docs/history/compatibility-runtime.md).
 
 - Synthetic-prior candidate:
   [`query_row_supervised_synthetic_v3.py`](../src/tabu_lab/experiments/query_row_supervised_synthetic_v3.py)
@@ -81,9 +100,10 @@ One directory or file per experiment. Record at least:
 - verdict: `pass`, `kill`, or `revise`, with failures preserved;
 - `harness_status`, `run_status`, `evidence_level`, and `claim_status` separately.
 
-Naming remains `G<N>-<slug>/` for gate directories. A new active configuration
-must replace the previous default in the entry documents; old configurations
-move to `historical` rather than accumulating as competing defaults.
+Naming remains `G<N>-<slug>/` for gate directories. Within each research route,
+identify the exact active configuration and preserve superseded runs as history.
+Single-episode and batch-episode routes coexist; a new configuration in one
+route does not retire the other.
 
 <!-- seed: If v3 cannot be made runner-bound without changing its loss coordinate
 or compute envelope, version the prior/runner contract explicitly instead of
