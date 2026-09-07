@@ -1,0 +1,57 @@
+{
+  "status": "local_unissued_running_snapshot",
+  "captured_utc": "2026-09-07T09:55:46.366166+00:00",
+  "latest_update_at_capture": {
+    "round": 437,
+    "step": 52430,
+    "dataset": "discoscm_073",
+    "loss": 1.6420098669511116,
+    "train_seconds": 0.3515974599868059
+  },
+  "last_complete_evaluation_round": 416,
+  "last_complete_evaluation_updates": 49920,
+  "model_state_sha256": "c096d408573795692c3ec76cb1cbaa2fd1975e14f39ae4962746d66488731123",
+  "loss_lower_than": {
+    "128": 118,
+    "256": 115,
+    "384": 91
+  },
+  "negative_log_loss_slope256_416": 115,
+  "metrics": {
+    "128": {
+      "regression_nmse_median": 0.6074484399600739,
+      "discrete_accuracy_median": 0.7573529411764706,
+      "discrete_nll_median": 0.6818546864282671
+    },
+    "256": {
+      "regression_nmse_median": 0.27570735370352817,
+      "discrete_accuracy_median": 0.8768382352941176,
+      "discrete_nll_median": 0.4179300813806064
+    },
+    "288": {
+      "regression_nmse_median": 0.24009842612322335,
+      "discrete_accuracy_median": 0.8308823529411765,
+      "discrete_nll_median": 0.3942935517001542
+    },
+    "320": {
+      "regression_nmse_median": 0.19671996972457326,
+      "discrete_accuracy_median": 0.9227941176470589,
+      "discrete_nll_median": 0.2866219445785444
+    },
+    "352": {
+      "regression_nmse_median": 0.16344276982025172,
+      "discrete_accuracy_median": 0.9338235294117647,
+      "discrete_nll_median": 0.2305822533804599
+    },
+    "384": {
+      "regression_nmse_median": 0.14576781075402964,
+      "discrete_accuracy_median": 0.9411764705882353,
+      "discrete_nll_median": 0.25861061940660623
+    },
+    "416": {
+      "regression_nmse_median": 0.11232837158290712,
+      "discrete_accuracy_median": 0.9669117647058824,
+      "discrete_nll_median": 0.1558839441341098
+    }
+  }
+}

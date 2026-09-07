@@ -1,5 +1,7 @@
 # TabU-lab
 
+Recent TAR progress: [120-table shared fitting, experimental FP32/MPS, and next research steps](docs/research/tar-shared-fit-20260907/README.md). These results remain local_unissued training-fit evidence.
+
 An open research lab for tabular foundation models, inspired by
 [Marin](https://github.com/marin-community/marin).
 
