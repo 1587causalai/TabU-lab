@@ -1,22 +1,29 @@
 {
-  "status": "local_unissued_running_snapshot",
-  "captured_utc": "2026-09-07T09:55:46.366166+00:00",
-  "latest_update_at_capture": {
-    "round": 437,
-    "step": 52430,
-    "dataset": "discoscm_073",
-    "loss": 1.6420098669511116,
-    "train_seconds": 0.3515974599868059
+  "status": "local_unissued_segment_completed",
+  "completed_rounds": 768,
+  "completed_updates": 92160,
+  "continuation": {
+    "parent_round": 512,
+    "additional_rounds": 256,
+    "additional_updates": 30720,
+    "parent_seconds": 8687.924562144995,
+    "continuation_seconds": 9075.063266338984
   },
-  "last_complete_evaluation_round": 416,
-  "last_complete_evaluation_updates": 49920,
-  "model_state_sha256": "c096d408573795692c3ec76cb1cbaa2fd1975e14f39ae4962746d66488731123",
+  "model_state_sha256": "f1d1034df28ed92441960515a516d81526c357a640fb1ab6ac917dd9949ee2f6",
+  "parent_final_state_sha256": "df9cda575f7a9cfee3d6caf8b635d4dbe183b2622cf87c46005a0cb7935ddaf8",
+  "verified_artifact_counts": {
+    "train128": 26,
+    "train256": 26,
+    "train512": 42,
+    "train768": 42
+  },
   "loss_lower_than": {
-    "128": 118,
-    "256": 115,
-    "384": 91
+    "128": 119,
+    "256": 118,
+    "416": 117,
+    "512": 110
   },
-  "negative_log_loss_slope256_416": 115,
+  "negative_log_loss_slope256_768": 119,
   "metrics": {
     "128": {
       "regression_nmse_median": 0.6074484399600739,
@@ -28,21 +35,6 @@
       "discrete_accuracy_median": 0.8768382352941176,
       "discrete_nll_median": 0.4179300813806064
     },
-    "288": {
-      "regression_nmse_median": 0.24009842612322335,
-      "discrete_accuracy_median": 0.8308823529411765,
-      "discrete_nll_median": 0.3942935517001542
-    },
-    "320": {
-      "regression_nmse_median": 0.19671996972457326,
-      "discrete_accuracy_median": 0.9227941176470589,
-      "discrete_nll_median": 0.2866219445785444
-    },
-    "352": {
-      "regression_nmse_median": 0.16344276982025172,
-      "discrete_accuracy_median": 0.9338235294117647,
-      "discrete_nll_median": 0.2305822533804599
-    },
     "384": {
       "regression_nmse_median": 0.14576781075402964,
       "discrete_accuracy_median": 0.9411764705882353,
@@ -52,6 +44,16 @@
       "regression_nmse_median": 0.11232837158290712,
       "discrete_accuracy_median": 0.9669117647058824,
       "discrete_nll_median": 0.1558839441341098
+    },
+    "512": {
+      "regression_nmse_median": 0.07659824168721409,
+      "discrete_accuracy_median": 0.9834558823529411,
+      "discrete_nll_median": 0.10159210827078159
+    },
+    "768": {
+      "regression_nmse_median": 0.03823832865279476,
+      "discrete_accuracy_median": 0.9926470588235294,
+      "discrete_nll_median": 0.040316555876492424
     }
   }
 }

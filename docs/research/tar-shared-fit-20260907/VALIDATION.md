@@ -44,3 +44,12 @@ Final packaging additions retain the same source/data bytes; the plotting
 script received formatting and an explicit zip-length check. Historical source
 identities remain distinct from this integration. No public maturity status or
 accepted claim was advanced.
+
+## Completed 768-round update
+
+The earlier 416-round snapshot is superseded by the completed 512-round segment
+plus 256 continuation rounds. All 42 artifact hashes in each of the 512/768
+segments were reverified. The parent final model state exactly matches the
+continuation initial state; all-table metrics share the 768-round final state.
+Only result exports, figures and documentation changed; implementation tests
+above describe the unchanged integration code.

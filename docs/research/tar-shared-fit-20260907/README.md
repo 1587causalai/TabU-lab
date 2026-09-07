@@ -1,9 +1,11 @@
 # TAR shared fitting: 120 tables and an experimental FP32 backend
 
 This update records **local_unissued, fixed-training-table evidence**. A single
-Small-128 model (1,267,136 parameters) learns across 120 heterogeneous synthetic
-tables. At the captured run snapshot, training had reached round 437; the latest
-complete all-table evaluation was round 416 (49,920 optimizer updates).
+Small-128 model (1,267,136 parameters) completed training through **768 rounds /
+92,160 updates**: the segment ending at 512 rounds was followed by 256 additional
+rounds with the same model, optimizer, learning rate, corpus and episode counters.
+Both bounded segments exited successfully. This supersedes the earlier round-416
+snapshot exported in the first revision of this PR.
 
 | Complete evaluation | Regression median NMSE (57 tables) | Discrete median accuracy (63 tables) | Discrete median NLL |
 |---|---:|---:|---:|
@@ -11,11 +13,14 @@ complete all-table evaluation was round 416 (49,920 optimizer updates).
 | 256 | 0.275707 | 87.684% | 0.417930 |
 | 384 | 0.145768 | 94.118% | 0.258611 |
 | 416 | 0.112328 | 96.691% | 0.155884 |
+| 512 | 0.076598 | 98.346% | 0.101592 |
+| 768 | 0.038238 | 99.265% | 0.040317 |
 
-At round 416, 118/120 table losses were below round 128, 115/120 below round 256,
-and 91/120 below round 384. Over the six evaluation points from 256 to 416,
-115/120 tables had a negative log-loss slope. These are descriptive comparisons,
-not significance tests or evidence that every adjacent loss decreases.
+At round 768, 119/120 table losses were below round 128, 118/120 below
+round 256, and 110/120 below round 512. Across the 17 evaluation points
+from 256 to 768, 119/120 tables had a negative log-loss slope. These are
+descriptive comparisons, not significance tests or a claim that every adjacent
+loss decreases.
 
 ![Per-table loss relative to round 128](loss-trends.png)
 
@@ -79,8 +84,9 @@ relaxed to make old checkpoints load.
 This directory contains a scalar-only export of captured evaluation data,
 per-table trends, figures, a plotting script and content checksums. Raw host
 logs, credentials, machine identities and model/optimizer weights are not part
-of this export. `summary.json` records the capture time. The historical run was
-still running at capture; this is not a final 512-round result.
+of this export. `summary.json` records the completed segments and verified artifact counts.
+The 512-round endpoint exactly matches the continuation initial state. The
+preregistered maximum remains 1024 rounds; 768 is the completed bounded endpoint.
 
 ## Next research decisions
 

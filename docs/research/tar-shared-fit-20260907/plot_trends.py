@@ -34,7 +34,7 @@ for ax, kind, color in zip(
     ax.text(
         0.98,
         0.95,
-        f"{int((ratios[:, -1] < 1).sum())}/{len(names)} lower at round 416 than 128",
+        f"{int((ratios[:, -1] < 1).sum())}/{len(names)} lower at round 768 than 128",
         ha="right",
         va="top",
         transform=ax.transAxes,
@@ -43,7 +43,7 @@ for ax, kind, color in zip(
     )
     ax.grid(axis="y", alpha=0.12)
     ax.spines[["top", "right"]].set_visible(False)
-    ax.set_xticks([32, 128, 256, 416])
+    ax.set_xticks([32, 128, 256, 768])
     ax.tick_params(labelsize=10)
     ax.set_ylabel("Loss / same-table loss at round 128", fontsize=10)
     axes[1, 0].set_xlabel("Training round")
@@ -58,7 +58,7 @@ fig.suptitle(
 fig.text(
     0.075,
     0.942,
-    "Complete evaluations through round 416 | Thin lines: individual tables; bold line: median",
+    "Complete evaluations through round 768 | Thin lines: individual tables; bold line: median",
     fontsize=11,
     color="#4b5563",
 )
