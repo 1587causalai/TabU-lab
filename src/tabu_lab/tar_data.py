@@ -6,6 +6,37 @@ import math
 import random
 
 
+def dataset_features(dataset):
+    """Preserve declared mixed types; legacy fixtures retain numeric predictors."""
+    from tabu_lab.models.tar import TARFeature
+
+    width = len(dataset["values"][0])
+    schema = dataset.get("features")
+    if schema is None:
+        schema = [dict(kind="numeric", domain=[]) for _ in range(width - 1)]
+        schema.append(dict(kind=dataset["target_kind"], domain=dataset["domain"]))
+    if len(schema) != width:
+        raise ValueError("dataset feature schema width mismatch")
+    features = tuple(
+        TARFeature(item["kind"], tuple(item.get("domain", [])), col)
+        for col, item in enumerate(schema)
+    )
+    if (features[-1].kind, features[-1].domain) != (
+        dataset["target_kind"],
+        tuple(dataset["domain"]),
+    ):
+        raise ValueError("dataset target metadata contradicts feature schema")
+    for row in dataset["values"]:
+        if len(row) != width or any(not math.isfinite(value) for value in row):
+            raise ValueError("dataset values must be a finite rectangular matrix")
+        for feature, value in zip(features, row, strict=True):
+            if feature.kind != "numeric" and (
+                value != int(value) or not 0 <= value < len(feature.domain)
+            ):
+                raise ValueError("dataset discrete value outside declared domain")
+    return features
+
+
 def full_train_test_split(values, *, seed, test_fraction=0.2, stratified=False):
     if not 0 < test_fraction < 1 or len(values) < 3:
         raise ValueError("invalid full-data split request")

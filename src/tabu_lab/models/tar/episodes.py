@@ -69,3 +69,28 @@ def sample_supervised_episode(
         query_row_ids=[row_ids[i] for i in q],
     )
     return episode, truth, record
+
+
+def covering_fit_episodes(training_values, features, *, row_ids, query_size, seed,
+                          namespace, count):
+    """Fixed cyclic masks cover every training row, without consulting labels."""
+    n = len(training_values)
+    if len(row_ids) != n or len(set(row_ids)) != n:
+        raise ValueError("training row IDs must be unique and match the pool")
+    if not 1 <= query_size <= n - 2 or count * query_size < n:
+        raise ValueError("fit bank must cover all rows with at least two context rows")
+    gen = torch.Generator().manual_seed(episode_seed(seed, namespace, 0, "row_roles"))
+    order = torch.randperm(n, generator=gen).tolist()
+    bank = []
+    for i in range(count):
+        q = [order[(i * query_size + j) % n] for j in range(query_size)]
+        selected = set(q)
+        c = [j for j in order if j not in selected]
+        book_seed = episode_seed(seed, namespace, i)
+        episode, truth = supervised_episode(training_values[c], training_values[q], features,
+                                           codebook_seed=book_seed)
+        bank.append((episode, truth, dict(
+            namespace=namespace, episode_id=i, codebook_seed=book_seed,
+            context_row_ids=[row_ids[j] for j in c], query_row_ids=[row_ids[j] for j in q],
+        )))
+    return bank

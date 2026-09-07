@@ -75,18 +75,30 @@ def gpu_preflight():
 
 def fit_model_config(spec, seed, *, smoke=False):
     """Resolve a named size with an explicit configuration identity."""
+    from dataclasses import replace
+
     from tabu_lab.models.tar import TARConfig
     from tabu_lab.tar_sizes import config_for_size
 
     if spec.get("model_overrides"):
         raise ValueError("choose a named model_size instead of unlabeled shape overrides")
     size = spec.get("model_size", "standard")
-    cfg = config_for_size(size, initialization_seed=seed)
+    cfg = replace(
+        config_for_size(size, initialization_seed=seed),
+        numerical_backend=spec.get("numerical_backend", "reference_fp64"),
+        value_encoding=spec.get("value_encoding", "legacy"),
+        encoder_initialization=spec.get("encoder_initialization", "design"),
+        encoder_trainable=spec.get("encoder_trainable", True),
+    )
     if spec.get("expected_parameter_count", cfg.parameter_count) != cfg.parameter_count:
         raise ValueError("model size differs from preregistered parameter count")
     if smoke:
         return TARConfig(
-            width=16,
+            numerical_backend=cfg.numerical_backend,
+            value_encoding=cfg.value_encoding,
+            encoder_initialization=cfg.encoder_initialization,
+            encoder_trainable=cfg.encoder_trainable,
+            width=16 if cfg.value_encoding == "legacy" else 128,
             heads=4,
             ff_width=32,
             blocks=2,
@@ -109,7 +121,7 @@ def run_fit(args):
         raise ValueError("dataset/seed not in preregistration")
     if not 0 < spec.get("mask_fraction", 0) < 1:
         raise ValueError("an explicit training label mask fraction is required")
-    if spec.get("evaluation_mode") != "all_train_context_joint_test":
+    if spec.get("evaluation_mode") not in ("all_train_context_joint_test", "training_masks_only"):
         raise ValueError("evaluation must use all train rows as context and joint test queries")
     if spec.get("protocol") != "resample_rows_and_nominal_codebooks_per_update":
         raise ValueError("explicit resampled episode protocol required")
@@ -144,6 +156,7 @@ def run_fit(args):
     from tabu_lab.observers import NullObserver
 
     observer = NullObserver()
+    monitor = None
     started = time.monotonic()
     deadline = float(os.environ.get("TABU_TAR_FIT_DEADLINE_UNIX", "inf"))
     deadline_file = root.parent / f"{root.name}.deadline.json"
@@ -193,6 +206,7 @@ def run_fit(args):
         )
         from tabu_lab.models.tar.checkpoint import source_digest
         from tabu_lab.models.tar.episodes import (
+            covering_fit_episodes,
             episode_seed,
             sample_supervised_episode,
             supervised_episode,
@@ -254,6 +268,17 @@ def run_fit(args):
             sample(i, "fit-evaluation")
             for i in range(2 if args.smoke else spec["fit_eval_episodes"])
         ]
+        train_only = spec["evaluation_mode"] == "training_masks_only"
+        if train_only and spec.get("fit_eval_cover_all", True):
+            fit_bank = covering_fit_episodes(
+                pool,
+                features,
+                row_ids=pool_ids,
+                query_size=len(pool) - context_size,
+                seed=spec["episode_seed"],
+                namespace=f"{args.dataset}/covering-fit",
+                count=spec["fit_eval_episodes"],
+            )
         # The test context is the complete train split, not one sampled context.
         namespace = f"{args.dataset}/joint-test-evaluation"
         test_seed = episode_seed(spec["episode_seed"], namespace, 0)
@@ -272,6 +297,8 @@ def run_fit(args):
                 ),
             )
         ]
+        if train_only:
+            held_bank = []
         (root / "evaluation-episodes.json").write_text(
             json.dumps(
                 {
@@ -299,6 +326,8 @@ def run_fit(args):
 
         @torch.no_grad()
         def evaluate(bank):
+            if not bank:
+                return None
             predictions, targets, losses = [], [], []
             was_training = model.training
             model.eval()
@@ -322,6 +351,8 @@ def run_fit(args):
                 model.train(was_training)
 
         def baseline(bank):
+            if not bank:
+                return None
             errors, correct = [], []
             for episode, truth, _ in bank:
                 y = episode.values[episode.visible[:, -1], -1]
@@ -337,6 +368,11 @@ def run_fit(args):
                 return dict(mse=float(np.mean(errors)), rmse=math.sqrt(float(np.mean(errors))))
             return dict(nll=float(np.mean(errors)), accuracy=float(np.mean(correct)))
 
+        monitor = None
+        if spec.get("monitor_encoder"):
+            from tabu_lab.tar_encoder_monitor import EncoderMonitor
+
+            monitor = EncoderMonitor(model, fit_bank[0][0])
         receipt.update(
             config=cfg.as_dict(),
             model_source_sha256=source_digest(),
@@ -344,6 +380,7 @@ def run_fit(args):
                 json.dumps(cfg.as_dict(), sort_keys=True).encode()
             ).hexdigest(),
             parameter_count=sum(p.numel() for p in model.parameters()),
+            trainable_parameter_count=sum(p.numel() for p in model.parameters() if p.requires_grad),
             environment=dict(
                 python=platform.python_version(),
                 torch=torch.__version__,
@@ -353,13 +390,19 @@ def run_fit(args):
             splits=parts,
             training_pool_row_ids=pool_ids,
             outer_split=dict(train_row_ids=pool_ids, test_row_ids=parts["test"]),
-            test_context_rows=len(pool),
-            test_query_rows=len(holdout),
+            test_context_rows=0 if train_only else len(pool),
+            test_query_rows=0 if train_only else len(holdout),
             evaluation_bank_size=dict(fit=len(fit_bank), holdout=len(held_bank)),
             reporting_target_scale=scale,
             initial_fit=evaluate(fit_bank),
             initial_holdout=evaluate(held_bank),
         )
+        if monitor is not None:
+            receipt["initial_encoder"] = monitor.measure()
+            receipt["initial_parameter_sha256"] = {
+                name: hashlib.sha256(p.detach().cpu().contiguous().numpy().tobytes()).hexdigest()
+                for name, p in model.named_parameters()
+            }
         receipt["constant_baseline"] = dict(fit=baseline(fit_bank), holdout=baseline(held_bank))
         from tabu_lab.observers import get_observer
 
@@ -424,6 +467,8 @@ def run_fit(args):
                 item = sample(trainer.step, "training")
                 record = audit(item)
                 update = trainer.train_step([item[:2]])
+                if monitor is not None:
+                    update["encoder_gradient_norm_preclip"] = monitor.gradient_norm
                 update["episode"] = record
                 update["train_seconds"] = time.monotonic() - train_start
                 stream.write(json.dumps(update, allow_nan=False) + "\n")
@@ -433,6 +478,8 @@ def run_fit(args):
                 if eval_every and trainer.step % eval_every == 0:
                     current_fit = evaluate(fit_bank)
                     periodic.append(dict(step=trainer.step, fit=current_fit))
+                    if monitor is not None:
+                        periodic[-1]["encoder"] = monitor.measure()
                     with (root / "periodic-fit.jsonl").open("a") as eval_stream:
                         eval_stream.write(json.dumps(periodic[-1], allow_nan=False) + "\n")
                     fit_metrics = {f"fit_{key}": value for key, value in current_fit.items()}
@@ -476,6 +523,9 @@ def run_fit(args):
             final_fit=evaluate(fit_bank),
             final_holdout=evaluate(held_bank),
         )
+        if monitor is not None:
+            receipt["final_encoder"] = monitor.measure()
+            monitor.close()
         receipt["fit_loss_ratio"] = receipt["final_fit"]["loss"] / max(
             receipt["initial_fit"]["loss"], 1e-30
         )
@@ -508,6 +558,8 @@ def run_fit(args):
         receipt.update(outcome="failed", error_type=type(exc).__name__, error=str(exc))
         raise
     finally:
+        if monitor is not None:
+            monitor.close()
         signal.signal(signal.SIGTERM, previous_sigterm)
         observer.log_summary(
             dict(

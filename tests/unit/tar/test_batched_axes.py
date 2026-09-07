@@ -91,7 +91,8 @@ def test_complete_model_matches_serial(inducing, columns_per_chunk):
     for (name, a), (other, b) in zip(new.named_parameters(), old.named_parameters(), strict=True):
         assert name == other
         torch.testing.assert_close(grad(a.grad, a), grad(b.grad, b), rtol=1e-8, atol=1e-10)
-    training = TARTrainingConfig(effective_episode_batch=1, warmup_steps=0, optimizer_steps=2)
+    training = TARTrainingConfig(effective_episode_batch=1,
+                                 warmup_steps=0, optimizer_steps=2)
     nt, ot = TARTrainer(new, training), TARTrainer(old, training)
     nt.train_step([(ep, truth)])
     ot.train_step([(ep, truth)])

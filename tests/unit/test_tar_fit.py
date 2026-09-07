@@ -360,3 +360,29 @@ def test_git_source_state_distinguishes_clean_dirty_and_unavailable(tmp_path):
     (tmp_path / "new.py").write_text("new untracked source")
     assert git_source_state(tmp_path) == dict(clean, state="dirty")
     assert set(clean) == {"state", "commit"}
+
+
+def test_training_only_covers_every_training_row_without_test_evaluation(tmp_path):
+    import shutil
+
+    spec = json.loads((ROOT / 'preregistration.yaml').read_text())
+    spec['evaluation_mode'] = 'training_masks_only'
+    prep = tmp_path / 'plan'
+    prep.mkdir()
+    shutil.copytree(ROOT / 'data', prep / 'data')
+    prereg = prep / 'preregistration.yaml'
+    prereg.write_text(json.dumps(spec))
+    out = tmp_path / 'out'
+    result = run_fit(SimpleNamespace(preregistration=prereg, dataset='iris', seed=1729,
+                                    device='cpu', smoke=True, output_root=out))
+    assert result['initial_holdout'] is None and result['final_holdout'] is None
+    assert result['test_query_rows'] == 0 and result['evaluation_bank_size']['holdout'] == 0
+    bank = json.loads((out / 'evaluation-episodes.json').read_text())
+    assert bank['holdout'] == []
+    covered = set()
+    train = set(result['splits']['train'])
+    for ep in bank['fit']:
+        c, q = set(ep['context_row_ids']), set(ep['query_row_ids'])
+        assert not c & q and c | q == train
+        covered.update(q)
+    assert covered == train

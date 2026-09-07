@@ -10,6 +10,7 @@ from torch import nn
 
 from .attention import TAROMAB
 from .config import TARConfig
+from .encoding import constant_weight_codebook, validate_constant_weight
 from .terminal import predict_terminal
 from .types import TAREpisode, TAROutput
 
@@ -67,10 +68,14 @@ class TabUTARModel(nn.Module):
     def __init__(self, config: TARConfig | None = None, *, device="cpu", dtype=torch.float32):
         super().__init__()
         self.config = cfg = config or TARConfig()
-        if torch.device(device).type not in ("cpu", "cuda", "meta"):
+        if torch.device(device).type not in ("cpu", "cuda", "meta", "mps"):
             raise ValueError("TAR reference supports CPU/CUDA; FP64 terminal requires float64")
         if dtype not in (torch.float32, torch.float64):
             raise ValueError("TAR correctness backend supports float32/float64")
+        if cfg.numerical_backend == "experimental_fp32" and dtype != torch.float32:
+            raise ValueError("experimental_fp32 requires float32 parameters")
+        if torch.device(device).type == "mps" and cfg.numerical_backend != "experimental_fp32":
+            raise ValueError("MPS requires experimental_fp32")
         kw = dict(device=device, dtype=dtype)
         d, k, j = cfg.width, cfg.semantic_slots, cfg.fourier_frequencies
         # Construct on CPU then move for CUDA so initialization is reproducible and
@@ -89,6 +94,7 @@ class TabUTARModel(nn.Module):
             self.layers = nn.ModuleList([TARAxisBlock(cfg, **create_kw) for _ in range(cfg.blocks)])
             if str(device) != "meta":
                 self._initialize()
+        self.continuous.requires_grad_(cfg.encoder_trainable)
         self.to(**kw)
 
     @torch.no_grad()
@@ -113,6 +119,10 @@ class TabUTARModel(nn.Module):
         q, r = torch.linalg.qr(torch.randn_like(self.continuous), mode="reduced")
         sign = torch.where(r.diagonal() >= 0, 1.0, -1.0)
         self.continuous.copy_(q * sign / math.sqrt(j))
+        if cfg.encoder_initialization == "identity":
+            self.continuous.copy_(
+                torch.eye(cfg.width, device=self.continuous.device, dtype=self.continuous.dtype)
+            )
         for name, p in self.named_parameters():
             if name in ("unit_query", "feature_query", "cell_query") or name.endswith(".inducing"):
                 seed_for(name)
@@ -122,15 +132,30 @@ class TabUTARModel(nn.Module):
                 seed_for(name)
                 p.normal_(std=1 / math.sqrt(cfg.semantic_slots * cfg.width))
 
+    @property
+    def W_enc(self):
+        """Shared bias-free projection in the unified candidate (stored as continuous)."""
+        if self.config.value_encoding != "unified_constant_weight":
+            raise AttributeError("W_enc is only defined for the unified candidate")
+        return self.continuous
+
     def compile_episode(self, episode: TAREpisode):
         episode.validate()
         cfg = self.config
         device, dtype = self.continuous.device, self.continuous.dtype
         if device.type == "meta":
             raise ValueError("meta model is for shape inspection only")
+        if device.type == "mps" and cfg.numerical_backend != "experimental_fp32":
+            raise ValueError("MPS requires experimental_fp32")
+        if cfg.numerical_backend == "experimental_fp32" and dtype != torch.float32:
+            raise ValueError("experimental_fp32 requires float32 parameters")
+        work_dtype = (
+            torch.float32 if cfg.numerical_backend == "experimental_fp32" else torch.float64
+        )
         # Detach input data at the declared non-learning preprocessing boundary.
-        x = episode.values.detach().to(device=device, dtype=torch.float64)
+        x = episode.values.detach().to(device=device, dtype=work_dtype)
         vis, queries = episode.visible.to(device), episode.queries.to(device)
+        unified = cfg.value_encoding == "unified_constant_weight"
         n, m = x.shape
         cols, stats, books, classes = [], [], {}, {}
         for a, feature in enumerate(episode.features):
@@ -142,7 +167,7 @@ class TabUTARModel(nn.Module):
             stats.append((mean, scale))
             col = self.continuous.new_zeros(n, cfg.width)
             if len(vals):
-                if feature.kind == "nominal":
+                if feature.kind == "nominal" or (unified and feature.kind == "ordinal"):
                     cl = tuple(int(i) for i in vals.unique(sorted=True).tolist())
                     if feature.column_id in episode.codebooks:
                         cb = (
@@ -153,15 +178,24 @@ class TabUTARModel(nn.Module):
                         supplied = episode.codebook_classes.get(feature.column_id)
                         if supplied != cl or cb.shape != (len(cl), cfg.width):
                             raise ValueError("invalid-input: codebook class/shape mismatch")
-                        if not bool(torch.isfinite(cb).all()) or not torch.allclose(
-                            cb.double().norm(dim=-1),
-                            torch.ones(len(cl), device=device, dtype=torch.float64),
+                        if cfg.value_encoding != "legacy":
+                            validate_constant_weight(cb, unit_norm=not unified)
+                        elif not bool(torch.isfinite(cb).all()) or not torch.allclose(
+                            cb.to(work_dtype).norm(dim=-1),
+                            torch.ones(len(cl), device=device, dtype=work_dtype),
                             atol=1e-6,
                             rtol=1e-6,
                         ):
                             raise ValueError(
                                 "invalid-input: nominal codes must be finite unit vectors"
                             )
+                    elif cfg.value_encoding != "legacy":
+                        cb = constant_weight_codebook(
+                            cl,
+                            seed=episode.codebook_seed,
+                            column_id=feature.column_id,
+                            unit_norm=not unified,
+                        ).to(device=device, dtype=dtype)
                     else:
                         rows = []
                         for category in cl:
@@ -176,6 +210,11 @@ class TabUTARModel(nn.Module):
                     indices = torch.searchsorted(torch.tensor(cl, device=device), vals.long())
                     encoded = cb[indices]
                     books[feature.column_id], classes[feature.column_id] = cb, cl
+                    if unified:
+                        if feature.kind == "ordinal":
+                            rank = vals.to(dtype) / max(1, len(feature.domain) - 1)
+                            encoded = encoded + rank[:, None]
+                        encoded = encoded @ self.W_enc.T
                 else:
                     if feature.kind == "numeric":
                         coordinate = (vals - mean) / (var.sqrt() + cfg.encoder_scale_epsilon)

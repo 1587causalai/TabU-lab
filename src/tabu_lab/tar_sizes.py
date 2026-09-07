@@ -7,6 +7,7 @@ DEFAULT_VALIDATION_SIZE = "small"
 # Standard deliberately delegates to TARConfig defaults, avoiding a second default source.
 _SIZE_OVERRIDES = {
     "small": dict(blocks=3, width=96, ff_width=192),
+    "small-128": dict(blocks=3, width=128, ff_width=256),
     "medium": dict(blocks=6, width=192, ff_width=384),
     "standard": {},
 }
@@ -18,7 +19,7 @@ def config_for_size(size="standard", *, initialization_seed=None):
     from tabu_lab.models.tar import TARConfig
 
     if size not in _SIZE_OVERRIDES:
-        raise ValueError(f"unknown TAR size: {size!r}; choose small, medium or standard")
+        raise ValueError(f"unknown TAR size: {size!r}; choose small, small-128, medium or standard")
     cfg = TARConfig()
     fields = dict(_SIZE_OVERRIDES[size])
     if initialization_seed is not None:
