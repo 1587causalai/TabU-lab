@@ -1,0 +1,92 @@
+{
+  "schema": "restoration.launch-verification.v1",
+  "status": "local_unissued",
+  "captured_at_utc": "2026-09-15T23:27:37.814573+00:00",
+  "execution_state": "running",
+  "run_url": "https://wandb.ai/zj3712/restoration/runs/old120-small128-tar-budget-20260916",
+  "source_commit": "af0ebcaac4c53115509e48acd01f6591c9c719e1",
+  "source_sha256": "8e4e2f761e97f2c77c9d14560129052be36adf23997bde8e6cfd917fbd97f763",
+  "preregistration_sha256": "d57d3d7740f6e2c7cb89c22562c9a25d5cc6cb5dbbd89d93e12a02f5b7434e37",
+  "budget": {
+    "max_seconds": 26824,
+    "max_rounds": 768,
+    "maximum_updates": 92160,
+    "evaluate_every_rounds": 32,
+    "final_reserve_seconds": 300
+  },
+  "initial": {
+    "complete": true,
+    "completed_episodes": 960,
+    "by_state": {
+      "query": {
+        "count": 1072768,
+        "discrete_accuracy": 0.2573310574229692,
+        "encoding_mse": 30.314196927938404,
+        "numeric_mse": 231.8808403494687
+      },
+      "retained": {
+        "count": 2145536,
+        "discrete_accuracy": 1.0,
+        "encoding_mse": 0.014645854465608963,
+        "numeric_mse": 0.09555072987606628
+      }
+    },
+    "coverage": {
+      "protected_discrete_cells": 87168,
+      "query_cells": 1072768,
+      "query_fraction": 0.3333333333333333,
+      "singleton_discrete_classes": 23816,
+      "total_cells": 3218304,
+      "unmaskable_discrete_classes": 23816
+    }
+  },
+  "training": {
+    "observed_updates": 183,
+    "round1_unique_tables": 120,
+    "last_update": {
+      "round": 2,
+      "update": 183,
+      "elapsed_seconds": 384.51034883700777,
+      "update_seconds": 1.0126760629937053,
+      "loss": 0.7655381673037877,
+      "gradient_norm": 1.8471034988989072
+    },
+    "all_logged_loss_and_gradient_norm_finite": true
+  },
+  "checkpoint": {
+    "round": 1,
+    "update": 183,
+    "cursor": 63,
+    "elapsed_seconds": 384.4527851199964
+  },
+  "checkpoint_identity_and_finite_state_verified": true,
+  "wandb": {
+    "state": "running",
+    "source_identity_matches": true,
+    "summary": {
+      "update": 177,
+      "round": 1,
+      "elapsed_seconds": 379.38627627602546,
+      "train/loss": 0.3458705973748083,
+      "train/gradient_norm": 0.36987833789006186,
+      "evaluation/by_state/query/encoding_mse": 30.314196927938404
+    }
+  },
+  "runtime": {
+    "python": "3.12.14",
+    "torch": "2.13.0+cu130",
+    "cuda": "13.0",
+    "wandb": "0.30.0"
+  },
+  "local_validation": {
+    "passed": 828,
+    "skipped": 9,
+    "changed_files_ruff": "passed",
+    "independent_review": "no unresolved launch blocker"
+  },
+  "qualification_sha256": {
+    "device-check.json": "0a373e9710550019521024545bcd44dea21d6688f9386b8173513d59a926d12c",
+    "largest-table-check.json": "778e0879027a18b6abd7b528b2f2ab2b82b3655cd5a9c216b1f1d7ca58d07949"
+  },
+  "scope": "Launch verification and known-table fit only; experiment remains running, no terminal result or reserved-row evaluation."
+}

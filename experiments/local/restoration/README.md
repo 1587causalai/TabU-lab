@@ -64,3 +64,25 @@ an older source cannot be resumed here.
 
 This remains `local_unissued` fitting evidence. No heldout capability or maturity
 promotion follows from the live dashboard.
+
+## Launch verification, 2026-09-16
+
+Execution source: `af0ebcaac4c53115509e48acd01f6591c9c719e1`, independently reviewed
+on branch `codex/restoration-wandb-budget-20260916`. Local checks: 828 passed,
+9 optional-dependency skips; changed Python files pass Ruff. Dedicated tests
+cover mid-second-round continuation with identical model/optimizer/RNG and
+update trace, failed-optimizer rollback, cumulative budgets, partial evaluations,
+and completion of an interrupted final evaluation without extra updates.
+
+The same source passed
+[CUDA forward/backward and exact continuation](old120-small128-tar-budget/qualification/device-check.json)
+and the
+[204 x 32 largest-table update](old120-small128-tar-budget/qualification/largest-table-check.json).
+These checks qualify this configuration's execution; they do not measure fit or
+generalization. Runtime output and checkpoints remain in the isolated experiment
+directory on the training machine.
+
+Live run:
+<https://wandb.ai/zj3712/restoration/runs/old120-small128-tar-budget-20260916>.
+The dashboard is an observation mirror; completion requires the terminal local
+receipt. The launch snapshot is recorded separately from the eventual result.
