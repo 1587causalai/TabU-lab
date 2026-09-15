@@ -17,6 +17,13 @@ def single_thread():
     torch.set_num_threads(old)
 
 
+@pytest.mark.parametrize("value", [float("inf"), -float("inf"), float("nan")])
+def test_pipeline_comparator_rejects_matching_nonfinite_gradients(value):
+    values = {"gradient": torch.tensor([value])}
+    with pytest.raises(FloatingPointError, match="nonfinite"):
+        compare_tensors(values, values)
+
+
 @pytest.mark.parametrize("n", [0, 1, 2, 3, 4, 5, 21])
 @pytest.mark.parametrize("dtype", [torch.float32, torch.float64])
 def test_batched_numeric_codec_matches_scalar_with_small_and_constant_support(n, dtype):

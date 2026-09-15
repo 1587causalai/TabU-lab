@@ -67,7 +67,12 @@ def compare_tensors(left, right):
             if a is not None or b is not None:
                 raise AssertionError("gradient presence differs")
             continue
-        torch.testing.assert_close(a, b, rtol=RTOL, atol=ATOL, equal_nan=False)
+        if not bool(torch.isfinite(a).all()) or not bool(torch.isfinite(b).all()):
+            raise FloatingPointError("nonfinite output, gradient or optimizer state")
+        exact = not a.is_floating_point() or key.endswith("_count")
+        torch.testing.assert_close(
+            a, b, rtol=0 if exact else RTOL, atol=0 if exact else ATOL, equal_nan=False
+        )
         maximum = max(maximum, float((a.detach() - b.detach()).abs().max()))
     return maximum
 
