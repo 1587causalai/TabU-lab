@@ -16,6 +16,7 @@ OUTPUTS = (
     ROOT / "src" / "tabu_lab" / "specs" / "model-factory-source-manifest.json",
 )
 ENTRYPOINTS = {
+    "tabu.tar": "TabU-TAR/model-design.tex",
     "tabu.cell.base": "table-cell-as-unit-models/TabUBase/main.tex",
     "tabu.query.base": "table-cell-as-query-models/TabUBase/main.tex",
     "tabu.query.row": "table-cell-as-query-models/TabUR/main.tex",
@@ -135,8 +136,8 @@ def build_payload(
         }
     return {
         "schema_version": "tabu-lab.model-factory-source-manifest.v1",
-        "observed_at": "2026-08-30",
-        "scope": "TabU query-family entrypoints plus recursive TeX and graphics include closures",
+        "observed_at": "2026-09-06",
+        "scope": "TabU model entrypoints plus recursive TeX and graphics include closures",
         "contracts": contracts,
     }
 

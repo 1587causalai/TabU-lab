@@ -22,7 +22,7 @@ def test_current_catalog_indexes_consolidated_model_sources() -> None:
     catalog = build_catalog(ROOT)
 
     entry_ids = {entry.entry_id for entry in catalog.entries}
-    assert len(entry_ids) == 89
+    assert len(entry_ids) == 90
     assert {
         "model_contract:tabu.cell.base@0.2.0",
         "model_contract:tabu.query.base@0.1.0",
@@ -30,6 +30,7 @@ def test_current_catalog_indexes_consolidated_model_sources() -> None:
         "model_contract:tabu.query.row@0.2.0",
         "model_contract:tabu.query.row_column@0.1.0",
         "model_contract:tabu.v2.tabur@0.1.0",
+        "model_contract:tabu.tar@0.1.0",
         "evolution_node:tabu.graph.query.base@1.0.0",
         "evolution_node:tabu.graph.query.row@1.0.0",
         "program_snapshot:tabu.pretraining.query-base@1.0.0",
@@ -65,6 +66,7 @@ def test_catalog_json_and_html_are_deterministic_bounded_projections() -> None:
     html = render_catalog_html(catalog)
     assert "catalog projection; not evidence or claim acceptance" in html
     assert "Formal receipts: 0;\naccepted claims: 0" in html
+    assert "tabu.tar@0.1.0" in html
     assert "tabu.cell.base@0.2.0" in html
     assert "tabu.query.base@0.1.0" in html
     assert "tabu.query.row@0.2.0" in html

@@ -1,0 +1,97 @@
+{
+  "schema": "tabu.tar.joint-training-fit.1",
+  "status": "local_unissued",
+  "model_id": "tabu.tar",
+  "hypothesis": "One shared Small-128 unified encoder model can retain good masked-label fit on all eight fixed synthetic training tables simultaneously.",
+  "model_configuration": "3 blocks, width 128, ff_width 256, 8 heads, 32 semantic slots, 128 inducing slots; unified value encoder.",
+  "model_size": "small-128",
+  "seeds": [
+    1729
+  ],
+  "datasets": {
+    "discoscm_1729": "e44993828d2ebd4481e213629d788cd79704f78e6ecc174644bf4f7e43ba58a3",
+    "linear_numeric": "ef81b086f8a7f288294daff258bfc7bd73fc45c5a82999e8d79a372ca2663ecf",
+    "nonlinear_additive_numeric": "7df517987aa6338897c58d95dbec54c01a34a2b4ee2785ccccf104e9b96830ca",
+    "interaction_numeric": "1d8d11cf0a79fa057f6dc06f00bc08ab3523b7c5bbf0d93b5729becfa0b42718",
+    "gated_numeric": "9a5a6ab51f8296a8af3cf39ba168457781161b83f6eb531e3057ed720977f708",
+    "xor_classification": "733be65b1dd9ae03d307a566d9623b1768cece3bed69a1fb93216aeab84d1363",
+    "discoscm_2718": "f8cc55ec76e39133f406a075ff2a118fbe3a7265e6f8debe9e0704e554d8cfd4",
+    "discoscm_31415": "994d7a1877568525416bcfa789ace0b3a7384d9d1d31385d4224993d47d34df5"
+  },
+  "learning_rate": 0.0001,
+  "final_learning_rate": 0.0001,
+  "warmup_steps": 0,
+  "effective_episode_batch": 1,
+  "log_every": 16,
+  "kill": [
+    "nonfinite carrier/loss/gradient",
+    "gradient alarm above 1e6",
+    "invalid input or insufficient support",
+    "CUDA unavailable",
+    "GPU occupied or host memory below 16 GiB before launch"
+  ],
+  "evaluation": "After each 128 complete rounds, evaluate the SAME model state on the same eight covering masks for EACH dataset; no test evaluation and no checkpoint selection on held-out labels.",
+  "controls": [
+    "previous independent 1024-update fit for each identical dataset",
+    "same per-dataset mask/codebook episode sequence and initial seed as independent fit"
+  ],
+  "claim_boundary": "Shared-parameter fitting on eight fixed small training tables, single seed. Report per-dataset errors and worst case; no foundation-model or generalization claim.",
+  "budget_boundary": "1024 rounds; one update per dataset per round, 8192 total optimizer updates; deterministic shuffled dataset order each round; at most 3000 wall seconds.",
+  "protocol": "resample_rows_and_nominal_codebooks_per_update",
+  "episode_seed": 20260907,
+  "fit_eval_episodes": 8,
+  "episode_protocol": {
+    "training_pool": "All 76 fixed training rows per update; 50 visible labels, 26 masked labels.",
+    "row_roles": "uniform address-only permutation; context_size=train_rows-ceil(train_rows/3)",
+    "nominal": "Raw 8-of-128 identity projected by W_enc, resampled per episode; only XOR target is nominal in these fixtures.",
+    "trace": "each successful update records row IDs, episode ID, seed, actual codebook hash and forward input hash",
+    "test": "Not evaluated; reserved rows excluded from all forwards.",
+    "fit": "Eight deterministic cyclic masks; all 76 training rows queried at least once."
+  },
+  "evidence_plan": "Record dataset/episode/codebook/input hashes per update, all-table metrics under a single model-state hash at each evaluation, final shared checkpoint and optimizer. No hard near-zero gate.",
+  "evaluation_mode": "training_masks_only",
+  "split_semantics": "Preserve frozen per-dataset 76 train / 20 reserved split. Only train rows enter training and evaluation.",
+  "expected_rows": {
+    "discoscm_1729": 96,
+    "linear_numeric": 96,
+    "nonlinear_additive_numeric": 96,
+    "interaction_numeric": 96,
+    "gated_numeric": 96,
+    "xor_classification": 96,
+    "discoscm_2718": 96,
+    "discoscm_31415": 96
+  },
+  "mask_fraction": 0.3333333333333333,
+  "split_seed": 20260907,
+  "test_fraction": 0.2,
+  "finalization_reserve_seconds": 60,
+  "periodic_fit_every": 128,
+  "monitor_terminal_weights": true,
+  "gradient_alarm_max": 1000000.0,
+  "zero_gradient_patience": 3,
+  "observer_group": "tar-unified-synthetic-nearzero",
+  "value_encoding": "unified_constant_weight",
+  "source_snapshots": {
+    "causal": {
+      "repository": "https://github.com/1587causalai/TabU-lab",
+      "commit": "3185f2557ec8e401a4979246f68cb6bd64ba3813",
+      "discoscm_source_blob": "70285476b0dec8222f097721762127ee36afe3c8",
+      "families": [
+        "discoscm",
+        "sparse_dag_scm"
+      ],
+      "width": 12,
+      "rows": 96,
+      "context_rows": 76,
+      "noise_level": "medium"
+    },
+    "elementary": "tar.synthetic.fit.v1; numeric functions include additive noise std 0.02; XOR deterministic"
+  },
+  "expected_parameter_count": 1267136,
+  "initialization_seed": 1729,
+  "order_seed": 20260907,
+  "max_rounds": 1024,
+  "max_seconds": 3000,
+  "evaluate_every": 128,
+  "integration_note": "Portable recipe derived from the local eight-table preregistration; provenance path normalized. This is a new recipe identity, not the original issued artifact."
+}

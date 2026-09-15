@@ -1,5 +1,10 @@
 # Evolvable TabUBase / TabUR pretraining programs
 
+This document describes the preserved query-base/query-row program system.
+`MAINLINE.yaml` selects programs within that system; it is not the selector for
+the current TAR research model or its single-episode and batch-episode routes.
+See the [current entry](../../README.md) and [experiment routes](../../experiments/README.md).
+
 Status: implemented as a tiny vertical slice. Every run produced before formal
 review remains `local_unissued`; this document does not claim pretraining
 quality or capability.

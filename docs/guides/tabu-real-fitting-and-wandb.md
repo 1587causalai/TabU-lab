@@ -1,6 +1,6 @@
 # TabUBase / TabUR 真实数据拟合与 W&B 实验教程
 
-本文是后续 TabU 实验的操作手册。它的目标不是给出一个固定的“最终训练脚本”，而是保证我们在改变数学设计、数据生成器、组件或训练配方之后，仍然能够回答：
+本文保留旧 TabUBase / TabUR 实验的协议与经验。当前 TAR 的入口见 [TAR 实现指南](../tutorials/tabu-tar.md)。下述历史脚本需与原始源码归档配套使用，不能作为 TAR checkpoint 的加载或训练入口。它的目标不是给出一个固定的“最终训练脚本”，而是保证我们在改变数学设计、数据生成器、组件或训练配方之后，仍然能够回答：
 
 1. 模型本身有没有拟合能力？
 2. 预训练是否提供了真实的数据迁移收益？
@@ -132,26 +132,19 @@ roc_auc_ovr_macro
 
 ## 3. 已验证的运行环境
 
-### 3.1 主机
+### 3.1 实验主机与路径模板
 
-GPU 实验固定优先在：
+以下命令使用部署时自行配置的 `EXPERIMENT_HOST`（SSH 目标）和
+`EXPERIMENT_ROOT`（主机上的实验根目录）。在执行端和远程 shell 中配置这些变量；
+文档不保存具体主机身份或个人目录。路径模板不是已发布的 checkpoint 下载地址。
 
-```text
-host: dgx2
-resolved host: spark-b5b3
-GPU: NVIDIA GB10
-```
-
-进入主机后先检查：
+进入选定 GPU 主机后，检查 GPU、已有 workload 和可用磁盘；旧日志不能证明当前资源空闲。
 
 ```bash
-ssh dgx2
-hostname
+ssh "$EXPERIMENT_HOST"
 nvidia-smi
-df -h /home/cms
+df -h "$EXPERIMENT_ROOT"
 ```
-
-不要只凭旧日志判断 GPU 是否空闲。开始新实验前必须重新检查正在运行的进程，避免覆盖其他 workload。
 
 ### 3.2 Docker image
 
@@ -199,13 +192,13 @@ qsar_fish_toxicity
 数据 manifest：
 
 ```text
-/home/cms/tabubase-runs/20260901-capacity64-phase2-scale-v1/source/experiments/transfer-base-v2/real-full-context-frozen-icl-openml-new6.yaml
+${EXPERIMENT_ROOT}/20260901-capacity64-phase2-scale-v1/source/experiments/transfer-base-v2/real-full-context-frozen-icl-openml-new6.yaml
 ```
 
 缓存目录：
 
 ```text
-/home/cms/scikit_learn_data
+${EXPERIMENT_ROOT}/scikit_learn_data
 ```
 
 OpenML direct API 有时会被 `api.openml.org` 路由阻断。当前 runner 会将其改写为 `www.openml.org`，并添加普通 User-Agent。不要绕过 pinned manifest，也不要用未记录的自动下载数据替换它。
@@ -215,8 +208,8 @@ OpenML direct API 有时会被 `api.openml.org` 路由阻断。当前 runner 会
 当前两个 best checkpoint 位于：
 
 ```text
-/home/cms/tabubase-runs/20260901-capacity64-phase2-scale-v1/checkpoints/tabu-query-base-best.pt
-/home/cms/tabubase-runs/20260901-capacity64-phase2-scale-v1/checkpoints/tabu-query-row-best.pt
+${EXPERIMENT_ROOT}/20260901-capacity64-phase2-scale-v1/checkpoints/tabu-query-base-best.pt
+${EXPERIMENT_ROOT}/20260901-capacity64-phase2-scale-v1/checkpoints/tabu-query-row-best.pt
 ```
 
 它们是旧式 weights-only PyTorch checkpoint，加载方式为：
@@ -241,7 +234,7 @@ model.load_state_dict(checkpoint["model_state_dict"], strict=True)
 source archive：
 
 ```text
-/home/cms/tabubase-runs/20260901-capacity64-fit-v1/source-7a3cec4.tar
+${EXPERIMENT_ROOT}/20260901-capacity64-fit-v1/source-7a3cec4.tar
 ```
 
 source archive SHA-256：
@@ -253,7 +246,7 @@ source archive SHA-256：
 开始分析前，先记录：
 
 ```bash
-sha256sum /home/cms/tabubase-runs/20260901-capacity64-phase2-scale-v1/checkpoints/*.pt
+sha256sum ${EXPERIMENT_ROOT}/20260901-capacity64-phase2-scale-v1/checkpoints/*.pt
 git -C /path/to/source rev-parse HEAD
 ```
 
@@ -295,7 +288,7 @@ git -C /path/to/source rev-parse HEAD
 原始 receipt：
 
 ```text
-/home/cms/tabubase-runs/20260901-capacity64-phase2-real-icl-v1/real-icl-eval.json
+${EXPERIMENT_ROOT}/20260901-capacity64-phase2-real-icl-v1/real-icl-eval.json
 ```
 
 ## 6. 监督拟合诊断协议
@@ -389,14 +382,14 @@ finetuned_heldout metrics
 3. Base 与 TabUR 的优化行为不同；
 4. 必须保留 scratch control，才能判断 pretrained 是否真的贡献了收益。
 
-## 8. `dgx2` 上运行独立实验
+## 8. 选定 GPU 主机 上运行独立实验
 
 ### 8.1 单个诊断 runner
 
 当前 one-off runner：
 
 ```text
-/home/cms/tabubase-runs/20260901-capacity64-real-finetune-panel-v2/real-finetune-diag.py
+${EXPERIMENT_ROOT}/20260901-capacity64-real-finetune-panel-v2/real-finetune-diag.py
 ```
 
 它的参数顺序是：
@@ -414,16 +407,16 @@ updates
 示例：
 
 ```bash
-ssh dgx2
+ssh "$EXPERIMENT_HOST"
 docker run --rm --gpus all --ipc=host --network host \
   --entrypoint python3 \
   --env PYTHONPATH=/workspace/src:/opt/wehub-packages:/opt/wehub-python \
   --env HTTP_PROXY= --env HTTPS_PROXY= --env ALL_PROXY= \
   --env http_proxy= --env https_proxy= --env all_proxy= \
-  -v /home/cms/tabubase-runs/20260901-capacity64-phase2-scale-v1/source:/workspace:ro \
-  -v /home/cms/tabubase-runs/20260901-capacity64-phase2-scale-v1:/checkpoints:ro \
-  -v /home/cms/tabubase-runs/20260901-capacity64-real-finetune-panel-v2:/run \
-  -v /home/cms/scikit_learn_data:/home/cms/scikit_learn_data \
+  -v ${EXPERIMENT_ROOT}/20260901-capacity64-phase2-scale-v1/source:/workspace:ro \
+  -v ${EXPERIMENT_ROOT}/20260901-capacity64-phase2-scale-v1:/checkpoints:ro \
+  -v ${EXPERIMENT_ROOT}/20260901-capacity64-real-finetune-panel-v2:/run \
+  -v ${EXPERIMENT_ROOT}/scikit_learn_data:${EXPERIMENT_ROOT}/scikit_learn_data \
   -w /workspace \
   wehub/ml-gpu:20260901-wandb \
   /run/real-finetune-diag.py \
@@ -439,37 +432,37 @@ docker run --rm --gpus all --ipc=host --network host \
 当前 panel launcher：
 
 ```text
-/home/cms/tabubase-runs/20260901-capacity64-real-finetune-panel-v2/launch-panel.sh
+${EXPERIMENT_ROOT}/20260901-capacity64-real-finetune-panel-v2/launch-panel.sh
 ```
 
 启动 500-update panel：
 
 ```bash
-ssh dgx2 \
-  'nohup bash /home/cms/tabubase-runs/20260901-capacity64-real-finetune-panel-v2/launch-panel.sh \
+ssh "$EXPERIMENT_HOST" \
+  'nohup bash ${EXPERIMENT_ROOT}/20260901-capacity64-real-finetune-panel-v2/launch-panel.sh \
     500 \
-    /home/cms/tabubase-runs/20260901-capacity64-real-finetune-panel-v2 \
+    ${EXPERIMENT_ROOT}/20260901-capacity64-real-finetune-panel-v2 \
     </dev/null \
-    > /home/cms/tabubase-runs/20260901-capacity64-real-finetune-panel-v2/panel.log 2>&1 &'
+    > ${EXPERIMENT_ROOT}/20260901-capacity64-real-finetune-panel-v2/panel.log 2>&1 &'
 ```
 
 启动后立刻检查：
 
 ```bash
-ssh dgx2 \
+ssh "$EXPERIMENT_HOST" \
   'ps -eo pid,etime,stat,cmd | grep -E "launch-panel|real-finetune-diag|docker run" | grep -v grep'
 
-ssh dgx2 \
-  'find /home/cms/tabubase-runs/20260901-capacity64-real-finetune-panel-v2/results \
+ssh "$EXPERIMENT_HOST" \
+  'find ${EXPERIMENT_ROOT}/20260901-capacity64-real-finetune-panel-v2/results \
    -type f -size +0c -printf "%f\\n" | sort'
 ```
 
 查看当前任务：
 
 ```bash
-ssh dgx2 \
-  'latest=$(ls -t /home/cms/tabubase-runs/20260901-capacity64-real-finetune-panel-v2/logs | head -1); \
-   tail -30 /home/cms/tabubase-runs/20260901-capacity64-real-finetune-panel-v2/logs/$latest'
+ssh "$EXPERIMENT_HOST" \
+  'latest=$(ls -t ${EXPERIMENT_ROOT}/20260901-capacity64-real-finetune-panel-v2/logs | head -1); \
+   tail -30 ${EXPERIMENT_ROOT}/20260901-capacity64-real-finetune-panel-v2/logs/$latest'
 ```
 
 不要把新的短实验写到已有的正式目录；每个新预算、source commit、数据协议或 sampler 都应创建新的 run root。
@@ -655,7 +648,7 @@ PYTHONPATH=/workspace/src:/opt/wehub-packages:/opt/wehub-python
 确认 checkpoint 所在目录已单独挂载：
 
 ```text
--v /home/cms/tabubase-runs/20260901-capacity64-phase2-scale-v1:/checkpoints:ro
+-v ${EXPERIMENT_ROOT}/20260901-capacity64-phase2-scale-v1:/checkpoints:ro
 ```
 
 并且容器内使用 `/checkpoints/...`，不能继续使用主机路径。
@@ -759,7 +752,7 @@ random initialization
 [ ] 确认 source commit 和 source archive hash
 [ ] 确认 checkpoint hash
 [ ] 确认数据 panel manifest hash
-[ ] 确认 dgx2 GPU 和已有 workload
+[ ] 确认实验主机 GPU 和已有 workload
 [ ] 创建新的 run root
 [ ] 写清楚 outer split、inner episode 和 held-out 边界
 [ ] 明确 numeric loss coordinate
@@ -786,9 +779,9 @@ random initialization
 截至 2026-09-01，正式 500-update panel 的运行目录是：
 
 ```text
-/home/cms/tabubase-runs/20260901-capacity64-real-finetune-panel-v2/
+${EXPERIMENT_ROOT}/20260901-capacity64-real-finetune-panel-v2/
 ```
 
-当前已经生成多个 dataset/seed receipt，panel 仍在 `dgx2` 上继续运行。完成后首先生成 macro 汇总，再决定是否进行更长训练、W&B 曲线实验或 architecture ablation。
+该 panel 的描述属于 2026-09-01 历史快照；本页不声称任务当前仍在运行。后续判断必须以原始 receipt 和新的主机检查为准。
 
 本教程本身是实验操作文档，不是对任何模型能力的证明。所有能力结论都必须回到对应 receipt、source identity、checkpoint identity 和 evaluation protocol。

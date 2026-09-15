@@ -1,0 +1,72 @@
+{
+  "schema": "tabu.tar.full-data-fit.1",
+  "status": "local_unissued",
+  "model_id": "tabu.tar",
+  "hypothesis": "Small-first posterior implementation, numerical and basic fitting checks on the current TAR architecture.",
+  "model_configuration": "Named model_size resolves the frozen shape; standard model defaults remain unchanged.",
+  "seeds": [
+    1729
+  ],
+  "datasets": {
+    "iris": "f26c38b822c59af1324f663168d687b252f5d1fbe11368f02f97c56ddbcc5dfc",
+    "diabetes": "17f0554001d5481992e36d52d7039bfa770ed1cfa2c3a419043ca6dc232665fc"
+  },
+  "max_updates": 128,
+  "max_train_seconds": 240,
+  "learning_rate": 0.0001,
+  "final_learning_rate": 0.0001,
+  "warmup_steps": 0,
+  "effective_episode_batch": 1,
+  "log_every": 10,
+  "pass_criteria": {
+    "fit_loss_ratio_max": 0.1,
+    "diabetes_normalized_mse_max": 0.01,
+    "iris_accuracy_min": 0.99
+  },
+  "kill": [
+    "nonfinite carrier/loss/gradient",
+    "invalid input or insufficient support",
+    "CUDA unavailable",
+    "GPU occupied or host memory below 16 GiB before launch"
+  ],
+  "evaluation": "Eight fixed training-mask episodes for paired fit evaluation. Test evaluation is one joint episode: all training rows with visible labels, all held-out rows with hidden labels; all known covariates visible. Initial/final replay uses the same test episode/codebook. Test labels never enter forward or checkpoint selection.",
+  "controls": [
+    "random initialization on the identical evaluation bank",
+    "per-episode context mean or class-frequency prediction"
+  ],
+  "claim_boundary": "Small-only local validation; no automatic Medium/Standard or six-stage capability promotion.",
+  "budget_boundary": "Four short lanes share 1800 wall seconds. Each at most 128 updates, 240 training-loop seconds and 300 wall seconds including startup/evaluation/save.",
+  "protocol": "resample_rows_and_nominal_codebooks_per_update",
+  "episode_seed": 20260906,
+  "fit_eval_episodes": 8,
+  "episode_protocol": {
+    "training_pool": "all train rows; random ceil(train_rows/3) labels masked each update; no row subsetting",
+    "row_roles": "uniform address-only permutation; context_size=train_rows-ceil(train_rows/3)",
+    "nominal": "fresh visible-class unit vectors per episode and column, consistent within episode; declared domain indices remain unchanged",
+    "rng": "episode root seed independent of model initialization; separate row_roles/codebook and training/fit-evaluation/holdout-evaluation streams",
+    "trace": "each successful update records row IDs, episode ID, seed, actual codebook hash and forward input hash",
+    "test": "all train labels visible; all test labels hidden; whole test predicted in one forward with one episode-local codebook"
+  },
+  "evidence_plan": "Periodic fixed training-mask evaluation every 32 updates; initial/final joint-test only; preclip gradient alarms and support-weight concentration/entropy; preserve all outcomes without selecting on test.",
+  "pass_criteria_note": "Existing numerical thresholds now apply to the paired evaluation bank, not stochastic update losses or the old fixed episode. No held-out threshold or best-seed selection.",
+  "evaluation_mode": "all_train_context_joint_test",
+  "split_semantics": "Every original row occurs exactly once in train or test; Iris stratified 120/30, Diabetes shuffled 353/89. Split fixed across initialization seeds.",
+  "expected_rows": {
+    "iris": 150,
+    "diabetes": 442
+  },
+  "mask_fraction": 0.3333333333333333,
+  "split_seed": 20260906,
+  "test_fraction": 0.2,
+  "batch_wall_seconds": 1800,
+  "lane_wall_seconds": 300,
+  "finalization_reserve_seconds": 60,
+  "periodic_fit_every": 32,
+  "monitor_terminal_weights": true,
+  "gradient_alarm_max": 1000000.0,
+  "zero_gradient_patience": 3,
+  "observer_group": "tar-small-validation",
+  "diagnostic_variant": "small-validation",
+  "model_size": "small",
+  "expected_parameter_count": 721464
+}
