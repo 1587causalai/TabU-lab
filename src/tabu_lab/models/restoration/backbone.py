@@ -78,10 +78,10 @@ class OMAB(nn.Module):
         log would delete tiny positive sources before a large content score can
         restore their mass. FP64 accumulation is part of this reference realization.
 
-        The projection is not separately finite-checked: carriers enter finite
-        (stage checks bound every OMAB call), so a nonfinite projection implies
-        nonfinite parameters, which the training loop reports at the preceding
-        step's gradient and loss checks. The OMAB output check stays explicit.
+        Nonfinite projections intentionally propagate to the OMAB output stage.
+        They must not be classified as exact-zero evidence: an overflowing
+        projection from finite inputs is a numerical failure, not an empty
+        source. The output check below reports it without adding a host sync here.
         """
         projection = self.ff_presence if local else self.attention_presence
         projected = torch.nn.functional.linear(carriers.double(), projection.weight.double())
@@ -140,10 +140,11 @@ class OMAB(nn.Module):
         # never NaN payloads, enter K/V. Zero projection gives -inf log presence.
         sources = torch.where(eligible[..., None], sources, torch.zeros_like(sources))
         log_p_source = self.log_presence(sources)  # [B, S], -inf deletes the entry
-        # A learned exact-zero presence also deletes its source before K/V.
-        # Otherwise an irrelevant, large finite carrier can overflow QK before masking.
+        # Delete only exact-zero presence before K/V. A nonfinite presence is
+        # retained so it propagates through the stage and is reported by the
+        # explicit OMAB output check instead of being silently treated as empty.
         sources = torch.where(
-            torch.isfinite(log_p_source)[..., None], sources, torch.zeros_like(sources)
+            ~torch.isneginf(log_p_source)[..., None], sources, torch.zeros_like(sources)
         )
         heads, dim = self.config.heads, self.config.width // self.config.heads
         batch, n_receivers = receivers.shape[0], receivers.shape[1]
