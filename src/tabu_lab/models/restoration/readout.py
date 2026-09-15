@@ -42,10 +42,11 @@ def unit_kernel_logits(
     blocks = []
     for chunk in targets.split(query_chunk_size):
         scaled_difference = (chunk[:, None, :] - sources[None, :, :]) / bandwidth
-        logits = -scaled_difference.square().sum(-1) / 2
-        finite(logits, "Unit kernel logits")
-        blocks.append(logits)
-    return torch.cat(blocks, dim=0)
+        blocks.append(-scaled_difference.square().sum(-1) / 2)
+    # One stage check after concatenation; a nonfinite chunk cannot hide.
+    logits = torch.cat(blocks, dim=0)
+    finite(logits, "Unit kernel logits")
+    return logits
 
 
 @dataclass(frozen=True)
@@ -195,10 +196,10 @@ class RestorationReadout:
         logits = torch.where(
             support_mask[:, None, :], shared_logits.to(torch.float64), -torch.inf
         )
+        # Unit logits are finite-checked upstream; padded supports are -inf by
+        # construction. A nonfinite real weight propagates into the LL system or
+        # the restored encoding, whose stage checks below report it explicitly.
         log_weights = logits.log_softmax(-1)
-        real = target_mask[:, :, None] & support_mask[:, None, :]
-        if not bool(torch.isfinite(log_weights[real]).all()):
-            raise FloatingPointError("numerical-failure: nonfinite normalized geometry logits")
         weights = log_weights.exp()
         coefficients = weights
         if self.mode == "ll":

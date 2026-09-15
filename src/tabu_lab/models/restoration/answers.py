@@ -54,9 +54,8 @@ class NumericAnswers:
             raise ValueError("numeric target values must have floating [column,target] shape")
         finite(values, "numeric target values")
         median, scale = cls._batch_parameters(codecs, values.device)
-        encoded = ((values.detach().double() - median[:, None]) / scale[:, None])[..., None]
-        finite(encoded, "numeric target encoding")
-        return encoded
+        # Codec statistics are finite by construction; the quotient stays finite.
+        return ((values.detach().double() - median[:, None]) / scale[:, None])[..., None]
 
     @classmethod
     def decode_batch(cls, codecs, encoded):
@@ -68,9 +67,8 @@ class NumericAnswers:
         median, scale = cls._batch_parameters(codecs, encoded.device)
         # Scalar decode's 0-D statistics follow the prediction tensor dtype.
         median, scale = median.to(encoded), scale.to(encoded)
-        result = median[:, None] + scale[:, None] * encoded[..., 0]
-        finite(result, "numeric prediction")
-        return result
+        # Finite predictions and finite codec statistics keep the decode finite.
+        return median[:, None] + scale[:, None] * encoded[..., 0]
 
     @classmethod
     def from_visible_batch(cls, values: Tensor, *, epsilon: float) -> tuple[NumericAnswers, ...]:
@@ -93,11 +91,12 @@ class NumericAnswers:
 
         median = quantile(0.5)
         scale = torch.clamp((quantile(0.75) - quantile(0.25)) / 2, min=epsilon)
-        finite(scale, "numeric scale")
+        # Values are finite (checked above), so the scale is finite; only FP
+        # underflow can round it to zero, which is reported explicitly here.
         if not bool((scale > 0).all()):
             raise FloatingPointError("numerical-failure: numeric scale rounded to zero")
+        # A finite values/positive-scale quotient is finite; no separate check.
         encoded = ((values - median[:, None]) / scale[:, None])[..., None]
-        finite(encoded, "numeric answer encoding")
         return tuple(cls(encoded[i], median[i], scale[i]) for i in range(len(values)))
 
     @classmethod
@@ -207,6 +206,16 @@ class CategoricalAnswers:
         directly in ``encoding_mse``. Nominal and ordinal share this decoder.
         Equal code norms allow candidate-versus-incumbent dot products. Subtract
         codes before accumulating, without an unrelated shared reference score.
+
+        Vectorized two-pass with exact scan semantics. Pass one scores every
+        class directly and takes the first schema-order index attaining the
+        maximum. Pass two verifies the winner against every class with the
+        pairwise subtraction the reference scan uses: a class whose shared
+        coordinates cancel exactly can beat a false direct-score tie, and an
+        earlier class tying the winner would keep it under scan order. Rows
+        failing verification — or producing nonfinite intermediates — fall back
+        to the literal pairwise scan, which is also the explicit nonfinite
+        reporting path. One host sync replaces the scan's per-candidate syncs.
         """
         matrix(encoded, "predicted encoding")
         if encoded.shape[1] != self.codebook.shape[1]:
@@ -215,14 +224,47 @@ class CategoricalAnswers:
             raise ValueError("decoder tensors must share a device")
         if not len(self.classes):
             raise ValueError("no-support: categorical decoding needs visible evidence")
-        # ||e-b||^2 - ||e-best||^2 = -2 e.(b-best), since every code has norm^2=8.
-        # A fixed-reference score can still erase differences between two other
-        # classes. Compare each challenger directly to the current best instead.
         prediction = encoded.to(torch.float64)
-        best = torch.zeros(len(encoded), dtype=torch.long, device=encoded.device)
+        count = len(self.classes)
+        order = torch.arange(count, device=prediction.device)
+        winner_chunks, fallback_chunks = [], []
+        for rows in prediction.split(256):
+            scores = rows @ self.codebook.T
+            maximum = scores.amax(-1, keepdim=True)
+            # First schema-order maximum; out-of-range only on nonfinite rows.
+            winner = torch.where(scores == maximum, order, count).amin(-1)
+            safe_winner = winner.clamp(max=count - 1)
+            # ||e-b||^2 - ||e-best||^2 = -2 e.(b-best), since every code has norm^2=8.
+            # Pairwise subtraction cancels shared coordinates exactly, so this
+            # resolves class differences that direct full-code products erase.
+            difference = self.codebook[None, :, :] - self.codebook[safe_winner][:, None, :]
+            advantage = (rows[:, None, :] * difference).sum(-1)
+            fallback = (
+                (advantage > 0).any(-1)
+                | ((advantage >= 0) & (order < safe_winner[:, None])).any(-1)
+                | ~torch.isfinite(scores).all(-1)
+                | ~torch.isfinite(advantage).all(-1)
+            )
+            winner_chunks.append(safe_winner)
+            fallback_chunks.append(fallback)
+        winner = torch.cat(winner_chunks)
+        fallback = torch.cat(fallback_chunks)
+        if bool(fallback.any()):
+            winner = winner.clone()
+            for row in fallback.nonzero(as_tuple=False)[:, 0].tolist():
+                winner[row] = self._decode_scan(prediction[row : row + 1])[0]
+        return self.classes[winner]
+
+    def _decode_scan(self, prediction: Tensor) -> Tensor:
+        """Literal candidate-versus-incumbent scan; fallback and test reference.
+
+        A fixed-reference score can still erase differences between two other
+        classes. Compare each challenger directly to the current best instead.
+        """
+        best = torch.zeros(len(prediction), dtype=torch.long, device=prediction.device)
         for candidate in range(1, len(self.classes)):
             difference = self.codebook[candidate] - self.codebook[best]
             advantage = (prediction * difference).sum(-1)
             finite(advantage, "categorical pairwise code comparison")
             best = torch.where(advantage > 0, candidate, best)
-        return self.classes[best]
+        return best

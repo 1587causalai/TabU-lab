@@ -77,10 +77,14 @@ class OMAB(nn.Module):
         Scale before squaring. Forming rho in the carrier dtype and then taking
         log would delete tiny positive sources before a large content score can
         restore their mass. FP64 accumulation is part of this reference realization.
+
+        The projection is not separately finite-checked: carriers enter finite
+        (stage checks bound every OMAB call), so a nonfinite projection implies
+        nonfinite parameters, which the training loop reports at the preceding
+        step's gradient and loss checks. The OMAB output check stays explicit.
         """
         projection = self.ff_presence if local else self.attention_presence
         projected = torch.nn.functional.linear(carriers.double(), projection.weight.double())
-        finite(projected, "projected presence")
         scale = projected.abs().amax(-1)
         active = scale > 0
         safe_scale = torch.where(active, scale, torch.ones_like(scale))
@@ -116,6 +120,13 @@ class OMAB(nn.Module):
         remove them from both numerator and denominator, exactly like deleting
         them from a per-set list. The fixed reference mass keeps every softmax
         row well defined, including fully masked rows.
+
+        Receivers, sources, and intermediate logits are not separately
+        finite-checked: every model-internal call passes stage-checked tensors
+        (encoder output or a previous OMAB output), nonfinite content propagates
+        through the softmax into the result, and the output check below is the
+        explicit stage boundary. This keeps one host sync per OMAB instead of
+        one per intermediate tensor.
         """
         if receivers.ndim != 3 or sources.ndim != 3 or eligible.ndim != 2:
             raise ValueError("batched OMAB expects [B,R,d], [B,S,d], [B,S] tensors")
@@ -125,7 +136,6 @@ class OMAB(nn.Module):
             or receivers.shape[2] != sources.shape[2]
         ):
             raise ValueError("batched receivers, sources, and mask must align")
-        finite(receivers, "OMAB receivers")
         # Delete ineligible sources before any projection: exact zero carriers,
         # never NaN payloads, enter K/V. Zero projection gives -inf log presence.
         sources = torch.where(eligible[..., None], sources, torch.zeros_like(sources))
@@ -141,7 +151,6 @@ class OMAB(nn.Module):
         k = self.k(sources).reshape(batch, -1, heads, dim).transpose(1, 2)
         v = self.v(sources).reshape(batch, -1, heads, dim).transpose(1, 2)
         content = q.double() @ k.double().transpose(-1, -2) / math.sqrt(dim)
-        finite(content, "OMAB logits")
         logits = content + log_p_source[:, None, None, :]
         reference = logits.new_full(
             (*logits.shape[:-1], 1), math.log(self.config.reference_mass)

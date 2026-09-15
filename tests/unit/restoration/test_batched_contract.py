@@ -1,5 +1,6 @@
 """Exact-zero source deletion also precedes content projection in batched OMAB."""
 
+import pytest
 import torch
 
 from tabu_lab.models.restoration.backbone import OMAB, BackboneConfig
@@ -20,3 +21,25 @@ def test_projected_zero_sources_cannot_overflow_content_before_deletion():
     assert torch.isfinite(actual).all()
     gradient, = torch.autograd.grad(actual.sum(), sources)
     assert torch.equal(gradient, torch.zeros_like(gradient))
+
+
+def test_nonfinite_receivers_fail_at_the_omab_output_stage():
+    """Stage-granularity checks: no per-tensor guards, output stays explicit."""
+    module = OMAB(BackboneConfig(width=4, heads=1, ff_width=8)).double()
+    receivers = torch.full((1, 2, 4), float("nan"), dtype=torch.float64)
+    sources = torch.zeros(1, 1, 4, dtype=torch.float64)
+    eligible = torch.ones(1, 1, dtype=torch.bool)
+    with pytest.raises(FloatingPointError, match="OMAB output"):
+        module.batched(receivers, sources, eligible)
+
+
+def test_ineligible_nan_source_payloads_stay_deleted_without_entering_checks():
+    """NaN payloads in deleted sources never enter a projection, by design."""
+    module = OMAB(BackboneConfig(width=4, heads=1, ff_width=8)).double()
+    receivers = torch.zeros(1, 2, 4, dtype=torch.float64)
+    sources = torch.zeros(1, 2, 4, dtype=torch.float64)
+    sources[0, 1] = float("nan")
+    eligible = torch.tensor([[True, False]])
+    expected = module.batched(receivers, sources[:, :1], eligible[:, :1])
+    actual = module.batched(receivers, sources, eligible)
+    torch.testing.assert_close(actual, expected, rtol=0, atol=0)

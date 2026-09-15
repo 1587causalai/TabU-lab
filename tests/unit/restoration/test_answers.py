@@ -266,3 +266,82 @@ def test_invalid_target_and_prediction_tensors_fail_explicitly():
         codec.decode(torch.full((1, 32), float("nan")))
     with pytest.raises(FloatingPointError, match="nonfinite"):
         encoding_mse(torch.zeros(1, 32), torch.full((1, 32), float("inf")))
+
+
+def _random_book(count, width, gen):
+    codes = torch.zeros(count, width, dtype=torch.float64)
+    seen = set()
+    for c in range(count):
+        while True:
+            positions = tuple(sorted(torch.randperm(width, generator=gen)[:8].tolist()))
+            if positions not in seen:
+                break
+        seen.add(positions)
+        codes[c, list(positions)] = 1
+    return codes
+
+
+@pytest.mark.parametrize("seed", range(24))
+def test_vectorized_decode_matches_reference_scan(seed):
+    gen = torch.Generator().manual_seed(seed)
+    width, count = 32, int(torch.randint(2, 13, (1,), generator=gen))
+    book = _random_book(count, width, gen)
+    labels = torch.cat((torch.arange(count), torch.randint(0, count, (25,), generator=gen)))
+    codec = CategoricalAnswers.from_visible(labels, torch.arange(count), book, domain_size=count)
+    rows = int(torch.randint(0, 40, (1,), generator=gen))
+    scale = 10.0 ** int(torch.randint(-4, 16, (1,), generator=gen))
+    prediction = torch.randn(rows, width, generator=gen, dtype=torch.float64) * scale
+    expected = codec.classes[codec._decode_scan(prediction)]
+    torch.testing.assert_close(codec.decode(prediction), expected)
+
+
+@pytest.mark.parametrize("seed", range(12))
+def test_vectorized_decode_matches_scan_at_extreme_shared_coordinates(seed):
+    gen = torch.Generator().manual_seed(1000 + seed)
+    width, count = 32, int(torch.randint(2, 9, (1,), generator=gen))
+    book = _random_book(count, width, gen)
+    codec = CategoricalAnswers.from_visible(
+        torch.arange(count).repeat(3), torch.arange(count), book, domain_size=count
+    )
+    rows = 30
+    prediction = torch.randn(rows, width, generator=gen, dtype=torch.float64)
+    shared = torch.randperm(width, generator=gen)[:6]
+    # Huge shared coordinates erase class differences in full-code products;
+    # the pairwise verification must still agree with the literal scan.
+    prediction[:, shared] += 1e16 * torch.randn(rows, 6, generator=gen, dtype=torch.float64)
+    expected = codec.classes[codec._decode_scan(prediction)]
+    torch.testing.assert_close(codec.decode(prediction), expected)
+
+
+def test_vectorized_decode_chunks_long_predictions():
+    gen = torch.Generator().manual_seed(7)
+    book = _random_book(5, 32, gen)
+    codec = CategoricalAnswers.from_visible(torch.arange(5), torch.arange(5), book, domain_size=5)
+    prediction = torch.randn(600, 32, generator=gen, dtype=torch.float64)
+    expected = codec.classes[codec._decode_scan(prediction)]
+    torch.testing.assert_close(codec.decode(prediction), expected)
+
+
+def test_decode_verification_falls_back_to_scan_only_on_disagreement(monkeypatch):
+    book = torch.zeros(2, 32, dtype=torch.float64)
+    book[:, :7] = 1
+    book[0, 7] = 1
+    book[1, 8] = 1
+    codec = CategoricalAnswers.from_visible(
+        torch.tensor([0, 1]), torch.tensor([0, 1]), book, domain_size=2
+    )
+    calls = []
+    original = CategoricalAnswers._decode_scan
+
+    def spy(self, prediction):
+        calls.append(len(prediction))
+        return original(self, prediction)
+
+    monkeypatch.setattr(CategoricalAnswers, "_decode_scan", spy)
+    torch.testing.assert_close(codec.decode(book), torch.tensor([0, 1]))
+    assert not calls
+    # Direct full-code scores tie here; only the pairwise comparison resolves it.
+    prediction = book[1:2].clone()
+    prediction[:, :7] = 1e17
+    torch.testing.assert_close(codec.decode(prediction), torch.tensor([1]))
+    assert calls == [1]
