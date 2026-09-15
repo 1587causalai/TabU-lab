@@ -9,7 +9,15 @@ It selects a complete immutable `ProgramSnapshot`: model contract, component
 graph, data mixture and policy, objective, training recipe, and evaluation
 protocol. Generated catalogs are query projections, not the source of truth.
 
-## Current focus: TabU-v2 / TabUR
+## Mathematical direction and executable default
+
+The parent project's current mathematical priority is fourth-generation
+**TabU-TAR (Typed Additive Readout)**: clarify the common mathematical design,
+then develop parameterized models and scenario customizations from it.
+In the parent checkout, see the [factory seed](../../latex/model-factory/seed.md)
+and [TAR core](../../latex/model-factory/TabU-TAR/MATHEMATICAL_DESIGN.tex).
+TAR is a mathematical work in progress; the runtime described below still
+implements the separate third-generation structural contract.
 
 The executable model-factory default is **TabU-v2 / TabUR** under
 `tabu.v2.tabur@0.1.0`. It implements the cell-as-query structural design in
@@ -24,8 +32,10 @@ explicit compatibility model, using
 **TabUBase** under `tabu.query.base@0.1.0` is an independently trainable sibling,
 not a prerequisite checkpoint. Both share the Episode/Prediction and evaluation
 protocol boundaries while retaining separate model and run identities.
-The immediate research question is whether diverse supervised synthetic
+The existing pretraining program asks whether diverse supervised synthetic
 pretraining produces useful frozen ICL and then improves real-task fine-tuning.
+That program retains its own pointer and evidence boundaries; it does not set
+the current mathematical design priority or establish a TAR capability.
 
 | Surface | Current status |
 | --- | --- |
@@ -44,7 +54,7 @@ checkpoint identity, or capability claim.
 
 ## Five-step runtime contract
 
-The mathematical authority for the default is the TabU-v2 source closure.
+The mathematical authority for this executable default is the TabU-v2 source closure.
 The historical Axis-C TabUR source binds only the explicit legacy contract. Runtime preserves the
 same five-step boundary:
 
