@@ -9,6 +9,7 @@ from torch import Tensor, nn
 
 from ._packing import column_positions, padded_stack
 from ._validation import positive
+from .answers import NumericAnswers
 from .backbone import AxialBackbone, BackboneConfig
 from .contracts import RestorationInput, RestorationRequest
 from .encoding import ColumnFacts, EncoderConfig, ValueEncoder
@@ -132,6 +133,21 @@ class RestorationModel(nn.Module):
                 support_cells=support_cells,
                 target_cells=target_cells,
             )
+            # Standard numeric codecs share inverse scaling. Keep custom codecs'
+            # decode methods as extension points and exclude padded targets.
+            numeric_slots = [i for i, (a, _) in enumerate(active)
+                             if type(facts[a].answers) is NumericAnswers]
+            numeric_decoded = {}
+            if numeric_slots:
+                if any(facts[active[i][0]].answers.encoded.shape[1] != 1 for i in numeric_slots):
+                    raise ValueError("numeric predictions require one answer coordinate")
+                codes = torch.where(
+                    target_mask[numeric_slots, :, None], encoded[numeric_slots, :, :1], 0
+                )
+                decoded = NumericAnswers.decode_batch(
+                    [facts[active[i][0]].answers for i in numeric_slots], codes
+                )
+                numeric_decoded = dict(zip(numeric_slots, decoded.unbind(0), strict=True))
             for i, (a, positions) in enumerate(active):
                 fact = facts[a]
                 t_a, n_a, p_a = len(positions), len(fact.rows), fact.answers.encoded.shape[1]
@@ -142,7 +158,8 @@ class RestorationModel(nn.Module):
                     log_weights[i, :t_a, :n_a],
                     coefficients[i, :t_a, :n_a],
                 )
-                decoded = fact.answers.decode(result.encoding)
+                decoded = (numeric_decoded[i][:t_a] if i in numeric_decoded
+                           else fact.answers.decode(result.encoding))
                 columns.append(ColumnPrediction(a, positions, result, decoded))
         columns.sort(key=lambda prediction: prediction.column)
         return RestorationOutput(request, tuple(columns), facts, h)

@@ -8,6 +8,7 @@ import torch
 from torch import Tensor
 
 from ._packing import column_positions
+from .answers import NumericAnswers
 from .contracts import RestorationInput, RestorationRequest, TruthSidecar, validate_values
 from .losses import encoding_mse
 from .model import RestorationModel, RestorationOutput
@@ -62,6 +63,7 @@ def _preflight(inputs, request, truth, facts):
     if len(targets) != len(observed):
         raise ValueError("invalid-episode: training targets must cover all original observations")
     encoded = {}
+    numeric_groups = {}
     positions_by_column = column_positions(targets[:, 1], len(inputs.schema))
     for a, schema in enumerate(inputs.schema):
         values = truth.values[a]
@@ -73,9 +75,20 @@ def _preflight(inputs, request, truth, facts):
         if len(facts[a].rows) < 2:
             raise ValueError("invalid-episode: every supervised column needs two visible supports")
         selected = values[targets[positions, 0]]
+        if schema.kind == "numeric" and type(facts[a].answers) is NumericAnswers:
+            if not selected.is_floating_point():
+                raise ValueError("numeric values must be finite floating values")
+            numeric_groups.setdefault(len(positions), []).append((a, selected))
+            continue
         validate_values(schema, selected)
         # Missing clean class invalidates the WHOLE episode, before neural forward.
         encoded[a] = facts[a].answers.encode_targets(selected)
+    for group in numeric_groups.values():
+        values = torch.stack([values for _, values in group])
+        if not bool(torch.isfinite(values).all()):
+            raise ValueError("numeric values must be finite floating values")
+        codes = NumericAnswers.encode_targets_batch([facts[a].answers for a, _ in group], values)
+        encoded.update((a, codes[i]) for i, (a, _) in enumerate(group))
     return encoded
 
 

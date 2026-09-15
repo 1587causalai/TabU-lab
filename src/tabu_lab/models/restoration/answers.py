@@ -39,6 +39,39 @@ class NumericAnswers:
     median: Tensor | None
     scale: Tensor | None
 
+    @staticmethod
+    def _batch_parameters(codecs, device):
+        if any(c.median is None or c.scale is None for c in codecs):
+            raise ValueError("no-support: numeric statistics are undefined")
+        if any(c.encoded.device != device for c in codecs):
+            raise ValueError("numeric values and visible answers must share a device")
+        return torch.stack([c.median for c in codecs]), torch.stack([c.scale for c in codecs])
+
+    @classmethod
+    def encode_targets_batch(cls, codecs, values):
+        """Scorer-only [column,target] truth encoding, with detached values."""
+        if values.ndim != 2 or len(values) != len(codecs) or not values.is_floating_point():
+            raise ValueError("numeric target values must have floating [column,target] shape")
+        finite(values, "numeric target values")
+        median, scale = cls._batch_parameters(codecs, values.device)
+        encoded = ((values.detach().double() - median[:, None]) / scale[:, None])[..., None]
+        finite(encoded, "numeric target encoding")
+        return encoded
+
+    @classmethod
+    def decode_batch(cls, codecs, encoded):
+        """Decode [column,target,1] predictions with one batched inverse scaling."""
+        if (encoded.ndim != 3 or len(encoded) != len(codecs) or encoded.shape[-1] != 1
+                or not encoded.is_floating_point()):
+            raise ValueError("numeric predictions need [column,target,1] shape")
+        finite(encoded, "predicted encoding")
+        median, scale = cls._batch_parameters(codecs, encoded.device)
+        # Scalar decode's 0-D statistics follow the prediction tensor dtype.
+        median, scale = median.to(encoded), scale.to(encoded)
+        result = median[:, None] + scale[:, None] * encoded[..., 0]
+        finite(result, "numeric prediction")
+        return result
+
     @classmethod
     def from_visible_batch(cls, values: Tensor, *, epsilon: float) -> tuple[NumericAnswers, ...]:
         """Batch columns with equal support counts; preserve the scalar Type-7 codec."""

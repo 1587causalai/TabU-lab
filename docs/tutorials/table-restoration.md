@@ -76,8 +76,8 @@ Inputs are episode-owned; do not mutate their tensors after construction. Numeri
 columns are floating vectors; discrete columns are int64 domain indices. Schema
 keys are stable, unique column identifiers. Ordinal indices encode declared order;
 domain size/order must not be inferred from hidden truth. All model/input tensors
-must share a device. CPU FP64 is the verified reference path; no GPU, MPS, mixed
-precision, throughput, or large-table memory claim is made.
+must share a device. CPU FP64 is the reference path. Device probes qualify bounded
+CUDA configurations; they do not establish MPS, mixed-precision or large-table support.
 
 Requests are unique int64 `[row, column]` pairs. Column predictions carry positions
 in the original request, restoring arbitrary request order without padding
@@ -175,8 +175,14 @@ The LL solver is a dense FP64 reference, not yet a scalable dual/chunked solver.
 Within one table, backbone attention batches columns or rows and all heads into
 tensor operations. Readout pads the active columns' supports, targets and answer
 widths for a single batched NW/LL call, with exact support and target masks.
-Column-level Python loops still prepare and unpack ragged inputs. This does not
-provide parallel execution of multiple table episodes.
+Numeric codecs group columns with equal support counts for batched quantiles;
+learned features group by schema type and share one projection over visible cells.
+Readout gathers geometry and Cell content across columns in batch. Standard numeric
+truth encoding and inverse scaling are also batched, while custom codec overrides
+remain available. Inducing collect reuses its computed source presence for gating.
+Column-level Python loops still organize metadata and unpack ragged outputs. This
+does not provide parallel execution of multiple table episodes or replace the
+dense primal LL solver with a dual solver.
 
 ## Damage and loss configuration
 
@@ -190,7 +196,9 @@ robustness claim. Sampling recipes, severity sweeps and curricula are deferred.
 
 Default loss is the mean over numeric targets plus the mean over discrete targets,
 omitting empty branches. `LossConfig(state_weights=(g,q,z,b))` instead sums weighted
-within-type, within-state means. `batch_loss` averages episode losses equally,
+within-type, within-state means. Targets with equal answer width share MSE calls;
+type/state reductions are tensor operations, with one host transfer for reported
+state counts and means. `batch_loss` averages episode losses equally,
 serially; it is not parallel batch execution. Mask sampling and loss weighting are
 independent choices. Reports separate retained, Query, Null and corrupted counts
 and coordinate MSE. Do not equate visible reconstruction with hidden recovery.
