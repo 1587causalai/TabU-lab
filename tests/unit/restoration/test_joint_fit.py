@@ -6,12 +6,13 @@ from types import SimpleNamespace
 
 import torch
 
-from tabu_lab.models.restoration import ColumnSchema, RestorationConfig
+from tabu_lab.models.restoration import ColumnSchema, RestorationConfig, RestorationModel
 from tabu_lab.models.restoration.backbone import BackboneConfig
 from tabu_lab.models.restoration.encoding import EncoderConfig
 from tabu_lab.restoration_joint_fit import (
     TablePlan,
     _episode,
+    _PreparedCache,
     _query_mask,
     prepare_plan,
     run_joint_fit,
@@ -70,6 +71,23 @@ def test_mixed_episode_has_all_observed_targets_and_finite_update():
     assert len(score.per_target) == 18
     assert bool(torch.isfinite(score.loss))
     assert score.by_state["query"]["count"] == 6
+
+
+def test_prepared_cache_replaces_entries_when_mask_identity_changes():
+    table = _toy_table()
+    q1, _ = _query_mask(table, 2, 29)
+    q2, _ = _query_mask(table, 2, 31)
+    model = RestorationModel(RestorationConfig(
+        encoder=EncoderConfig(),
+        backbone=BackboneConfig(kind="inducing", layers=1, heads=4, ff_width=32, slots=2),
+    )).double()
+    cache = _PreparedCache(model, capacity=1)
+    first = cache.get((table.name, 0), _episode(table, q1, 37, "cpu"))
+    assert cache.get((table.name, 0), _episode(table, q1, 37, "cpu")) is first
+    second = cache.get((table.name, 1), _episode(table, q2, 41, "cpu"))
+    assert second is not first
+    assert len(cache.entries) == 1
+    assert cache.get((table.name, 0), _episode(table, q1, 37, "cpu")) is not first
 
 
 def _write_fixture(root: Path):
