@@ -54,8 +54,9 @@ class NumericAnswers:
             raise ValueError("numeric target values must have floating [column,target] shape")
         finite(values, "numeric target values")
         median, scale = cls._batch_parameters(codecs, values.device)
-        # Codec statistics are finite by construction; the quotient stays finite.
-        return ((values.detach().double() - median[:, None]) / scale[:, None])[..., None]
+        encoded = ((values.detach().double() - median[:, None]) / scale[:, None])[..., None]
+        finite(encoded, "numeric target encoding")
+        return encoded
 
     @classmethod
     def decode_batch(cls, codecs, encoded):
@@ -67,8 +68,9 @@ class NumericAnswers:
         median, scale = cls._batch_parameters(codecs, encoded.device)
         # Scalar decode's 0-D statistics follow the prediction tensor dtype.
         median, scale = median.to(encoded), scale.to(encoded)
-        # Finite predictions and finite codec statistics keep the decode finite.
-        return median[:, None] + scale[:, None] * encoded[..., 0]
+        result = median[:, None] + scale[:, None] * encoded[..., 0]
+        finite(result, "numeric prediction")
+        return result
 
     @classmethod
     def from_visible_batch(cls, values: Tensor, *, epsilon: float) -> tuple[NumericAnswers, ...]:
@@ -91,12 +93,11 @@ class NumericAnswers:
 
         median = quantile(0.5)
         scale = torch.clamp((quantile(0.75) - quantile(0.25)) / 2, min=epsilon)
-        # Values are finite (checked above), so the scale is finite; only FP
-        # underflow can round it to zero, which is reported explicitly here.
+        finite(scale, "numeric scale")
         if not bool((scale > 0).all()):
             raise FloatingPointError("numerical-failure: numeric scale rounded to zero")
-        # A finite values/positive-scale quotient is finite; no separate check.
         encoded = ((values - median[:, None]) / scale[:, None])[..., None]
+        finite(encoded, "numeric answer encoding")
         return tuple(cls(encoded[i], median[i], scale[i]) for i in range(len(values)))
 
     @classmethod
