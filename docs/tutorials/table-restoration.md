@@ -225,6 +225,50 @@ original units, discrete accuracy, and coverage by table, source family, and
 column type. The route remains a training-row fit diagnostic; the reserved 52 rows
 and unseen-table generalization are outside this result.
 
+The current runnable recipe is
+[`restoration/old120-small128-tar-budget`](../../experiments/local/restoration/README.md).
+The earlier `restoration-old120-joint-fit` preregistration is a historical v1
+pilot bound to source `def4954`; preserve its bytes and use that exact source to
+reproduce it. The current v2 runner rejects its old protocol and checkpoints.
+
+### Live restoration observation
+
+`restoration joint-fit --execute` can mirror its events to the W&B project
+`restoration` when the optional `telemetry` dependency is installed. Observation
+is disabled by default. Enable it only for an authorized experiment:
+
+```bash
+export TABU_LAB_OBSERVER=wandb
+export TABU_LAB_ALLOW_WANDB_HOST_DISCLOSURE=1
+export WANDB_PROJECT=restoration
+export WANDB_RUN_ID=restoration-small128-budget-001
+export WANDB_NAME=restoration-small128-budget-001
+```
+
+The SDK uses existing authentication, including `.netrc`; a `WANDB_API_KEY`
+environment variable is not required. `WANDB_ENTITY` and `WANDB_RUN_GROUP` are
+optional (`WANDB_GROUP` is also accepted). Use a unique
+`WANDB_RUN_ID` for a fresh model and the same ID for a checkpoint continuation.
+The observer uses `resume="allow"` and plots against the model's `update` counter.
+W&B history steps remain SDK-managed so evaluation and resumed events do not
+rewind the tracker history.
+
+The mirror includes training loss, gradient norm, update duration, memory,
+evaluation progress, retained/Query metrics, coverage, and terminal status.
+An evaluation cut short by the deadline records `complete=false`, its completed
+and expected episode counts, and `stop_reason=wall_limit` in the mirror.
+Numeric hyperparameters and source/data/config digests identify the run. Raw
+tables, masks, checkpoints, credentials and filesystem paths are excluded.
+Per-table metric curves require `TABU_LAB_WANDB_TABLE_METRICS=1`; grouped metrics
+are included by default. Git/code capture, console capture and automatic system
+metrics are disabled. The backend may still record host metadata independently,
+which is why hosted mode retains the explicit disclosure opt-in.
+
+Local JSON/JSONL receipts remain the result source. A tracker failure disables
+the mirror while training continues to write those receipts. When live monitoring
+is required, verify W&B initialization and the run URL before starting the long
+budget; an offline mirror or a dry-run plan does not establish online readiness.
+
 ## Prepared execution for repeated episodes
 
 `prepare_episode(model, inputs, request, truth)` creates an owned snapshot for

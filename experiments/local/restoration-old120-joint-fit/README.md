@@ -1,5 +1,10 @@
 # old120 Small-128 restoration joint fit
 
+Historical v1 pilot: the commands and unchanged preregistration below require
+source commit `def4954`. The current v2 runner rejects the v1 protocol and its
+checkpoints. For a new run, use the
+[current restoration budget recipe](../restoration/README.md).
+
 This is the first multi-table fit diagnostic for the five-step table-restoration
 model. It uses all 120 frozen old120 tables and every row in each table's original
 204-row training split. The 52 reserved rows remain outside the model and all

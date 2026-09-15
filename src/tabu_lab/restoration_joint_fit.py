@@ -34,7 +34,7 @@ from tabu_lab.models.restoration import (
 from tabu_lab.tar_data import validate_full_dataset
 
 SCHEMA = "tabu.restoration.joint-fit.v1"
-PROTOCOL = "old120_all_train_rows_mixed_types_all_observed_targets_v1"
+PROTOCOL = "old120_all_train_rows_mixed_types_all_observed_targets_v2"
 
 
 def _hash(path: Path) -> str:
@@ -172,16 +172,17 @@ def _query_mask(table: TablePlan, count: int, seed: int) -> tuple[torch.Tensor, 
     eligible_counts = []
     singleton_per_column = []
     for column, spec in enumerate(table.schema):
+        rng = random.Random(f"{seed}/{column}")
         if spec.kind == "numeric":
             eligible = list(range(n))
             singleton_per_column.append(0)
         else:
             labels = table.values[column]
             occurrences = Counter(labels.tolist())
-            first = {}
+            rows_by_class = {}
             for row, label in enumerate(labels.tolist()):
-                first.setdefault(int(label), row)
-            keep = set(first.values())
+                rows_by_class.setdefault(int(label), []).append(row)
+            keep = {rng.choice(rows) for rows in rows_by_class.values()}
             eligible = [row for row in range(n) if row not in keep]
             protected += len(keep)
             singleton = sum(count == 1 for count in occurrences.values())
@@ -191,14 +192,14 @@ def _query_mask(table: TablePlan, count: int, seed: int) -> tuple[torch.Tensor, 
                 raise ValueError(f"{table.name}: query mask cannot preserve all classes")
         if len(eligible) < count:
             raise ValueError(f"{table.name}: fewer than query_count safely maskable cells")
-        random.Random(f"{seed}/{column}").shuffle(eligible)
+        rng.shuffle(eligible)
         query[eligible[:count], column] = True
         eligible_counts.append(len(eligible))
     return query, dict(
         query_per_column=count,
         eligible_per_column=eligible_counts,
         protected_discrete_cells=protected,
-        unmaskable_discrete_classes=protected,
+        unmaskable_discrete_classes=singleton_classes,
         singleton_discrete_classes=singleton_classes,
         singleton_classes_per_column=singleton_per_column,
         query_coverage=float(count * width) / (n * width),
@@ -211,6 +212,12 @@ def _source_identity() -> dict:
     files.update({f"models/restoration/{p.name}": _hash(p)
                   for p in sorted((root / "models" / "restoration").glob("*.py"))})
     files["tar_data.py"] = _hash(root / "tar_data.py")
+    preflight = root / "restoration_joint_preflight.py"
+    if preflight.exists():
+        files["restoration_joint_preflight.py"] = _hash(preflight)
+    observer = root / "observers" / "restoration.py"
+    if observer.exists():
+        files["observers/restoration.py"] = _hash(observer)
     return {"files": files, "sha256": _digest(files)}
 
 
@@ -248,6 +255,8 @@ def prepare_plan(preregistration: Path, corpus: Path, device="cpu") -> FitPlan:
     spec = _load_mapping(Path(preregistration))
     if spec.get("schema") != SCHEMA or spec.get("status") != "local_unissued":
         raise ValueError(f"preregistration schema/status must be {SCHEMA}/local_unissued")
+    if spec.get("protocol") != PROTOCOL:
+        raise ValueError(f"preregistration protocol must be {PROTOCOL}")
     corpus = Path(corpus).resolve()
     corpus_spec_path = corpus / "preregistration.yaml"
     corpus_spec = _load_mapping(corpus_spec_path)
@@ -255,6 +264,9 @@ def prepare_plan(preregistration: Path, corpus: Path, device="cpu") -> FitPlan:
         raise ValueError("corpus preregistration digest mismatch")
     if corpus_spec.get("schema") != "tabu.tar.joint-training-fit.1":
         raise ValueError("unexpected old120 corpus schema")
+    if ("corpus_manifest_sha256" in corpus_spec
+            and corpus_spec["corpus_manifest_sha256"] != _hash(corpus / "manifest.json")):
+        raise ValueError("corpus manifest digest mismatch")
     datasets = corpus_spec.get("datasets")
     expected = corpus_spec.get("expected_rows")
     if not isinstance(datasets, dict) or not isinstance(expected, dict):
@@ -271,6 +283,11 @@ def prepare_plan(preregistration: Path, corpus: Path, device="cpu") -> FitPlan:
     _integer(spec.get("evaluation_masks"), "evaluation_masks")
     max_rounds = _integer(spec.get("max_rounds"), "max_rounds")
     max_seconds = _number(spec.get("max_seconds"), "max_seconds")
+    evaluate_every = _integer(spec.get("evaluate_every_rounds", 1), "evaluate_every_rounds")
+    reserve = _number(spec.get("final_reserve_seconds", min(300, max_seconds / 10)),
+                      "final_reserve_seconds", zero=True)
+    if reserve >= max_seconds:
+        raise ValueError("final_reserve_seconds must be below max_seconds")
     if _integer(spec.get("checkpoint_every_round"), "checkpoint_every_round") != 1:
         raise ValueError("checkpoint_every_round must be 1 for resumable joint fit")
     seeds = spec.get("seeds")
@@ -353,10 +370,12 @@ def prepare_plan(preregistration: Path, corpus: Path, device="cpu") -> FitPlan:
         "max_rounds": max_rounds,
         "max_updates": max_rounds * len(tables),
         "max_seconds": max_seconds,
+        "evaluate_every_rounds": evaluate_every,
+        "final_reserve_seconds": reserve,
         "model": config.as_dict(),
         "optimizer": optimizer,
         "data_scope": "all training rows; reserved rows excluded",
-        "mask_policy": "preserve one visible sample per observed discrete class",
+        "mask_policy": "randomly preserve one visible sample per observed discrete class",
     }
     return FitPlan(dict(spec, _summary=summary), corpus, corpus_spec, tables, config,
                    _source_identity(), identity)
@@ -370,14 +389,12 @@ def _episode(table: TablePlan, query: torch.Tensor, code_seed: int, device: str)
 
 
 def _fixed_bank(plan: FitPlan, table: TablePlan, device: str):
-    bank = []
     for index in range(plan.spec["evaluation_masks"]):
         query, mask_info = _query_mask(
             table, plan.spec["query_count"], _seed(plan.spec["seeds"]["masks"], table.name, index)
         )
         code_seed = _seed(plan.spec["seeds"]["codes"], table.name, index)
-        bank.append((_episode(table, query, code_seed, device), mask_info))
-    return bank
+        yield (_episode(table, query, code_seed, device), mask_info)
 
 
 class _PreparedCache:
@@ -393,116 +410,144 @@ class _PreparedCache:
         self.model = model
         self.capacity = capacity
         self.entries = OrderedDict()
+        self.identities = {}
 
     def get(self, key, episode):
-        if key not in self.entries:
+        inputs, request, truth = episode
+        identity = hashlib.sha256(repr((inputs.schema, inputs.code_seed)).encode())
+        for tensor in (*inputs.values, inputs.visible, inputs.query, request.targets,
+                       *truth.values, truth.states):
+            identity.update(str((tensor.shape, tensor.dtype, tensor.device)).encode())
+            identity.update(tensor.detach().cpu().contiguous().numpy().tobytes())
+        fingerprint = identity.hexdigest()
+        if key not in self.entries or self.identities[key] != fingerprint:
             self.entries[key] = prepare_episode(self.model, *episode)
+            self.identities[key] = fingerprint
             if len(self.entries) > self.capacity:
-                self.entries.popitem(last=False)
+                evicted, _ = self.entries.popitem(last=False)
+                del self.identities[evicted]
         self.entries.move_to_end(key)
         return self.entries[key]
 
 
 def _metrics(plan: FitPlan, model: RestorationModel, device: str, banks=None,
-             prepared_cache=None) -> dict:
-    model.eval()
-    def blank():
-        return {"count": 0, "encoding_sse": 0.0, "numeric_count": 0,
-                "numeric_sse": 0.0, "discrete_count": 0, "discrete_correct": 0}
+             prepared_cache=None, *, deadline=None, progress=None) -> dict:
+    """Reduce metrics on device; copy one small column summary per episode.
 
-    totals = {state: blank() for state in ("retained", "query")}
-    by_type = {kind: {state: blank()
-                      for state in ("retained", "query")}
-               for kind in ("numeric", "nominal", "ordinal")}
-    by_table = {
-        table.name: {state: blank() for state in ("retained", "query")}
-        for table in plan.tables
-    }
-    groups = sorted({table.name.rsplit("_", 1)[0] for table in plan.tables})
-    by_source = {
-        group: {state: blank() for state in ("retained", "query")}
-        for group in groups
-    }
+    Evaluation episodes are regenerated from fixed CPU seeds one table at a
+    time. A deadline produces an explicit partial receipt, never a complete
+    score for the full corpus. The check is between episodes (one forward pass
+    is the smallest interruptible unit).
+    """
+    model.eval()
+    fields = ("count", "encoding_sse", "numeric_count", "numeric_sse",
+              "discrete_count", "discrete_correct")
+
+    def blank():
+        return dict.fromkeys(fields, 0)
+
+    def states():
+        return {state: blank() for state in ("retained", "query")}
+
+    totals = states()
+    by_type = {kind: states() for kind in ("numeric", "nominal", "ordinal")}
+    by_table = {table.name: states() for table in plan.tables}
+    by_source = {table.name.rsplit("_", 1)[0]: states() for table in plan.tables}
     losses = []
-    coverage = {
-        "query_cells": 0,
-        "total_cells": 0,
-        "protected_discrete_cells": 0,
-        "unmaskable_discrete_classes": 0,
-        "singleton_discrete_classes": 0,
-    }
-    banks = banks or {t.name: _fixed_bank(plan, t, device) for t in plan.tables}
+    coverage = dict.fromkeys(("query_cells", "total_cells", "protected_discrete_cells",
+                             "unmaskable_discrete_classes", "singleton_discrete_classes"), 0)
+    expected = plan.table_count * plan.spec["evaluation_masks"]
+    complete = True
+    longest_episode = 0.0
     with torch.no_grad():
         for table in plan.tables:
-            for index, ((inputs, request, truth), info) in enumerate(banks[table.name]):
+            # Only this table's masks/episodes occupy device memory. The prepared
+            # cache is independently bounded, including scorer-only clean truth.
+            if deadline is not None and time.monotonic() + longest_episode >= deadline:
+                complete = False
+                break
+            bank = banks[table.name] if banks is not None else _fixed_bank(plan, table, device)
+            for index, ((inputs, request, truth), info) in enumerate(bank):
+                tick = time.monotonic()
+                if deadline is not None and tick + longest_episode >= deadline:
+                    complete = False
+                    break
                 if prepared_cache is None:
                     score = score_episode(model, inputs, request, truth)
                 else:
                     prepared = prepared_cache.get((table.name, index),
                                                    (inputs, request, truth))
-                    score = score_prepared_episode(
-                        model, prepared, decode=True, report=True
-                    )
-                losses.append(float(score.loss))
+                    score = score_prepared_episode(model, prepared, decode=True, report=True)
                 targets = request.targets
-                states = truth.states[targets[:, 0], targets[:, 1]]
-                coverage["query_cells"] += int((states == 1).sum())
-                coverage["total_cells"] += len(states)
-                coverage["protected_discrete_cells"] += info["protected_discrete_cells"]
-                coverage["unmaskable_discrete_classes"] += info["unmaskable_discrete_classes"]
-                coverage["singleton_discrete_classes"] += info["singleton_discrete_classes"]
-                columns = {item.column: item for item in score.output.columns}
-                for position, (row, column) in enumerate(targets.tolist()):
-                    state = ("retained", "query")[int(states[position] == 1)]
-                    kind = table.schema[column].kind
-                    source = table.name.rsplit("_", 1)[0]
-                    items = (
-                        totals[state], by_type[kind][state],
-                        by_table[table.name][state], by_source[source][state],
-                    )
-                    for item in items:
-                        item["count"] += 1
-                    error = float(score.per_target[position])
-                    for item in items:
-                        item["encoding_sse"] += error
-                    prediction = columns[column].decoded
-                    local = int((columns[column].target_indices == position).nonzero()[0])
-                    actual = truth.values[column][row]
+                target_states = truth.states[targets[:, 0], targets[:, 1]]
+                reduced = []
+                kinds = []
+                for column in score.output.columns:
+                    positions = column.target_indices
+                    rows = targets[positions, 0]
+                    kind = table.schema[column.column].kind
+                    kinds.append(kind)
+                    membership = torch.stack((target_states[positions] == 0,
+                                              target_states[positions] == 1)).to(torch.float64)
+                    count = membership.sum(1)
+                    error = (membership * score.per_target[positions]).sum(1)
+                    actual = truth.values[column.column][rows]
                     if kind == "numeric":
-                        squared = float((prediction[local] - actual).square())
-                        for item in items:
-                            item["numeric_count"] += 1
-                            item["numeric_sse"] += squared
+                        numeric = (membership * (column.decoded - actual).square()).sum(1)
+                        zero = torch.zeros_like(count)
+                        reduced.append(torch.stack((count, error, count, numeric, zero, zero), 1))
                     else:
-                        correct = int(prediction[local] == actual)
-                        for item in items:
-                            item["discrete_count"] += 1
-                            item["discrete_correct"] += correct
+                        correct = (membership * (column.decoded == actual)).sum(1)
+                        zero = torch.zeros_like(count)
+                        reduced.append(torch.stack((count, error, zero, zero, count, correct), 1))
+                # One transfer replaces thousands of per-cell CUDA synchronizations.
+                compact = torch.cat((score.loss.reshape(1), torch.stack(reduced).reshape(-1)))
+                values = compact.detach().cpu().tolist()
+                if not all(math.isfinite(value) for value in values):
+                    raise FloatingPointError("nonfinite evaluation metric")
+                losses.append(values[0])
+                source = table.name.rsplit("_", 1)[0]
+                for column_index, kind in enumerate(kinds):
+                    for state_index, state in enumerate(("retained", "query")):
+                        offset = 1 + (column_index * 2 + state_index) * len(fields)
+                        row = values[offset:offset + len(fields)]
+                        for item in (totals[state], by_type[kind][state],
+                                     by_table[table.name][state], by_source[source][state]):
+                            for field, value in zip(fields, row, strict=True):
+                                item[field] += value
+                coverage["query_cells"] += info["query_per_column"] * len(table.schema)
+                coverage["total_cells"] += len(targets)
+                for name in ("protected_discrete_cells", "unmaskable_discrete_classes",
+                             "singleton_discrete_classes"):
+                    coverage[name] += info[name]
+                longest_episode = max(longest_episode, time.monotonic() - tick)
+            if progress is not None:
+                progress({"completed_episodes": len(losses), "total_episodes": expected,
+                          "table": table.name})
+            if not complete:
+                break
+
     def finish(item):
-        count = item["count"]
+        count = int(item["count"])
+        item["count"] = count
         item["encoding_mse"] = item.pop("encoding_sse") / count if count else None
-        numeric_count = item.pop("numeric_count")
+        numeric_count = int(item.pop("numeric_count"))
         numeric_sse = item.pop("numeric_sse")
         item["numeric_mse"] = numeric_sse / numeric_count if numeric_count else None
-        discrete_count = item.pop("discrete_count")
+        discrete_count = int(item.pop("discrete_count"))
         discrete_correct = item.pop("discrete_correct")
         item["discrete_accuracy"] = discrete_correct / discrete_count if discrete_count else None
-        return item
-    for state in totals:
-        finish(totals[state])
-    for kind in by_type:
-        for state in by_type[kind]:
-            finish(by_type[kind][state])
-    for table in by_table.values():
-        for state in table:
-            finish(table[state])
-    for source in by_source.values():
-        for state in source:
-            finish(source[state])
-    coverage["query_fraction"] = coverage["query_cells"] / coverage["total_cells"]
-    return {"loss": sum(losses) / len(losses), "by_state": totals,
+
+    for group in (totals, *by_type.values(), *by_table.values(), *by_source.values()):
+        for item in group.values():
+            finish(item)
+    coverage["query_fraction"] = (coverage["query_cells"] / coverage["total_cells"]
+                                  if coverage["total_cells"] else None)
+    return {"loss": sum(losses) / len(losses) if losses else None, "by_state": totals,
             "by_type": by_type, "by_table": by_table, "by_source": by_source,
-            "coverage": coverage,
+            "coverage": coverage, "complete": complete and len(losses) == expected,
+            "completed_episodes": len(losses), "expected_episodes": expected,
+            "stop_reason": None if complete else "wall_limit",
             "scope": "fixed masks on training rows; no reserved evaluation"}
 
 
@@ -517,9 +562,9 @@ def _finite_state(value):
 
 
 def _checkpoint(path: Path, model, optimizer, identity, round_index, update, cursor, elapsed,
-                *, replace=False):
+                *, replace=False, evaluation=None):
     state = {
-        "schema": "tabu.restoration.joint-fit-checkpoint.v1",
+        "schema": "tabu.restoration.joint-fit-checkpoint.v2",
         "identity": identity,
         "config": model.config.as_dict(),
         "model": {k: v.detach().cpu() for k, v in model.state_dict().items()},
@@ -534,6 +579,7 @@ def _checkpoint(path: Path, model, optimizer, identity, round_index, update, cur
         "update": update,
         "cursor": cursor,
         "elapsed_seconds": elapsed,
+        "evaluation": evaluation or {},
     }
     if not _finite_state(state["model"]) or not _finite_state(state["optimizer"]):
         raise FloatingPointError("nonfinite checkpoint state")
@@ -551,12 +597,20 @@ def _checkpoint(path: Path, model, optimizer, identity, round_index, update, cur
 
 def _load_checkpoint(path: Path, model, optimizer, plan: FitPlan):
     state = torch.load(path, map_location="cpu", weights_only=True)
-    if state.get("schema") != "tabu.restoration.joint-fit-checkpoint.v1":
+    if state.get("schema") != "tabu.restoration.joint-fit-checkpoint.v2":
         raise ValueError("unsupported joint-fit checkpoint schema")
     if state.get("identity") != plan.identity or state.get("config") != model.config.as_dict():
         raise ValueError("checkpoint identity or source drift")
     if not _finite_state(state.get("model")) or not _finite_state(state.get("optimizer")):
         raise ValueError("checkpoint contains nonfinite state")
+    round_index = _integer(state.get("round"), "checkpoint round", minimum=0)
+    cursor = _integer(state.get("cursor"), "checkpoint cursor", minimum=0)
+    update = _integer(state.get("update"), "checkpoint update", minimum=0)
+    _number(state.get("elapsed_seconds"), "checkpoint elapsed_seconds", zero=True)
+    if (round_index > plan.spec["max_rounds"] or cursor >= plan.table_count
+            or update != round_index * plan.table_count + cursor
+            or (round_index == plan.spec["max_rounds"] and cursor)):
+        raise ValueError("checkpoint round/cursor/update are inconsistent")
     model.load_state_dict(state["model"], strict=True)
     optimizer.load_state_dict(state["optimizer"])
     torch.set_rng_state(state["torch_cpu_rng"])
@@ -573,16 +627,22 @@ class WallLimit(RuntimeError):
     pass
 
 
-def run_joint_fit(args):
+def run_joint_fit(args, observer=None):
+    """Execute a preregistered run; local receipts remain authoritative.
+
+    ``observer`` is an optional callable receiving JSON-safe event mappings.
+    Observer failures are recorded without discarding a valid training boundary.
+    The wall budget is cumulative across attempts, including evaluation and
+    checkpointing. A CUDA forward/update is the smallest non-preemptible unit.
+    """
     prereg = Path(args.preregistration)
     output = Path(args.output_root)
     if output.exists():
         raise FileExistsError("output-root must be a new attempt directory")
     plan = prepare_plan(prereg, Path(args.corpus), args.device)
     if not args.execute:
-        summary = dict(plan.spec["_summary"], corpus=str(Path(args.corpus).resolve()),
-                       source=plan.source, identity=plan.identity)
-        return summary
+        return dict(plan.spec["_summary"], corpus=str(Path(args.corpus).resolve()),
+                    source=plan.source, identity=plan.identity)
     _require_committed(prereg)
     output.mkdir(parents=True, exist_ok=False)
     receipt = {"schema": SCHEMA, "status": "local_unissued", "outcome": "started",
@@ -592,10 +652,54 @@ def run_joint_fit(args):
     previous_signal = signal.signal(signal.SIGTERM, lambda signum, frame: (_ for _ in ()).throw(
         KeyboardInterrupt(f"signal {signum}")))
     model = optimizer = None
-    boundary = None
     round_index = update = cursor = 0
     prior_elapsed = 0.0
-    stop_round = None
+    deadline = started + plan.spec["max_seconds"]
+    latest_checkpoint = None
+    evaluation = {"initial": None, "latest": None, "latest_update": -1}
+    prepared_cache = None
+    stop_round = getattr(args, "stop_after_round", None) or plan.spec["max_rounds"]
+    evaluate_every = plan.spec["_summary"]["evaluate_every_rounds"]
+    reserve = plan.spec["_summary"]["final_reserve_seconds"]
+    save_reserve = min(5.0, reserve / 10)
+
+    def elapsed():
+        return prior_elapsed + time.monotonic() - started
+
+    def emit(event, **payload):
+        if observer is not None:
+            try:
+                observer(dict(event=event, round=round_index, update=update,
+                              elapsed_seconds=elapsed(), **payload))
+            except Exception as error:
+                failures = receipt.setdefault("observer_errors", [])
+                if len(failures) < 10:
+                    failures.append({"event": event, "error_type": type(error).__name__})
+
+    def checkpoint(path, *, replace=False):
+        nonlocal latest_checkpoint
+        _checkpoint(path, model, optimizer, plan.identity, round_index, update,
+                    cursor, elapsed(), replace=replace, evaluation=evaluation)
+        latest_checkpoint = path
+
+    def evaluate(stage, limit):
+        emit("phase", stage=stage)
+        result = _metrics(
+            plan, model, args.device, prepared_cache=prepared_cache, deadline=limit,
+            progress=lambda values: emit("evaluation_progress", stage=stage, **values),
+        )
+        result["at_update"] = update
+        result["at_round"] = round_index
+        _write_json(output / f"{stage}-metrics.json", result)
+        if result["complete"]:
+            evaluation["latest"] = result
+            evaluation["latest_update"] = update
+            if update == 0 and evaluation["initial"] is None:
+                evaluation["initial"] = result
+            checkpoint(output / "checkpoint-progress.pt", replace=True)
+        emit("phase", stage=f"{stage}_complete", metrics=result)
+        return result
+
     try:
         _write_json(output / "started.json", receipt)
         if args.device == "cuda:0":
@@ -618,65 +722,78 @@ def run_joint_fit(args):
                                       weight_decay=opt["weight_decay"],
                                       betas=tuple(opt["betas"]), eps=opt["eps"])
         resume_path = getattr(args, "resume_checkpoint", None)
-        state = _load_checkpoint(Path(resume_path), model, optimizer, plan) if resume_path else None
-        round_index = int(state["round"]) if state else 0
-        update = int(state["update"]) if state else 0
-        cursor = int(state["cursor"]) if state else 0
-        if round_index < 0 or round_index > plan.spec["max_rounds"]:
-            raise ValueError("checkpoint round is outside the declared budget")
-        if cursor < 0 or cursor > plan.table_count:
-            raise ValueError("checkpoint table cursor is invalid")
-        prior_elapsed = float(state["elapsed_seconds"]) if state else 0.0
+        if resume_path:
+            state = _load_checkpoint(Path(resume_path), model, optimizer, plan)
+            round_index, update, cursor = state["round"], state["update"], state["cursor"]
+            prior_elapsed = state["elapsed_seconds"]
+            evaluation = state["evaluation"]
+            receipt["resumed_from_update"] = update
+        if not 0 < stop_round <= plan.spec["max_rounds"] or stop_round < round_index:
+            raise ValueError("stop_after_round must be within the remaining round budget")
+        if stop_round == round_index and cursor:
+            raise ValueError("stop_after_round precedes the checkpoint table position")
         deadline = started + max(0.0, plan.spec["max_seconds"] - prior_elapsed)
-        receipt.update(execution_started=True, round=round_index, update=update)
-        eval_bank = {t.name: _fixed_bank(plan, t, args.device) for t in plan.tables}
+        training_deadline = deadline - reserve
+        receipt.update(execution_started=True, identity=plan.identity,
+                       model_parameters=sum(p.numel() for p in model.parameters()),
+                       type_counts=plan.spec["_summary"]["type_counts"],
+                       evaluate_every_rounds=evaluate_every, final_reserve_seconds=reserve)
         prepared_cache = _PreparedCache(model, capacity=8)
-        receipt["identity"] = plan.identity
-        receipt["model_parameters"] = sum(p.numel() for p in model.parameters())
-        receipt["type_counts"] = plan.spec["_summary"]["type_counts"]
-        receipt["initial"] = _metrics(plan, model, args.device, eval_bank, prepared_cache)
-        _write_json(
-            output / "resolved.json",
-            {"preregistration": plan.spec, "identity": plan.identity},
-        )
-        _write_json(output / "initial-metrics.json", receipt["initial"])
-        # Store the deterministic mask/code identities without serializing tensors.
+        _write_json(output / "resolved.json",
+                    {"preregistration": plan.spec, "identity": plan.identity})
+        # CPU-only identities are sufficient to regenerate the fixed bank.
         masks_record = {}
-        for name, bank in eval_bank.items():
-            masks_record[name] = []
-            for (inputs, _request, _truth), info in bank:
-                masks_record[name].append({"query": inputs.query.cpu().tolist(), "info": info,
-                                           "code_seed": inputs.code_seed})
+        for table in plan.tables:
+            masks_record[table.name] = []
+            for index in range(plan.spec["evaluation_masks"]):
+                mask_seed = _seed(plan.spec["seeds"]["masks"], table.name, index)
+                query, info = _query_mask(table, plan.spec["query_count"], mask_seed)
+                masks_record[table.name].append({
+                    "query": query.tolist(), "info": info, "mask_seed": mask_seed,
+                    "code_seed": _seed(plan.spec["seeds"]["codes"], table.name, index),
+                })
         _write_json(output / "evaluation-masks.json", masks_record)
-        _checkpoint(output / "checkpoint-initial.pt", model, optimizer, plan.identity,
-                    round_index, update, cursor, prior_elapsed)
+        checkpoint(output / "checkpoint-initial.pt")
+        emit("phase", stage="start", config=plan.spec, identity=plan.identity,
+             model_parameters=receipt["model_parameters"])
+        if evaluation["initial"] is None:
+            if update:
+                raise ValueError("checkpoint lacks the original initial evaluation")
+            receipt["initial"] = evaluate("initial", training_deadline)
+            if not receipt["initial"]["complete"]:
+                receipt["final"] = receipt["initial"]
+                raise WallLimit("initial evaluation did not fit within the training budget")
+        else:
+            receipt["initial"] = evaluation["initial"]
+            _write_json(output / "initial-metrics.json", receipt["initial"])
+        longest_update = 0.0
         with (output / "updates.jsonl").open("x", encoding="utf-8") as curve:
-            stop_round = getattr(args, "stop_after_round", None) or plan.spec["max_rounds"]
-            if not 0 < stop_round <= plan.spec["max_rounds"] or stop_round <= round_index:
-                raise ValueError("stop_after_round must advance within the declared round budget")
-            for current_round in range(round_index, stop_round):
-                if time.monotonic() >= deadline:
-                    raise WallLimit("max_seconds reached before round")
+            while round_index < stop_round:
+                # On resume, complete an interrupted scheduled evaluation before
+                # advancing to the next training round.
+                if (cursor == 0 and round_index > 0 and round_index % evaluate_every == 0
+                        and evaluation["latest_update"] != update):
+                    metrics = evaluate(f"round-{round_index:04d}", training_deadline)
+                    if not metrics["complete"]:
+                        raise WallLimit("scheduled evaluation reached the training deadline")
+                current_round = round_index
                 order = list(range(plan.table_count))
                 random.Random(f"{plan.spec['seeds']['order']}/{current_round}").shuffle(order)
-                start_position = cursor if current_round == round_index else 0
-                for position, table_index in enumerate(order):
-                    if position < start_position:
-                        continue
-                    if time.monotonic() >= deadline:
-                        raise WallLimit("max_seconds reached between table updates")
-                    table = plan.tables[table_index]
+                for position in range(cursor, plan.table_count):
+                    if time.monotonic() + longest_update >= training_deadline:
+                        raise WallLimit("training stopped to preserve final evaluation/save time")
+                    tick = time.monotonic()
+                    table = plan.tables[order[position]]
                     query, mask_info = _query_mask(
                         table, plan.spec["query_count"],
                         _seed(plan.spec["seeds"]["masks"], table.name, "train", current_round),
                     )
                     code_seed = _seed(
-                        plan.spec["seeds"]["codes"], table.name, "train", current_round
+                        plan.spec["seeds"]["codes"], table.name, "train", current_round,
                     )
                     episode = _episode(table, query, code_seed, args.device)
                     model.train()
                     prepared = prepare_episode(model, *episode)
-                    tick = time.monotonic()
                     optimizer.zero_grad(set_to_none=True)
                     score = score_prepared_episode(model, prepared)
                     if not bool(torch.isfinite(score.loss)):
@@ -688,67 +805,79 @@ def run_joint_fit(args):
                     norm = torch.nn.utils.clip_grad_norm_(params, opt["grad_clip"],
                                                           error_if_nonfinite=True)
                     optimizer.step()
-                    update += 1
-                    cursor = position + 1
-                    if not _finite_state(model.state_dict()) or not _finite_state(
-                        optimizer.state_dict()
-                    ):
+                    if (not _finite_state(model.state_dict())
+                            or not _finite_state(optimizer.state_dict())):
                         raise FloatingPointError("nonfinite parameters or optimizer state")
                     if args.device == "cuda:0":
                         torch.cuda.synchronize()
+                    # Counters always describe the NEXT update; round is the
+                    # number of complete rounds, including at the last table.
+                    update += 1
+                    round_index = current_round + int(position + 1 == plan.table_count)
+                    cursor = (position + 1) % plan.table_count
+                    checkpoint(output / "checkpoint-progress.pt", replace=True)
                     row = {"round": current_round + 1, "update": update, "table": table.name,
                            "loss": float(score.loss.detach()), "gradient_norm": float(norm),
-                           "update_seconds": time.monotonic() - tick, "mask": mask_info,
-                           "code_seed": code_seed}
+                           "mask": mask_info, "code_seed": code_seed,
+                           "elapsed_seconds": elapsed()}
                     if args.device == "cuda:0":
                         row["peak_allocated_bytes"] = torch.cuda.max_memory_allocated()
+                    # Includes episode preparation and durable checkpointing.
+                    row["update_seconds"] = time.monotonic() - tick
                     curve.write(json.dumps(row, allow_nan=False) + "\n")
                     curve.flush()
-                    _checkpoint(output / "checkpoint-progress.pt", model, optimizer,
-                                plan.identity, current_round, update, cursor,
-                                prior_elapsed + time.monotonic() - started, replace=True)
-                    receipt.update(round=current_round, cursor=cursor, update=update)
-                cursor = 0
-                boundary = output / f"checkpoint-round-{current_round + 1:04d}.pt"
-                _checkpoint(boundary, model, optimizer, plan.identity, current_round + 1,
-                            update, cursor, prior_elapsed + time.monotonic() - started)
-                metrics = _metrics(plan, model, args.device, eval_bank, prepared_cache)
-                _write_json(output / f"metrics-round-{current_round + 1:04d}.json", metrics)
-        receipt["round"] = stop_round
-        receipt["cursor"] = 0
-        receipt["update"] = update
-        receipt["final"] = _metrics(plan, model, args.device, eval_bank, prepared_cache)
-        receipt["outcome"] = (
-            "completed" if stop_round == plan.spec["max_rounds"] else "segment_completed"
-        )
+                    os.fsync(curve.fileno())
+                    longest_update = max(longest_update, time.monotonic() - tick)
+                    emit("update", **{k: v for k, v in row.items()
+                                      if k not in ("round", "update", "elapsed_seconds")},
+                         training_round=current_round + 1)
+                checkpoint(output / f"checkpoint-round-{round_index:04d}.pt")
+            if evaluation["latest_update"] != update:
+                receipt["final"] = evaluate(f"round-{round_index:04d}", deadline - save_reserve)
+            else:
+                receipt["final"] = evaluation["latest"]
+        if not receipt["final"]["complete"]:
+            raise WallLimit("final evaluation reached max_seconds")
+        receipt["outcome"] = ("completed" if stop_round == plan.spec["max_rounds"]
+                              else "segment_completed")
     except WallLimit as error:
         receipt.update(outcome="wall_limit", error_type=type(error).__name__, error=str(error))
+        # Training is at a validated boundary. Spend the explicitly reserved
+        # time on a final evaluation; leave an honest partial receipt if needed.
+        if model is not None and evaluation["initial"] is not None and "final" not in receipt:
+            try:
+                receipt["final"] = (evaluation["latest"] if evaluation["latest_update"] == update
+                                    else evaluate("final", deadline - save_reserve))
+            except KeyboardInterrupt:
+                receipt["final_evaluation_interrupted"] = True
+            except Exception as evaluation_error:
+                receipt["final_evaluation_error_type"] = type(evaluation_error).__name__
     except KeyboardInterrupt as error:
         receipt.update(outcome="interrupted", error_type=type(error).__name__, error=str(error))
     except Exception as error:
         receipt.update(outcome="failed", error_type=type(error).__name__, error=str(error))
     finally:
         signal.signal(signal.SIGTERM, previous_signal)
-        if receipt.get("outcome") in ("completed", "segment_completed") and stop_round is not None:
-            receipt["round"] = stop_round
-            receipt["cursor"] = 0
-        else:
-            receipt["round"] = round_index
-            receipt["cursor"] = cursor
-        receipt["update"] = update if model is not None else receipt.get("update", 0)
-        receipt["elapsed_seconds"] = prior_elapsed + time.monotonic() - started \
-            if model is not None else time.monotonic() - started
-        if model is not None and optimizer is not None:
+        # Always restore the latest durable boundary, even when interruption or
+        # an optimizer failure left live tensors partly changed/nonfinite.
+        if latest_checkpoint is not None:
             try:
-                _checkpoint(output / "checkpoint.pt", model, optimizer, plan.identity,
-                            receipt["round"], receipt["update"], receipt["cursor"],
-                            receipt["elapsed_seconds"])
+                saved = torch.load(latest_checkpoint, map_location="cpu", weights_only=True)
+                round_index, update, cursor = saved["round"], saved["update"], saved["cursor"]
+                saved["elapsed_seconds"] = elapsed()
+                with (output / "checkpoint.pt").open("xb") as handle:
+                    torch.save(saved, handle)
+                    handle.flush()
+                    os.fsync(handle.fileno())
                 receipt["checkpoint"] = "checkpoint.pt"
             except Exception as error:
                 receipt["checkpoint_error_type"] = type(error).__name__
                 receipt["outcome"] = "failed"
+        receipt.update(round=round_index, cursor=cursor, update=update, elapsed_seconds=elapsed())
         if args.device == "cuda:0" and receipt.get("execution_started"):
             receipt["peak_allocated_bytes"] = torch.cuda.max_memory_allocated()
+        receipt["budget_exhausted"] = receipt["elapsed_seconds"] >= plan.spec["max_seconds"]
+        emit("summary", metrics=receipt)
         _write_json(output / "terminal.json", receipt)
     return receipt
 

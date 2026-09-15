@@ -1,0 +1,37 @@
+{
+  "schema": "restoration.tar-budget-reference.v1",
+  "reference": "historical old120 Small-128 TAR",
+  "segments": [
+    {
+      "attempt": "pilot",
+      "seconds": 343.98047956300434,
+      "receipt_sha256": "06b9e4330aa5b5533236fa58dcf44a2040a0842f8435359562e0b0088f7d2d8f"
+    },
+    {
+      "attempt": "train128",
+      "seconds": 4328.831468989985,
+      "receipt_sha256": "c902688bf2acbd008389b2ee635e2430dd73ce4ba1bca33cc4da61d067eed3f5"
+    },
+    {
+      "attempt": "train256",
+      "seconds": 4388.071322313015,
+      "receipt_sha256": "941cb8588e9455d24b73834ed2e4ca5e692aa5c657bde304b058b802ac2e95c1"
+    },
+    {
+      "attempt": "train512",
+      "seconds": 8687.924562144995,
+      "receipt_sha256": "d2fa0f2f00b5114f437f84a8a8358bfb45efaf4285c9aff142d9c4bcf074ac11"
+    },
+    {
+      "attempt": "train768",
+      "seconds": 9075.063266338984,
+      "receipt_sha256": "3220aa337bcc745d462c01cdf981bb385fda4136d7720f541597fd15c1c7cdad"
+    }
+  ],
+  "actual_total_seconds": 26823.871099349984,
+  "rounds": 768,
+  "updates": 92160,
+  "original_per_invocation_soft_seconds": 14400,
+  "original_max_rounds": 1024,
+  "comparison": "cumulative elapsed time ceiling and maximum table exposures; not matched FLOPs or loss"
+}

@@ -151,7 +151,16 @@ def _run_restoration_fit(args: argparse.Namespace) -> int:
 def _run_restoration_joint_fit(args: argparse.Namespace) -> int:
     from tabu_lab.restoration_joint_fit import run_joint_fit
 
-    result = run_joint_fit(args)
+    observer = None
+    if args.execute:
+        from tabu_lab.observers.restoration import create_restoration_observer
+
+        observer = create_restoration_observer()
+    try:
+        result = run_joint_fit(args, observer=observer)
+    finally:
+        if observer is not None:
+            observer.close()
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0 if result["outcome"] in ("planned", "completed", "segment_completed") else 3
 
@@ -160,6 +169,14 @@ def _run_restoration_benchmark(args: argparse.Namespace) -> int:
     from tabu_lab.restoration_benchmark import run_benchmark
 
     return run_benchmark(args)
+
+
+def _run_restoration_joint_preflight(args: argparse.Namespace) -> int:
+    from tabu_lab.restoration_joint_preflight import run_preflight
+
+    result = run_preflight(args)
+    print(json.dumps(result, indent=2, sort_keys=True))
+    return 0 if result["outcome"] == "passed" else 3
 
 
 def _run_restoration_pipeline_benchmark(args: argparse.Namespace) -> int:
@@ -304,6 +321,14 @@ def build_parser() -> argparse.ArgumentParser:
     )
     restoration_joint_fit.add_argument("--execute", action="store_true")
     restoration_joint_fit.set_defaults(handler=_run_restoration_joint_fit)
+    joint_preflight = restoration_sub.add_parser(
+        "joint-fit-preflight", help="one largest-table update with the joint-fit configuration"
+    )
+    joint_preflight.add_argument("--preregistration", type=Path, required=True)
+    joint_preflight.add_argument("--corpus", type=Path, required=True)
+    joint_preflight.add_argument("--output", type=Path, required=True)
+    joint_preflight.add_argument("--device", choices=("cpu", "cuda:0"), default="cuda:0")
+    joint_preflight.set_defaults(handler=_run_restoration_joint_preflight)
     benchmark = restoration_sub.add_parser(
         "benchmark-vectorization", help="bounded paired serial/batched execution comparison"
     )
