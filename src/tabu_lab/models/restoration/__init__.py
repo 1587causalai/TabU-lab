@@ -11,9 +11,16 @@ from .contracts import (
 )
 from .encoding import EncoderConfig
 from .losses import encoding_mse
-from .model import RestorationConfig, RestorationModel, RestorationOutput
+from .model import PreparedRestoration, RestorationConfig, RestorationModel, RestorationOutput
 from .readout import EncodedRestoration, RestorationReadout, unit_kernel_logits
-from .training import LossConfig, batch_loss, score_episode
+from .training import (
+    LossConfig,
+    PreparedEpisode,
+    batch_loss,
+    prepare_episode,
+    score_episode,
+    score_prepared_episode,
+)
 
 __all__ = [
     "BackboneConfig",
@@ -23,6 +30,8 @@ __all__ = [
     "EncoderConfig",
     "LossConfig",
     "NumericAnswers",
+    "PreparedEpisode",
+    "PreparedRestoration",
     "RestorationConfig",
     "RestorationInput",
     "RestorationModel",
@@ -33,6 +42,8 @@ __all__ = [
     "batch_loss",
     "encoding_mse",
     "make_episode",
+    "prepare_episode",
     "score_episode",
+    "score_prepared_episode",
     "unit_kernel_logits",
 ]

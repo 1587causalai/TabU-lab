@@ -13,6 +13,7 @@ import os
 import signal
 import subprocess
 import time
+from collections import OrderedDict
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -24,7 +25,9 @@ from tabu_lab.models.restoration import (
     RestorationConfig,
     RestorationModel,
     make_episode,
+    prepare_episode,
     score_episode,
+    score_prepared_episode,
 )
 from tabu_lab.tar_data import validate_full_dataset
 
@@ -131,6 +134,35 @@ class FitPlan:
             query,
             code_seed=self.code_seeds[bank_index],
         )
+
+
+class _PreparedBank:
+    """Run-local LRU of at most eight fixed mask/seed episodes on one device.
+
+    No learned state or autograd graph is cached. This is rebuilt on resume;
+    only the existing sampler cursor and mask/code identities are checkpointed.
+    """
+
+    def __init__(self, plan, model, device, capacity=8):
+        self.plan, self.model, self.device = plan, model, device
+        self.capacity = capacity
+        self.values = tuple(value.to(device) for value in plan.values)
+        self.entries = OrderedDict()
+
+    def get(self, index):
+        key = index % len(self.plan.queries)
+        if key not in self.entries:
+            query = self.plan.queries[key].to(self.device)
+            episode = make_episode(
+                self.plan.schema, self.values, torch.ones_like(query), query,
+                code_seed=self.plan.code_seeds[key],
+            )
+            prepared = prepare_episode(self.model, *episode)
+            if len(self.entries) == self.capacity:
+                self.entries.popitem(last=False)
+            self.entries[key] = prepared
+        self.entries.move_to_end(key)
+        return self.entries[key]
 
 
 def prepare_plan(preregistration, dataset, device="cpu"):
@@ -502,6 +534,7 @@ def run_fit(args):
         receipt["initial"] = evaluate(model, plan, args.device, deadline)
         _json(output / "initial-metrics.json", receipt["initial"])
         accumulation = plan.spec.get("gradient_accumulation", 1)
+        prepared_bank = _PreparedBank(plan, model, args.device)
         while step < plan.spec["max_updates"]:
             _check_wall(deadline)
             tick = time.monotonic()
@@ -510,7 +543,7 @@ def run_fit(args):
             losses = []
             for offset in range(accumulation):
                 _check_wall(deadline)
-                score = score_episode(model, *plan.episode(cursor + offset, args.device))
+                score = score_prepared_episode(model, prepared_bank.get(cursor + offset))
                 if not bool(torch.isfinite(score.loss)):
                     raise FloatingPointError("nonfinite training loss")
                 (score.loss / accumulation).backward()

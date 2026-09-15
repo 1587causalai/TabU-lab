@@ -160,6 +160,12 @@ def _run_restoration_pipeline_benchmark(args: argparse.Namespace) -> int:
     return run_benchmark(args)
 
 
+def _run_restoration_prepared_benchmark(args: argparse.Namespace) -> int:
+    from tabu_lab.restoration_prepared_benchmark import run_benchmark
+
+    return run_benchmark(args)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="tabu-lab")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -259,6 +265,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--output", type=Path, help="new, non-overwriting JSON check file"
     )
     restoration_verify.set_defaults(handler=_run_restoration_verify)
+    prepared = restoration_sub.add_parser(
+        "prepared-benchmark", help="bounded prepared replay parity and timing"
+    )
+    prepared.add_argument("--device", choices=("cpu", "cuda:0"), default="cpu")
+    prepared.add_argument("--output", type=Path, required=True)
+    prepared.set_defaults(handler=_run_restoration_prepared_benchmark)
     restoration_fit = restoration_sub.add_parser(
         "fit", help="plan a bounded numeric fit diagnostic; execution requires --execute"
     )

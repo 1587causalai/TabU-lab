@@ -273,7 +273,7 @@ def test_resume_rejects_preregistration_and_source_drift(artifacts, monkeypatch)
 
 
 def test_nonfinite_loss_kills_before_update_and_keeps_terminal(artifacts, monkeypatch):
-    actual_score = fit.score_episode
+    actual_score = fit.score_prepared_episode
 
     def nonfinite(model, *args, **kwargs):
         result = actual_score(model, *args, **kwargs)
@@ -283,7 +283,7 @@ def test_nonfinite_loss_kills_before_update_and_keeps_terminal(artifacts, monkey
             else result
         )
 
-    monkeypatch.setattr(fit, "score_episode", nonfinite)
+    monkeypatch.setattr(fit, "score_prepared_episode", nonfinite)
     receipt = execute(artifacts)
     assert receipt["outcome"] == "failed" and receipt["completed_updates"] == 0
     assert receipt["error"] == "nonfinite training loss"
@@ -291,7 +291,7 @@ def test_nonfinite_loss_kills_before_update_and_keeps_terminal(artifacts, monkey
 
 
 def test_wall_limit_and_nonfinite_gradient_kill(artifacts, monkeypatch):
-    actual_score = fit.score_episode
+    actual_score = fit.score_prepared_episode
 
     def bad_gradient(model, *args, **kwargs):
         result = actual_score(model, *args, **kwargs)
@@ -299,7 +299,7 @@ def test_wall_limit_and_nonfinite_gradient_kill(artifacts, monkeypatch):
             result.loss.register_hook(lambda gradient: gradient * float("nan"))
         return result
 
-    monkeypatch.setattr(fit, "score_episode", bad_gradient)
+    monkeypatch.setattr(fit, "score_prepared_episode", bad_gradient)
     receipt = execute(artifacts)
     assert receipt["outcome"] == "failed" and receipt["completed_updates"] == 0
     assert "nonfinite training gradients" in receipt["error"]
@@ -379,3 +379,30 @@ def test_cuda_unavailable_never_falls_back_and_has_receipt(artifacts, monkeypatc
     result = execute(artifacts)
     assert result["outcome"] == "failed" and result["error"] == "CUDA unavailable; no CPU fallback"
     assert not result["execution_started"]
+
+
+def test_prepared_bank_reuses_fixed_episodes_and_bounds_capacity(artifacts, monkeypatch):
+    plan = fit.prepare_plan(artifacts.preregistration, artifacts.dataset)
+    model = RestorationModel(plan.config).double()
+    actual = fit.prepare_episode
+    calls = []
+
+    def spy(*args):
+        calls.append(1)
+        return actual(*args)
+
+    monkeypatch.setattr(fit, "prepare_episode", spy)
+    bank = fit._PreparedBank(plan, model, "cpu")
+    first = bank.get(0)
+    assert bank.get(len(plan.queries)) is first
+    assert len(calls) == 1
+    assert len(bank.entries) == 1
+    # An evicted entry rebuilds from its original mask/seed with identical loss.
+    bounded = fit._PreparedBank(plan, model, "cpu", capacity=1)
+    original = bounded.get(0)
+    expected = fit.score_prepared_episode(model, original).loss
+    bounded.get(1)
+    rebuilt = bounded.get(0)
+    assert rebuilt is not original and len(bounded.entries) == 1
+    torch.testing.assert_close(fit.score_prepared_episode(model, rebuilt).loss, expected,
+                               rtol=0, atol=0)
