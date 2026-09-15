@@ -148,6 +148,12 @@ def _run_restoration_fit(args: argparse.Namespace) -> int:
     return 0 if result["outcome"] in ("planned", "completed") else 3
 
 
+def _run_restoration_benchmark(args: argparse.Namespace) -> int:
+    from tabu_lab.restoration_benchmark import run_benchmark
+
+    return run_benchmark(args)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="tabu-lab")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -257,6 +263,14 @@ def build_parser() -> argparse.ArgumentParser:
     restoration_fit.add_argument("--resume", type=Path, help="checkpoint from a previous attempt")
     restoration_fit.add_argument("--execute", action="store_true")
     restoration_fit.set_defaults(handler=_run_restoration_fit)
+    benchmark = restoration_sub.add_parser(
+        "benchmark-vectorization", help="bounded paired serial/batched execution comparison"
+    )
+    benchmark.add_argument("--preregistration", type=Path, required=True)
+    benchmark.add_argument("--dataset", type=Path, required=True)
+    benchmark.add_argument("--output", type=Path, required=True)
+    benchmark.add_argument("--device", choices=("cpu", "cuda:0"), default="cuda:0")
+    benchmark.set_defaults(handler=_run_restoration_benchmark)
     return parser
 
 
