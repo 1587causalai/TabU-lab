@@ -194,6 +194,43 @@ def test_zero_one_support_and_training_support_preflight():
         score_episode(model, inputs, RestorationRequest(torch.tensor([[0, 0], [1, 0]])), truth)
 
 
+def test_episode_construction_enforces_two_visible_supports():
+    """n_a >= 2 is an episode well-formedness condition, checked at construction."""
+    schema = (ColumnSchema("x", "numeric"),)
+    values = (torch.tensor([1.0, 2.0, 3.0]),)
+    observed = torch.ones(3, 1, dtype=torch.bool)
+    # Query-masking two of three observations leaves n_a = 1: reject here.
+    with pytest.raises(ValueError, match="no-valid-episode"):
+        make_episode(
+            schema, values, observed, torch.tensor([[True], [True], [False]]), code_seed=0
+        )
+    # Null damage has the same effect on the support count.
+    with pytest.raises(ValueError, match="no-valid-episode"):
+        make_episode(
+            schema,
+            values,
+            observed,
+            torch.tensor([[True], [False], [False]]),
+            code_seed=0,
+            null=torch.tensor([[False], [True], [False]]),
+        )
+    # A legal masking constructs fine; an unobserved untargeted column stays empty.
+    inputs, _, _ = make_episode(
+        schema, values, observed, torch.tensor([[True], [False], [False]]), code_seed=0
+    )
+    assert int(inputs.visible.sum()) == 2
+    wider = (*schema, ColumnSchema("aux", "numeric"))
+    empty_column = torch.zeros(3, 1, dtype=torch.bool)
+    inputs, _, _ = make_episode(
+        wider,
+        (torch.tensor([1.0, 2.0, 3.0]), torch.zeros(3)),
+        torch.cat((observed, empty_column), dim=1),
+        torch.tensor([[True, False], [False, False], [False, False]]),
+        code_seed=0,
+    )
+    assert not bool(inputs.visible[:, 1].any())
+
+
 def test_numeric_input_coordinate_is_the_answer_encoding():
     """v2: one shared robust coordinate for input, answer, score, and decode."""
     inputs, _, _ = example_episode()

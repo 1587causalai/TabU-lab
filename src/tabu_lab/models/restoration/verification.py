@@ -136,7 +136,8 @@ def check_robust_numeric_coordinates() -> dict[str, float]:
     one = NumericAnswers.from_visible(torch.tensor([7.0], dtype=torch.float64), epsilon=0.02)
     torch.testing.assert_close(one.scale, one.scale.new_tensor(0.02))
     # Encode/decode round trip on the shared coordinate.
-    torch.testing.assert_close(base.decode(base.encoded), torch.arange(8.0, 17.0, dtype=torch.float64))
+    original = torch.arange(8.0, 17.0, dtype=torch.float64)
+    torch.testing.assert_close(base.decode(base.encoded), original)
     return {"median": float(base.median), "half_iqr_scale": float(base.scale)}
 
 

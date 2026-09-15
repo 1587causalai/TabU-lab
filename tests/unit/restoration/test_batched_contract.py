@@ -2,7 +2,7 @@
 
 import torch
 
-from tabu_lab.models.restoration.backbone import BackboneConfig, OMAB
+from tabu_lab.models.restoration.backbone import OMAB, BackboneConfig
 
 
 def test_projected_zero_sources_cannot_overflow_content_before_deletion():

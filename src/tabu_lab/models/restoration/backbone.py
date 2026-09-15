@@ -178,7 +178,7 @@ class AxialLayer(nn.Module):
             self.register_parameter("slot_seed", None)
 
     def forward(self, h: Tensor, source_mask: Tensor, null_mask: Tensor) -> Tensor:
-        n, m = h.shape[0] - 1, h.shape[1] - 1
+        m = h.shape[1] - 1
         columns = h.transpose(0, 1)  # [M+1, N+1, d]: batch element a is column a
         if self.collect is not None:
             visible_sources = columns[:m]

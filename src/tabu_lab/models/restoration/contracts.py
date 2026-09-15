@@ -39,12 +39,15 @@ class ColumnSchema:
             raise ValueError("discrete columns require a declared positive domain_size")
         elif self.kind == "nominal" and self.order is not None:
             raise ValueError("nominal columns declare no category order")
-        if self.kind == "ordinal" and self.order is not None:
-            if (
+        if (
+            self.kind == "ordinal"
+            and self.order is not None
+            and (
                 not isinstance(self.order, tuple)
                 or sorted(self.order) != list(range(self.domain_size))
-            ):
-                raise ValueError("ordinal order must permute the declared domain indices")
+            )
+        ):
+            raise ValueError("ordinal order must permute the declared domain indices")
 
     def rank_positions(self) -> tuple[int, ...] | None:
         """Domain index -> 0-based rank position for ordinal columns, else None."""
@@ -141,7 +144,10 @@ def make_episode(
 ) -> tuple[RestorationInput, RestorationRequest, TruthSidecar]:
     """Explicit episode construction, not a hidden random-mask retry policy.
 
-    Main restoration requires a nonempty Q. Passing ``null`` or ``replacements``
+    Main restoration requires a nonempty Q. Every supervised column must keep
+    n_a >= 2 visible supports after Query/Null masking, or construction fails
+    with ``no-valid-episode`` — the caller rejects or resamples the mask, the
+    loss is never silently narrowed. Passing ``null`` or ``replacements``
     explicitly opts into damage restoration. Replacement values are actual input
     supports; original clean values remain exclusively in the returned sidecar.
     """
@@ -162,6 +168,17 @@ def make_episode(
     # Validate clean observed truth before replacing or hiding any of it.
     clean = RestorationInput(schema, values, observed, torch.zeros_like(observed), code_seed)
     visible = observed & ~query & ~null
+    # Training evidence policy, checked at episode construction: every supervised
+    # column (the request covers all observed cells) needs n_a >= 2 visible
+    # supports. Reject or resample the mask here; never silently drop the
+    # column's targets from the loss or fabricate a zero-loss sample. Columns
+    # with no observations and no targets may stay empty.
+    for a, column in enumerate(schema):
+        if bool(observed[:, a].any()) and int(visible[:, a].sum()) < 2:
+            raise ValueError(
+                f"no-valid-episode: supervised column {column.key!r} keeps "
+                f"n_a={int(visible[:, a].sum())} < 2 visible supports after masking"
+            )
     payload = [v.clone() for v in clean.values]
     states = torch.full_like(observed, -1, dtype=torch.long)
     states[observed] = 0

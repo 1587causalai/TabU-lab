@@ -24,7 +24,7 @@ def _quantile(sorted_values: Tensor, q: float) -> Tensor:
     """
     n = sorted_values.numel()
     v = 1 + (n - 1) * q
-    j = int(math.floor(v))
+    j = math.floor(v)
     delta = v - j
     lo = sorted_values[j - 1]
     hi = sorted_values[min(j + 1, n) - 1]
