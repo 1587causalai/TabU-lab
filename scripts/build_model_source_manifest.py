@@ -52,8 +52,37 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def physical(path: Path) -> Path:
+    """Locate retired top-level model paths without changing manifest names."""
+    if path.exists():
+        return path.resolve()
+    resolved = path.resolve()
+    relative = resolved.relative_to(FACTORY.resolve())
+    if relative.parts and relative.parts[0] in {"TabUL", "TabU4Graph", "TabU4Rec", "TabU4Do"}:
+        return FACTORY.resolve() / "first-generation-models" / relative
+    if relative.parts and relative.parts[0] == "TabU-v2":
+        return FACTORY.resolve() / "table-cell-as-query-models" / relative
+    return resolved
+
+
 def logical(path: Path) -> str:
-    return path.resolve().relative_to(FACTORY.resolve()).as_posix()
+    """Keep registered source names stable across physical folder relocation.
+
+    Existing entrypoints can be compatibility symlinks into a generation folder.
+    Resolve for containment and include traversal, but hash the original logical
+    contract paths. Source edits still change their content hashes.
+    """
+    resolved = path.resolve()
+    relative = resolved.relative_to(FACTORY.resolve())
+    roots = {Path(name).parent for name in ENTRYPOINTS.values()}
+    for logical_root in sorted(roots, key=lambda item: (-len(item.parts), str(item))):
+        physical_root = physical(FACTORY / logical_root)
+        try:
+            suffix = resolved.relative_to(physical_root)
+        except ValueError:
+            continue
+        return (logical_root / suffix).as_posix()
+    return relative.as_posix()
 
 
 def resolve_reference(parent: Path, reference: str, *, tex: bool) -> Path:
@@ -71,7 +100,7 @@ def resolve_reference(parent: Path, reference: str, *, tex: bool) -> Path:
 
 
 def source_closure(entrypoint: Path) -> dict[str, str]:
-    pending = [entrypoint]
+    pending = [physical(entrypoint)]
     seen: set[Path] = set()
     factory = FACTORY.resolve()
     while pending:
@@ -126,7 +155,7 @@ def build_payload(
             # the corresponding upstream TeX change.
             contracts[contract_id] = existing_contracts[contract_id]
             continue
-        entrypoint = FACTORY / entrypoint_name
+        entrypoint = physical(FACTORY / entrypoint_name)
         semantic_sources = source_closure(entrypoint)
         contracts[contract_id] = {
             "entrypoint": entrypoint_name,

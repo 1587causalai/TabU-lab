@@ -427,7 +427,21 @@ def validate_registry_source_parity(
 
 def _source_path(spec: ModelSpec, source_root: Path | None) -> Path:
     root = source_root if source_root is not None else Path(__file__).resolve().parents[2]
-    return (root / spec.upstream.path).resolve()
+    candidate = (root / spec.upstream.path).resolve()
+    if candidate.exists():
+        return candidate
+    # These source names are retained in immutable historical ModelSpecs, while
+    # their top-level filesystem aliases have been retired by the owner.
+    for factory in candidate.parents:
+        if factory.name != "model-factory":
+            continue
+        relative = candidate.relative_to(factory)
+        if relative.parts[0] in {"TabUL", "TabU4Graph", "TabU4Rec", "TabU4Do"}:
+            return (factory / "first-generation-models" / relative).resolve()
+        if relative.parts[0] == "TabU-v2":
+            return (factory / "table-cell-as-query-models" / relative).resolve()
+        break
+    return candidate
 
 
 def validate_model_spec(
@@ -565,8 +579,8 @@ instantiate = instantiate_model
 
 
 __all__ = [
-    "Alternative",
     "DEFAULT_MODEL_ID",
+    "Alternative",
     "BuildResult",
     "BuildStatus",
     "ContractBuildState",
