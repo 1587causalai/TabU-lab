@@ -45,7 +45,10 @@ singleton 类别 `23,816`。汇总同时写入每表、四个 source family
   表 `204×32` 的 forward/backward/update 有限性通过；该有限性检查峰值显存
   为 `11,454,275,072` bytes。
 - 所有 808 个仓库测试通过，9 个因本地缺少 `sklearn`/`xgboost` 跳过；新
-  joint-fit 专项测试为 3 passed。
+  joint-fit 专项测试为 4 passed。
+
+CUDA 对照 receipt 位于 `/home/cms/tabu-restoration/cuda-check-def4954-r2.json`，
+最大表 receipt 位于 `/home/cms/tabu-restoration/max-scale-def4954.json`。
 
 这些检查和本次首段结果仍是本地未发行的实现／拟合证据；没有据此声明
 benchmark readiness 或公开能力。
