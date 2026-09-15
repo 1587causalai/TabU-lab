@@ -1,0 +1,41 @@
+schema: tabu.restoration.joint-fit.v1
+status: local_unissued
+protocol: old120_all_train_rows_mixed_types_all_observed_targets_v1
+corpus_preregistration_sha256: bf6cf7be84f867a5f0c6eda9298b3dbe1dcd95c16ea2020e1b513d9edacd3c2b
+table_count: 120
+query_count: 68
+evaluation_masks: 8
+seeds:
+  model: 1729
+  order: 1730
+  masks: 1731
+  codes: 1732
+max_rounds: 2
+max_seconds: 3600
+checkpoint_every_round: 1
+model:
+  encoder:
+    width: 128
+    category_map: identity128
+    mlp_hidden: 128
+    epsilon: 0.000001
+  backbone:
+    width: 128
+    layers: 3
+    heads: 8
+    ff_width: 256
+    kind: inducing
+    slots: 256
+    tau_presence: 1.0
+    reference_mass: 1.0
+    norm_eps: 0.000001
+  readout: ll
+  bandwidth: 1.0
+  ridge: 0.001
+optimizer:
+  kind: adamw
+  learning_rate: 0.0001
+  weight_decay: 0.0
+  betas: [0.9, 0.95]
+  eps: 0.00000001
+  grad_clip: 1.0

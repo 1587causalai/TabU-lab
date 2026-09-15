@@ -148,6 +148,14 @@ def _run_restoration_fit(args: argparse.Namespace) -> int:
     return 0 if result["outcome"] in ("planned", "completed") else 3
 
 
+def _run_restoration_joint_fit(args: argparse.Namespace) -> int:
+    from tabu_lab.restoration_joint_fit import run_joint_fit
+
+    result = run_joint_fit(args)
+    print(json.dumps(result, indent=2, sort_keys=True))
+    return 0 if result["outcome"] in ("planned", "completed", "segment_completed") else 3
+
+
 def _run_restoration_benchmark(args: argparse.Namespace) -> int:
     from tabu_lab.restoration_benchmark import run_benchmark
 
@@ -281,6 +289,21 @@ def build_parser() -> argparse.ArgumentParser:
     restoration_fit.add_argument("--resume", type=Path, help="checkpoint from a previous attempt")
     restoration_fit.add_argument("--execute", action="store_true")
     restoration_fit.set_defaults(handler=_run_restoration_fit)
+    restoration_joint_fit = restoration_sub.add_parser(
+        "joint-fit", help="plan or run bounded mixed-type old120 restoration fitting"
+    )
+    restoration_joint_fit.add_argument("--preregistration", type=Path, required=True)
+    restoration_joint_fit.add_argument("--corpus", type=Path, required=True)
+    restoration_joint_fit.add_argument("--output-root", type=Path, required=True)
+    restoration_joint_fit.add_argument("--device", choices=("cpu", "cuda:0"), default="cpu")
+    restoration_joint_fit.add_argument(
+        "--resume-checkpoint", type=Path, help="checkpoint from a previous joint-fit attempt"
+    )
+    restoration_joint_fit.add_argument(
+        "--stop-after-round", type=int, help="optional bounded segment endpoint"
+    )
+    restoration_joint_fit.add_argument("--execute", action="store_true")
+    restoration_joint_fit.set_defaults(handler=_run_restoration_joint_fit)
     benchmark = restoration_sub.add_parser(
         "benchmark-vectorization", help="bounded paired serial/batched execution comparison"
     )

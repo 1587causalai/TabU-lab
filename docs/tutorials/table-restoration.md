@@ -217,6 +217,14 @@ solver optimization must demonstrate forward, gradient, optimizer and continuati
 equivalence before replacing this reference. Existing TAR runners and model factory
 defaults remain unchanged.
 
+The `restoration joint-fit` route extends the same contract to the frozen old120
+corpus: one shared mixed-type Small-128 model receives one fresh, class-supported
+mask per table and round, while a bounded eight-entry prepared cache serves the
+fixed evaluation masks. It reports retained/Query encoding MSE, numeric error in
+original units, discrete accuracy, and coverage by table, source family, and
+column type. The route remains a training-row fit diagnostic; the reserved 52 rows
+and unseen-table generalization are outside this result.
+
 ## Prepared execution for repeated episodes
 
 `prepare_episode(model, inputs, request, truth)` creates an owned snapshot for
