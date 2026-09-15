@@ -18,38 +18,42 @@ from ._validation import finite, matrix, positive
 @dataclass(frozen=True)
 class NumericAnswers:
     encoded: Tensor  # [support, 1]
-    mean: Tensor | None
+    center: Tensor | None  # visible Type-7 median
     scale: Tensor | None
 
     @classmethod
-    def from_visible(cls, values: Tensor, *, sigma_min: float) -> NumericAnswers:
-        positive(sigma_min, "sigma_min")
+    def from_visible(cls, values: Tensor, *, scale_floor: float) -> NumericAnswers:
+        """Fix visible-only median/half-IQR coordinates in FP64, without clipping."""
+        positive(scale_floor, "scale_floor")
         if values.ndim != 1 or not values.is_floating_point():
             raise ValueError("visible numeric answers must be a floating vector")
         finite(values, "numeric answers")
         values = values.detach().to(torch.float64)
         if not values.numel():
             return cls(values[:, None], None, None)
-        mean = values.mean()
-        centered = values - mean
-        scale = (centered.square().mean() + sigma_min**2).sqrt()
+        # Type 7: linearly interpolate sorted values at zero-based index (n - 1) q.
+        q25, center, q75 = torch.quantile(
+            values, values.new_tensor([0.25, 0.5, 0.75]), interpolation="linear"
+        )
+        centered = values - center
+        scale = ((q75 - q25) / 2).clamp_min(scale_floor)
         finite(scale, "numeric scale")
         if not bool(scale > 0):
             raise FloatingPointError("numerical-failure: numeric scale rounded to zero")
         encoded = (centered / scale)[:, None]
         finite(encoded, "numeric answer encoding")
-        return cls(encoded, mean, scale)
+        return cls(encoded, center, scale)
 
     def encode_targets(self, values: Tensor) -> Tensor:
         """Scorer-only truth encoding using fixed visible statistics, with p=1."""
         if values.ndim != 1 or not values.is_floating_point():
             raise ValueError("numeric target values must be a floating vector")
         finite(values, "numeric target values")
-        if self.mean is None or self.scale is None:
+        if self.center is None or self.scale is None:
             raise ValueError("no-support: numeric statistics are undefined")
         if values.device != self.encoded.device:
             raise ValueError("numeric targets and visible answers must share a device")
-        encoded = ((values.detach().to(torch.float64) - self.mean) / self.scale)[:, None]
+        encoded = ((values.detach().to(torch.float64) - self.center) / self.scale)[:, None]
         finite(encoded, "numeric target encoding")
         return encoded
 
@@ -57,9 +61,9 @@ class NumericAnswers:
         matrix(encoded, "predicted encoding")
         if encoded.shape[1] != 1:
             raise ValueError("numeric predictions require one answer coordinate")
-        if self.mean is None or self.scale is None:
+        if self.center is None or self.scale is None:
             raise ValueError("no-support: numeric statistics are undefined")
-        result = self.mean + self.scale * encoded[:, 0]
+        result = self.center + self.scale * encoded[:, 0]
         finite(result, "numeric prediction")
         return result
 

@@ -81,12 +81,39 @@ subsets are inference-only and cannot hide missing answer codes. `make_episode`
 constructs all observed targets and requires nonempty Query for
 main restoration. It never silently retries masks or skips invalid episodes.
 
-## Input features are not answer coordinates
+## Shared numeric coordinates and learned input features
 
-Numeric input uses population standard deviation plus `eps_scale`; numeric answers
-use `sqrt(population_variance + sigma_min**2)`. Both statistics come only from
-actual visible inputs. The learned 64-frequency sin/cos input map feeds a shared
-bias-free 128-to-d projection, initialized by thin QR divided by eight; d >= 128.
+Numeric columns establish one codec from their actual finite visible inputs,
+including corrupted visible values. With Type-7 sample quantiles (linear
+interpolation at zero-based sorted index $(n-1)q$), its coordinates are
+
+$$
+m = Q(1/2),\qquad s = \max\{(Q(3/4)-Q(1/4))/2,\varepsilon\},\qquad
+e(x) = (x-m)/s.
+$$
+
+`NumericAnswers.center` stores the median; `scale` stores the half-IQR bounded
+below by `EncoderConfig.scale_floor` (default $10^{-6}$ in the column's raw units).
+This is a central scale without a normal-consistency factor. Single-support,
+constant and repeated-value columns use the same floor when necessary; there is
+no standard-deviation fallback. Empty support retains `no-support` with undefined
+center and scale.
+
+Input coordinates, support answers, scorer-only truth encoding and final decoding
+reuse this fixed codec. Hidden truth and newly added Query rows cannot alter its
+statistics. Answers remain linear and reversible, without clipping. For example,
+visible values $8,9,\ldots,16$ give $m=12$ and $s=2$; changing only the last value
+to $16000$ leaves both unchanged. This example does not imply invariance to every
+pattern of corruption. A positive unit change $x'=\gamma x+\beta$ preserves the
+coordinates when the floor is also changed to $\varepsilon'=\gamma\varepsilon$.
+
+The learned 64-frequency sin/cos map transforms these coordinates only for input
+features, then feeds a shared bias-free 128-to-d projection initialized by thin QR
+divided by eight; $d\ge128$. Decoding never inverts the Fourier map.
+
+The former `eps_scale` and `sigma_min` configuration fields are removed and are
+rejected rather than interpreted as `scale_floor`. Old mean/std configurations and
+checkpoints require an explicit migration decision before reuse.
 
 Nominal identity codes have exactly eight ones. The deterministic per-episode
 generator hashes explicit seed, stable column key and sorted visible identities;

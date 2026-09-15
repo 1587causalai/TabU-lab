@@ -150,7 +150,13 @@ def test_damage_uses_actual_corrupted_support_stats_and_original_truth():
     model = RestorationModel(small_config()).double()
     score = score_episode(model, *damage)
     fact = score.output.facts[0]
-    assert fact.answers.mean == 3.75  # supports 9,1,2,3; not clean 0,1,2,3
+    # Visible support is 9,1,2,3; the clean values 0,1,2,3 cannot set this codec.
+    assert fact.answers.center == 2.5 and fact.answers.scale == 1.375
+    assert fact.input_coordinates is fact.answers.encoded
+    torch.testing.assert_close(
+        fact.answers.encode_targets(damage[2].values[0])[:, 0],
+        (damage[2].values[0].double() - 2.5) / 1.375,
+    )
     assert damage[2].values[0][0] == 0
     assert clean[0].values[0][0] == 0
     assert score.by_state["corrupted"]["count"] == 1
@@ -170,6 +176,12 @@ def test_damage_uses_actual_corrupted_support_stats_and_original_truth():
     torch.testing.assert_close(weighted.loss, expected)
     combined, _ = batch_loss(model, [damage, clean])
     torch.testing.assert_close(combined, (score.loss + score_episode(model, *clean).loss) / 2)
+
+
+@pytest.mark.parametrize("old_field", ["eps_scale", "sigma_min"])
+def test_encoder_rejects_old_numeric_scale_configuration(old_field):
+    with pytest.raises(TypeError, match=old_field):
+        EncoderConfig(**{old_field: 0.1})
 
 
 def test_zero_one_support_and_training_support_preflight():

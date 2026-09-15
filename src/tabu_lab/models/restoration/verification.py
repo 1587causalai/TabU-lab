@@ -20,7 +20,7 @@ from .readout import RestorationReadout, unit_kernel_logits
 
 def numeric_example() -> dict[str, float]:
     """Uniform evidence (c,x)=(0,1),(1,3),(2,5); predict at c=3."""
-    codec = NumericAnswers.from_visible(torch.tensor([1.0, 3.0, 5.0]), sigma_min=1e-6)
+    codec = NumericAnswers.from_visible(torch.tensor([1.0, 3.0, 5.0]), scale_floor=1e-6)
     logits = torch.zeros(1, 3, dtype=torch.float64)
     source = torch.arange(3, dtype=torch.float64)[:, None]
     target = torch.tensor([[3.0]], dtype=torch.float64)
@@ -74,7 +74,7 @@ def check_gradients() -> None:
         torch.randn(*shape, generator=gen, dtype=torch.float64).requires_grad_()
         for shape in ((2, 2), (3, 2), (2, 2), (3, 2))
     ]
-    numeric = NumericAnswers.from_visible(torch.tensor([1.0, -0.5, 2.0]), sigma_min=0.01)
+    numeric = NumericAnswers.from_visible(torch.tensor([1.0, -0.5, 2.0]), scale_floor=0.01)
     for mode in ("nw", "ll"):
         for codec in (numeric, categorical_example(32), categorical_example(128)):
             truth = codec.encode_targets(
@@ -151,7 +151,7 @@ def check_rotation_lift_mse() -> None:
         torch.randn(*shape, generator=gen, dtype=torch.float64).requires_grad_()
         for shape in ((2, 3), (3, 2), (2, 2))
     ]
-    numeric = NumericAnswers.from_visible(torch.tensor([1.0, -0.5, 2.0]), sigma_min=0.01)
+    numeric = NumericAnswers.from_visible(torch.tensor([1.0, -0.5, 2.0]), scale_floor=0.01)
     for codec in (numeric, categorical_example(32)):
         width = codec.encoded.shape[1]
         rotation = torch.linalg.qr(torch.randn(128, width, generator=gen, dtype=torch.float64)).Q

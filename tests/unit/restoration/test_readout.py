@@ -137,7 +137,7 @@ def test_empty_and_single_support(mode):
 
 
 def test_collinear_content_and_constant_numeric_answers():
-    numeric = NumericAnswers.from_visible(torch.tensor([0.0, 0.0, 0.0]), sigma_min=0.02)
+    numeric = NumericAnswers.from_visible(torch.tensor([0.0, 0.0, 0.0]), scale_floor=0.02)
     assert numeric.scale == 0.02
     result = RestorationReadout("ll")(
         torch.zeros(2, 3),
@@ -190,7 +190,7 @@ def test_rotation_lift_preserves_normalized_mse_and_gradients():
 @pytest.mark.parametrize("mode", ["nw", "ll"])
 def test_mse_gradients_reach_geometry_and_ll_cells_but_not_fixed_answers(mode, width):
     codec = (
-        NumericAnswers.from_visible(torch.tensor([1.0, -0.5, 2.0]), sigma_min=0.01)
+        NumericAnswers.from_visible(torch.tensor([1.0, -0.5, 2.0]), scale_floor=0.01)
         if width == 1
         else categorical(width=width)
     )
@@ -233,7 +233,7 @@ def test_rejects_invalid_supports_missing_ll_cells_and_nonfinite_inputs():
     with pytest.raises(FloatingPointError, match="nonfinite"):
         unit_kernel_logits(torch.tensor([[float("nan")]]), torch.zeros(2, 1), bandwidth=1)
     with pytest.raises(ValueError, match="positive"):
-        NumericAnswers.from_visible(torch.ones(2), sigma_min=0)
+        NumericAnswers.from_visible(torch.ones(2), scale_floor=0)
 
 
 def test_codebook_must_be_same_visible_identity_space():
@@ -254,7 +254,7 @@ def test_codebook_must_be_same_visible_identity_space():
 
 @pytest.mark.parametrize("width", [1, 128])
 def test_coincident_supports_large_common_translation_preserves_nw_limit(width):
-    codec = NumericAnswers.from_visible(torch.tensor([1.0, 2.0, 5.0]), sigma_min=0.1)
+    codec = NumericAnswers.from_visible(torch.tensor([1.0, 2.0, 5.0]), scale_floor=0.1)
     logits = torch.tensor([[0.0, -1.0, -2.0]], dtype=torch.float64)
     rows = torch.arange(3)
     expected = RestorationReadout("nw")(logits, rows, codec.encoded).encoding

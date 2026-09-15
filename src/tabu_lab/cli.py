@@ -131,6 +131,14 @@ def _run_restoration_verify(args: argparse.Namespace) -> int:
     return 0 if result["outcome"] == "passed" else 1
 
 
+def _run_restoration_fit(args: argparse.Namespace) -> int:
+    from tabu_lab.restoration_fit import run_fit
+
+    result = run_fit(args)
+    print(json.dumps(result, indent=2, sort_keys=True))
+    return 0 if result["outcome"] in ("planned", "completed") else 3
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="tabu-lab")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -229,6 +237,16 @@ def build_parser() -> argparse.ArgumentParser:
         "--output", type=Path, help="new, non-overwriting JSON check file"
     )
     restoration_verify.set_defaults(handler=_run_restoration_verify)
+    restoration_fit = restoration_sub.add_parser(
+        "fit", help="plan a bounded numeric fit diagnostic; execution requires --execute"
+    )
+    restoration_fit.add_argument("--preregistration", type=Path, required=True)
+    restoration_fit.add_argument("--dataset", type=Path, required=True)
+    restoration_fit.add_argument("--output-root", type=Path, required=True)
+    restoration_fit.add_argument("--device", choices=("cpu", "cuda:0"), default="cpu")
+    restoration_fit.add_argument("--resume", type=Path, help="checkpoint from a previous attempt")
+    restoration_fit.add_argument("--execute", action="store_true")
+    restoration_fit.set_defaults(handler=_run_restoration_fit)
     return parser
 
 

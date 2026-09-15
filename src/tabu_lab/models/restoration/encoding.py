@@ -20,8 +20,7 @@ class EncoderConfig:
     width: int = 128
     category_map: str = "identity128"
     mlp_hidden: int = 128
-    eps_scale: float = 1e-6
-    sigma_min: float = 1e-6
+    scale_floor: float = 1e-6  # positive lower bound in each numeric column's raw units
 
     def __post_init__(self):
         if type(self.width) is not int or self.width < 128:
@@ -30,8 +29,7 @@ class EncoderConfig:
             raise ValueError("unknown category input map")
         if type(self.mlp_hidden) is not int or self.mlp_hidden < 1:
             raise ValueError("MLP hidden width must be positive")
-        positive(self.eps_scale, "eps_scale")
-        positive(self.sigma_min, "sigma_min")
+        positive(self.scale_floor, "scale_floor")
 
     @property
     def answer_width(self):
@@ -97,10 +95,8 @@ class ValueEncoder(nn.Module):
             rows = inputs.visible[:, a].nonzero().flatten()
             values = inputs.values[a][rows]
             if schema.kind == "numeric":
-                codec = NumericAnswers.from_visible(values, sigma_min=self.config.sigma_min)
-                centered = values.detach().double() - (codec.mean if len(rows) else 0)
-                scale = centered.square().mean().sqrt() if len(rows) else centered.new_tensor(0)
-                coordinates = (centered / (scale + self.config.eps_scale))[:, None]
+                codec = NumericAnswers.from_visible(values, scale_floor=self.config.scale_floor)
+                coordinates = codec.encoded
             else:
                 # Alternative ordinal lifts are design-open. Nominal alternatives
                 # coexist with the declared default ordinal 128/8 + rank lift.
