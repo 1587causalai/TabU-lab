@@ -44,7 +44,7 @@ singleton 类别 `23,816`。汇总同时写入每表、四个 source family
 - 两步 optimizer continuation（model、optimizer、CPU/CUDA RNG）通过，最大
   表 `204×32` 的 forward/backward/update 有限性通过；该有限性检查峰值显存
   为 `11,454,275,072` bytes。
-- 所有 807 个仓库测试通过，9 个因本地缺少 `sklearn`/`xgboost` 跳过；新
+- 所有 808 个仓库测试通过，9 个因本地缺少 `sklearn`/`xgboost` 跳过；新
   joint-fit 专项测试为 3 passed。
 
 这些检查和本次首段结果仍是本地未发行的实现／拟合证据；没有据此声明
