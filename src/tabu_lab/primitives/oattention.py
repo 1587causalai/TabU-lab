@@ -30,9 +30,19 @@ def presence_gate(value: Tensor, tau: float | Tensor = 1.0e-6) -> Tensor:
         raise ValueError("tau must be one finite scalar")
     if float(resolved_tau.detach().cpu()) <= 0.0:
         raise ValueError("tau must be positive")
-    # ``n / (tau + n)`` becomes inf/inf for large finite inputs.  The
-    # algebraically equivalent form below saturates safely at one.
-    gate = 1.0 - resolved_tau / (resolved_tau + norm_squared)
+    # Compute the ratio directly.  The algebraically equivalent
+    # ``1 - tau / (tau + n)`` form suffers catastrophic cancellation when
+    # ``n << tau``: a small non-zero receiver can become an exact zero in
+    # float32 and lose its differentiable path.  Preserve the exact-zero
+    # fixed point explicitly, while treating an overflowed norm as the
+    # saturated unit-presence limit.
+    finite_limit = torch.finfo(work.dtype).max / 2.0
+    overflowed = torch.isinf(norm_squared) | (norm_squared >= finite_limit)
+    gate = torch.where(
+        overflowed,
+        torch.ones_like(norm_squared),
+        norm_squared / (resolved_tau + norm_squared),
+    )
     gate = torch.where(norm_squared == 0, torch.zeros_like(gate), gate)
     gate = torch.nan_to_num(gate, nan=0.0, posinf=1.0, neginf=0.0).clamp_(0.0, 1.0)
     return gate.to(dtype=value.dtype)

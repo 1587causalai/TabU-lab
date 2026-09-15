@@ -20,7 +20,12 @@ class OMABOutput:
 
 
 class OMAB(nn.Module):
-    """Pre-norm OAttention plus receiver-gated FFN residual."""
+    """Pre-norm OAttention plus a zero-preserving FFN residual.
+
+    Presence is a continuous update gate, not a structural Null mask.  A
+    zero carrier stays zero because both update branches are gated; a small
+    non-zero receiver must retain its residual and its gradient path.
+    """
 
     def __init__(
         self,
@@ -73,11 +78,13 @@ class OMAB(nn.Module):
         ff = self.ff2(F.gelu(self.ff1(self.ff_norm(residual))))
         ff = presence_gate(residual, self.presence_tau).unsqueeze(-1) * ff
         state = residual + self.dropout(ff)
-        state = torch.where(
-            raw_receiver_presence.unsqueeze(-1) > 0,
-            state,
-            torch.zeros_like(state),
-        )
+        # Do not hard-mask the whole receiver state by ``raw_receiver_presence``.
+        # Presence gates only the updates: for a zero carrier, residual == 0
+        # and the FFN update is also exactly zero; for a small non-zero carrier,
+        # the residual and its autograd path must remain intact.  Using
+        # ``where(raw_receiver_presence > 0, state, 0)`` here would conflate
+        # numerical presence with structural Null semantics and recreate the
+        # near-zero hard-deletion bug.
         if zero_when_no_support:
             state = torch.where(
                 attention.support_available.unsqueeze(-1),
