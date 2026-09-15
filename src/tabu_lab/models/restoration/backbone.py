@@ -85,6 +85,7 @@ class OMAB(nn.Module):
         """
         projection = self.ff_presence if local else self.attention_presence
         projected = torch.nn.functional.linear(carriers.double(), projection.weight.double())
+        finite_projection = torch.isfinite(projected).all(-1)
         scale = projected.abs().amax(-1)
         active = scale > 0
         safe_scale = torch.where(active, scale, torch.ones_like(scale))
@@ -94,7 +95,15 @@ class OMAB(nn.Module):
         log_rho = log_mass - torch.logaddexp(
             log_mass, log_mass.new_tensor(math.log(self.config.tau_presence))
         )
-        return torch.where(active, log_rho, torch.full_like(log_rho, -torch.inf))
+        zero_log_presence = torch.full_like(log_rho, -torch.inf)
+        invalid_log_presence = torch.full_like(log_rho, torch.nan)
+        # Exact-zero is the only inactive state. Nonfinite projections must
+        # remain nonfinite so the OMAB output guard reports numerical failure.
+        return torch.where(
+            finite_projection,
+            torch.where(active, log_rho, zero_log_presence),
+            invalid_log_presence,
+        )
 
     def presence(self, carriers: Tensor, *, local: bool = False) -> Tensor:
         return self.log_presence(carriers, local=local).exp()
