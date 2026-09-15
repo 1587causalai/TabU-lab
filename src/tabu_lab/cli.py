@@ -154,6 +154,12 @@ def _run_restoration_benchmark(args: argparse.Namespace) -> int:
     return run_benchmark(args)
 
 
+def _run_restoration_pipeline_benchmark(args: argparse.Namespace) -> int:
+    from tabu_lab.restoration_pipeline_benchmark import run_benchmark
+
+    return run_benchmark(args)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="tabu-lab")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -271,6 +277,14 @@ def build_parser() -> argparse.ArgumentParser:
     benchmark.add_argument("--output", type=Path, required=True)
     benchmark.add_argument("--device", choices=("cpu", "cuda:0"), default="cuda:0")
     benchmark.set_defaults(handler=_run_restoration_benchmark)
+    pipeline = restoration_sub.add_parser(
+        "benchmark-pipeline", help="frozen full-pipeline parity and paired timing"
+    )
+    pipeline.add_argument("--preregistration", type=Path, required=True)
+    pipeline.add_argument("--dataset", type=Path, required=True)
+    pipeline.add_argument("--output", type=Path, required=True)
+    pipeline.add_argument("--device", choices=("cpu", "cuda:0"), default="cuda:0")
+    pipeline.set_defaults(handler=_run_restoration_pipeline_benchmark)
     return parser
 
 

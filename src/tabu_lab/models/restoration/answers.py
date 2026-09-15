@@ -40,6 +40,34 @@ class NumericAnswers:
     scale: Tensor | None
 
     @classmethod
+    def from_visible_batch(cls, values: Tensor, *, epsilon: float) -> tuple[NumericAnswers, ...]:
+        """Batch columns with equal support counts; preserve the scalar Type-7 codec."""
+        positive(epsilon, "epsilon")
+        if values.ndim != 2 or not values.is_floating_point():
+            raise ValueError("batched numeric answers must have floating [column, support] shape")
+        finite(values, "numeric answers")
+        values = values.detach().to(torch.float64)
+        n = values.shape[1]
+        if not n:
+            return tuple(cls(row[:, None], None, None) for row in values)
+        ordered = values.sort(-1).values
+
+        def quantile(q):
+            v = 1 + (n - 1) * q
+            j = math.floor(v)
+            delta = v - j
+            return (1 - delta) * ordered[:, j - 1] + delta * ordered[:, min(j + 1, n) - 1]
+
+        median = quantile(0.5)
+        scale = torch.clamp((quantile(0.75) - quantile(0.25)) / 2, min=epsilon)
+        finite(scale, "numeric scale")
+        if not bool((scale > 0).all()):
+            raise FloatingPointError("numerical-failure: numeric scale rounded to zero")
+        encoded = ((values - median[:, None]) / scale[:, None])[..., None]
+        finite(encoded, "numeric answer encoding")
+        return tuple(cls(encoded[i], median[i], scale[i]) for i in range(len(values)))
+
+    @classmethod
     def from_visible(cls, values: Tensor, *, epsilon: float) -> NumericAnswers:
         """m = Q(1/2), s = max{(Q(3/4)-Q(1/4))/2, epsilon}; no std fallback."""
         positive(epsilon, "epsilon")

@@ -93,18 +93,29 @@ class ValueEncoder(nn.Module):
 
     def prepare(self, inputs: RestorationInput) -> tuple[ColumnFacts, ...]:
         """Nonlearned artifacts; reads only stored visible values, never target truth."""
+        counts = inputs.visible.sum(0).tolist()
+        rows_by_column = inputs.visible.T.nonzero()[:, 1].split(counts)
+        numeric_groups = {}
+        for a, schema in enumerate(inputs.schema):
+            if schema.kind == "numeric":
+                numeric_groups.setdefault(counts[a], []).append(a)
+        numeric_codecs = {}
+        for columns in numeric_groups.values():
+            values = torch.stack([inputs.values[a][rows_by_column[a]] for a in columns])
+            codecs = NumericAnswers.from_visible_batch(values, epsilon=self.config.epsilon)
+            numeric_codecs.update(zip(columns, codecs, strict=True))
         facts = []
         for a, schema in enumerate(inputs.schema):
-            rows = inputs.visible[:, a].nonzero().flatten()
-            values = inputs.values[a][rows]
+            rows = rows_by_column[a]
             if schema.kind == "numeric":
                 # Input coordinate IS the answer encoding: one shared robust
                 # coordinate (median/half-IQR) per the v2 design, not a second
                 # preprocessing scale.
-                codec = NumericAnswers.from_visible(values, epsilon=self.config.epsilon)
+                codec = numeric_codecs[a]
                 coordinates = codec.encoded
                 rank = None
             else:
+                values = inputs.values[a][rows]
                 # Alternative ordinal lifts are design-open. Nominal alternatives
                 # coexist with the declared default ordinal 128/8 + rank lift.
                 width = 128 if schema.kind == "ordinal" else self.config.answer_width
@@ -126,7 +137,7 @@ class ValueEncoder(nn.Module):
                     finite(rank, "ordinal rank coordinates")
                 else:
                     rank = None
-            finite(coordinates, "visible input coordinates")
+            # The codec checked all coordinate values, batched for numeric columns.
             facts.append(ColumnFacts(rows, codec, coordinates, rank))
         return tuple(facts)
 
@@ -147,18 +158,27 @@ class ValueEncoder(nn.Module):
         h[:n, :m] = torch.where(inputs.query[..., None], self.cell_seed, 0)
         h[:n, m] = self.unit_seed
         h[n, :m] = self.feature_seed
-        for a, (schema, fact) in enumerate(zip(inputs.schema, facts, strict=True)):
-            coord = fact.input_coordinates.to(weight)
-            if schema.kind == "numeric":
+        groups = {}
+        for a, schema in enumerate(inputs.schema):
+            groups.setdefault(schema.kind, []).append(a)
+        feature_parts, address_parts = [], []
+        for kind, columns in groups.items():
+            coord = torch.cat([facts[a].input_coordinates for a in columns]).to(weight)
+            if kind == "numeric":
                 phase = coord * self.frequencies
                 features = torch.cat((phase.sin(), phase.cos()), -1)
-            elif schema.kind == "ordinal":
+            elif kind == "ordinal":
                 # b_a(x) + r_a(x)·1: rank comes from prepare, derived from the
                 # declared order — not from raw label indices in inputs.values.
-                features = coord + fact.rank.to(weight)[:, None]
+                rank = torch.cat([facts[a].rank for a in columns]).to(weight)
+                features = coord + rank[:, None]
             else:
                 features = self.category_features(coord)
-            h[fact.rows, a] = self.projection(features)
+            feature_parts.append(features)
+            address_parts.extend(facts[a].rows * (m + 1) + a for a in columns)
+        h = h.flatten(0, 1).index_copy(
+            0, torch.cat(address_parts), self.projection(torch.cat(feature_parts))
+        ).reshape(n + 1, m + 1, self.config.width)
         finite(h, "initial carriers")
         active = torch.zeros(n + 1, m + 1, dtype=torch.bool, device=h.device)
         active[:n, :m] = inputs.visible | inputs.query

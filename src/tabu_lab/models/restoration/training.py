@@ -7,6 +7,7 @@ from dataclasses import dataclass
 import torch
 from torch import Tensor
 
+from ._packing import column_positions
 from .contracts import RestorationInput, RestorationRequest, TruthSidecar, validate_values
 from .losses import encoding_mse
 from .model import RestorationModel, RestorationOutput
@@ -61,11 +62,12 @@ def _preflight(inputs, request, truth, facts):
     if len(targets) != len(observed):
         raise ValueError("invalid-episode: training targets must cover all original observations")
     encoded = {}
+    positions_by_column = column_positions(targets[:, 1], len(inputs.schema))
     for a, schema in enumerate(inputs.schema):
         values = truth.values[a]
         if values.shape != (len(inputs.visible),) or values.device != targets.device:
             raise ValueError("truth columns must align with input rows and device")
-        positions = (targets[:, 1] == a).nonzero().flatten()
+        positions = positions_by_column[a]
         if not len(positions):
             continue
         if len(facts[a].rows) < 2:
@@ -91,31 +93,40 @@ def score_episode(
     targets = request.targets
     per_target = output.carriers.new_zeros(len(targets), dtype=torch.float64)
     numeric = torch.tensor(
-        [inputs.schema[a].kind == "numeric" for a in targets[:, 1].tolist()],
+        [schema.kind == "numeric" for schema in inputs.schema],
         dtype=torch.bool,
         device=targets.device,
-    )
+    )[targets[:, 1]]
+    groups = {}
     for col in output.columns:
-        per_target = per_target.index_copy(
-            0, col.target_indices, encoding_mse(col.result.encoding, encoded_truth[col.column])
+        groups.setdefault(col.result.encoding.shape[1], []).append(col)
+    indices, losses = [], []
+    for columns in groups.values():
+        indices.extend(col.target_indices for col in columns)
+        losses.append(
+            encoding_mse(torch.cat([col.result.encoding for col in columns]),
+                         torch.cat([encoded_truth[col.column] for col in columns]))
         )
+    per_target = per_target.index_copy(0, torch.cat(indices), torch.cat(losses))
     states = truth.states[targets[:, 0], targets[:, 1]]
-    loss = per_target.sum() * 0
-    for branch in (numeric, ~numeric):
-        if loss_config.state_weights is None:
-            if bool(branch.any()):
-                loss = loss + per_target[branch].mean()
-        else:
-            for state, weight in enumerate(loss_config.state_weights):
-                selected = branch & (states == state)
-                if bool(selected.any()):
-                    loss = loss + weight * per_target[selected].mean()
+    types = torch.stack((numeric, ~numeric))
+    state_masks = states[None] == torch.arange(4, device=states.device)[:, None]
+    if loss_config.state_weights is None:
+        loss = ((per_target[None] * types).sum(-1) / types.sum(-1).clamp_min(1)).sum()
+    else:
+        selected = types[:, None, :] & state_masks[None, :, :]
+        means = (per_target * selected).sum(-1) / selected.sum(-1).clamp_min(1)
+        loss = (means * per_target.new_tensor(loss_config.state_weights)).sum()
+    counts = state_masks.sum(-1)
+    means = (per_target.detach() * state_masks).sum(-1) / counts.clamp_min(1)
+    # Preserve Python-valued reporting with one device-to-host transfer.
+    statistics = torch.stack((counts.to(means), means), -1).cpu().tolist()
     by_state = {}
     for state, name in enumerate(("retained", "query", "null", "corrupted")):
-        selected = states == state
-        by_state[name] = {"count": int(selected.sum())}
-        if bool(selected.any()):
-            by_state[name]["encoding_mse"] = float(per_target[selected].detach().mean())
+        count, mean = statistics[state]
+        by_state[name] = {"count": int(count)}
+        if count:
+            by_state[name]["encoding_mse"] = mean
     return EpisodeScore(loss, per_target, by_state, output)
 
 

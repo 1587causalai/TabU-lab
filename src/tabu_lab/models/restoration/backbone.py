@@ -104,6 +104,9 @@ class OMAB(nn.Module):
         return self.batched(receivers[None], sources[None], eligible[None])[0]
 
     def batched(self, receivers: Tensor, sources: Tensor, eligible: Tensor) -> Tensor:
+        return self._batched_with_presence(receivers, sources, eligible)[0]
+
+    def _batched_with_presence(self, receivers, sources, eligible):
         """Batched OMAB over independent receiver/source pairs.
 
         ``receivers`` is [B, R, d], ``sources`` is [B, S, d], and ``eligible``
@@ -159,7 +162,7 @@ class OMAB(nn.Module):
         ).double()
         result = residual + local_update.to(residual)
         finite(result, "OMAB output")
-        return result
+        return result, log_p_source
 
 
 class AxialLayer(nn.Module):
@@ -187,13 +190,10 @@ class AxialLayer(nn.Module):
             # visible carriers only. No host sync; the seed residual is not
             # evidence, so a gated column's summaries become exact zeros and
             # the read sublayer masks them through -inf presence.
-            zeroed = torch.where(
-                eligible[..., None], visible_sources, torch.zeros_like(visible_sources)
-            )
-            has_evidence = torch.isfinite(self.collect.log_presence(zeroed)).any(-1)
-            summaries = self.collect.batched(
+            summaries, source_presence = self.collect._batched_with_presence(
                 self.slot_seed.unsqueeze(0).expand(m, -1, -1), visible_sources, eligible
             )
+            has_evidence = torch.isfinite(source_presence).any(-1)
             summaries = summaries * has_evidence.to(summaries.dtype)[:, None, None]
             # The Unit extension column reads zero sources: local remainder only.
             read_sources = torch.cat((summaries, h.new_zeros(1, *summaries.shape[1:])), dim=0)
