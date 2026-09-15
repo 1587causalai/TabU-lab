@@ -100,8 +100,7 @@ def test_nearest_code_compares_current_best_after_three_class_ll_extrapolation(w
     )
     result = RestorationReadout("ll", ridge=1)(
         torch.tensor([[0.0, -40.0, -40.0]], dtype=torch.float64),
-        torch.arange(3),
-        codec.encoded,
+        torch.arange(3), codec.encoded,
         support_cells=torch.tensor([[0.0], [-1.0], [1.0]], dtype=torch.float64),
         target_cells=torch.tensor([[1e33]], dtype=torch.float64),
     )
@@ -133,11 +132,8 @@ def test_single_visible_class_restores_exact_code_with_zero_mse(mode, width):
         torch.tensor([3]), torch.tensor([3]), book, domain_size=5
     )
     result = RestorationReadout(mode)(
-        torch.zeros(2, 1),
-        torch.tensor([0]),
-        codec.encoded,
-        support_cells=torch.zeros(1, 1),
-        target_cells=torch.tensor([[20.0], [-5.0]]),
+        torch.zeros(2, 1), torch.tensor([0]), codec.encoded,
+        support_cells=torch.zeros(1, 1), target_cells=torch.tensor([[20.0], [-5.0]]),
     )
     truth = codec.encode_targets(torch.tensor([3, 3]))
     assert torch.equal(encoding_mse(result.encoding, truth), torch.zeros(2, dtype=torch.float64))
@@ -177,68 +173,45 @@ def test_no_support_and_empty_target_shapes_are_explicit(width):
 
 def test_numeric_truth_uses_visible_statistics_and_detaches_truth():
     values = torch.tensor([1.0, 3.0, 5.0], requires_grad=True)
-    codec = NumericAnswers.from_visible(values, scale_floor=0.5)
+    codec = NumericAnswers.from_visible(values, epsilon=0.5)
     raw_truth = torch.tensor([-20.0, 60.0], requires_grad=True)
     truth = codec.encode_targets(raw_truth)
-    assert codec.center == 3 and codec.scale == 1
+    # median 3, half-IQR 1: the floor 0.5 is inactive, scale is exactly 1.
     torch.testing.assert_close(truth[:, 0], raw_truth.double() - 3)
     assert truth.shape == (2, 1) and not truth.requires_grad
     assert not codec.encoded.requires_grad
     torch.testing.assert_close(codec.decode(truth), raw_truth.double())
     torch.testing.assert_close(codec.encode_targets(values), codec.encoded, rtol=0, atol=0)
     assert torch.equal(encoding_mse(truth, truth), torch.zeros(2, dtype=torch.float64))
-    empty = NumericAnswers.from_visible(torch.empty(0), scale_floor=0.5)
-    assert empty.center is None and empty.scale is None
-    assert empty.encoded.shape == (0, 1)
+    empty = NumericAnswers.from_visible(torch.empty(0), epsilon=0.5)
     with pytest.raises(ValueError, match="no-support"):
         empty.encode_targets(raw_truth)
     with pytest.raises(ValueError, match="no-support"):
         empty.decode(torch.zeros(1, 1))
 
 
-@pytest.mark.parametrize(
-    ("values", "center", "scale"),
-    [([1.0, 9.0], 5.0, 2.0), ([9.0, 1.0, 2.0, 3.0], 2.5, 1.375)],
-)
-def test_numeric_type7_interpolates_even_support(values, center, scale):
-    codec = NumericAnswers.from_visible(torch.tensor(values), scale_floor=0.1)
-    assert codec.center == center and codec.scale == scale
+def test_numeric_robust_coordinates_ignore_tail_moves():
+    base = NumericAnswers.from_visible(torch.arange(8.0, 17.0), epsilon=1e-9)
+    torch.testing.assert_close(base.median, base.median.new_tensor(12.0))
+    torch.testing.assert_close(base.scale, base.scale.new_tensor(2.0))
+    tailed = torch.arange(8.0, 17.0)
+    tailed[-1] = 16000.0
+    moved = NumericAnswers.from_visible(tailed, epsilon=1e-9)
+    torch.testing.assert_close(moved.median, base.median, rtol=0, atol=0)
+    torch.testing.assert_close(moved.scale, base.scale, rtol=0, atol=0)
+    torch.testing.assert_close(moved.encoded[:-1], base.encoded[:-1], rtol=0, atol=0)
+    pair = NumericAnswers.from_visible(torch.tensor([0.0, 10.0]), epsilon=1e-9)
+    torch.testing.assert_close(pair.median, pair.median.new_tensor(5.0))
+    torch.testing.assert_close(pair.scale, pair.scale.new_tensor(2.5))
 
 
-def test_numeric_tail_amplitude_does_not_drag_central_coordinates_or_clip_answers():
-    values = torch.arange(8.0, 17.0, dtype=torch.float64)
-    original = NumericAnswers.from_visible(values, scale_floor=1e-6)
-    values[-1] = 16000
-    corrupted = NumericAnswers.from_visible(values, scale_floor=1e-6)
-    assert original.center == corrupted.center == 12
-    assert original.scale == corrupted.scale == 2
-    torch.testing.assert_close(original.encoded[:-1], corrupted.encoded[:-1], rtol=0, atol=0)
-    assert corrupted.encoded[-1, 0] == 7994
-    torch.testing.assert_close(corrupted.decode(corrupted.encoded), values, rtol=0, atol=0)
-
-
-@pytest.mark.parametrize("values", [[7.0], [7.0, 7.0, 7.0], [7.0] * 8 + [10000.0]])
-def test_numeric_degenerate_half_iqr_uses_declared_floor(values):
-    codec = NumericAnswers.from_visible(torch.tensor(values), scale_floor=0.5)
-    assert codec.center == 7 and codec.scale == 0.5
-    truth = torch.tensor([6.0, 8.0], requires_grad=True)
-    torch.testing.assert_close(
-        codec.encode_targets(truth)[:, 0], torch.tensor([-2.0, 2.0]).double()
-    )
-    torch.testing.assert_close(codec.decode(codec.encoded), torch.tensor(values).double())
-
-
-@pytest.mark.parametrize("values", [[1.0, 2.0, 9.0, 12.0], [7.0, 7.0]])
-def test_numeric_unit_change_preserves_coordinates_when_floor_changes(values):
-    values = torch.tensor(values, dtype=torch.float64)
-    original = NumericAnswers.from_visible(values, scale_floor=0.5)
-    changed = NumericAnswers.from_visible(4 * values + 3, scale_floor=2.0)
-    torch.testing.assert_close(changed.encoded, original.encoded, rtol=0, atol=0)
-
-
-def test_numeric_old_sigma_configuration_is_rejected():
-    with pytest.raises(TypeError, match="sigma_min"):
-        NumericAnswers.from_visible(torch.ones(2), sigma_min=0.1)
+def test_numeric_floor_covers_constant_and_single_support_columns():
+    flat = NumericAnswers.from_visible(torch.ones(4), epsilon=0.02)
+    assert float(flat.scale) == 0.02
+    torch.testing.assert_close(flat.encoded, torch.zeros(4, 1, dtype=torch.float64))
+    one = NumericAnswers.from_visible(torch.tensor([7.0]), epsilon=0.02)
+    assert float(one.scale) == 0.02
+    torch.testing.assert_close(one.decode(one.encoded), torch.tensor([7.0], dtype=torch.float64))
 
 
 @pytest.mark.parametrize("width", [1, 32, 128])

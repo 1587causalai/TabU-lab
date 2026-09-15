@@ -122,7 +122,16 @@ def _run_restoration_verify(args: argparse.Namespace) -> int:
             indent=2, sort_keys=True,
         ))
         return 0
-    result = verify_components() if args.components_only else verify_model()
+    if args.output is not None and args.output.exists():
+        raise FileExistsError("verification output already exists")
+    if args.device == "cuda:0":
+        from tabu_lab.models.restoration.device_verification import verify_device
+
+        if args.components_only:
+            raise ValueError("--components-only requires --device cpu")
+        result = verify_device(args.device)
+    else:
+        result = verify_components() if args.components_only else verify_model()
     if args.output is not None:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         with args.output.open("x", encoding="utf-8") as handle:
@@ -231,7 +240,8 @@ def build_parser() -> argparse.ArgumentParser:
         "inspect", help="show the reference configuration"
     )
     restoration_inspect.set_defaults(handler=_run_restoration_verify)
-    restoration_verify = restoration_sub.add_parser("verify", help="bounded CPU correctness probes")
+    restoration_verify = restoration_sub.add_parser("verify", help="bounded correctness probes")
+    restoration_verify.add_argument("--device", choices=("cpu", "cuda:0"), default="cpu")
     restoration_verify.add_argument("--components-only", action="store_true")
     restoration_verify.add_argument(
         "--output", type=Path, help="new, non-overwriting JSON check file"

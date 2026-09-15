@@ -148,7 +148,7 @@ def test_json_exponents_inside_yaml_filename_remain_numbers(artifacts):
     assert "1e-08" in artifacts.preregistration.read_text()
     plan = fit.prepare_plan(artifacts.preregistration, artifacts.dataset)
     assert plan.spec["optimizer"]["eps"] == 1e-8
-    assert plan.config.encoder.scale_floor == 1e-6
+    assert plan.config.encoder.epsilon == 1e-6
 
 
 def test_fixed_masks_train_split_fp64_and_all_observed_targets(artifacts):

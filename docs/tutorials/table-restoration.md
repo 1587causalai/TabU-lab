@@ -26,6 +26,7 @@ uv sync --frozen --extra dev
 uv run tabu-lab restoration inspect
 uv run tabu-lab restoration verify --components-only
 uv run tabu-lab restoration verify
+uv run tabu-lab restoration verify --device cuda:0 --output device-check.json
 uv run pytest -q tests/unit/restoration
 ```
 
@@ -39,6 +40,12 @@ cover row/column permutation, receiver-only insertion, request independence,
 projected zero source mass, damage statistics, support failures, and aggregation.
 `--output path.json` additionally records the check JSON and refuses to overwrite
 an existing file. A recorded local check is not formal receipt issuance.
+
+The CUDA entry compares a bounded mixed-type FP64 episode against CPU, including
+parameter gradients, at predeclared `rtol=1e-7, atol=1e-8`. It also checks exact
+two-update CUDA AdamW continuation through an in-memory checkpoint. It records
+the actual device/runtime and fails explicitly if CUDA is unavailable; a passing
+probe qualifies only that configuration, not full-scale training or throughput.
 
 ## Model and training API
 
@@ -92,8 +99,8 @@ m = Q(1/2),\qquad s = \max\{(Q(3/4)-Q(1/4))/2,\varepsilon\},\qquad
 e(x) = (x-m)/s.
 $$
 
-`NumericAnswers.center` stores the median; `scale` stores the half-IQR bounded
-below by `EncoderConfig.scale_floor` (default $10^{-6}$ in the column's raw units).
+`NumericAnswers.median` stores the median; `scale` stores the half-IQR bounded
+below by `EncoderConfig.epsilon` (default $10^{-6}$ in the column's raw units).
 This is a central scale without a normal-consistency factor. Single-support,
 constant and repeated-value columns use the same floor when necessary; there is
 no standard-deviation fallback. Empty support retains `no-support` with undefined
@@ -112,7 +119,7 @@ features, then feeds a shared bias-free 128-to-d projection initialized by thin 
 divided by eight; $d\ge128$. Decoding never inverts the Fourier map.
 
 The former `eps_scale` and `sigma_min` configuration fields are removed and are
-rejected rather than interpreted as `scale_floor`. Old mean/std configurations and
+rejected rather than interpreted as `epsilon`. Old mean/std configurations and
 checkpoints require an explicit migration decision before reuse.
 
 Nominal identity codes have exactly eight ones. The deterministic per-episode
@@ -165,6 +172,12 @@ targets. NW is a separate model-wide weighted-mean alternative. No per-type mode
 routing, top-K search, cache, learned answer head, or inverse MLP is introduced.
 The LL solver is a dense FP64 reference, not yet a scalable dual/chunked solver.
 
+Within one table, backbone attention batches columns or rows and all heads into
+tensor operations. Readout pads the active columns' supports, targets and answer
+widths for a single batched NW/LL call, with exact support and target masks.
+Column-level Python loops still prepare and unpack ragged inputs. This does not
+provide parallel execution of multiple table episodes.
+
 ## Damage and loss configuration
 
 Passing `null=...` and/or `replacements={(row, column): value}` to `make_episode`
@@ -185,10 +198,13 @@ and coordinate MSE. Do not equate visible reconstruction with hidden recovery.
 Persist `model.config.as_dict()`, `model.state_dict()`, optimizer state, RNG state
 and the episode source/schema/mask/code-seed identity for reproducible continuation.
 Configuration is restored with `RestorationConfig.from_dict`. The verifier tests
-model and optimizer continuation, but does not offer a production experiment runner.
-
-Next work requires a separately approved, committed preregistration: a bounded
-fit diagnostic, frozen mask/code seeds and held-out recovery reporting. Large-table
+model and optimizer continuation. `restoration fit` adds a bounded diagnostic
+runner with committed preregistration, fixed training rows/masks, immutable output
+directories, finite-state checks and resumable model/optimizer/RNG state. The
+`restoration-small128-latest-pilot` preregistration uses fresh initialization and
+at most 200 updates or 600 cumulative seconds. Its metrics use the fixed fit mask
+bank; reserved rows are not scored. Execution results must be read from the
+terminal record, separately from preparation and component checks. Large-table
 solver optimization must demonstrate forward, gradient, optimizer and continuation
 equivalence before replacing this reference. Existing TAR runners and model factory
 defaults remain unchanged.

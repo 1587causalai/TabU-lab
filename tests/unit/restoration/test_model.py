@@ -150,13 +150,9 @@ def test_damage_uses_actual_corrupted_support_stats_and_original_truth():
     model = RestorationModel(small_config()).double()
     score = score_episode(model, *damage)
     fact = score.output.facts[0]
-    # Visible support is 9,1,2,3; the clean values 0,1,2,3 cannot set this codec.
-    assert fact.answers.center == 2.5 and fact.answers.scale == 1.375
-    assert fact.input_coordinates is fact.answers.encoded
-    torch.testing.assert_close(
-        fact.answers.encode_targets(damage[2].values[0])[:, 0],
-        (damage[2].values[0].double() - 2.5) / 1.375,
-    )
+    # Supports are the corrupted 9,1,2,3 (clean 0,1,2,3 would give median 1.5).
+    assert fact.answers.median == 2.5
+    assert fact.answers.scale == 1.375  # half-IQR of 1,2,3,9
     assert damage[2].values[0][0] == 0
     assert clean[0].values[0][0] == 0
     assert score.by_state["corrupted"]["count"] == 1
@@ -176,12 +172,6 @@ def test_damage_uses_actual_corrupted_support_stats_and_original_truth():
     torch.testing.assert_close(weighted.loss, expected)
     combined, _ = batch_loss(model, [damage, clean])
     torch.testing.assert_close(combined, (score.loss + score_episode(model, *clean).loss) / 2)
-
-
-@pytest.mark.parametrize("old_field", ["eps_scale", "sigma_min"])
-def test_encoder_rejects_old_numeric_scale_configuration(old_field):
-    with pytest.raises(TypeError, match=old_field):
-        EncoderConfig(**{old_field: 0.1})
 
 
 def test_zero_one_support_and_training_support_preflight():
@@ -204,6 +194,15 @@ def test_zero_one_support_and_training_support_preflight():
         score_episode(model, inputs, RestorationRequest(torch.tensor([[0, 0], [1, 0]])), truth)
 
 
+def test_numeric_input_coordinate_is_the_answer_encoding():
+    """v2: one shared robust coordinate for input, answer, score, and decode."""
+    inputs, _, _ = example_episode()
+    model = RestorationModel(small_config()).double()
+    fact = model.encoder.prepare(inputs)[0]
+    assert float(fact.answers.median) == 2.0 and float(fact.answers.scale) == 1.0
+    torch.testing.assert_close(fact.input_coordinates, fact.answers.encoded, rtol=0, atol=0)
+
+
 def test_visible_codes_stable_under_global_rng_and_row_order():
     inputs, _, _ = example_episode()
     encoder = ValueEncoder(EncoderConfig(category_map="rotary32"))
@@ -217,6 +216,39 @@ def test_visible_codes_stable_under_global_rng_and_row_order():
     assert not torch.equal(a[1].answers.codebook, encoder.prepare(changed)[1].answers.codebook)
     assert a[1].answers.encoded.shape[-1] == 32
     assert a[2].answers.encoded.shape[-1] == 128  # ordinal default retained explicitly
+
+
+def test_ordinal_rank_follows_declared_order_not_label_index():
+    """rank_a(x) counts categories below x under the DECLARED order, not labels."""
+    schema = (ColumnSchema("rank", "ordinal", 3, order=(2, 0, 1)),)
+    values = (torch.tensor([0, 1, 2], dtype=torch.long),)
+    visible = torch.ones(3, 1, dtype=torch.bool)
+    query = torch.zeros(3, 1, dtype=torch.bool)
+    fact = ValueEncoder(EncoderConfig()).prepare(
+        RestorationInput(schema, values, visible, query, 0)
+    )[0]
+    # order[0]=2 declares label 2 lowest: label 2 -> rank 0, 0 -> 1/2, 1 -> 1.
+    torch.testing.assert_close(
+        fact.rank, torch.tensor([0.5, 1.0, 0.0], dtype=torch.float64), rtol=0, atol=0
+    )
+    identity = RestorationInput(
+        (ColumnSchema("rank", "ordinal", 3),), values, visible, query, 0
+    )
+    torch.testing.assert_close(
+        ValueEncoder(EncoderConfig()).prepare(identity)[0].rank,
+        torch.tensor([0.0, 0.5, 1.0], dtype=torch.float64),
+        rtol=0,
+        atol=0,
+    )
+
+
+def test_ordinal_order_schema_validation():
+    with pytest.raises(ValueError, match="permute"):
+        ColumnSchema("bad", "ordinal", 3, order=(0, 0, 1))
+    with pytest.raises(ValueError, match="order"):
+        ColumnSchema("bad", "nominal", 3, order=(0, 1, 2))
+    with pytest.raises(ValueError, match="order"):
+        ColumnSchema("bad", "numeric", order=(0,))
 
 
 def test_rotary_is_four_isometries_and_input_projection_init():

@@ -11,9 +11,19 @@ from torch import Tensor
 
 @dataclass(frozen=True)
 class ColumnSchema:
+    """Declared column type; ordinal order is explicit, not inferred from labels.
+
+    For ordinal columns, ``order`` maps rank position to declared-domain index:
+    ``order[0]`` is the index of the lowest category under the declared total
+    order. The default ``None`` declares the identity convention — domain index
+    i IS the i-th category — which callers must opt into knowingly. Nominal and
+    numeric columns have no order.
+    """
+
     key: str
     kind: Literal["numeric", "nominal", "ordinal"]
     domain_size: int | None = None
+    order: tuple[int, ...] | None = None
 
     def __post_init__(self):
         if not isinstance(self.key, str) or not self.key:
@@ -23,8 +33,28 @@ class ColumnSchema:
         if self.kind == "numeric":
             if self.domain_size is not None:
                 raise ValueError("numeric columns have no discrete domain")
+            if self.order is not None:
+                raise ValueError("numeric columns have no declared order")
         elif type(self.domain_size) is not int or self.domain_size < 1:
             raise ValueError("discrete columns require a declared positive domain_size")
+        elif self.kind == "nominal" and self.order is not None:
+            raise ValueError("nominal columns declare no category order")
+        if self.kind == "ordinal" and self.order is not None:
+            if (
+                not isinstance(self.order, tuple)
+                or sorted(self.order) != list(range(self.domain_size))
+            ):
+                raise ValueError("ordinal order must permute the declared domain indices")
+
+    def rank_positions(self) -> tuple[int, ...] | None:
+        """Domain index -> 0-based rank position for ordinal columns, else None."""
+        if self.kind != "ordinal":
+            return None
+        order = tuple(range(self.domain_size)) if self.order is None else self.order
+        positions = [0] * self.domain_size
+        for position, index in enumerate(order):
+            positions[index] = position
+        return tuple(positions)
 
 
 def validate_values(schema: ColumnSchema, values: Tensor):

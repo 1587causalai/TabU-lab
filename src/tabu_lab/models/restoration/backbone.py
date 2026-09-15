@@ -2,6 +2,15 @@
 
 Q/K/V read raw carriers. Only the local FFN uses learned-scale RMS normalization.
 This implements the table-restoration realization, not a replacement for P02.
+
+Execution is batched: one column sublayer updates all augmented columns in a
+single masked attention call, and one row sublayer updates all augmented rows
+in one call. Source deletion still happens before any projection — ineligible
+entries are replaced by exact zero carriers, whose bias-free projections are
+zero and whose log presence is -inf, so they occupy no softmax mass. This is
+value-equivalent to the former per-column filtered lists, including NaN in
+ineligible payloads never entering a projection. The empty-evidence gate for
+inducing collect is a multiplicative tensor switch, not a host-side branch.
 """
 
 from __future__ import annotations
@@ -75,7 +84,7 @@ class OMAB(nn.Module):
         scale = projected.abs().amax(-1)
         active = scale > 0
         safe_scale = torch.where(active, scale, torch.ones_like(scale))
-        squared = (projected / safe_scale[:, None]).square().sum(-1)
+        squared = (projected / safe_scale[..., None]).square().sum(-1)
         safe_squared = torch.where(active, squared, torch.ones_like(squared))
         log_mass = 2 * safe_scale.log() + safe_squared.log()
         log_rho = log_mass - torch.logaddexp(
@@ -87,37 +96,67 @@ class OMAB(nn.Module):
         return self.log_presence(carriers, local=local).exp()
 
     def forward(self, receivers: Tensor, sources: Tensor, eligible: Tensor) -> Tensor:
-        # Delete ineligible sources before any projection; zero-mass real sources
-        # are also removed before log/softmax, including learned nullspaces.
+        """Single receiver/source sets; a thin wrapper over the batched operator."""
+        if receivers.ndim != 2 or sources.ndim != 2 or eligible.ndim != 1:
+            raise ValueError("single-set OMAB expects [R,d] receivers, [S,d] sources, [S] mask")
+        if len(sources) != len(eligible) or receivers.shape[1] != sources.shape[1]:
+            raise ValueError("sources, mask, and receiver width must align")
+        return self.batched(receivers[None], sources[None], eligible[None])[0]
+
+    def batched(self, receivers: Tensor, sources: Tensor, eligible: Tensor) -> Tensor:
+        """Batched OMAB over independent receiver/source pairs.
+
+        ``receivers`` is [B, R, d], ``sources`` is [B, S, d], and ``eligible``
+        is the [B, S] boolean source-eligibility mask. Batches share this
+        module's parameters but never exchange information. Ineligible sources
+        are zeroed before any projection; their zero K/V and -inf log presence
+        remove them from both numerator and denominator, exactly like deleting
+        them from a per-set list. The fixed reference mass keeps every softmax
+        row well defined, including fully masked rows.
+        """
+        if receivers.ndim != 3 or sources.ndim != 3 or eligible.ndim != 2:
+            raise ValueError("batched OMAB expects [B,R,d], [B,S,d], [B,S] tensors")
+        if (
+            receivers.shape[0] != sources.shape[0]
+            or sources.shape[:2] != eligible.shape
+            or receivers.shape[2] != sources.shape[2]
+        ):
+            raise ValueError("batched receivers, sources, and mask must align")
         finite(receivers, "OMAB receivers")
-        sources = sources[eligible]
-        log_p_source = self.log_presence(sources)
-        active = torch.isfinite(log_p_source)
-        sources, log_p_source = sources[active], log_p_source[active]
-        if len(sources):
-            heads, dim = self.config.heads, self.config.width // self.config.heads
-            q = self.q(receivers).reshape(-1, heads, dim).transpose(0, 1)
-            k = self.k(sources).reshape(-1, heads, dim).transpose(0, 1)
-            v = self.v(sources).reshape(-1, heads, dim).transpose(0, 1)
-            logits = q.double() @ k.double().transpose(-1, -2) / math.sqrt(dim) + log_p_source
-            finite(logits, "OMAB logits")
-            reference = logits.new_full(
-                (*logits.shape[:-1], 1), math.log(self.config.reference_mass)
-            )
-            weights = torch.cat((logits, reference), -1).softmax(-1)[..., :-1]
-            mixed = (weights @ v.double()).transpose(0, 1).reshape(len(receivers), -1)
-            update = torch.nn.functional.linear(
-                self.presence(receivers)[:, None] * mixed, self.out.weight.double()
-            ).to(receivers)
-        else:
-            update = torch.zeros_like(receivers)
+        # Delete ineligible sources before any projection: exact zero carriers,
+        # never NaN payloads, enter K/V. Zero projection gives -inf log presence.
+        sources = torch.where(eligible[..., None], sources, torch.zeros_like(sources))
+        log_p_source = self.log_presence(sources)  # [B, S], -inf deletes the entry
+        # A learned exact-zero presence also deletes its source before K/V.
+        # Otherwise an irrelevant, large finite carrier can overflow QK before masking.
+        sources = torch.where(
+            torch.isfinite(log_p_source)[..., None], sources, torch.zeros_like(sources)
+        )
+        heads, dim = self.config.heads, self.config.width // self.config.heads
+        batch, n_receivers = receivers.shape[0], receivers.shape[1]
+        q = self.q(receivers).reshape(batch, n_receivers, heads, dim).transpose(1, 2)
+        k = self.k(sources).reshape(batch, -1, heads, dim).transpose(1, 2)
+        v = self.v(sources).reshape(batch, -1, heads, dim).transpose(1, 2)
+        content = q.double() @ k.double().transpose(-1, -2) / math.sqrt(dim)
+        finite(content, "OMAB logits")
+        logits = content + log_p_source[:, None, None, :]
+        reference = logits.new_full(
+            (*logits.shape[:-1], 1), math.log(self.config.reference_mass)
+        )
+        weights = torch.cat((logits, reference), -1).softmax(-1)[..., :-1]
+        mixed = (weights @ v.double()).transpose(1, 2).reshape(batch, n_receivers, -1)
+        update = torch.nn.functional.linear(
+            self.presence(receivers)[..., None] * mixed, self.out.weight.double()
+        ).to(receivers)
         residual = receivers + update
         normalized = (
             self.norm_scale
             * residual
             * torch.rsqrt(residual.square().mean(-1, keepdim=True) + self.config.norm_eps)
         )
-        local_update = self.presence(residual, local=True)[:, None] * self.ff(normalized).double()
+        local_update = self.presence(residual, local=True)[..., None] * self.ff(
+            normalized
+        ).double()
         result = residual + local_update.to(residual)
         finite(result, "OMAB output")
         return result
@@ -140,26 +179,31 @@ class AxialLayer(nn.Module):
 
     def forward(self, h: Tensor, source_mask: Tensor, null_mask: Tensor) -> Tensor:
         n, m = h.shape[0] - 1, h.shape[1] - 1
-        columns = []
-        for a in range(m + 1):
-            source = h[:, a]
-            eligible = source_mask[:, a]
-            if self.collect is not None and a < m:
-                # The seed residual is not evidence. Check projected collect mass,
-                # not carrier norm, and keep the slot count independent of N.
-                has_evidence = bool(
-                    torch.isfinite(self.collect.log_presence(source[eligible])).any()
-                )
-                if has_evidence:
-                    source = self.collect(self.slot_seed, source, eligible)
-                    eligible = torch.ones(len(source), dtype=torch.bool, device=h.device)
-                else:
-                    source = h.new_empty(0, h.shape[-1])
-                    eligible = source_mask.new_empty(0)
-            columns.append(self.column(h[:, a], source, eligible))
-        h = torch.stack(columns, 1).masked_fill(null_mask[..., None], 0)
-        rows = [self.row(h[r], h[r], source_mask[r]) for r in range(n + 1)]
-        return torch.stack(rows).masked_fill(null_mask[..., None], 0)
+        columns = h.transpose(0, 1)  # [M+1, N+1, d]: batch element a is column a
+        if self.collect is not None:
+            visible_sources = columns[:m]
+            eligible = source_mask.transpose(0, 1)[:m]
+            # Empty-evidence gate as a tensor switch: projected collect mass on
+            # visible carriers only. No host sync; the seed residual is not
+            # evidence, so a gated column's summaries become exact zeros and
+            # the read sublayer masks them through -inf presence.
+            zeroed = torch.where(
+                eligible[..., None], visible_sources, torch.zeros_like(visible_sources)
+            )
+            has_evidence = torch.isfinite(self.collect.log_presence(zeroed)).any(-1)
+            summaries = self.collect.batched(
+                self.slot_seed.unsqueeze(0).expand(m, -1, -1), visible_sources, eligible
+            )
+            summaries = summaries * has_evidence.to(summaries.dtype)[:, None, None]
+            # The Unit extension column reads zero sources: local remainder only.
+            read_sources = torch.cat((summaries, h.new_zeros(1, *summaries.shape[1:])), dim=0)
+            read_eligible = source_mask.new_ones(m + 1, summaries.shape[1])
+            h = self.column.batched(columns, read_sources, read_eligible).transpose(0, 1)
+        else:
+            h = self.column.batched(columns, columns, source_mask.transpose(0, 1)).transpose(0, 1)
+        h = h.masked_fill(null_mask[..., None], 0)
+        h = self.row.batched(h, h, source_mask)
+        return h.masked_fill(null_mask[..., None], 0)
 
 
 class AxialBackbone(nn.Module):

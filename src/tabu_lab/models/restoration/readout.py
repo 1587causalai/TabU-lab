@@ -152,3 +152,101 @@ class RestorationReadout:
         finite(encoded, "restored answer encoding")
         finite(coefficients, "equivalent coefficients")
         return EncodedRestoration("ok", n, encoded, log_weights, coefficients)
+
+    def batched(
+        self,
+        shared_logits: Tensor,
+        support_mask: Tensor,
+        target_mask: Tensor,
+        answers: Tensor,
+        *,
+        support_cells: Tensor | None = None,
+        target_cells: Tensor | None = None,
+    ) -> tuple[Tensor, Tensor, Tensor]:
+        """Cross-column batched readout over padded stacks; same per-column math.
+
+        ``shared_logits`` is [A, T, S]: Unit-kernel logits for A active columns,
+        up to T targets and S supports each. ``support_mask`` [A, S] and
+        ``target_mask`` [A, T] mark real entries; every active column must have
+        at least one real support (no-support columns are reported by the caller,
+        never solved). Padded supports receive -inf logits, hence exactly zero
+        weight after the stable softmax — the same values as a per-column call
+        with filtered lists. Padded target rows produce well-defined ignored
+        rows. ``answers`` is [A, S, P], zero-padded on both trailing dims;
+        extra answer coordinates are exactly zero and sliced off by the caller.
+        Returns (encoded [A, T, P], log_weights [A, T, S], coefficients [A, T, S]).
+        """
+        if shared_logits.ndim != 3 or answers.ndim != 3:
+            raise ValueError("batched readout expects [A,T,S] logits and [A,S,P] answers")
+        if (
+            support_mask.shape != shared_logits.shape[::2]
+            or target_mask.shape != shared_logits.shape[:2]
+            or support_mask.dtype != torch.bool
+            or target_mask.dtype != torch.bool
+        ):
+            raise ValueError("batched masks must be aligned boolean [A,S] and [A,T]")
+        if answers.shape[:2] != shared_logits.shape[::2] or not answers.shape[2]:
+            raise ValueError("answers must align with the padded support stack")
+        if not bool(support_mask.any(-1).all()):
+            raise ValueError("every batched column needs at least one real support")
+        for tensor in (shared_logits, support_mask, target_mask, answers):
+            if tensor.device != shared_logits.device:
+                raise ValueError("batched readout inputs must share a device")
+        logits = torch.where(
+            support_mask[:, None, :], shared_logits.to(torch.float64), -torch.inf
+        )
+        log_weights = logits.log_softmax(-1)
+        real = target_mask[:, :, None] & support_mask[:, None, :]
+        if not bool(torch.isfinite(log_weights[real]).all()):
+            raise FloatingPointError("numerical-failure: nonfinite normalized geometry logits")
+        weights = log_weights.exp()
+        coefficients = weights
+        if self.mode == "ll":
+            if support_cells is None or target_cells is None:
+                raise ValueError("LL requires target and support Cell content for every type")
+            if (
+                support_cells.shape != (*shared_logits.shape[::2], support_cells.shape[-1])
+                or target_cells.shape[:2] != shared_logits.shape[:2]
+                or support_cells.shape[-1] != target_cells.shape[-1]
+                or not target_cells.shape[-1]
+            ):
+                raise ValueError("Cell content must align with targets, supports, and width")
+            for tensor in (support_cells, target_cells):
+                if tensor.device != weights.device:
+                    raise ValueError("Cell content and geometry must share a device")
+            support = support_cells.to(torch.float64)
+            targets = target_cells.to(torch.float64)
+            # An arbitrary common translation is exact in the real contract.
+            # Center relative to one actual support before taking weighted sums:
+            # identical large coordinates then have exactly zero covariance.
+            # Row zero is a real support in every batched column (checked above).
+            origin = support[:, 0]
+            support = support - origin[:, None]
+            targets = targets - origin[:, None]
+            mean = weights @ support
+            centered = support[:, None, :, :] - mean[:, :, None, :]
+            covariance = centered.transpose(-1, -2) @ (weights[..., None] * centered)
+            covariance = (covariance + covariance.transpose(-1, -2)) / 2
+            system = covariance + self.ridge * torch.eye(
+                support.shape[-1], dtype=weights.dtype, device=weights.device
+            )
+            finite(system, "LL system")
+            chol, info = torch.linalg.cholesky_ex(system)
+            if bool((info != 0).any()):
+                raise FloatingPointError("numerical-failure: LL Cholesky failed; ridge unchanged")
+            evaluation = torch.cholesky_solve((targets - mean)[..., None], chol).squeeze(-1)
+            coefficients = weights * (1 + (centered * evaluation[:, :, None, :]).sum(-1))
+            if not torch.allclose(
+                coefficients.sum(-1)[target_mask],
+                coefficients.new_ones(int(target_mask.sum())),
+                atol=1e-9,
+                rtol=1e-9,
+            ):
+                raise FloatingPointError(
+                    "numerical-failure: LL coefficient sum lost constant reproduction"
+                )
+        # Answer bytes/statistics/codebook are fixed facts, not learned tensors.
+        encoded = coefficients @ answers.detach().to(torch.float64)
+        finite(encoded, "restored answer encoding")
+        finite(coefficients[target_mask], "equivalent coefficients")
+        return encoded, log_weights, coefficients

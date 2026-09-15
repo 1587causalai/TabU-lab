@@ -137,7 +137,7 @@ def test_empty_and_single_support(mode):
 
 
 def test_collinear_content_and_constant_numeric_answers():
-    numeric = NumericAnswers.from_visible(torch.tensor([0.0, 0.0, 0.0]), scale_floor=0.02)
+    numeric = NumericAnswers.from_visible(torch.tensor([0.0, 0.0, 0.0]), epsilon=0.02)
     assert numeric.scale == 0.02
     result = RestorationReadout("ll")(
         torch.zeros(2, 3),
@@ -171,9 +171,7 @@ def test_same_ll_answer_with_different_support_weights_decodes_identically(width
     # Both rows restore code 1 exactly while their geometric weights differ.
     weights = torch.tensor([[0.75, 0.25], [0.25, 0.75]], dtype=torch.float64)
     result = RestorationReadout("ll", ridge=3 / 16)(
-        weights.log(),
-        torch.arange(2),
-        codec.encoded,
+        weights.log(), torch.arange(2), codec.encoded,
         support_cells=torch.tensor([[0.0], [1.0]], dtype=torch.float64),
         target_cells=torch.tensor([[1.75], [1.25]], dtype=torch.float64),
     )
@@ -190,9 +188,8 @@ def test_rotation_lift_preserves_normalized_mse_and_gradients():
 @pytest.mark.parametrize("mode", ["nw", "ll"])
 def test_mse_gradients_reach_geometry_and_ll_cells_but_not_fixed_answers(mode, width):
     codec = (
-        NumericAnswers.from_visible(torch.tensor([1.0, -0.5, 2.0]), scale_floor=0.01)
-        if width == 1
-        else categorical(width=width)
+        NumericAnswers.from_visible(torch.tensor([1.0, -0.5, 2.0]), epsilon=0.01)
+        if width == 1 else categorical(width=width)
     )
     truth = codec.encode_targets(torch.tensor([0.2]) if width == 1 else torch.tensor([1]))
     truth.requires_grad_()
@@ -208,8 +205,7 @@ def test_mse_gradients_reach_geometry_and_ll_cells_but_not_fixed_answers(mode, w
         assert decoded.dtype == torch.long and not decoded.requires_grad
     grads = torch.autograd.grad(
         encoding_mse(result.encoding, truth).sum(),
-        (logits, target, support, answers, truth),
-        allow_unused=True,
+        (logits, target, support, answers, truth), allow_unused=True,
     )
     assert grads[0].isfinite().all() and grads[0].norm() > 1e-6
     if mode == "ll":
@@ -233,7 +229,7 @@ def test_rejects_invalid_supports_missing_ll_cells_and_nonfinite_inputs():
     with pytest.raises(FloatingPointError, match="nonfinite"):
         unit_kernel_logits(torch.tensor([[float("nan")]]), torch.zeros(2, 1), bandwidth=1)
     with pytest.raises(ValueError, match="positive"):
-        NumericAnswers.from_visible(torch.ones(2), scale_floor=0)
+        NumericAnswers.from_visible(torch.ones(2), epsilon=0)
 
 
 def test_codebook_must_be_same_visible_identity_space():
@@ -254,7 +250,7 @@ def test_codebook_must_be_same_visible_identity_space():
 
 @pytest.mark.parametrize("width", [1, 128])
 def test_coincident_supports_large_common_translation_preserves_nw_limit(width):
-    codec = NumericAnswers.from_visible(torch.tensor([1.0, 2.0, 5.0]), scale_floor=0.1)
+    codec = NumericAnswers.from_visible(torch.tensor([1.0, 2.0, 5.0]), epsilon=0.1)
     logits = torch.tensor([[0.0, -1.0, -2.0]], dtype=torch.float64)
     rows = torch.arange(3)
     expected = RestorationReadout("nw")(logits, rows, codec.encoded).encoding

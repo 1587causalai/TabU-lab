@@ -20,7 +20,7 @@ class EncoderConfig:
     width: int = 128
     category_map: str = "identity128"
     mlp_hidden: int = 128
-    scale_floor: float = 1e-6  # positive lower bound in each numeric column's raw units
+    epsilon: float = 1e-6
 
     def __post_init__(self):
         if type(self.width) is not int or self.width < 128:
@@ -29,7 +29,9 @@ class EncoderConfig:
             raise ValueError("unknown category input map")
         if type(self.mlp_hidden) is not int or self.mlp_hidden < 1:
             raise ValueError("MLP hidden width must be positive")
-        positive(self.scale_floor, "scale_floor")
+        # Shared default scale floor in each column's ORIGINAL units; a column
+        # rescaling x' = gamma*x + beta must carry epsilon' = gamma*epsilon.
+        positive(self.epsilon, "epsilon")
 
     @property
     def answer_width(self):
@@ -41,6 +43,7 @@ class ColumnFacts:
     rows: Tensor
     answers: NumericAnswers | CategoricalAnswers
     input_coordinates: Tensor  # scalar numeric coordinate or raw category code
+    rank: Tensor | None = None  # ordinal declared-order rank r(x) in [0,1]; else None
 
 
 def visible_codes(labels: Tensor, *, width: int, seed: int, key: str) -> tuple[Tensor, Tensor]:
@@ -95,8 +98,12 @@ class ValueEncoder(nn.Module):
             rows = inputs.visible[:, a].nonzero().flatten()
             values = inputs.values[a][rows]
             if schema.kind == "numeric":
-                codec = NumericAnswers.from_visible(values, scale_floor=self.config.scale_floor)
+                # Input coordinate IS the answer encoding: one shared robust
+                # coordinate (median/half-IQR) per the v2 design, not a second
+                # preprocessing scale.
+                codec = NumericAnswers.from_visible(values, epsilon=self.config.epsilon)
                 coordinates = codec.encoded
+                rank = None
             else:
                 # Alternative ordinal lifts are design-open. Nominal alternatives
                 # coexist with the declared default ordinal 128/8 + rank lift.
@@ -108,8 +115,19 @@ class ValueEncoder(nn.Module):
                     values, classes, codes, domain_size=schema.domain_size
                 )
                 coordinates = codec.encoded
+                if schema.kind == "ordinal":
+                    # rank_a(x) counts categories strictly below x under the
+                    # DECLARED order ≺_a (ColumnSchema.order), never the label
+                    # index. Identity order is an explicit caller convention.
+                    positions = torch.tensor(
+                        schema.rank_positions(), dtype=torch.float64, device=values.device
+                    )
+                    rank = positions[values] / max(schema.domain_size - 1, 1)
+                    finite(rank, "ordinal rank coordinates")
+                else:
+                    rank = None
             finite(coordinates, "visible input coordinates")
-            facts.append(ColumnFacts(rows, codec, coordinates))
+            facts.append(ColumnFacts(rows, codec, coordinates, rank))
         return tuple(facts)
 
     def category_features(self, codes: Tensor) -> Tensor:
@@ -135,8 +153,9 @@ class ValueEncoder(nn.Module):
                 phase = coord * self.frequencies
                 features = torch.cat((phase.sin(), phase.cos()), -1)
             elif schema.kind == "ordinal":
-                rank = inputs.values[a][fact.rows].to(weight) / max(schema.domain_size - 1, 1)
-                features = coord + rank[:, None]
+                # b_a(x) + r_a(x)·1: rank comes from prepare, derived from the
+                # declared order — not from raw label indices in inputs.values.
+                features = coord + fact.rank.to(weight)[:, None]
             else:
                 features = self.category_features(coord)
             h[fact.rows, a] = self.projection(features)

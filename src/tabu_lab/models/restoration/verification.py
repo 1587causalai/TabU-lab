@@ -19,8 +19,12 @@ from .readout import RestorationReadout, unit_kernel_logits
 
 
 def numeric_example() -> dict[str, float]:
-    """Uniform evidence (c,x)=(0,1),(1,3),(2,5); predict at c=3."""
-    codec = NumericAnswers.from_visible(torch.tensor([1.0, 3.0, 5.0]), scale_floor=1e-6)
+    """Uniform evidence (c,x)=(0,1),(1,3),(2,5); predict at c=3.
+
+    Robust coordinates: median 3, half-IQR 1, scale 1, so the encoding is
+    (-2, 0, 2); the affine decode keeps the hand-computed answers exact.
+    """
+    codec = NumericAnswers.from_visible(torch.tensor([1.0, 3.0, 5.0]), epsilon=1e-6)
     logits = torch.zeros(1, 3, dtype=torch.float64)
     source = torch.arange(3, dtype=torch.float64)[:, None]
     target = torch.tensor([[3.0]], dtype=torch.float64)
@@ -74,7 +78,7 @@ def check_gradients() -> None:
         torch.randn(*shape, generator=gen, dtype=torch.float64).requires_grad_()
         for shape in ((2, 2), (3, 2), (2, 2), (3, 2))
     ]
-    numeric = NumericAnswers.from_visible(torch.tensor([1.0, -0.5, 2.0]), scale_floor=0.01)
+    numeric = NumericAnswers.from_visible(torch.tensor([1.0, -0.5, 2.0]), epsilon=0.01)
     for mode in ("nw", "ll"):
         for codec in (numeric, categorical_example(32), categorical_example(128)):
             truth = codec.encode_targets(
@@ -107,6 +111,33 @@ def check_answer_codes() -> None:
                 raise
         else:
             raise AssertionError("unknown truth class must fail without inventing an answer code")
+
+
+def check_robust_numeric_coordinates() -> dict[str, float]:
+    """Median/half-IQR coordinates: quantile convention, tail stability, floors."""
+    base = NumericAnswers.from_visible(
+        torch.arange(8.0, 17.0, dtype=torch.float64), epsilon=1e-9
+    )
+    torch.testing.assert_close(base.median, base.median.new_tensor(12.0))
+    torch.testing.assert_close(base.scale, base.scale.new_tensor(2.0))
+    tailed = torch.arange(8.0, 17.0, dtype=torch.float64)
+    tailed[-1] = 16000.0
+    moved = NumericAnswers.from_visible(tailed, epsilon=1e-9)
+    torch.testing.assert_close(moved.median, base.median, rtol=0, atol=0)
+    torch.testing.assert_close(moved.scale, base.scale, rtol=0, atol=0)
+    # Fixed quantile convention: two points interpolate Q(1/4), Q(3/4) linearly.
+    pair = NumericAnswers.from_visible(torch.tensor([0.0, 10.0], dtype=torch.float64), epsilon=1e-9)
+    torch.testing.assert_close(pair.median, pair.median.new_tensor(5.0))
+    torch.testing.assert_close(pair.scale, pair.scale.new_tensor(2.5))
+    # Constant columns and single supports use the declared floor, not std.
+    flat = NumericAnswers.from_visible(torch.zeros(4, dtype=torch.float64), epsilon=0.02)
+    torch.testing.assert_close(flat.scale, flat.scale.new_tensor(0.02))
+    torch.testing.assert_close(flat.encoded, torch.zeros(4, 1, dtype=torch.float64))
+    one = NumericAnswers.from_visible(torch.tensor([7.0], dtype=torch.float64), epsilon=0.02)
+    torch.testing.assert_close(one.scale, one.scale.new_tensor(0.02))
+    # Encode/decode round trip on the shared coordinate.
+    torch.testing.assert_close(base.decode(base.encoded), torch.arange(8.0, 17.0, dtype=torch.float64))
+    return {"median": float(base.median), "half_iqr_scale": float(base.scale)}
 
 
 def check_nearest_code_stability() -> None:
@@ -151,7 +182,7 @@ def check_rotation_lift_mse() -> None:
         torch.randn(*shape, generator=gen, dtype=torch.float64).requires_grad_()
         for shape in ((2, 3), (3, 2), (2, 2))
     ]
-    numeric = NumericAnswers.from_visible(torch.tensor([1.0, -0.5, 2.0]), scale_floor=0.01)
+    numeric = NumericAnswers.from_visible(torch.tensor([1.0, -0.5, 2.0]), epsilon=0.01)
     for codec in (numeric, categorical_example(32)):
         width = codec.encoded.shape[1]
         rotation = torch.linalg.qr(torch.randn(128, width, generator=gen, dtype=torch.float64)).Q
@@ -190,6 +221,7 @@ def verify_components() -> dict:
     try:
         for name, probe in (
             ("hand_computed_numeric_nw_ll", numeric_example),
+            ("robust_median_half_iqr_coordinates", check_robust_numeric_coordinates),
             ("scalar_32d_128d_augmented_normal_equations", check_normal_equations),
             ("numeric_categorical_encoding_mse_finite_differences", check_gradients),
             ("32d_128d_answer_codes_nearest_class_and_unknown_truth", check_answer_codes),

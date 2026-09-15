@@ -7,6 +7,7 @@ and prediction use visible facts alone and never sample another codebook.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 
 import torch
@@ -15,45 +16,60 @@ from torch import Tensor
 from ._validation import finite, matrix, positive
 
 
+def _quantile(sorted_values: Tensor, q: float) -> Tensor:
+    """Fixed linear-interpolation quantile convention from the design document.
+
+    With 1-based ranks, v = 1 + (n-1)q, j = floor(v), delta = v - j, and
+    Q(q) = (1-delta) x_(j) + delta x_(min(j+1, n)).
+    """
+    n = sorted_values.numel()
+    v = 1 + (n - 1) * q
+    j = int(math.floor(v))
+    delta = v - j
+    lo = sorted_values[j - 1]
+    hi = sorted_values[min(j + 1, n) - 1]
+    return (1 - delta) * lo + delta * hi
+
+
 @dataclass(frozen=True)
 class NumericAnswers:
+    """Median/half-IQR robust coordinates shared by input, answer, score, decode."""
+
     encoded: Tensor  # [support, 1]
-    center: Tensor | None  # visible Type-7 median
+    median: Tensor | None
     scale: Tensor | None
 
     @classmethod
-    def from_visible(cls, values: Tensor, *, scale_floor: float) -> NumericAnswers:
-        """Fix visible-only median/half-IQR coordinates in FP64, without clipping."""
-        positive(scale_floor, "scale_floor")
+    def from_visible(cls, values: Tensor, *, epsilon: float) -> NumericAnswers:
+        """m = Q(1/2), s = max{(Q(3/4)-Q(1/4))/2, epsilon}; no std fallback."""
+        positive(epsilon, "epsilon")
         if values.ndim != 1 or not values.is_floating_point():
             raise ValueError("visible numeric answers must be a floating vector")
         finite(values, "numeric answers")
         values = values.detach().to(torch.float64)
         if not values.numel():
             return cls(values[:, None], None, None)
-        # Type 7: linearly interpolate sorted values at zero-based index (n - 1) q.
-        q25, center, q75 = torch.quantile(
-            values, values.new_tensor([0.25, 0.5, 0.75]), interpolation="linear"
-        )
-        centered = values - center
-        scale = ((q75 - q25) / 2).clamp_min(scale_floor)
+        ordered = values.sort().values
+        median = _quantile(ordered, 0.5)
+        half_iqr = (_quantile(ordered, 0.75) - _quantile(ordered, 0.25)) / 2
+        scale = torch.clamp(half_iqr, min=epsilon)
         finite(scale, "numeric scale")
         if not bool(scale > 0):
             raise FloatingPointError("numerical-failure: numeric scale rounded to zero")
-        encoded = (centered / scale)[:, None]
+        encoded = ((values - median) / scale)[:, None]
         finite(encoded, "numeric answer encoding")
-        return cls(encoded, center, scale)
+        return cls(encoded, median, scale)
 
     def encode_targets(self, values: Tensor) -> Tensor:
         """Scorer-only truth encoding using fixed visible statistics, with p=1."""
         if values.ndim != 1 or not values.is_floating_point():
             raise ValueError("numeric target values must be a floating vector")
         finite(values, "numeric target values")
-        if self.center is None or self.scale is None:
+        if self.median is None or self.scale is None:
             raise ValueError("no-support: numeric statistics are undefined")
         if values.device != self.encoded.device:
             raise ValueError("numeric targets and visible answers must share a device")
-        encoded = ((values.detach().to(torch.float64) - self.center) / self.scale)[:, None]
+        encoded = ((values.detach().to(torch.float64) - self.median) / self.scale)[:, None]
         finite(encoded, "numeric target encoding")
         return encoded
 
@@ -61,9 +77,9 @@ class NumericAnswers:
         matrix(encoded, "predicted encoding")
         if encoded.shape[1] != 1:
             raise ValueError("numeric predictions require one answer coordinate")
-        if self.center is None or self.scale is None:
+        if self.median is None or self.scale is None:
             raise ValueError("no-support: numeric statistics are undefined")
-        result = self.center + self.scale * encoded[:, 0]
+        result = self.median + self.scale * encoded[:, 0]
         finite(result, "numeric prediction")
         return result
 
