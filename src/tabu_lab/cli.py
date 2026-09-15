@@ -305,11 +305,6 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         return int(args.handler(args))
-    except FileExistsError:
-        # Output collisions are an explicit non-overwrite boundary. Preserve
-        # the typed exception for library callers and tests; parser.error would
-        # turn a safe refusal into an unrelated SystemExit.
-        raise
     except (OSError, ValueError) as exc:
         parser.error(str(exc))
     return 2  # pragma: no cover

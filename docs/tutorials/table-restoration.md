@@ -216,3 +216,68 @@ terminal record, separately from preparation and component checks. Large-table
 solver optimization must demonstrate forward, gradient, optimizer and continuation
 equivalence before replacing this reference. Existing TAR runners and model factory
 defaults remain unchanged.
+
+## Prepared execution for repeated episodes
+
+`prepare_episode(model, inputs, request, truth)` creates an owned snapshot for
+repeated updates on one fixed episode. It prepares visible numeric statistics,
+category codes, typed coordinates, input addresses, readout packing and target
+ordering once. Its scorer-only section holds detached truth encodings and loss
+groups. Only the visible section reaches `model.forward_prepared`; neither clean
+Query truth nor damage-state labels become model inputs.
+
+```python
+from tabu_lab.models.restoration import prepare_episode, score_prepared_episode
+
+prepared = prepare_episode(model, inputs, request, truth)
+for _ in range(3):
+    optimizer.zero_grad(set_to_none=True)
+    score = score_prepared_episode(model, prepared)
+    score.loss.backward()
+    optimizer.step()
+
+# Explicit prediction/reporting when needed:
+score = score_prepared_episode(model, prepared, decode=True, report=True)
+```
+
+The training replay defaults to `decode=False, report=False`: `decoded` fields and
+`by_state` are then `None`. Encoding MSE, learned forward, backward, and numerical
+checks still run every step. Skipping inverse scaling does not certify finite
+original-unit predictions; request decoding during evaluation to check those.
+`score_episode` and ordinary model inference keep their full decoding/reporting
+behavior. Model-only replay is available through `model.prepare(inputs, request)`
+and `model.forward_prepared(prepared_visible, decode=True)`.
+
+Prepared data contain no learned features, Unit logits, LL covariance/factorization,
+or retained autograd graph. Those quantities are recomputed after every parameter
+update. The snapshot does not follow edits to the caller's original tensors:
+changed values, roles, targets, code seeds, schema or preprocessing configuration
+require a new preparation. Ordinary in-place edits to prepared tensors are rejected
+using tensor version metadata, without device scalar reads. Do not bypass version
+tracking with `.data` or external storage writes; prepare outside `inference_mode`.
+Replacing the encoder or its configuration requires rebuilding the plan. Only the
+built-in parameter-independent `ValueEncoder` supports this replay API; custom
+encoders retain the ordinary uncached path.
+
+The numeric fit runner now maintains a run-local LRU of at most eight prepared
+mask/seed episodes. Table values move to the selected device once for this bank;
+mask/seed selection and equal-weight sequential gradient accumulation are unchanged.
+An evicted entry is rebuilt deterministically. Resume rebuilds the bank from the
+existing sampler cursor and fixed identities; prepared objects are never serialized
+as model state. Checkpoint capture, finite-state checks, and interruption recovery
+retain their existing behavior.
+
+A bounded comparison is available as:
+
+```bash
+uv run tabu-lab restoration prepared-benchmark --device cpu --output new-check.json
+```
+
+It checks loss, encodings and parameter-gradient agreement, then separately times
+fresh full scoring, prepared full scoring, and prepared scoring without decoding
+or Python reports. The fixed six-row mixed-damage panel uses FP64 and one CPU
+thread (or explicit `--device cuda:0`), two warmups and four alternating rounds.
+One-time preparation is reported separately; optimizer updates and checkpoint I/O
+are outside these timings. JSON binds the source files and refuses overwrite.
+This is an implementation check, not a fitting campaign or a throughput claim for
+other table sizes or hardware.

@@ -195,6 +195,9 @@ def test_prepared_cli_records_check_and_refuses_overwrite(tmp_path, capsys):
     assert all(v > 0 for v in result["median_seconds"].values())
     assert len(result["measurements"]) == 12
     assert len(result["source_sha256"]) >= 16
-    with pytest.raises(FileExistsError):
+    original = output.read_bytes()
+    with pytest.raises(SystemExit) as error:
         main(args)
+    assert error.value.code == 2
+    assert output.read_bytes() == original
     capsys.readouterr()
