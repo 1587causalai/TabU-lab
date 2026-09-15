@@ -9,7 +9,6 @@ from .builders import (
     build_tabu_cell_base,
     build_tabu_query_base,
     build_tabu_query_row,
-    build_tabu_tar,
     build_tabu_v2,
     register_model_builder,
 )
@@ -63,7 +62,6 @@ from .query_task_adapters import (
 )
 from .table_cell import LabelColumnBroadcast, TabUCellBaseModel
 from .tabu_v2 import TabUV2CellAsQueryModel
-from .tar import TabUTARModel, TARConfig
 from .types import (
     DenseModelInput,
     DynamicsBlockKind,
@@ -113,7 +111,6 @@ __all__ = [
     "ResolvedQueryComponentComposition",
     "RowReadoutMode",
     "SupervisedResponseAdapter",
-    "TARConfig",
     "TabUBaseComponentManifest",
     "TabUBaseComposition",
     "TabUCellBaseModel",
@@ -121,14 +118,12 @@ __all__ = [
     "TabUQueryBaseModel",
     "TabUQueryProfile",
     "TabUQueryRowModel",
-    "TabUTARModel",
     "TabUV2CellAsQueryModel",
     "build_from_spec",
     "build_model",
     "build_tabu_cell_base",
     "build_tabu_query_base",
     "build_tabu_query_row",
-    "build_tabu_tar",
     "build_tabu_v2",
     "canonical_query_base_manifest",
     "canonical_query_row_manifest",

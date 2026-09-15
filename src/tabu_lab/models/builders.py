@@ -349,23 +349,6 @@ def build_tabu_v2(**kwargs: Any) -> TabUV2CellAsQueryModel:
     )
 
 
-def build_tabu_tar(**kwargs: Any):
-    """Build the explicit TAR contract without changing compatibility defaults."""
-    from tabu_lab.contracts import canonical_hash
-    from tabu_lab.registry import get_model_spec, model_spec_identity_payload
-
-    from .tar import TabUTARModel, TARConfig
-
-    config = kwargs.pop("config", None)
-    if config is not None and not isinstance(config, TARConfig):
-        raise TypeError("config must be a TARConfig")
-    model = TabUTARModel(config, **kwargs)
-    spec = get_model_spec("tabu.tar")
-    model.contract_version = spec.contract_version
-    model.model_spec_hash = canonical_hash(model_spec_identity_payload(spec))
-    return model
-
-
 class BuilderRegistry:
     """Small duplicate-rejecting extension seam for model builders."""
 
@@ -411,7 +394,6 @@ class BuilderRegistry:
 _CANONICAL_MODEL_BUILDERS: Mapping[str, Callable[..., Any]] = MappingProxyType(
     {
         "tabu.v2.tabur": build_tabu_v2,
-        "tabu.tar": build_tabu_tar,
         "tabu.cell.base": build_tabu_cell_base,
         "tabu.query.base": build_tabu_query_base,
         "tabu.query.row": build_tabu_query_row,
@@ -470,11 +452,6 @@ def build_from_spec(spec: Any, **kwargs: Any) -> Any:
         raise RuntimeError("canonical query-row builder returned the wrong model type")
     if registered.contract_id == "tabu.v2.tabur" and not isinstance(model, TabUV2CellAsQueryModel):
         raise RuntimeError("canonical TabU-v2 builder returned the wrong model type")
-    if registered.contract_id == "tabu.tar":
-        from .tar import TabUTARModel
-
-        if not isinstance(model, TabUTARModel):
-            raise RuntimeError("canonical TAR builder returned the wrong model type")
     if getattr(model, "contract_version", None) != registered.contract_version:
         raise RuntimeError("builder returned the wrong contract version")
     if getattr(model, "model_spec_hash", None) != registered_hash:
@@ -483,7 +460,6 @@ def build_from_spec(spec: Any, **kwargs: Any) -> Any:
 
 
 __all__ = [
-    "DEFAULT_MODEL_ID",
     "MODEL_BUILDERS",
     "DEFAULT_MODEL_ID",
     "BuilderRegistry",
@@ -492,7 +468,6 @@ __all__ = [
     "build_tabu_cell_base",
     "build_tabu_query_base",
     "build_tabu_query_row",
-    "build_tabu_tar",
     "build_tabu_v2",
     "register_model_builder",
 ]
