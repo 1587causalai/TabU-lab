@@ -112,6 +112,25 @@ def _run_tar(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_restoration_verify(args: argparse.Namespace) -> int:
+    from tabu_lab.models.restoration import RestorationConfig
+    from tabu_lab.models.restoration.verification import verify_components, verify_model
+
+    if args.restoration_command == "inspect":
+        print(json.dumps(
+            {"status": "local_unissued", "config": RestorationConfig().as_dict()},
+            indent=2, sort_keys=True,
+        ))
+        return 0
+    result = verify_components() if args.components_only else verify_model()
+    if args.output is not None:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        with args.output.open("x", encoding="utf-8") as handle:
+            handle.write(json.dumps(result, indent=2, sort_keys=True) + "\n")
+    print(json.dumps(result, indent=2, sort_keys=True))
+    return 0 if result["outcome"] == "passed" else 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="tabu-lab")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -198,6 +217,18 @@ def build_parser() -> argparse.ArgumentParser:
     corpus.add_argument("--rows", type=int, default=256)
     corpus.add_argument("--seed", type=int, default=20260907)
     corpus.set_defaults(handler=_run_tar)
+    restoration = subparsers.add_parser("restoration", help="five-step table-restoration reference")
+    restoration_sub = restoration.add_subparsers(dest="restoration_command", required=True)
+    restoration_inspect = restoration_sub.add_parser(
+        "inspect", help="show the reference configuration"
+    )
+    restoration_inspect.set_defaults(handler=_run_restoration_verify)
+    restoration_verify = restoration_sub.add_parser("verify", help="bounded CPU correctness probes")
+    restoration_verify.add_argument("--components-only", action="store_true")
+    restoration_verify.add_argument(
+        "--output", type=Path, help="new, non-overwriting JSON check file"
+    )
+    restoration_verify.set_defaults(handler=_run_restoration_verify)
     return parser
 
 

@@ -30,6 +30,10 @@ their own evaluations.
 
 ## Start here
 
+- [Five-step table-restoration reference](docs/tutorials/table-restoration.md):
+  independent visible-only input, extensible encoders/backbones, encoded LL/NW
+  prediction and scorer-only training. This new implementation does not replace
+  TAR identities or inherit their fit results.
 - [TAR implementation guide](docs/tutorials/tabu-tar.md): model configuration,
   typed episodes, training semantics and checkpoints.
 - [Experiment routes](experiments/README.md): single-episode and batch-episode

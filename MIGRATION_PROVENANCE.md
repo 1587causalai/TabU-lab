@@ -1,5 +1,18 @@
 # Provenance of the TAR shared-fitting integration
 
+## Independent table-restoration reference
+
+`src/tabu_lab/models/restoration/` and its unit tests are an independently written
+realization of the project's table-restoration five-step design as reviewed on
+2026-09-15. Existing local answer-code, readout and loss components are integrated
+with new input, encoder, backbone, scorer and verification modules. No donor code
+or pretrained weights are imported. This is not a migration of P02's general
+OTransformer or a relabeling of historical TAR source/checkpoint/run identities.
+Implementation boundaries and configured choices are recorded in
+`docs/tutorials/table-restoration.md`; verification remains `local_unissued`.
+
+## Historical TAR integration
+
 The TAR implementation and experiment harness are integrated from the project's
 local reviewed snapshots, preserving current mainline compatibility behavior.
 Historical run identities and the new integration identity are distinct; see
