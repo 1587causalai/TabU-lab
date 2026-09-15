@@ -66,6 +66,31 @@ def visible_codes(labels: Tensor, *, width: int, seed: int, key: str) -> tuple[T
     return classes, codes.to(labels.device)
 
 
+@dataclass(frozen=True)
+class EncodingLayout:
+    groups: tuple  # (kind, fixed coordinates, optional ordinal rank)
+    addresses: Tensor
+    active: Tensor
+
+
+def prepare_features(inputs, facts):
+    n, m = inputs.visible.shape
+    groups = {}
+    for a, schema in enumerate(inputs.schema):
+        groups.setdefault(schema.kind, []).append(a)
+    fixed, addresses = [], []
+    for kind, columns in groups.items():
+        coord = torch.cat([facts[a].input_coordinates for a in columns])
+        rank = torch.cat([facts[a].rank for a in columns]) if kind == "ordinal" else None
+        fixed.append((kind, coord, rank))
+        addresses.extend(facts[a].rows * (m + 1) + a for a in columns)
+    active = torch.zeros(n + 1, m + 1, dtype=torch.bool, device=inputs.visible.device)
+    active[:n, :m] = inputs.visible | inputs.query
+    active[:n, m] = True
+    active[n, :m] = True
+    return EncodingLayout(tuple(fixed), torch.cat(addresses), active)
+
+
 class ValueEncoder(nn.Module):
     def __init__(self, config: EncoderConfig):
         super().__init__()
@@ -150,6 +175,9 @@ class ValueEncoder(nn.Module):
         return torch.stack((x * cos - y * sin, x * sin + y * cos), -1).flatten(1)
 
     def forward(self, inputs: RestorationInput, facts: tuple[ColumnFacts, ...]) -> Tensor:
+        return self.forward_prepared(inputs, prepare_features(inputs, facts))
+
+    def forward_prepared(self, inputs: RestorationInput, layout: EncodingLayout) -> Tensor:
         n, m = inputs.visible.shape
         weight = self.projection.weight
         if inputs.visible.device != weight.device:
@@ -158,32 +186,24 @@ class ValueEncoder(nn.Module):
         h[:n, :m] = torch.where(inputs.query[..., None], self.cell_seed, 0)
         h[:n, m] = self.unit_seed
         h[n, :m] = self.feature_seed
-        groups = {}
-        for a, schema in enumerate(inputs.schema):
-            groups.setdefault(schema.kind, []).append(a)
-        feature_parts, address_parts = [], []
-        for kind, columns in groups.items():
-            coord = torch.cat([facts[a].input_coordinates for a in columns]).to(weight)
+        feature_parts = []
+        for kind, coordinates, fixed_rank in layout.groups:
+            coord = coordinates.to(weight)
             if kind == "numeric":
                 phase = coord * self.frequencies
                 features = torch.cat((phase.sin(), phase.cos()), -1)
             elif kind == "ordinal":
                 # b_a(x) + r_a(x)·1: rank comes from prepare, derived from the
                 # declared order — not from raw label indices in inputs.values.
-                rank = torch.cat([facts[a].rank for a in columns]).to(weight)
+                rank = fixed_rank.to(weight)
                 features = coord + rank[:, None]
             else:
                 features = self.category_features(coord)
             feature_parts.append(features)
-            address_parts.extend(facts[a].rows * (m + 1) + a for a in columns)
         h = h.flatten(0, 1).index_copy(
-            0, torch.cat(address_parts), self.projection(torch.cat(feature_parts))
+            0, layout.addresses, self.projection(torch.cat(feature_parts))
         ).reshape(n + 1, m + 1, self.config.width)
         finite(h, "initial carriers")
-        active = torch.zeros(n + 1, m + 1, dtype=torch.bool, device=h.device)
-        active[:n, :m] = inputs.visible | inputs.query
-        active[:n, m] = True
-        active[n, :m] = True
-        if bool((h[active].square().sum(-1) == 0).any()):
+        if bool((h[layout.active].square().sum(-1) == 0).any()):
             raise FloatingPointError("non-Null input carrier collapsed to zero")
         return h

@@ -8,10 +8,11 @@ import torch
 from torch import Tensor
 
 from ._packing import column_positions
+from ._prepared import TensorVersions
 from .answers import NumericAnswers
 from .contracts import RestorationInput, RestorationRequest, TruthSidecar, validate_values
 from .losses import encoding_mse
-from .model import RestorationModel, RestorationOutput
+from .model import PreparedRestoration, RestorationModel, RestorationOutput, prepare_readout
 
 
 @dataclass(frozen=True)
@@ -33,11 +34,11 @@ class LossConfig:
 class EpisodeScore:
     loss: Tensor
     per_target: Tensor
-    by_state: dict[str, dict[str, float | int]]
+    by_state: dict[str, dict[str, float | int]] | None
     output: RestorationOutput
 
 
-def _preflight(inputs, request, truth, facts):
+def _preflight(inputs, request, truth, facts, positions_by_column=None):
     request.validate(inputs)
     targets = request.targets
     if not len(targets):
@@ -64,7 +65,8 @@ def _preflight(inputs, request, truth, facts):
         raise ValueError("invalid-episode: training targets must cover all original observations")
     encoded = {}
     numeric_groups = {}
-    positions_by_column = column_positions(targets[:, 1], len(inputs.schema))
+    if positions_by_column is None:
+        positions_by_column = column_positions(targets[:, 1], len(inputs.schema))
     for a, schema in enumerate(inputs.schema):
         values = truth.values[a]
         if values.shape != (len(inputs.visible),) or values.device != targets.device:
@@ -92,6 +94,101 @@ def _preflight(inputs, request, truth, facts):
     return encoded
 
 
+@dataclass(frozen=True)
+class LossLayout:
+    groups: tuple  # (column indices, concatenated scorer-only truth encodings)
+    indices: Tensor
+    types: Tensor
+    state_masks: Tensor
+    counts: Tensor
+
+
+@dataclass(frozen=True)
+class PreparedEpisode:
+    """Scorer-owned plan; only visible reaches model.forward_prepared."""
+
+    visible: PreparedRestoration
+    scoring: LossLayout
+    versions: TensorVersions
+
+
+def _prepare_loss(inputs, request, truth, facts, layout):
+    encoded_truth = _preflight(inputs, request, truth, facts, layout.positions)
+    targets = request.targets
+    numeric = torch.tensor(
+        [schema.kind == "numeric" for schema in inputs.schema],
+        dtype=torch.bool, device=targets.device,
+    )[targets[:, 1]]
+    groups = {}
+    for a, _ in layout.active:
+        groups.setdefault(facts[a].answers.encoded.shape[1], []).append(a)
+    indices, fixed = [], []
+    for columns in groups.values():
+        indices.extend(layout.positions[a] for a in columns)
+        fixed.append((tuple(columns), torch.cat([encoded_truth[a] for a in columns])))
+    states = truth.states[targets[:, 0], targets[:, 1]]
+    state_masks = states[None] == torch.arange(4, device=states.device)[:, None]
+    return LossLayout(tuple(fixed), torch.cat(indices), torch.stack((numeric, ~numeric)),
+                      state_masks, state_masks.sum(-1))
+
+
+@torch.no_grad()
+def prepare_episode(model, inputs, request, truth) -> PreparedEpisode:
+    """Validate and snapshot fixed data once; truth encoding stays in the scorer."""
+    visible = model.prepare(inputs, request)
+    scoring = _prepare_loss(visible.inputs, visible.request, truth, visible.facts, visible.layout)
+    return PreparedEpisode(visible, scoring, TensorVersions(scoring))
+
+
+def _score_output(output, layout, loss_config, report):
+    targets = output.request.targets
+    columns = {col.column: col for col in output.columns}
+    losses = [
+        encoding_mse(torch.cat([columns[a].result.encoding for a in group]), encoded_truth)
+        for group, encoded_truth in layout.groups
+    ]
+    per_target = output.carriers.new_zeros(len(targets), dtype=torch.float64)
+    per_target = per_target.index_copy(0, layout.indices, torch.cat(losses))
+    types, state_masks = layout.types, layout.state_masks
+    if loss_config.state_weights is None:
+        loss = ((per_target[None] * types).sum(-1) / types.sum(-1).clamp_min(1)).sum()
+    else:
+        selected = types[:, None, :] & state_masks[None, :, :]
+        means = (per_target * selected).sum(-1) / selected.sum(-1).clamp_min(1)
+        loss = (means * per_target.new_tensor(loss_config.state_weights)).sum()
+    by_state = None
+    if report:
+        counts = layout.counts
+        means = (per_target.detach() * state_masks).sum(-1) / counts.clamp_min(1)
+        statistics = torch.stack((counts.to(means), means), -1).cpu().tolist()
+        by_state = {}
+        for state, name in enumerate(("retained", "query", "null", "corrupted")):
+            count, mean = statistics[state]
+            by_state[name] = {"count": int(count)}
+            if count:
+                by_state[name]["encoding_mse"] = mean
+    return EpisodeScore(loss, per_target, by_state, output)
+
+
+def score_prepared_episode(
+    model: RestorationModel,
+    prepared: PreparedEpisode,
+    loss_config: LossConfig | None = None,
+    *,
+    decode: bool = False,
+    report: bool = False,
+) -> EpisodeScore:
+    """Replay a fixed episode. Decoding and Python reports are explicit opt-ins.
+
+    Invalid episodes still fail during preparation, before any learned forward.
+    Learned finite/Cholesky checks remain active on every replay. A skipped
+    decoder does not certify finiteness in original units; evaluation still does.
+    """
+    prepared.versions.validate()
+    output = model.forward_prepared(prepared.visible, decode=decode)
+    return _score_output(output, prepared.scoring, loss_config or LossConfig(), report)
+
+
 def score_episode(
     model: RestorationModel,
     inputs: RestorationInput,
@@ -99,48 +196,12 @@ def score_episode(
     truth: TruthSidecar,
     loss_config: LossConfig | None = None,
 ) -> EpisodeScore:
-    loss_config = loss_config or LossConfig()
+    request.validate(inputs)
     facts = model.encoder.prepare(inputs)
-    encoded_truth = _preflight(inputs, request, truth, facts)
-    output = model._forward_prepared(inputs, request, facts)
-    targets = request.targets
-    per_target = output.carriers.new_zeros(len(targets), dtype=torch.float64)
-    numeric = torch.tensor(
-        [schema.kind == "numeric" for schema in inputs.schema],
-        dtype=torch.bool,
-        device=targets.device,
-    )[targets[:, 1]]
-    groups = {}
-    for col in output.columns:
-        groups.setdefault(col.result.encoding.shape[1], []).append(col)
-    indices, losses = [], []
-    for columns in groups.values():
-        indices.extend(col.target_indices for col in columns)
-        losses.append(
-            encoding_mse(torch.cat([col.result.encoding for col in columns]),
-                         torch.cat([encoded_truth[col.column] for col in columns]))
-        )
-    per_target = per_target.index_copy(0, torch.cat(indices), torch.cat(losses))
-    states = truth.states[targets[:, 0], targets[:, 1]]
-    types = torch.stack((numeric, ~numeric))
-    state_masks = states[None] == torch.arange(4, device=states.device)[:, None]
-    if loss_config.state_weights is None:
-        loss = ((per_target[None] * types).sum(-1) / types.sum(-1).clamp_min(1)).sum()
-    else:
-        selected = types[:, None, :] & state_masks[None, :, :]
-        means = (per_target * selected).sum(-1) / selected.sum(-1).clamp_min(1)
-        loss = (means * per_target.new_tensor(loss_config.state_weights)).sum()
-    counts = state_masks.sum(-1)
-    means = (per_target.detach() * state_masks).sum(-1) / counts.clamp_min(1)
-    # Preserve Python-valued reporting with one device-to-host transfer.
-    statistics = torch.stack((counts.to(means), means), -1).cpu().tolist()
-    by_state = {}
-    for state, name in enumerate(("retained", "query", "null", "corrupted")):
-        count, mean = statistics[state]
-        by_state[name] = {"count": int(count)}
-        if count:
-            by_state[name]["encoding_mse"] = mean
-    return EpisodeScore(loss, per_target, by_state, output)
+    layout = prepare_readout(request, facts)
+    scoring = _prepare_loss(inputs, request, truth, facts, layout)
+    output = model._forward_prepared(inputs, request, facts, layout=layout)
+    return _score_output(output, scoring, loss_config or LossConfig(), True)
 
 
 def batch_loss(model: RestorationModel, episodes, loss_config: LossConfig | None = None):
