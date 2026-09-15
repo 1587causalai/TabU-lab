@@ -1,0 +1,126 @@
+{
+  "calls_per_round": 6,
+  "config": {
+    "backbone": {
+      "ff_width": 32,
+      "heads": 4,
+      "kind": "inducing",
+      "layers": 1,
+      "norm_eps": 1e-06,
+      "reference_mass": 1.0,
+      "slots": 4,
+      "tau_presence": 1.0,
+      "width": 128
+    },
+    "bandwidth": 1.0,
+    "encoder": {
+      "category_map": "identity128",
+      "epsilon": 1e-06,
+      "mlp_hidden": 24,
+      "width": 128
+    },
+    "readout": "ll",
+    "ridge": 0.001
+  },
+  "device": "cpu",
+  "max_abs_differences": {
+    "fresh_full": 0.0,
+    "prepared_full": 0.0,
+    "prepared_training": 0.0
+  },
+  "measurements": [
+    {
+      "round": 0,
+      "seconds_per_call": 0.01879647917424639,
+      "variant": "fresh_full"
+    },
+    {
+      "round": 0,
+      "seconds_per_call": 0.018423208345969517,
+      "variant": "prepared_full"
+    },
+    {
+      "round": 0,
+      "seconds_per_call": 0.0148332638394398,
+      "variant": "prepared_training"
+    },
+    {
+      "round": 1,
+      "seconds_per_call": 0.01472988883809497,
+      "variant": "prepared_training"
+    },
+    {
+      "round": 1,
+      "seconds_per_call": 0.017141624994110316,
+      "variant": "prepared_full"
+    },
+    {
+      "round": 1,
+      "seconds_per_call": 0.01646613182189564,
+      "variant": "fresh_full"
+    },
+    {
+      "round": 2,
+      "seconds_per_call": 0.0165114791598171,
+      "variant": "fresh_full"
+    },
+    {
+      "round": 2,
+      "seconds_per_call": 0.01525447917326043,
+      "variant": "prepared_full"
+    },
+    {
+      "round": 2,
+      "seconds_per_call": 0.014365007014324268,
+      "variant": "prepared_training"
+    },
+    {
+      "round": 3,
+      "seconds_per_call": 0.01488094450905919,
+      "variant": "prepared_training"
+    },
+    {
+      "round": 3,
+      "seconds_per_call": 0.014612708318357667,
+      "variant": "prepared_full"
+    },
+    {
+      "round": 3,
+      "seconds_per_call": 0.015475416672416031,
+      "variant": "fresh_full"
+    }
+  ],
+  "median_seconds": {
+    "fresh_full": 0.01648880549085637,
+    "prepared_full": 0.016198052083685372,
+    "prepared_training": 0.014781576338767385
+  },
+  "outcome": "passed",
+  "prepare_seconds": 0.010864833020605147,
+  "rounds": 4,
+  "schema": "tabu.restoration.prepared-benchmark.v1",
+  "scope": "6-row mixed damage episode; FP64; no optimizer or checkpoint I/O",
+  "source_sha256": {
+    "models/restoration/__init__.py": "1850bcecbd09f22e02f012261e896e31ea39799a18253e7a0beb81d27a7be9f2",
+    "models/restoration/_packing.py": "d0c05139b86d581fb2ec239f330ef653f7fb385e1b30f9f22206f98045f11b2d",
+    "models/restoration/_prepared.py": "3b421e0252ddb63a41dbdb8437dac36507afbcbb4036144e6c2b1ea9bf230ba3",
+    "models/restoration/_validation.py": "badaa7c7741144052fcad97eb1fba1f227d3074d660d6a4ecdfd3002133897f7",
+    "models/restoration/answers.py": "cfdc44b7975dbc0df4e1e9fea32ad71c13199a00f2d4b552e4dc72fdf8167397",
+    "models/restoration/backbone.py": "823a364a7d5e1e872f119339feda38a651d549a98fa8e92b0409696ef6a9d3df",
+    "models/restoration/contracts.py": "d8cf3e619d0376c4fc166195ac6fa2de873277abc9c14c99460802fb3aa8970a",
+    "models/restoration/device_verification.py": "d104bc76fd1a0dc847474a9814c81af30049d06ce417cce2f318b5efa23bbb97",
+    "models/restoration/encoding.py": "11004043dae2bf00481952987add0e72c96a187f19c8540c1e5f1908636c54c3",
+    "models/restoration/end_to_end_checks.py": "53bd2e80f8cb1e83650ed699e792414c09ced0563fc9f7e1732495a5a9759aba",
+    "models/restoration/losses.py": "50cf2ccaa6d5db971c20dbb9f20e529853067f561fdd865854a40fc519578f61",
+    "models/restoration/model.py": "019a70f4fdf1cbd6a34b8f9b4b214955216aa371dafb540fa0ba2bb18581a1d4",
+    "models/restoration/readout.py": "daf14d13eb4be554957ec77bab16081bd0220b88c27b44f216d47d0559c45e11",
+    "models/restoration/training.py": "20c3991bb06bc08c54c39715181e185e61345b39737e67e23b50e8999b50c659",
+    "models/restoration/verification.py": "2f7c8db015259ed426e219765f19b6605b86a7c0d962ba6395a95589846dc37a",
+    "restoration_pipeline_benchmark.py": "713b6176cd7aacf6688929fba021eb5707f7cdace006fe51d32d56dec041c5a4",
+    "restoration_prepared_benchmark.py": "35a7da2a47488fee13a79db6b7f9b6ddb83de1eee801fc9a3ea8407abc900f11"
+  },
+  "status": "local_unissued",
+  "threads": 1,
+  "torch_version": "2.13.0",
+  "warmup_calls": 2
+}

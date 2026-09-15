@@ -1,0 +1,132 @@
+{
+  "checks": [
+    {
+      "detail": {
+        "ll": 5.666666666666666,
+        "nw": 3.0
+      },
+      "name": "hand_computed_numeric_nw_ll",
+      "outcome": "passed"
+    },
+    {
+      "detail": {
+        "half_iqr_scale": 2.0,
+        "median": 12.0
+      },
+      "name": "robust_median_half_iqr_coordinates",
+      "outcome": "passed"
+    },
+    {
+      "detail": null,
+      "name": "scalar_32d_128d_augmented_normal_equations",
+      "outcome": "passed"
+    },
+    {
+      "detail": null,
+      "name": "numeric_categorical_encoding_mse_finite_differences",
+      "outcome": "passed"
+    },
+    {
+      "detail": null,
+      "name": "32d_128d_answer_codes_nearest_class_and_unknown_truth",
+      "outcome": "passed"
+    },
+    {
+      "detail": null,
+      "name": "32d_128d_nearest_code_large_finite_stability",
+      "outcome": "passed"
+    },
+    {
+      "detail": null,
+      "name": "normalized_rotation_lift_mse_and_gradient_equivalence",
+      "outcome": "passed"
+    },
+    {
+      "detail": {
+        "direct/identity128/ll": {
+          "loss": 7.297518716544123,
+          "parameters": 230080
+        },
+        "direct/identity128/nw": {
+          "loss": 2.405247499448098,
+          "parameters": 230080
+        },
+        "direct/mlp256/ll": {
+          "loss": 7.218227029071622,
+          "parameters": 239448
+        },
+        "direct/mlp256/nw": {
+          "loss": 2.3940009180597994,
+          "parameters": 239448
+        },
+        "direct/mlp32/ll": {
+          "loss": 7.774533500920496,
+          "parameters": 234072
+        },
+        "direct/mlp32/nw": {
+          "loss": 2.4527605233288967,
+          "parameters": 234072
+        },
+        "direct/rotary32/ll": {
+          "loss": 7.240630822788833,
+          "parameters": 230144
+        },
+        "direct/rotary32/nw": {
+          "loss": 2.4602026502465355,
+          "parameters": 230144
+        },
+        "inducing/identity128/ll": {
+          "loss": 7.284228652351411,
+          "parameters": 337216
+        },
+        "inducing/identity128/nw": {
+          "loss": 2.4048055272590085,
+          "parameters": 337216
+        },
+        "inducing/mlp256/ll": {
+          "loss": 7.247714024537125,
+          "parameters": 346584
+        },
+        "inducing/mlp256/nw": {
+          "loss": 2.3941916732337036,
+          "parameters": 346584
+        },
+        "inducing/mlp32/ll": {
+          "loss": 8.011122437300719,
+          "parameters": 341208
+        },
+        "inducing/mlp32/nw": {
+          "loss": 2.4518236813516485,
+          "parameters": 341208
+        },
+        "inducing/rotary32/ll": {
+          "loss": 7.238150462674779,
+          "parameters": 337280
+        },
+        "inducing/rotary32/nw": {
+          "loss": 2.4611999278378986,
+          "parameters": 337280
+        }
+      },
+      "name": "sixteen_model_variants_forward_backward_and_damage",
+      "outcome": "passed"
+    },
+    {
+      "detail": {
+        "checkpoint": "in-memory",
+        "model_optimizer_continuation": "exact",
+        "updates": 2
+      },
+      "name": "two_update_serialized_optimizer_continuation",
+      "outcome": "passed"
+    }
+  ],
+  "component_source_sha256": "fc17e7f3b7ca66f6904263fc99cea98db92e24bbb000a12fbd8511f9d68d84a5",
+  "device": "cpu",
+  "dtype": "float64",
+  "outcome": "passed",
+  "schema_version": "tabu.restoration.model-check.v1",
+  "scope": "five-step CPU reference correctness; not F0 fit, benchmark, or issued evidence",
+  "status": "local_unissued",
+  "torch_version": "2.13.0"
+}
