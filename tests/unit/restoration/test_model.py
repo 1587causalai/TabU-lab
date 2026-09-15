@@ -25,6 +25,7 @@ from tabu_lab.models.restoration.end_to_end_checks import (
     example_episode,
     small_config,
 )
+from tabu_lab.models.restoration.training import _masked_mean
 
 
 @pytest.fixture(autouse=True)
@@ -201,9 +202,7 @@ def test_episode_construction_enforces_two_visible_supports():
     observed = torch.ones(3, 1, dtype=torch.bool)
     # Query-masking two of three observations leaves n_a = 1: reject here.
     with pytest.raises(ValueError, match="no-valid-episode"):
-        make_episode(
-            schema, values, observed, torch.tensor([[True], [True], [False]]), code_seed=0
-        )
+        make_episode(schema, values, observed, torch.tensor([[True], [True], [False]]), code_seed=0)
     # Null damage has the same effect on the support count.
     with pytest.raises(ValueError, match="no-valid-episode"):
         make_episode(
@@ -268,9 +267,7 @@ def test_ordinal_rank_follows_declared_order_not_label_index():
     torch.testing.assert_close(
         fact.rank, torch.tensor([0.5, 1.0, 0.0], dtype=torch.float64), rtol=0, atol=0
     )
-    identity = RestorationInput(
-        (ColumnSchema("rank", "ordinal", 3),), values, visible, query, 0
-    )
+    identity = RestorationInput((ColumnSchema("rank", "ordinal", 3),), values, visible, query, 0)
     torch.testing.assert_close(
         ValueEncoder(EncoderConfig()).prepare(identity)[0].rank,
         torch.tensor([0.0, 0.5, 1.0], dtype=torch.float64),
@@ -286,6 +283,23 @@ def test_ordinal_order_schema_validation():
         ColumnSchema("bad", "nominal", 3, order=(0, 1, 2))
     with pytest.raises(ValueError, match="order"):
         ColumnSchema("bad", "numeric", order=(0,))
+    with pytest.raises(ValueError, match="only int"):
+        ColumnSchema("bad", "ordinal", 3, order=(0.0, 1, 2))
+
+
+def test_restoration_input_owns_schema_container():
+    inputs, _, _ = example_episode()
+    schema = list(inputs.schema)
+    owned = RestorationInput(schema, inputs.values, inputs.visible, inputs.query, inputs.code_seed)
+    schema[0] = ColumnSchema("changed", "numeric")
+    assert owned.schema[0] == inputs.schema[0]
+
+
+def test_masked_mean_scales_before_sum():
+    values = torch.tensor([1.21e308, 1.21e308], dtype=torch.float64)
+    mean = _masked_mean(values, torch.ones(2, dtype=torch.bool))
+    assert torch.isfinite(mean)
+    torch.testing.assert_close(mean, torch.tensor(1.21e308, dtype=torch.float64))
 
 
 def test_rotary_is_four_isometries_and_input_projection_init():

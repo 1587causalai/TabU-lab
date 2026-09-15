@@ -9,6 +9,7 @@ from torch import Tensor
 
 from ._packing import column_positions
 from ._prepared import TensorVersions
+from ._validation import finite
 from .answers import NumericAnswers
 from .contracts import RestorationInput, RestorationRequest, TruthSidecar, validate_values
 from .losses import encoding_mse
@@ -112,12 +113,21 @@ class PreparedEpisode:
     versions: TensorVersions
 
 
+def _masked_mean(values: Tensor, mask: Tensor) -> Tensor:
+    """Mean after scaling each term, so a finite mean cannot overflow in sum."""
+    if not bool(mask.any()):
+        return values.new_zeros(())
+    count = mask.sum()
+    return (values[mask] / count).sum()
+
+
 def _prepare_loss(inputs, request, truth, facts, layout):
     encoded_truth = _preflight(inputs, request, truth, facts, layout.positions)
     targets = request.targets
     numeric = torch.tensor(
         [schema.kind == "numeric" for schema in inputs.schema],
-        dtype=torch.bool, device=targets.device,
+        dtype=torch.bool,
+        device=targets.device,
     )[targets[:, 1]]
     groups = {}
     for a, _ in layout.active:
@@ -128,8 +138,13 @@ def _prepare_loss(inputs, request, truth, facts, layout):
         fixed.append((tuple(columns), torch.cat([encoded_truth[a] for a in columns])))
     states = truth.states[targets[:, 0], targets[:, 1]]
     state_masks = states[None] == torch.arange(4, device=states.device)[:, None]
-    return LossLayout(tuple(fixed), torch.cat(indices), torch.stack((numeric, ~numeric)),
-                      state_masks, state_masks.sum(-1))
+    return LossLayout(
+        tuple(fixed),
+        torch.cat(indices),
+        torch.stack((numeric, ~numeric)),
+        state_masks,
+        state_masks.sum(-1),
+    )
 
 
 @torch.no_grad()
@@ -151,22 +166,32 @@ def _score_output(output, layout, loss_config, report):
     per_target = per_target.index_copy(0, layout.indices, torch.cat(losses))
     types, state_masks = layout.types, layout.state_masks
     if loss_config.state_weights is None:
-        loss = ((per_target[None] * types).sum(-1) / types.sum(-1).clamp_min(1)).sum()
+        loss = sum(
+            (_masked_mean(per_target, type_mask) for type_mask in types),
+            start=per_target.new_zeros(()),
+        )
     else:
-        selected = types[:, None, :] & state_masks[None, :, :]
-        means = (per_target * selected).sum(-1) / selected.sum(-1).clamp_min(1)
-        loss = (means * per_target.new_tensor(loss_config.state_weights)).sum()
+        terms = []
+        for type_mask in types:
+            for state, weight in enumerate(loss_config.state_weights):
+                if weight:
+                    terms.append(
+                        per_target.new_tensor(weight)
+                        * _masked_mean(per_target, type_mask & state_masks[state])
+                    )
+        loss = sum(terms, start=per_target.new_zeros(()))
+    finite(loss, "episode loss")
     by_state = None
     if report:
         counts = layout.counts
-        means = (per_target.detach() * state_masks).sum(-1) / counts.clamp_min(1)
-        statistics = torch.stack((counts.to(means), means), -1).cpu().tolist()
         by_state = {}
         for state, name in enumerate(("retained", "query", "null", "corrupted")):
-            count, mean = statistics[state]
+            count = counts[state]
             by_state[name] = {"count": int(count)}
-            if count:
-                by_state[name]["encoding_mse"] = mean
+            if bool(count):
+                mean = _masked_mean(per_target.detach(), state_masks[state])
+                finite(mean, f"{name} encoding MSE")
+                by_state[name]["encoding_mse"] = float(mean)
     return EpisodeScore(loss, per_target, by_state, output)
 
 

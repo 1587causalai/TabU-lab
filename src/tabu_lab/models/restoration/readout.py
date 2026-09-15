@@ -182,6 +182,95 @@ class RestorationReadout:
         if (
             support_mask.shape != shared_logits.shape[::2]
             or target_mask.shape != shared_logits.shape[:2]
+            or support_mask.dtype is not torch.bool
+            or target_mask.dtype is not torch.bool
+        ):
+            raise ValueError("batched readout masks have incompatible shape or dtype")
+        if answers.shape[:2] != shared_logits.shape[::2] or answers.shape[-1] == 0:
+            raise ValueError("batched readout answers have incompatible shape")
+        for tensor in (support_mask, target_mask, answers):
+            if tensor.device != shared_logits.device:
+                raise ValueError("batched readout tensors must share a device")
+        if not bool(target_mask.any()):
+            return (
+                answers.new_zeros(
+                    (*shared_logits.shape[:2], answers.shape[-1]), dtype=torch.float64
+                ),
+                shared_logits.new_full(shared_logits.shape, -torch.inf, dtype=torch.float64),
+                shared_logits.new_zeros(shared_logits.shape, dtype=torch.float64),
+            )
+        if self.mode == "ll":
+            if support_cells is None or target_cells is None:
+                raise ValueError("LL requires target and support Cell content for every type")
+            if (
+                support_cells.ndim != 3
+                or target_cells.ndim != 3
+                or support_cells.shape[:2] != shared_logits.shape[::2]
+                or target_cells.shape[:2] != shared_logits.shape[:2]
+                or support_cells.shape[-1] != target_cells.shape[-1]
+                or not target_cells.shape[-1]
+            ):
+                raise ValueError("Cell content must align with targets, supports, and width")
+            for tensor in (support_cells, target_cells):
+                if tensor.device != shared_logits.device:
+                    raise ValueError("Cell content and geometry must share a device")
+        # Pack only real target rows before the LL solve. Padding is a storage
+        # concern, never an additional regression problem: a padded row has no
+        # target Cell and must not create its own weights/covariance/Cholesky.
+        real_columns, real_targets = target_mask.nonzero(as_tuple=True)
+        compact_logits = shared_logits[real_columns, real_targets].unsqueeze(1)
+        compact_support_mask = support_mask[real_columns]
+        compact_answers = answers[real_columns]
+        if self.mode == "ll":
+            compact_support_cells = None if support_cells is None else support_cells[real_columns]
+            compact_target_cells = (
+                None
+                if target_cells is None
+                else target_cells[real_columns, real_targets].unsqueeze(1)
+            )
+        else:
+            compact_support_cells = compact_target_cells = None
+        compact_encoded, compact_log_weights, compact_coefficients = self._batched_dense(
+            compact_logits,
+            compact_support_mask,
+            torch.ones((len(real_columns), 1), dtype=torch.bool, device=target_mask.device),
+            compact_answers,
+            support_cells=compact_support_cells,
+            target_cells=compact_target_cells,
+        )
+        n_columns, n_targets = target_mask.shape
+        flat_indices = real_columns * n_targets + real_targets
+        encoded = compact_encoded.new_zeros(
+            (n_columns * n_targets, compact_encoded.shape[-1])
+        ).index_copy_(0, flat_indices, compact_encoded[:, 0])
+        log_weights = compact_log_weights.new_full(
+            (n_columns * n_targets, compact_log_weights.shape[-1]), -torch.inf
+        ).index_copy_(0, flat_indices, compact_log_weights[:, 0])
+        coefficients = compact_coefficients.new_zeros(
+            (n_columns * n_targets, compact_coefficients.shape[-1])
+        ).index_copy_(0, flat_indices, compact_coefficients[:, 0])
+        return (
+            encoded.reshape(n_columns, n_targets, -1),
+            log_weights.reshape(n_columns, n_targets, -1),
+            coefficients.reshape(n_columns, n_targets, -1),
+        )
+
+    def _batched_dense(
+        self,
+        shared_logits: Tensor,
+        support_mask: Tensor,
+        target_mask: Tensor,
+        answers: Tensor,
+        *,
+        support_cells: Tensor | None = None,
+        target_cells: Tensor | None = None,
+    ) -> tuple[Tensor, Tensor, Tensor]:
+        """Solve a stack whose target rows are all real; padding is support-only."""
+        if shared_logits.ndim != 3 or answers.ndim != 3:
+            raise ValueError("batched readout expects [A,T,S] logits and [A,S,P] answers")
+        if (
+            support_mask.shape != shared_logits.shape[::2]
+            or target_mask.shape != shared_logits.shape[:2]
             or support_mask.dtype != torch.bool
             or target_mask.dtype != torch.bool
         ):
@@ -193,9 +282,7 @@ class RestorationReadout:
         for tensor in (shared_logits, support_mask, target_mask, answers):
             if tensor.device != shared_logits.device:
                 raise ValueError("batched readout inputs must share a device")
-        logits = torch.where(
-            support_mask[:, None, :], shared_logits.to(torch.float64), -torch.inf
-        )
+        logits = torch.where(support_mask[:, None, :], shared_logits.to(torch.float64), -torch.inf)
         # Unit logits are finite-checked upstream; padded supports are -inf by
         # construction. A nonfinite real weight propagates into the LL system or
         # the restored encoding, whose stage checks below report it explicitly.

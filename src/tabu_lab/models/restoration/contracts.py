@@ -39,15 +39,15 @@ class ColumnSchema:
             raise ValueError("discrete columns require a declared positive domain_size")
         elif self.kind == "nominal" and self.order is not None:
             raise ValueError("nominal columns declare no category order")
-        if (
-            self.kind == "ordinal"
-            and self.order is not None
-            and (
-                not isinstance(self.order, tuple)
-                or sorted(self.order) != list(range(self.domain_size))
-            )
-        ):
-            raise ValueError("ordinal order must permute the declared domain indices")
+        if self.kind == "ordinal" and self.order is not None:
+            if not isinstance(self.order, (tuple, list)):
+                raise ValueError("ordinal order must be an integer sequence")
+            order = tuple(self.order)
+            if any(type(index) is not int for index in order):
+                raise ValueError("ordinal order must contain only int domain indices")
+            if sorted(order) != list(range(self.domain_size)):
+                raise ValueError("ordinal order must permute the declared domain indices")
+            object.__setattr__(self, "order", order)
 
     def rank_positions(self) -> tuple[int, ...] | None:
         """Domain index -> 0-based rank position for ordinal columns, else None."""
@@ -85,8 +85,12 @@ class RestorationInput:
     code_seed: int = 0
 
     def __post_init__(self):
-        if not self.schema or len({s.key for s in self.schema}) != len(self.schema):
+        schema = tuple(self.schema)
+        if not schema or any(not isinstance(s, ColumnSchema) for s in schema):
+            raise ValueError("schema must be a nonempty sequence of ColumnSchema")
+        if len({s.key for s in schema}) != len(schema):
             raise ValueError("schema needs distinct stable column keys")
+        object.__setattr__(self, "schema", schema)
         if type(self.code_seed) is not int:
             raise ValueError("code_seed must be an explicit integer")
         if (

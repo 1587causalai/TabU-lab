@@ -171,13 +171,48 @@ def test_same_ll_answer_with_different_support_weights_decodes_identically(width
     # Both rows restore code 1 exactly while their geometric weights differ.
     weights = torch.tensor([[0.75, 0.25], [0.25, 0.75]], dtype=torch.float64)
     result = RestorationReadout("ll", ridge=3 / 16)(
-        weights.log(), torch.arange(2), codec.encoded,
+        weights.log(),
+        torch.arange(2),
+        codec.encoded,
         support_cells=torch.tensor([[0.0], [1.0]], dtype=torch.float64),
         target_cells=torch.tensor([[1.75], [1.25]], dtype=torch.float64),
     )
     assert not torch.equal(result.log_weights[0], result.log_weights[1])
     torch.testing.assert_close(result.encoding, codec.codebook[1:2].expand(2, -1))
     torch.testing.assert_close(codec.decode(result.encoding), torch.tensor([1, 1]))
+
+
+def test_ll_batched_readout_ignores_padded_target_rows_before_solving():
+    readout = RestorationReadout("ll", ridge=1e-3)
+    logits = torch.tensor([[[0.0, -1000.0], [0.0, 0.0]]], dtype=torch.float64)
+    support_mask = torch.tensor([[True, True]])
+    target_mask = torch.tensor([[True, False]])
+    answers = torch.tensor([[[1.0], [2.0]]], dtype=torch.float64)
+    support_cells = torch.tensor([[[0.0, 0.0], [1e10, 1e10]]], dtype=torch.float64)
+    target_cells = torch.zeros(1, 2, 2, dtype=torch.float64)
+
+    encoded, log_weights, coefficients = readout.batched(
+        logits,
+        support_mask,
+        target_mask,
+        answers,
+        support_cells=support_cells,
+        target_cells=target_cells,
+    )
+    expected = readout(
+        logits[0, :1],
+        torch.arange(2),
+        answers[0],
+        support_cells=support_cells[0],
+        target_cells=target_cells[0, :1],
+    )
+
+    torch.testing.assert_close(encoded[0, 0], expected.encoding[0])
+    torch.testing.assert_close(log_weights[0, 0], expected.log_weights[0])
+    torch.testing.assert_close(coefficients[0, 0], expected.coefficients[0])
+    assert torch.equal(encoded[0, 1], torch.zeros(1, dtype=torch.float64))
+    assert torch.isneginf(log_weights[0, 1]).all()
+    assert torch.equal(coefficients[0, 1], torch.zeros(2, dtype=torch.float64))
 
 
 def test_rotation_lift_preserves_normalized_mse_and_gradients():
@@ -189,7 +224,8 @@ def test_rotation_lift_preserves_normalized_mse_and_gradients():
 def test_mse_gradients_reach_geometry_and_ll_cells_but_not_fixed_answers(mode, width):
     codec = (
         NumericAnswers.from_visible(torch.tensor([1.0, -0.5, 2.0]), epsilon=0.01)
-        if width == 1 else categorical(width=width)
+        if width == 1
+        else categorical(width=width)
     )
     truth = codec.encode_targets(torch.tensor([0.2]) if width == 1 else torch.tensor([1]))
     truth.requires_grad_()
@@ -205,7 +241,8 @@ def test_mse_gradients_reach_geometry_and_ll_cells_but_not_fixed_answers(mode, w
         assert decoded.dtype == torch.long and not decoded.requires_grad
     grads = torch.autograd.grad(
         encoding_mse(result.encoding, truth).sum(),
-        (logits, target, support, answers, truth), allow_unused=True,
+        (logits, target, support, answers, truth),
+        allow_unused=True,
     )
     assert grads[0].isfinite().all() and grads[0].norm() > 1e-6
     if mode == "ll":
