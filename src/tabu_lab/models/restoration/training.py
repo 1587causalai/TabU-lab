@@ -7,6 +7,7 @@ from dataclasses import dataclass
 import torch
 from torch import Tensor
 
+from ._dtype import solve_dtype
 from ._packing import column_positions
 from ._prepared import TensorVersions
 from ._validation import finite
@@ -162,7 +163,7 @@ def _score_output(output, layout, loss_config, report):
         encoding_mse(torch.cat([columns[a].result.encoding for a in group]), encoded_truth)
         for group, encoded_truth in layout.groups
     ]
-    per_target = output.carriers.new_zeros(len(targets), dtype=torch.float64)
+    per_target = output.carriers.new_zeros(len(targets), dtype=solve_dtype(output.carriers))
     per_target = per_target.index_copy(0, layout.indices, torch.cat(losses))
     types, state_masks = layout.types, layout.state_masks
     if loss_config.state_weights is None:

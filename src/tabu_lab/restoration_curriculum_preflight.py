@@ -51,7 +51,8 @@ def run_preflight(args):
         torch.cuda.reset_peak_memory_stats()
     for label, table, stage in probes:
         started = time.monotonic()
-        episode, _ = _episode_for(table, 0, stage, seeds, config, args.device)
+        episode, _ = _episode_for(table, 0, stage, seeds, config, args.device,
+                                  dtype=plan["_dtype"])
         optimizer.zero_grad(set_to_none=True)
         score = score_prepared_episode(model, prepare_episode(model, *episode))
         score.loss.backward()

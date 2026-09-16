@@ -13,6 +13,7 @@ from dataclasses import dataclass
 import torch
 from torch import Tensor
 
+from ._dtype import solve_dtype
 from ._validation import finite, matrix, positive
 
 
@@ -79,7 +80,7 @@ class NumericAnswers:
         if values.ndim != 2 or not values.is_floating_point():
             raise ValueError("batched numeric answers must have floating [column, support] shape")
         finite(values, "numeric answers")
-        values = values.detach().to(torch.float64)
+        values = values.detach().to(solve_dtype(values))
         n = values.shape[1]
         if not n:
             return tuple(cls(row[:, None], None, None) for row in values)
@@ -107,7 +108,7 @@ class NumericAnswers:
         if values.ndim != 1 or not values.is_floating_point():
             raise ValueError("visible numeric answers must be a floating vector")
         finite(values, "numeric answers")
-        values = values.detach().to(torch.float64)
+        values = values.detach().to(solve_dtype(values))
         if not values.numel():
             return cls(values[:, None], None, None)
         ordered = values.sort().values
@@ -130,7 +131,7 @@ class NumericAnswers:
             raise ValueError("no-support: numeric statistics are undefined")
         if values.device != self.encoded.device:
             raise ValueError("numeric targets and visible answers must share a device")
-        encoded = ((values.detach().to(torch.float64) - self.median) / self.scale)[:, None]
+        encoded = ((values.detach().to(self.encoded.dtype) - self.median) / self.scale)[:, None]
         finite(encoded, "numeric target encoding")
         return encoded
 
@@ -178,7 +179,7 @@ class CategoricalAnswers:
         # Declared-domain indices encode schema order, regardless of caller order.
         order = classes.argsort()
         classes = classes.detach()[order].clone()
-        codes = codebook.detach().to(torch.float64)[order].clone()
+        codes = codebook.detach().to(solve_dtype(codebook))[order].clone()
         if len(labels):
             positions = (labels[:, None] == classes[None, :]).long().argmax(-1)
             encoded = codes[positions]
@@ -225,7 +226,7 @@ class CategoricalAnswers:
             raise ValueError("decoder tensors must share a device")
         if not len(self.classes):
             raise ValueError("no-support: categorical decoding needs visible evidence")
-        prediction = encoded.to(torch.float64)
+        prediction = encoded.to(solve_dtype(encoded))
         count = len(self.classes)
         order = torch.arange(count, device=prediction.device)
         winner_chunks, fallback_chunks = [], []

@@ -10,6 +10,7 @@ from dataclasses import dataclass
 import torch
 from torch import Tensor, nn
 
+from ._dtype import solve_dtype
 from ._validation import finite, positive
 from .answers import CategoricalAnswers, NumericAnswers
 from .contracts import RestorationInput
@@ -54,7 +55,7 @@ def visible_codes(labels: Tensor, *, width: int, seed: int, key: str) -> tuple[T
     identity = json.dumps([seed, key, classes.cpu().tolist()], ensure_ascii=True).encode()
     local_seed = int.from_bytes(hashlib.sha256(identity).digest()[:8], "little")
     gen = torch.Generator(device="cpu").manual_seed(local_seed)
-    codes = torch.zeros(len(classes), width, dtype=torch.float64)
+    codes = torch.zeros(len(classes), width, dtype=solve_dtype(labels))
     seen = set()
     for i in range(len(classes)):
         while True:
@@ -156,7 +157,7 @@ class ValueEncoder(nn.Module):
                     # DECLARED order ≺_a (ColumnSchema.order), never the label
                     # index. Identity order is an explicit caller convention.
                     positions = torch.tensor(
-                        schema.rank_positions(), dtype=torch.float64, device=values.device
+                        schema.rank_positions(), dtype=solve_dtype(values), device=values.device
                     )
                     rank = positions[values] / max(schema.domain_size - 1, 1)
                     finite(rank, "ordinal rank coordinates")

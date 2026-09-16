@@ -227,7 +227,7 @@ def _as_plan(table: CurriculumTable, *, index: int, seed: int, evaluation=False)
     return table, values, row_ids
 
 
-def _random_cell_episode(table, values, row_ids, fraction, seed, config, device):
+def _random_cell_episode(table, values, row_ids, fraction, seed, config, device, dtype=None):
     plan = _PlanView(table.name, values, table.schema, row_ids)
     query, info = global_query_mask(
         plan,
@@ -239,10 +239,10 @@ def _random_cell_episode(table, values, row_ids, fraction, seed, config, device)
         },
         numeric_scale_floor=config.encoder.epsilon,
     )
-    return _episode(plan, query, _seed(seed, "code"), device), info
+    return _episode(plan, query, _seed(seed, "code"), device, dtype), info
 
 
-def _supervised_row_episode(table, values, row_ids, fraction, seed, device):
+def _supervised_row_episode(table, values, row_ids, fraction, seed, device, dtype=None):
     plan = _PlanView(table.name, values, table.schema, row_ids)
     rows = plan.train_rows
     hidden = max(1, min(rows - 2, math.ceil(rows * fraction)))
@@ -250,7 +250,7 @@ def _supervised_row_episode(table, values, row_ids, fraction, seed, device):
     random.Random(seed).shuffle(order)
     query = torch.zeros(rows, plan.width, dtype=torch.bool)
     query[order[:hidden], plan.width - 1] = True
-    return _episode(plan, query, _seed(seed, "code"), device), {
+    return _episode(plan, query, _seed(seed, "code"), device, dtype), {
         "mask_mode": "supervised_row",
         "query_rows": hidden,
         "query_count": hidden,
@@ -275,8 +275,13 @@ class _PlanView:
         return len(self.schema)
 
 
-def _episode(table, query, code_seed, device):
-    values = tuple(value.to(device) for value in table.values)
+def _episode(table, query, code_seed, device, dtype=None):
+    values = tuple(
+        value.to(device)
+        if dtype is None or not value.is_floating_point()
+        else value.to(device=device, dtype=dtype)
+        for value in table.values
+    )
     query = query.to(device)
     return make_episode(table.schema, values, torch.ones_like(query), query, code_seed=code_seed)
 
@@ -290,6 +295,7 @@ def _episode_for(
     device,
     *,
     evaluation=False,
+    dtype=None,
 ):
     _, values, row_ids = _as_plan(table, index=index, seed=seeds["windows"], evaluation=evaluation)
     mask_mode = stage.get(
@@ -303,9 +309,9 @@ def _episode_for(
         stage.get("mask_fraction", 1 / 3),
     )
     if mask_mode == "random_cell":
-        return _random_cell_episode(table, values, row_ids, fraction, seed, config, device)
+        return _random_cell_episode(table, values, row_ids, fraction, seed, config, device, dtype)
     if mask_mode == "supervised_row":
-        return _supervised_row_episode(table, values, row_ids, fraction, seed, device)
+        return _supervised_row_episode(table, values, row_ids, fraction, seed, device, dtype)
     raise ValueError(f"unsupported mask mode {mask_mode}")
 
 
@@ -427,7 +433,7 @@ def _reserved_subset(table, seed, cap):
     return values, ids, count
 
 
-def _test_episode(table, seeds, stage_name, device, max_rows):
+def _test_episode(table, seeds, stage_name, device, max_rows, dtype=None):
     """Forward-only reserved-row episode: the training context stays fully
     visible; reserved rows are visible on predictor columns and queried on the
     final (target) column. Windowed tables use the deterministic evaluation
@@ -450,10 +456,11 @@ def _test_episode(table, seeds, stage_name, device, max_rows):
         table.name, values, table.schema, tuple(context_ids) + tuple(reserved_ids)
     )
     seed = _seed(seeds["codes"], stage_name, table.name, "reserved_test")
-    return _episode(plan, query, seed, device), total
+    return _episode(plan, query, seed, device, dtype), total
 
 
-def _evaluate_reserved_test(model, tables, stage, seeds, config, device, *, max_rows, deadline):
+def _evaluate_reserved_test(model, tables, stage, seeds, config, device, *, max_rows, deadline,
+                            dtype=None):
     by_table = {}
     by_type = {}
     by_source = {}
@@ -464,7 +471,7 @@ def _evaluate_reserved_test(model, tables, stage, seeds, config, device, *, max_
         if deadline is not None and time.monotonic() >= deadline:
             complete = False
             break
-        episode, total_rows = _test_episode(table, seeds, stage["name"], device, max_rows)
+        episode, total_rows = _test_episode(table, seeds, stage["name"], device, max_rows, dtype)
         if episode is None:
             continue
         score = score_prepared_episode(
@@ -494,7 +501,7 @@ def _evaluate_reserved_test(model, tables, stage, seeds, config, device, *, max_
 
 
 def evaluate(model, tables, stage, seeds, config, device, *, masks=8, deadline=None,
-             reserved_test=0):
+             reserved_test=0, dtype=None):
     model.eval()
     by_table = {}
     by_type = {}
@@ -510,7 +517,7 @@ def evaluate(model, tables, stage, seeds, config, device, *, masks=8, deadline=N
                     complete = False
                     break
                 episode, info = _episode_for(
-                    table, index, stage, seeds, config, device, evaluation=True
+                    table, index, stage, seeds, config, device, evaluation=True, dtype=dtype
                 )
                 score = score_prepared_episode(
                     model, prepare_episode(model, *episode), decode=True, report=True
@@ -558,7 +565,7 @@ def evaluate(model, tables, stage, seeds, config, device, *, masks=8, deadline=N
         if reserved_test:
             test_block = _evaluate_reserved_test(
                 model, tables, stage, seeds, config, device,
-                max_rows=reserved_test, deadline=deadline,
+                max_rows=reserved_test, deadline=deadline, dtype=dtype,
             )
     by_state = _merge_by_state(by_table)
     by_type = {kind: _finish_metrics(values) for kind, values in by_type.items()}
@@ -753,6 +760,8 @@ def prepare_plan(preregistration: Path, corpus_root: Path, device="cpu"):
     if device not in ("cpu", "cuda:0", "mps"):
         raise ValueError("device must be cpu, cuda:0 or mps")
     exec_dtype = _execution_dtype(spec)
+    if device == "mps" and exec_dtype != "float32":
+        raise ValueError("mps execution requires execution.dtype float32 (MPS has no float64)")
     config = RestorationConfig.from_dict(spec["model"])
     seeds = spec.get("seeds")
     if not isinstance(seeds, dict) or set(seeds) != {"model", "order", "masks", "codes", "windows"}:
@@ -995,7 +1004,8 @@ def run_curriculum_fit(args, observer=None):
                                        plan["_config"], args.device,
                                        masks=int(plan.get("evaluation_masks", 8)),
                                        deadline=evaluation_deadline,
-                                       reserved_test=reserved_test_rows)
+                                       reserved_test=reserved_test_rows,
+                                       dtype=plan["_dtype"])
             if not initial_metrics["complete"]:
                 raise WallLimit(f"stage {stage['name']} initial evaluation exceeded budget")
             initial_metrics["stage"] = stage["name"]
@@ -1014,6 +1024,7 @@ def run_curriculum_fit(args, observer=None):
                     seeds,
                     plan["_config"],
                     args.device,
+                    dtype=plan["_dtype"],
                 )
                 update_started = time.monotonic()
                 model.train()
@@ -1087,7 +1098,8 @@ def run_curriculum_fit(args, observer=None):
                                              plan["_config"], args.device,
                                              masks=int(plan.get("evaluation_masks", 8)),
                                              deadline=evaluation_deadline,
-                                             reserved_test=reserved_test_rows)
+                                             reserved_test=reserved_test_rows,
+                                             dtype=plan["_dtype"])
                         if not periodic["complete"]:
                             raise WallLimit(f"stage {stage['name']} evaluation exceeded budget")
                         periodic["stage"] = stage["name"]
@@ -1120,6 +1132,7 @@ def run_curriculum_fit(args, observer=None):
                 masks=int(plan.get("evaluation_masks", 8)),
                 deadline=stage_start + stage_budget - stage_elapsed_prior,
                 reserved_test=reserved_test_rows,
+                dtype=plan["_dtype"],
             )
             if not stage_eval["complete"]:
                 raise WallLimit(f"stage {stage['name']} final evaluation exceeded budget")

@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-import torch
 from torch import Tensor
 
+from ._dtype import solve_dtype
 from ._validation import finite, matrix
 
 
@@ -21,6 +21,7 @@ def encoding_mse(predicted: Tensor, truth: Tensor) -> Tensor:
         raise ValueError("answer encodings must have identical [target, p] shapes with p > 0")
     if predicted.device != truth.device:
         raise ValueError("predicted and truth answer encodings must share a device")
-    losses = (predicted.to(torch.float64) - truth.detach().to(torch.float64)).square().mean(-1)
+    dtype = solve_dtype(predicted)
+    losses = (predicted.to(dtype) - truth.detach().to(dtype)).square().mean(-1)
     finite(losses, "answer encoding MSE")
     return losses

@@ -13,6 +13,7 @@ from typing import Literal
 import torch
 from torch import Tensor
 
+from ._dtype import solve_dtype
 from ._validation import finite, matrix, positive
 
 
@@ -35,8 +36,9 @@ def unit_kernel_logits(
         raise ValueError("target and source Units must share a nonzero width")
     if target_units.device != source_units.device:
         raise ValueError("target and source Units must share a device")
-    targets = target_units.to(torch.float64)
-    sources = source_units.to(torch.float64)
+    dtype = solve_dtype(target_units)
+    targets = target_units.to(dtype)
+    sources = source_units.to(dtype)
     if not len(targets):
         return targets[:, :1] @ sources[:, :1].T
     blocks = []
@@ -100,7 +102,7 @@ class RestorationReadout:
         n = len(support_rows)
         if n == 0:
             return EncodedRestoration("no-support", 0)
-        log_weights = shared_logits[:, support_rows].to(torch.float64).log_softmax(-1)
+        log_weights = shared_logits[:, support_rows].to(solve_dtype(shared_logits)).log_softmax(-1)
         finite(log_weights, "normalized geometry logits")
         weights = log_weights.exp()
         coefficients = weights
@@ -118,8 +120,8 @@ class RestorationReadout:
                 raise ValueError("Cell content must align with targets, supports, and width")
             if support_cells.device != weights.device or target_cells.device != weights.device:
                 raise ValueError("Cell content and geometry must share a device")
-            support = support_cells.to(torch.float64)
-            targets = target_cells.to(torch.float64)
+            support = support_cells.to(solve_dtype(support_cells))
+            targets = target_cells.to(solve_dtype(support_cells))
             # An arbitrary common translation is exact in the real contract.
             # Center relative to one actual support before taking weighted sums:
             # identical large coordinates then have exactly zero covariance.
@@ -148,11 +150,13 @@ class RestorationReadout:
             q = q - (weights * q).sum(-1, keepdim=True)
             coefficients = weights * (1 + q)
             coefficient_sums = coefficients.sum(-1)
+            # FP64 rounding keeps this at 1e-9; FP32 (MPS) rounding is looser.
+            tolerance = 1e-9 if coefficients.dtype == torch.float64 else 1e-4
             if not torch.allclose(
                 coefficient_sums,
                 coefficients.new_ones(len(coefficients)),
-                atol=1e-9,
-                rtol=1e-9,
+                atol=tolerance,
+                rtol=tolerance,
             ):
                 deviation = (coefficient_sums - 1).abs().max().item()
                 raise FloatingPointError(
@@ -160,7 +164,7 @@ class RestorationReadout:
                     f"(max |sum-1| = {deviation:.3e})"
                 )
         # Answer bytes/statistics/codebook are fixed facts, not learned tensors.
-        encoded = coefficients @ answers.detach().to(torch.float64)
+        encoded = coefficients @ answers.detach().to(coefficients.dtype)
         finite(encoded, "restored answer encoding")
         finite(coefficients, "equivalent coefficients")
         return EncodedRestoration("ok", n, encoded, log_weights, coefficients)
@@ -203,12 +207,13 @@ class RestorationReadout:
             if tensor.device != shared_logits.device:
                 raise ValueError("batched readout tensors must share a device")
         if not bool(target_mask.any()):
+            empty_dtype = solve_dtype(shared_logits)
             return (
                 answers.new_zeros(
-                    (*shared_logits.shape[:2], answers.shape[-1]), dtype=torch.float64
+                    (*shared_logits.shape[:2], answers.shape[-1]), dtype=empty_dtype
                 ),
-                shared_logits.new_full(shared_logits.shape, -torch.inf, dtype=torch.float64),
-                shared_logits.new_zeros(shared_logits.shape, dtype=torch.float64),
+                shared_logits.new_full(shared_logits.shape, -torch.inf, dtype=empty_dtype),
+                shared_logits.new_zeros(shared_logits.shape, dtype=empty_dtype),
             )
         if self.mode == "ll":
             if support_cells is None or target_cells is None:
@@ -293,7 +298,9 @@ class RestorationReadout:
         for tensor in (shared_logits, support_mask, target_mask, answers):
             if tensor.device != shared_logits.device:
                 raise ValueError("batched readout inputs must share a device")
-        logits = torch.where(support_mask[:, None, :], shared_logits.to(torch.float64), -torch.inf)
+        logits = torch.where(
+            support_mask[:, None, :], shared_logits.to(solve_dtype(shared_logits)), -torch.inf
+        )
         # Unit logits are finite-checked upstream; padded supports are -inf by
         # construction. A nonfinite real weight propagates into the LL system or
         # the restored encoding, whose stage checks below report it explicitly.
@@ -313,8 +320,8 @@ class RestorationReadout:
             for tensor in (support_cells, target_cells):
                 if tensor.device != weights.device:
                     raise ValueError("Cell content and geometry must share a device")
-            support = support_cells.to(torch.float64)
-            targets = target_cells.to(torch.float64)
+            support = support_cells.to(solve_dtype(support_cells))
+            targets = target_cells.to(solve_dtype(support_cells))
             # An arbitrary common translation is exact in the real contract.
             # Center relative to one actual support before taking weighted sums:
             # identical large coordinates then have exactly zero covariance.
@@ -340,11 +347,13 @@ class RestorationReadout:
             q = q - (weights * q).sum(-1, keepdim=True)
             coefficients = weights * (1 + q)
             coefficient_sums = coefficients.sum(-1)[target_mask]
+            # Same FP64/FP32 tolerance split as the single-column path.
+            tolerance = 1e-9 if coefficients.dtype == torch.float64 else 1e-4
             if not torch.allclose(
                 coefficient_sums,
                 coefficients.new_ones(int(target_mask.sum())),
-                atol=1e-9,
-                rtol=1e-9,
+                atol=tolerance,
+                rtol=tolerance,
             ):
                 deviation = (coefficient_sums - 1).abs().max().item()
                 raise FloatingPointError(
@@ -352,7 +361,7 @@ class RestorationReadout:
                     f"(max |sum-1| = {deviation:.3e})"
                 )
         # Answer bytes/statistics/codebook are fixed facts, not learned tensors.
-        encoded = coefficients @ answers.detach().to(torch.float64)
+        encoded = coefficients @ answers.detach().to(coefficients.dtype)
         finite(encoded, "restored answer encoding")
         finite(coefficients[target_mask], "equivalent coefficients")
         return encoded, log_weights, coefficients
