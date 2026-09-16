@@ -55,7 +55,7 @@ class NumericAnswers:
             raise ValueError("numeric target values must have floating [column,target] shape")
         finite(values, "numeric target values")
         median, scale = cls._batch_parameters(codecs, values.device)
-        encoded = ((values.detach().double() - median[:, None]) / scale[:, None])[..., None]
+        encoded = ((values.detach().to(median.dtype) - median[:, None]) / scale[:, None])[..., None]
         finite(encoded, "numeric target encoding")
         return encoded
 
