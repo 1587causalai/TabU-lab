@@ -289,6 +289,8 @@ def prepare_plan(preregistration, dataset, device="cpu"):
     values = tuple(matrix[:, index].clone() for index in range(len(columns)))
     mask_mode = spec.get("mask_mode", "cell_bank")
     if mask_mode == "tar_covering_fit_labels":
+        # Supervised row masking is value-independent: unlike the current
+        # random-cell recipe, it must not implicitly protect extreme labels.
         # Reproduce the TAR joint-fit evaluation bank exactly: cyclic
         # hidden-row chunks over a randperm keyed by
         # episode_seed(episode_seed, mask_namespace, 0, "row_roles"), with only

@@ -450,11 +450,24 @@ def test_tar_covering_fit_mask_mode_matches_tar_bank(artifacts):
     )
     order = torch.randperm(4, generator=generator).tolist()
     expected = [{order[(i * 2 + j) % 4] for j in range(2)} for i in range(2)]
-    for query, rows in zip(plan.queries, expected):
+    for query, rows in zip(plan.queries, expected, strict=True):
         actual = {int(row) for row in query[:, 1].nonzero().flatten()}
         assert actual == rows
     # Cyclic chunks cover every row across the bank.
     assert set().union(*expected) == {0, 1, 2, 3}
+
+    # Supervised row assignment must not depend on target magnitude. This
+    # extreme label exceeds the random-cell default of four half-IQR units.
+    data = json.loads(artifacts.dataset.read_text())
+    for row in range(4):
+        data["values"][row][1] = 1e9 if row == 3 else 0.0
+    artifacts.dataset.write_text(json.dumps(data))
+    alter_spec(artifacts, dataset_sha256=hashlib.sha256(
+        artifacts.dataset.read_bytes()).hexdigest())
+    extreme = fit.prepare_plan(artifacts.preregistration, artifacts.dataset, "cpu")
+    assert all(torch.equal(before, after) for before, after in
+               zip(plan.queries, extreme.queries, strict=True))
+    assert any(query[3, 1] for query in extreme.queries)
 
 
 def test_tar_mask_mode_requires_namespace_and_rejects_unknown_modes(artifacts):

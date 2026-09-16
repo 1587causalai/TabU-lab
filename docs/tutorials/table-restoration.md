@@ -227,7 +227,11 @@ and unseen-table generalization are outside this result.
 
 The current prepared recipe is
 [`restoration/old120-small128-tail-guard4`](../../experiments/local/restoration/old120-small128-tail-guard4/README.md).
-Before masking, its v4 sampler protects numeric cells whose distance from the
+This default applies only to table random-cell masking. Table supervised row
+masking defaults to no tail protection; the TAR target-label row bank remains
+independent of label values, including extreme labels. Frozen historical
+random-cell protocols retain their declared policies.
+Before masking, the current v4 sampler protects numeric cells whose distance from the
 training-column median exceeds `4 * max(train_half_IQR, encoder_epsilon)`.
 These values stay visible and remain all-cell loss targets. The encoder's own
 statistics still use only visible inputs. The global 2.5% Query budget is drawn

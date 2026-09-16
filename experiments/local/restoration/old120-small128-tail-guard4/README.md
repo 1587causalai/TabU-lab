@@ -4,7 +4,12 @@ Current recipe: [preregistration.yaml](preregistration.yaml). Status: prepared,
 not launched. The owner selected threshold 4 and requested stopping the earlier
 threshold-8 run and integrating the implementation into local main.
 
-Before artificial masking, protect numeric cells satisfying
+This default applies to **table random-cell masking** only. **Table supervised
+row masking** (including TAR target-label row masks) defaults to no tail guard:
+label magnitude must not determine whether a supervised row becomes Query.
+Frozen historical random-cell protocols keep their recorded policies.
+
+Before random-cell masking, protect numeric cells satisfying
 `abs(x - train_median) > 4 * max(train_half_IQR, 1e-6)`. Calibration uses only
 204 training rows and linear-interpolation quantiles. Equality stays eligible.
 These cells remain visible supports and retained targets in all-cell loss.
