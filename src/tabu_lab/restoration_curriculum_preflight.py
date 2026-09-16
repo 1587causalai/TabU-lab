@@ -49,9 +49,11 @@ def run_preflight(args):
         torch.cuda.reset_peak_memory_stats()
     for label, table, stage in probes:
         started = time.monotonic()
-        episode, _ = _episode_for(table, 0, stage, seeds, config, args.device)
+        episode, _ = _episode_for(table, 0, stage, seeds, config, args.device,
+                                  numeric_query_guard=plan["_numeric_query_guard"])
         optimizer.zero_grad(set_to_none=True)
-        score = score_prepared_episode(model, prepare_episode(model, *episode))
+        score = score_prepared_episode(model, prepare_episode(model, *episode),
+                                       loss_config=plan["_loss_config"])
         score.loss.backward()
         finite_gradients = all(parameter.grad is None or bool(torch.isfinite(parameter.grad).all())
                                for parameter in model.parameters())
@@ -73,7 +75,8 @@ def run_preflight(args):
             optimizer, _partition = switch_to_muon(optimizer, model, plan["_optimizer"])
     peak = torch.cuda.max_memory_allocated() if args.device == "cuda:0" else 0
     result = {"outcome": "passed", "device": args.device, "probes": measurements,
-              "peak_allocated_bytes": peak, "optimizer_transition": "passed"}
+              "peak_allocated_bytes": peak, "optimizer_transition": "passed",
+              "objective": plan["_summary"]["objective"], "identity": plan["_identity"]}
     Path(args.output).parent.mkdir(parents=True, exist_ok=True)
     Path(args.output).write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
     print(json.dumps(result, indent=2, sort_keys=True))

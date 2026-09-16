@@ -20,6 +20,22 @@ if TYPE_CHECKING:
     from tabu_lab.restoration_joint_fit import TablePlan
 
 
+def validate_numeric_query_guard(guard: dict) -> dict:
+    """Validate a recorded sampling policy, retaining historical cell guards."""
+    fields = {"median_half_iqr": "max_abs_robust_z", "std_iqr_column": "max_std_iqr_ratio"}
+    if (not isinstance(guard, dict) or not isinstance(guard.get("kind"), str)
+            or guard["kind"] not in fields):
+        raise ValueError("numeric_query_guard kind must be median_half_iqr or std_iqr_column")
+    field = fields[guard["kind"]]
+    if set(guard) != {"kind", field}:
+        raise ValueError(f"numeric_query_guard must declare kind and {field}")
+    threshold = guard[field]
+    if (isinstance(threshold, bool) or not isinstance(threshold, int | float)
+            or not math.isfinite(threshold) or threshold <= 0):
+        raise ValueError(f"numeric_query_guard {field} must be finite and positive")
+    return {"kind": guard["kind"], field: float(threshold)}
+
+
 def numeric_tail_protection(
     table: TablePlan, guard: dict, scale_floor: float,
 ) -> tuple[torch.Tensor, dict]:
@@ -31,15 +47,9 @@ def numeric_tail_protection(
     The audit contains counts and declared policy, never observed values or
     fitted numeric coordinates.
     """
-    if (not isinstance(guard, dict)
-            or set(guard) != {"kind", "max_abs_robust_z"}
-            or guard.get("kind") != "median_half_iqr"):
-        raise ValueError("numeric_query_guard must declare "
-                         "kind=median_half_iqr and max_abs_robust_z")
-    threshold = guard["max_abs_robust_z"]
-    if (isinstance(threshold, bool) or not isinstance(threshold, int | float)
-            or not math.isfinite(threshold) or threshold <= 0):
-        raise ValueError("numeric_query_guard max_abs_robust_z must be finite and positive")
+    guard = validate_numeric_query_guard(guard)
+    column_guard = guard["kind"] == "std_iqr_column"
+    threshold = guard["max_std_iqr_ratio" if column_guard else "max_abs_robust_z"]
     if (isinstance(scale_floor, bool) or not isinstance(scale_floor, int | float)
             or not math.isfinite(scale_floor) or scale_floor <= 0):
         raise ValueError("numeric_query_guard scale_floor must be finite and positive")
@@ -56,23 +66,35 @@ def numeric_tail_protection(
             raise ValueError("numeric query guard requires finite training values")
         quantiles = torch.quantile(values, values.new_tensor([.25, .5, .75]),
                                    interpolation="linear")
-        scale = torch.clamp((quantiles[2] - quantiles[0]) / 2, min=scale_floor)
+        spread = quantiles[2] - quantiles[0]
+        scale = torch.clamp(spread if column_guard else spread / 2, min=scale_floor)
         cutoff = threshold * scale
         if not bool(torch.isfinite(quantiles).all() & torch.isfinite(cutoff)):
             raise ValueError("nonfinite numeric query guard calibration")
-        # A cell exactly at the declared boundary is still eligible.
-        protected[:, column] = (values - quantiles[1]).abs() > cutoff
+        # Equality stays eligible. Column policy uses population std and full IQR.
+        if column_guard:
+            std = torch.std(values, correction=0)
+            if not bool(torch.isfinite(std)):
+                raise ValueError("nonfinite numeric query guard standard deviation")
+            protected[:, column] = std > cutoff
+        else:
+            protected[:, column] = (values - quantiles[1]).abs() > cutoff
     per_column = protected.sum(0).tolist()
-    return protected, {
+    audit = {
         "protected_numeric_tail_cells": sum(per_column),
         "protected_numeric_tail_per_column": per_column,
         "numeric_query_guard": {
-            "kind": "median_half_iqr", "max_abs_robust_z": float(threshold),
+            **guard,
             "scale_floor": float(scale_floor), "comparison": "strictly_greater",
             "quantile_interpolation": "linear",
             "reference_scope": "all training rows before masking",
         },
     }
+    if column_guard:
+        audit["numeric_query_guard"].update(std_correction=0, scale="full_iqr")
+        audit["protected_numeric_columns"] = sum(value == n for value in per_column)
+        audit["protected_numeric_column_cells"] = sum(per_column)
+    return protected, audit
 
 
 def global_query_mask(
@@ -155,6 +177,10 @@ def global_query_mask(
         numeric_audit["query_numeric_tail_cells"] = int((query & numeric_protected).sum())
         if numeric_audit["query_numeric_tail_cells"]:
             raise AssertionError("numeric tail cell entered Query despite guard")
+        if numeric_query_guard["kind"] == "std_iqr_column":
+            numeric_audit["query_protected_numeric_column_cells"] = (
+                numeric_audit["query_numeric_tail_cells"]
+            )
     singleton_classes = sum(singleton_per_column)
     return query, dict(
         query_count=count,

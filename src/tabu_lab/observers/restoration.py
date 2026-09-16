@@ -28,13 +28,14 @@ _NUMERIC_CONFIG = frozenset({
     "model_parameters", "bandwidth", "ridge", "width", "mlp_hidden", "epsilon",
     "layers", "heads", "ff_width", "slots", "tau_presence", "reference_mass", "norm_eps",
     "learning_rate", "weight_decay", "eps", "grad_clip", "model", "order", "masks", "codes",
-    "max_abs_robust_z",
+    "max_abs_robust_z", "max_std_iqr_ratio",
 })
 _CONFIG_GROUPS = frozenset({
     "model", "encoder", "backbone", "optimizer", "seeds", "numeric_query_guard",
 })
 _CONFIG_ENUMS = {
-    "readout": {"ll", "nw"}, "kind": {"direct", "inducing", "adamw", "median_half_iqr"},
+    "readout": {"ll", "nw"},
+    "kind": {"direct", "inducing", "adamw", "median_half_iqr", "std_iqr_column"},
     "category_map": {"identity128", "rotary32", "mlp32", "mlp256"},
 }
 _IDENTITY_ENUMS = {"device": {"cpu", "cuda:0"}, "dtype": {"float64", "float32"}}
@@ -50,6 +51,7 @@ _TRAIN_METRICS = (
     "loss", "gradient_norm", "post_clip_gradient_norm", "update_seconds", "train_seconds",
     "learning_rate",
     "peak_allocated_bytes", "checkpoint_seconds", "preparation_seconds",
+    "retained_loss", "query_loss", "retained_loss_contribution", "query_loss_contribution",
 )
 _STATE_METRICS = (
     "count", "encoding_mse", "numeric_mse", "discrete_accuracy", "numeric_count",
@@ -59,6 +61,8 @@ _COVERAGE_METRICS = (
     "query_cells", "total_cells", "protected_discrete_cells", "unmaskable_discrete_classes",
     "singleton_discrete_classes", "query_fraction", "query_count",
     "protected_numeric_tail_cells", "query_numeric_tail_cells",
+    "protected_numeric_columns", "protected_numeric_column_cells",
+    "query_protected_numeric_column_cells",
 )
 _SOURCES = frozenset({
     "scm_mixed_v1", "discoscm", "scm_numeric_v0", "sklearn_synthetic",
@@ -74,11 +78,28 @@ def _finite(value: Any) -> bool:
     return type(value) in (int, float) and math.isfinite(value)
 
 
+def _objective(payload: Any, prefix: str = "objective/") -> dict[str, Any]:
+    """Mirror only the public objective definition, never arbitrary nested metadata."""
+    if not isinstance(payload, Mapping):
+        return {}
+    if payload.get("kind") == "type_mean_all_observed":
+        return {f"{prefix}kind": "type_mean_all_observed"}
+    if payload.get("kind") != "state_weighted":
+        return {}
+    result: dict[str, Any] = {f"{prefix}kind": "state_weighted"}
+    for key in ("retained_weight", "query_weight"):
+        if _finite(payload.get(key)):
+            result[f"{prefix}{key}"] = payload[key]
+    return result
+
+
 def _config(payload: Mapping[str, Any], prefix: str = "") -> dict[str, Any]:
     result: dict[str, Any] = {}
     for key, value in payload.items():
         name = f"{prefix}{key}"
-        if key in _CONFIG_GROUPS and isinstance(value, Mapping):
+        if key == "objective":
+            result.update(_objective(value, f"{name}/"))
+        elif key in _CONFIG_GROUPS and isinstance(value, Mapping):
             result.update(_config(value, f"{name}/"))
         elif (key in _NUMERIC_CONFIG and _finite(value)) or (
             key in _CONFIG_ENUMS and isinstance(value, str) and value in _CONFIG_ENUMS[key]
@@ -293,6 +314,7 @@ class RestorationObserver:
                                                   table_metrics=self._table_metrics))
                 if kind == "summary":
                     _copy_numeric(result, metrics, _COUNTERS)
+                    result.update(_objective(metrics.get("objective")))
                     if type(metrics.get("budget_exhausted")) is bool:
                         result["budget_exhausted"] = metrics["budget_exhausted"]
                     for key in ("outcome", "status"):

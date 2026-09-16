@@ -46,6 +46,27 @@ class FakeSDK:
         return self.run
 
 
+def test_column_guard_metadata_and_coverage_are_mirrored_without_raw_statistics(enabled):
+    fake = FakeSDK()
+    observer = create_restoration_observer({"numeric_query_guard": {
+        "kind": "std_iqr_column", "max_std_iqr_ratio": 4., "raw_std": [123.],
+    }}, {}, wandb=fake)
+    config = fake.calls[0]["config"]
+    assert config["numeric_query_guard/kind"] == "std_iqr_column"
+    assert config["numeric_query_guard/max_std_iqr_ratio"] == 4.
+    assert not any("raw_std" in key for key in config)
+    observer({"event": "update", "update": 1, "mask": {
+        "protected_numeric_columns": 4, "protected_numeric_column_cells": 816,
+        "query_protected_numeric_column_cells": 0,
+    }})
+    logged = fake.run.logs[-1]
+    for name, value in {"protected_numeric_columns": 4,
+                        "protected_numeric_column_cells": 816,
+                        "query_protected_numeric_column_cells": 0}.items():
+        assert any(key.endswith('/' + name) and actual == value
+                   for key, actual in logged.items())
+
+
 @pytest.fixture
 def enabled(monkeypatch):
     for key in (
@@ -317,3 +338,73 @@ def test_tail_guard_and_pre_post_clip_norms_are_allowlisted_without_calibration_
     observer({"event": "update", "post_clip_gradient_norm": float("nan")})
     assert fake.run.logs[-1] == {"phase": "training"}
     assert "/private" not in json.dumps(fake.calls + fake.run.logs)
+
+
+def test_weighted_objective_and_state_contributions_are_allowlisted(enabled):
+    fake = FakeSDK()
+    objective = {
+        "kind": "state_weighted", "retained_weight": 0.05, "query_weight": 0.95,
+        "private_path": "/private/objective", "raw_values": [123.0],
+        "model": {"width": 987},
+    }
+    observer = create_restoration_observer({"objective": objective}, {}, wandb=fake)
+    expected = {
+        "objective/kind": "state_weighted", "objective/retained_weight": 0.05,
+        "objective/query_weight": 0.95,
+    }
+    assert fake.calls[0]["config"] == expected
+    observer({
+        "event": "update", "update": 1, "loss": 3.85,
+        "retained_loss": 1.0, "query_loss": 4.0,
+        "retained_loss_contribution": 0.05, "query_loss_contribution": 3.8,
+        "retained_loss_raw_values": [123.0], "query_loss_raw_values": [123.0],
+    })
+    assert fake.run.logs[-1] == {
+        "phase": "training", "update": 1, "train/loss": 3.85,
+        "train/retained_loss": 1.0, "train/query_loss": 4.0,
+        "train/retained_loss_contribution": 0.05, "train/query_loss_contribution": 3.8,
+    }
+    observer({"event": "summary", "metrics": {"objective": objective}})
+    assert fake.run.logs[-1] == expected
+    assert fake.run.summary == expected
+    serialized = json.dumps(fake.calls + fake.run.logs)
+    assert "private" not in serialized and "raw_values" not in serialized
+
+
+@pytest.mark.parametrize("objective", [
+    {"kind": "/private/objective", "retained_weight": 0.05, "query_weight": 0.95},
+    {"retained_weight": 0.05, "query_weight": 0.95},
+    "/private/objective",
+    [0.05, 0.95],
+])
+def test_unknown_objective_payload_is_not_mirrored(enabled, objective):
+    fake = FakeSDK()
+    observer = create_restoration_observer({"objective": objective}, {}, wandb=fake)
+    assert fake.calls[0]["config"] == {}
+    observer({"event": "summary", "metrics": {"objective": objective}})
+    assert fake.run.logs == []
+    assert fake.run.summary == {}
+
+
+def test_objective_and_state_metrics_reject_nonfinite_or_nonnumeric_values(enabled):
+    fake = FakeSDK()
+    objective = {"kind": "state_weighted", "retained_weight": float("inf"),
+                 "query_weight": "/private/weight"}
+    observer = create_restoration_observer({"objective": objective}, {}, wandb=fake)
+    assert fake.calls[0]["config"] == {"objective/kind": "state_weighted"}
+    observer({"event": "update", "retained_loss": float("nan"),
+              "query_loss": float("inf"), "retained_loss_contribution": True,
+              "query_loss_contribution": "/private/loss"})
+    assert fake.run.logs[-1] == {"phase": "training"}
+    observer({"event": "summary", "metrics": {"objective": objective}})
+    assert fake.run.summary == {"objective/kind": "state_weighted"}
+
+
+def test_legacy_objective_kind_is_mirrored_without_weight_claims(enabled):
+    fake = FakeSDK()
+    objective = {"kind": "type_mean_all_observed", "retained_weight": 0.05,
+                 "query_weight": 0.95, "private_path": "/private/objective"}
+    observer = create_restoration_observer({"objective": objective}, {}, wandb=fake)
+    assert fake.calls[0]["config"] == {"objective/kind": "type_mean_all_observed"}
+    observer({"event": "summary", "metrics": {"objective": objective}})
+    assert fake.run.summary == {"objective/kind": "type_mean_all_observed"}

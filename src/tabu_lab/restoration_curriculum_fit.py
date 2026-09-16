@@ -25,6 +25,7 @@ import yaml
 
 from tabu_lab.models.restoration import (
     ColumnSchema,
+    LossConfig,
     RestorationConfig,
     RestorationModel,
     make_episode,
@@ -32,7 +33,7 @@ from tabu_lab.models.restoration import (
     score_prepared_episode,
 )
 from tabu_lab.restoration_joint_fit import _distribution, _seed
-from tabu_lab.restoration_masking import global_query_mask
+from tabu_lab.restoration_masking import global_query_mask, validate_numeric_query_guard
 from tabu_lab.restoration_optimizers import OptimizerConfig, adamw, switch_to_muon
 from tabu_lab.tar_data import validate_full_dataset
 
@@ -87,6 +88,51 @@ def _integer(value, name, minimum=1):
     if type(value) is not int or value < minimum:
         raise ValueError(f"{name} must be an integer >= {minimum}")
     return value
+
+
+def _loss_config(spec):
+    """Resolve opt-in state means without changing archived all-cell recipes."""
+    if "objective" not in spec:
+        return LossConfig()
+    objective = spec["objective"]
+    if (not isinstance(objective, dict)
+            or set(objective) != {"kind", "retained_weight", "query_weight"}
+            or objective["kind"] != "state_weighted"):
+        raise ValueError("objective must declare state_weighted, retained_weight and query_weight")
+    retained = _positive(objective["retained_weight"], "retained_weight")
+    query = _positive(objective["query_weight"], "query_weight")
+    if not math.isclose(retained + query, 1.0, rel_tol=0, abs_tol=1e-12):
+        raise ValueError("retained_weight and query_weight must sum to one")
+    return LossConfig((retained, query, 0.0, 0.0))
+
+
+def _numeric_query_guard(spec):
+    # Frozen recipes without an explicit policy retain their recorded cell guard.
+    return validate_numeric_query_guard(spec.get("numeric_query_guard", {
+        "kind": "median_half_iqr", "max_abs_robust_z": 4.0,
+    }))
+
+
+def _loss_terms(score, prepared, loss_config):
+    """Log state means and their actual contributions under the active objective."""
+    errors = score.per_target.detach()
+    means = errors.new_zeros(2)
+    contributions = errors.new_zeros(2)
+    for type_mask in prepared.scoring.types:
+        count = type_mask.sum().clamp_min(1)
+        for state in (0, 1):
+            selected = type_mask & prepared.scoring.state_masks[state]
+            state_count = selected.sum().clamp_min(1)
+            mean = (errors[selected] / state_count).sum()
+            means[state] += mean
+            contributions[state] += (
+                mean * loss_config.state_weights[state]
+                if loss_config.state_weights is not None
+                else (errors[selected] / count).sum()
+            )
+    retained, query, retained_part, query_part = torch.cat((means, contributions)).cpu().tolist()
+    return {"retained_loss": retained, "query_loss": query,
+            "retained_loss_contribution": retained_part, "query_loss_contribution": query_part}
 
 
 @dataclass(frozen=True)
@@ -215,13 +261,14 @@ def _as_plan(table: CurriculumTable, *, index: int, seed: int, evaluation=False)
     return table, values, row_ids
 
 
-def _random_cell_episode(table, values, row_ids, fraction, seed, config, device):
+def _random_cell_episode(table, values, row_ids, fraction, seed, config, device,
+                         numeric_query_guard=None):
     plan = _PlanView(table.name, values, table.schema, row_ids)
     query, info = global_query_mask(
         plan,
         fraction,
         seed,
-        numeric_query_guard={
+        numeric_query_guard=numeric_query_guard if numeric_query_guard is not None else {
             "kind": "median_half_iqr",
             "max_abs_robust_z": 4.0,
         },
@@ -278,6 +325,7 @@ def _episode_for(
     device,
     *,
     evaluation=False,
+    numeric_query_guard=None,
 ):
     _, values, row_ids = _as_plan(table, index=index, seed=seeds["windows"], evaluation=evaluation)
     mask_mode = stage.get(
@@ -291,7 +339,8 @@ def _episode_for(
         stage.get("mask_fraction", 1 / 3),
     )
     if mask_mode == "random_cell":
-        return _random_cell_episode(table, values, row_ids, fraction, seed, config, device)
+        return _random_cell_episode(table, values, row_ids, fraction, seed, config, device,
+                                    numeric_query_guard=numeric_query_guard)
     if mask_mode == "supervised_row":
         return _supervised_row_episode(table, values, row_ids, fraction, seed, device)
     raise ValueError(f"unsupported mask mode {mask_mode}")
@@ -346,7 +395,8 @@ def _new_acc():
     }
 
 
-def evaluate(model, tables, stage, seeds, config, device, *, masks=8, deadline=None):
+def evaluate(model, tables, stage, seeds, config, device, *, masks=8, deadline=None,
+             loss_config=None, numeric_query_guard=None):
     model.eval()
     by_table = {}
     by_type = {}
@@ -362,10 +412,12 @@ def evaluate(model, tables, stage, seeds, config, device, *, masks=8, deadline=N
                     complete = False
                     break
                 episode, info = _episode_for(
-                    table, index, stage, seeds, config, device, evaluation=True
+                    table, index, stage, seeds, config, device, evaluation=True,
+                    numeric_query_guard=numeric_query_guard,
                 )
                 score = score_prepared_episode(
-                    model, prepare_episode(model, *episode), decode=True, report=True
+                    model, prepare_episode(model, *episode), loss_config=loss_config,
+                    decode=True, report=True
                 )
                 if not bool(torch.isfinite(score.loss)):
                     raise FloatingPointError("nonfinite evaluation loss")
@@ -403,6 +455,10 @@ def evaluate(model, tables, stage, seeds, config, device, *, masks=8, deadline=N
                     info.get("protected_numeric_tail_cells", 0)
                 )
                 coverage["query_numeric_tail_cells"] += int(info.get("query_numeric_tail_cells", 0))
+                for key in ("protected_numeric_columns", "protected_numeric_column_cells",
+                            "query_protected_numeric_column_cells"):
+                    if key in info:
+                        coverage[key] += int(info[key])
             if not complete:
                 break
             by_table[table.name] = _finish_metrics(acc)
@@ -505,6 +561,8 @@ def _identity(spec, prereg: Path, tables, source_digest):
         "preregistration_sha256": _hash(prereg),
         "source": source_digest,
         "model": spec["model"],
+        "objective": spec.get("objective", {"kind": "type_mean_all_observed"}),
+        "numeric_query_guard": _numeric_query_guard(spec),
         "table_digests": spec.get("table_digests", {}),
         "table_names": [table.name for table in tables],
     }
@@ -612,6 +670,8 @@ def prepare_plan(preregistration: Path, corpus_root: Path, device="cpu"):
     if device not in ("cpu", "cuda:0"):
         raise ValueError("device must be cpu or cuda:0")
     config = RestorationConfig.from_dict(spec["model"])
+    loss_config = _loss_config(spec)
+    numeric_query_guard = _numeric_query_guard(spec)
     seeds = spec.get("seeds")
     if not isinstance(seeds, dict) or set(seeds) != {"model", "order", "masks", "codes", "windows"}:
         raise ValueError("seeds must declare model, order, masks, codes and windows")
@@ -703,6 +763,8 @@ def prepare_plan(preregistration: Path, corpus_root: Path, device="cpu"):
         "table_count": len(tables),
         "model": config.as_dict(),
         "optimizer": spec["optimizer"],
+        "objective": spec.get("objective", {"kind": "type_mean_all_observed"}),
+        "numeric_query_guard": numeric_query_guard,
         "device": device,
         "total_seconds": sum(stage["max_seconds"] for stage in stages),
         "stages": [
@@ -715,6 +777,8 @@ def prepare_plan(preregistration: Path, corpus_root: Path, device="cpu"):
         _tables=tables,
         _config=config,
         _optimizer=opt,
+        _loss_config=loss_config,
+        _numeric_query_guard=numeric_query_guard,
         _identity=identity,
         _summary=summary,
     )
@@ -736,6 +800,8 @@ def run_curriculum_fit(args, observer=None):
     torch.manual_seed(seeds["model"])
     model = RestorationModel(plan["_config"]).to(device=args.device, dtype=torch.float64)
     cfg = plan["_optimizer"]
+    loss_config = plan["_loss_config"]
+    numeric_query_guard = plan["_numeric_query_guard"]
     optimizer = adamw(model, cfg)
     identity = plan["_identity"]
     stage_index = update = cursor = 0
@@ -842,7 +908,8 @@ def run_curriculum_fit(args, observer=None):
             initial_metrics = evaluate(model, stage_tables(), stage, seeds,
                                        plan["_config"], args.device,
                                        masks=int(plan.get("evaluation_masks", 8)),
-                                       deadline=evaluation_deadline)
+                                       deadline=evaluation_deadline, loss_config=loss_config,
+                                       numeric_query_guard=numeric_query_guard)
             if not initial_metrics["complete"]:
                 raise WallLimit(f"stage {stage['name']} initial evaluation exceeded budget")
             initial_metrics["stage"] = stage["name"]
@@ -866,12 +933,13 @@ def run_curriculum_fit(args, observer=None):
                     seeds,
                     plan["_config"],
                     args.device,
+                    numeric_query_guard=numeric_query_guard,
                 )
                 update_started = time.monotonic()
                 model.train()
                 prepared = prepare_episode(model, *episode)
                 optimizer.zero_grad(set_to_none=True)
-                score = score_prepared_episode(model, prepared)
+                score = score_prepared_episode(model, prepared, loss_config=loss_config)
                 if not bool(torch.isfinite(score.loss)):
                     raise FloatingPointError("nonfinite training loss")
                 score.loss.backward()
@@ -901,6 +969,7 @@ def run_curriculum_fit(args, observer=None):
                     "update": update,
                     "table": table.name,
                     "loss": cycle_losses[-1],
+                    **_loss_terms(score, prepared, loss_config),
                     "gradient_norm": float(gradient_norm.detach().cpu()),
                     "post_clip_gradient_norm": float(post_clip_norm.detach().cpu()),
                     "mask": mask_info,
@@ -944,7 +1013,8 @@ def run_curriculum_fit(args, observer=None):
                         periodic = evaluate(model, stage_tables(), stage, seeds,
                                              plan["_config"], args.device,
                                              masks=int(plan.get("evaluation_masks", 8)),
-                                             deadline=evaluation_deadline)
+                                             deadline=evaluation_deadline, loss_config=loss_config,
+                                             numeric_query_guard=numeric_query_guard)
                         if not periodic["complete"]:
                             # A periodic evaluation that reaches the training
                             # cutoff ends updates for this stage; the final
@@ -986,6 +1056,8 @@ def run_curriculum_fit(args, observer=None):
                 args.device,
                 masks=int(plan.get("evaluation_masks", 8)),
                 deadline=stage_start + stage_budget - stage_elapsed_prior,
+                loss_config=loss_config,
+                numeric_query_guard=numeric_query_guard,
             )
             if not stage_eval["complete"]:
                 raise WallLimit(f"stage {stage['name']} final evaluation exceeded budget")
