@@ -1,9 +1,19 @@
 # Experiments ledger
 
+## Table-restoration research
+
+The current research focus is reconstructing available table evidence and
+learning Unit-specific relationships. Start with the
+[restoration guide](../docs/tutorials/table-restoration.md) and
+[restoration experiment routes](local/restoration/README.md) for implementation
+checks, dated recipes, and execution records. These experiments retain their
+own source, objective, precision, and evidence identities; historical TAR fitting
+results do not establish restoration performance or unseen-table transfer.
+
 ## TAR training routes
 
-The current research model is **TabU-TAR**, explicitly selected as `tabu.tar`.
-Single-episode and batch-episode training are both continuing research routes.
+The separate **TabU-TAR** model is explicitly selected as `tabu.tar`.
+Single-episode and batch-episode training retain distinct research routes.
 Preserve their separate configurations, source snapshots, optimizer states and
 results as each route develops.
 
@@ -68,7 +78,7 @@ experiment between these roles by itself.
 ## Historical query-family routing
 
 The entries below preserve the query-row/query-base program lane. They do not
-select the TAR research model. `MAINLINE.yaml` continues to bind that separate
+select the restoration or TAR research models. `MAINLINE.yaml` continues to bind that separate
 program system; see the [compatibility guide](../docs/history/compatibility-runtime.md).
 
 - Synthetic-prior candidate:

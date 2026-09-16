@@ -17,7 +17,7 @@ REQUIRED = {
     "assets/tabu-mark.svg",
     "zh/index.html",
 }
-MARKER = "tabu-lab-site-v20260826-02"
+MARKER = "tabu-lab-site-v20260916-research"
 PAGES = {
     "index.html": {
         "lang": '<html lang="en">',
@@ -128,8 +128,26 @@ def main() -> None:
         total_refs += len(parser.refs)
 
     card = json.loads((PUBLIC / "agent.json").read_text(encoding="utf-8"))
-    if card.get("status", {}).get("public_training_receipts") != 0:
-        fail("bootstrap agent card must not claim public training receipts")
+    catalog = json.loads((ROOT / "catalog.json").read_text(encoding="utf-8"))
+    public_catalog = json.loads((PUBLIC / "catalog.json").read_text(encoding="utf-8"))
+    if catalog != public_catalog:
+        fail("public catalog does not match the repository catalog")
+    status = card.get("status", {})
+    for card_field, catalog_field in (
+        ("formal_receipt_count", "formal_receipt_count"),
+        ("accepted_model_claims", "accepted_claim_count"),
+    ):
+        count = catalog.get(catalog_field)
+        if type(count) is not int or count < 0 or status.get(card_field) != count:
+            fail(f"agent card {card_field} disagrees with the research catalog")
+    for record in card.get("evidence", []):
+        prefix = "https://github.com/1587causalai/TabU-lab/blob/main/"
+        url = record.get("url", "")
+        if not url.startswith(prefix):
+            fail("evidence link must identify a public repository document")
+        evidence = (ROOT / url.removeprefix(prefix)).resolve()
+        if ROOT.resolve() not in evidence.parents or not evidence.is_file():
+            fail(f"missing local source for evidence link: {url}")
     if card.get("project", {}).get("public_url") != "https://research.wehub.us/tabu-lab/":
         fail("agent card public URL mismatch")
 
@@ -138,7 +156,7 @@ def main() -> None:
         f"{total_ids} ids, {total_refs} references"
     )
     print(f"PASS: marker={MARKER}")
-    print("PASS: claim boundary remains lab_bootstrap / zero public training receipts")
+    print("PASS: agent-card counts match the catalog; evidence documents exist")
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
   "schema": "https://research.wehub.us/schemas/research-project-card.v0.json",
   "project": {
     "name": "TabU-lab",
-    "tagline": "Tabular Foundation Modeling from Scratch",
+    "tagline": "Open research for transferable tabular models",
     "kind": "open_research_lab",
     "public_url": "https://research.wehub.us/tabu-lab/",
     "repository": "https://github.com/1587causalai/TabU-lab",
@@ -11,19 +11,21 @@
       "https://wehub.us/causal-superintelligence/"
     ]
   },
-  "purpose": "Develop tabular foundation models through open, small-scale-reproducible, falsifiable experiments.",
+  "purpose": "Investigate whether reconstructing available table evidence learns useful unit-specific relationships and representations that transfer across tables, while producing reusable open research software.",
   "status": {
-    "phase": "lab_bootstrap",
-    "updated_at": "2026-08-26",
-    "public_training_receipts": 0,
+    "phase": "active_experimental_research",
+    "updated_at": "2026-09-16",
+    "evidence_level": "local_unissued",
+    "catalog": "catalog.json",
+    "formal_receipt_count": 0,
     "accepted_model_claims": 0,
-    "next_gate": "Commit the first experiment preregistration before reporting a run."
+    "next_gate": "Define a bounded comparison and its resource budget; assess restoration, transfer, and scaling within separately specified protocols."
   },
   "protocol": [
-    "preregister_hypothesis_and_gate",
+    "preregister_hypothesis_baselines_budget_and_gate",
     "commit_reproducible_code_and_config",
-    "record_seed_data_environment_host_and_compute",
-    "publish_raw_metrics_curves_logs_and_limitations",
+    "record_seed_data_source_and_coarse_compute_environment",
+    "publish_shareable_metrics_and_limitations",
     "declare_pass_kill_or_revise"
   ],
   "claim_boundaries": [
@@ -35,6 +37,42 @@
   "participation": {
     "propose_experiment": "https://github.com/1587causalai/TabU-lab/issues/new",
     "experiment_ledger": "https://github.com/1587causalai/TabU-lab/tree/main/experiments",
-    "reports": "https://github.com/1587causalai/TabU-lab/tree/main/docs/reports"
-  }
+    "reports": "https://github.com/1587causalai/TabU-lab/tree/main/docs/reports",
+    "collaboration": "https://github.com/1587causalai/TabU-lab/issues/new"
+  },
+  "research_support": {
+    "logic": [
+      "important_question",
+      "existing_evidence",
+      "remaining_uncertainty",
+      "bounded_work_and_resources",
+      "inspectable_result",
+      "reusable_contribution"
+    ],
+    "forms": [
+      "research_grants",
+      "compute_support",
+      "maintainer_tools_and_api_credits",
+      "data_and_research_partnerships"
+    ],
+    "scope": "Candidate work packages; budgets, milestones, data rights and publication terms require project-specific agreement.",
+    "overview": "https://research.wehub.us/tabu-lab/#support"
+  },
+  "evidence": [
+    {
+      "kind": "implementation_check",
+      "url": "https://github.com/1587causalai/TabU-lab/blob/main/docs/reviews/restoration-five-step-20260915/README.md",
+      "scope": "Dated restoration implementation review; no fit or generalization claim."
+    },
+    {
+      "kind": "historical_fit",
+      "url": "https://github.com/1587causalai/TabU-lab/blob/main/docs/research/tar-shared-fit-20260907/README.md",
+      "scope": "TabU-TAR fixed-training-table fitting; results do not transfer to the restoration model."
+    },
+    {
+      "kind": "implementation_check",
+      "url": "https://github.com/1587causalai/TabU-lab/blob/main/docs/reviews/restoration-prepared-20260916/README.md",
+      "scope": "Scoped prepared-execution equivalence and timing checks."
+    }
+  ]
 }
