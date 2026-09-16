@@ -834,12 +834,17 @@ def run_curriculum_fit(args, observer=None):
             initial_metrics["stage"] = stage["name"]
             _write(output / f"{stage['name']}-initial-metrics.json", initial_metrics)
             emit("phase", stage=f"{stage['name']}_initial_complete", metrics=initial_metrics)
+            stage_stop = False
             for step_index, (table, cycle, position) in enumerate(_schedule(stage, tables, seeds)):
                 if step_index < skip_updates:
                     continue
                 stage_elapsed = stage_elapsed_prior + time.monotonic() - stage_start
                 if stage_elapsed >= stage_budget - float(stage.get("final_reserve_seconds", 300)):
-                    raise WallLimit(f"stage {stage['name']} wall budget exhausted")
+                    # The stage's training budget is exhausted.  Leave the
+                    # reserved interval for the fixed final evaluation and
+                    # checkpoint, then continue to the next curriculum stage.
+                    stage_stop = True
+                    break
                 episode, mask_info = _episode_for(
                     table,
                     _episode_index(stage["name"], cycle, position),
@@ -921,13 +926,19 @@ def run_curriculum_fit(args, observer=None):
                                              masks=int(plan.get("evaluation_masks", 8)),
                                              deadline=evaluation_deadline)
                         if not periodic["complete"]:
-                            raise WallLimit(f"stage {stage['name']} evaluation exceeded budget")
-                        periodic["stage"] = stage["name"]
-                        periodic["cycle"] = cycle + 1
-                        _write(output / f"{stage['name']}-cycle-{cycle + 1:04d}-metrics.json",
-                               periodic)
-                        emit("phase", stage=f"{stage['name']}_cycle_{cycle + 1}_complete",
-                             metrics=periodic)
+                            # A periodic evaluation that reaches the training
+                            # cutoff ends updates for this stage; the final
+                            # evaluation below gets the remaining reserved
+                            # interval and decides whether the chain can move
+                            # on safely.
+                            stage_stop = True
+                        else:
+                            periodic["stage"] = stage["name"]
+                            periodic["cycle"] = cycle + 1
+                            _write(output / f"{stage['name']}-cycle-{cycle + 1:04d}-metrics.json",
+                                   periodic)
+                            emit("phase", stage=f"{stage['name']}_cycle_{cycle + 1}_complete",
+                                 metrics=periodic)
                     cycle_losses = []
                 _checkpoint(
                     output / "checkpoint-progress.pt",
@@ -942,6 +953,8 @@ def run_curriculum_fit(args, observer=None):
                     stage_elapsed=stage_elapsed,
                     cycle_losses=cycle_losses,
                 )
+                if stage_stop:
+                    break
             stage_eval = evaluate(
                 model,
                 stage_tables(),
