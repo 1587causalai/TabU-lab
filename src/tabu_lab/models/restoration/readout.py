@@ -147,14 +147,17 @@ class RestorationReadout:
             q = (centered * evaluation[:, None, :]).sum(-1)
             q = q - (weights * q).sum(-1, keepdim=True)
             coefficients = weights * (1 + q)
+            coefficient_sums = coefficients.sum(-1)
             if not torch.allclose(
-                coefficients.sum(-1),
+                coefficient_sums,
                 coefficients.new_ones(len(coefficients)),
                 atol=1e-9,
                 rtol=1e-9,
             ):
+                deviation = (coefficient_sums - 1).abs().max().item()
                 raise FloatingPointError(
-                    "numerical-failure: LL coefficient sum lost constant reproduction"
+                    "numerical-failure: LL coefficient sum lost constant reproduction "
+                    f"(max |sum-1| = {deviation:.3e})"
                 )
         # Answer bytes/statistics/codebook are fixed facts, not learned tensors.
         encoded = coefficients @ answers.detach().to(torch.float64)
@@ -249,14 +252,17 @@ class RestorationReadout:
             q = (centered * evaluation[:, :, None, :]).sum(-1)
             q = q - (weights * q).sum(-1, keepdim=True)
             coefficients = weights * (1 + q)
+            coefficient_sums = coefficients.sum(-1)[target_mask]
             if not torch.allclose(
-                coefficients.sum(-1)[target_mask],
+                coefficient_sums,
                 coefficients.new_ones(int(target_mask.sum())),
                 atol=1e-9,
                 rtol=1e-9,
             ):
+                deviation = (coefficient_sums - 1).abs().max().item()
                 raise FloatingPointError(
-                    "numerical-failure: LL coefficient sum lost constant reproduction"
+                    "numerical-failure: LL coefficient sum lost constant reproduction "
+                    f"(max |sum-1| = {deviation:.3e})"
                 )
         # Answer bytes/statistics/codebook are fixed facts, not learned tensors.
         encoded = coefficients @ answers.detach().to(torch.float64)
