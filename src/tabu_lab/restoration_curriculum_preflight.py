@@ -35,7 +35,7 @@ def run_preflight(args):
     )
     largest_real_rows = max(
         (table for table in plan["_tables"] if table.kind == "real"),
-        key=lambda table: table.train_rows,
+        key=lambda table: min(table.train_rows, 204) if table.windowed else table.train_rows,
     )
     stage_synthetic = plan["_stages"][0]
     stage_real = plan["_stages"][2]
