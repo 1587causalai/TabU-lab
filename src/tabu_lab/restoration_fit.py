@@ -60,10 +60,20 @@ def _load_spec(path):
         return yaml.safe_load(text)
 
 
-def _execution_identity(device):
+def _execution_dtype(spec):
+    execution = spec.get("execution", {})
+    if not isinstance(execution, dict) or set(execution) - {"dtype"}:
+        raise ValueError("execution may only declare dtype")
+    dtype = execution.get("dtype", "float64")
+    if dtype not in ("float64", "float32"):
+        raise ValueError("execution dtype must be float64 or float32")
+    return dtype
+
+
+def _execution_identity(device, dtype="float64"):
     return {
         "device": device,
-        "dtype": "float64",
+        "dtype": dtype,
         "torch": str(torch.__version__),
         "torch_num_threads": torch.get_num_threads(),
         "torch_num_interop_threads": torch.get_num_interop_threads(),
@@ -121,6 +131,7 @@ class FitPlan:
     values: tuple
     queries: tuple
     code_seeds: tuple
+    dtype: torch.dtype
     identity: dict
     summary: dict
 
@@ -231,6 +242,7 @@ def prepare_plan(preregistration, dataset, device="cpu"):
     _integer(spec.get("gradient_accumulation", 1), "gradient_accumulation")
     _integer(spec.get("checkpoint_every", 1), "checkpoint_every")
     config = RestorationConfig.from_dict(spec["model"])
+    exec_dtype = _execution_dtype(spec)
     optimizer = spec.get("optimizer")
     if not isinstance(optimizer, dict) or optimizer.get("kind") != "adamw":
         raise ValueError("pilot optimizer must be explicit adamw")
@@ -288,7 +300,7 @@ def prepare_plan(preregistration, dataset, device="cpu"):
         "mask_bank_sha256": _digest(bank),
         "protocol": PROTOCOL,
         "source": source_identity(),
-        "execution": _execution_identity(device),
+        "execution": _execution_identity(device, exec_dtype),
     }
     summary = {
         "status": "local_unissued",
@@ -312,7 +324,10 @@ def prepare_plan(preregistration, dataset, device="cpu"):
         "model": config.as_dict(),
         "optimizer": optimizer,
     }
-    return FitPlan(spec, config, schema, values, tuple(queries), code_seeds, identity, summary)
+    return FitPlan(
+        spec, config, schema, values, tuple(queries), code_seeds,
+        getattr(torch, exec_dtype), identity, summary,
+    )
 
 
 def _require_committed_preregistration(path):
@@ -513,7 +528,7 @@ def run_fit(args):
             plan.identity["execution"]["cuda_device"] = receipt["cuda_device"]
         _json(output / "resolved.json", {"preregistration": plan.spec, "plan": plan.summary})
         torch.manual_seed(plan.spec["seeds"]["model"])
-        model = RestorationModel(plan.config).to(device=args.device, dtype=torch.float64)
+        model = RestorationModel(plan.config).to(device=args.device, dtype=plan.dtype)
         cfg = plan.spec["optimizer"]
         optimizer = torch.optim.AdamW(
             model.parameters(),

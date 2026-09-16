@@ -138,15 +138,26 @@ class RestorationReadout:
             if bool((info != 0).any()):
                 raise FloatingPointError("numerical-failure: LL Cholesky failed; ridge unchanged")
             evaluation = torch.cholesky_solve((targets - mean)[..., None], chol).squeeze(-1)
-            coefficients = weights * (1 + (centered * evaluation[:, None, :]).sum(-1))
+            # Enforce the exact weighted-annihilation identity structurally:
+            # sum_s w_s q_s = 0 holds in exact arithmetic, so project q onto
+            # that subspace instead of relying on solve accuracy alone. The
+            # projection is a no-op up to rounding in FP64; in FP32 it keeps
+            # constant reproduction at softmax precision regardless of the
+            # Cholesky solve's conditioning.
+            q = (centered * evaluation[:, None, :]).sum(-1)
+            q = q - (weights * q).sum(-1, keepdim=True)
+            coefficients = weights * (1 + q)
+            coefficient_sums = coefficients.sum(-1)
             if not torch.allclose(
-                coefficients.sum(-1),
+                coefficient_sums,
                 coefficients.new_ones(len(coefficients)),
                 atol=1e-9,
                 rtol=1e-9,
             ):
+                deviation = (coefficient_sums - 1).abs().max().item()
                 raise FloatingPointError(
-                    "numerical-failure: LL coefficient sum lost constant reproduction"
+                    "numerical-failure: LL coefficient sum lost constant reproduction "
+                    f"(max |sum-1| = {deviation:.3e})"
                 )
         # Answer bytes/statistics/codebook are fixed facts, not learned tensors.
         encoded = coefficients @ answers.detach().to(torch.float64)
@@ -323,15 +334,22 @@ class RestorationReadout:
             if bool((info != 0).any()):
                 raise FloatingPointError("numerical-failure: LL Cholesky failed; ridge unchanged")
             evaluation = torch.cholesky_solve((targets - mean)[..., None], chol).squeeze(-1)
-            coefficients = weights * (1 + (centered * evaluation[:, :, None, :]).sum(-1))
+            # Same structural projection as the single-column path: enforce
+            # sum_s w_s q_s = 0 by construction (see above).
+            q = (centered * evaluation[:, :, None, :]).sum(-1)
+            q = q - (weights * q).sum(-1, keepdim=True)
+            coefficients = weights * (1 + q)
+            coefficient_sums = coefficients.sum(-1)[target_mask]
             if not torch.allclose(
-                coefficients.sum(-1)[target_mask],
+                coefficient_sums,
                 coefficients.new_ones(int(target_mask.sum())),
                 atol=1e-9,
                 rtol=1e-9,
             ):
+                deviation = (coefficient_sums - 1).abs().max().item()
                 raise FloatingPointError(
-                    "numerical-failure: LL coefficient sum lost constant reproduction"
+                    "numerical-failure: LL coefficient sum lost constant reproduction "
+                    f"(max |sum-1| = {deviation:.3e})"
                 )
         # Answer bytes/statistics/codebook are fixed facts, not learned tensors.
         encoded = coefficients @ answers.detach().to(torch.float64)

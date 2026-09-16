@@ -406,3 +406,22 @@ def test_prepared_bank_reuses_fixed_episodes_and_bounds_capacity(artifacts, monk
     assert rebuilt is not original and len(bounded.entries) == 1
     torch.testing.assert_close(fit.score_prepared_episode(model, rebuilt).loss, expected,
                                rtol=0, atol=0)
+
+
+def test_execution_dtype_defaults_records_and_validates(artifacts):
+    plan = fit.prepare_plan(artifacts.preregistration, artifacts.dataset)
+    assert plan.dtype is torch.float64
+    assert plan.identity["execution"]["dtype"] == "float64"
+
+    alter_spec(artifacts, execution={"dtype": "float32"})
+    plan32 = fit.prepare_plan(artifacts.preregistration, artifacts.dataset)
+    assert plan32.dtype is torch.float32
+    assert plan32.identity["execution"]["dtype"] == "float32"
+
+    alter_spec(artifacts, execution={"dtype": "float16"})
+    with pytest.raises(ValueError, match="float64 or float32"):
+        fit.prepare_plan(artifacts.preregistration, artifacts.dataset)
+
+    alter_spec(artifacts, execution={"dtype": "float32", "device": "cuda:0"})
+    with pytest.raises(ValueError, match="only declare dtype"):
+        fit.prepare_plan(artifacts.preregistration, artifacts.dataset)
