@@ -262,8 +262,18 @@ def prepare_plan(preregistration, dataset, device="cpu"):
         or any(not 0 <= _positive(beta, "beta", zero=True) < 1 for beta in betas)
     ):
         raise ValueError("betas must be two finite values in [0,1)")
-    generator = torch.Generator().manual_seed(seeds["rows"])
-    order = torch.randperm(len(data["splits"]["train"]), generator=generator)[:count].tolist()
+    row_order = spec.get("row_order", "shuffle_seeded")
+    if row_order == "split":
+        # Keep the dataset's train-split order, required for reproducing the
+        # TAR covering-fit bank (TAR indexes its pool in split order).
+        if count != len(data["splits"]["train"]):
+            raise ValueError("row_order=split requires row_count to cover the full train split")
+        order = list(range(len(data["splits"]["train"])))
+    elif row_order == "shuffle_seeded":
+        generator = torch.Generator().manual_seed(seeds["rows"])
+        order = torch.randperm(len(data["splits"]["train"]), generator=generator)[:count].tolist()
+    else:
+        raise ValueError("row_order must be shuffle_seeded or split")
     row_ids = [data["splits"]["train"][index] for index in order]
     selected = [[rows[row][col] for col in columns] for row in row_ids]
     if any(
@@ -277,14 +287,40 @@ def prepare_plan(preregistration, dataset, device="cpu"):
         raise ValueError("selected numeric values must fit FP64")
     schema = tuple(ColumnSchema(f"column-{col}", "numeric") for col in columns)
     values = tuple(matrix[:, index].clone() for index in range(len(columns)))
-    generator.manual_seed(seeds["masks"])
-    queries = []
-    for _ in range(bank_size):
-        query = torch.zeros(count, len(columns), dtype=torch.bool)
-        for column in range(len(columns)):
-            query[torch.randperm(count, generator=generator)[:hidden], column] = True
-        queries.append(query)
-    generator.manual_seed(seeds["codes"])
+    mask_mode = spec.get("mask_mode", "cell_bank")
+    if mask_mode == "tar_covering_fit_labels":
+        # Reproduce the TAR joint-fit evaluation bank exactly: cyclic
+        # hidden-row chunks over a randperm keyed by
+        # episode_seed(episode_seed, mask_namespace, 0, "row_roles"), with only
+        # the final (target) column masked. Query row sets then coincide with
+        # TAR's covering-fit episodes for the same table.
+        from tabu_lab.models.tar.episodes import episode_seed
+
+        episode_seed_value = _integer(spec.get("episode_seed"), "episode_seed", 0)
+        namespace = spec.get("mask_namespace")
+        if not isinstance(namespace, str) or not namespace:
+            raise ValueError("mask_mode=tar_covering_fit_labels requires a mask_namespace")
+        generator = torch.Generator().manual_seed(
+            episode_seed(episode_seed_value, namespace, 0, "row_roles")
+        )
+        order = torch.randperm(count, generator=generator).tolist()
+        queries = []
+        for index in range(bank_size):
+            query = torch.zeros(count, len(columns), dtype=torch.bool)
+            for offset in range(hidden):
+                query[order[(index * hidden + offset) % count], len(columns) - 1] = True
+            queries.append(query)
+    elif mask_mode == "cell_bank":
+        generator = torch.Generator().manual_seed(seeds["masks"])
+        queries = []
+        for _ in range(bank_size):
+            query = torch.zeros(count, len(columns), dtype=torch.bool)
+            for column in range(len(columns)):
+                query[torch.randperm(count, generator=generator)[:hidden], column] = True
+            queries.append(query)
+    else:
+        raise ValueError("mask_mode must be cell_bank or tar_covering_fit_labels")
+    generator = torch.Generator().manual_seed(seeds["codes"])
     code_seeds = tuple(torch.randint(2**63 - 1, (bank_size,), generator=generator).tolist())
     bank = [
         {"query": query.tolist(), "code_seed": seed}
@@ -311,6 +347,8 @@ def prepare_plan(preregistration, dataset, device="cpu"):
         "selected_rows": count,
         "selected_columns": columns,
         "excluded_columns": [i for i in range(width) if i not in columns],
+        "row_order": row_order,
+        "mask_mode": mask_mode,
         "query_per_column": hidden,
         "visible_per_column": count - hidden,
         "mask_bank": bank,

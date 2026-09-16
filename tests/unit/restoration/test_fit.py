@@ -425,3 +425,49 @@ def test_execution_dtype_defaults_records_and_validates(artifacts):
     alter_spec(artifacts, execution={"dtype": "float32", "device": "cuda:0"})
     with pytest.raises(ValueError, match="only declare dtype"):
         fit.prepare_plan(artifacts.preregistration, artifacts.dataset)
+
+
+def test_tar_covering_fit_mask_mode_matches_tar_bank(artifacts):
+    from tabu_lab.models.tar.episodes import episode_seed
+
+    alter_spec(
+        artifacts,
+        mask_mode="tar_covering_fit_labels",
+        row_order="split",
+        mask_fraction=0.5,
+        episode_seed=20260907,
+        mask_namespace="fixture/covering-fit",
+    )
+    plan = fit.prepare_plan(artifacts.preregistration, artifacts.dataset, "cpu")
+    # Split order preserves train row IDs (the TAR pool order).
+    assert plan.identity["selected_train_row_ids"] == [0, 1, 2, 3]
+    # Only the final (target) column is masked.
+    assert all(not query[:, 0].any() for query in plan.queries)
+    assert all(int(query[:, 1].sum()) == 2 for query in plan.queries)
+    # Query rows reproduce TAR's cyclic covering-fit bank exactly.
+    generator = torch.Generator().manual_seed(
+        episode_seed(20260907, "fixture/covering-fit", 0, "row_roles")
+    )
+    order = torch.randperm(4, generator=generator).tolist()
+    expected = [{order[(i * 2 + j) % 4] for j in range(2)} for i in range(2)]
+    for query, rows in zip(plan.queries, expected):
+        actual = {int(row) for row in query[:, 1].nonzero().flatten()}
+        assert actual == rows
+    # Cyclic chunks cover every row across the bank.
+    assert set().union(*expected) == {0, 1, 2, 3}
+
+
+def test_tar_mask_mode_requires_namespace_and_rejects_unknown_modes(artifacts):
+    alter_spec(artifacts, mask_mode="tar_covering_fit_labels", row_order="split",
+               episode_seed=20260907)
+    with pytest.raises(ValueError, match="mask_namespace"):
+        fit.prepare_plan(artifacts.preregistration, artifacts.dataset, "cpu")
+    alter_spec(artifacts, mask_namespace="fixture/covering-fit", mask_mode="mystery")
+    with pytest.raises(ValueError, match="mask_mode"):
+        fit.prepare_plan(artifacts.preregistration, artifacts.dataset, "cpu")
+
+
+def test_row_order_split_requires_full_train_split(artifacts):
+    alter_spec(artifacts, row_order="split", row_count=3)
+    with pytest.raises(ValueError, match="row_order"):
+        fit.prepare_plan(artifacts.preregistration, artifacts.dataset, "cpu")
