@@ -5,13 +5,14 @@ Local receipts, source identities and checkpoints remain the primary record.
 The tracker mirrors aggregate metrics and progress; table contents and model
 checkpoints are not uploaded by the observer.
 
-## Current recipe: global 2.5% masks with numeric tail protection
+## Current recipe: global 2.5% masks with threshold-4 numeric tail protection
 
-Use [old120 Small-128 tail protection](old120-small128-tail-guard/README.md).
-Extreme numeric training cells stay visible while the total Query budget and
-full-cell loss remain unchanged. The preceding global-mask run stopped with a
-checkpoint at update 2,338. The new run starts from seed 1729 and adds separate
-pre-clip/post-clip gradient monitoring.
+Use [old120 Small-128 threshold-4 tail protection](old120-small128-tail-guard4/README.md).
+The current threshold is 4 half-IQR. Protected values stay visible and remain
+full-cell loss targets; the global Query budget stays at 2.5%.
+The threshold-8 run stopped at update 1,004 with a saved checkpoint, at the
+owner's request. Its configuration and results remain historical records.
+The threshold-4 recipe is prepared but has not been launched.
 
 ## Previous recipe: global 2.5% masks
 

@@ -18,6 +18,21 @@ from tabu_lab.restoration_masking import global_query_mask, numeric_tail_protect
 GUARD = {"kind": "median_half_iqr", "max_abs_robust_z": 8.0}
 
 
+def test_threshold_four_protects_additional_tail_without_shrinking_query_budget():
+    table = _guard_table([0] * 12 + [4, 5, 8, 9])
+    four = {**GUARD, "max_abs_robust_z": 4.0}
+    protected4, _ = numeric_tail_protection(table, four, 1.0)
+    protected8, _ = numeric_tail_protection(table, GUARD, 1.0)
+    assert protected4[:, 0].tolist() == [False] * 13 + [True] * 3
+    assert protected8[:, 0].tolist() == [False] * 15 + [True]
+    for seed in range(20):
+        query, info = global_query_mask(table, .25, seed, numeric_query_guard=four,
+                                        numeric_scale_floor=1.0)
+        assert query.sum() == 4
+        assert not (query & protected4).any()
+        assert info["numeric_query_guard"]["max_abs_robust_z"] == 4.0
+
+
 def _numeric_table(rows=204, columns=8):
     return TablePlan(
         "numeric", tuple(range(rows)),

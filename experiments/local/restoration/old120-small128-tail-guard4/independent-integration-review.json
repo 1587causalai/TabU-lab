@@ -1,0 +1,67 @@
+{
+  "blockers": [],
+  "boundaries": [
+    "Repository full tests, TeX compilation and visual verification are integrator-reported; this review independently inspected the TeX text and verified its source digest against the compile receipt.",
+    "Readout changed through the main integration, so any future CUDA run requires qualification on this final integrated source.",
+    "The stop artifact was checked for internal consistency; this review did not independently reread or modify remote processes/checkpoints.",
+    "No public merge/release, source mutation, or replacement training was performed by this review."
+  ],
+  "checks": {
+    "branch_runner_mask_observer_cli_preflight_byte_identical_to_reviewed_head": [
+      "src/tabu_lab/restoration_joint_fit.py",
+      "src/tabu_lab/restoration_masking.py",
+      "src/tabu_lab/observers/restoration.py",
+      "src/tabu_lab/cli.py",
+      "src/tabu_lab/restoration_joint_preflight.py"
+    ],
+    "current_tutorial_links_threshold4_recipe": true,
+    "historical_threshold8_tracked_artifacts_unchanged": 11,
+    "main_changed_files_byte_identical_to_main": [
+      "experiments/local/restoration-204row-fp32-pilot/preregistration.yaml",
+      "experiments/local/restoration-204row-fp64-pilot/preregistration.yaml",
+      "experiments/local/restoration-old120-tar-aligned-fp32-pilot/preregistration.yaml",
+      "experiments/local/restoration-old120-tar-aligned-fp64-pilot/preregistration.yaml",
+      "experiments/local/restoration-small128-fp32-pilot/preregistration.yaml",
+      "src/tabu_lab/models/restoration/readout.py",
+      "src/tabu_lab/restoration_fit.py",
+      "tests/unit/restoration/test_fit.py"
+    ],
+    "manuscript_source_digest_matches_compile_receipt": "35b71925a9b2afe413e4b2c4a36b47883e3333209f0bdd62d05565be7bc81246",
+    "manuscript_threshold4_footnote_matches_guard_semantics": true,
+    "new_recipe_launch_status": "prepared_not_launched",
+    "prior_stop_checkpoint_error": null,
+    "prior_stop_record_counter_consistent": true,
+    "threshold4_fixed_mask_cpu_census": {
+      "affected_columns": 884,
+      "affected_tables": 110,
+      "episodes_checked": 960,
+      "protected_cells_queried": 0,
+      "query_cells": 80432,
+      "unique_protected_numeric_cells": 3622
+    }
+  },
+  "integrated_main_head": "3f1450069dc1a5364277790c2969538219210ab5",
+  "integrator_reported_validation": {
+    "diff_checks": "passed",
+    "expected_warnings": 2,
+    "manuscript_compile": "passed",
+    "manuscript_visual_check": "passed",
+    "repository_tests_passed": 882,
+    "repository_tests_skipped": 9,
+    "ruff_changed_files": "passed"
+  },
+  "preregistration_sha256": "5e8862800b9aaa495e88b19d3d89587ba668bf0f5a41e5c54deda41703e747ee",
+  "result": "no_merge_blockers",
+  "review_scope": "Independent non-developer read-only review of current integration and threshold-4 recipe; no training or merge performed.",
+  "reviewed_branch_head": "54a4059d79c18b144a7dc8369f3f8f79ac2b33a3",
+  "schema": "tabu.restoration.threshold4-independent-integration-review.v1",
+  "semantics": [
+    "Main FP32 execution, TAR covering-label masks, on-device checkpoint snapshot and LL constant-reproduction projection changes are retained byte-for-byte.",
+    "Joint-fit remains explicit FP64 and does not acquire single-table dtype/mask defaults from restoration_fit.",
+    "Threshold 4 is an explicit new preregistration; threshold-8 configuration and historical evidence are unchanged.",
+    "Guard calibration uses train204 only; protected values remain visible supports and all-cell targets; model codec remains visible-only.",
+    "Source and preregistration identity changes prevent continuation from the threshold-8 checkpoint.",
+    "Query metrics are conditional on the narrower eligibility domain, not directly equivalent across thresholds."
+  ],
+  "source_sha256": "eb42c74dc47023914eda5349149afde410963586ff41e4bd040a532fd667eb1b"
+}

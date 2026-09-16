@@ -1,0 +1,217 @@
+{
+  "complete_rounds": 5,
+  "mask_and_code_replay_exact": true,
+  "observed_at_utc": "2026-09-16T01:24:17.229196+00:00",
+  "query_4_to_8_exposures": 384,
+  "run_id": "old120-small128-tailguard8-20260916",
+  "schema": "tabu.restoration.threshold4-descriptive-audit.v1",
+  "scope": "CPU mask replay and logged metrics only; no scorer counterfactual or change to running training.",
+  "top10_gradient": [
+    {
+      "gradient_norm": 14398.108548529539,
+      "loss": 24.625245678939947,
+      "max_hidden_train_robust_z": 7.043415916681489,
+      "post_clip_gradient_norm": 0.9999999999305464,
+      "queried_4_to_8_cells": 2,
+      "round": 2,
+      "table": "discoscm_086",
+      "update": 228
+    },
+    {
+      "gradient_norm": 13061.631266874381,
+      "loss": 23.06020948994228,
+      "max_hidden_train_robust_z": 7.964401558219926,
+      "post_clip_gradient_norm": 0.9999999999234398,
+      "queried_4_to_8_cells": 2,
+      "round": 3,
+      "table": "discoscm_086",
+      "update": 244
+    },
+    {
+      "gradient_norm": 8454.976996418438,
+      "loss": 16.852788393016038,
+      "max_hidden_train_robust_z": 5.207976787417828,
+      "post_clip_gradient_norm": 0.9999999998817264,
+      "queried_4_to_8_cells": 2,
+      "round": 5,
+      "table": "discoscm_086",
+      "update": 573
+    },
+    {
+      "gradient_norm": 4958.78336107024,
+      "loss": 16.8238272996582,
+      "max_hidden_train_robust_z": 5.709828918564034,
+      "post_clip_gradient_norm": 0.9999999997983375,
+      "queried_4_to_8_cells": 3,
+      "round": 1,
+      "table": "discoscm_086",
+      "update": 75
+    },
+    {
+      "gradient_norm": 2269.0582181563104,
+      "loss": 5.386003035436857,
+      "max_hidden_train_robust_z": 4.908480805802294,
+      "post_clip_gradient_norm": 0.9999999995592884,
+      "queried_4_to_8_cells": 1,
+      "round": 4,
+      "table": "discoscm_086",
+      "update": 471
+    },
+    {
+      "gradient_norm": 2125.2271098521533,
+      "loss": 3.1904761965719364,
+      "max_hidden_train_robust_z": 7.052570466091017,
+      "post_clip_gradient_norm": 0.9999999995294623,
+      "queried_4_to_8_cells": 4,
+      "round": 2,
+      "table": "discoscm_080",
+      "update": 225
+    },
+    {
+      "gradient_norm": 1533.950239289222,
+      "loss": 3.387094455933863,
+      "max_hidden_train_robust_z": 5.279958917684236,
+      "post_clip_gradient_norm": 0.9999999993480883,
+      "queried_4_to_8_cells": 1,
+      "round": 1,
+      "table": "discoscm_080",
+      "update": 30
+    },
+    {
+      "gradient_norm": 1523.8072119471685,
+      "loss": 9.97726579870698,
+      "max_hidden_train_robust_z": 3.3007571207709603,
+      "post_clip_gradient_norm": 0.9999999993437488,
+      "queried_4_to_8_cells": 0,
+      "round": 1,
+      "table": "discoscm_084",
+      "update": 99
+    },
+    {
+      "gradient_norm": 966.6531882643128,
+      "loss": 1.1926681835305724,
+      "max_hidden_train_robust_z": 7.921921768087078,
+      "post_clip_gradient_norm": 0.9999999989655027,
+      "queried_4_to_8_cells": 8,
+      "round": 5,
+      "table": "discoscm_080",
+      "update": 558
+    },
+    {
+      "gradient_norm": 507.62235234985565,
+      "loss": 0.739095052428537,
+      "max_hidden_train_robust_z": 7.688934430253656,
+      "post_clip_gradient_norm": 0.9999999980300316,
+      "queried_4_to_8_cells": 2,
+      "round": 2,
+      "table": "discoscm_090",
+      "update": 237
+    }
+  ],
+  "top10_loss": [
+    {
+      "gradient_norm": 14398.108548529539,
+      "loss": 24.625245678939947,
+      "max_hidden_train_robust_z": 7.043415916681489,
+      "post_clip_gradient_norm": 0.9999999999305464,
+      "queried_4_to_8_cells": 2,
+      "round": 2,
+      "table": "discoscm_086",
+      "update": 228
+    },
+    {
+      "gradient_norm": 13061.631266874381,
+      "loss": 23.06020948994228,
+      "max_hidden_train_robust_z": 7.964401558219926,
+      "post_clip_gradient_norm": 0.9999999999234398,
+      "queried_4_to_8_cells": 2,
+      "round": 3,
+      "table": "discoscm_086",
+      "update": 244
+    },
+    {
+      "gradient_norm": 8454.976996418438,
+      "loss": 16.852788393016038,
+      "max_hidden_train_robust_z": 5.207976787417828,
+      "post_clip_gradient_norm": 0.9999999998817264,
+      "queried_4_to_8_cells": 2,
+      "round": 5,
+      "table": "discoscm_086",
+      "update": 573
+    },
+    {
+      "gradient_norm": 4958.78336107024,
+      "loss": 16.8238272996582,
+      "max_hidden_train_robust_z": 5.709828918564034,
+      "post_clip_gradient_norm": 0.9999999997983375,
+      "queried_4_to_8_cells": 3,
+      "round": 1,
+      "table": "discoscm_086",
+      "update": 75
+    },
+    {
+      "gradient_norm": 1523.8072119471685,
+      "loss": 9.97726579870698,
+      "max_hidden_train_robust_z": 3.3007571207709603,
+      "post_clip_gradient_norm": 0.9999999993437488,
+      "queried_4_to_8_cells": 0,
+      "round": 1,
+      "table": "discoscm_084",
+      "update": 99
+    },
+    {
+      "gradient_norm": 2269.0582181563104,
+      "loss": 5.386003035436857,
+      "max_hidden_train_robust_z": 4.908480805802294,
+      "post_clip_gradient_norm": 0.9999999995592884,
+      "queried_4_to_8_cells": 1,
+      "round": 4,
+      "table": "discoscm_086",
+      "update": 471
+    },
+    {
+      "gradient_norm": 1533.950239289222,
+      "loss": 3.387094455933863,
+      "max_hidden_train_robust_z": 5.279958917684236,
+      "post_clip_gradient_norm": 0.9999999993480883,
+      "queried_4_to_8_cells": 1,
+      "round": 1,
+      "table": "discoscm_080",
+      "update": 30
+    },
+    {
+      "gradient_norm": 2125.2271098521533,
+      "loss": 3.1904761965719364,
+      "max_hidden_train_robust_z": 7.052570466091017,
+      "post_clip_gradient_norm": 0.9999999995294623,
+      "queried_4_to_8_cells": 4,
+      "round": 2,
+      "table": "discoscm_080",
+      "update": 225
+    },
+    {
+      "gradient_norm": 208.03705608968076,
+      "loss": 2.963208395186096,
+      "max_hidden_train_robust_z": 4.353011307736414,
+      "post_clip_gradient_norm": 0.9999999951931642,
+      "queried_4_to_8_cells": 1,
+      "round": 2,
+      "table": "scm_mixed_v1_006",
+      "update": 195
+    },
+    {
+      "gradient_norm": 139.83179240146603,
+      "loss": 2.4149220538938097,
+      "max_hidden_train_robust_z": 3.415579956053925,
+      "post_clip_gradient_norm": 0.9999999928485507,
+      "queried_4_to_8_cells": 0,
+      "round": 3,
+      "table": "scm_mixed_v1_006",
+      "update": 349
+    }
+  ],
+  "top20_gradient_querying_4_to_8": 15,
+  "top20_loss_querying_4_to_8": 15,
+  "updates": 600,
+  "updates_querying_4_to_8_cells": 237
+}

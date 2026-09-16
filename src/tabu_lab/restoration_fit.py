@@ -60,10 +60,20 @@ def _load_spec(path):
         return yaml.safe_load(text)
 
 
-def _execution_identity(device):
+def _execution_dtype(spec):
+    execution = spec.get("execution", {})
+    if not isinstance(execution, dict) or set(execution) - {"dtype"}:
+        raise ValueError("execution may only declare dtype")
+    dtype = execution.get("dtype", "float64")
+    if dtype not in ("float64", "float32"):
+        raise ValueError("execution dtype must be float64 or float32")
+    return dtype
+
+
+def _execution_identity(device, dtype="float64"):
     return {
         "device": device,
-        "dtype": "float64",
+        "dtype": dtype,
         "torch": str(torch.__version__),
         "torch_num_threads": torch.get_num_threads(),
         "torch_num_interop_threads": torch.get_num_interop_threads(),
@@ -121,6 +131,7 @@ class FitPlan:
     values: tuple
     queries: tuple
     code_seeds: tuple
+    dtype: torch.dtype
     identity: dict
     summary: dict
 
@@ -231,6 +242,7 @@ def prepare_plan(preregistration, dataset, device="cpu"):
     _integer(spec.get("gradient_accumulation", 1), "gradient_accumulation")
     _integer(spec.get("checkpoint_every", 1), "checkpoint_every")
     config = RestorationConfig.from_dict(spec["model"])
+    exec_dtype = _execution_dtype(spec)
     optimizer = spec.get("optimizer")
     if not isinstance(optimizer, dict) or optimizer.get("kind") != "adamw":
         raise ValueError("pilot optimizer must be explicit adamw")
@@ -250,8 +262,18 @@ def prepare_plan(preregistration, dataset, device="cpu"):
         or any(not 0 <= _positive(beta, "beta", zero=True) < 1 for beta in betas)
     ):
         raise ValueError("betas must be two finite values in [0,1)")
-    generator = torch.Generator().manual_seed(seeds["rows"])
-    order = torch.randperm(len(data["splits"]["train"]), generator=generator)[:count].tolist()
+    row_order = spec.get("row_order", "shuffle_seeded")
+    if row_order == "split":
+        # Keep the dataset's train-split order, required for reproducing the
+        # TAR covering-fit bank (TAR indexes its pool in split order).
+        if count != len(data["splits"]["train"]):
+            raise ValueError("row_order=split requires row_count to cover the full train split")
+        order = list(range(len(data["splits"]["train"])))
+    elif row_order == "shuffle_seeded":
+        generator = torch.Generator().manual_seed(seeds["rows"])
+        order = torch.randperm(len(data["splits"]["train"]), generator=generator)[:count].tolist()
+    else:
+        raise ValueError("row_order must be shuffle_seeded or split")
     row_ids = [data["splits"]["train"][index] for index in order]
     selected = [[rows[row][col] for col in columns] for row in row_ids]
     if any(
@@ -265,14 +287,40 @@ def prepare_plan(preregistration, dataset, device="cpu"):
         raise ValueError("selected numeric values must fit FP64")
     schema = tuple(ColumnSchema(f"column-{col}", "numeric") for col in columns)
     values = tuple(matrix[:, index].clone() for index in range(len(columns)))
-    generator.manual_seed(seeds["masks"])
-    queries = []
-    for _ in range(bank_size):
-        query = torch.zeros(count, len(columns), dtype=torch.bool)
-        for column in range(len(columns)):
-            query[torch.randperm(count, generator=generator)[:hidden], column] = True
-        queries.append(query)
-    generator.manual_seed(seeds["codes"])
+    mask_mode = spec.get("mask_mode", "cell_bank")
+    if mask_mode == "tar_covering_fit_labels":
+        # Reproduce the TAR joint-fit evaluation bank exactly: cyclic
+        # hidden-row chunks over a randperm keyed by
+        # episode_seed(episode_seed, mask_namespace, 0, "row_roles"), with only
+        # the final (target) column masked. Query row sets then coincide with
+        # TAR's covering-fit episodes for the same table.
+        from tabu_lab.models.tar.episodes import episode_seed
+
+        episode_seed_value = _integer(spec.get("episode_seed"), "episode_seed", 0)
+        namespace = spec.get("mask_namespace")
+        if not isinstance(namespace, str) or not namespace:
+            raise ValueError("mask_mode=tar_covering_fit_labels requires a mask_namespace")
+        generator = torch.Generator().manual_seed(
+            episode_seed(episode_seed_value, namespace, 0, "row_roles")
+        )
+        order = torch.randperm(count, generator=generator).tolist()
+        queries = []
+        for index in range(bank_size):
+            query = torch.zeros(count, len(columns), dtype=torch.bool)
+            for offset in range(hidden):
+                query[order[(index * hidden + offset) % count], len(columns) - 1] = True
+            queries.append(query)
+    elif mask_mode == "cell_bank":
+        generator = torch.Generator().manual_seed(seeds["masks"])
+        queries = []
+        for _ in range(bank_size):
+            query = torch.zeros(count, len(columns), dtype=torch.bool)
+            for column in range(len(columns)):
+                query[torch.randperm(count, generator=generator)[:hidden], column] = True
+            queries.append(query)
+    else:
+        raise ValueError("mask_mode must be cell_bank or tar_covering_fit_labels")
+    generator = torch.Generator().manual_seed(seeds["codes"])
     code_seeds = tuple(torch.randint(2**63 - 1, (bank_size,), generator=generator).tolist())
     bank = [
         {"query": query.tolist(), "code_seed": seed}
@@ -288,7 +336,7 @@ def prepare_plan(preregistration, dataset, device="cpu"):
         "mask_bank_sha256": _digest(bank),
         "protocol": PROTOCOL,
         "source": source_identity(),
-        "execution": _execution_identity(device),
+        "execution": _execution_identity(device, exec_dtype),
     }
     summary = {
         "status": "local_unissued",
@@ -299,6 +347,8 @@ def prepare_plan(preregistration, dataset, device="cpu"):
         "selected_rows": count,
         "selected_columns": columns,
         "excluded_columns": [i for i in range(width) if i not in columns],
+        "row_order": row_order,
+        "mask_mode": mask_mode,
         "query_per_column": hidden,
         "visible_per_column": count - hidden,
         "mask_bank": bank,
@@ -312,7 +362,10 @@ def prepare_plan(preregistration, dataset, device="cpu"):
         "model": config.as_dict(),
         "optimizer": optimizer,
     }
-    return FitPlan(spec, config, schema, values, tuple(queries), code_seeds, identity, summary)
+    return FitPlan(
+        spec, config, schema, values, tuple(queries), code_seeds,
+        getattr(torch, exec_dtype), identity, summary,
+    )
 
 
 def _require_committed_preregistration(path):
@@ -404,25 +457,60 @@ def _cpu_copy(value):
     return value
 
 
-def _finite_state(value):
+def _device_copy(value):
+    """Structural clone that stays on the source device (no host sync)."""
     if isinstance(value, torch.Tensor):
-        return bool(torch.isfinite(value).all())
+        return value.detach().clone()
     if isinstance(value, dict):
-        return all(_finite_state(item) for item in value.values())
+        return {key: _device_copy(item) for key, item in value.items()}
     if isinstance(value, (list, tuple)):
-        return all(_finite_state(item) for item in value)
-    return not isinstance(value, float) or math.isfinite(value)
+        return type(value)(_device_copy(item) for item in value)
+    return value
+
+
+def _finite_state(value):
+    """Same detection semantics as before, but tensor flags are accumulated
+    device-side and reduced with a single host sync instead of one sync per
+    tensor (matters on MPS/CUDA, where each bool() stalls the pipeline)."""
+    tensor_flags = []
+    python_finite = True
+
+    def walk(item):
+        nonlocal python_finite
+        if isinstance(item, torch.Tensor):
+            tensor_flags.append(torch.isfinite(item).all().reshape(()))
+        elif isinstance(item, dict):
+            for sub in item.values():
+                walk(sub)
+        elif isinstance(item, (list, tuple)):
+            for sub in item:
+                walk(sub)
+        elif isinstance(item, float) and not math.isfinite(item):
+            python_finite = False
+
+    walk(value)
+    if not python_finite:
+        return False
+    if not tensor_flags:
+        return True
+    devices = {flag.device for flag in tensor_flags}
+    if len(devices) > 1:
+        # Mixed-device state: fall back to per-tensor checks.
+        return all(bool(flag) for flag in tensor_flags)
+    return bool(torch.stack(tensor_flags).all())
 
 
 def checkpoint_state(model, optimizer, plan, step, cursor, elapsed):
     # Capture only a fully completed, finite update. Assignment of the returned
-    # independent CPU snapshot is atomic; an interrupted copy preserves its predecessor.
+    # independent snapshot is atomic; an interrupted copy preserves its predecessor.
+    # The snapshot is cloned on-device (no host sync per update); the host copy
+    # happens once inside save_checkpoint, i.e. at actual save points.
     return {
         "schema": "tabu.restoration.pilot-checkpoint.v1",
         "identity": plan.identity,
         "config": model.config.as_dict(),
-        "model": _cpu_copy(model.state_dict()),
-        "optimizer": _cpu_copy(optimizer.state_dict()),
+        "model": _device_copy(model.state_dict()),
+        "optimizer": _device_copy(optimizer.state_dict()),
         "step": step,
         "sampler_cursor": cursor,
         "elapsed_seconds": elapsed,
@@ -435,7 +523,7 @@ def checkpoint_state(model, optimizer, plan, step, cursor, elapsed):
 
 def save_checkpoint(path, state):
     with Path(path).open("xb") as handle:
-        torch.save(state, handle)
+        torch.save(_cpu_copy(state), handle)
         handle.flush()
         os.fsync(handle.fileno())
 
@@ -513,7 +601,7 @@ def run_fit(args):
             plan.identity["execution"]["cuda_device"] = receipt["cuda_device"]
         _json(output / "resolved.json", {"preregistration": plan.spec, "plan": plan.summary})
         torch.manual_seed(plan.spec["seeds"]["model"])
-        model = RestorationModel(plan.config).to(device=args.device, dtype=torch.float64)
+        model = RestorationModel(plan.config).to(device=args.device, dtype=plan.dtype)
         cfg = plan.spec["optimizer"]
         optimizer = torch.optim.AdamW(
             model.parameters(),
@@ -552,7 +640,16 @@ def run_fit(args):
             parameters = [
                 parameter for parameter in model.parameters() if parameter.grad is not None
             ]
-            if not parameters or any(not bool(torch.isfinite(p.grad).all()) for p in parameters):
+            if not parameters:
+                raise FloatingPointError("missing or nonfinite training gradients")
+            # Same detection, one host sync: accumulate per-parameter flags on
+            # device and reduce once, instead of one bool() sync per parameter.
+            grad_flags = [torch.isfinite(p.grad).all().reshape(()) for p in parameters]
+            if len({flag.device for flag in grad_flags}) > 1:
+                grads_finite = all(bool(flag) for flag in grad_flags)
+            else:
+                grads_finite = bool(torch.stack(grad_flags).all())
+            if not grads_finite:
                 raise FloatingPointError("missing or nonfinite training gradients")
             gradient_norm = torch.nn.utils.clip_grad_norm_(
                 parameters, cfg["grad_clip"], error_if_nonfinite=True

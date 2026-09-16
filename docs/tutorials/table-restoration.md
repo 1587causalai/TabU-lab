@@ -225,11 +225,20 @@ original units, discrete accuracy, and coverage by table, source family, and
 column type. The route remains a training-row fit diagnostic; the reserved 52 rows
 and unseen-table generalization are outside this result.
 
-The current runnable recipe is
-[`restoration/old120-small128-tar-budget`](../../experiments/local/restoration/README.md).
+The current prepared recipe is
+[`restoration/old120-small128-tail-guard4`](../../experiments/local/restoration/old120-small128-tail-guard4/README.md).
+Before masking, its v4 sampler protects numeric cells whose distance from the
+training-column median exceeds `4 * max(train_half_IQR, encoder_epsilon)`.
+These values stay visible and remain all-cell loss targets. The encoder's own
+statistics still use only visible inputs. The global 2.5% Query budget is drawn
+across eligible cells without per-column quotas. Training and fixed evaluation
+share the policy and report protection/coverage; a smaller threshold narrows the
+Query domain, so lower Query loss alone does not establish better restoration.
+The threshold-8 run was stopped and preserved; threshold 4 has not been launched.
 The earlier `restoration-old120-joint-fit` preregistration is a historical v1
 pilot bound to source `def4954`; preserve its bytes and use that exact source to
-reproduce it. The current v2 runner rejects its old protocol and checkpoints.
+reproduce it. The current runner rejects that v1 protocol and its checkpoints;
+v2/v3 configurations retain their explicitly declared historical mask policies.
 
 ### Live restoration observation
 

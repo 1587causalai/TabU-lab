@@ -1,0 +1,104 @@
+{
+  "schema": "tabu.restoration.pilot-fit.v1",
+  "status": "local_unissued",
+  "hypothesis": "The single-pass restoration model can reduce Query encoding MSE on a fixed bank of cell masks over a bounded training-row subset. This is a fit diagnostic, not held-out-row or unseen-table evaluation.",
+  "dataset_sha256": "226be84dd0833fff8245bcd8bf6295ba5002f8c0de95bba2489960c611b3f0f0",
+  "expected_rows": 256,
+  "columns": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "row_count": 204,
+  "mask_fraction": 0.3333333333333333,
+  "mask_bank_size": 8,
+  "seeds": {
+    "model": 1729,
+    "rows": 1730,
+    "masks": 1731,
+    "codes": 1732
+  },
+  "model": {
+    "encoder": {
+      "width": 128,
+      "category_map": "identity128",
+      "mlp_hidden": 128,
+      "epsilon": 1e-06
+    },
+    "backbone": {
+      "width": 128,
+      "layers": 3,
+      "heads": 8,
+      "ff_width": 256,
+      "kind": "inducing",
+      "slots": 256,
+      "tau_presence": 1.0,
+      "reference_mass": 1.0,
+      "norm_eps": 1e-06
+    },
+    "readout": "ll",
+    "bandwidth": 1.0,
+    "ridge": 0.001
+  },
+  "optimizer": {
+    "kind": "adamw",
+    "learning_rate": 0.0001,
+    "weight_decay": 0.0,
+    "betas": [
+      0.9,
+      0.95
+    ],
+    "eps": 1e-08,
+    "grad_clip": 1.0
+  },
+  "gradient_accumulation": 1,
+  "max_updates": 200,
+  "max_wall_seconds": 7200,
+  "checkpoint_every": 20,
+  "pass_criteria": [
+    "Finite forward, loss, gradients and parameters throughout the bounded attempt.",
+    "Report final versus initial Query encoding MSE on the same fixed fit mask bank; a decrease supports only this bounded fit hypothesis.",
+    "Keep retained and Query metrics separate and preserve exact checkpoint continuation identity."
+  ],
+  "kill_criteria": [
+    "Stop and record failure on invalid support, nonfinite loss, gradient or parameter.",
+    "Stop at 200 total optimizer updates or 600 cumulative attempt seconds, checked between operations; do not reset the recorded budget through resume."
+  ],
+  "evidence_plan": [
+    "Bind the snapshot, original split, selected training row IDs, schema, mask/code seeds, model configuration and actual source bytes.",
+    "Save initial/final fixed-bank fit metrics, per-update progress, checkpoint, optimizer/RNG/cursor and a terminal outcome even on failure.",
+    "Do not score reserved rows or enable external observers."
+  ],
+  "legacy_reference": {
+    "model": "tabu.tar Small-128",
+    "reused": [
+      "width=128",
+      "layers=3",
+      "heads=8",
+      "ff_width=256",
+      "seed=1729",
+      "B1",
+      "lr=1e-4",
+      "Adam betas=0.9/0.95",
+      "eps=1e-8",
+      "clip=1"
+    ],
+    "adaptations": [
+      "New single-pass all-cell restoration objective and visible-only robust numeric codec.",
+      "Keep new-model inducing_slots=256, tau_presence=1 and reference_mass=1; legacy Small-128 used 128 inducing slots and a different presence/readout realization.",
+      "Use AdamW with zero decay for the first diagnostic; legacy trained with matrix decay and later mixed Muon/AdamW.",
+      "Use 32 training rows from one numeric table before measuring the historical 204-row, multi-table scale.",
+      "Fresh initialization; no legacy checkpoint or optimizer state."
+    ]
+  },
+  "preparation_revision": "TAR-aligned mask amendment: same scm_mixed_v1_000 snapshot, full 204-row train split in split order (identical to TAR's pool), masks restricted to the target column with the TAR covering-fit bank reproduced exactly (episode_seed=20260907, namespace=scm_mixed_v1_000/covering-fit, 8 cyclic 68-row query chunks = TAR's fit-eval episodes). Model, optimizer, seeds and 200-update budget as the 204-row pilot; one restoration update corresponds to one TAR round on this table, enabling direct per-round comparison. Note: restoration trains on the same fixed bank it reports (bounded fit diagnostic), whereas TAR resampled training episodes per round and used the bank for evaluation only. Execution dtype float64 (registered default).",
+  "row_order": "split",
+  "mask_mode": "tar_covering_fit_labels",
+  "episode_seed": 20260907,
+  "mask_namespace": "scm_mixed_v1_000/covering-fit"
+}
