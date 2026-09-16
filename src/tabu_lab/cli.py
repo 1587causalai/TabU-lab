@@ -304,6 +304,12 @@ def build_parser() -> argparse.ArgumentParser:
     restoration_fit.add_argument("--output-root", type=Path, required=True)
     restoration_fit.add_argument("--device", choices=("cpu", "cuda:0"), default="cpu")
     restoration_fit.add_argument("--resume", type=Path, help="checkpoint from a previous attempt")
+    restoration_fit.add_argument(
+        "--wandb-project",
+        default=None,
+        help="passive W&B mirror project; requires preregistration telemetry.wandb_mirror: true",
+    )
+    restoration_fit.add_argument("--wandb-entity", default=None)
     restoration_fit.add_argument("--execute", action="store_true")
     restoration_fit.set_defaults(handler=_run_restoration_fit)
     restoration_joint_fit = restoration_sub.add_parser(

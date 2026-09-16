@@ -471,3 +471,58 @@ def test_row_order_split_requires_full_train_split(artifacts):
     alter_spec(artifacts, row_order="split", row_count=3)
     with pytest.raises(ValueError, match="row_order"):
         fit.prepare_plan(artifacts.preregistration, artifacts.dataset, "cpu")
+
+
+def test_wandb_mirror_requires_preregistration_declaration(artifacts):
+    artifacts.wandb_project = "tabu-lab"
+    artifacts.wandb_entity = None
+    receipt = execute(artifacts)
+    assert receipt["outcome"] == "failed"
+    assert receipt["error_type"] == "ValueError"
+    assert "wandb_mirror" in receipt["error"]
+
+
+def test_wandb_mirror_logs_and_finishes(artifacts, monkeypatch):
+    calls = {"init": 0, "log": [], "finish": None}
+
+    class StubRun:
+        url = "https://wandb.invalid/run/1"
+        id = "stub-1"
+
+        def log(self, payload, step=None):
+            calls["log"].append((payload, step))
+
+        def finish(self, exit_code=0):
+            calls["finish"] = exit_code
+
+    class StubWandb:
+        def init(self, **kwargs):
+            calls["init"] += 1
+            assert kwargs["project"] == "tabu-lab"
+            return StubRun()
+
+    monkeypatch.setitem(__import__("sys").modules, "wandb", StubWandb())
+    alter_spec(artifacts, telemetry={"wandb_mirror": True})
+    artifacts.wandb_project = "tabu-lab"
+    artifacts.wandb_entity = None
+    receipt = execute(artifacts)
+    assert receipt["outcome"] == "completed"
+    assert receipt["wandb"]["id"] == "stub-1"
+    assert calls["init"] == 1
+    steps = [step for _, step in calls["log"]]
+    assert 0 in steps and 1 in steps and 3 in steps  # initial, updates, final
+    assert calls["finish"] == 0
+
+
+def test_wandb_mirror_runtime_failure_is_nonfatal(artifacts, monkeypatch):
+    class FailingWandb:
+        def init(self, **kwargs):
+            raise OSError("network down")
+
+    monkeypatch.setitem(__import__("sys").modules, "wandb", FailingWandb())
+    alter_spec(artifacts, telemetry={"wandb_mirror": True})
+    artifacts.wandb_project = "tabu-lab"
+    artifacts.wandb_entity = None
+    receipt = execute(artifacts)
+    assert receipt["outcome"] == "completed"
+    assert receipt["wandb"]["error_type"] == "OSError"
