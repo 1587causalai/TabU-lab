@@ -96,9 +96,13 @@
       "Fresh initialization; no legacy checkpoint or optimizer state."
     ]
   },
-  "preparation_revision": "TAR-aligned mask amendment: same scm_mixed_v1_000 snapshot, full 204-row train split in split order (identical to TAR's pool), masks restricted to the target column with the TAR covering-fit bank reproduced exactly (episode_seed=20260907, namespace=scm_mixed_v1_000/covering-fit, 8 cyclic 68-row query chunks = TAR's fit-eval episodes). Model, optimizer, seeds and 200-update budget as the 204-row pilot; one restoration update corresponds to one TAR round on this table, enabling direct per-round comparison. Note: restoration trains on the same fixed bank it reports (bounded fit diagnostic), whereas TAR resampled training episodes per round and used the bank for evaluation only. Execution dtype float64 (registered default).",
+  "preparation_revision": "TAR-aligned mask amendment: same scm_mixed_v1_000 snapshot, full 204-row train split in split order (identical to TAR's pool), masks restricted to the target column with the TAR covering-fit bank reproduced exactly (episode_seed=20260907, namespace=scm_mixed_v1_000/covering-fit, 8 cyclic 68-row query chunks = TAR's fit-eval episodes). Model, optimizer, seeds and 200-update budget as the 204-row pilot; one restoration update corresponds to one TAR round on this table, enabling direct per-round comparison. Note: restoration trains on the same fixed bank it reports (bounded fit diagnostic), whereas TAR resampled training episodes per round and used the bank for evaluation only. Execution dtype float64 (registered default). Telemetry amendment: a passive W&B mirror of the authoritative local JSONL stream is declared and permitted; it is an observer-only projection with no influence on masks, model, or updates.",
   "row_order": "split",
   "mask_mode": "tar_covering_fit_labels",
   "episode_seed": 20260907,
-  "mask_namespace": "scm_mixed_v1_000/covering-fit"
+  "mask_namespace": "scm_mixed_v1_000/covering-fit",
+  "telemetry": {
+    "wandb_mirror": true,
+    "mode": "passive projection of updates.jsonl (loss, gradient_norm, update_seconds) and initial/final fixed-bank metrics; the mirror never feeds back into training; a mirror runtime failure is recorded in the receipt and is non-fatal."
+  }
 }

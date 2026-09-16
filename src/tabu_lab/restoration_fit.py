@@ -559,6 +559,58 @@ def load_checkpoint(path, model, optimizer, plan):
     return step, cursor, elapsed
 
 
+def _wandb_start(args, plan, receipt):
+    """Start a passive W&B mirror of the fit stream.
+
+    updates.jsonl stays authoritative; the mirror never feeds back into
+    training. Missing declaration or a missing wandb install is fatal (the
+    caller asked explicitly); a mirror *runtime* failure is recorded in the
+    receipt and training continues.
+    """
+    project = getattr(args, "wandb_project", None)
+    if project is None:
+        return None
+    if plan.spec.get("telemetry", {}).get("wandb_mirror") is not True:
+        raise ValueError("preregistration does not declare telemetry.wandb_mirror: true")
+    try:
+        import wandb
+    except ImportError:
+        raise RuntimeError("wandb mirror requested but wandb is not installed (extra: telemetry)")
+    try:
+        run = wandb.init(
+            project=project,
+            entity=getattr(args, "wandb_entity", None),
+            name=f"{Path(args.preregistration).parent.name}-{plan.identity['preregistration_sha256'][:8]}",
+            config={
+                "preregistration_sha256": plan.identity["preregistration_sha256"],
+                "dataset_sha256": plan.identity["dataset_sha256"],
+                "mask_bank_sha256": plan.identity["mask_bank_sha256"],
+                "execution": plan.identity["execution"],
+                "max_updates": plan.spec["max_updates"],
+            },
+            tags=["restoration", "passive-mirror"],
+        )
+    except Exception as error:
+        receipt["wandb"] = {"mode": "passive_mirror", "error_type": type(error).__name__}
+        return None
+    receipt["wandb"] = {"mode": "passive_mirror", "url": run.url, "id": run.id}
+    return run
+
+
+def _wandb_log_metrics(run, stage, metrics, step):
+    run.log(
+        {
+            f"{stage}.loss": metrics["loss"],
+            **{
+                f"{stage}.{state}.encoding_mse": values["encoding_mse"]
+                for state, values in metrics.get("by_state", {}).items()
+                if "encoding_mse" in values
+            },
+        },
+        step=step,
+    )
+
+
 def run_fit(args):
     output = Path(args.output_root)
     if output.exists():
@@ -577,6 +629,7 @@ def run_fit(args):
     }
     started = time.monotonic()
     previous_signal = None
+    wandb_run = None
     model = optimizer = plan = None
     boundary = None
     step = cursor = 0
@@ -602,6 +655,7 @@ def run_fit(args):
             }
             plan.identity["execution"]["cuda_device"] = receipt["cuda_device"]
         _json(output / "resolved.json", {"preregistration": plan.spec, "plan": plan.summary})
+        wandb_run = _wandb_start(args, plan, receipt)
         torch.manual_seed(plan.spec["seeds"]["model"])
         model = RestorationModel(plan.config).to(device=args.device, dtype=plan.dtype)
         cfg = plan.spec["optimizer"]
@@ -623,6 +677,8 @@ def run_fit(args):
         receipt["execution_started"] = True
         receipt["initial"] = evaluate(model, plan, args.device, deadline)
         _json(output / "initial-metrics.json", receipt["initial"])
+        if wandb_run is not None:
+            _wandb_log_metrics(wandb_run, "initial", receipt["initial"], 0)
         accumulation = plan.spec.get("gradient_accumulation", 1)
         prepared_bank = _PreparedBank(plan, model, args.device)
         while step < plan.spec["max_updates"]:
@@ -681,9 +737,20 @@ def run_fit(args):
             with (output / "updates.jsonl").open("a", encoding="utf-8") as handle:
                 handle.write(json.dumps(metric, allow_nan=False) + "\n")
                 handle.flush()
+            if wandb_run is not None:
+                wandb_run.log(
+                    {
+                        "update.loss": metric["loss"],
+                        "update.gradient_norm": metric["gradient_norm"],
+                        "update.update_seconds": metric["update_seconds"],
+                    },
+                    step=step,
+                )
             if step % plan.spec.get("checkpoint_every", 1) == 0:
                 save_checkpoint(output / f"checkpoint-{step:08d}.pt", boundary)
         receipt["final"] = evaluate(model, plan, args.device, deadline)
+        if wandb_run is not None:
+            _wandb_log_metrics(wandb_run, "final", receipt["final"], step)
         receipt["outcome"] = "completed"
     except WallLimit as error:
         receipt.update(outcome="wall_limit", error_type=type(error).__name__, error=str(error))
@@ -701,6 +768,11 @@ def run_fit(args):
             error="artifact I/O failure" if isinstance(error, OSError) else message,
         )
     finally:
+        if wandb_run is not None:
+            try:
+                wandb_run.finish(exit_code=0 if receipt["outcome"] == "completed" else 1)
+            except Exception:
+                pass  # mirror teardown must never mask the authoritative receipt
         if previous_signal is not None:
             signal.signal(signal.SIGTERM, previous_signal)
         receipt["completed_updates"] = boundary["step"] if boundary is not None else step
