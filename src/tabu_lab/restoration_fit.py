@@ -419,25 +419,60 @@ def _cpu_copy(value):
     return value
 
 
-def _finite_state(value):
+def _device_copy(value):
+    """Structural clone that stays on the source device (no host sync)."""
     if isinstance(value, torch.Tensor):
-        return bool(torch.isfinite(value).all())
+        return value.detach().clone()
     if isinstance(value, dict):
-        return all(_finite_state(item) for item in value.values())
+        return {key: _device_copy(item) for key, item in value.items()}
     if isinstance(value, (list, tuple)):
-        return all(_finite_state(item) for item in value)
-    return not isinstance(value, float) or math.isfinite(value)
+        return type(value)(_device_copy(item) for item in value)
+    return value
+
+
+def _finite_state(value):
+    """Same detection semantics as before, but tensor flags are accumulated
+    device-side and reduced with a single host sync instead of one sync per
+    tensor (matters on MPS/CUDA, where each bool() stalls the pipeline)."""
+    tensor_flags = []
+    python_finite = True
+
+    def walk(item):
+        nonlocal python_finite
+        if isinstance(item, torch.Tensor):
+            tensor_flags.append(torch.isfinite(item).all().reshape(()))
+        elif isinstance(item, dict):
+            for sub in item.values():
+                walk(sub)
+        elif isinstance(item, (list, tuple)):
+            for sub in item:
+                walk(sub)
+        elif isinstance(item, float) and not math.isfinite(item):
+            python_finite = False
+
+    walk(value)
+    if not python_finite:
+        return False
+    if not tensor_flags:
+        return True
+    devices = {flag.device for flag in tensor_flags}
+    if len(devices) > 1:
+        # Mixed-device state: fall back to per-tensor checks.
+        return all(bool(flag) for flag in tensor_flags)
+    return bool(torch.stack(tensor_flags).all())
 
 
 def checkpoint_state(model, optimizer, plan, step, cursor, elapsed):
     # Capture only a fully completed, finite update. Assignment of the returned
-    # independent CPU snapshot is atomic; an interrupted copy preserves its predecessor.
+    # independent snapshot is atomic; an interrupted copy preserves its predecessor.
+    # The snapshot is cloned on-device (no host sync per update); the host copy
+    # happens once inside save_checkpoint, i.e. at actual save points.
     return {
         "schema": "tabu.restoration.pilot-checkpoint.v1",
         "identity": plan.identity,
         "config": model.config.as_dict(),
-        "model": _cpu_copy(model.state_dict()),
-        "optimizer": _cpu_copy(optimizer.state_dict()),
+        "model": _device_copy(model.state_dict()),
+        "optimizer": _device_copy(optimizer.state_dict()),
         "step": step,
         "sampler_cursor": cursor,
         "elapsed_seconds": elapsed,
@@ -450,7 +485,7 @@ def checkpoint_state(model, optimizer, plan, step, cursor, elapsed):
 
 def save_checkpoint(path, state):
     with Path(path).open("xb") as handle:
-        torch.save(state, handle)
+        torch.save(_cpu_copy(state), handle)
         handle.flush()
         os.fsync(handle.fileno())
 
@@ -567,7 +602,16 @@ def run_fit(args):
             parameters = [
                 parameter for parameter in model.parameters() if parameter.grad is not None
             ]
-            if not parameters or any(not bool(torch.isfinite(p.grad).all()) for p in parameters):
+            if not parameters:
+                raise FloatingPointError("missing or nonfinite training gradients")
+            # Same detection, one host sync: accumulate per-parameter flags on
+            # device and reduce once, instead of one bool() sync per parameter.
+            grad_flags = [torch.isfinite(p.grad).all().reshape(()) for p in parameters]
+            if len({flag.device for flag in grad_flags}) > 1:
+                grads_finite = all(bool(flag) for flag in grad_flags)
+            else:
+                grads_finite = bool(torch.stack(grad_flags).all())
+            if not grads_finite:
                 raise FloatingPointError("missing or nonfinite training gradients")
             gradient_norm = torch.nn.utils.clip_grad_norm_(
                 parameters, cfg["grad_clip"], error_if_nonfinite=True
