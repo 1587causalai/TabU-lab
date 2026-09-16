@@ -1,5 +1,10 @@
 # Old120 Small-128: protect numeric tails from Query masking
 
+[Live monitoring](https://wandb.ai/zj3712/restoration/reports/Restoration-%7C-tail-guard-and-gradient-monitoring--VmlldzoxNzk0MTU1MA==)
+and [run](https://wandb.ai/zj3712/restoration/runs/old120-small128-tailguard8-20260916).
+The report's ten panels and exact run filter were read back and
+[verified](report-verification.json).
+
 This is a fresh seed-1729 run of all 120 tables. It keeps the Small-128 FP64
 model, B=1, 204 training rows, every column, all-observed-cell loss, and the
 26,824-second / 768-round ceiling with a 300-second finalization reserve.
@@ -91,6 +96,33 @@ protected tails, and legacy v3 mask/metadata equality. All 1,216 numeric columns
 also matched the existing codec's median/half-IQR threshold calculation.
 These are implementation checks; launch and training results require separate
 runtime receipts.
+
+## Launch and first-round verification
+
+Execution commit: `855990fa41b7ddfe72281c78503f6af0df517452`.
+The final committed source passed the
+[CUDA forward/backward and exact optimizer continuation check](qualification/device-check.json)
+and [204 x 32 update](qualification/largest-table-check.json). The largest-table
+step took 2.664 seconds and peaked at 13,421,190,656 allocated bytes.
+
+The [launch snapshot](launch-verification.json) verifies all 960 initial
+evaluation masks completed, then all 120 tables completed the first training
+round with a saved checkpoint. The round loss mean/median/P95 were
+0.34214 / 0.06124 / 0.45534. All 598 protected numeric cells stayed visible;
+the training round still queried 10,054 cells. W&B received all 21 round/evaluation
+series plus the new guard and pre/post-clip norm fields with matching source/config.
+
+Spikes persist: the first round's maximum loss was 16.82383 and maximum pre-clip
+gradient norm was 4,958.78336, both on `discoscm_086` at update 75, despite zero
+protected numeric Query cells. The measured post-clip norm never exceeded 1.
+This records a remaining stability issue; it does not establish whether the
+residual comes from retained predictions, eligible Query predictions, or their
+shared computation. No optimizer/loss change was added to hide it.
+
+The snapshot observed update 138 and an active run. It is not a terminal result
+or evidence that the budget finished. Check the remote terminal receipt for the
+eventual outcome. The parent design's footnote and regenerated PDF are separately
+recorded in [manuscript verification](manuscript-verification.json).
 
 ## Execution
 

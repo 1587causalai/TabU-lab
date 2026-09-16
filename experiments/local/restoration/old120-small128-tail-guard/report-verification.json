@@ -1,0 +1,107 @@
+{
+  "outcome": "passed",
+  "panels": [
+    {
+      "title": "Training: loss over 120 tables",
+      "x": "completed_round",
+      "y": [
+        "train_round/loss/mean",
+        "train_round/loss/median",
+        "train_round/loss/p95"
+      ]
+    },
+    {
+      "title": "Query numeric: encoding MSE",
+      "x": "completed_round",
+      "y": [
+        "evaluation/query/numeric/encoding_mse/mean",
+        "evaluation/query/numeric/encoding_mse/median",
+        "evaluation/query/numeric/encoding_mse/p95"
+      ]
+    },
+    {
+      "title": "Query discrete: encoding MSE",
+      "x": "completed_round",
+      "y": [
+        "evaluation/query/discrete/encoding_mse/mean",
+        "evaluation/query/discrete/encoding_mse/median",
+        "evaluation/query/discrete/encoding_mse/p95"
+      ]
+    },
+    {
+      "title": "Query discrete: error rate",
+      "x": "completed_round",
+      "y": [
+        "evaluation/query/discrete/discrete_error_rate/mean",
+        "evaluation/query/discrete/discrete_error_rate/median",
+        "evaluation/query/discrete/discrete_error_rate/p95"
+      ]
+    },
+    {
+      "title": "Retained numeric: encoding MSE",
+      "x": "completed_round",
+      "y": [
+        "evaluation/retained/numeric/encoding_mse/mean",
+        "evaluation/retained/numeric/encoding_mse/median",
+        "evaluation/retained/numeric/encoding_mse/p95"
+      ]
+    },
+    {
+      "title": "Retained discrete: encoding MSE",
+      "x": "completed_round",
+      "y": [
+        "evaluation/retained/discrete/encoding_mse/mean",
+        "evaluation/retained/discrete/encoding_mse/median",
+        "evaluation/retained/discrete/encoding_mse/p95"
+      ]
+    },
+    {
+      "title": "Retained discrete: error rate",
+      "x": "completed_round",
+      "y": [
+        "evaluation/retained/discrete/discrete_error_rate/mean",
+        "evaluation/retained/discrete/discrete_error_rate/median",
+        "evaluation/retained/discrete/discrete_error_rate/p95"
+      ]
+    },
+    {
+      "title": "Gradient norm before clipping",
+      "x": "update",
+      "y": [
+        "train/gradient_norm"
+      ]
+    },
+    {
+      "title": "Gradient norm after clipping (clip=1)",
+      "x": "update",
+      "y": [
+        "train/post_clip_gradient_norm"
+      ]
+    },
+    {
+      "title": "Protected numeric tails selected as Query (must be zero)",
+      "x": "update",
+      "y": [
+        "train/coverage/query_numeric_tail_cells"
+      ]
+    }
+  ],
+  "run_filter": {
+    "filterFormat": "filterV2",
+    "filters": [
+      {
+        "disabled": false,
+        "key": {
+          "name": "name",
+          "section": "run"
+        },
+        "op": "=",
+        "value": "old120-small128-tailguard8-20260916"
+      }
+    ]
+  },
+  "run_id": "old120-small128-tailguard8-20260916",
+  "schema": "tabu.restoration.report-verification.v1",
+  "series_count": 24,
+  "url": "https://wandb.ai/zj3712/restoration/reports/Restoration-|-tail-guard-and-gradient-monitoring--VmlldzoxNzk0MTU1MA=="
+}

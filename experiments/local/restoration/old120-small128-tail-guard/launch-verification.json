@@ -1,0 +1,64 @@
+{
+  "budget": {
+    "final_reserve_seconds": 300,
+    "max_rounds": 768,
+    "max_seconds": 26824
+  },
+  "claim_boundary": "Launch, initial fixed-bank evaluation, and first-round telemetry only; run remains in progress. Pre-clip gradient spikes persist; no claim all spikes are eliminated or Query scores are comparable to the prior eligibility policy.",
+  "execution_commit": "855990fa41b7ddfe72281c78503f6af0df517452",
+  "first_round": {
+    "checkpoint_saved": true,
+    "loss": {
+      "mean": 0.34214275576782593,
+      "median": 0.061237143337328825,
+      "p95": 0.4553430925721471,
+      "table_count": 120
+    },
+    "max_loss": 16.8238272996582,
+    "max_postclip_gradient_norm": 0.9999999997983375,
+    "max_preclip_gradient_norm": 4958.78336107024,
+    "max_update_seconds": 2.1462547320406884,
+    "peak_allocated_bytes": 13555897856,
+    "protected_numeric_tail_cells": 598,
+    "query_cells": 10054,
+    "query_numeric_tail_cells": 0,
+    "table_count": 120,
+    "updates": 120
+  },
+  "initial": {
+    "complete": true,
+    "coverage": {
+      "numeric_query_guard": {
+        "kind": "median_half_iqr",
+        "max_abs_robust_z": 8.0,
+        "reference_scope": "training rows before masking",
+        "scale_floor": 1e-06
+      },
+      "numeric_tail_count_scope": "mask-cell exposures in evaluated episodes",
+      "protected_discrete_cells": 87168,
+      "protected_numeric_tail_cells": 4784,
+      "query_cells": 80432,
+      "query_fraction": 0.02499204549974148,
+      "query_numeric_tail_cells": 0,
+      "singleton_discrete_classes": 23816,
+      "total_cells": 3218304,
+      "unmaskable_discrete_classes": 23816
+    },
+    "episodes": 960,
+    "loss": 2.3857549066319614
+  },
+  "observed_at_utc": "2026-09-16T01:15:26.120881+00:00",
+  "observed_update": 138,
+  "outcome": "running_verified_after_first_complete_round",
+  "preregistration_sha256": "ce6716789fa257cd7abb60f22d6751e4b5b0a9b2cd25ba480c5441c1639a3004",
+  "run_id": "old120-small128-tailguard8-20260916",
+  "run_url": "https://wandb.ai/zj3712/restoration/runs/old120-small128-tailguard8-20260916",
+  "schema": "tabu.restoration.tail-guard-launch-check.v1",
+  "source_sha256": "31ce19668661d559557b7cc1055d1bb41d347ef651276476f4c2cc10706eed5e",
+  "wandb": {
+    "all_21_round_and_evaluation_series_present": true,
+    "guard_and_pre_postclip_metrics_present": true,
+    "source_identity_matches": true,
+    "state": "running"
+  }
+}
