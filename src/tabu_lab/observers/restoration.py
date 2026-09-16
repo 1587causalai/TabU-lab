@@ -44,6 +44,7 @@ _HASH_KEYS = (
 _COUNTERS = (
     "update", "round", "elapsed_seconds", "completed_episodes", "total_episodes",
     "model_parameters", "cursor", "peak_allocated_bytes", "training_round", "completed_round",
+    "stage_index", "cycle",
 )
 _TRAIN_METRICS = (
     "loss", "gradient_norm", "post_clip_gradient_norm", "update_seconds", "train_seconds",
@@ -59,7 +60,10 @@ _COVERAGE_METRICS = (
     "singleton_discrete_classes", "query_fraction", "query_count",
     "protected_numeric_tail_cells", "query_numeric_tail_cells",
 )
-_SOURCES = frozenset({"scm_mixed_v1", "discoscm", "scm_numeric_v0", "sklearn_synthetic"})
+_SOURCES = frozenset({
+    "scm_mixed_v1", "discoscm", "scm_numeric_v0", "sklearn_synthetic",
+    "old120", "recent120", "old3", "new9",
+})
 _STATUSES = frozenset({
     "started", "completed", "segment_completed", "wall_limit", "interrupted", "failed",
     "budget_exhausted", "local_unissued",
@@ -243,10 +247,7 @@ class RestorationObserver:
             result: dict[str, Any] = {}
             _copy_numeric(result, event, _COUNTERS)
             stage = event.get("stage")
-            if isinstance(stage, str) and re.fullmatch(
-                r"(?:start|initial|final|train|training|round[-_]\d+|completed|interrupted)"
-                r"(?:_complete)?", stage
-            ):
+            if isinstance(stage, str) and re.fullmatch(r"[A-Za-z0-9_-]+", stage):
                 result["phase"] = stage
             if kind == "update":
                 result["phase"] = "training"

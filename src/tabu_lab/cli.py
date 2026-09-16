@@ -165,6 +165,30 @@ def _run_restoration_joint_fit(args: argparse.Namespace) -> int:
     return 0 if result["outcome"] in ("planned", "completed", "segment_completed") else 3
 
 
+def _run_restoration_curriculum_fit(args: argparse.Namespace) -> int:
+    from tabu_lab.restoration_curriculum_fit import run_curriculum_fit
+
+    observer = None
+    if args.execute:
+        from tabu_lab.observers.restoration import create_restoration_observer
+
+        observer = create_restoration_observer()
+    try:
+        result = run_curriculum_fit(args, observer=observer)
+    finally:
+        if observer is not None:
+            observer.close()
+    print(json.dumps(result, indent=2, sort_keys=True, default=str))
+    return 0 if result["outcome"] in ("planned", "completed") else 3
+
+
+def _run_restoration_curriculum_preflight(args: argparse.Namespace) -> int:
+    from tabu_lab.restoration_curriculum_preflight import run_preflight
+
+    result = run_preflight(args)
+    return 0 if result["outcome"] == "passed" else 3
+
+
 def _run_restoration_benchmark(args: argparse.Namespace) -> int:
     from tabu_lab.restoration_benchmark import run_benchmark
 
@@ -327,6 +351,28 @@ def build_parser() -> argparse.ArgumentParser:
     )
     restoration_joint_fit.add_argument("--execute", action="store_true")
     restoration_joint_fit.set_defaults(handler=_run_restoration_joint_fit)
+    restoration_curriculum_fit = restoration_sub.add_parser(
+        "curriculum-fit", help="plan or run the three-stage Small-128 restoration curriculum"
+    )
+    restoration_curriculum_fit.add_argument("--preregistration", type=Path, required=True)
+    restoration_curriculum_fit.add_argument("--corpus-root", type=Path, required=True)
+    restoration_curriculum_fit.add_argument("--output-root", type=Path, required=True)
+    restoration_curriculum_fit.add_argument("--device", choices=("cpu", "cuda:0"), default="cpu")
+    restoration_curriculum_fit.add_argument(
+        "--resume-checkpoint", type=Path, help="checkpoint from a previous curriculum attempt"
+    )
+    restoration_curriculum_fit.add_argument("--execute", action="store_true")
+    restoration_curriculum_fit.set_defaults(handler=_run_restoration_curriculum_fit)
+    restoration_curriculum_preflight = restoration_sub.add_parser(
+        "curriculum-preflight", help="qualify largest curriculum episodes and optimizer transition"
+    )
+    restoration_curriculum_preflight.add_argument("--preregistration", type=Path, required=True)
+    restoration_curriculum_preflight.add_argument("--corpus-root", type=Path, required=True)
+    restoration_curriculum_preflight.add_argument("--output", type=Path, required=True)
+    restoration_curriculum_preflight.add_argument(
+        "--device", choices=("cpu", "cuda:0"), default="cuda:0"
+    )
+    restoration_curriculum_preflight.set_defaults(handler=_run_restoration_curriculum_preflight)
     joint_preflight = restoration_sub.add_parser(
         "joint-fit-preflight", help="one largest-table update with the joint-fit configuration"
     )

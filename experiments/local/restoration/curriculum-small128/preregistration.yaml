@@ -1,0 +1,79 @@
+schema: tabu.restoration.curriculum-fit.v1
+status: local_unissued
+experiment_id: restoration-small128-tar-curriculum-v1
+seeds:
+  model: 1729
+  order: 1730
+  masks: 1731
+  codes: 1732
+  windows: 1733
+corpora:
+  old120: old120
+  recent120: recent120
+  old3: old3
+  new9: new9
+model:
+  encoder:
+    width: 128
+    category_map: identity128
+    mlp_hidden: 128
+    epsilon: 1.0e-6
+  backbone:
+    width: 128
+    layers: 3
+    heads: 8
+    ff_width: 256
+    kind: inducing
+    slots: 256
+    tau_presence: 1.0
+    reference_mass: 1.0
+    norm_eps: 1.0e-6
+  readout: ll
+  bandwidth: 1.0
+  ridge: 0.001
+optimizer:
+  kind: adamw_then_muon
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  betas: [0.9, 0.95]
+  eps: 1.0e-8
+  grad_clip: 1.0
+  muon_momentum: 0.95
+  muon_nesterov: true
+  muon_ns_steps: 5
+  muon_adjust_lr_fn: match_rms_adamw
+evaluation_masks: 8
+final_reserve_seconds: 300
+stages:
+  - name: old120
+    max_seconds: 26824
+    max_updates: 92160
+    mask: random_cell
+    mask_fraction: 0.025
+    synthetic_mask_fraction: 0.025
+    cycle_updates: 120
+    evaluate_every_cycles: 32
+  - name: recent120_replay
+    max_seconds: 28800
+    max_updates: 38400
+    mask: random_cell
+    mask_fraction: 0.025
+    synthetic_mask_fraction: 0.025
+    cycle_updates: 150
+    evaluate_every_cycles: 16
+  - name: openml12_mixed
+    max_seconds: 7200
+    max_updates: 9600
+    mask: supervised_row
+    synthetic_mask: random_cell
+    real_mask: supervised_row
+    real_mask_fraction: 0.3333333333333333
+    synthetic_mask_fraction: 0.025
+    cycle_updates: 1200
+    evaluate_every_cycles: 1
+notes:
+  objective: all_observed_cells_with_query_and_retained_reports
+  synthetic_mask: global_random_cell_with_median_half_iqr_tail_guard_threshold_4
+  real_mask: supervised_row_target_only_without_tail_guard
+  reserved_rows: excluded_from_training_and_scoring
+  budgets_include: initialization_evaluation_training_evaluation_and_checkpointing
