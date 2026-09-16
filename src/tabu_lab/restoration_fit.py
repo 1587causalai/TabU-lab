@@ -1,7 +1,14 @@
 """Bounded numeric restoration fit diagnostic; execution is an explicit opt-in.
 
-The snapshot's reserved rows never enter an episode. Initial/final scores use the
-same fixed mask bank on sampled training rows and are fit diagnostics only.
+Training episodes come from the fixed mask bank (default) or from TAR-style
+stateless resampled supervised episodes (``training_episode_mode =
+"resampled_supervised"``): update ``i`` then reproduces TAR joint-fit round
+``i`` for this table (same episode seed stream, context/query split and
+codebook seed). Initial/final scores always use the fixed mask bank on sampled
+training rows. With ``reserved_test`` enabled, the snapshot's reserved rows
+additionally appear in exactly one forward-only evaluation episode (target
+column queried, predictors visible); they never enter a training episode or a
+gradient.
 """
 
 from __future__ import annotations
@@ -123,6 +130,27 @@ def _positive(value, name, *, zero=False):
     return float(value)
 
 
+def _resampled_supervised_query(count, width, hidden, seed, namespace, episode_id):
+    """Reproduce TAR joint-fit training episode ``episode_id`` for this table.
+
+    Same stateless stream as ``models.tar.episodes.sample_supervised_episode``:
+    one randperm keyed by (seed, namespace, episode_id, "row_roles"), the first
+    ``count - hidden`` rows form the visible context, the remaining ``hidden``
+    rows are queried on the final (target) column only; the codebook seed is the
+    default "codebook" stream of the same episode id.
+    """
+    from tabu_lab.models.tar.episodes import episode_seed
+
+    generator = torch.Generator().manual_seed(
+        episode_seed(seed, namespace, episode_id, "row_roles")
+    )
+    order = torch.randperm(count, generator=generator).tolist()
+    query = torch.zeros(count, width, dtype=torch.bool)
+    for row in order[count - hidden :]:
+        query[row, width - 1] = True
+    return query, episode_seed(seed, namespace, episode_id)
+
+
 @dataclass(frozen=True)
 class FitPlan:
     spec: dict
@@ -134,6 +162,9 @@ class FitPlan:
     dtype: torch.dtype
     identity: dict
     summary: dict
+    training_mode: str = "fixed_bank"
+    evaluate_every: int | None = None
+    test: dict | None = None
 
     def episode(self, index, device="cpu"):
         bank_index = index % len(self.queries)
@@ -144,6 +175,42 @@ class FitPlan:
             torch.ones_like(query),
             query,
             code_seed=self.code_seeds[bank_index],
+        )
+
+    def training_episode(self, index, device="cpu"):
+        """The episode consumed by update ``index`` (sampler cursor value)."""
+        if self.training_mode == "fixed_bank":
+            return self.episode(index, device)
+        count = len(self.values[0])
+        hidden = math.ceil(count * self.spec["mask_fraction"])
+        query, code_seed = _resampled_supervised_query(
+            count,
+            len(self.schema),
+            hidden,
+            _integer(self.spec.get("episode_seed"), "episode_seed", 0),
+            self.spec["training_episode_namespace"],
+            index,
+        )
+        query = query.to(device)
+        return make_episode(
+            self.schema,
+            tuple(value.to(device) for value in self.values),
+            torch.ones_like(query),
+            query,
+            code_seed=code_seed,
+        )
+
+    def test_episode(self, device="cpu"):
+        """The single forward-only reserved-row episode (target column queried)."""
+        if self.test is None:
+            raise ValueError("this plan declares no reserved-row test episode")
+        query = self.test["query"].to(device)
+        return make_episode(
+            self.schema,
+            tuple(value.to(device) for value in self.test["values"]),
+            torch.ones_like(query),
+            query,
+            code_seed=self.test["code_seed"],
         )
 
 
@@ -174,6 +241,20 @@ class _PreparedBank:
             self.entries[key] = prepared
         self.entries.move_to_end(key)
         return self.entries[key]
+
+
+class _ResampledEpisodes:
+    """Stateless TAR-style training episodes; each cursor value is used once.
+
+    Episode masks and codebook seeds are pure functions of the sampler cursor,
+    so resume just regenerates the same episode from the checkpointed cursor.
+    """
+
+    def __init__(self, plan, model, device):
+        self.plan, self.model, self.device = plan, model, device
+
+    def get(self, index):
+        return prepare_episode(self.model, *self.plan.training_episode(index, self.device))
 
 
 def prepare_plan(preregistration, dataset, device="cpu"):
@@ -241,6 +322,22 @@ def prepare_plan(preregistration, dataset, device="cpu"):
     _positive(spec.get("max_wall_seconds"), "max_wall_seconds")
     _integer(spec.get("gradient_accumulation", 1), "gradient_accumulation")
     _integer(spec.get("checkpoint_every", 1), "checkpoint_every")
+    evaluate_every = spec.get("evaluate_every")
+    if evaluate_every is not None:
+        _integer(evaluate_every, "evaluate_every")
+    training_mode = spec.get("training_episode_mode", "fixed_bank")
+    if training_mode not in ("fixed_bank", "resampled_supervised"):
+        raise ValueError("training_episode_mode must be fixed_bank or resampled_supervised")
+    training_namespace = spec.get("training_episode_namespace")
+    if training_mode == "resampled_supervised":
+        if not isinstance(training_namespace, str) or not training_namespace:
+            raise ValueError("resampled_supervised requires a training_episode_namespace")
+        _integer(spec.get("episode_seed"), "episode_seed", 0)
+    elif training_namespace is not None:
+        raise ValueError("training_episode_namespace requires resampled_supervised")
+    reserved_test = spec.get("reserved_test", False)
+    if type(reserved_test) is not bool:
+        raise ValueError("reserved_test must be a boolean")
     config = RestorationConfig.from_dict(spec["model"])
     exec_dtype = _execution_dtype(spec)
     optimizer = spec.get("optimizer")
@@ -324,6 +421,28 @@ def prepare_plan(preregistration, dataset, device="cpu"):
         raise ValueError("mask_mode must be cell_bank or tar_covering_fit_labels")
     generator = torch.Generator().manual_seed(seeds["codes"])
     code_seeds = tuple(torch.randint(2**63 - 1, (bank_size,), generator=generator).tolist())
+    test_pack = None
+    if reserved_test:
+        test_ids = list(data["splits"]["test"])
+        panel_ids = list(row_ids) + test_ids
+        panel = [[rows[row][col] for col in columns] for row in panel_ids]
+        if any(
+            isinstance(value, bool) or not isinstance(value, (float, int)) or not math.isfinite(value)
+            for row in panel
+            for value in row
+        ):
+            raise ValueError("reserved-row test panel must be finite real values")
+        panel_matrix = torch.tensor(panel, dtype=torch.float64)
+        test_query = torch.zeros(len(panel_ids), len(columns), dtype=torch.bool)
+        test_query[len(row_ids) :, len(columns) - 1] = True
+        test_pack = {
+            "values": tuple(panel_matrix[:, index].clone() for index in range(len(columns))),
+            "query": test_query,
+            # One more draw from the declared codes stream; bank seeds unchanged.
+            "code_seed": int(torch.randint(2**63 - 1, (1,), generator=generator)[0]),
+            "train_row_ids": list(row_ids),
+            "test_row_ids": test_ids,
+        }
     bank = [
         {"query": query.tolist(), "code_seed": seed}
         for query, seed in zip(queries, code_seeds, strict=True)
@@ -339,7 +458,23 @@ def prepare_plan(preregistration, dataset, device="cpu"):
         "protocol": PROTOCOL,
         "source": source_identity(),
         "execution": _execution_identity(device, exec_dtype),
+        "training_episode_mode": training_mode,
     }
+    if training_mode == "resampled_supervised":
+        identity["training_episode_namespace"] = training_namespace
+    if test_pack is not None:
+        identity["reserved_test"] = {
+            "train_row_ids": test_pack["train_row_ids"],
+            "test_row_ids": test_pack["test_row_ids"],
+            "episode_sha256": _digest(
+                {
+                    "rows": panel_ids,
+                    "columns": columns,
+                    "query": test_pack["query"].tolist(),
+                    "code_seed": test_pack["code_seed"],
+                }
+            ),
+        }
     summary = {
         "status": "local_unissued",
         "outcome": "planned",
@@ -351,11 +486,24 @@ def prepare_plan(preregistration, dataset, device="cpu"):
         "excluded_columns": [i for i in range(width) if i not in columns],
         "row_order": row_order,
         "mask_mode": mask_mode,
+        "training_episode_mode": training_mode,
+        "evaluate_every": evaluate_every,
         "query_per_column": hidden,
         "visible_per_column": count - hidden,
         "mask_bank": bank,
         "reserved_rows_used": 0,
-        "evaluation_scope": "fixed fit masks on training rows; no reserved evaluation",
+        "evaluation_scope": "fixed fit masks on training rows; no reserved evaluation"
+        if test_pack is None
+        else "fixed fit masks on training rows; reserved-row test episode is forward-only",
+        "reserved_test": None
+        if test_pack is None
+        else {
+            "panel_rows": len(panel_ids),
+            "test_rows": len(test_ids),
+            "query_cells": int(test_pack["query"].sum()),
+            "queried_column": columns[-1],
+            "scope": "forward-only evaluation; reserved rows never enter training episodes",
+        },
         "cuda_hardware_identity": "bound during execute"
         if device == "cuda:0"
         else "not applicable",
@@ -367,6 +515,7 @@ def prepare_plan(preregistration, dataset, device="cpu"):
     return FitPlan(
         spec, config, schema, values, tuple(queries), code_seeds,
         getattr(torch, exec_dtype), identity, summary,
+        training_mode, evaluate_every, test_pack,
     )
 
 
@@ -403,16 +552,15 @@ def _check_wall(deadline):
 
 
 @torch.no_grad()
-def evaluate(model, plan, device, deadline):
+def _evaluate_episodes(model, episodes, deadline, scope):
     model.eval()
     totals = {
         name: {"count": 0, "encoding_sse": 0.0, "numeric_sse": 0.0}
         for name in ("retained", "query")
     }
     losses = []
-    for index in range(len(plan.queries)):
+    for episode in episodes:
         _check_wall(deadline)
-        episode = plan.episode(index, device)
         score = score_episode(model, *episode)
         if not bool(torch.isfinite(score.loss)):
             raise FloatingPointError("nonfinite evaluation loss")
@@ -440,13 +588,31 @@ def evaluate(model, plan, device, deadline):
     report = {
         "loss": sum(losses) / len(losses),
         "by_state": totals,
-        "scope": plan.summary["evaluation_scope"],
+        "scope": scope,
     }
     try:
         json.dumps(report, allow_nan=False)
     except ValueError as error:
         raise FloatingPointError("nonfinite evaluation report") from error
     return report
+
+
+def evaluate(model, plan, device, deadline):
+    """Fixed-bank fit diagnostic over the declared training rows."""
+    episodes = [plan.episode(index, device) for index in range(len(plan.queries))]
+    return _evaluate_episodes(model, episodes, deadline, plan.summary["evaluation_scope"])
+
+
+def evaluate_test(model, plan, device, deadline):
+    """Forward-only reserved-row test episode; None when not declared."""
+    if plan.test is None:
+        return None
+    return _evaluate_episodes(
+        model,
+        [plan.test_episode(device)],
+        deadline,
+        plan.summary["reserved_test"]["scope"],
+    )
 
 
 def _cpu_copy(value):
@@ -643,6 +809,10 @@ def run_fit(args):
         previous_signal = signal.signal(signal.SIGTERM, interrupted)
         plan = prepare_plan(args.preregistration, args.dataset, args.device)
         receipt["identity"] = plan.identity
+        receipt["training_episode_mode"] = plan.training_mode
+        receipt["reserved_test_rows_evaluated"] = (
+            len(plan.test["test_row_ids"]) if plan.test is not None else 0
+        )
         _require_committed_preregistration(args.preregistration)
         _configure_backend()
         if args.device == "cuda:0" and not torch.cuda.is_available():
@@ -679,8 +849,17 @@ def run_fit(args):
         _json(output / "initial-metrics.json", receipt["initial"])
         if wandb_run is not None:
             _wandb_log_metrics(wandb_run, "initial", receipt["initial"], 0)
+        if plan.test is not None:
+            receipt["initial_test"] = evaluate_test(model, plan, args.device, deadline)
+            _json(output / "initial-test-metrics.json", receipt["initial_test"])
+            if wandb_run is not None:
+                _wandb_log_metrics(wandb_run, "initial_test", receipt["initial_test"], 0)
         accumulation = plan.spec.get("gradient_accumulation", 1)
-        prepared_bank = _PreparedBank(plan, model, args.device)
+        episodes = (
+            _PreparedBank(plan, model, args.device)
+            if plan.training_mode == "fixed_bank"
+            else _ResampledEpisodes(plan, model, args.device)
+        )
         while step < plan.spec["max_updates"]:
             _check_wall(deadline)
             tick = time.monotonic()
@@ -689,7 +868,7 @@ def run_fit(args):
             losses = []
             for offset in range(accumulation):
                 _check_wall(deadline)
-                score = score_prepared_episode(model, prepared_bank.get(cursor + offset))
+                score = score_prepared_episode(model, episodes.get(cursor + offset))
                 if not bool(torch.isfinite(score.loss)):
                     raise FloatingPointError("nonfinite training loss")
                 (score.loss / accumulation).backward()
@@ -748,9 +927,29 @@ def run_fit(args):
                 )
             if step % plan.spec.get("checkpoint_every", 1) == 0:
                 save_checkpoint(output / f"checkpoint-{step:08d}.pt", boundary)
+            if (
+                plan.evaluate_every
+                and step % plan.evaluate_every == 0
+                and step < plan.spec["max_updates"]
+            ):
+                point = {"step": step, "bank": evaluate(model, plan, args.device, deadline)}
+                if wandb_run is not None:
+                    _wandb_log_metrics(wandb_run, "eval.bank", point["bank"], step)
+                if plan.test is not None:
+                    point["test"] = evaluate_test(model, plan, args.device, deadline)
+                    if wandb_run is not None:
+                        _wandb_log_metrics(wandb_run, "eval.test", point["test"], step)
+                with (output / "evaluations.jsonl").open("a", encoding="utf-8") as handle:
+                    handle.write(json.dumps(point, allow_nan=False) + "\n")
+                    handle.flush()
         receipt["final"] = evaluate(model, plan, args.device, deadline)
         if wandb_run is not None:
             _wandb_log_metrics(wandb_run, "final", receipt["final"], step)
+        if plan.test is not None:
+            receipt["final_test"] = evaluate_test(model, plan, args.device, deadline)
+            _json(output / "final-test-metrics.json", receipt["final_test"])
+            if wandb_run is not None:
+                _wandb_log_metrics(wandb_run, "final_test", receipt["final_test"], step)
         receipt["outcome"] = "completed"
     except WallLimit as error:
         receipt.update(outcome="wall_limit", error_type=type(error).__name__, error=str(error))

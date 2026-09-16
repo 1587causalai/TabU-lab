@@ -194,6 +194,11 @@ def test_hidden_truth_only_changes_scorer(artifacts):
         ({"row_count": 5}, "exceeds training split"),
         ({"mask_fraction": 0.8}, "at least two visible"),
         ({"columns": []}, "explicitly list"),
+        ({"training_episode_mode": "resampled_supervised"}, "training_episode_namespace"),
+        ({"training_episode_namespace": "fixture/training"}, "requires resampled_supervised"),
+        ({"training_episode_mode": "mystery"}, "fixed_bank or resampled_supervised"),
+        ({"reserved_test": "yes"}, "must be a boolean"),
+        ({"evaluate_every": 0}, "evaluate_every must be an integer"),
     ],
 )
 def test_invalid_predeclared_sampling_fails_without_retry(artifacts, changes, message):
@@ -539,3 +544,153 @@ def test_wandb_mirror_runtime_failure_is_nonfatal(artifacts, monkeypatch):
     receipt = execute(artifacts)
     assert receipt["outcome"] == "completed"
     assert receipt["wandb"]["error_type"] == "OSError"
+
+
+def test_resampled_supervised_reproduces_tar_training_stream(artifacts):
+    from tabu_lab.models.tar.episodes import episode_seed
+
+    alter_spec(artifacts, row_order="split", mask_fraction=0.5)
+    fixed = fit.prepare_plan(artifacts.preregistration, artifacts.dataset, "cpu")
+    assert fixed.training_mode == "fixed_bank"
+    # Fixed mode keeps bank cycling as the training stream.
+    assert torch.equal(fixed.training_episode(0)[0].query, fixed.episode(0)[0].query)
+    assert torch.equal(
+        fixed.training_episode(len(fixed.queries))[0].query, fixed.episode(0)[0].query
+    )
+    alter_spec(
+        artifacts,
+        episode_seed=20260907,
+        training_episode_mode="resampled_supervised",
+        training_episode_namespace="fixture/training",
+    )
+    plan = fit.prepare_plan(artifacts.preregistration, artifacts.dataset, "cpu")
+    assert plan.training_mode == "resampled_supervised"
+    assert plan.identity["training_episode_mode"] == "resampled_supervised"
+    assert plan.identity["training_episode_namespace"] == "fixture/training"
+    for index in range(3):
+        inputs, _, _ = plan.training_episode(index)
+        # TAR joint-fit round `index`: one randperm, tail rows become queries.
+        generator = torch.Generator().manual_seed(
+            episode_seed(20260907, "fixture/training", index, "row_roles")
+        )
+        order = torch.randperm(4, generator=generator).tolist()
+        expected = set(order[2:])  # hidden = ceil(4 * 0.5) = 2
+        assert inputs.visible.shape == (4, 2)
+        assert not inputs.query[:, 0].any()
+        actual = {int(row) for row in inputs.query[:, 1].nonzero().flatten()}
+        assert actual == expected
+    # Stateless: rebuilding the plan regenerates the identical stream.
+    same = fit.prepare_plan(artifacts.preregistration, artifacts.dataset, "cpu")
+    for index in range(3):
+        assert torch.equal(
+            plan.training_episode(index)[0].query, same.training_episode(index)[0].query
+        )
+    # Enabling resampled training leaves the fixed evaluation bank untouched.
+    for before, after in zip(fixed.queries, plan.queries, strict=True):
+        assert torch.equal(before, after)
+    assert fixed.code_seeds == plan.code_seeds
+
+
+def test_reserved_test_episode_construction_and_bank_invariance(artifacts):
+    alter_spec(artifacts, row_order="split")
+    baseline = fit.prepare_plan(artifacts.preregistration, artifacts.dataset, "cpu")
+    assert baseline.test is None and baseline.summary["reserved_test"] is None
+    assert baseline.summary["evaluation_scope"].endswith("no reserved evaluation")
+    alter_spec(artifacts, reserved_test=True)
+    plan = fit.prepare_plan(artifacts.preregistration, artifacts.dataset, "cpu")
+    # Fixed bank and code seeds are untouched by the extra test episode.
+    for before, after in zip(baseline.queries, plan.queries, strict=True):
+        assert torch.equal(before, after)
+    assert baseline.code_seeds == plan.code_seeds
+    # Panel: four train rows in split order, then reserved rows 4 and 5.
+    assert plan.test["train_row_ids"] == [0, 1, 2, 3]
+    assert plan.test["test_row_ids"] == [4, 5]
+    query = plan.test["query"]
+    assert query.shape == (6, 2) and int(query.sum()) == 2
+    assert query[4, 1] and query[5, 1]
+    assert not query[:, 0].any() and not query[:4].any()
+    assert plan.identity["reserved_test"]["test_row_ids"] == [4, 5]
+    assert plan.summary["reserved_test"]["query_cells"] == 2
+    assert "forward-only" in plan.summary["evaluation_scope"]
+    inputs, request, truth = plan.test_episode("cpu")
+    assert inputs.visible.shape == (6, 2)
+    assert int((truth.states == 1).sum()) == 2
+    assert int((truth.states == 0).sum()) == 10
+    # Reserved rows never enter a training episode in either mode.
+    for index in range(4):
+        assert plan.training_episode(index)[0].visible.shape[0] == 4
+    # Test panel values match the dataset rows exactly.
+    data = json.loads(artifacts.dataset.read_text())
+    for panel_row, dataset_row in enumerate([0, 1, 2, 3, 4, 5]):
+        for column_position, column in enumerate([0, 1]):
+            assert plan.test["values"][column_position][panel_row] == pytest.approx(
+                data["values"][dataset_row][column]
+            )
+
+
+def test_full_run_resampled_with_reserved_test_and_periodic_eval(artifacts):
+    alter_spec(
+        artifacts,
+        row_order="split",
+        mask_fraction=0.5,
+        episode_seed=20260907,
+        training_episode_mode="resampled_supervised",
+        training_episode_namespace="fixture/training",
+        reserved_test=True,
+        evaluate_every=2,
+        max_updates=3,
+    )
+    receipt = execute(artifacts)
+    assert receipt["outcome"] == "completed", receipt
+    assert receipt["training_episode_mode"] == "resampled_supervised"
+    assert receipt["reserved_rows_used"] == 0
+    assert receipt["reserved_test_rows_evaluated"] == 2
+    assert receipt["initial_test"]["by_state"]["query"]["count"] == 2
+    assert receipt["final_test"]["by_state"]["query"]["count"] == 2
+    assert (artifacts.output_root / "initial-test-metrics.json").exists()
+    assert (artifacts.output_root / "final-test-metrics.json").exists()
+    points = [
+        json.loads(line)
+        for line in (artifacts.output_root / "evaluations.jsonl").read_text().splitlines()
+    ]
+    assert [point["step"] for point in points] == [2]
+    assert set(points[0]) == {"step", "bank", "test"}
+    assert points[0]["test"]["by_state"]["query"]["count"] == 2
+
+
+def test_resampled_resume_matches_uninterrupted(artifacts, monkeypatch):
+    alter_spec(
+        artifacts,
+        row_order="split",
+        mask_fraction=0.5,
+        episode_seed=20260907,
+        training_episode_mode="resampled_supervised",
+        training_episode_namespace="fixture/training",
+    )
+    baseline = execute(artifacts)
+    assert baseline["outcome"] == "completed", baseline
+    complete = torch.load(artifacts.output_root / "checkpoint.pt", weights_only=True)
+    artifacts.output_root = artifacts.output_root.parent / "interrupted-resampled"
+    actual_step = torch.optim.AdamW.step
+    calls = 0
+
+    def interrupt_second(optimizer, *args, **kwargs):
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            raise KeyboardInterrupt
+        return actual_step(optimizer, *args, **kwargs)
+
+    monkeypatch.setattr(torch.optim.AdamW, "step", interrupt_second)
+    interrupted = fit.run_fit(artifacts)
+    assert interrupted["outcome"] == "interrupted" and interrupted["completed_updates"] == 1
+    parent = artifacts.output_root / "checkpoint.pt"
+    monkeypatch.setattr(torch.optim.AdamW, "step", actual_step)
+    artifacts.output_root = artifacts.output_root.parent / "resumed-resampled"
+    artifacts.resume = parent
+    resumed = fit.run_fit(artifacts)
+    assert resumed["outcome"] == "completed" and resumed["completed_updates"] == 3, resumed
+    continued = torch.load(artifacts.output_root / "checkpoint.pt", weights_only=True)
+    for name, value in complete["model"].items():
+        torch.testing.assert_close(value, continued["model"][name], rtol=0, atol=0)
+    assert complete["sampler_cursor"] == continued["sampler_cursor"] == 3
