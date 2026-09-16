@@ -1,0 +1,82 @@
+{
+  "report_url": "https://wandb.ai/zj3712/restoration/reports/Restoration-|-round-and-fixed-mask-monitoring--VmlldzoxNzk0MTM0Mw==",
+  "panels": [
+    {
+      "title": "Training: loss over 120 tables",
+      "x": "completed_round",
+      "y": [
+        "train_round/loss/mean",
+        "train_round/loss/median",
+        "train_round/loss/p95"
+      ]
+    },
+    {
+      "title": "Query numeric: encoding MSE",
+      "x": "completed_round",
+      "y": [
+        "evaluation/query/numeric/encoding_mse/mean",
+        "evaluation/query/numeric/encoding_mse/median",
+        "evaluation/query/numeric/encoding_mse/p95"
+      ]
+    },
+    {
+      "title": "Query discrete: encoding MSE",
+      "x": "completed_round",
+      "y": [
+        "evaluation/query/discrete/encoding_mse/mean",
+        "evaluation/query/discrete/encoding_mse/median",
+        "evaluation/query/discrete/encoding_mse/p95"
+      ]
+    },
+    {
+      "title": "Query discrete: error rate",
+      "x": "completed_round",
+      "y": [
+        "evaluation/query/discrete/discrete_error_rate/mean",
+        "evaluation/query/discrete/discrete_error_rate/median",
+        "evaluation/query/discrete/discrete_error_rate/p95"
+      ]
+    },
+    {
+      "title": "Retained numeric: encoding MSE",
+      "x": "completed_round",
+      "y": [
+        "evaluation/retained/numeric/encoding_mse/mean",
+        "evaluation/retained/numeric/encoding_mse/median",
+        "evaluation/retained/numeric/encoding_mse/p95"
+      ]
+    },
+    {
+      "title": "Retained discrete: encoding MSE",
+      "x": "completed_round",
+      "y": [
+        "evaluation/retained/discrete/encoding_mse/mean",
+        "evaluation/retained/discrete/encoding_mse/median",
+        "evaluation/retained/discrete/encoding_mse/p95"
+      ]
+    },
+    {
+      "title": "Retained discrete: error rate",
+      "x": "completed_round",
+      "y": [
+        "evaluation/retained/discrete/discrete_error_rate/mean",
+        "evaluation/retained/discrete/discrete_error_rate/median",
+        "evaluation/retained/discrete/discrete_error_rate/p95"
+      ]
+    }
+  ],
+  "run_filter": {
+    "filterFormat": "filterV2",
+    "filters": [
+      {
+        "key": {
+          "section": "run",
+          "name": "name"
+        },
+        "op": "=",
+        "value": "old120-small128-global025-20260916",
+        "disabled": false
+      }
+    ]
+  }
+}

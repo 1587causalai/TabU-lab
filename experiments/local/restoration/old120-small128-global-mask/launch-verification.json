@@ -1,0 +1,179 @@
+{
+  "schema": "restoration.global-mask-launch-verification.v1",
+  "status": "local_unissued",
+  "captured_at_utc": "2026-09-16T00:22:04.489392+00:00",
+  "state": "running",
+  "source_commit": "63f367ff924d9c8275d854979e3da9c40a015d04",
+  "source_sha256": "8465cf2a4a4360f0565a2403fdbf19c42f2e37d60f2b745ba4f58e6adb75b7a5",
+  "preregistration_sha256": "24d0481b3dcdcc7a587f065358b4041dc941ed954876bab1b51f37ed996ec923",
+  "run_url": "https://wandb.ai/zj3712/restoration/runs/old120-small128-global025-20260916",
+  "report_url": "https://wandb.ai/zj3712/restoration/reports/Restoration-|-round-and-fixed-mask-monitoring--VmlldzoxNzk0MTM0Mw==",
+  "observed_updates": 193,
+  "complete_rounds_observed": 1,
+  "first_round": {
+    "training_round": 1,
+    "completed_round": 1,
+    "update": 120,
+    "train_round": {
+      "loss": {
+        "mean": 1.0876032173359453,
+        "median": 0.061320221721494705,
+        "p95": 1.4193417598866542,
+        "table_count": 120
+      },
+      "completed_tables": 120,
+      "total_tables": 120,
+      "complete": true,
+      "scope": "one pre-update loss per table during sequential training"
+    }
+  },
+  "first_round_loss_statistics_independently_recomputed": true,
+  "initial_complete_episodes": 960,
+  "initial_query_cells": 80432,
+  "initial_total_cells": 3218304,
+  "initial_actual_query_fraction": 0.02499204549974148,
+  "initial_table_macro": {
+    "query": {
+      "all": {
+        "encoding_mse": {
+          "eligible_table_count": 120,
+          "mean": 31.198204077174143,
+          "median": 2.3629081511841825,
+          "p95": 83.81425956706106,
+          "table_count": 120,
+          "target_count": 80432
+        }
+      },
+      "discrete": {
+        "discrete_accuracy": {
+          "eligible_table_count": 95,
+          "mean": 0.29544171468293073,
+          "median": 0.2631578947368421,
+          "p95": 0.5714114832535885,
+          "table_count": 95,
+          "target_count": 30073
+        },
+        "discrete_error_rate": {
+          "eligible_table_count": 95,
+          "mean": 0.7045582853170693,
+          "median": 0.7368421052631579,
+          "p95": 0.9053984413712329,
+          "table_count": 95,
+          "target_count": 30073
+        },
+        "encoding_mse": {
+          "eligible_table_count": 95,
+          "mean": 0.09602703687979788,
+          "median": 0.09726326976722886,
+          "p95": 0.15629844877230742,
+          "table_count": 95,
+          "target_count": 30073
+        }
+      },
+      "numeric": {
+        "encoding_mse": {
+          "eligible_table_count": 116,
+          "mean": 122.05325007099462,
+          "median": 3.0825606283267235,
+          "p95": 210.6459082556854,
+          "table_count": 116,
+          "target_count": 50359
+        },
+        "numeric_mse": {
+          "eligible_table_count": 116,
+          "mean": 644.1332096733776,
+          "median": 1.4995401915208113,
+          "p95": 1282.6262956078642,
+          "table_count": 116,
+          "target_count": 50359
+        }
+      }
+    },
+    "retained": {
+      "all": {
+        "encoding_mse": {
+          "eligible_table_count": 120,
+          "mean": 0.020803590314265007,
+          "median": 0.00039703993886033986,
+          "p95": 0.022072500460301157,
+          "table_count": 120,
+          "target_count": 3137872
+        }
+      },
+      "discrete": {
+        "discrete_accuracy": {
+          "eligible_table_count": 95,
+          "mean": 1.0,
+          "median": 1.0,
+          "p95": 1.0,
+          "table_count": 95,
+          "target_count": 1203719
+        },
+        "discrete_error_rate": {
+          "eligible_table_count": 95,
+          "mean": 0.0,
+          "median": 0.0,
+          "p95": 0.0,
+          "table_count": 95,
+          "target_count": 1203719
+        },
+        "encoding_mse": {
+          "eligible_table_count": 95,
+          "mean": 0.00017558489557185496,
+          "median": 4.025714446247212e-05,
+          "p95": 0.0009945172507079228,
+          "table_count": 95,
+          "target_count": 1203719
+        }
+      },
+      "numeric": {
+        "encoding_mse": {
+          "eligible_table_count": 116,
+          "mean": 0.09684268818411472,
+          "median": 0.00048288468853503004,
+          "p95": 0.10000161442234598,
+          "table_count": 116,
+          "target_count": 1934153
+        },
+        "numeric_mse": {
+          "eligible_table_count": 116,
+          "mean": 0.3957863274619844,
+          "median": 0.0002207063339375218,
+          "p95": 0.5100106501686956,
+          "table_count": 116,
+          "target_count": 1934153
+        }
+      }
+    }
+  },
+  "initial_encoding_macros_independently_recomputed": true,
+  "all_21_report_metrics_present_in_live_wandb": true,
+  "wandb_summary": {
+    "train_round/loss/mean": 1.0876032173359451,
+    "train_round/loss/median": 0.061320221721494705,
+    "train_round/loss/p95": 1.4193417598866542,
+    "evaluation/query/numeric/encoding_mse/mean": 122.05325007099462,
+    "evaluation/query/numeric/encoding_mse/median": 3.0825606283267235,
+    "evaluation/query/numeric/encoding_mse/p95": 210.6459082556854,
+    "evaluation/query/discrete/encoding_mse/mean": 0.09602703687979788,
+    "evaluation/query/discrete/encoding_mse/median": 0.09726326976722886,
+    "evaluation/query/discrete/encoding_mse/p95": 0.15629844877230742,
+    "evaluation/query/discrete/discrete_error_rate/mean": 0.7045582853170693,
+    "evaluation/query/discrete/discrete_error_rate/median": 0.7368421052631579,
+    "evaluation/query/discrete/discrete_error_rate/p95": 0.9053984413712328,
+    "evaluation/retained/numeric/encoding_mse/mean": 0.09684268818411472,
+    "evaluation/retained/numeric/encoding_mse/median": 0.0004828846885350301,
+    "evaluation/retained/numeric/encoding_mse/p95": 0.10000161442234598,
+    "evaluation/retained/discrete/encoding_mse/mean": 0.00017558489557185496,
+    "evaluation/retained/discrete/encoding_mse/median": 4.025714446247212e-05,
+    "evaluation/retained/discrete/encoding_mse/p95": 0.0009945172507079228,
+    "evaluation/retained/discrete/discrete_error_rate/mean": 0,
+    "evaluation/retained/discrete/discrete_error_rate/median": 0,
+    "evaluation/retained/discrete/discrete_error_rate/p95": 0
+  },
+  "checkpoint_cursor_verified": true,
+  "checkpoint_round_summary_matches_ledger": true,
+  "source_identity_matches_qualification_and_wandb": true,
+  "first_round_per_column_counts_vary_in_all_120_tables": true,
+  "scope": "Launch and monitoring verification only; new run remains running."
+}

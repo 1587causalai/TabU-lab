@@ -1,0 +1,16 @@
+{
+  "schema": "restoration.mask-policy-supersession.v1",
+  "previous_run_url": "https://wandb.ai/zj3712/restoration/runs/old120-small128-tar-budget-20260916",
+  "replacement_run_url": "https://wandb.ai/zj3712/restoration/runs/old120-small128-global025-20260916",
+  "previous_terminal_sha256": "6e6f4505575e905272346680e45122bae7661e20371043f1fdb3c1c807f5ac11",
+  "previous_terminal": {
+    "outcome": "interrupted",
+    "round": 22,
+    "cursor": 19,
+    "update": 2659,
+    "elapsed_seconds": 2520.9080482770223,
+    "checkpoint": "checkpoint.pt"
+  },
+  "reason": "owner requested lower global mask fraction and round/table macro monitoring",
+  "replacement_initialization": "fresh seed 1729; source/config/mask policy changed"
+}

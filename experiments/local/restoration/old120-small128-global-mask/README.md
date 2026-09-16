@@ -1,5 +1,9 @@
 # Old120 Small-128: global 2.5% Query masks
 
+[Grouped live monitoring](https://wandb.ai/zj3712/restoration/reports/Restoration-%7C-round-and-fixed-mask-monitoring--VmlldzoxNzk0MTM0Mw==)
+and [run](https://wandb.ai/zj3712/restoration/runs/old120-small128-global025-20260916).
+The report filters this run ID and has seven panels with three statistics each.
+
 This recipe supersedes the per-column 68-cell masking experiment. It starts
 from seed 1729 in a separate run, with the same 26,824-second / 768-round ceiling
 and 300-second finalization reserve. The earlier run was stopped and retained;
@@ -77,3 +81,22 @@ uv run tabu-lab restoration joint-fit \
 [Mask accounting](mask-budget-reference.json) is derived from the frozen corpus.
 The time-budget reference is the unchanged
 [historical five-segment record](../old120-small128-tar-budget/budget-reference.json).
+
+## Verification
+
+Execution source: `63f367ff924d9c8275d854979e3da9c40a015d04`, independently reviewed.
+Local tests: 851 passed, 9 optional-dependency skips; changed files pass Ruff.
+The reviewed integration check produced exactly one summary per full round and
+all 21 chart metrics from runner events. CUDA forward/backward, optimizer
+continuation and the largest-table update passed on the execution source; see
+[device check](qualification/device-check.json) and
+[largest-table check](qualification/largest-table-check.json).
+The largest-table check selected 163 total Query cells across 32 columns, with
+individual column counts between 1 and 9 for that seed. This single update is
+an execution check, not a training result.
+
+The earlier 68-per-column run stopped at update 2,659 with a saved checkpoint.
+Its original terminal receipt and curve remain unchanged. This new run starts
+from scratch and remains `local_unissued`; completion requires its own terminal
+receipt. Report structure was read back from W&B and recorded in
+[report verification](report-verification.json).
