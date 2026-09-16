@@ -267,6 +267,15 @@ class RestorationObserver:
                             and losses.get("table_count") == total):
                         _copy_numeric(result, losses, ("mean", "median", "p95", "table_count"),
                                       "train_round/loss/")
+                        source_losses = stats.get("loss_by_source", {})
+                        if isinstance(source_losses, Mapping):
+                            for source, values in source_losses.items():
+                                if source not in _SOURCES or not isinstance(values, Mapping):
+                                    continue
+                                _copy_numeric(
+                                    result, values, ("mean", "median", "p95", "table_count"),
+                                    f"train_round/loss_by_source/{source}/",
+                                )
                         result["train_round/complete"] = True
                         if _finite(event.get("training_round")):
                             result["completed_round"] = event["training_round"]

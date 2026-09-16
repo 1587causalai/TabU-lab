@@ -542,6 +542,7 @@ def _checkpoint(
     stage_name,
     stage_elapsed=0.0,
     cycle_losses=(),
+    cycle_source_losses=None,
 ):
     state = {
         "schema": CHECKPOINT_SCHEMA,
@@ -558,6 +559,9 @@ def _checkpoint(
         "stage_elapsed_seconds": stage_elapsed,
         "elapsed_seconds": elapsed,
         "cycle_losses": list(cycle_losses),
+        "cycle_source_losses": {
+            key: list(values) for key, values in (cycle_source_losses or {}).items()
+        },
     }
     if not _finite_state(state["model"]) or not _finite_state(state["optimizer"]):
         raise FloatingPointError("nonfinite model checkpoint")
@@ -738,6 +742,7 @@ def run_curriculum_fit(args, observer=None):
     stage_elapsed_prior = 0.0
     prior_elapsed = 0.0
     resume_cycle_losses = []
+    resume_cycle_source_losses = {}
     resume = getattr(args, "resume_checkpoint", None)
     if resume:
         raw = torch.load(Path(resume), map_location="cpu", weights_only=True)
@@ -754,6 +759,10 @@ def run_curriculum_fit(args, observer=None):
             state["elapsed_seconds"],
         )
         resume_cycle_losses = [float(value) for value in state.get("cycle_losses", [])]
+        resume_cycle_source_losses = {
+            str(key): [float(value) for value in values]
+            for key, values in state.get("cycle_source_losses", {}).items()
+        }
     started = time.monotonic()
     receipt = {
         "schema": SCHEMA,
@@ -811,7 +820,12 @@ def run_curriculum_fit(args, observer=None):
                 stage["name"]
             ]
             cycle_losses = list(resume_cycle_losses) if index == resume_stage_index else []
+            cycle_source_losses = (
+                {key: list(values) for key, values in resume_cycle_source_losses.items()}
+                if index == resume_stage_index else {}
+            )
             resume_cycle_losses = []
+            resume_cycle_source_losses = {}
             emit("phase", stage=stage["name"], config=plan["_summary"], identity=identity)
             tables = plan["_tables"]
 
@@ -880,6 +894,7 @@ def run_curriculum_fit(args, observer=None):
                 update += 1
                 cursor = step_index + 1
                 cycle_losses.append(float(score.loss.detach().cpu()))
+                cycle_source_losses.setdefault(table.cohort, []).append(cycle_losses[-1])
                 row = {
                     "stage": stage["name"],
                     "cycle": cycle,
@@ -903,6 +918,10 @@ def run_curriculum_fit(args, observer=None):
                         "cycle": cycle + 1,
                         "completed_round": cycle + 1,
                         "loss": _distribution(cycle_losses),
+                        "loss_by_source": {
+                            source: _distribution(values)
+                            for source, values in sorted(cycle_source_losses.items())
+                        },
                         "complete": True,
                         "total_tables": cycle_size,
                         "completed_tables": cycle_size,
@@ -914,6 +933,7 @@ def run_curriculum_fit(args, observer=None):
                         training_round=cycle + 1,
                         train_round={
                             "loss": summary["loss"],
+                            "loss_by_source": summary["loss_by_source"],
                             "complete": True,
                             "total_tables": cycle_size,
                             "completed_tables": cycle_size,
@@ -940,6 +960,7 @@ def run_curriculum_fit(args, observer=None):
                             emit("phase", stage=f"{stage['name']}_cycle_{cycle + 1}_complete",
                                  metrics=periodic)
                     cycle_losses = []
+                    cycle_source_losses = {}
                 _checkpoint(
                     output / "checkpoint-progress.pt",
                     model,
@@ -952,6 +973,7 @@ def run_curriculum_fit(args, observer=None):
                     stage_name=stage["name"],
                     stage_elapsed=stage_elapsed,
                     cycle_losses=cycle_losses,
+                    cycle_source_losses=cycle_source_losses,
                 )
                 if stage_stop:
                     break
@@ -981,6 +1003,7 @@ def run_curriculum_fit(args, observer=None):
                 stage_name=stage["name"],
                 stage_elapsed=0.0,
                 cycle_losses=(),
+                cycle_source_losses={},
             )
             stage_elapsed_prior = 0.0
             resume_stage_index, resume_cursor = index + 1, 0
