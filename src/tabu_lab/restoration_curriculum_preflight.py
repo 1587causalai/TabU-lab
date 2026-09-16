@@ -33,11 +33,17 @@ def run_preflight(args):
         key=lambda table: (min(table.train_rows, 204) if table.windowed else table.train_rows)
         * table.width,
     )
+    largest_real_rows = max(
+        (table for table in plan["_tables"] if table.kind == "real"),
+        key=lambda table: table.train_rows,
+    )
     stage_synthetic = plan["_stages"][0]
     stage_real = plan["_stages"][2]
     seeds = plan["seeds"]
     probes = [("synthetic", largest_synthetic, stage_synthetic),
-              ("real", largest_real, stage_real)]
+              ("real_footprint", largest_real, stage_real)]
+    if largest_real_rows.name != largest_real.name:
+        probes.append(("real_max_rows", largest_real_rows, stage_real))
     measurements = []
     if args.device == "cuda:0":
         torch.cuda.reset_peak_memory_stats()
