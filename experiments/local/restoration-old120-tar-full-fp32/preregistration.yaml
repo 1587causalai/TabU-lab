@@ -1,0 +1,115 @@
+{
+  "schema": "tabu.restoration.pilot-fit.v1",
+  "status": "local_unissued",
+  "hypothesis": "A dedicated Small-scale restoration model trained on the exact TAR joint-fit round stream for scm_mixed_v1_000 (1024 resampled supervised episodes) reduces fixed-bank and reserved-row test encoding MSE versus initialization. This isolates single-table training from TAR's cross-table interference; it is not an unseen-table claim.",
+  "dataset_sha256": "226be84dd0833fff8245bcd8bf6295ba5002f8c0de95bba2489960c611b3f0f0",
+  "expected_rows": 256,
+  "columns": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "row_count": 204,
+  "mask_fraction": 0.3333333333333333,
+  "mask_bank_size": 8,
+  "seeds": {
+    "model": 1729,
+    "rows": 1730,
+    "masks": 1731,
+    "codes": 1732
+  },
+  "model": {
+    "encoder": {
+      "width": 128,
+      "category_map": "identity128",
+      "mlp_hidden": 128,
+      "epsilon": 1e-06
+    },
+    "backbone": {
+      "width": 128,
+      "layers": 3,
+      "heads": 8,
+      "ff_width": 256,
+      "kind": "inducing",
+      "slots": 256,
+      "tau_presence": 1.0,
+      "reference_mass": 1.0,
+      "norm_eps": 1e-06
+    },
+    "readout": "ll",
+    "bandwidth": 1.0,
+    "ridge": 0.001
+  },
+  "optimizer": {
+    "kind": "adamw",
+    "learning_rate": 0.0001,
+    "weight_decay": 0.0,
+    "betas": [
+      0.9,
+      0.95
+    ],
+    "eps": 1e-08,
+    "grad_clip": 1.0
+  },
+  "gradient_accumulation": 1,
+  "max_updates": 1024,
+  "max_wall_seconds": 14400,
+  "checkpoint_every": 32,
+  "evaluate_every": 32,
+  "row_order": "split",
+  "mask_mode": "tar_covering_fit_labels",
+  "episode_seed": 20260907,
+  "mask_namespace": "scm_mixed_v1_000/covering-fit",
+  "training_episode_mode": "resampled_supervised",
+  "training_episode_namespace": "scm_mixed_v1_000/training",
+  "reserved_test": true,
+  "execution": {
+    "dtype": "float32"
+  },
+  "telemetry": {
+    "wandb_mirror": true,
+    "mode": "passive projection of updates.jsonl (loss, gradient_norm, update_seconds) and periodic/final bank and reserved-test metrics; the mirror never feeds back into training; a mirror runtime failure is recorded in the receipt and is non-fatal."
+  },
+  "pass_criteria": [
+    "Finite forward, loss, gradients and parameters throughout the bounded attempt.",
+    "Report initial, every-32-update and final fixed-bank metrics and reserved-row test metrics; a decrease versus initialization supports only this bounded single-table fit hypothesis.",
+    "Keep retained and Query metrics separate, keep the reserved-row test episode forward-only, and preserve exact checkpoint continuation identity."
+  ],
+  "kill_criteria": [
+    "Stop and record failure on invalid support, nonfinite loss, gradient or parameter.",
+    "Stop at 1024 total optimizer updates or 14400 cumulative attempt seconds, checked between operations; do not reset the recorded budget through resume."
+  ],
+  "evidence_plan": [
+    "Bind the snapshot, original split, selected training row IDs, schema, mask/code seeds, model configuration, reserved-test episode and actual source bytes.",
+    "Save initial/final and periodic fixed-bank and reserved-test metrics, per-update progress, checkpoints, optimizer/RNG/cursor and a terminal outcome even on failure.",
+    "Reserved rows enter exactly one forward-only evaluation episode and never a training episode or gradient; updates.jsonl and evaluations.jsonl remain authoritative over the passive mirror."
+  ],
+  "legacy_reference": {
+    "model": "tabu.tar Small-128",
+    "reused": [
+      "width=128",
+      "layers=3",
+      "heads=8",
+      "ff_width=256",
+      "seed=1729",
+      "lr=1e-4",
+      "Adam betas=0.9/0.95",
+      "eps=1e-8",
+      "clip=1",
+      "episode_seed=20260907 with scm_mixed_v1_000/training and /covering-fit namespaces"
+    ],
+    "adaptations": [
+      "New single-pass all-cell restoration objective and visible-only robust numeric codec.",
+      "Keep new-model inducing_slots=256, tau_presence=1 and reference_mass=1; legacy Small-128 used 128 inducing slots and a different presence/readout realization.",
+      "Use AdamW with zero decay; legacy trained with matrix decay and later mixed Muon/AdamW.",
+      "Dedicated single-table training on scm_mixed_v1_000; legacy Small-128 was shared across 120 tables with per-round table shuffling.",
+      "Fresh initialization; no legacy checkpoint or optimizer state."
+    ]
+  },
+  "preparation_revision": "Full-budget TAR-aligned amendment of the 200-update tar-aligned pilot. Training now consumes TAR joint-fit's exact per-table training stream: update i reproduces round i for scm_mixed_v1_000 (episode_seed 20260907, namespace scm_mixed_v1_000/training, row_roles randperm, 136 context + 68 target-column queries, codebook seed from the episode's codebook stream). 1024 updates equal TAR's preregistered max_rounds, so this table sees exactly the training episodes it would have seen inside TAR's complete joint run. Evaluation: the fixed 8-episode covering-fit bank (byte-identical to the 200-update pilot's bank) at step 0, every 32 updates and at termination, plus one forward-only reserved-row episode (all 204 training rows fully visible, the 52 reserved rows visible on predictor columns and queried on the target column) on the same cadence. This is the first reserved-row measurement in this model line; TAR's joint fit never evaluated reserved rows. Execution dtype float32 (CPU FP32~=FP64 for speed and effect established in the 200-update pilot). Passive W&B mirror declared."
+}
