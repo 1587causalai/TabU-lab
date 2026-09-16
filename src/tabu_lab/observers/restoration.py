@@ -28,10 +28,13 @@ _NUMERIC_CONFIG = frozenset({
     "model_parameters", "bandwidth", "ridge", "width", "mlp_hidden", "epsilon",
     "layers", "heads", "ff_width", "slots", "tau_presence", "reference_mass", "norm_eps",
     "learning_rate", "weight_decay", "eps", "grad_clip", "model", "order", "masks", "codes",
+    "max_abs_robust_z",
 })
-_CONFIG_GROUPS = frozenset({"model", "encoder", "backbone", "optimizer", "seeds"})
+_CONFIG_GROUPS = frozenset({
+    "model", "encoder", "backbone", "optimizer", "seeds", "numeric_query_guard",
+})
 _CONFIG_ENUMS = {
-    "readout": {"ll", "nw"}, "kind": {"direct", "inducing", "adamw"},
+    "readout": {"ll", "nw"}, "kind": {"direct", "inducing", "adamw", "median_half_iqr"},
     "category_map": {"identity128", "rotary32", "mlp32", "mlp256"},
 }
 _IDENTITY_ENUMS = {"device": {"cpu", "cuda:0"}, "dtype": {"float64", "float32"}}
@@ -43,7 +46,8 @@ _COUNTERS = (
     "model_parameters", "cursor", "peak_allocated_bytes", "training_round", "completed_round",
 )
 _TRAIN_METRICS = (
-    "loss", "gradient_norm", "update_seconds", "train_seconds", "learning_rate",
+    "loss", "gradient_norm", "post_clip_gradient_norm", "update_seconds", "train_seconds",
+    "learning_rate",
     "peak_allocated_bytes", "checkpoint_seconds", "preparation_seconds",
 )
 _STATE_METRICS = (
@@ -53,6 +57,7 @@ _STATE_METRICS = (
 _COVERAGE_METRICS = (
     "query_cells", "total_cells", "protected_discrete_cells", "unmaskable_discrete_classes",
     "singleton_discrete_classes", "query_fraction", "query_count",
+    "protected_numeric_tail_cells", "query_numeric_tail_cells",
 )
 _SOURCES = frozenset({"scm_mixed_v1", "discoscm", "scm_numeric_v0", "sklearn_synthetic"})
 _STATUSES = frozenset({

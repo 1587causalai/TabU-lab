@@ -37,6 +37,10 @@ from tabu_lab.tar_data import validate_full_dataset
 SCHEMA = "tabu.restoration.joint-fit.v1"
 PROTOCOL = "old120_all_train_rows_mixed_types_all_observed_targets_v2"
 GLOBAL_MASK_PROTOCOL = "old120_all_train_rows_mixed_types_global_fraction_all_observed_targets_v3"
+TAIL_GUARD_PROTOCOL = (
+    "old120_all_train_rows_mixed_types_global_fraction_numeric_tail_guard_all_observed_targets_v4"
+)
+GLOBAL_MASK_PROTOCOLS = (GLOBAL_MASK_PROTOCOL, TAIL_GUARD_PROTOCOL)
 
 
 def _hash(path: Path) -> str:
@@ -259,8 +263,13 @@ def prepare_plan(preregistration: Path, corpus: Path, device="cpu") -> FitPlan:
     if spec.get("schema") != SCHEMA or spec.get("status") != "local_unissued":
         raise ValueError(f"preregistration schema/status must be {SCHEMA}/local_unissued")
     protocol = spec.get("protocol")
-    if protocol not in (PROTOCOL, GLOBAL_MASK_PROTOCOL):
-        raise ValueError(f"preregistration protocol must be {PROTOCOL} or {GLOBAL_MASK_PROTOCOL}")
+    if protocol not in (PROTOCOL, *GLOBAL_MASK_PROTOCOLS):
+        raise ValueError("unsupported restoration preregistration protocol")
+    if protocol == TAIL_GUARD_PROTOCOL:
+        if not isinstance(spec.get("numeric_query_guard"), dict):
+            raise ValueError("tail guard protocol requires numeric_query_guard")
+    elif "numeric_query_guard" in spec:
+        raise ValueError("numeric_query_guard requires the explicit tail guard protocol")
     corpus = Path(corpus).resolve()
     corpus_spec_path = corpus / "preregistration.yaml"
     corpus_spec = _load_mapping(corpus_spec_path)
@@ -282,7 +291,7 @@ def prepare_plan(preregistration: Path, corpus: Path, device="cpu") -> FitPlan:
         raise ValueError("dataset_names must contain the declared table_count")
     if len(set(names)) != len(names) or set(names) != set(datasets):
         raise ValueError("dataset_names must cover the frozen corpus exactly")
-    if protocol == GLOBAL_MASK_PROTOCOL:
+    if protocol in GLOBAL_MASK_PROTOCOLS:
         if "query_count" in spec:
             raise ValueError("global mask protocol declares mask_fraction, not query_count")
         if _number(spec.get("mask_fraction"), "mask_fraction") >= 1:
@@ -377,7 +386,7 @@ def prepare_plan(preregistration: Path, corpus: Path, device="cpu") -> FitPlan:
             )
             for table in tables
         ),
-        **({"mask_fraction": spec["mask_fraction"]} if protocol == GLOBAL_MASK_PROTOCOL
+        **({"mask_fraction": spec["mask_fraction"]} if protocol in GLOBAL_MASK_PROTOCOLS
            else {"query_count": spec["query_count"]}),
         "evaluation_masks": spec["evaluation_masks"],
         "max_rounds": max_rounds,
@@ -391,15 +400,42 @@ def prepare_plan(preregistration: Path, corpus: Path, device="cpu") -> FitPlan:
         "mask_policy": (
             "global cell sampling without equal per-column counts; randomly preserve one "
             "visible sample per observed discrete class; retain at least two cells per column"
-            if protocol == GLOBAL_MASK_PROTOCOL else
+            if protocol in GLOBAL_MASK_PROTOCOLS else
             "equal per-column counts; randomly preserve one visible sample "
             "per observed discrete class"
         ),
     }
+    numeric_guard_options = {}
+    if protocol == TAIL_GUARD_PROTOCOL:
+        numeric_guard_options = {
+            "numeric_query_guard": spec["numeric_query_guard"],
+            "numeric_scale_floor": config.encoder.epsilon,
+        }
+        summary["numeric_query_guard"] = dict(spec["numeric_query_guard"],
+                                             scale_floor=config.encoder.epsilon,
+                                             reference_scope="training rows before masking")
+        summary["mask_policy"] += "; numeric tails stay visible and remain all-cell targets"
+        summary["numeric_tail_coverage"] = {
+            "protected_numeric_tail_cells": 0, "protected_numeric_tail_columns": 0,
+            "protected_numeric_tail_tables": 0,
+            "numeric_training_cells": sum(table.train_rows * table.kind_counts.get("numeric", 0)
+                                          for table in tables),
+            "scope": "unique training cells, counted once before masking; reserved rows excluded",
+        }
     # Validate the mask budget against every frozen table before starting a run.
     for table in tables:
-        if protocol == GLOBAL_MASK_PROTOCOL:
-            global_query_mask(table, spec["mask_fraction"], seeds["masks"])
+        if protocol in GLOBAL_MASK_PROTOCOLS:
+            _, info = global_query_mask(table, spec["mask_fraction"], seeds["masks"],
+                                        **numeric_guard_options)
+            if protocol == TAIL_GUARD_PROTOCOL:
+                coverage = summary["numeric_tail_coverage"]
+                coverage["protected_numeric_tail_cells"] += info["protected_numeric_tail_cells"]
+                coverage["protected_numeric_tail_columns"] += sum(
+                    count > 0 for count in info["protected_numeric_tail_per_column"]
+                )
+                coverage["protected_numeric_tail_tables"] += int(
+                    info["protected_numeric_tail_cells"] > 0
+                )
         else:
             _query_mask(table, spec["query_count"], seeds["masks"])
     return FitPlan(dict(spec, _summary=summary), corpus, corpus_spec, tables, config,
@@ -423,6 +459,10 @@ def _fixed_bank(plan: FitPlan, table: TablePlan, device: str):
 
 
 def _plan_query_mask(plan: FitPlan, table: TablePlan, seed: int):
+    if plan.spec["protocol"] == TAIL_GUARD_PROTOCOL:
+        return global_query_mask(table, plan.spec["mask_fraction"], seed,
+                                 numeric_query_guard=plan.spec["numeric_query_guard"],
+                                 numeric_scale_floor=plan.config.encoder.epsilon)
     if plan.spec["protocol"] == GLOBAL_MASK_PROTOCOL:
         return global_query_mask(table, plan.spec["mask_fraction"], seed)
     return _query_mask(table, plan.spec["query_count"], seed)
@@ -561,6 +601,10 @@ def _metrics(plan: FitPlan, model: RestorationModel, device: str, banks=None,
     episodes_by_table = Counter()
     coverage = dict.fromkeys(("query_cells", "total_cells", "protected_discrete_cells",
                              "unmaskable_discrete_classes", "singleton_discrete_classes"), 0)
+    if plan.spec["protocol"] == TAIL_GUARD_PROTOCOL:
+        coverage.update(protected_numeric_tail_cells=0, query_numeric_tail_cells=0,
+                        numeric_tail_count_scope="mask-cell exposures in evaluated episodes",
+                        numeric_query_guard=plan.spec["_summary"]["numeric_query_guard"])
     expected = plan.table_count * plan.spec["evaluation_masks"]
     complete = True
     longest_episode = 0.0
@@ -629,6 +673,9 @@ def _metrics(plan: FitPlan, model: RestorationModel, device: str, banks=None,
                 for name in ("protected_discrete_cells", "unmaskable_discrete_classes",
                              "singleton_discrete_classes"):
                     coverage[name] += info[name]
+                if plan.spec["protocol"] == TAIL_GUARD_PROTOCOL:
+                    for name in ("protected_numeric_tail_cells", "query_numeric_tail_cells"):
+                        coverage[name] += info[name]
                 longest_episode = max(longest_episode, time.monotonic() - tick)
             if progress is not None:
                 progress({"completed_episodes": len(losses), "total_episodes": expected,
@@ -948,10 +995,17 @@ def run_joint_fit(args, observer=None):
                         raise FloatingPointError("nonfinite training loss")
                     score.loss.backward()
                     params = [p for p in model.parameters() if p.grad is not None]
-                    if not params or any(not bool(torch.isfinite(p.grad).all()) for p in params):
+                    if not params or not bool(torch.stack([
+                        torch.isfinite(parameter.grad).all() for parameter in params
+                    ]).all()):
                         raise FloatingPointError("missing or nonfinite training gradient")
                     norm = torch.nn.utils.clip_grad_norm_(params, opt["grad_clip"],
                                                           error_if_nonfinite=True)
+                    # Batched per-tensor norms, then one scalar reduction. The
+                    # audit measures actual clipped gradients before AdamW.
+                    post_clip_norm = torch.linalg.vector_norm(torch.stack(torch._foreach_norm(
+                        [parameter.grad.detach() for parameter in params], 2,
+                    )))
                     optimizer.step()
                     if (not _finite_state(model.state_dict())
                             or not _finite_state(optimizer.state_dict())):
@@ -959,6 +1013,9 @@ def run_joint_fit(args, observer=None):
                     if args.device == "cuda:0":
                         torch.cuda.synchronize()
                     loss = float(score.loss.detach())
+                    gradient_norm, post_clip_gradient_norm = torch.stack(
+                        (norm, post_clip_norm)
+                    ).detach().cpu().tolist()
                     partial = training_metrics["partial_round_losses"]
                     if table.name in partial:
                         raise ValueError("duplicate table in training round metrics")
@@ -986,7 +1043,8 @@ def run_joint_fit(args, observer=None):
                         training_metrics["partial_round_losses"] = {}
                     checkpoint(output / "checkpoint-progress.pt", replace=True)
                     row = {"round": current_round + 1, "update": update, "table": table.name,
-                           "loss": loss, "gradient_norm": float(norm),
+                           "loss": loss, "gradient_norm": gradient_norm,
+                           "post_clip_gradient_norm": post_clip_gradient_norm,
                            "mask": mask_info, "code_seed": code_seed,
                            "elapsed_seconds": elapsed()}
                     if args.device == "cuda:0":

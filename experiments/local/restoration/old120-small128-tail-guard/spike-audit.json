@@ -1,0 +1,250 @@
+{
+  "all_updates_querying_at_least_one_tail_cell": {
+    "12": 110,
+    "20": 81,
+    "8": 134
+  },
+  "interpretation": [
+    "Threshold 8 protects 598 numeric cells while preserving them as visible supports and retaining them in the all-observed-cell loss under the proposed policy.",
+    "18 of the 20 largest logged losses queried a threshold-8 tail candidate. Two of the largest 20 did not, so preventing tail Query cells does not by itself promise to eliminate all spikes.",
+    "Logged gradient_norm is the pre-clipping norm; the optimizer uses the declared clip value 1.",
+    "Changes to the Query eligibility distribution require a fresh run and fresh fixed evaluation masks; no direct loss-equivalence or generalization claim follows."
+  ],
+  "mask_replay_validation": {
+    "code_seed_matches": true,
+    "full_mask_metadata_matches": true,
+    "updates_matched": 2338
+  },
+  "methods": [
+    "For each numeric column, compute median and half-IQR using the original fixed 204 training rows and linear-interpolation quantiles; floor scale at encoder epsilon 1e-6.",
+    "A cell is a tail candidate iff abs(value - median) / max(half-IQR, epsilon) is strictly greater than the stated threshold. Standard deviation is a column statistic, not a cell property.",
+    "Replay the original global 2.5 percent sampler from the recorded source using seed hash(1731, table, train, round-1); verify the complete mask metadata against every logged update and independently verify code seed hash(1732, table, train, round-1).",
+    "Rank the 2338 logged updates separately by pre-update loss and pre-clipping gradient norm; count how many of each top-20 set queried at least one tail candidate.",
+    "No model/scorer replay was performed; the audit is descriptive association and does not establish the cause of any spike."
+  ],
+  "run_id": "old120-small128-global025-20260916",
+  "schema": "tabu.restoration.tail-spike-audit.v1",
+  "scope": {
+    "all_training_cells": 402288,
+    "numeric_training_cells": 248064,
+    "reserved_rows_used": 0,
+    "tables": 120,
+    "training_rows_per_table": 204
+  },
+  "source_commit_for_mask_replay": "0f400e379f1f5f16716621f2a483c4ad390f840e",
+  "status": "local_unissued_descriptive_audit",
+  "stopped_boundary": {
+    "completed_rounds": 19,
+    "cursor": 58,
+    "outcome": "interrupted",
+    "updates": 2338
+  },
+  "threshold_census": [
+    {
+      "affected_numeric_columns": 59,
+      "affected_tables": 19,
+      "fraction_all_training_cells": 0.0014864972358111601,
+      "fraction_numeric_training_cells": 0.0024106682146542826,
+      "protected_numeric_cells": 598,
+      "threshold": 8
+    },
+    {
+      "affected_numeric_columns": 37,
+      "affected_tables": 10,
+      "fraction_all_training_cells": 0.0010266276896154,
+      "fraction_numeric_training_cells": 0.0016648929308565531,
+      "protected_numeric_cells": 413,
+      "threshold": 12
+    },
+    {
+      "affected_numeric_columns": 36,
+      "affected_tables": 10,
+      "fraction_all_training_cells": 0.0006264168953585491,
+      "fraction_numeric_training_cells": 0.0010158668730650155,
+      "protected_numeric_cells": 252,
+      "threshold": 20
+    }
+  ],
+  "top10_loss_updates": [
+    {
+      "code_seed": 8961203082623093540,
+      "gradient_norm": 721.6081522482851,
+      "loss": 691.9292446795132,
+      "max_hidden_robust_score": 556.5071156830737,
+      "round": 19,
+      "table": "discoscm_086",
+      "tail_hidden": {
+        "12": 2,
+        "20": 2,
+        "8": 2
+      },
+      "update": 2218
+    },
+    {
+      "code_seed": 5941008390125146100,
+      "gradient_norm": 1917.956121549995,
+      "loss": 327.99490965035056,
+      "max_hidden_robust_score": 556.5071156830737,
+      "round": 13,
+      "table": "discoscm_086",
+      "tail_hidden": {
+        "12": 2,
+        "20": 1,
+        "8": 2
+      },
+      "update": 1534
+    },
+    {
+      "code_seed": 3264951002228098867,
+      "gradient_norm": 11364.37493369502,
+      "loss": 115.71086156351174,
+      "max_hidden_robust_score": 297.5849523444328,
+      "round": 3,
+      "table": "discoscm_086",
+      "tail_hidden": {
+        "12": 2,
+        "20": 1,
+        "8": 3
+      },
+      "update": 244
+    },
+    {
+      "code_seed": 6080340515652484938,
+      "gradient_norm": 1469.8991877425274,
+      "loss": 85.07910258289772,
+      "max_hidden_robust_score": 176.3198257414317,
+      "round": 8,
+      "table": "discoscm_084",
+      "tail_hidden": {
+        "12": 2,
+        "20": 1,
+        "8": 2
+      },
+      "update": 919
+    },
+    {
+      "code_seed": 3891967664268674520,
+      "gradient_norm": 1779.7347668630985,
+      "loss": 84.87709899012067,
+      "max_hidden_robust_score": 176.3198257414317,
+      "round": 17,
+      "table": "discoscm_084",
+      "tail_hidden": {
+        "12": 1,
+        "20": 1,
+        "8": 2
+      },
+      "update": 1955
+    },
+    {
+      "code_seed": 2850771039111877227,
+      "gradient_norm": 761.7867182316877,
+      "loss": 75.44438070469461,
+      "max_hidden_robust_score": 176.3198257414317,
+      "round": 16,
+      "table": "discoscm_084",
+      "tail_hidden": {
+        "12": 1,
+        "20": 1,
+        "8": 1
+      },
+      "update": 1916
+    },
+    {
+      "code_seed": 3297900424378903381,
+      "gradient_norm": 382.4331542669571,
+      "loss": 74.77621461701102,
+      "max_hidden_robust_score": 171.65781524301502,
+      "round": 1,
+      "table": "discoscm_090",
+      "tail_hidden": {
+        "12": 1,
+        "20": 1,
+        "8": 1
+      },
+      "update": 76
+    },
+    {
+      "code_seed": 7488154528887753717,
+      "gradient_norm": 1562.0839103277274,
+      "loss": 53.326197938108365,
+      "max_hidden_robust_score": 115.07187973038265,
+      "round": 18,
+      "table": "discoscm_084",
+      "tail_hidden": {
+        "12": 3,
+        "20": 3,
+        "8": 3
+      },
+      "update": 2094
+    },
+    {
+      "code_seed": 4528228874860026880,
+      "gradient_norm": 17647.424669803382,
+      "loss": 47.7175756750728,
+      "max_hidden_robust_score": 11.538772113926813,
+      "round": 2,
+      "table": "discoscm_086",
+      "tail_hidden": {
+        "12": 0,
+        "20": 0,
+        "8": 1
+      },
+      "update": 228
+    },
+    {
+      "code_seed": 8139893485659024229,
+      "gradient_norm": 15113.112859805167,
+      "loss": 36.92366369789164,
+      "max_hidden_robust_score": 70.67948220113034,
+      "round": 1,
+      "table": "discoscm_086",
+      "tail_hidden": {
+        "12": 2,
+        "20": 2,
+        "8": 4
+      },
+      "update": 75
+    }
+  ],
+  "top20_gradient_updates_querying_at_least_one_tail_cell": {
+    "12": 15,
+    "20": 14,
+    "8": 18
+  },
+  "top20_loss_exceptions_at_threshold_8": [
+    {
+      "code_seed": 6016656249137347084,
+      "gradient_norm": 1579.1514969602324,
+      "loss": 16.48053863450215,
+      "max_hidden_robust_score": 3.7233805573347802,
+      "round": 11,
+      "table": "discoscm_084",
+      "tail_hidden": {
+        "12": 0,
+        "20": 0,
+        "8": 0
+      },
+      "update": 1201
+    },
+    {
+      "code_seed": 4032065451838883161,
+      "gradient_norm": 6535.928787945859,
+      "loss": 15.615288918532865,
+      "max_hidden_robust_score": 4.38321743049899,
+      "round": 4,
+      "table": "discoscm_086",
+      "tail_hidden": {
+        "12": 0,
+        "20": 0,
+        "8": 0
+      },
+      "update": 471
+    }
+  ],
+  "top20_loss_updates_querying_at_least_one_tail_cell": {
+    "12": 17,
+    "20": 17,
+    "8": 18
+  }
+}

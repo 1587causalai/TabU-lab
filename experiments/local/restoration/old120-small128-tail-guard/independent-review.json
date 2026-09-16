@@ -1,0 +1,32 @@
+{
+  "claim_boundary": "Read-only source review plus independent CPU sampler/data-contract census. No claim of CUDA training success, causality, or elimination of all spikes.",
+  "findings": [],
+  "independent_evidence": {
+    "fixed_bank_episodes_checked": 960,
+    "guard_matches_existing_codec_quantile_definition": true,
+    "legacy_v2_function_ast_unchanged": true,
+    "legacy_v3_masks_and_metadata_matched": 960,
+    "mask_census": "independent-mask-census.json",
+    "numeric_columns_compared_to_existing_codec": 1216,
+    "queried_tail_cells": 0,
+    "unique_numeric_tail_cells_protected": 598
+  },
+  "launch_conditions": [
+    "Run final repository tests and CUDA/source/resource qualification on the committed source.",
+    "Start a new run and fixed-mask bank under protocol v4; do not resume the stopped v3 checkpoint."
+  ],
+  "preregistration_sha256": "ce6716789fa257cd7abb60f22d6751e4b5b0a9b2cd25ba480c5441c1639a3004",
+  "reviewed_boundaries": [
+    "Guard calibration only reads the TablePlan training values; the original reserved split remains excluded.",
+    "The strict threshold uses linear quartiles, median, half-IQR and the same encoder epsilon floor; equality stays eligible.",
+    "Guard statistics stay in the sampler. Model input and codec preparation remain visible-only; protected cells remain visible and all-cell targets.",
+    "The global 2.5 percent budget, random discrete class protection and two-visible-cells minimum remain enforced without shrinking loss.",
+    "Protocol v4 and preregistration/source digests bind checkpoint continuation. Prepared cache fingerprints include actual masks, values, requests and code seeds.",
+    "Plan coverage counts unique protected training cells; evaluation coverage explicitly counts mask-cell exposures.",
+    "Post-clip norm is measured from actual clipped gradients before AdamW; W&B forwards pre/post norms under separate metric keys.",
+    "The ten report panels use current allowlisted metric keys; Query scores are explicitly conditional on eligibility."
+  ],
+  "schema": "tabu.restoration.tail-guard-independent-review.v1",
+  "source_sha256": "31ce19668661d559557b7cc1055d1bb41d347ef651276476f4c2cc10706eed5e",
+  "status": "reviewed_no_launch_blockers"
+}

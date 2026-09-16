@@ -20,8 +20,64 @@ if TYPE_CHECKING:
     from tabu_lab.restoration_joint_fit import TablePlan
 
 
+def numeric_tail_protection(
+    table: TablePlan, guard: dict, scale_floor: float,
+) -> tuple[torch.Tensor, dict]:
+    """Mark numeric cells excluded from Query sampling using training rows only.
+
+    These statistics define the corruption candidate pool, not the model's
+    numeric codec. They are computed before masking and never passed to the
+    model; protected cells remain visible and participate in the all-cell loss.
+    The audit contains counts and declared policy, never observed values or
+    fitted numeric coordinates.
+    """
+    if (not isinstance(guard, dict)
+            or set(guard) != {"kind", "max_abs_robust_z"}
+            or guard.get("kind") != "median_half_iqr"):
+        raise ValueError("numeric_query_guard must declare "
+                         "kind=median_half_iqr and max_abs_robust_z")
+    threshold = guard["max_abs_robust_z"]
+    if (isinstance(threshold, bool) or not isinstance(threshold, int | float)
+            or not math.isfinite(threshold) or threshold <= 0):
+        raise ValueError("numeric_query_guard max_abs_robust_z must be finite and positive")
+    if (isinstance(scale_floor, bool) or not isinstance(scale_floor, int | float)
+            or not math.isfinite(scale_floor) or scale_floor <= 0):
+        raise ValueError("numeric_query_guard scale_floor must be finite and positive")
+    n, width = table.train_rows, len(table.schema)
+    if (type(n) is not int or n < 3 or width < 1 or len(table.values) != width
+            or any(value.ndim != 1 or len(value) != n for value in table.values)):
+        raise ValueError("numeric query guard values must match declared training rows and columns")
+    protected = torch.zeros((n, width), dtype=torch.bool)
+    for column, spec in enumerate(table.schema):
+        if spec.kind != "numeric":
+            continue
+        values = table.values[column].detach().to(device="cpu", dtype=torch.float64)
+        if not bool(torch.isfinite(values).all()):
+            raise ValueError("numeric query guard requires finite training values")
+        quantiles = torch.quantile(values, values.new_tensor([.25, .5, .75]),
+                                   interpolation="linear")
+        scale = torch.clamp((quantiles[2] - quantiles[0]) / 2, min=scale_floor)
+        cutoff = threshold * scale
+        if not bool(torch.isfinite(quantiles).all() & torch.isfinite(cutoff)):
+            raise ValueError("nonfinite numeric query guard calibration")
+        # A cell exactly at the declared boundary is still eligible.
+        protected[:, column] = (values - quantiles[1]).abs() > cutoff
+    per_column = protected.sum(0).tolist()
+    return protected, {
+        "protected_numeric_tail_cells": sum(per_column),
+        "protected_numeric_tail_per_column": per_column,
+        "numeric_query_guard": {
+            "kind": "median_half_iqr", "max_abs_robust_z": float(threshold),
+            "scale_floor": float(scale_floor), "comparison": "strictly_greater",
+            "quantile_interpolation": "linear",
+            "reference_scope": "all training rows before masking",
+        },
+    }
+
+
 def global_query_mask(
     table: TablePlan, fraction: float, seed: int,
+    *, numeric_query_guard: dict | None = None, numeric_scale_floor: float | None = None,
 ) -> tuple[torch.Tensor, dict]:
     """Sample an exact global Query budget, retaining all observed classes.
 
@@ -40,6 +96,15 @@ def global_query_mask(
                                          for column in table.values):
         raise ValueError("table values must match the declared rows and columns")
 
+    numeric_protected = None
+    numeric_audit = {}
+    if numeric_query_guard is not None:
+        numeric_protected, numeric_audit = numeric_tail_protection(
+            table, numeric_query_guard, numeric_scale_floor,
+        )
+    elif numeric_scale_floor is not None:
+        raise ValueError("numeric_scale_floor requires an explicit numeric_query_guard")
+
     count = max(1, math.floor(n * width * fraction + 0.5))
     rng = random.Random(seed)
     eligible = []
@@ -49,7 +114,9 @@ def global_query_mask(
     for column, spec in enumerate(table.schema):
         keep = set()
         singleton_count = 0
-        if spec.kind != "numeric":
+        if spec.kind == "numeric" and numeric_protected is not None:
+            keep = set(numeric_protected[:, column].nonzero().flatten().tolist())
+        elif spec.kind != "numeric":
             rows_by_class = {}
             for row, label in enumerate(table.values[column].tolist()):
                 rows_by_class.setdefault(int(label), []).append(row)
@@ -84,6 +151,10 @@ def global_query_mask(
     query = torch.zeros(n * width, dtype=torch.bool)
     query[sampled] = True
     query = query.reshape(n, width)
+    if numeric_protected is not None:
+        numeric_audit["query_numeric_tail_cells"] = int((query & numeric_protected).sum())
+        if numeric_audit["query_numeric_tail_cells"]:
+            raise AssertionError("numeric tail cell entered Query despite guard")
     singleton_classes = sum(singleton_per_column)
     return query, dict(
         query_count=count,
@@ -97,4 +168,5 @@ def global_query_mask(
         singleton_classes_per_column=singleton_per_column,
         query_coverage=count / (n * width),
         sampling_attempts=sampling_attempts,
+        **numeric_audit,
     )

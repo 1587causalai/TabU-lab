@@ -5,7 +5,15 @@ Local receipts, source identities and checkpoints remain the primary record.
 The tracker mirrors aggregate metrics and progress; table contents and model
 checkpoints are not uploaded by the observer.
 
-## Current recipe: global 2.5% masks
+## Current recipe: global 2.5% masks with numeric tail protection
+
+Use [old120 Small-128 tail protection](old120-small128-tail-guard/README.md).
+Extreme numeric training cells stay visible while the total Query budget and
+full-cell loss remain unchanged. The preceding global-mask run stopped with a
+checkpoint at update 2,338. The new run starts from seed 1729 and adds separate
+pre-clip/post-clip gradient monitoring.
+
+## Previous recipe: global 2.5% masks
 
 Use [old120 Small-128 global masks](old120-small128-global-mask/README.md).
 This replaces equal per-column masking with a table-wide budget and adds

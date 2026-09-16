@@ -283,3 +283,37 @@ def test_table_macro_metrics_separate_types_states_and_incomplete_banks(enabled)
     logged = fake.run.logs[-1]
     assert "evaluation/query/numeric/encoding_mse/mean" not in logged
     assert logged["evaluation/partial/query/numeric/encoding_mse/mean"] == 2.0
+
+
+def test_tail_guard_and_pre_post_clip_norms_are_allowlisted_without_calibration_values(enabled):
+    fake = FakeSDK()
+    observer = create_restoration_observer({"numeric_query_guard": {
+        "kind": "median_half_iqr", "max_abs_robust_z": 8.0,
+        "fitted_medians": [123.0], "private_path": "/private/calibration",
+    }}, {}, wandb=fake)
+    assert fake.calls[0]["config"] == {
+        "numeric_query_guard/kind": "median_half_iqr",
+        "numeric_query_guard/max_abs_robust_z": 8.0,
+    }
+    observer({"event": "update", "update": 1, "gradient_norm": 12000.0,
+              "post_clip_gradient_norm": 0.999999, "mask": {
+                  "protected_numeric_tail_cells": 8, "query_numeric_tail_cells": 0,
+                  "protected_numeric_tail_per_column": [0, 8], "raw_values": [123.0],
+              }})
+    assert fake.run.logs[-1] == {
+        "update": 1, "phase": "training", "train/gradient_norm": 12000.0,
+        "train/post_clip_gradient_norm": 0.999999,
+        "train/coverage/protected_numeric_tail_cells": 8,
+        "train/coverage/query_numeric_tail_cells": 0,
+    }
+    observer({"event": "phase", "metrics": {"coverage": {
+        "protected_numeric_tail_cells": 64, "query_numeric_tail_cells": 0,
+        "raw_values": [123.0],
+    }}})
+    assert fake.run.logs[-1] == {
+        "evaluation/coverage/protected_numeric_tail_cells": 64,
+        "evaluation/coverage/query_numeric_tail_cells": 0,
+    }
+    observer({"event": "update", "post_clip_gradient_norm": float("nan")})
+    assert fake.run.logs[-1] == {"phase": "training"}
+    assert "/private" not in json.dumps(fake.calls + fake.run.logs)

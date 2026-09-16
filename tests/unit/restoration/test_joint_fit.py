@@ -13,6 +13,7 @@ from tabu_lab.models.restoration.backbone import BackboneConfig
 from tabu_lab.models.restoration.encoding import EncoderConfig
 from tabu_lab.restoration_joint_fit import (
     GLOBAL_MASK_PROTOCOL,
+    TAIL_GUARD_PROTOCOL,
     TablePlan,
     _distribution,
     _episode,
@@ -563,3 +564,91 @@ def test_global_mask_protocol_has_one_budget_and_rejects_ambiguous_configuration
     prereg.write_text(json.dumps(spec))
     with pytest.raises(ValueError, match="cannot declare mask_fraction"):
         prepare_plan(prereg, corpus)
+
+
+def _tail_guard_fixture(root):
+    prereg, corpus = _write_fixture(root)
+    data_path = corpus / "data" / "toy.json"
+    data = json.loads(data_path.read_text())
+    for row, value in enumerate([0, 0, 0, 1, 2, 100, -1e9, 1e9]):
+        data["values"][row][0] = value
+    data_path.write_text(json.dumps(data))
+    corpus_path = corpus / "preregistration.yaml"
+    corpus_spec = json.loads(corpus_path.read_text())
+    corpus_spec["datasets"]["toy"] = hashlib.sha256(data_path.read_bytes()).hexdigest()
+    corpus_path.write_text(json.dumps(corpus_spec))
+    spec = json.loads(prereg.read_text())
+    spec["corpus_preregistration_sha256"] = hashlib.sha256(corpus_path.read_bytes()).hexdigest()
+    spec["protocol"] = TAIL_GUARD_PROTOCOL
+    spec["mask_fraction"] = .1
+    spec["numeric_query_guard"] = {"kind": "median_half_iqr", "max_abs_robust_z": 8.0}
+    spec["evaluation_masks"] = 8
+    del spec["query_count"]
+    prereg.write_text(json.dumps(spec))
+    return prereg, corpus
+
+
+def test_tail_guard_plan_excludes_reserved_rows_and_applies_to_train_and_fixed_masks(tmp_path):
+    prereg, corpus = _tail_guard_fixture(tmp_path)
+    plan = prepare_plan(prereg, corpus)
+    table = plan.tables[0]
+    assert table.values[0].tolist() == [0, 0, 0, 1, 2, 100]
+    assert table.reserved_rows == 2
+    summary = plan.spec["_summary"]
+    assert summary["numeric_query_guard"]["scale_floor"] == plan.config.encoder.epsilon
+    assert summary["numeric_tail_coverage"]["protected_numeric_tail_cells"] == 1
+    assert summary["numeric_tail_coverage"]["numeric_training_cells"] == 6
+    assert summary["numeric_tail_coverage"]["protected_numeric_tail_tables"] == 1
+    for seed in range(20):
+        mask, info = _plan_query_mask(plan, table, seed)
+        assert not mask[5, 0]  # Would cease to be an outlier if reserved +/-1e9 entered the IQR.
+        assert mask.sum() == 2
+        assert info["protected_numeric_tail_cells"] == 1
+        assert info["query_numeric_tail_cells"] == 0
+        replay, same_info = _plan_query_mask(plan, table, seed)
+        assert torch.equal(mask, replay)
+        assert info == same_info
+    bank = list(_fixed_bank(plan, table, "cpu"))
+    assert len(bank) == 8
+    for (inputs, request, _), info in bank:
+        assert not inputs.query[5, 0]
+        assert inputs.visible[5, 0]
+        assert request.targets.shape[0] == 18
+        assert info["query_numeric_tail_cells"] == 0
+    measured = _metrics(plan, RestorationModel(plan.config).double(), "cpu")
+    assert measured["coverage"]["protected_numeric_tail_cells"] == 8
+    assert measured["coverage"]["query_numeric_tail_cells"] == 0
+    assert measured["coverage"]["total_cells"] == 18 * 8
+
+
+def test_tail_guard_requires_explicit_protocol_and_configuration(tmp_path):
+    prereg, corpus = _tail_guard_fixture(tmp_path)
+    spec = json.loads(prereg.read_text())
+    spec["protocol"] = GLOBAL_MASK_PROTOCOL
+    prereg.write_text(json.dumps(spec))
+    with pytest.raises(ValueError, match="requires the explicit tail guard protocol"):
+        prepare_plan(prereg, corpus)
+    spec["protocol"] = TAIL_GUARD_PROTOCOL
+    del spec["numeric_query_guard"]
+    prereg.write_text(json.dumps(spec))
+    with pytest.raises(ValueError, match="requires numeric_query_guard"):
+        prepare_plan(prereg, corpus)
+
+
+def test_tail_guard_run_records_measured_post_clip_gradient_norm(tmp_path):
+    prereg, corpus = _tail_guard_fixture(tmp_path)
+    spec = json.loads(prereg.read_text())
+    spec["optimizer"]["grad_clip"] = 1e-4
+    prereg.write_text(json.dumps(spec))
+    _commit_fixture(tmp_path)
+    result = run_joint_fit(_args(tmp_path, prereg, corpus, "guarded"))
+    assert result["outcome"] == "completed"
+    rows = [json.loads(line) for line in (
+        tmp_path / "guarded" / "updates.jsonl").read_text().splitlines()]
+    assert len(rows) == 2
+    assert any(row["gradient_norm"] > 1e-4 for row in rows)
+    for row in rows:
+        assert 0 <= row["post_clip_gradient_norm"] <= 1e-4 + 1e-12
+        assert row["post_clip_gradient_norm"] <= row["gradient_norm"] + 1e-12
+        assert row["mask"]["protected_numeric_tail_cells"] == 1
+        assert row["mask"]["query_numeric_tail_cells"] == 0
