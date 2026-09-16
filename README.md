@@ -1,217 +1,111 @@
 # TabU-lab
 
-An open research lab for tabular foundation models, inspired by
-[Marin](https://github.com/marin-community/marin).
+**Learning from tables. Building the evidence in the open.**
 
-The repository's single pretraining-direction pointer is
-[`MAINLINE.yaml`](./MAINLINE.yaml).
-It selects a complete immutable `ProgramSnapshot`: model contract, component
-graph, data mixture and policy, objective, training recipe, and evaluation
-protocol. Generated catalogs are query projections, not the source of truth.
+TabU-lab develops tabular foundation models and the open research software needed
+to understand how they learn. Our central question is whether reconstructing
+available table evidence can teach a model the relationships specific to each
+unit (a row or entity), and whether those representations transfer to new tables.
 
-## Mathematical direction and executable default
+[Research website](https://research.wehub.us/tabu-lab/) ·
+[Research and support brief](docs/research-support.md) ·
+[Try the implementation](#try-the-implementation) ·
+[Evidence](#what-exists-today) ·
+[中文](https://research.wehub.us/tabu-lab/zh/)
 
-The parent project's current mathematical priority is fourth-generation
-**TabU-TAR (Typed Additive Readout)**: clarify the common mathematical design,
-then develop parameterized models and scenario customizations from it.
-In the parent checkout, see the [factory seed](../../latex/model-factory/seed.md)
-and [TAR core](../../latex/model-factory/TabU-TAR/MATHEMATICAL_DESIGN.tex).
-TAR is a mathematical work in progress; the runtime described below still
-implements the separate third-generation structural contract.
+## Why this research
 
-The executable model-factory default is **TabU-v2 / TabUR** under
-`tabu.v2.tabur@0.1.0`. It implements the cell-as-query structural design in
-the readonly `TabU-v2` source closure. Historical query-family models remain
-available through explicit contract ids and are not silently aliased to v2.
-TabU-v2 is still experimental: selecting it as the default is a routing
-decision, not an evidence-backed capability claim.
+Tables bring together different variable types, incomplete observations, and
+relationships that can change across datasets. We investigate how a shared model
+can organize the evidence relevant to each unit and reconstruct table values.
+Prediction is one downstream use of that learned structure.
 
-The historical **TabUR** contract under `tabu.query.row@0.2.0` remains an
-explicit compatibility model, using
-`supervised.label_broadcast.v1` and the default symmetric `anchored` readout.
-**TabUBase** under `tabu.query.base@0.1.0` is an independently trainable sibling,
-not a prerequisite checkpoint. Both share the Episode/Prediction and evaluation
-protocol boundaries while retaining separate model and run identities.
-The existing pretraining program asks whether diverse supervised synthetic
-pretraining produces useful frozen ICL and then improves real-task fine-tuning.
-That program retains its own pointer and evidence boundaries; it does not set
-the current mathematical design priority or establish a TAR capability.
+The long-term aim is useful, transferable tabular models. The public contribution
+also includes inspectable implementations, training recipes, evaluation protocols,
+and documented limitations that other researchers can reuse as the work develops.
+Inspired by [Marin](https://github.com/marin-community/marin), we make the research
+process part of the deliverable.
 
-| Surface | Current status |
-| --- | --- |
-| TabU-v2 / TabUR contract and runtime | default via `tabu.v2.tabur@0.1.0` |
-| historical TabUR compatibility runtime | explicit `tabu.query.row@0.2.0` |
-| Evolvable program kernel | implemented with immutable manifests, typed DAG validation, impact analysis, freeze, exact resume, and explicit warm start |
-| Broad supervised synthetic prior v3 | candidate implementation selectable through versioned Generator/Mixture manifests |
-| v3 long-run pretraining | activated as scratch-first Grow snapshots `tabu.pretraining.query-{base,row}@1.2.0`; execution remains `local_unissued` until a run receipt exists |
-| frozen ICL for the 0.2/v3 lane | `not_run` |
-| real-task pretrained-vs-scratch fine-tuning for the 0.2/v3 lane | `not_run` |
-| formal evidence / accepted capability claim | none |
+## What exists today
 
-Results from Axis-B TabUBase, `tabu.query.row@0.1.0`, or synthetic priors v1/v2
-remain immutable historical evidence. They do not transfer to the current model,
-checkpoint identity, or capability claim.
+Status as of **2026-09-16**: active experimental development. The repository contains
+implementation checks and exploratory training reports; broad unseen-table
+generalization remains an open research question.
 
-## Five-step runtime contract
+| Research asset | What a reader can inspect | What the evidence supports |
+| --- | --- | --- |
+| Table-restoration implementation | [Five-step guide](docs/tutorials/table-restoration.md), [implementation review](docs/reviews/restoration-five-step-20260915/README.md) | Typed value encoding, contextual representations, Unit-based geometry, and LL/NW restoration; bounded implementation checks |
+| Reusable execution work | [Prepared-execution review](docs/reviews/restoration-prepared-20260916/README.md) | Scoped equivalence and timing checks, with source, configuration, and limitations recorded |
+| Historical TabU-TAR experiments | [120-table shared-fit report and curves](docs/research/tar-shared-fit-20260907/README.md) | Joint fitting on fixed training tables under its own recipe; these are TAR results, not restoration or unseen-table results |
+| Reproducible research tools | [Program manifests](docs/architecture/evolvable-pretraining-programs.md), [evaluation protocol](docs/architecture/real-evaluation-default-protocol.md), [catalog](catalog.json) | Versioned model/data/recipe identities and explicit evaluation boundaries |
 
-The mathematical authority for this executable default is the TabU-v2 source closure.
-The historical Axis-C TabUR source binds only the explicit legacy contract. Runtime preserves the
-same five-step boundary:
+These records are `local_unissued` where stated. The catalog records no formal
+receipts or accepted capability claims. Each linked review describes its dated
+source and scope; its test totals are not a current whole-repository certification.
 
-1. **Compile evidence.** An `EvidenceEpisode` contains only model-visible table
-   evidence. Query truth is held outside the model in `TruthSidecar`.
-2. **Tokenize query cells.** Visible values, roles, masks, and null state produce
-   typed initial cell states $h^{(0)}_{ra}$; target truth is absent.
-3. **Run typed dynamics.** The visible-only source mask updates one extended
-   carrier of shape $(N+K)\times(M+K)\times d$ by column OMAB and then row OMAB.
-   Cell Query, Unit Query, Feature Query, and Null slots are receiver-only.
-4. **Read out coordinates.** With $c_{ra}=h^{(L)}_{ra}$, canonical TabU-v2 uses
+## Try the implementation
 
-   $$
-   A_{ra}=W+\lambda_F(F_a+\lambda_U U_r),
-   \qquad z_{ra}=A_{ra}c_{ra}.
-   $$
-
-   The default regime sets $\lambda_F=\lambda_U=0$, so the response field is
-   shared across datasets. Feature- and Unit-adjusted regimes are explicit
-   ablations. $W$ is a shared response parameter, not a semantic Unit; $F_a$
-   and $U_r$ are address-indexed views of the final carrier.
-5. **Score externally.** The typed terminal returns a `PredictionBundle`; the
-   evaluator alone pairs it with `TruthSidecar`. The canonical numeric loss
-   coordinate is context-standardized. `numeric_raw_prediction` is an auxiliary
-   inverse projection, not the Step-5 training target.
-
-The construction defaults to $K=\texttt{matched\_slots}$ (an explicit `k` overrides it) and keeps the numeric
-terminal in context-standardized coordinates; `numeric_raw_prediction` is an
-auxiliary inverse projection. See the [TabU-v2 ModelSpec](./specs/models/tabu.v2.tabur.yaml)
-and the historical [query runtime mapping](./docs/architecture/query-model-runtime-mapping.md).
-
-## Active defaults
-
-| Decision | Default |
-| --- | --- |
-| contract | `tabu.v2.tabur@0.1.0` |
-| historical compatibility contract | `tabu.query.row@0.2.0` (explicit only) |
-| response regime | shared across datasets, `lambda_F=0`, `lambda_U=0` |
-| numeric terminal | `local_linear` in context-standardized coordinates |
-| nominal tokenizer | `source_scoped_frozen_codebook.v2` |
-| $K$ | `matched_slots=4` |
-| pretraining direction | `MAINLINE.yaml` remains the existing query-base/query-row program pointer |
-| synthetic data | broad supervised synthetic prior v3 candidate |
-| v3 model capacity | `max_features=1024` for this lane only |
-| real-data estimand | all labeled train rows as context; all held-out test rows as queries |
-| evidence level before review | `local_unissued` |
-
-The v3 prior currently samples up to 256 predictor columns, plus one response
-column. `max_features=1024` is deliberate headroom for the v3 TabUR lane; it is
-not a QueryBase-wide architectural default.
-
-## Local readback
-
-Install the frozen development environment and run the focused contract and v3
-generator checks:
+Use Python 3.11 or 3.12 and [uv](https://docs.astral.sh/uv/):
 
 ```bash
+git clone https://github.com/1587causalai/TabU-lab.git
+cd TabU-lab
 uv sync --frozen --extra dev
-uv run pytest \
-  tests/contract/test_query_base.py \
-  tests/unit/test_query_row_supervised_synthetic_v3.py
+uv run tabu-lab restoration inspect
+uv run tabu-lab restoration verify
 ```
 
-Inspect the complete pretraining program and rehearse a change before spending
-compute:
+The verifier uses a reduced CPU reference model and returns JSON with check
+outcomes and source identity. It checks implementation behavior, including
+forward/backward paths and checkpoint continuation. It does not launch a training
+campaign. See the [restoration guide](docs/tutorials/table-restoration.md) for
+the Python API, check scope, and optional device probes.
 
-```bash
-tabu-lab program validate
-tabu-lab program resolve --program tabu.pretraining.query-row@1.2.0
-tabu-lab program impact \
-  --from-program tabu.pretraining.query-base@1.0.0 \
-  --to-program tabu.pretraining.query-base-generator-v3@1.1.0-exercise
-```
+The separate TAR implementation is selected explicitly as `tabu.tar`; start
+with its [guide](docs/tutorials/tabu-tar.md) and
+[design snapshot](docs/design/README.md). The no-argument model factory retains
+`tabu.v2.tabur` for compatibility. [Historical runtime documentation](docs/history/compatibility-runtime.md)
+preserves those model contracts and formulas. [MAINLINE.yaml](MAINLINE.yaml)
+continues to select the query-family pretraining program; it does not select the
+restoration model or change the identity of previous experiments.
 
-See [evolvable pretraining programs](./docs/architecture/evolvable-pretraining-programs.md)
-for manifest ownership, lane semantics, resume rules, and the three evolution
-exercises.
+## What additional support would make possible
 
-Build the current default model explicitly (the model id may be omitted):
+We organize potential collaborations around a scientific question, a bounded
+work package, a resource budget, and a public result. The next questions are
+which reconstruction choices learn reliably, whether they transfer beyond
+training tables, and when additional data or compute changes that answer.
 
-```python
-from tabu_lab.models import build_model
-from tabu_lab.models.types import ReferenceConfig
+| Support | Research or maintenance work it can enable | Proposed public output |
+| --- | --- | --- |
+| Research grants or fellowships | Researcher time for controlled comparisons, analysis, and independent reproduction | Methods, comparison reports, reusable protocols, and documented negative results |
+| GPU or cloud credits | Matched training and evaluation budgets across model/data configurations | Learning curves, resource measurements, and reproducible recipes |
+| Coding tools or API credits | Review, numerical regression checks, documentation, and release maintenance | Tested changes, reproducibility fixes, and contributor documentation |
+| Data or research partnerships | Permissioned evaluation data, domain questions, and independent validation | Agreed evaluation reports and reusable adapters where sharing is permitted |
 
-model = build_model(
-    config=ReferenceConfig(
-        matched_slots=4,
-        max_features=1024,
-    ),
-)
-# model.model_id == "tabu.v2.tabur"
+These are candidate work packages, not funded commitments. Budget, milestones,
+data permissions, and publication scope are agreed for each collaboration.
+The [research and support brief](docs/research-support.md) connects the questions,
+existing evidence, next decisions, and possible deliverables.
 
-# Pair v2 predictions with truth in the same numeric coordinate:
-from tabu_lab.training import MixedObjective
-objective = MixedObjective(numeric_target_coordinate="context_standardized")
+## Participate
 
-# Historical TabUR remains an explicit compatibility choice:
-legacy = build_model(
-    "tabu.query.row",
-    profile="supervised.label_broadcast.v1",
-    row_token_count=4,
-    row_readout_mode="anchored",
-    anchored_gamma_initial=1.0e-2,
-)
-```
+Maintained by [Heyang Gong](https://github.com/1587causalai) / WeHub Research.
+Researchers, maintainers, and potential supporters can
+[open a public issue](https://github.com/1587causalai/TabU-lab/issues/new) with a
+research question, reproduction result, bug, or collaboration outline.
+Please keep private data and confidential terms out of public issues.
 
-The existing `scripts/run_tabur_r5_pretraining.py` is bound to synthetic prior v2
-(not the TabU-v2 model family). Those historical training programs remain explicitly
-pinned; changing the model-factory default does not rewrite their identities. Prior-v3 execution
-instead goes through `tabu-lab program run`, which binds the generator,
-1024-feature capacity graph, loss coordinate, checkpoint identity, policy
-state, and exact-resume state in one snapshot. A v2 checkpoint may initialize
-an explicit `warm_start` arm through the checked projection, but cannot resume
-or inherit the v3 run identity.
+Code is licensed under [Apache-2.0](LICENSE); dataset and artifact permissions are
+recorded separately. Useful contributions include reproducing a published check,
+testing an evaluation assumption, improving an adapter, or making an experiment
+easier for the next researcher to run.
 
-## Evaluation default
+## Explore the repository
 
-For the familiar table-foundation-model evaluation, first make one deterministic
-train/test split. The model receives every labeled train row as context and must
-predict every held-out test row. A finite `context_row_limit` is an explicit
-diagnostic override, not the default estimand; it must not be called $K$, which
-already denotes TabUR's row-token/coordinate width.
-
-Frozen ICL compares `pretrained_frozen`, `random_init_frozen`, and
-`pretrained_shuffled` without constructing an optimizer and with unchanged
-parameter hashes. Real-task fine-tuning compares pretrained and scratch arms
-from the same root initialization, split, budget, schedule, and seeds.
-
-See the [experiment ledger](./experiments/README.md) and
-[real-evaluation default protocol](./docs/architecture/real-evaluation-default-protocol.md).
-
-## Navigation
-
-- Default model/runtime authority: [TabU-v2 ModelSpec](./specs/models/tabu.v2.tabur.yaml)
-  and the historical [query runtime mapping](./docs/architecture/query-model-runtime-mapping.md)
-- Current synthetic-prior candidate:
-  [`query_row_supervised_synthetic_v3.py`](./src/tabu_lab/experiments/query_row_supervised_synthetic_v3.py)
-- Current evaluation routing: [experiments/README.md](./experiments/README.md)
-- Historical local evidence: [local artifact index](./docs/reports/local-artifact-index.json)
-- Compiler boundary: [compiler-data-boundary.md](./docs/architecture/compiler-data-boundary.md)
-- Evidence semantics: [evidence-core.md](./docs/architecture/evidence-core.md)
-- Program evolution kernel:
-  [evolvable-pretraining-programs.md](./docs/architecture/evolvable-pretraining-programs.md)
-- Public research surface: https://research.wehub.us/tabu-lab/
-
-QueryBase remains the Unit-silent architectural anchor. TabUC and TabURC remain
-`design_open`; they are not current training targets and cannot inherit TabUR
-checkpoints or evidence.
-
-<!-- seed: If another model family becomes the active experiment, replace this
-current-focus surface in place. Do not append a second competing default. -->
-
-## Repository layout
-
-- `src/tabu_lab/` — contracts, runtime, registry, generators, and experiment code
-- `specs/models/` — public ModelSpecs
-- `tests/contract/` — model and evidence boundaries
-- `experiments/` — preregistrations and experiment ledger
-- `docs/reports/` — historical local findings and artifact identities
-- `site/public/` — public projection; not an evidence authority
+- [Restoration experiments](experiments/local/restoration/README.md) and
+  [TAR / historical experiment routes](experiments/README.md)
+- [Research reports](docs/reports/README.md) and [review records](docs/reviews/)
+- [Compiler and truth boundary](docs/architecture/compiler-data-boundary.md)
+- [Evidence semantics](docs/architecture/evidence-core.md)
+- [Source](src/tabu_lab/), [model specifications](specs/models/), and [tests](tests/)

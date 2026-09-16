@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TabU-lab — Open Tabular Foundation Model Training · WeHub Research</title>
-  <meta name="description" content="TabU-lab is a WeHub open research lab for training tabular foundation models from scratch, with preregistered gates and reproducible experiment receipts.">
+  <title>TabU-lab — Open Research for Tabular Foundation Models</title>
+  <meta name="description" content="An open research lab learning from table reconstruction, with inspectable implementations, experimental evidence, and research collaborations.">
   <meta name="theme-color" content="#06101d">
   <meta name="robots" content="index,follow">
   <link rel="canonical" href="https://research.wehub.us/tabu-lab/">
@@ -12,219 +12,127 @@
   <link rel="alternate" hreflang="en" href="https://research.wehub.us/tabu-lab/">
   <link rel="alternate" hreflang="x-default" href="https://research.wehub.us/tabu-lab/">
   <link rel="icon" href="assets/tabu-mark.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=20260826-02">
+  <link rel="stylesheet" href="styles.css?v=20260916-research">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="TabU-lab — Open Tabular Foundation Model Training">
-  <meta property="og:description" content="Every experiment starts with a hypothesis and ends with a receipt.">
+  <meta property="og:title" content="TabU-lab — Open Research for Tabular Foundation Models">
+  <meta property="og:description" content="An open research lab learning from table reconstruction, with inspectable implementations, experimental evidence, and research collaborations.">
   <meta property="og:url" content="https://research.wehub.us/tabu-lab/">
   <meta property="og:image" content="https://research.wehub.us/tabu-lab/assets/tabu-mark.svg">
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "ResearchProject",
-    "name": "TabU-lab",
-    "description": "An open research lab for training tabular foundation models from scratch.",
-    "url": "https://research.wehub.us/tabu-lab/",
-    "codeRepository": "https://github.com/1587causalai/TabU-lab",
-    "parentOrganization": {"@type": "Organization", "name": "WeHub", "url": "https://wehub.us/"}
-  }
-  </script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"ResearchProject","name":"TabU-lab","description":"An open research lab learning from table reconstruction, with inspectable implementations, experimental evidence, and research collaborations.","url":"https://research.wehub.us/tabu-lab/","codeRepository":"https://github.com/1587causalai/TabU-lab","parentOrganization":{"@type":"Organization","name":"WeHub","url":"https://wehub.us/"}}</script>
 </head>
-<body data-site-version="tabu-lab-site-v20260826-02">
+<body data-site-version="tabu-lab-site-v20260916-research">
   <a class="skip-link" href="#main">Skip to content</a>
   <div class="ambient ambient-a" aria-hidden="true"></div>
   <div class="ambient ambient-b" aria-hidden="true"></div>
   <div class="grid-field" aria-hidden="true"></div>
-
   <header class="site-header">
     <nav class="nav-shell" aria-label="Primary navigation">
-      <a class="brand" href="#top" aria-label="TabU-lab home">
+      <a class="brand" href="#top">
         <img src="assets/tabu-mark.svg" alt="" width="42" height="42">
         <span><strong>TabU-lab</strong><small>WeHub Research open lab</small></span>
       </a>
       <div class="nav-actions">
         <div class="nav-links" id="nav-links">
-          <a href="#mission">Mission</a>
-          <a href="#protocol">Protocol</a>
-          <a href="#ledger">Ledger</a>
-          <a href="#join">Join</a>
-          <a class="nav-external" href="https://research.wehub.us/">WeHub Research <span aria-hidden="true">↗</span></a>
+          <a href="#mission">Question</a>
+          <a href="#ledger">Evidence</a>
+          <a href="#lanes">Next steps</a>
+          <a href="#support">Support</a>
+          <a class="nav-external" href="https://github.com/1587causalai/TabU-lab">GitHub ↗</a>
         </div>
         <div class="language-switch" aria-label="Language">
           <a href="zh/" lang="zh-CN" hreflang="zh-CN">中文</a>
-          <a class="active" href="./" lang="en" hreflang="en" aria-current="page">EN</a>
+          <a class="active" aria-current="page" href="./" lang="en" hreflang="en">EN</a>
         </div>
-        <button class="menu-button" type="button" aria-expanded="false" aria-controls="nav-links">
-          <span class="sr-only">Toggle navigation</span><span></span><span></span>
-        </button>
+        <button class="menu-button" type="button" aria-expanded="false" aria-controls="nav-links"><span class="sr-only">Toggle navigation</span><span></span><span></span></button>
       </div>
     </nav>
   </header>
-
   <main id="main">
     <section class="hero section-shell" id="top">
       <div class="hero-copy">
-        <div class="eyebrow"><span class="pulse-dot"></span> Lab bootstrap · public surface live</div>
-        <h1>Tabular foundation models,<br><em>trained in the open.</em></h1>
-        <p class="hero-lede">TabU-lab is a WeHub open research lab for building tabular foundation models from scratch. Every run begins with a falsifiable question and ends with enough provenance to reproduce, reject, or extend it.</p>
-        <div class="hero-actions">
-          <a class="button button-primary" href="https://github.com/1587causalai/TabU-lab">View source <span aria-hidden="true">↗</span></a>
-          <a class="button button-secondary" href="#protocol">Inspect the protocol <span aria-hidden="true">↓</span></a>
-        </div>
-        <dl class="principles" aria-label="Lab principles">
-          <div><dt>Open</dt><dd>Code, configs, curves, mistakes</dd></div>
-          <div><dt>Reproducible</dt><dd>Fixed seeds, splits, compute</dd></div>
-          <div><dt>Falsifiable</dt><dd>Pass / kill gates before runs</dd></div>
-        </dl>
+        <div class="eyebrow"><span class="pulse-dot"></span>Active research · September 2026</div>
+        <h1>Learning from tables,<br><em>in the open.</em></h1>
+        <p class="hero-lede">Can reconstructing a table’s available evidence teach a model the relationships specific to each row or entity—and help it learn across tables? TabU-lab brings this question into open implementations and experiments that others can inspect, reproduce, and extend.</p>
+        <div class="hero-actions"><a class="button button-primary" href="#ledger">Explore the evidence ↓</a><a class="button button-secondary" href="#support">Support the next question ↓</a></div>
+        <dl class="principles"><div><dt>Question</dt><dd>How do units learn from context?</dd></div><div><dt>Evidence</dt><dd>Code, controls, and findings</dd></div><div><dt>Contribution</dt><dd>Materials others can build on</dd></div></dl>
       </div>
-
-      <div class="hero-visual" aria-label="A table is compiled into typed tokens and a public experiment receipt">
-        <div class="visual-topline"><span>PUBLIC TRAINING TRACE</span><span>00 · BOOTSTRAP</span></div>
-        <div class="carrier-stage">
-          <div class="stage-label">typed table</div>
-          <div class="table-grid" aria-hidden="true">
-            <span class="cell unit">U₁</span><span class="cell value">3.2</span><span class="cell category">A</span><span class="cell query">?</span>
-            <span class="cell unit">U₂</span><span class="cell value">1.7</span><span class="cell null">∅</span><span class="cell value">0.8</span>
-            <span class="cell unit">U₃</span><span class="cell value">4.1</span><span class="cell category">B</span><span class="cell value">1.4</span>
-          </div>
-          <div class="compile-arrow"><span>compile</span><b>→</b></div>
-          <div class="token-field" aria-hidden="true">
-            <i class="token token-unit">u</i><i class="token token-value">v</i><i class="token token-role">r</i><i class="token token-query">q</i>
-            <i class="token token-unit">u</i><i class="token token-value">v</i><i class="token token-null">0</i><i class="token token-value">v</i>
-            <i class="token token-unit">u</i><i class="token token-value">v</i><i class="token token-role">r</i><i class="token token-value">v</i>
-            <svg viewBox="0 0 260 170" preserveAspectRatio="none"><path d="M28 30C85 18 87 80 132 76S196 29 232 38M28 84c55 0 72 59 122 50s39-54 82-44M28 140c59 8 72-44 119-34s44 45 85 38"/></svg>
-          </div>
-        </div>
-        <div class="receipt">
-          <div><span>hypothesis</span><b>written first</b></div>
-          <div><span>execution</span><b>seed + config + compute</b></div>
-          <div><span>verdict</span><b class="pending">pending first run</b></div>
-        </div>
-      </div>
+      <aside class="research-sketch">
+        <span class="kicker">RESEARCH SKETCH · NOT MODEL OUTPUT</span>
+        <h2>From available evidence<br>to unit-specific relationships.</h2>
+        <p>Learn which observations are relevant to a unit, then reconstruct values from that evidence.</p>
+        <ol class="research-path"><li><span>01</span><div><strong>Available table</strong><small>Values · types · missingness</small></div></li><li><span>02</span><div><strong>Learned relationships</strong><small>Cell context · Unit geometry</small></div></li><li><span>03</span><div><strong>Restoration</strong><small>Reconstruct and evaluate</small></div></li></ol>
+        <p class="scope-note">Prediction is a downstream use. Transfer to new tables is a research question.</p>
+      </aside>
     </section>
-
-    <section class="truth-strip" aria-label="Current claim boundary">
-      <div class="section-shell truth-inner"><span>Current truth</span><p>The lab infrastructure exists. No public training result, model checkpoint, or benchmark claim has been accepted yet.</p><a href="#ledger">See the live ledger →</a></div>
+    <section class="truth-strip" aria-label="Current evidence">
+      <div class="section-shell truth-inner"><span>Current evidence</span><p>Reference implementations, bounded checks, and exploratory reports are public. Unseen-table generalization remains open.</p><a href="#ledger">Read the scope →</a></div>
     </section>
-
     <section class="section-shell split-section" id="mission">
-      <div class="section-heading sticky-heading">
-        <span class="kicker">01 · Mission</span>
-        <h2>Make the path to a model inspectable.</h2>
-        <p>“Open” means more than publishing a final checkpoint. The decisions that created it must remain visible enough for another researcher—or another agent—to audit and continue.</p>
+      <div class="section-heading sticky-heading"><span class="kicker">01 · Scientific question</span><h2>What makes a table model reusable?</h2><p>Our hypothesis is that reconstructing available evidence can teach representations useful beyond a single task. We investigate the mechanism and test where it holds.</p></div>
+      <div class="mission-stack"><article class="mission-card"><span class="card-index">01</span><div><h3>Representation</h3><p>Learn from the relationships among cells, units, and features. Visible values and contextual evidence both contribute to reconstruction.</p></div></article>
+        <article class="mission-card"><span class="card-index">02</span><div><h3>Estimation</h3><p>Use Unit geometry to organize relevant observations, with typed value encoding and local linear or kernel-based restoration.</p></div></article>
+        <article class="mission-card"><span class="card-index">03</span><div><h3>Transfer</h3><p>Test whether what is learned remains useful on held-out rows and new tables, under matched baselines and explicit data boundaries.</p></div></article></div>
+    </section>
+    <section class="section-shell ledger-section" id="ledger">
+      <div class="section-heading ledger-heading"><span class="kicker">02 · Work you can inspect</span><h2>A working research base.</h2><p>Each record answers a particular question. The original source, configuration, and limitations remain attached to it.</p></div>
+      <div class="ledger-board evidence-board">
+        <article class="ledger-card">
+          <div class="ledger-meta"><span class="status status-live">Implementation</span></div>
+          <h3>Table restoration</h3><p>A five-step reference implementation connects typed encoding, contextual dynamics, Unit geometry, and restoration. Dated reviews record checks and corrections.</p>
+          <p class="scope-note">Implementation checks; not model performance.</p>
+          <div class="evidence-row"><a href="https://github.com/1587causalai/TabU-lab/blob/main/docs/tutorials/table-restoration.md">Read the guide ↗</a><a href="https://github.com/1587causalai/TabU-lab/blob/main/docs/reviews/restoration-five-step-20260915/README.md">Review ↗</a></div>
+        </article>
+        <article class="ledger-card">
+          <div class="ledger-meta"><span class="status status-live">Historical experiment</span></div>
+          <h3>120-table TAR fitting</h3><p>A published report preserves shared fitting curves and a completed bounded training endpoint. These observations belong to the earlier TabU-TAR model and its recipe.</p>
+          <p class="scope-note">Fixed training tables; transfer remains separate.</p>
+          <div class="evidence-row"><a href="https://github.com/1587causalai/TabU-lab/blob/main/docs/research/tar-shared-fit-20260907/README.md">Report and curves ↗</a><a href="https://github.com/1587causalai/TabU-lab/blob/main/experiments/local/tar-diverse-120-fit/README.md">Recipe ↗</a></div>
+        </article>
+        <article class="ledger-card">
+          <div class="ledger-meta"><span class="status status-live">Reusable software</span></div>
+          <h3>Reproducible execution</h3><p>Source-bound configurations, checkpoint continuation, and prepared-execution checks help another researcher inspect a run and reproduce a scoped comparison.</p>
+          <p class="scope-note">Published local records; no accepted capability claim.</p>
+          <div class="evidence-row"><a href="https://github.com/1587causalai/TabU-lab/blob/main/docs/reviews/restoration-prepared-20260916/README.md">Read the review ↗</a><a href="https://github.com/1587causalai/TabU-lab/blob/main/docs/architecture/evolvable-pretraining-programs.md">Program tools ↗</a></div>
+        </article>
       </div>
-      <div class="mission-stack">
-        <article class="mission-card">
-          <span class="card-index">A</span>
-          <div><h3>Train from public recipes</h3><p>Architecture, data preparation, objectives, and compute assumptions stay in versioned source rather than disappearing behind a final metric.</p></div>
-        </article>
-        <article class="mission-card">
-          <span class="card-index">B</span>
-          <div><h3>Be reproducible at small scale</h3><p>Every idea first earns signal under an explicit budget. Scale is a later decision, not a substitute for understanding.</p></div>
-        </article>
-        <article class="mission-card">
-          <span class="card-index">C</span>
-          <div><h3>Publish failures as information</h3><p>A killed hypothesis is a useful result when its protocol, logs, and boundary are clear. Silent dead ends teach nobody.</p></div>
-        </article>
+      <p class="scope-note" data-evidence-status="local_unissued">The research catalog records zero formal receipts and zero accepted capability claims. A published local report is useful evidence within its stated scope.</p>
+      <div class="ledger-links"><a href="https://github.com/1587causalai/TabU-lab#try-the-implementation"><span>Implementation</span><small>Run the CPU reference checks</small><b>↗</b></a><a href="models/"><span>Research catalog</span><small>Versioned models and programs</small><b>↗</b></a><a href="https://github.com/1587causalai/TabU-lab/tree/main/experiments"><span>Experiment source</span><small>Protocols and research records</small><b>↗</b></a></div>
+    </section>
+    <section class="lanes-section" id="lanes">
+      <div class="section-shell">
+        <div class="section-heading"><span class="kicker">03 · Next questions</span><h2>Resources tied to a decision.</h2><p>Candidate work packages begin with a question and end with an inspectable result. Scope, budget, and milestones are agreed for each collaboration.</p></div>
+        <div class="work-packages"><article><span class="kicker">01</span><h3>Reproduce a baseline</h3><p>Which restoration choices learn reliably?</p><div><strong>Public output</strong><p>Controlled recipes, comparison curves, and documented failure modes.</p></div></article><article><span class="kicker">02</span><h3>Test transfer</h3><p>Does learned structure help beyond the training tables?</p><div><strong>Public output</strong><p>Matched held-out evaluations, controls, and reproducibility reports.</p></div></article><article><span class="kicker">03</span><h3>Understand scaling</h3><p>When do data diversity, capacity, and compute help?</p><div><strong>Public output</strong><p>Learning and resource curves that inform whether to scale, revise, or stop.</p></div></article></div>
       </div>
     </section>
-
+    <section class="section-shell support-section" id="support">
+      <div class="section-heading"><span class="kicker">04 · Research and support</span><h2>Several ways to advance<br>the same research.</h2><p>Research funding, compute, tools, and partnerships contribute to a common goal: resolve meaningful uncertainty and leave useful work for others.</p></div>
+      <div class="support-grid"><article><h3>Research grants</h3><p>Time for mechanism studies, controlled comparisons, analysis, and independent reproduction.</p><div><span>Public output</span><strong>Methods and research reports</strong></div></article><article><h3>GPU / cloud resources</h3><p>Bounded training and evaluation budgets across explicitly matched configurations.</p><div><span>Public output</span><strong>Recipes and learning/resource curves</strong></div></article><article><h3>Tools / API credits</h3><p>Maintainer review, numerical regression checks, documentation, and reproducibility work.</p><div><span>Public output</span><strong>Tested software and clearer interfaces</strong></div></article><article><h3>Data / research partnerships</h3><p>Domain questions, permitted evaluation data, and external validation.</p><div><span>Public output</span><strong>Agreed reports and reusable adapters</strong></div></article></div>
+      <p class="scope-note">These are proposed collaboration scopes. Resource amounts, dates, data rights, and publication terms are agreed separately. Model weights require verification and licensing before release.</p>
+    </section>
     <section class="protocol-section" id="protocol">
       <div class="section-shell">
-        <div class="section-heading wide-heading">
-          <span class="kicker">02 · Experiment protocol</span>
-          <h2>Every experiment is a typed, auditable unit of work.</h2>
-          <p>Marin shows the value of exposing the whole experiment lifecycle. TabU-lab adapts that idea to WeHub: a compact gate, an exact execution receipt, and an honest verdict before synthesis.</p>
-        </div>
-        <ol class="protocol-grid">
-          <li><span>01</span><h3>Preregister</h3><p>Write the hypothesis, baseline, budget, and pass / kill criterion before execution.</p></li>
-          <li><span>02</span><h3>Implement</h3><p>Commit the code and config that make the proposed comparison executable.</p></li>
-          <li><span>03</span><h3>Run</h3><p>Record the command, seed, data provenance, environment, host, and compute used.</p></li>
-          <li><span>04</span><h3>Receipt</h3><p>Publish raw metrics, curves, logs, artifacts, and anything that limits interpretation.</p></li>
-          <li><span>05</span><h3>Verdict</h3><p>Mark pass, kill, or revise. Consolidate only what the receipt actually supports.</p></li>
-        </ol>
-        <div class="receipt-schema">
-          <div class="schema-title"><span>RUN RECEIPT / MINIMUM FIELDS</span><code>receipt.v0</code></div>
-          <ul>
-            <li>hypothesis + gate</li><li>commit + config hash</li><li>dataset + split</li><li>seed + environment</li><li>host + compute budget</li><li>raw metrics + curves</li><li>failure notes</li><li>pass / kill / revise</li>
-          </ul>
-        </div>
+        <div class="section-heading wide-heading"><span class="kicker">05 · How support becomes useful</span><h2>A clear path from question to contribution.</h2><p>We plan around what an experiment can resolve. Positive and negative results both matter when another researcher can check and reuse them.</p></div>
+        <ol class="protocol-grid"><li><span>01</span><h3>Question</h3><p>Name the uncertainty and why it matters.</p></li><li><span>02</span><h3>Evidence</h3><p>Start from the relevant implementation and prior observations.</p></li><li><span>03</span><h3>Resources</h3><p>Specify a baseline, budget, and stop or revise criterion.</p></li><li><span>04</span><h3>Result</h3><p>Publish a scoped comparison with its limitations.</p></li><li><span>05</span><h3>Reuse</h3><p>Leave code, recipes, or reports others can build on.</p></li></ol>
       </div>
     </section>
-
-    <section class="section-shell ledger-section" id="ledger">
-      <div class="section-heading ledger-heading">
-        <span class="kicker">03 · Public ledger</span>
-        <h2>The lab starts with an empty ledger—not invented momentum.</h2>
-        <p>This page exposes the current state as it is. New cards appear only when a preregistration or receipt exists in the repository.</p>
-      </div>
-      <div class="ledger-board">
-        <article class="ledger-card active-card">
-          <div class="ledger-meta"><span class="status status-live">in progress</span><time datetime="2026-08-26">2026-08-26</time></div>
-          <span class="ledger-id">BOOTSTRAP · LAB-000</span>
-          <h3>Public lab substrate</h3>
-          <p>Repository layout, experiment receipt contract, and WeHub Research entrance are established.</p>
-          <div class="evidence-row"><span>Evidence</span><a href="https://github.com/1587causalai/TabU-lab">repository ↗</a><a href="agent.json">agent card</a></div>
-        </article>
-        <article class="ledger-card empty-card">
-          <div class="ledger-meta"><span class="status status-open">open slot</span><span>G1</span></div>
-          <span class="ledger-id">FIRST PUBLIC RUN</span>
-          <h3>Not preregistered yet</h3>
-          <p>The first training question will be named here only after its hypothesis and gate are committed.</p>
-          <div class="evidence-row"><span>State</span><b>no result claimed</b></div>
-        </article>
-      </div>
-      <div class="ledger-links">
-        <a href="https://github.com/1587causalai/TabU-lab/tree/main/experiments"><span>Experiments</span><small>Preregistrations and run receipts</small><b>↗</b></a>
-        <a href="https://github.com/1587causalai/TabU-lab/tree/main/docs/reports"><span>Reports</span><small>Cross-run synthesis and retrospectives</small><b>↗</b></a>
-        <a href="agent.json"><span>Agent card</span><small>Machine-readable status and boundaries</small><b>→</b></a>
-      </div>
-    </section>
-
-    <section class="lanes-section" id="lanes">
-      <div class="section-shell lanes-grid">
-        <div class="section-heading">
-          <span class="kicker">04 · Research lanes</span>
-          <h2>Four places to ask a falsifiable question.</h2>
-          <p>These are invitation surfaces, not claims that the corresponding systems already exist.</p>
-        </div>
-        <div class="lane-list">
-          <article><span>01</span><h3>Data & priors</h3><p>Which synthetic or real-table distributions teach reusable structure without hiding test knowledge?</p></article>
-          <article><span>02</span><h3>Representation</h3><p>How should values, roles, missingness, units, and table structure become typed computational objects?</p></article>
-          <article><span>03</span><h3>Training systems</h3><p>Which small-scale recipes produce stable learning signals before expensive scaling?</p></article>
-          <article><span>04</span><h3>Evaluation</h3><p>Which held-out tables, shifts, and negative controls can actually falsify the proposed mechanism?</p></article>
-        </div>
-      </div>
-    </section>
-
     <section class="section-shell join-section" id="join">
       <div class="join-panel">
-        <div>
-          <span class="kicker">05 · Join the lab</span>
-          <h2>Bring a question that can lose.</h2>
-          <p>The best contribution is not a large promise. It is a sharp hypothesis, a matched comparison, and a receipt that lets the next person continue.</p>
-          <div class="join-actions">
-            <a class="button button-primary" href="https://github.com/1587causalai/TabU-lab/issues/new">Propose an experiment <span aria-hidden="true">↗</span></a>
-            <a class="button button-secondary" href="https://github.com/1587causalai/TabU-lab#readme">Read the lab guide <span aria-hidden="true">↗</span></a>
-          </div>
+        <div><span class="kicker">Work with the lab</span><h2>Help answer the next question.</h2><p>Researchers, open-source contributors, and potential supporters are welcome. Start with a research question, a reproduction result, or a bounded collaboration outline.</p>
+          <div class="join-actions"><a class="button button-primary" href="https://github.com/1587causalai/TabU-lab/issues/new">Discuss a collaboration ↗</a><a class="button button-secondary" href="https://github.com/1587causalai/TabU-lab#readme">Read the project overview ↗</a></div>
+          <p class="scope-note">The discussion link opens a public GitHub issue. Keep private data and confidential terms out of it.</p>
         </div>
-        <aside class="relationship-card">
-          <span>WEHUB RESEARCH RELATIONSHIP</span>
-          <h3>An open training surface inside a larger research system.</h3>
-          <p>TabU-lab supplies public, reproducible experiment evidence. TabU provides broader Unit-as-Primitive research context. WeHub Research connects the work to causal intelligence and human–agent collaboration without transferring source ownership.</p>
-          <div><a href="https://research.wehub.us/">WeHub Research ↗</a><a href="https://wehub.us/causal-superintelligence/">Causal Superintelligence ↗</a></div>
+        <aside class="relationship-card"><span>MAINTENANCE & CONTINUITY</span><h3>Heyang Gong · WeHub Research</h3><p>TabU-lab maintains the public implementations and experimental record of the TabU research line. Code is Apache-2.0; data and artifact permissions are handled separately.</p>
+          <div><a href="https://github.com/1587causalai">GitHub · Heyang Gong ↗</a><a href="https://research.wehub.us/">WeHub Research ↗</a><a href="https://github.com/1587causalai/TabU-lab/blob/main/LICENSE">Apache-2.0 ↗</a></div>
         </aside>
       </div>
     </section>
   </main>
-
   <footer class="site-footer">
     <div class="section-shell footer-inner">
-      <div class="footer-brand"><img src="assets/tabu-mark.svg" alt="" width="36" height="36"><span><strong>TabU-lab</strong><small>Tabular Foundation Modeling from Scratch</small></span></div>
-      <p>Public research surface · Source and evidence remain in the project repository.</p>
-      <nav aria-label="Footer navigation"><a href="https://research.wehub.us/">Research</a><a href="https://wehub.us/">WeHub</a><a href="https://github.com/1587causalai/TabU-lab">GitHub</a></nav>
+      <div class="footer-brand"><img src="assets/tabu-mark.svg" alt="" width="36" height="36"><span><strong>TabU-lab</strong><small>Open tabular foundation-model research</small></span></div>
+      <p>Research overview updated 2026-09-16 · Experimental evidence retains its original scope.</p><nav aria-label="Footer navigation"><a href="agent.json">Project card</a><a href="https://github.com/1587causalai/TabU-lab">GitHub</a></nav>
     </div>
   </footer>
-  <script src="app.js?v=20260826-02"></script>
+  <script src="app.js?v=20260916-research"></script>
 </body>
 </html>

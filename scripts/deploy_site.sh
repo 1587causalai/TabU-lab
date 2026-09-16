@@ -7,7 +7,7 @@ HOST="${TABU_SITE_HOST:-dgx2}"
 STAGING="/home/cms/wehub-sites/research/tabu-lab"
 LIVE="/var/www/research.wehub.us/tabu-lab"
 ARCHIVE="/home/cms/wehub-sites/research/.backups/tabu-lab"
-MARKER="tabu-lab-site-v20260826-02"
+MARKER="tabu-lab-site-v20260916-research"
 STAMP="$(date +%Y%m%d-%H%M%S)"
 
 python3 "$ROOT/scripts/verify_site.py"

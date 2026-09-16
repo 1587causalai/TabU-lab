@@ -3,13 +3,16 @@
 This preserves the compatibility-runtime sections of the repository README at
 `8bf368c5ef194155809abdf9503562f5f7b9b956` (2026-09-08). References to “current”,
 “default” or “activated” below describe those earlier query-family lanes and
-recorded implementation states, not the current TAR research agenda or a fresh
+recorded implementation states, not the current restoration research agenda or a fresh
 execution check. Original model names, formulas and experiment identities remain
 attached to their own sources.
 
-For current research, use the [TAR entry](../../README.md) and
-[experiment routes](../../experiments/README.md). The no-argument factory still
-selects `tabu.v2.tabur`; TAR callers select `tabu.tar` explicitly. The separate
+For current research, use the [project entry](../../README.md),
+[restoration guide](../tutorials/table-restoration.md), and
+[experiment routes](../../experiments/README.md). The separate
+[TAR guide](../tutorials/tabu-tar.md) retains that model's contract and evidence.
+The no-argument factory still selects `tabu.v2.tabur`; TAR callers select
+`tabu.tar` explicitly. The separate
 `MAINLINE.yaml` pointer resolves query-row/query-base programs at version 1.4.0;
 older program versions discussed below retain their historical identities.
 
@@ -197,6 +200,5 @@ See the [experiment ledger](../../experiments/README.md) and
 QueryBase remains the Unit-silent architectural anchor. TabUC and TabURC remain
 `design_open`; they are not current training targets and cannot inherit TabUR
 checkpoints or evidence.
-
 
 
