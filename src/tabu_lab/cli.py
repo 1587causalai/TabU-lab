@@ -357,7 +357,9 @@ def build_parser() -> argparse.ArgumentParser:
     restoration_curriculum_fit.add_argument("--preregistration", type=Path, required=True)
     restoration_curriculum_fit.add_argument("--corpus-root", type=Path, required=True)
     restoration_curriculum_fit.add_argument("--output-root", type=Path, required=True)
-    restoration_curriculum_fit.add_argument("--device", choices=("cpu", "cuda:0"), default="cpu")
+    restoration_curriculum_fit.add_argument(
+        "--device", choices=("cpu", "cuda:0", "mps"), default="cpu"
+    )
     restoration_curriculum_fit.add_argument(
         "--resume-checkpoint", type=Path, help="checkpoint from a previous curriculum attempt"
     )
@@ -370,7 +372,7 @@ def build_parser() -> argparse.ArgumentParser:
     restoration_curriculum_preflight.add_argument("--corpus-root", type=Path, required=True)
     restoration_curriculum_preflight.add_argument("--output", type=Path, required=True)
     restoration_curriculum_preflight.add_argument(
-        "--device", choices=("cpu", "cuda:0"), default="cuda:0"
+        "--device", choices=("cpu", "cuda:0", "mps"), default="cuda:0"
     )
     restoration_curriculum_preflight.set_defaults(handler=_run_restoration_curriculum_preflight)
     joint_preflight = restoration_sub.add_parser(

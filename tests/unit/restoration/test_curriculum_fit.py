@@ -8,6 +8,7 @@ from tabu_lab.restoration_curriculum_fit import (
     SYNTHETIC,
     CurriculumTable,
     _episode_for,
+    _execution_dtype,
     _schedule,
     _test_episode,
     evaluate,
@@ -158,3 +159,15 @@ def test_evaluate_adds_reserved_test_block_only_when_enabled():
     # The fixed-bank evaluation is unaffected by the extra test pass.
     assert report["by_state"]["query"]["count"] == plain["by_state"]["query"]["count"]
     assert report["by_state"]["query"]["encoding_mse"] == plain["by_state"]["query"]["encoding_mse"]
+
+
+def test_execution_dtype_declaration_defaults_and_validates():
+    assert _execution_dtype({}) == "float64"
+    assert _execution_dtype({"execution": {}}) == "float64"
+    assert _execution_dtype({"execution": {"dtype": "float32"}}) == "float32"
+    for bad in ({"execution": {"dtype": "bfloat16"}}, {"execution": {"device": "mps"}}):
+        try:
+            _execution_dtype(bad)
+        except ValueError:
+            continue
+        raise AssertionError(f"accepted invalid execution block: {bad}")

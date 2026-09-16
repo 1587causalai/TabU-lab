@@ -13,6 +13,7 @@ import hashlib
 import json
 import math
 import os
+import platform
 import random
 import signal
 import time
@@ -45,6 +46,13 @@ REAL = "real"
 def _configure_runtime(device):
     if device == "cuda:0" and not torch.cuda.is_available():
         raise RuntimeError("CUDA unavailable; no CPU fallback")
+    if device == "mps":
+        if not torch.backends.mps.is_available():
+            raise RuntimeError("MPS unavailable; no CPU fallback")
+        if os.environ.get("PYTORCH_ENABLE_MPS_FALLBACK") != "0":
+            raise RuntimeError("MPS requires explicit fallback=0")
+        if os.environ.get("PYTORCH_MPS_FAST_MATH", "0") != "0":
+            raise RuntimeError("MPS fast math must be disabled")
     os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
     torch.use_deterministic_algorithms(True)
     torch.backends.cuda.matmul.allow_tf32 = False
@@ -727,13 +735,24 @@ def _optimizer_config(spec):
     )
 
 
+def _execution_dtype(spec):
+    execution = spec.get("execution", {})
+    if not isinstance(execution, dict) or set(execution) - {"dtype"}:
+        raise ValueError("execution may only declare dtype")
+    dtype = execution.get("dtype", "float64")
+    if dtype not in ("float64", "float32"):
+        raise ValueError("execution dtype must be float64 or float32")
+    return dtype
+
+
 def prepare_plan(preregistration: Path, corpus_root: Path, device="cpu"):
     preregistration = Path(preregistration).resolve()
     spec = _load_mapping(preregistration)
     if spec.get("schema") != SCHEMA or spec.get("status") != "local_unissued":
         raise ValueError(f"preregistration schema/status must be {SCHEMA}/local_unissued")
-    if device not in ("cpu", "cuda:0"):
-        raise ValueError("device must be cpu or cuda:0")
+    if device not in ("cpu", "cuda:0", "mps"):
+        raise ValueError("device must be cpu, cuda:0 or mps")
+    exec_dtype = _execution_dtype(spec)
     config = RestorationConfig.from_dict(spec["model"])
     seeds = spec.get("seeds")
     if not isinstance(seeds, dict) or set(seeds) != {"model", "order", "masks", "codes", "windows"}:
@@ -833,6 +852,7 @@ def prepare_plan(preregistration: Path, corpus_root: Path, device="cpu"):
         "model": config.as_dict(),
         "optimizer": spec["optimizer"],
         "device": device,
+        "dtype": exec_dtype,
         "reserved_test": reserved_test,
         "reserved_test_max_rows": reserved_test_max_rows,
         "total_seconds": sum(stage["max_seconds"] for stage in stages),
@@ -846,6 +866,7 @@ def prepare_plan(preregistration: Path, corpus_root: Path, device="cpu"):
         _tables=tables,
         _config=config,
         _optimizer=opt,
+        _dtype=getattr(torch, exec_dtype),
         _identity=identity,
         _summary=summary,
     )
@@ -865,7 +886,7 @@ def run_curriculum_fit(args, observer=None):
         "seeds", {"model": 1729, "order": 1730, "masks": 1731, "codes": 1732, "windows": 1733}
     )
     torch.manual_seed(seeds["model"])
-    model = RestorationModel(plan["_config"]).to(device=args.device, dtype=torch.float64)
+    model = RestorationModel(plan["_config"]).to(device=args.device, dtype=plan["_dtype"])
     cfg = plan["_optimizer"]
     optimizer = adamw(model, cfg)
     identity = plan["_identity"]
@@ -907,6 +928,13 @@ def run_curriculum_fit(args, observer=None):
         receipt["cuda_device"] = {
             "name": torch.cuda.get_device_name(0),
             "capability": list(torch.cuda.get_device_capability(0)),
+        }
+    if args.device == "mps":
+        receipt["mps_runtime"] = {
+            "macos": platform.mac_ver()[0],
+            "fallback": "0",
+            "fast_math": "0",
+            "dtype": plan["_summary"]["dtype"],
         }
     signal_previous = signal.signal(
         signal.SIGTERM, lambda signum, frame: (_ for _ in ()).throw(KeyboardInterrupt())

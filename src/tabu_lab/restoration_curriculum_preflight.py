@@ -21,10 +21,12 @@ def run_preflight(args):
     plan = prepare_plan(Path(args.preregistration), Path(args.corpus_root), args.device)
     if args.device == "cuda:0" and not torch.cuda.is_available():
         return {"outcome": "blocked_resources", "reason": "CUDA unavailable"}
+    if args.device == "mps" and not torch.backends.mps.is_available():
+        return {"outcome": "blocked_resources", "reason": "MPS unavailable"}
     _configure_runtime(args.device)
     config = plan["_config"]
     torch.manual_seed(plan["seeds"]["model"])
-    model = RestorationModel(config).to(device=args.device, dtype=torch.float64)
+    model = RestorationModel(config).to(device=args.device, dtype=plan["_dtype"])
     optimizer = adamw(model, plan["_optimizer"])
     largest_synthetic = max((table for table in plan["_tables"] if table.kind == "synthetic"),
                             key=lambda table: table.train_rows * table.width)
@@ -72,8 +74,9 @@ def run_preflight(args):
         if label == "synthetic":
             optimizer, _partition = switch_to_muon(optimizer, model, plan["_optimizer"])
     peak = torch.cuda.max_memory_allocated() if args.device == "cuda:0" else 0
-    result = {"outcome": "passed", "device": args.device, "probes": measurements,
-              "peak_allocated_bytes": peak, "optimizer_transition": "passed"}
+    result = {"outcome": "passed", "device": args.device, "dtype": plan["_summary"]["dtype"],
+              "probes": measurements, "peak_allocated_bytes": peak,
+              "optimizer_transition": "passed"}
     Path(args.output).parent.mkdir(parents=True, exist_ok=True)
     Path(args.output).write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
     print(json.dumps(result, indent=2, sort_keys=True))

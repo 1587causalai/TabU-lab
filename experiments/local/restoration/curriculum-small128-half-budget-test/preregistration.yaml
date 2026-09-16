@@ -46,6 +46,8 @@ evaluation_masks: 8
 final_reserve_seconds: 300
 reserved_test: true
 reserved_test_max_rows: 256
+execution:
+  dtype: float32
 stages:
   - name: old120
     max_seconds: 13412
@@ -81,3 +83,4 @@ notes:
   reserved_test_protocol: one forward-only episode per table per evaluation point; training context fully visible (evaluation window 0 for windowed tables); reserved rows visible on predictors and queried on the target column; up to 256 deterministically selected reserved rows per table
   budgets_include: initialization_evaluation_training_evaluation_and_checkpointing
   budget_amendment: half of the frozen curriculum-small128 budgets (updates and wall seconds both halved), same stage structure, seeds, model, optimizer schedule and mask policies
+  execution_amendment: float32 model dtype for Apple MPS execution (M4 Max); corpus values stay float64 at rest and are cast by the model-side pipeline exactly as in the single-table restoration fit float32 path
