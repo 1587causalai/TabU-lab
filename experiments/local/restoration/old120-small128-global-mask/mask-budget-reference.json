@@ -1,0 +1,37 @@
+{
+  "schema": "restoration.mask-budget-reference.v1",
+  "old_tar_target_query_cells_per_table": 68,
+  "old_tar_tables": 120,
+  "training_cells": 402288,
+  "old_tar_total_query_cells": 8160,
+  "old_tar_corpus_query_fraction": 0.02028397565922921,
+  "new_requested_fraction": 0.025,
+  "rounding": "nearest integer, half up, at least one Query cell",
+  "new_total_query_cells_per_round": 10054,
+  "new_actual_corpus_fraction": 0.02499204549974148,
+  "relative_query_increase": 0.23210784313725497,
+  "by_width": {
+    "6": {
+      "tables": 10,
+      "query_cells_per_table": 31
+    },
+    "8": {
+      "tables": 16,
+      "query_cells_per_table": 41
+    },
+    "12": {
+      "tables": 36,
+      "query_cells_per_table": 61
+    },
+    "20": {
+      "tables": 42,
+      "query_cells_per_table": 102
+    },
+    "32": {
+      "tables": 16,
+      "query_cells_per_table": 163
+    }
+  },
+  "matching_scope": "all-corpus cell-weighted Query fraction; per-table Query count varies with width",
+  "within_table_policy": "uniform feasible subset after randomized visible class support protection; no equal per-column quota"
+}

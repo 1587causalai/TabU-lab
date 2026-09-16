@@ -23,7 +23,7 @@ from tabu_lab.observers import (
 )
 
 _NUMERIC_CONFIG = frozenset({
-    "table_count", "query_count", "evaluation_masks", "max_rounds", "max_seconds",
+    "table_count", "query_count", "mask_fraction", "evaluation_masks", "max_rounds", "max_seconds",
     "evaluate_every_rounds", "checkpoint_every_round", "final_reserve_seconds",
     "model_parameters", "bandwidth", "ridge", "width", "mlp_hidden", "epsilon",
     "layers", "heads", "ff_width", "slots", "tau_presence", "reference_mass", "norm_eps",
@@ -40,7 +40,7 @@ _HASH_KEYS = (
 )
 _COUNTERS = (
     "update", "round", "elapsed_seconds", "completed_episodes", "total_episodes",
-    "model_parameters", "cursor", "peak_allocated_bytes", "training_round",
+    "model_parameters", "cursor", "peak_allocated_bytes", "training_round", "completed_round",
 )
 _TRAIN_METRICS = (
     "loss", "gradient_norm", "update_seconds", "train_seconds", "learning_rate",
@@ -52,7 +52,7 @@ _STATE_METRICS = (
 )
 _COVERAGE_METRICS = (
     "query_cells", "total_cells", "protected_discrete_cells", "unmaskable_discrete_classes",
-    "singleton_discrete_classes", "query_fraction",
+    "singleton_discrete_classes", "query_fraction", "query_count",
 )
 _SOURCES = frozenset({"scm_mixed_v1", "discoscm", "scm_numeric_v0", "sklearn_synthetic"})
 _STATUSES = frozenset({
@@ -135,6 +135,28 @@ def _evaluation(payload: Mapping, prefix: str, *, table_metrics: bool) -> dict:
     coverage = payload.get("coverage", {})
     if isinstance(coverage, Mapping):
         _copy_numeric(result, coverage, _COVERAGE_METRICS, f"{prefix}coverage/")
+    macro = payload.get("table_macro", {})
+    if isinstance(macro, Mapping):
+        complete = payload.get("table_macro_complete") is True
+        if "table_macro_complete" in payload:
+            result[f"{prefix}table_macro_complete"] = complete
+        macro_prefix = prefix if complete else f"{prefix}partial/"
+        for state in ("query", "retained"):
+            groups = macro.get(state, {})
+            if not isinstance(groups, Mapping):
+                continue
+            for kind in ("all", "numeric", "discrete"):
+                metrics = groups.get(kind, {})
+                if not isinstance(metrics, Mapping):
+                    continue
+                for metric in ("encoding_mse", "numeric_mse", "discrete_accuracy",
+                               "discrete_error_rate"):
+                    stats = metrics.get(metric, {})
+                    if isinstance(stats, Mapping):
+                        _copy_numeric(result, stats,
+                                      ("mean", "median", "p95", "table_count", "target_count",
+                                       "eligible_table_count"),
+                                      f"{macro_prefix}{state}/{kind}/{metric}/")
     return result
 
 
@@ -189,6 +211,10 @@ class RestorationObserver:
             self._run.define_metric("update")
             for pattern in ("train/*", "evaluation/*", "progress/*"):
                 self._run.define_metric(pattern, step_metric="update")
+            self._run.define_metric("completed_round")
+            for pattern in ("train_round/*", "evaluation/query/*", "evaluation/retained/*",
+                            "evaluation/partial/*"):
+                self._run.define_metric(pattern, step_metric="completed_round")
         except Exception as error:
             self._fail(error)
 
@@ -200,7 +226,7 @@ class RestorationObserver:
             return
         try:
             kind = event.get("event")
-            if kind not in {"phase", "evaluation_progress", "update", "summary"}:
+            if kind not in {"phase", "evaluation_progress", "update", "round_summary", "summary"}:
                 return
             if self._run is None:
                 config = dict(event.get("config", {}))
@@ -218,13 +244,31 @@ class RestorationObserver:
             ):
                 result["phase"] = stage
             if kind == "update":
+                result["phase"] = "training"
                 _copy_numeric(result, event, _TRAIN_METRICS, "train/")
                 mask = event.get("mask", {})
                 if isinstance(mask, Mapping):
                     _copy_numeric(result, mask, (*_COVERAGE_METRICS, "query_coverage"),
                                   "train/coverage/")
+            if kind == "round_summary":
+                stats = event.get("train_round", {})
+                if isinstance(stats, Mapping) and stats.get("complete") is True:
+                    total = stats.get("total_tables")
+                    losses = stats.get("loss", {})
+                    if (type(total) is int and total > 0
+                            and stats.get("completed_tables") == total
+                            and isinstance(losses, Mapping)
+                            and losses.get("table_count") == total):
+                        _copy_numeric(result, losses, ("mean", "median", "p95", "table_count"),
+                                      "train_round/loss/")
+                        result["train_round/complete"] = True
+                        if _finite(event.get("training_round")):
+                            result["completed_round"] = event["training_round"]
+                        result["phase"] = "round_complete"
             metrics = event.get("metrics", {})
             if isinstance(metrics, Mapping):
+                if _finite(metrics.get("at_round")):
+                    result["completed_round"] = metrics["at_round"]
                 result.update(_evaluation(metrics, "evaluation/",
                                           table_metrics=self._table_metrics))
                 for phase in ("initial", "final"):

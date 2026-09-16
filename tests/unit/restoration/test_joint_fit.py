@@ -12,12 +12,16 @@ from tabu_lab.models.restoration import ColumnSchema, RestorationConfig, Restora
 from tabu_lab.models.restoration.backbone import BackboneConfig
 from tabu_lab.models.restoration.encoding import EncoderConfig
 from tabu_lab.restoration_joint_fit import (
+    GLOBAL_MASK_PROTOCOL,
     TablePlan,
+    _distribution,
     _episode,
     _fixed_bank,
     _metrics,
+    _plan_query_mask,
     _PreparedCache,
     _query_mask,
+    _table_macro,
     prepare_plan,
     run_joint_fit,
 )
@@ -268,6 +272,12 @@ def test_prepared_cache_same_key_detects_mask_and_code_changes():
 def test_vectorized_metrics_match_scalar_mixed_type_oracle(tmp_path):
     from tabu_lab.models.restoration import score_episode
     prereg, corpus = _write_fixture(tmp_path)
+    spec = json.loads(prereg.read_text())
+    spec["evaluation_masks"] = 8
+    spec["protocol"] = GLOBAL_MASK_PROTOCOL
+    spec["mask_fraction"] = .15
+    del spec["query_count"]
+    prereg.write_text(json.dumps(spec))
     plan = prepare_plan(prereg, corpus)
     model = RestorationModel(plan.config).double()
     measured = _metrics(plan, model, "cpu")
@@ -295,6 +305,22 @@ def test_vectorized_metrics_match_scalar_mixed_type_oracle(tmp_path):
             expected_mean = sum(expected_state[key]) / len(expected_state[key])
             assert result[field] == pytest.approx(expected_mean)
     assert measured["complete"]
+    assert measured["completed_tables"] == 1
+    assert measured["table_macro_complete"]
+    for state in expected:
+        macro = measured["table_macro"][state]
+        assert macro["all"]["encoding_mse"]["mean"] == pytest.approx(
+            measured["by_table"]["toy"][state]["encoding_mse"]
+        )
+        assert macro["numeric"]["numeric_mse"]["mean"] == pytest.approx(
+            measured["by_table_type"]["toy"]["numeric"][state]["numeric_mse"]
+        )
+        assert macro["discrete"]["discrete_accuracy"]["mean"] == pytest.approx(
+            measured["by_table"]["toy"][state]["discrete_accuracy"]
+        )
+        assert macro["discrete"]["discrete_error_rate"]["mean"] == pytest.approx(
+            1 - measured["by_table"]["toy"][state]["discrete_accuracy"]
+        )
 
 
 def test_metrics_deadline_reports_partial_table_coverage(tmp_path, monkeypatch):
@@ -314,6 +340,38 @@ def test_metrics_deadline_reports_partial_table_coverage(tmp_path, monkeypatch):
     assert result["expected_episodes"] == 2
     assert result["by_table"]["toy_1"]["query"]["count"] == 0
     assert result["by_table"]["toy_1"]["query"]["encoding_mse"] is None
+    assert not result["table_macro_complete"]
+    distribution = result["table_macro"]["query"]["all"]["encoding_mse"]
+    assert distribution["table_count"] == 1
+    assert distribution["eligible_table_count"] == 2
+
+
+def test_partial_fixed_mask_bank_excluded_from_table_macro(tmp_path, monkeypatch):
+    import tabu_lab.restoration_joint_fit as runner
+    prereg, corpus = _write_fixture(tmp_path)
+    spec = json.loads(prereg.read_text())
+    spec["evaluation_masks"] = 8
+    prereg.write_text(json.dumps(spec))
+    plan = prepare_plan(prereg, corpus)
+    clock = [0.0]
+    monkeypatch.setattr(runner.time, "monotonic", lambda: clock[0])
+    original = runner.score_episode
+
+    def scored(*args, **kwargs):
+        result = original(*args, **kwargs)
+        clock[0] += 2
+        return result
+
+    monkeypatch.setattr(runner, "score_episode", scored)
+    result = _metrics(plan, RestorationModel(plan.config).double(), "cpu", deadline=3)
+    assert result["completed_episodes"] == 1
+    assert result["completed_tables"] == 0
+    assert not result["complete"]
+    assert result["by_table"]["toy"]["query"]["count"] > 0  # Honest partial micro receipt.
+    assert result["table_macro"]["query"]["all"]["encoding_mse"] == {
+        "mean": None, "median": None, "p95": None,
+        "table_count": 0, "eligible_table_count": 1, "target_count": 0,
+    }
 
 
 def test_multitable_resume_mid_second_round_matches_uninterrupted(tmp_path):
@@ -339,13 +397,27 @@ def test_multitable_resume_mid_second_round_matches_uninterrupted(tmp_path):
     assert not any(event.get("stage") == "initial" for event in events)
     full_state = torch.load(tmp_path / "full" / "checkpoint.pt", weights_only=True)
     resumed_state = torch.load(tmp_path / "resumed" / "checkpoint.pt", weights_only=True)
-    for key in ("model", "optimizer", "torch_cpu_rng", "evaluation"):
+    for key in ("model", "optimizer", "torch_cpu_rng", "evaluation", "training_metrics"):
         _assert_tree_equal(full_state[key], resumed_state[key])
     def read_trace(name):
         rows = map(json.loads, (tmp_path / name / "updates.jsonl").read_text().splitlines())
         return [{key: row[key] for key in ("round", "update", "table", "loss", "mask", "code_seed")}
                 for row in rows]
     assert read_trace("full") == read_trace("partial") + read_trace("resumed")
+    partial_state = torch.load(tmp_path / "partial" / "checkpoint.pt", weights_only=True)
+    assert len(partial_state["training_metrics"]["partial_round_losses"]) == 1
+    full_rounds = [json.loads(line) for line in (
+        tmp_path / "full" / "round-metrics.jsonl").read_text().splitlines()]
+    resumed_rounds = [json.loads(line) for line in (
+        tmp_path / "resumed" / "round-metrics.jsonl").read_text().splitlines()]
+    assert resumed_rounds == full_rounds
+    assert [row["training_round"] for row in full_rounds] == [1, 2, 3]
+    trace = read_trace("full")
+    for summary in full_rounds:
+        values = [row["loss"] for row in trace if row["round"] == summary["training_round"]]
+        assert summary["train_round"]["loss"] == _distribution(values)
+    assert [event["training_round"] for event in events
+            if event["event"] == "round_summary"] == [2, 3]
 
 
 def test_resume_after_last_update_finishes_pending_evaluation(tmp_path):
@@ -418,3 +490,76 @@ def test_wall_limit_reserves_final_eval_and_keeps_cumulative_budget(tmp_path, mo
     assert resumed["outcome"] == "wall_limit"
     assert resumed["update"] == 1
     assert resumed["elapsed_seconds"] == 109.0
+
+
+def test_distribution_uses_linear_percentiles():
+    result = _distribution([9, 1, 3])
+    assert result == {"mean": pytest.approx(13 / 3), "median": 3, "p95": pytest.approx(8.4),
+                      "table_count": 3}
+    assert _distribution([]) == {"mean": None, "median": None, "p95": None, "table_count": 0}
+
+
+def test_table_macro_weights_tables_not_cells_and_excludes_absent_types():
+    mixed = _toy_table()
+    numeric = replace(mixed, name="numeric", kind_counts={"numeric": 2})
+
+    def item(count, error, accuracy=None):
+        return {"count": count, "encoding_mse": error,
+                "numeric_mse": error * 10 if error is not None and accuracy is None else None,
+                "discrete_accuracy": accuracy,
+                "discrete_error_rate": 1 - accuracy if accuracy is not None else None}
+
+    def states(value):
+        return {state: dict(value) for state in ("query", "retained")}
+
+    by_table = {"toy": states(item(10, 1)), "numeric": states(item(100, 9))}
+    by_type = {
+        "toy": {"numeric": states(item(2, 3)), "nominal": states(item(2, 1, 1)),
+                "ordinal": states(item(6, 5, 0))},
+        "numeric": {"numeric": states(item(100, 9)), "nominal": states(item(0, None)),
+                    "ordinal": states(item(0, None))},
+    }
+    result = _table_macro((mixed, numeric), by_table, by_type, {"toy", "numeric"})
+    for state in ("query", "retained"):
+        macro = result[state]
+        # Equal table weights: the 100-target table does not outweigh the 10-target table.
+        assert macro["all"]["encoding_mse"] == {
+            "mean": 5, "median": 5, "p95": pytest.approx(8.6),
+            "table_count": 2, "eligible_table_count": 2, "target_count": 110,
+        }
+        assert macro["numeric"]["encoding_mse"]["mean"] == 6
+        assert macro["numeric"]["encoding_mse"]["target_count"] == 102
+        assert macro["discrete"]["encoding_mse"] == {
+            "mean": 4, "median": 4, "p95": 4,
+            "table_count": 1, "eligible_table_count": 1, "target_count": 8,
+        }
+        assert macro["discrete"]["discrete_accuracy"]["mean"] == .25
+        assert macro["discrete"]["discrete_error_rate"]["mean"] == .75
+
+
+def test_global_mask_protocol_has_one_budget_and_rejects_ambiguous_configuration(tmp_path):
+    prereg, corpus = _write_fixture(tmp_path)
+    spec = json.loads(prereg.read_text())
+    spec["protocol"] = GLOBAL_MASK_PROTOCOL
+    spec["mask_fraction"] = .1
+    with pytest.raises(ValueError, match="not query_count"):
+        prereg.write_text(json.dumps(spec))
+        prepare_plan(prereg, corpus)
+    del spec["query_count"]
+    prereg.write_text(json.dumps(spec))
+    plan = prepare_plan(prereg, corpus)
+    query, info = _plan_query_mask(plan, plan.tables[0], 1729)
+    assert query.sum().item() == 2  # round(18 cells * 10%); no equal per-column quota.
+    assert 0 in info["query_per_column"]
+    assert _episode(plan.tables[0], query, 1730, "cpu")[1].targets.shape[0] == 18
+    assert plan.identity["protocol"] == GLOBAL_MASK_PROTOCOL
+    _commit_fixture(tmp_path)
+    result = run_joint_fit(_args(tmp_path, prereg, corpus, "global-run"))
+    assert result["outcome"] == "completed"
+    assert result["final"]["coverage"]["query_cells"] == 2
+    assert result["final"]["coverage"]["total_cells"] == 18
+    spec["protocol"] = "old120_all_train_rows_mixed_types_all_observed_targets_v2"
+    spec["query_count"] = 2
+    prereg.write_text(json.dumps(spec))
+    with pytest.raises(ValueError, match="cannot declare mask_fraction"):
+        prepare_plan(prereg, corpus)

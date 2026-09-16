@@ -31,10 +31,12 @@ from tabu_lab.models.restoration import (
     score_episode,
     score_prepared_episode,
 )
+from tabu_lab.restoration_masking import global_query_mask
 from tabu_lab.tar_data import validate_full_dataset
 
 SCHEMA = "tabu.restoration.joint-fit.v1"
 PROTOCOL = "old120_all_train_rows_mixed_types_all_observed_targets_v2"
+GLOBAL_MASK_PROTOCOL = "old120_all_train_rows_mixed_types_global_fraction_all_observed_targets_v3"
 
 
 def _hash(path: Path) -> str:
@@ -212,6 +214,7 @@ def _source_identity() -> dict:
     files.update({f"models/restoration/{p.name}": _hash(p)
                   for p in sorted((root / "models" / "restoration").glob("*.py"))})
     files["tar_data.py"] = _hash(root / "tar_data.py")
+    files["restoration_masking.py"] = _hash(root / "restoration_masking.py")
     preflight = root / "restoration_joint_preflight.py"
     if preflight.exists():
         files["restoration_joint_preflight.py"] = _hash(preflight)
@@ -255,8 +258,9 @@ def prepare_plan(preregistration: Path, corpus: Path, device="cpu") -> FitPlan:
     spec = _load_mapping(Path(preregistration))
     if spec.get("schema") != SCHEMA or spec.get("status") != "local_unissued":
         raise ValueError(f"preregistration schema/status must be {SCHEMA}/local_unissued")
-    if spec.get("protocol") != PROTOCOL:
-        raise ValueError(f"preregistration protocol must be {PROTOCOL}")
+    protocol = spec.get("protocol")
+    if protocol not in (PROTOCOL, GLOBAL_MASK_PROTOCOL):
+        raise ValueError(f"preregistration protocol must be {PROTOCOL} or {GLOBAL_MASK_PROTOCOL}")
     corpus = Path(corpus).resolve()
     corpus_spec_path = corpus / "preregistration.yaml"
     corpus_spec = _load_mapping(corpus_spec_path)
@@ -278,8 +282,16 @@ def prepare_plan(preregistration: Path, corpus: Path, device="cpu") -> FitPlan:
         raise ValueError("dataset_names must contain the declared table_count")
     if len(set(names)) != len(names) or set(names) != set(datasets):
         raise ValueError("dataset_names must cover the frozen corpus exactly")
-    if _integer(spec.get("query_count"), "query_count") >= 204:
-        raise ValueError("query_count must be below the frozen 204 train rows")
+    if protocol == GLOBAL_MASK_PROTOCOL:
+        if "query_count" in spec:
+            raise ValueError("global mask protocol declares mask_fraction, not query_count")
+        if _number(spec.get("mask_fraction"), "mask_fraction") >= 1:
+            raise ValueError("mask_fraction must be below one")
+    else:
+        if "mask_fraction" in spec:
+            raise ValueError("legacy per-column protocol cannot declare mask_fraction")
+        if _integer(spec.get("query_count"), "query_count") >= 204:
+            raise ValueError("query_count must be below the frozen 204 train rows")
     _integer(spec.get("evaluation_masks"), "evaluation_masks")
     max_rounds = _integer(spec.get("max_rounds"), "max_rounds")
     max_seconds = _number(spec.get("max_seconds"), "max_seconds")
@@ -328,7 +340,7 @@ def prepare_plan(preregistration: Path, corpus: Path, device="cpu") -> FitPlan:
         raise ValueError("old120 corpus must have 204 train and 52 reserved rows per table")
     identity = {
         "schema": SCHEMA,
-        "protocol": PROTOCOL,
+        "protocol": protocol,
         "device": device,
         "dtype": "float64",
         "preregistration_sha256": _hash(preregistration),
@@ -342,7 +354,7 @@ def prepare_plan(preregistration: Path, corpus: Path, device="cpu") -> FitPlan:
         "status": "local_unissued",
         "outcome": "planned",
         "execution_started": False,
-        "protocol": PROTOCOL,
+        "protocol": protocol,
         "table_count": len(tables),
         "train_rows_per_table": sorted({t.train_rows for t in tables}),
         "reserved_rows_per_table": sorted({t.reserved_rows for t in tables}),
@@ -365,7 +377,8 @@ def prepare_plan(preregistration: Path, corpus: Path, device="cpu") -> FitPlan:
             )
             for table in tables
         ),
-        "query_count": spec["query_count"],
+        **({"mask_fraction": spec["mask_fraction"]} if protocol == GLOBAL_MASK_PROTOCOL
+           else {"query_count": spec["query_count"]}),
         "evaluation_masks": spec["evaluation_masks"],
         "max_rounds": max_rounds,
         "max_updates": max_rounds * len(tables),
@@ -375,8 +388,20 @@ def prepare_plan(preregistration: Path, corpus: Path, device="cpu") -> FitPlan:
         "model": config.as_dict(),
         "optimizer": optimizer,
         "data_scope": "all training rows; reserved rows excluded",
-        "mask_policy": "randomly preserve one visible sample per observed discrete class",
+        "mask_policy": (
+            "global cell sampling without equal per-column counts; randomly preserve one "
+            "visible sample per observed discrete class; retain at least two cells per column"
+            if protocol == GLOBAL_MASK_PROTOCOL else
+            "equal per-column counts; randomly preserve one visible sample "
+            "per observed discrete class"
+        ),
     }
+    # Validate the mask budget against every frozen table before starting a run.
+    for table in tables:
+        if protocol == GLOBAL_MASK_PROTOCOL:
+            global_query_mask(table, spec["mask_fraction"], seeds["masks"])
+        else:
+            _query_mask(table, spec["query_count"], seeds["masks"])
     return FitPlan(dict(spec, _summary=summary), corpus, corpus_spec, tables, config,
                    _source_identity(), identity)
 
@@ -390,11 +415,89 @@ def _episode(table: TablePlan, query: torch.Tensor, code_seed: int, device: str)
 
 def _fixed_bank(plan: FitPlan, table: TablePlan, device: str):
     for index in range(plan.spec["evaluation_masks"]):
-        query, mask_info = _query_mask(
-            table, plan.spec["query_count"], _seed(plan.spec["seeds"]["masks"], table.name, index)
+        query, mask_info = _plan_query_mask(
+            plan, table, _seed(plan.spec["seeds"]["masks"], table.name, index)
         )
         code_seed = _seed(plan.spec["seeds"]["codes"], table.name, index)
         yield (_episode(table, query, code_seed, device), mask_info)
+
+
+def _plan_query_mask(plan: FitPlan, table: TablePlan, seed: int):
+    if plan.spec["protocol"] == GLOBAL_MASK_PROTOCOL:
+        return global_query_mask(table, plan.spec["mask_fraction"], seed)
+    return _query_mask(table, plan.spec["query_count"], seed)
+
+
+def _distribution(values, *, eligible_table_count=None):
+    """Equal-table summaries with linearly interpolated median and P95."""
+    ordered = sorted(float(value) for value in values)
+    count = len(ordered)
+
+    def quantile(probability):
+        if not count:
+            return None
+        position = (count - 1) * probability
+        lower = math.floor(position)
+        upper = math.ceil(position)
+        return ordered[lower] + (ordered[upper] - ordered[lower]) * (position - lower)
+
+    result = {"mean": sum(ordered) / count if count else None,
+              "median": quantile(.5), "p95": quantile(.95), "table_count": count}
+    if eligible_table_count is not None:
+        result["eligible_table_count"] = eligible_table_count
+    return result
+
+
+def _table_macro(tables, by_table, by_table_type, completed_tables):
+    """Combine masks within each table before giving every table equal weight.
+
+    Tables without any scored cells for a metric are excluded from that metric.
+    ``eligible_table_count`` is the number of corpus tables containing the
+    relevant type, so sparse Query coverage and partial evaluation stay visible.
+    """
+    result = {}
+    for state in ("retained", "query"):
+        result[state] = {}
+        for group, metrics in (
+            ("all", ("encoding_mse",)),
+            ("numeric", ("encoding_mse", "numeric_mse")),
+            ("discrete", ("encoding_mse", "discrete_accuracy", "discrete_error_rate")),
+        ):
+            values = {metric: [] for metric in metrics}
+            target_counts = {metric: 0 for metric in metrics}
+            eligible = 0
+            for table in tables:
+                if group == "all":
+                    has_type = True
+                    item = by_table[table.name][state]
+                elif group == "numeric":
+                    has_type = bool(table.kind_counts.get("numeric", 0))
+                    item = by_table_type[table.name]["numeric"][state]
+                else:
+                    has_type = bool(table.kind_counts.get("nominal", 0)
+                                    or table.kind_counts.get("ordinal", 0))
+                    parts = [by_table_type[table.name][kind][state]
+                             for kind in ("nominal", "ordinal")]
+                    count = sum(part["count"] for part in parts)
+                    item = {
+                        metric: (sum(part[metric] * part["count"] for part in parts
+                                     if part["count"]) / count if count else None)
+                        for metric in metrics
+                    }
+                    item["count"] = count
+                eligible += int(has_type)
+                if table.name not in completed_tables:
+                    continue
+                for metric in metrics:
+                    if item[metric] is not None:
+                        values[metric].append(item[metric])
+                        target_counts[metric] += item["count"]
+            result[state][group] = {
+                metric: dict(_distribution(items, eligible_table_count=eligible),
+                             target_count=target_counts[metric])
+                for metric, items in values.items()
+            }
+    return result
 
 
 class _PreparedCache:
@@ -452,8 +555,10 @@ def _metrics(plan: FitPlan, model: RestorationModel, device: str, banks=None,
     totals = states()
     by_type = {kind: states() for kind in ("numeric", "nominal", "ordinal")}
     by_table = {table.name: states() for table in plan.tables}
+    by_table_type = {table.name: {kind: states() for kind in by_type} for table in plan.tables}
     by_source = {table.name.rsplit("_", 1)[0]: states() for table in plan.tables}
     losses = []
+    episodes_by_table = Counter()
     coverage = dict.fromkeys(("query_cells", "total_cells", "protected_discrete_cells",
                              "unmaskable_discrete_classes", "singleton_discrete_classes"), 0)
     expected = plan.table_count * plan.spec["evaluation_masks"]
@@ -506,16 +611,20 @@ def _metrics(plan: FitPlan, model: RestorationModel, device: str, banks=None,
                 if not all(math.isfinite(value) for value in values):
                     raise FloatingPointError("nonfinite evaluation metric")
                 losses.append(values[0])
+                episodes_by_table[table.name] += 1
                 source = table.name.rsplit("_", 1)[0]
                 for column_index, kind in enumerate(kinds):
                     for state_index, state in enumerate(("retained", "query")):
                         offset = 1 + (column_index * 2 + state_index) * len(fields)
                         row = values[offset:offset + len(fields)]
                         for item in (totals[state], by_type[kind][state],
-                                     by_table[table.name][state], by_source[source][state]):
+                                     by_table[table.name][state], by_source[source][state],
+                                     by_table_type[table.name][kind][state]):
                             for field, value in zip(fields, row, strict=True):
                                 item[field] += value
-                coverage["query_cells"] += info["query_per_column"] * len(table.schema)
+                per_column = info["query_per_column"]
+                coverage["query_cells"] += (sum(per_column) if isinstance(per_column, list)
+                                            else per_column * len(table.schema))
                 coverage["total_cells"] += len(targets)
                 for name in ("protected_discrete_cells", "unmaskable_discrete_classes",
                              "singleton_discrete_classes"):
@@ -537,15 +646,30 @@ def _metrics(plan: FitPlan, model: RestorationModel, device: str, banks=None,
         discrete_count = int(item.pop("discrete_count"))
         discrete_correct = item.pop("discrete_correct")
         item["discrete_accuracy"] = discrete_correct / discrete_count if discrete_count else None
+        item["discrete_error_rate"] = (1 - item["discrete_accuracy"]
+                                       if discrete_count else None)
 
-    for group in (totals, *by_type.values(), *by_table.values(), *by_source.values()):
+    table_type_states = [group for table_types in by_table_type.values()
+                         for group in table_types.values()]
+    for group in (totals, *by_type.values(), *by_table.values(), *by_source.values(),
+                  *table_type_states):
         for item in group.values():
             finish(item)
     coverage["query_fraction"] = (coverage["query_cells"] / coverage["total_cells"]
                                   if coverage["total_cells"] else None)
+    completed_tables = {name for name, count in episodes_by_table.items()
+                        if count == plan.spec["evaluation_masks"]}
+    complete = complete and len(losses) == expected
     return {"loss": sum(losses) / len(losses) if losses else None, "by_state": totals,
             "by_type": by_type, "by_table": by_table, "by_source": by_source,
-            "coverage": coverage, "complete": complete and len(losses) == expected,
+            "by_table_type": by_table_type,
+            "table_macro": _table_macro(plan.tables, by_table, by_table_type, completed_tables),
+            "table_macro_complete": complete,
+            "table_macro_scope": "equal table weights after pooling fixed masks within table",
+            "completed_tables": len(completed_tables), "expected_tables": plan.table_count,
+            "episodes_by_table": {table.name: episodes_by_table[table.name]
+                                  for table in plan.tables},
+            "coverage": coverage, "complete": complete,
             "completed_episodes": len(losses), "expected_episodes": expected,
             "stop_reason": None if complete else "wall_limit",
             "scope": "fixed masks on training rows; no reserved evaluation"}
@@ -562,9 +686,9 @@ def _finite_state(value):
 
 
 def _checkpoint(path: Path, model, optimizer, identity, round_index, update, cursor, elapsed,
-                *, replace=False, evaluation=None):
+                *, replace=False, evaluation=None, training_metrics=None):
     state = {
-        "schema": "tabu.restoration.joint-fit-checkpoint.v2",
+        "schema": "tabu.restoration.joint-fit-checkpoint.v3",
         "identity": identity,
         "config": model.config.as_dict(),
         "model": {k: v.detach().cpu() for k, v in model.state_dict().items()},
@@ -580,6 +704,7 @@ def _checkpoint(path: Path, model, optimizer, identity, round_index, update, cur
         "cursor": cursor,
         "elapsed_seconds": elapsed,
         "evaluation": evaluation or {},
+        "training_metrics": training_metrics or {"partial_round_losses": {}, "round_summaries": []},
     }
     if not _finite_state(state["model"]) or not _finite_state(state["optimizer"]):
         raise FloatingPointError("nonfinite checkpoint state")
@@ -597,7 +722,7 @@ def _checkpoint(path: Path, model, optimizer, identity, round_index, update, cur
 
 def _load_checkpoint(path: Path, model, optimizer, plan: FitPlan):
     state = torch.load(path, map_location="cpu", weights_only=True)
-    if state.get("schema") != "tabu.restoration.joint-fit-checkpoint.v2":
+    if state.get("schema") != "tabu.restoration.joint-fit-checkpoint.v3":
         raise ValueError("unsupported joint-fit checkpoint schema")
     if state.get("identity") != plan.identity or state.get("config") != model.config.as_dict():
         raise ValueError("checkpoint identity or source drift")
@@ -611,6 +736,19 @@ def _load_checkpoint(path: Path, model, optimizer, plan: FitPlan):
             or update != round_index * plan.table_count + cursor
             or (round_index == plan.spec["max_rounds"] and cursor)):
         raise ValueError("checkpoint round/cursor/update are inconsistent")
+    training_metrics = state.get("training_metrics", {})
+    partial = training_metrics.get("partial_round_losses", {})
+    summaries = training_metrics.get("round_summaries", [])
+    order = list(range(plan.table_count))
+    random.Random(f"{plan.spec['seeds']['order']}/{round_index}").shuffle(order)
+    expected_partial = {plan.tables[index].name for index in order[:cursor]}
+    if (not isinstance(partial, dict) or set(partial) != expected_partial
+            or not all(isinstance(value, float) and math.isfinite(value)
+                       for value in partial.values())
+            or not isinstance(summaries, list) or len(summaries) != round_index
+            or any(item.get("training_round") != index + 1
+                   for index, item in enumerate(summaries))):
+        raise ValueError("checkpoint training round metrics are inconsistent")
     model.load_state_dict(state["model"], strict=True)
     optimizer.load_state_dict(state["optimizer"])
     torch.set_rng_state(state["torch_cpu_rng"])
@@ -657,6 +795,7 @@ def run_joint_fit(args, observer=None):
     deadline = started + plan.spec["max_seconds"]
     latest_checkpoint = None
     evaluation = {"initial": None, "latest": None, "latest_update": -1}
+    training_metrics = {"partial_round_losses": {}, "round_summaries": []}
     prepared_cache = None
     stop_round = getattr(args, "stop_after_round", None) or plan.spec["max_rounds"]
     evaluate_every = plan.spec["_summary"]["evaluate_every_rounds"]
@@ -679,7 +818,8 @@ def run_joint_fit(args, observer=None):
     def checkpoint(path, *, replace=False):
         nonlocal latest_checkpoint
         _checkpoint(path, model, optimizer, plan.identity, round_index, update,
-                    cursor, elapsed(), replace=replace, evaluation=evaluation)
+                    cursor, elapsed(), replace=replace, evaluation=evaluation,
+                    training_metrics=training_metrics)
         latest_checkpoint = path
 
     def evaluate(stage, limit):
@@ -727,6 +867,7 @@ def run_joint_fit(args, observer=None):
             round_index, update, cursor = state["round"], state["update"], state["cursor"]
             prior_elapsed = state["elapsed_seconds"]
             evaluation = state["evaluation"]
+            training_metrics = state["training_metrics"]
             receipt["resumed_from_update"] = update
         if not 0 < stop_round <= plan.spec["max_rounds"] or stop_round < round_index:
             raise ValueError("stop_after_round must be within the remaining round budget")
@@ -747,7 +888,7 @@ def run_joint_fit(args, observer=None):
             masks_record[table.name] = []
             for index in range(plan.spec["evaluation_masks"]):
                 mask_seed = _seed(plan.spec["seeds"]["masks"], table.name, index)
-                query, info = _query_mask(table, plan.spec["query_count"], mask_seed)
+                query, info = _plan_query_mask(plan, table, mask_seed)
                 masks_record[table.name].append({
                     "query": query.tolist(), "info": info, "mask_seed": mask_seed,
                     "code_seed": _seed(plan.spec["seeds"]["codes"], table.name, index),
@@ -767,7 +908,14 @@ def run_joint_fit(args, observer=None):
             receipt["initial"] = evaluation["initial"]
             _write_json(output / "initial-metrics.json", receipt["initial"])
         longest_update = 0.0
-        with (output / "updates.jsonl").open("x", encoding="utf-8") as curve:
+        with ((output / "updates.jsonl").open("x", encoding="utf-8") as curve,
+              (output / "round-metrics.jsonl").open("x", encoding="utf-8") as round_curve):
+            # A new attempt carries the complete prior round history exactly
+            # once; partial rounds remain only in its durable accumulator.
+            for summary in training_metrics["round_summaries"]:
+                round_curve.write(json.dumps(summary, allow_nan=False) + "\n")
+            round_curve.flush()
+            os.fsync(round_curve.fileno())
             while round_index < stop_round:
                 # On resume, complete an interrupted scheduled evaluation before
                 # advancing to the next training round.
@@ -784,8 +932,8 @@ def run_joint_fit(args, observer=None):
                         raise WallLimit("training stopped to preserve final evaluation/save time")
                     tick = time.monotonic()
                     table = plan.tables[order[position]]
-                    query, mask_info = _query_mask(
-                        table, plan.spec["query_count"],
+                    query, mask_info = _plan_query_mask(
+                        plan, table,
                         _seed(plan.spec["seeds"]["masks"], table.name, "train", current_round),
                     )
                     code_seed = _seed(
@@ -810,14 +958,35 @@ def run_joint_fit(args, observer=None):
                         raise FloatingPointError("nonfinite parameters or optimizer state")
                     if args.device == "cuda:0":
                         torch.cuda.synchronize()
+                    loss = float(score.loss.detach())
+                    partial = training_metrics["partial_round_losses"]
+                    if table.name in partial:
+                        raise ValueError("duplicate table in training round metrics")
+                    partial[table.name] = loss
                     # Counters always describe the NEXT update; round is the
                     # number of complete rounds, including at the last table.
                     update += 1
                     round_index = current_round + int(position + 1 == plan.table_count)
                     cursor = (position + 1) % plan.table_count
+                    round_summary = None
+                    if cursor == 0:
+                        if set(partial) != {item.name for item in plan.tables}:
+                            raise ValueError("complete training round does not cover all tables")
+                        round_summary = {
+                            "training_round": round_index, "completed_round": round_index,
+                            "update": update,
+                            "train_round": {
+                                "loss": _distribution(partial.values()),
+                                "completed_tables": len(partial), "total_tables": plan.table_count,
+                                "complete": True,
+                                "scope": "one pre-update loss per table during sequential training",
+                            },
+                        }
+                        training_metrics["round_summaries"].append(round_summary)
+                        training_metrics["partial_round_losses"] = {}
                     checkpoint(output / "checkpoint-progress.pt", replace=True)
                     row = {"round": current_round + 1, "update": update, "table": table.name,
-                           "loss": float(score.loss.detach()), "gradient_norm": float(norm),
+                           "loss": loss, "gradient_norm": float(norm),
                            "mask": mask_info, "code_seed": code_seed,
                            "elapsed_seconds": elapsed()}
                     if args.device == "cuda:0":
@@ -828,6 +997,12 @@ def run_joint_fit(args, observer=None):
                     curve.flush()
                     os.fsync(curve.fileno())
                     longest_update = max(longest_update, time.monotonic() - tick)
+                    if round_summary is not None:
+                        round_curve.write(json.dumps(round_summary, allow_nan=False) + "\n")
+                        round_curve.flush()
+                        os.fsync(round_curve.fileno())
+                        emit("round_summary", **{key: value for key, value in round_summary.items()
+                                                 if key != "update"})
                     emit("update", **{k: v for k, v in row.items()
                                       if k not in ("round", "update", "elapsed_seconds")},
                          training_round=current_round + 1)

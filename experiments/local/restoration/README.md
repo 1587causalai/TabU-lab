@@ -5,6 +5,14 @@ Local receipts, source identities and checkpoints remain the primary record.
 The tracker mirrors aggregate metrics and progress; table contents and model
 checkpoints are not uploaded by the observer.
 
+## Current recipe: global 2.5% masks
+
+Use [old120 Small-128 global masks](old120-small128-global-mask/README.md).
+This replaces equal per-column masking with a table-wide budget and adds
+complete-round loss distributions and equal-table fixed-evaluation summaries.
+The earlier high-mask run below was stopped with its checkpoint preserved;
+its entries remain historical records.
+
 ## Old120 Small-128, historical TAR budget
 
 Recipe: [`old120-small128-tar-budget/preregistration.yaml`](old120-small128-tar-budget/preregistration.yaml).

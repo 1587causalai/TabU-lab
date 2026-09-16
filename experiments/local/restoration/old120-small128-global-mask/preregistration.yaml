@@ -1,0 +1,67 @@
+schema: tabu.restoration.joint-fit.v1
+status: local_unissued
+protocol: old120_all_train_rows_mixed_types_global_fraction_all_observed_targets_v3
+corpus_preregistration_sha256: bf6cf7be84f867a5f0c6eda9298b3dbe1dcd95c16ea2020e1b513d9edacd3c2b
+table_count: 120
+evaluation_masks: 8
+seeds:
+  model: 1729
+  order: 1730
+  masks: 1731
+  codes: 1732
+max_rounds: 768
+max_seconds: 26824
+checkpoint_every_round: 1
+model:
+  encoder:
+    width: 128
+    category_map: identity128
+    mlp_hidden: 128
+    epsilon: 1.0e-06
+  backbone:
+    width: 128
+    layers: 3
+    heads: 8
+    ff_width: 256
+    kind: inducing
+    slots: 256
+    tau_presence: 1.0
+    reference_mass: 1.0
+    norm_eps: 1.0e-06
+  readout: ll
+  bandwidth: 1.0
+  ridge: 0.001
+optimizer:
+  kind: adamw
+  learning_rate: 0.0001
+  weight_decay: 0.0
+  betas:
+  - 0.9
+  - 0.95
+  eps: 1.0e-08
+  grad_clip: 1.0
+evaluate_every_rounds: 32
+final_reserve_seconds: 300
+hypothesis: With a corpus-level Query fraction close to historical TAR, fit all old120
+  tables while tracking equal-table training and fixed-mask Query distributions.
+budget_reference_sha256: eb3798afb346136e7aa0b2857f4a6bf9085faf40f91e531d018d353232be84f1
+kill_conditions:
+- nonfinite loss, gradients, model or optimizer state
+- data, configuration or source identity mismatch
+- cumulative wall budget exhausted; keep last validated boundary
+evidence_plan:
+- initial, each 32 rounds, and terminal fixed eight-mask evaluation on training rows
+- Query and retained encoding MSE; numeric original-unit error; discrete accuracy;
+  coverage
+- per-table, type and source summaries; update durations and CUDA peak allocation
+- local receipts and checkpoints are primary; W&B is a progress mirror
+- reserved 52 rows remain unscored; no unseen-table claim or direct cross-model loss
+  comparison
+- 'each complete round: one pre-update loss per table, equal-table mean, median and
+  linear-interpolation P95'
+- 'fixed evaluation: aggregate all eight masks within each table, then report equal-table
+  distributions separately for Query and retained, numeric and discrete'
+- partial rounds are not complete-round points; partial evaluations have separate
+  metric names and explicit table counts
+mask_fraction: 0.025
+mask_budget_reference_sha256: d0c97fe93f6b595a9715576afcb79f94faac58c075bb78ffae9864a866e23b40

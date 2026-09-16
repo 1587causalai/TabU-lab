@@ -10,7 +10,7 @@ from pathlib import Path
 import torch
 
 from tabu_lab.models.restoration import RestorationModel, prepare_episode, score_prepared_episode
-from tabu_lab.restoration_joint_fit import _episode, _query_mask, _write_json, prepare_plan
+from tabu_lab.restoration_joint_fit import _episode, _plan_query_mask, _write_json, prepare_plan
 
 
 def run_preflight(args):
@@ -51,7 +51,8 @@ def run_preflight(args):
             torch.cuda.synchronize()
             torch.cuda.reset_peak_memory_stats()
         started = time.monotonic()
-        query, _ = _query_mask(table, plan.spec["query_count"], plan.spec["seeds"]["masks"])
+        query, mask_info = _plan_query_mask(plan, table, plan.spec["seeds"]["masks"])
+        result["mask"] = mask_info
         prepared = prepare_episode(model, *_episode(table, query, plan.spec["seeds"]["codes"],
                                                     args.device))
         mark("prepare_seconds")

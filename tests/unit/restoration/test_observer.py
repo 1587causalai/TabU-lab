@@ -122,6 +122,7 @@ def test_metadata_and_events_are_allowlisted_and_sdk_auth_is_accepted(enabled, m
     assert fake.run.logs[-1] == {
         "update": 5, "round": 1, "elapsed_seconds": 4.5, "train/loss": 2.0,
         "train/update_seconds": 0.3, "train/coverage/query_coverage": 1 / 3,
+        "phase": "training",
     }
     encoded = json.dumps(fake.calls + fake.run.logs)
     assert "secret" not in encoded and "/private" not in encoded
@@ -235,3 +236,50 @@ def test_init_failure_is_isolated_and_resuming_uses_same_run_id(enabled):
     assert [call["resume"] for call in fake.calls] == ["allow", "allow"]
     # The model update is a custom axis, not a W&B history step that may rewind.
     assert fake.run.logs[-1]["update"] == 5
+
+
+def test_complete_round_distribution_has_round_axis_and_partial_round_is_not_reported(enabled):
+    fake = FakeSDK()
+    observer = create_restoration_observer({"mask_fraction": 0.025}, {}, wandb=fake)
+    payload = {"loss": {"mean": 2.0, "median": 1.5, "p95": 4.0, "table_count": 120},
+               "completed_tables": 120, "total_tables": 120, "complete": True}
+    observer({"event": "round_summary", "update": 120, "training_round": 1,
+              "train_round": payload})
+    logged = fake.run.logs[-1]
+    assert logged["train_round/loss/mean"] == 2.0
+    assert logged["train_round/loss/median"] == 1.5
+    assert logged["train_round/loss/p95"] == 4.0
+    assert logged["completed_round"] == 1
+    assert (("train_round/*",), {"step_metric": "completed_round"}) in fake.run.definitions
+    assert fake.calls[0]["config"]["mask_fraction"] == 0.025
+    observer({"event": "round_summary", "update": 121, "training_round": 2,
+              "train_round": {**payload, "completed_tables": 1, "complete": False}})
+    assert not any(key.startswith("train_round/") for key in fake.run.logs[-1])
+    observer({"event": "update", "update": 122, "loss": 0.5})
+    assert fake.run.logs[-1]["phase"] == "training"
+
+
+def test_table_macro_metrics_separate_types_states_and_incomplete_banks(enabled):
+    fake = FakeSDK()
+    observer = create_restoration_observer({}, {}, wandb=fake)
+    stats = {"mean": 2.0, "median": 1.0, "p95": 5.0, "table_count": 116,
+             "eligible_table_count": 116, "target_count": 1000, "token": "secret"}
+    metrics = {"complete": True, "table_macro_complete": True, "at_round": 32,
+               "table_macro": {
+                   "query": {"numeric": {"encoding_mse": stats},
+                             "discrete": {"discrete_error_rate": {**stats, "mean": 0.4}}},
+                   "retained": {"numeric": {"encoding_mse": {**stats, "mean": 0.01}}},
+               }}
+    observer({"event": "phase", "stage": "round-0032_complete", "metrics": metrics})
+    logged = fake.run.logs[-1]
+    assert logged["completed_round"] == 32
+    assert logged["evaluation/query/numeric/encoding_mse/p95"] == 5.0
+    assert logged["evaluation/query/discrete/discrete_error_rate/mean"] == 0.4
+    assert logged["evaluation/retained/numeric/encoding_mse/mean"] == 0.01
+    assert "secret" not in json.dumps(logged)
+    observer({"event": "phase", "metrics": {
+        **metrics, "complete": False, "table_macro_complete": False,
+    }})
+    logged = fake.run.logs[-1]
+    assert "evaluation/query/numeric/encoding_mse/mean" not in logged
+    assert logged["evaluation/partial/query/numeric/encoding_mse/mean"] == 2.0
