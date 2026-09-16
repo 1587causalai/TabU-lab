@@ -317,3 +317,27 @@ def test_tail_guard_and_pre_post_clip_norms_are_allowlisted_without_calibration_
     observer({"event": "update", "post_clip_gradient_norm": float("nan")})
     assert fake.run.logs[-1] == {"phase": "training"}
     assert "/private" not in json.dumps(fake.calls + fake.run.logs)
+
+
+def test_reserved_test_metrics_mirror_under_test_evaluation(enabled):
+    fake = FakeSDK()
+    observer = create_restoration_observer({}, {}, wandb=fake)
+    metrics = {
+        "loss": 1.0,
+        "complete": True,
+        "by_state": {"query": {"count": 4, "encoding_mse": 0.5}},
+        "test": {
+            "loss": 0.7,
+            "complete": True,
+            "by_state": {"query": {"count": 6, "encoding_mse": 0.9}},
+            "coverage": {"query_cells": 6, "reserved_rows": 8, "tables": 2},
+        },
+    }
+    observer({"event": "phase", "stage": "old120_cycle_32_complete", "metrics": metrics})
+    observer.close()
+    payload = fake.run.logs[-1]
+    assert payload["evaluation/by_state/query/encoding_mse"] == 0.5
+    assert payload["test_evaluation/by_state/query/encoding_mse"] == 0.9
+    assert payload["test_evaluation/coverage/reserved_rows"] == 8
+    assert payload["test_evaluation/coverage/tables"] == 2
+    assert payload["test_evaluation/complete"] is True

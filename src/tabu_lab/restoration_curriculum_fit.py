@@ -99,6 +99,8 @@ class CurriculumTable:
     row_ids: tuple[int, ...]
     reserved_rows: int
     windowed: bool = False
+    reserved_values: tuple[torch.Tensor, ...] = ()
+    reserved_row_ids: tuple[int, ...] = ()
 
     @property
     def width(self):
@@ -154,33 +156,35 @@ def load_table(path: Path, name: str, cohort: str, kind: str, *, windowed=False)
         raise ValueError(f"{name}: explicit train/test split required")
     coverage = validate_full_dataset(data, len(values))
     schema = _schema(name, data.get("features"), values)
-    columns = []
-    for column, spec in enumerate(schema):
-        raw = [row[column] for row in values]
-        if spec.kind == "numeric":
-            if any(
-                isinstance(v, bool) or not isinstance(v, int | float) or not math.isfinite(v)
-                for v in raw
-            ):
-                raise ValueError(f"{name}: numeric values must be finite")
-            columns.append(
-                torch.tensor([raw[i] for i in data["splits"]["train"]], dtype=torch.float64)
-            )
-        else:
-            if any(type(v) is not int or not 0 <= v < spec.domain_size for v in raw):
-                raise ValueError(f"{name}: discrete value outside declared domain")
-            columns.append(
-                torch.tensor([raw[i] for i in data["splits"]["train"]], dtype=torch.long)
-            )
+
+    def _columns(row_ids):
+        columns = []
+        for column, spec in enumerate(schema):
+            raw = [values[row][column] for row in row_ids]
+            if spec.kind == "numeric":
+                if any(
+                    isinstance(v, bool) or not isinstance(v, int | float) or not math.isfinite(v)
+                    for v in raw
+                ):
+                    raise ValueError(f"{name}: numeric values must be finite")
+                columns.append(torch.tensor(raw, dtype=torch.float64))
+            else:
+                if any(type(v) is not int or not 0 <= v < spec.domain_size for v in raw):
+                    raise ValueError(f"{name}: discrete value outside declared domain")
+                columns.append(torch.tensor(raw, dtype=torch.long))
+        return tuple(columns)
+
     return CurriculumTable(
         name,
         cohort,
         kind,
-        tuple(columns),
+        _columns(data["splits"]["train"]),
         schema,
         tuple(data["splits"]["train"]),
         coverage["test_rows"],
         windowed,
+        _columns(data["splits"]["test"]),
+        tuple(data["splits"]["test"]),
     )
 
 
@@ -346,7 +350,143 @@ def _new_acc():
     }
 
 
-def evaluate(model, tables, stage, seeds, config, device, *, masks=8, deadline=None):
+def _merge_by_state(by_table):
+    by_state = {}
+    for state in ("retained", "query"):
+        merged = {
+            "count": 0,
+            "encoding_sse": 0.0,
+            "numeric_count": 0,
+            "numeric_sse": 0.0,
+            "discrete_count": 0,
+            "discrete_correct": 0,
+        }
+        for item in by_table.values():
+            values = item[state]
+            merged["count"] += values["count"]
+            merged["encoding_sse"] += (
+                values["encoding_mse"] * values["count"] if values["count"] else 0
+            )
+            merged["numeric_count"] += values["numeric_count"]
+            merged["numeric_sse"] += (
+                values["numeric_mse"] * values["numeric_count"] if values["count"] else 0
+            )
+            merged["discrete_count"] += values["discrete_count"]
+            merged["discrete_correct"] += (
+                values["discrete_accuracy"] * values["discrete_count"]
+                if values["discrete_count"]
+                else 0
+            )
+        by_state[state] = _finish_metrics({state: merged})[state]
+    return by_state
+
+
+def _accumulate_episode(score, episode, table, acc, by_type, by_source):
+    targets = episode[1].targets
+    states = episode[2].states[targets[:, 0], targets[:, 1]]
+    for prediction in score.output.columns:
+        positions = prediction.target_indices
+        kind = table.schema[prediction.column].kind
+        for local, position in enumerate(positions.tolist()):
+            state = "query" if int(states[position]) == 1 else "retained"
+            encoded = score.per_target[position]
+            actual = episode[2].values[prediction.column][targets[position, 0]]
+            if kind == "numeric":
+                error = (prediction.decoded[local] - actual).square()
+                _metric_add(acc, state, kind, encoded, error, False)
+                _metric_add(by_type.setdefault(kind, _new_acc()), state, kind,
+                            encoded, error, False)
+                _metric_add(by_source.setdefault(table.cohort, _new_acc()), state,
+                            kind, encoded, error, False)
+            else:
+                correct = prediction.decoded[local] == actual
+                _metric_add(acc, state, kind, encoded, 0.0, correct)
+                _metric_add(by_type.setdefault(kind, _new_acc()), state, kind,
+                            encoded, 0.0, correct)
+                _metric_add(by_source.setdefault(table.cohort, _new_acc()), state,
+                            kind, encoded, 0.0, correct)
+
+
+def _reserved_subset(table, seed, cap):
+    """Deterministic reserved-row subset; split order is kept within the subset."""
+    count = len(table.reserved_row_ids)
+    positions = list(range(count))
+    if count > cap:
+        generator = torch.Generator().manual_seed(_seed(seed, table.name, "reserved_test_subset"))
+        positions = sorted(torch.randperm(count, generator=generator)[:cap].tolist())
+    values = tuple(table.reserved_values[column][positions] for column in range(table.width))
+    ids = tuple(table.reserved_row_ids[position] for position in positions)
+    return values, ids, count
+
+
+def _test_episode(table, seeds, stage_name, device, max_rows):
+    """Forward-only reserved-row episode: the training context stays fully
+    visible; reserved rows are visible on predictor columns and queried on the
+    final (target) column. Windowed tables use the deterministic evaluation
+    window 0 as context so the panel stays bounded. Reserved rows never enter
+    any training episode or gradient."""
+    if not table.reserved_row_ids:
+        return None, 0
+    if table.windowed:
+        context, context_ids = _window(table, 0, seeds["windows"], evaluation=True)
+    else:
+        context, context_ids = table.values, table.row_ids
+    reserved_values, reserved_ids, total = _reserved_subset(table, seeds["codes"], max_rows)
+    values = tuple(
+        torch.cat((context[column], reserved_values[column])) for column in range(table.width)
+    )
+    rows = len(context_ids) + len(reserved_ids)
+    query = torch.zeros(rows, table.width, dtype=torch.bool)
+    query[len(context_ids):, table.width - 1] = True
+    plan = _PlanView(
+        table.name, values, table.schema, tuple(context_ids) + tuple(reserved_ids)
+    )
+    seed = _seed(seeds["codes"], stage_name, table.name, "reserved_test")
+    return _episode(plan, query, seed, device), total
+
+
+def _evaluate_reserved_test(model, tables, stage, seeds, config, device, *, max_rows, deadline):
+    by_table = {}
+    by_type = {}
+    by_source = {}
+    losses = []
+    coverage = Counter()
+    complete = True
+    for table in tables:
+        if deadline is not None and time.monotonic() >= deadline:
+            complete = False
+            break
+        episode, total_rows = _test_episode(table, seeds, stage["name"], device, max_rows)
+        if episode is None:
+            continue
+        score = score_prepared_episode(
+            model, prepare_episode(model, *episode), decode=True, report=True
+        )
+        if not bool(torch.isfinite(score.loss)):
+            raise FloatingPointError("nonfinite reserved-test evaluation loss")
+        losses.append(float(score.loss.detach().cpu()))
+        acc = _new_acc()
+        _accumulate_episode(score, episode, table, acc, by_type, by_source)
+        by_table[table.name] = _finish_metrics(acc)
+        coverage["tables"] += 1
+        coverage["query_cells"] += int((episode[2].states == 1).sum())
+        coverage["total_cells"] += int((episode[2].states >= 0).sum())
+        coverage["reserved_rows"] += total_rows
+    return {
+        "loss": sum(losses) / len(losses) if losses else None,
+        "by_state": _merge_by_state(by_table),
+        "by_type": {kind: _finish_metrics(values) for kind, values in by_type.items()},
+        "by_source": {source: _finish_metrics(values) for source, values in by_source.items()},
+        "by_table": by_table,
+        "coverage": dict(coverage),
+        "complete": complete,
+        "scope": "reserved rows forward-only; final-column queries on up to "
+        f"{max_rows} reserved rows per table; never trained",
+    }
+
+
+def evaluate(model, tables, stage, seeds, config, device, *, masks=8, deadline=None,
+             reserved_test=0):
     model.eval()
     by_table = {}
     by_type = {}
@@ -406,40 +546,20 @@ def evaluate(model, tables, stage, seeds, config, device, *, masks=8, deadline=N
             if not complete:
                 break
             by_table[table.name] = _finish_metrics(acc)
-    by_state = {}
-    for state in ("retained", "query"):
-        merged = {
-            "count": 0,
-            "encoding_sse": 0.0,
-            "numeric_count": 0,
-            "numeric_sse": 0.0,
-            "discrete_count": 0,
-            "discrete_correct": 0,
-        }
-        for item in by_table.values():
-            values = item[state]
-            merged["count"] += values["count"]
-            merged["encoding_sse"] += (
-                values["encoding_mse"] * values["count"] if values["count"] else 0
+        test_block = None
+        if reserved_test:
+            test_block = _evaluate_reserved_test(
+                model, tables, stage, seeds, config, device,
+                max_rows=reserved_test, deadline=deadline,
             )
-            merged["numeric_count"] += values["numeric_count"]
-            merged["numeric_sse"] += (
-                values["numeric_mse"] * values["numeric_count"] if values["numeric_count"] else 0
-            )
-            merged["discrete_count"] += values["discrete_count"]
-            merged["discrete_correct"] += (
-                values["discrete_accuracy"] * values["discrete_count"]
-                if values["discrete_count"]
-                else 0
-            )
-        by_state[state] = _finish_metrics({state: merged})[state]
+    by_state = _merge_by_state(by_table)
     by_type = {kind: _finish_metrics(values) for kind, values in by_type.items()}
     by_source = {source: _finish_metrics(values) for source, values in by_source.items()}
     coverage["query_fraction"] = (
         coverage["query_cells"] / coverage["total_cells"]
         if coverage["total_cells"] else None
     )
-    return {
+    report = {
         "loss": sum(losses) / len(losses) if losses else None,
         "by_state": by_state,
         "by_type": by_type,
@@ -450,6 +570,12 @@ def evaluate(model, tables, stage, seeds, config, device, *, masks=8, deadline=N
         "evaluation_masks": masks,
         "scope": "fixed masks on training rows; reserved rows excluded",
     }
+    if reserved_test:
+        report["test"] = test_block
+        report["scope"] = (
+            "fixed masks on training rows; reserved rows scored forward-only in test"
+        )
+    return report
 
 
 def _schedule(stage, tables, seeds):
@@ -507,6 +633,7 @@ def _identity(spec, prereg: Path, tables, source_digest):
         "model": spec["model"],
         "table_digests": spec.get("table_digests", {}),
         "table_names": [table.name for table in tables],
+        "reserved_test": bool(spec.get("reserved_test", False)),
     }
 
 
@@ -686,6 +813,12 @@ def prepare_plan(preregistration: Path, corpus_root: Path, device="cpu"):
             raise ValueError(f"stage {stage['name']} update budget must contain complete cycles")
         if stage.get("cycle_updates", cycle_size) != cycle_size:
             raise ValueError(f"stage {stage['name']} cycle_updates mismatch")
+    reserved_test = spec.get("reserved_test", False)
+    if type(reserved_test) is not bool:
+        raise ValueError("reserved_test must be a boolean")
+    reserved_test_max_rows = _integer(
+        spec.get("reserved_test_max_rows", 256), "reserved_test_max_rows", 16
+    )
     opt = _optimizer_config(spec)
     identity = _identity(
         dict(spec, model=config.as_dict()), preregistration, tables,
@@ -700,6 +833,8 @@ def prepare_plan(preregistration: Path, corpus_root: Path, device="cpu"):
         "model": config.as_dict(),
         "optimizer": spec["optimizer"],
         "device": device,
+        "reserved_test": reserved_test,
+        "reserved_test_max_rows": reserved_test_max_rows,
         "total_seconds": sum(stage["max_seconds"] for stage in stages),
         "stages": [
             {key: value for key, value in stage.items() if key != "tables"} for stage in stages
@@ -734,6 +869,9 @@ def run_curriculum_fit(args, observer=None):
     cfg = plan["_optimizer"]
     optimizer = adamw(model, cfg)
     identity = plan["_identity"]
+    reserved_test_rows = (
+        int(plan.get("reserved_test_max_rows", 256)) if plan.get("reserved_test") else 0
+    )
     stage_index = update = cursor = 0
     stage_elapsed_prior = 0.0
     prior_elapsed = 0.0
@@ -828,7 +966,8 @@ def run_curriculum_fit(args, observer=None):
             initial_metrics = evaluate(model, stage_tables(), stage, seeds,
                                        plan["_config"], args.device,
                                        masks=int(plan.get("evaluation_masks", 8)),
-                                       deadline=evaluation_deadline)
+                                       deadline=evaluation_deadline,
+                                       reserved_test=reserved_test_rows)
             if not initial_metrics["complete"]:
                 raise WallLimit(f"stage {stage['name']} initial evaluation exceeded budget")
             initial_metrics["stage"] = stage["name"]
@@ -919,7 +1058,8 @@ def run_curriculum_fit(args, observer=None):
                         periodic = evaluate(model, stage_tables(), stage, seeds,
                                              plan["_config"], args.device,
                                              masks=int(plan.get("evaluation_masks", 8)),
-                                             deadline=evaluation_deadline)
+                                             deadline=evaluation_deadline,
+                                             reserved_test=reserved_test_rows)
                         if not periodic["complete"]:
                             raise WallLimit(f"stage {stage['name']} evaluation exceeded budget")
                         periodic["stage"] = stage["name"]
@@ -951,6 +1091,7 @@ def run_curriculum_fit(args, observer=None):
                 args.device,
                 masks=int(plan.get("evaluation_masks", 8)),
                 deadline=stage_start + stage_budget - stage_elapsed_prior,
+                reserved_test=reserved_test_rows,
             )
             if not stage_eval["complete"]:
                 raise WallLimit(f"stage {stage['name']} final evaluation exceeded budget")

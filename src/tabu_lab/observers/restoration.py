@@ -59,6 +59,7 @@ _COVERAGE_METRICS = (
     "query_cells", "total_cells", "protected_discrete_cells", "unmaskable_discrete_classes",
     "singleton_discrete_classes", "query_fraction", "query_count",
     "protected_numeric_tail_cells", "query_numeric_tail_cells",
+    "reserved_rows", "tables",
 )
 _SOURCES = frozenset({
     "scm_mixed_v1", "discoscm", "scm_numeric_v0", "sklearn_synthetic",
@@ -218,11 +219,12 @@ class RestorationObserver:
             if self._run is None:
                 raise RuntimeError("W&B init returned no run")
             self._run.define_metric("update")
-            for pattern in ("train/*", "evaluation/*", "progress/*"):
+            for pattern in ("train/*", "evaluation/*", "progress/*", "test_evaluation/*"):
                 self._run.define_metric(pattern, step_metric="update")
             self._run.define_metric("completed_round")
             for pattern in ("train_round/*", "evaluation/query/*", "evaluation/retained/*",
-                            "evaluation/partial/*"):
+                            "evaluation/partial/*", "test_evaluation/query/*",
+                            "test_evaluation/retained/*"):
                 self._run.define_metric(pattern, step_metric="completed_round")
         except Exception as error:
             self._fail(error)
@@ -277,6 +279,10 @@ class RestorationObserver:
                     result["completed_round"] = metrics["at_round"]
                 result.update(_evaluation(metrics, "evaluation/",
                                           table_metrics=self._table_metrics))
+                test_metrics = metrics.get("test", {})
+                if isinstance(test_metrics, Mapping):
+                    result.update(_evaluation(test_metrics, "test_evaluation/",
+                                              table_metrics=self._table_metrics))
                 for phase in ("initial", "final"):
                     values = metrics.get(phase, {})
                     if isinstance(values, Mapping):

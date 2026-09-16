@@ -9,6 +9,8 @@ from tabu_lab.restoration_curriculum_fit import (
     CurriculumTable,
     _episode_for,
     _schedule,
+    _test_episode,
+    evaluate,
 )
 from tabu_lab.restoration_optimizers import (
     OptimizerConfig,
@@ -77,3 +79,82 @@ def test_muon_transition_covers_backbone_weights_without_overlap():
     assert partition["muon"] == list(selected)
     assigned = [id(parameter) for group in mixed.param_groups for parameter in group["params"]]
     assert len(assigned) == len(set(assigned)) == sum(1 for _ in model.parameters())
+
+
+def _table_with_reserved(name, cohort, kind=SYNTHETIC, rows=8, reserved=3, windowed=False):
+    return CurriculumTable(
+        name, cohort, kind,
+        (torch.arange(rows, dtype=torch.float64),),
+        (ColumnSchema(f"{name}/target", "numeric"),),
+        tuple(range(rows)), reserved, windowed,
+        (torch.arange(rows, rows + reserved, dtype=torch.float64) + 0.5,),
+        tuple(range(rows, rows + reserved)),
+    )
+
+
+def _small_config():
+    return RestorationConfig(encoder=EncoderConfig(width=128), backbone=BackboneConfig(
+        width=128, layers=1, heads=2, ff_width=16, slots=2,
+    ))
+
+
+def test_reserved_test_episode_queries_only_reserved_target_rows():
+    table = _table_with_reserved("syn", "old120")
+    episode, total = _test_episode(table, {"windows": 5, "codes": 6}, "old120", "cpu", 256)
+    inputs, _, truth = episode
+    assert total == 3
+    assert inputs.visible.shape == (11, 1)
+    assert int(inputs.query.sum()) == 3
+    assert inputs.query[8:, 0].all() and not inputs.query[:8].any()
+    assert int((truth.states == 1).sum()) == 3 and int((truth.states == 0).sum()) == 8
+    again, _ = _test_episode(table, {"windows": 5, "codes": 6}, "old120", "cpu", 256)
+    assert torch.equal(again[0].query, inputs.query)
+    assert torch.equal(again[0].values[0], inputs.values[0])
+    # Training episodes keep the 8-row training panel; reserved rows never enter.
+    stage = _stage("old120", 120)
+    train_episode, _ = _episode_for(
+        table, 0, stage, {"masks": 4, "windows": 5}, _small_config(), "cpu"
+    )
+    assert train_episode[0].visible.shape == (8, 1)
+
+
+def test_reserved_test_episode_caps_rows_and_windows_large_tables():
+    table = _table_with_reserved("big", "new9", rows=8, reserved=100, windowed=True)
+    episode, total = _test_episode(table, {"windows": 5, "codes": 6}, "openml12_mixed", "cpu", 16)
+    inputs, _, _ = episode
+    assert total == 100
+    assert int(inputs.query.sum()) == 16  # capped by reserved_test_max_rows
+    assert inputs.visible.shape == (8 + 16, 1)  # window-0 context (8) + subset (16)
+    again, _ = _test_episode(table, {"windows": 5, "codes": 6}, "openml12_mixed", "cpu", 16)
+    assert torch.equal(again[0].query, inputs.query)
+    other, _ = _test_episode(table, {"windows": 5, "codes": 7}, "openml12_mixed", "cpu", 16)
+    # Truth sidecar keeps the original values; the codes seed picks a different subset.
+    assert not torch.equal(other[2].values[0][8:], episode[2].values[0][8:])
+
+
+def test_evaluate_adds_reserved_test_block_only_when_enabled():
+    tables = [
+        _table_with_reserved("syn_a", "old120"),
+        _table_with_reserved("real_b", "old3", REAL),
+    ]
+    config = _small_config()
+    model = RestorationModel(config).double()
+    stage = _stage("old120", 120)
+    seeds = {"masks": 4, "windows": 5, "codes": 6}
+    plain = evaluate(model, tables, stage, seeds, config, "cpu", masks=2)
+    assert "test" not in plain
+    assert plain["scope"].endswith("reserved rows excluded")
+    report = evaluate(model, tables, stage, seeds, config, "cpu", masks=2, reserved_test=64)
+    assert "forward-only" in report["scope"]
+    test = report["test"]
+    assert test["complete"] is True
+    assert test["coverage"]["tables"] == 2
+    assert test["coverage"]["query_cells"] == 6
+    assert test["coverage"]["reserved_rows"] == 6
+    assert test["by_state"]["query"]["count"] == 6
+    assert test["by_state"]["query"]["encoding_mse"] is not None
+    assert set(test["by_table"]) == {"syn_a", "real_b"}
+    assert "forward-only" in test["scope"]
+    # The fixed-bank evaluation is unaffected by the extra test pass.
+    assert report["by_state"]["query"]["count"] == plain["by_state"]["query"]["count"]
+    assert report["by_state"]["query"]["encoding_mse"] == plain["by_state"]["query"]["encoding_mse"]
