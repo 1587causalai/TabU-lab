@@ -46,6 +46,7 @@ REAL = "real"
 def _configure_runtime(device):
     if device == "cuda:0" and not torch.cuda.is_available():
         raise RuntimeError("CUDA unavailable; no CPU fallback")
+    mps_warn_only = False
     if device == "mps":
         if not torch.backends.mps.is_available():
             raise RuntimeError("MPS unavailable; no CPU fallback")
@@ -53,8 +54,11 @@ def _configure_runtime(device):
             raise RuntimeError("MPS requires explicit fallback=0")
         if os.environ.get("PYTORCH_MPS_FAST_MATH", "0") != "0":
             raise RuntimeError("MPS fast math must be disabled")
+        # index_copy's backward (index_put_with_accumulate) has no deterministic
+        # MPS kernel; keep every other op strict and let that one warn.
+        mps_warn_only = True
     os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
-    torch.use_deterministic_algorithms(True)
+    torch.use_deterministic_algorithms(True, warn_only=mps_warn_only)
     torch.backends.cuda.matmul.allow_tf32 = False
     torch.backends.cudnn.allow_tf32 = False
     torch.backends.cudnn.deterministic = True
@@ -944,6 +948,7 @@ def run_curriculum_fit(args, observer=None):
             "fallback": "0",
             "fast_math": "0",
             "dtype": plan["_summary"]["dtype"],
+            "deterministic": "warn_only:index_put_with_accumulate",
         }
     signal_previous = signal.signal(
         signal.SIGTERM, lambda signum, frame: (_ for _ in ()).throw(KeyboardInterrupt())
