@@ -218,9 +218,11 @@ def _run_restoration_prepared_benchmark(args: argparse.Namespace) -> int:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="tabu-lab")
     subparsers = parser.add_subparsers(dest="command", required=True)
+    from tabu_lab.curriculum_v53.cli import add_commands
     from tabu_lab.evolution.cli import add_program_commands
 
     add_program_commands(subparsers)
+    add_commands(subparsers)
     tabu = subparsers.add_parser("tabur", help="TabUR experiment commands")
     tabu_subparsers = tabu.add_subparsers(dest="tabur_command", required=True)
     optimize = tabu_subparsers.add_parser(
