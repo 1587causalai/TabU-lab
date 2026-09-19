@@ -42,12 +42,10 @@ def test_exact_default_and_baseline_budget(inducing, blocks, count):
 
 
 def test_defaults_match_design():
-    source = (
-        Path(__file__).resolve().parents[4] / "latex/model-factory/TabU-TAR/design/defaults.json"
-    )
-    # The package also works without the parent research checkout.
-    if source.exists():
-        assert TARConfig.from_design_defaults(json.loads(source.read_text())) == TARConfig()
+    # Check the implementation's versioned snapshot. The parent research draft
+    # may describe a different candidate and need not exist in a standalone clone.
+    source = Path(__file__).resolve().parents[3] / "docs/design/tar-defaults.json"
+    assert TARConfig.from_design_defaults(json.loads(source.read_text())) == TARConfig()
 
 
 @pytest.mark.parametrize(

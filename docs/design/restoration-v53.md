@@ -144,8 +144,8 @@ isolation. The current local checks do not authorize capability claims.
 
 ## Validation
 
-The final integration check on 2026-09-19 passed the full repository suite:
-**998 passed**, with two expected W&B fallback warnings. It used CPU,
+The final main-checkout check on 2026-09-19 passed the full committed-scope suite:
+**982 passed**, with two expected W&B fallback warnings. It used CPU,
 PyTorch 2.13.0 and scikit-learn 1.9.0 for the optional classical-baseline tests.
 Ruff passed for the V5.3 implementation, tests and example. This is local
 implementation validation, not GPU qualification or a training result.
