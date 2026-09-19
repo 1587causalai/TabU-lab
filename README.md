@@ -35,6 +35,7 @@ generalization remains an open research question.
 | Research asset | What a reader can inspect | What the evidence supports |
 | --- | --- | --- |
 | Table-restoration implementation | [Five-step guide](docs/tutorials/table-restoration.md), [implementation review](docs/reviews/restoration-five-step-20260915/README.md) | Typed value encoding, contextual representations, Unit-based geometry, and LL/NW restoration; bounded implementation checks |
+| V5.3 reference implementation | [Design and Python entry point](docs/design/restoration-v53.md), [CPU example](examples/restoration_v53_smoke.py) | Affine numeric encoding and column-shared LL, with local correctness checks; a separate API from the historical training CLI |
 | Reusable execution work | [Prepared-execution review](docs/reviews/restoration-prepared-20260916/README.md) | Scoped equivalence and timing checks, with source, configuration, and limitations recorded |
 | Historical TabU-TAR experiments | [120-table shared-fit report and curves](docs/research/tar-shared-fit-20260907/README.md) | Joint fitting on fixed training tables under its own recipe; these are TAR results, not restoration or unseen-table results |
 | Reproducible research tools | [Program manifests](docs/architecture/evolvable-pretraining-programs.md), [evaluation protocol](docs/architecture/real-evaluation-default-protocol.md), [catalog](catalog.json) | Versioned model/data/recipe identities and explicit evaluation boundaries |
