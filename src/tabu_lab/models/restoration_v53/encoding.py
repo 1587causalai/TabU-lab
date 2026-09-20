@@ -159,9 +159,10 @@ class AffineValueEncoder(nn.Module):
                 codec = nominal_type.from_visible(
                     values, schema=schema, seed=inputs.code_seed
                 )
-            elif self.codec_version == "unit_gaussian_v1":
+            elif self.codec_version in ("unit_gaussian_v1", "constant_weight_v1"):
                 codec = AffineOrdinalAnswers.from_visible(
-                    values, schema=schema, seed=inputs.code_seed
+                    values, schema=schema, seed=inputs.code_seed,
+                    codec_version=self.codec_version,
                 )
                 rank = codec.rank_by_label[values]
             else:

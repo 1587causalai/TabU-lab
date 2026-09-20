@@ -43,13 +43,13 @@ this file must not be used to infer a newer default from an older snapshot.
 |---|---|
 | Numeric value space | Visible z-score with epsilon floor; $e=q_a+zb_a$ for input and answer. Gaussian unit bases or two distinct raw 128/4 bases |
 | Nominal values | One unit Gaussian or raw 128/8 identity per visible category; scorer rejects hidden classes lacking a visible code |
-| Ordinal values | $e=q_{a,c}+r_a(c)b_a$: one identity per declared category and a shared rank direction. Both use unit Gaussian or raw 128/4 vectors; the complete schema codebook is fixed before scoring |
+| Ordinal values | $e=q_a+r_a(c)b_a$: one shared affine line per column. The default uses unit Gaussian or raw 128/4 base/direction vectors; the complete declared rank domain is fixed before scoring |
 | Input projection | Shared bias-free $W_{\rm enc}$, unscaled thin QR initialization and isometric QR parameterization throughout training; single shared Cell/Unit/Feature seeds |
 | Backbone | Existing `AxialBackbone`: column collect/read, then direct row; default 256 slots, width 128, V5.3 presence threshold $10^{-6}$; direct-axis control remains configurable |
 | Unit refinement | `unit_layers=0` is exact identity; positive depth uses OMAB with `visible.any(-1)` eligibility and does not write back Cells/Features |
 | Regression geometry | `regression_width=None` is identity; explicit width enables learned bias-free $P_R$ |
 | Column-shared LL | `readout.py`: all $N$ current Units as centers, $\pi_r=1/N$; one FP64 Cholesky factorization per requested supported column |
-| Evaluation | $\widehat e_{ra}=\bar e_{ra}+B_a(c_{ra}-\bar c_{ra})$; numeric centered projection and inverse scale, nominal nearest visible code, ordinal nearest full declared identity-plus-rank code (lower declared rank on ties) |
+| Evaluation | $\widehat e_{ra}=\bar e_{ra}+B_a(c_{ra}-\bar c_{ra})$; numeric centered projection and inverse scale, nominal nearest visible code, ordinal projection onto the shared rank direction and nearest declared rank |
 | Loss | All original observations remain in the scoring contract; numeric $128\times$ coordinate MSE and discrete coordinate MSE. Separate type/state means; Query coefficient 1, retained coefficient 0 by default |
 | Fixed episode reuse | Visible-only preparation snapshots, mutation guards; carriers, Unit weights and slopes recomputed after every parameter update |
 
@@ -133,28 +133,28 @@ legacy = V53Config(codec_version="legacy_v53", numeric_scaling="median_half_iqr"
 old_loss = V53LossConfig(state_weights=None)
 ```
 
-The new ordinal lift is $e_a(c)=q_{a,c}+r_a(c)b_a$. Identities cover the entire
-declared domain independently of support visibility and hidden truth. Inputs,
-answers and scorer reuse the same fixed tensors. Decoding minimizes full squared
-distance, including candidate norms; projection onto $b_a$ or dot-product-only
-comparison is generally incorrect. Training retains all 128 error coordinates.
+The default ordinal lift is $e_a(c)=q_a+r_a(c)b_a$, matching numeric's shared
+affine line. The declared order is carried by normalized rank, and inputs,
+answers and scorer reuse the same fixed column-level base and direction.
+Decoding projects onto $b_a$ and matches the nearest declared rank. Training
+still retains all 128 error coordinates.
 
 `constant_weight_v1` uses raw binary vectors without dividing by $\sqrt{k}$:
-numeric bases and ordinal identities/directions have four ones; nominal
-identities have eight. Numeric bases are distinct; same-column identities are
-sampled without replacement. The ordinal direction is independent and may
-overlap an identity. Capacity overflow fails explicitly. Sampling uses a local
-CPU generator, stable column identity and code seed. The nominal visible class
-set also fixes its sparse codebook; ordinal uses the full declared domain.
+numeric and ordinal bases have four ones; nominal identities have eight.
+Numeric and ordinal bases are distinct. Capacity overflow fails explicitly.
+Sampling uses a local CPU generator, stable column identity and code seed. The
+nominal visible class set fixes its sparse codebook; ordinal uses the full
+declared rank domain.
 Numeric decoding divides the centered dot product by $\|b_a\|^2$ (1 or 4).
 Consequently numeric loss is $(\hat z-z)^2$ in G and $4(\hat z-z)^2$ in C;
 nominal and ordinal retain coordinate MSE. A different sparse normalization
 would require its own codec version.
 
-`unit_gaussian_v1` preserves the old shared-origin ordinal line and projected
-nearest-rank decoder. `legacy_v53` preserves 128/8 discrete answer codes and
-ordinal rank addition to the input only. Both remain explicit historical
-candidates. Replaying the previous training objective also requires `old_loss`.
+`unit_gaussian_v1` preserves the historical shared-origin Gaussian ordinal line
+and projected nearest-rank decoder. `unit_gaussian_v2` preserves the explicit
+category-identity-plus-rank candidate. `legacy_v53` preserves 128/8 discrete
+answer codes and ordinal rank addition to the input only. Replaying the
+previous training objective also requires `old_loss`.
 
 `as_dict` records both fields; `from_dict` rejects configurations missing either
 field rather than treating an old configuration as the new default. A model

@@ -113,8 +113,7 @@ def test_compiler_uses_same_affine_answers_and_declared_ordinal_order():
             ranks = rank_by_label[inputs.values[a][fact.rows]]
             torch.testing.assert_close(fact.rank, ranks)
             torch.testing.assert_close(
-                lift, fact.answers.identities[inputs.values[a][fact.rows]]
-                + ranks[:, None] * fact.answers.direction
+                lift, fact.answers.origin + ranks[:, None] * fact.answers.direction
             )
         torch.testing.assert_close(initial[fact.rows, a], model.encoder.projection(lift))
 

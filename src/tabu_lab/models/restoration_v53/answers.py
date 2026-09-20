@@ -259,7 +259,12 @@ class IdentityOrdinalAnswers:
 
 @dataclass(frozen=True)
 class AffineOrdinalAnswers:
-    """Historical unit_gaussian_v1 shared-origin codec; retained for exact replay."""
+    """Shared-origin ordinal codec, matching numeric's affine geometry.
+
+    ``unit_gaussian_v1`` is retained for exact historical replay.  The current
+    constant-weight codec uses one shared ``q_a`` and one shared rank direction
+    ``b_a``; it does not allocate a separate identity vector per category.
+    """
     encoded: Tensor
     origin: Tensor
     direction: Tensor
@@ -267,13 +272,26 @@ class AffineOrdinalAnswers:
     classes: Tensor  # In increasing declared-rank order, not domain-index order.
 
     @classmethod
-    def from_visible(cls, labels: Tensor, *, schema: ColumnSchema, seed: int):
+    def from_visible(
+        cls, labels: Tensor, *, schema: ColumnSchema, seed: int,
+        codec_version: str = "unit_gaussian_v1",
+    ):
         if schema.kind != "ordinal":
             raise ValueError("affine ordinal codec requires an ordinal schema")
         validate_values(schema, labels)
         positions = torch.tensor(schema.rank_positions(), dtype=torch.float64, device=labels.device)
         ranks = positions / max(schema.domain_size - 1, 1)
-        origin, direction = unit_gaussians(["v53-ordinal", seed, schema.key], 2, labels.device)
+        if codec_version == "unit_gaussian_v1":
+            origin, direction = unit_gaussians(
+                ["v53-ordinal", seed, schema.key], 2, labels.device
+            )
+        elif codec_version == "constant_weight_v1":
+            origin, direction = constant_weight_vectors(
+                ["v53-ordinal-affine-constant", seed, schema.key],
+                2, 4, labels.device,
+            )
+        else:
+            raise ValueError("shared-origin ordinal codec requires an affine codec version")
         encoded = origin + ranks[labels, None] * direction
         return cls(encoded, origin, direction, ranks, positions.argsort())
 
@@ -295,7 +313,10 @@ class AffineOrdinalAnswers:
             raise ValueError("ordinal predictions need 128 coordinates on the codec device")
         if not len(self.encoded):
             raise ValueError("no-support: ordinal decoding needs visible evidence")
-        coordinate = (encoded.double() - self.origin) @ self.direction
+        coordinate = (
+            (encoded.double() - self.origin) @ self.direction
+            / self.direction.square().sum()
+        )
         finite(coordinate, "ordinal projected rank")
         ranks = self.rank_by_label[self.classes]
         # right=False chooses the lower rank at an exact midpoint. Outside

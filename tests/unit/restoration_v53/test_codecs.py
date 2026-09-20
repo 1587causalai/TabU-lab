@@ -137,6 +137,21 @@ def test_ordinal_projection_decodes_lower_rank_ties_endpoints_and_singleton():
     assert singleton.decode(torch.randn(3, 128)).tolist() == [0, 0, 0]
 
 
+@pytest.mark.parametrize("codec_version", ["unit_gaussian_v1", "constant_weight_v1"])
+def test_shared_origin_ordinal_uses_one_column_base_and_rank_direction(codec_version):
+    schema = ColumnSchema("severity", "ordinal", 4, order=(2, 0, 3, 1))
+    codec = AffineOrdinalAnswers.from_visible(
+        torch.tensor([2, 1]), schema=schema, seed=7, codec_version=codec_version,
+    )
+    expected = codec.origin + codec.rank_by_label[:, None] * codec.direction
+    torch.testing.assert_close(codec.encode_targets(torch.arange(4)), expected)
+    if codec_version == "constant_weight_v1":
+        for vector in (codec.origin, codec.direction):
+            assert bool(((vector == 0) | (vector == 1)).all())
+            assert vector.sum() == 4
+    assert torch.equal(codec.decode(expected), torch.arange(4))
+
+
 def test_explicit_legacy_candidate_preserves_old_scalar_codes_and_ordinal_lift():
     model = V53Model(replace(config(), codec_version="legacy_v53",
                              numeric_scaling="median_half_iqr")).double()
@@ -210,13 +225,15 @@ def test_unseen_ordinal_truth_is_scorable_but_inference_remains_truth_free(codec
     assert not torch.equal(first.encoded_truth[0], second.encoded_truth[0])
     a, b = score_prepared_episode(model, first), score_prepared_episode(model, second)
     torch.testing.assert_close(a.output.carriers, b.output.carriers, atol=0, rtol=0)
-    # Ordinal keeps the entire identity-plus-rank vector, before hard decoding.
+    # Ordinal keeps the entire encoded vector, before hard decoding.
     codec = first.visible.facts[0].answers
-    error = a.output.columns[0].result.encoding - codec.codebook[truth.values[0]]
+    target_code = codec.encode_targets(truth.values[0])
+    error = a.output.columns[0].result.encoding - target_code
     expected = error.square().mean(-1)
     torch.testing.assert_close(a.per_target, expected)
     rank_only = (error @ codec.direction).square() / codec.direction.square().sum() / 128
-    assert a.per_target[-1] > rank_only[-1] + 1e-4
+    if codec_version == "unit_gaussian_v2":
+        assert a.per_target[-1] > rank_only[-1] + 1e-4
     codec.rank_by_label.add_(1)
     with pytest.raises(ValueError, match="mutated"):
         score_prepared_episode(model, first)
