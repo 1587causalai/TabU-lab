@@ -168,11 +168,13 @@ artifacts; prepared tensors are recreated from that visible episode.
 
 ## Input isometry and presence scale
 
-V5.3's exported `BackboneConfig` defaults to `tau_presence=1e-6`; the historical
-`restoration.backbone.BackboneConfig` retains its original default. The existing
-presence function and its independently learned readouts are unchanged. The
-reference mass, norm epsilon, matching bandwidth, loss and clip threshold are
-independent settings and are not rescaled by this change.
+V5.3's exported `BackboneConfig` defaults to `tau_presence=1.0`, making a
+unit-norm readout the half-participation point. The historical
+`restoration.backbone.BackboneConfig` retains the same default. The existing
+presence function and its independently learned readouts are unchanged. A
+smaller threshold such as `1e-6` is an explicit ablation rather than the
+default. The reference mass, norm epsilon, matching bandwidth, loss and clip
+threshold are independent settings and are not rescaled by this choice.
 
 `input_projection="isometric_qr"` is the new default. Its effective matrix obeys
 $W_{\rm enc}^{\top}W_{\rm enc}=I_{128}$ for both square and tall matrices. A

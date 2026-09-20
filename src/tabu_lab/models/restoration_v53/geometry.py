@@ -13,7 +13,9 @@ INPUT_PROJECTIONS = {"isometric_qr": 1, "legacy_scaled": 0}
 
 @dataclass(frozen=True)
 class BackboneConfig(HistoricalBackboneConfig):
-    tau_presence: float = 1e-6
+    # V5.3 default: unit-norm presence is at the half-participation point.
+    # Smaller thresholds remain explicit experiment variants.
+    tau_presence: float = 1.0
 
 
 class QRIsometry(nn.Module):

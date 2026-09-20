@@ -17,7 +17,7 @@ from .test_model import config, deterministic_cpu  # noqa: F401
 def test_defaults_propagate_to_curriculum_without_changing_historical_backbone():
     assert HistoricalBackboneConfig().tau_presence == 1.
     for cfg in (V53Config(), _model({}), _model({"backbone": {"slots": 4}})):
-        assert cfg.backbone.tau_presence == 1e-6
+        assert cfg.backbone.tau_presence == 1.
         assert cfg.input_projection == "isometric_qr"
         assert V53Config.from_dict(cfg.as_dict()) == cfg
     assert _model({"backbone": {"tau_presence": 0.03}}).backbone.tau_presence == .03
@@ -143,4 +143,6 @@ def test_presence_default_half_radius_and_unit_readout():
     values = torch.zeros(3, 128, dtype=torch.float64)
     values[1, 0], values[2, 0] = 1e-3, 1.
     actual = method(values).exp()
-    torch.testing.assert_close(actual, torch.tensor([0., .5, 1 / (1 + 1e-6)], dtype=torch.float64))
+    torch.testing.assert_close(
+        actual, torch.tensor([0., 1e-6 / (1 + 1e-6), .5], dtype=torch.float64)
+    )
