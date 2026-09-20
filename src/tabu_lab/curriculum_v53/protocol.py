@@ -14,7 +14,7 @@ from typing import Any
 import yaml
 
 from tabu_lab.models.restoration_v53 import BackboneConfig, V53Config, V53LossConfig
-from tabu_lab.restoration_masking import validate_numeric_query_guard
+from tabu_lab.restoration_masking import default_v53_query_guard, validate_numeric_query_guard
 from tabu_lab.restoration_optimizers import OptimizerConfig
 
 SCHEMA = "tabu.curriculum.v53.v1"
@@ -154,7 +154,7 @@ def _recipe(value, name):
             else validate_numeric_query_guard(guard)
         )
     else:
-        value["numeric_query_guard"] = {"kind": "none"}
+        value["numeric_query_guard"] = default_v53_query_guard(value["kind"])
     return value
 
 

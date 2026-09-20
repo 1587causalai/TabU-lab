@@ -44,9 +44,9 @@ def test_affine_codec_is_fixed_local_random_state_and_roundtrips():
     state = torch.get_rng_state().clone()
     codec = AffineNumericAnswers.from_visible(values, epsilon=1e-6, seed=7, key="a")
     assert torch.equal(state, torch.get_rng_state())
-    torch.testing.assert_close(codec.origin.norm(), torch.tensor(1.0, dtype=torch.float64))
-    torch.testing.assert_close(codec.direction.norm(), torch.tensor(1.0, dtype=torch.float64))
-    assert abs(codec.origin @ codec.direction) > 1e-4  # No orthogonalization.
+    torch.testing.assert_close(codec.origin.norm(), torch.tensor(2.0, dtype=torch.float64))
+    torch.testing.assert_close(codec.direction.norm(), torch.tensor(2.0, dtype=torch.float64))
+    assert not torch.equal(codec.origin, codec.direction)  # No orthogonalization is imposed.
     torch.testing.assert_close(codec.decode(codec.encoded), values)
     repeated = AffineNumericAnswers.from_visible(values.flip(0), epsilon=1e-6, seed=7, key="a")
     assert torch.equal(codec.origin, repeated.origin)

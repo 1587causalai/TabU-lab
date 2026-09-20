@@ -19,13 +19,21 @@ the document lineage.
 
 Versioned design source adopted by this implementation:
 `latex/model-factory/table-restoration/TabU_V5p3_Refined_Complete/TabU_V5p3_Refined_Complete.tex`.
+The main TeX source is authoritative for current design decisions. This
+implementation note records a particular implementation state only: when its
+snapshot language conflicts with the main TeX source, the TeX source wins and
+this note must be updated before it is used as design evidence.
 The initial source snapshot read on 2026-09-19 had SHA256
 `e6803a713e807a39f484169d64e9f55485bb4f2329f8353dd8b971cde76ff7e7`.
-The current codec defaults follow the 2026-09-20 source snapshot with SHA256
+The earlier 2026-09-20 Gaussian-default snapshot had SHA256
 `8d4ba6b21d0dd8d9395fd2bbaf72c1260e19386f04d8debe09cf12cafc3688e2`.
-Main Steps 1–5 are the contract: Gaussian and raw constant-weight codecs are
-selectable modes; historical mechanisms require explicit opt-in.
-The living manuscript can advance independently of this recorded snapshot.
+The current combinatorial-default source snapshot has SHA256
+`b4ff4d612b2d577548930839ed88b1c8c87ab327c751b4ae634f4f71e04dfd2b`.
+Main Steps 1–5 are the contract: raw constant-weight compositional coding is
+the default, while unit-Gaussian coding is an explicitly selected comparison
+mode; historical mechanisms require explicit opt-in.
+The living manuscript can advance independently of this recorded snapshot;
+this file must not be used to infer a newer default from an older snapshot.
 
 ## Implemented path
 
@@ -87,7 +95,15 @@ codec also requires at least two distinct visible values per supervised numeric
 column; ordinal supports may have equal ranks, which is a degenerate fitting
 case, not a missing-code error. Inference
 returns explicit `no-support` for empty columns. Invalid training episodes fail
-before the neural forward, with no silent target removal.
+before the neural forward, with no silent target removal. Direct V5.3 scorer
+preparation also requires nonempty Query, including callers that manually
+construct the input/request/sidecar instead of using `make_episode`.
+
+New curriculum random-cell recipes default to the manuscript's whole-column
+numeric guard: population std greater than twice the full IQR (floor 1e-6)
+keeps that column visible. Supervised-row recipes keep this guard disabled;
+explicit `none` and historical guard recipes remain available. This protection
+changes eligible Query coverage and is reported separately from fit metrics.
 
 The default loss is $\mathcal L_Q+\lambda_{\rm restore}\mathcal L_V$ with
 $\lambda_{\rm restore}=0$, represented by `V53LossConfig(state_weights=(0,1,0,0))`.
@@ -100,7 +116,7 @@ cannot silently fall back to the old scalar-answer assumptions.
 
 ## Codec identity and historical candidates
 
-New construction defaults to `V53Config(codec_version="unit_gaussian_v2",
+New construction defaults to `V53Config(codec_version="constant_weight_v1",
 numeric_scaling="zscore")`. Numeric statistics use only visible values,
 $\sigma_a^2=n_a^{-1}\sum_i(x_i-\bar x_a)^2$, with scale
 $\max(\sigma_a,\varepsilon)$. `median_half_iqr` remains an independent option.
@@ -108,8 +124,8 @@ $\max(\sigma_a,\varepsilon)$. `median_half_iqr` remains an independent option.
 ```python
 from tabu_lab.models.restoration_v53 import V53Config, V53LossConfig
 
-gaussian = V53Config()  # unit_gaussian_v2 + zscore
-combinatorial = V53Config(codec_version="constant_weight_v1")
+combinatorial = V53Config()  # constant_weight_v1 + zscore
+gaussian = V53Config(codec_version="unit_gaussian_v2")
 old_gaussian = V53Config(codec_version="unit_gaussian_v1")
 legacy = V53Config(codec_version="legacy_v53", numeric_scaling="median_half_iqr")
 old_loss = V53LossConfig(state_weights=None)

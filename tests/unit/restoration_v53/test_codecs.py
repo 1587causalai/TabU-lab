@@ -158,6 +158,7 @@ def test_explicit_legacy_candidate_preserves_old_scalar_codes_and_ordinal_lift()
     robust = AffineNumericAnswers.from_visible(
         inputs.values[0][facts[0].rows], epsilon=1e-6, seed=inputs.code_seed,
         key=inputs.schema[0].key, scaling="median_half_iqr",
+        codec_version="legacy_v53",
     )
     assert torch.equal(robust.encoded, facts[0].answers.encoded)
 

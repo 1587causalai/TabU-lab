@@ -13,8 +13,12 @@ from tabu_lab.models.restoration_v53 import (
     ColumnSchema,
     ConstantWeightNominalAnswers,
     IdentityOrdinalAnswers,
+    RestorationInput,
+    RestorationRequest,
+    TruthSidecar,
     V53LossConfig,
     V53Model,
+    prepare_episode,
     score_episode,
 )
 from tabu_lab.models.restoration_v53.answers import constant_weight_vectors
@@ -22,6 +26,22 @@ from tabu_lab.models.restoration_v53.answers import constant_weight_vectors
 from .test_model import config, deterministic_cpu  # noqa: F401
 
 CURRENT_CODECS = ["unit_gaussian_v2", "constant_weight_v1"]
+
+
+@pytest.mark.parametrize("version", CURRENT_CODECS)
+def test_empty_query_rejected_before_training_but_visible_inference_is_valid(version):
+    schema = (ColumnSchema("x", "numeric"),)
+    values = (torch.arange(4, dtype=torch.float64),)
+    observed = torch.ones(4, 1, dtype=torch.bool)
+    inputs = RestorationInput(schema, values, observed, torch.zeros_like(observed), code_seed=7)
+    request = RestorationRequest(observed.nonzero())
+    truth = TruthSidecar(values, torch.zeros_like(observed, dtype=torch.long))
+    episode = inputs, request, truth
+    model = V53Model(replace(config(), codec_version=version)).double()
+    inputs, request, _ = episode
+    assert model(inputs, request).columns[0].result.status == "ok"
+    with pytest.raises(ValueError, match="nonempty Query"):
+        prepare_episode(model, *episode)
 
 
 @pytest.mark.parametrize("version", CURRENT_CODECS)

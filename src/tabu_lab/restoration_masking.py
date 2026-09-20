@@ -20,6 +20,15 @@ if TYPE_CHECKING:
     from tabu_lab.restoration_joint_fit import TablePlan
 
 
+def default_v53_query_guard(kind: str) -> dict:
+    """Current V5.3 policy; historical callers keep their explicit recipes."""
+    if kind == "random_cell":
+        return {"kind": "std_iqr_column", "max_std_iqr_ratio": 2.0}
+    if kind == "supervised_row":
+        return {"kind": "none"}
+    raise ValueError("unknown V5.3 masking kind")
+
+
 def validate_numeric_query_guard(guard: dict) -> dict:
     """Validate a recorded sampling policy, retaining historical cell guards."""
     fields = {"median_half_iqr": "max_abs_robust_z", "std_iqr_column": "max_std_iqr_ratio"}

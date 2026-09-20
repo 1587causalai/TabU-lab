@@ -67,8 +67,10 @@ def test_defaults_expand_without_execution_and_preserve_probe_boundaries(tmp_pat
     assert plan.spec["stages"][0]["loss"] == {
         "discrete_weight": 1.0, "state_weights": [0.0, 1.0, 0.0, 0.0],
     }
-    assert plan.config.codec_version == "unit_gaussian_v2"
-    assert plan.spec["stages"][0]["recipe"]["synthetic"]["numeric_query_guard"] == {"kind": "none"}
+    assert plan.config.codec_version == "constant_weight_v1"
+    assert plan.spec["stages"][0]["recipe"]["synthetic"]["numeric_query_guard"] == {
+        "kind": "std_iqr_column", "max_std_iqr_ratio": 2.0,
+    }
     assert plan.summary["status"] == "local_unissued"
     assert not plan.summary["execution_started"]
     assert "held-out" in plan.summary["probe_boundary"]

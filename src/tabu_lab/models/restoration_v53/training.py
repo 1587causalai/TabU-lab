@@ -46,6 +46,8 @@ class V53Score:
 
 @torch.no_grad()
 def prepare_episode(model: V53Model, inputs, request, truth) -> PreparedV53Episode:
+    if not bool(inputs.query.any()):
+        raise ValueError("no-valid-episode: V5.3 training requires nonempty Query")
     visible = model.prepare(inputs, request)
     # Reuse the established full-observation/state/codebook preflight. Its
     # custom-codec path invokes affine encode_targets, with truth confined here.

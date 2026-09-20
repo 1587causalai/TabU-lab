@@ -21,7 +21,11 @@ from tabu_lab.models.restoration_v53 import (
     ColumnSchema,
     make_episode,
 )
-from tabu_lab.restoration_masking import global_query_mask, validate_numeric_query_guard
+from tabu_lab.restoration_masking import (
+    default_v53_query_guard,
+    global_query_mask,
+    validate_numeric_query_guard,
+)
 
 
 def _canonical(value) -> bytes:
@@ -236,7 +240,7 @@ def _recipe(recipe: dict) -> tuple[str, float, dict]:
     if (type(fraction) not in (int, float) or not math.isfinite(fraction)
             or not 0 < fraction < 1):
         raise ValueError("episode fraction must be strictly between zero and one")
-    guard = recipe.get("numeric_query_guard", {"kind": "none"})
+    guard = recipe.get("numeric_query_guard", default_v53_query_guard(kind))
     if guard != {"kind": "none"}:
         guard = validate_numeric_query_guard(guard)
     return kind, float(fraction), dict(guard)

@@ -79,7 +79,9 @@ def test_local_rng_repeatability_class_protection_and_training_isolation(tmp_pat
     assert torch.equal(torch.get_rng_state(), state)
     assert first[3] == repeat[3]
     assert torch.equal(first[0].query, repeat[0].query)
-    assert first[3]["numeric_query_guard"] == {"kind": "none"}
+    assert first[3]["numeric_query_guard"]["kind"] == (
+        "std_iqr_column" if kind == "random_cell" else "none"
+    )
     assert set(first[3]["row_ids"]) <= set(table.row_ids)
     assert min(first[3]["visible_per_column"]) >= 2
     for a, spec in enumerate(table.schema):
@@ -91,6 +93,26 @@ def test_local_rng_repeatability_class_protection_and_training_isolation(tmp_pat
     evaluation = build_episode(table, recipe, 1, SEEDS, "cpu", evaluation=True)
     assert first[3]["code_seed"] != evaluation[3]["code_seed"]
     assert first[3]["window_seed"] != evaluation[3]["window_seed"]
+
+
+def test_current_random_cell_default_excludes_whole_tail_column(tmp_path):
+    entry, _ = write_table_fixture(
+        tmp_path, values=[[float(i) if i != 19 else 10000.0, float(i)] for i in range(22)],
+        features=[{"kind": "numeric"}, {"kind": "numeric"}],
+        splits={"train": list(range(20)), "test": [20, 21]},
+    )
+    table = load_table(entry, tmp_path)
+    recipe = {"kind": "random_cell", "fraction": 0.2}
+    inputs, _, _, audit = build_episode(table, recipe, 0, SEEDS, "cpu")
+    assert not inputs.query[:, 0].any()
+    assert inputs.visible[:, 0].all()
+    assert int(inputs.query.sum()) == 8
+    assert audit["protected_numeric_columns"] == 1
+    assert audit["protected_numeric_column_cells"] == 20
+    recipe["numeric_query_guard"] = {"kind": "none"}
+    unguarded = build_episode(table, recipe, 0, SEEDS, "cpu")
+    assert unguarded[3]["numeric_query_guard"] == {"kind": "none"}
+    assert unguarded[0].query[:, 0].any()
 
 
 def test_supervised_does_not_drop_unsupported_queries_or_reduce_budget(tmp_path):
