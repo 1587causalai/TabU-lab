@@ -238,14 +238,23 @@ def _recipe(recipe: dict) -> tuple[str, float, dict]:
 
 
 def build_episode(table: Table, recipe: dict, index: int, seeds: dict, device: str, *,
-                  evaluation: bool = False, partition: str = "train", epsilon: float = 1e-6):
+                  evaluation: bool = False, partition: str = "train", epsilon: float = 1e-6,
+                  codec_version: str = "unit_gaussian_v1"):
     """Build one episode; return inputs/request/truth plus original-address audit.
 
     Supervised training uses an exact rounded Query count and protects every
-    target class before sampling. Reserved evaluation is transductive: all
+    nominal class before sampling. The legacy codec also protects ordinal
+    classes; the default ordinal codec uses the complete declared rank domain.
+    Reserved evaluation is transductive: all
     non-target heldout features are visible. Its target truth is scorer-only.
     """
     kind, fraction, guard = _recipe(recipe)
+    if codec_version not in ("unit_gaussian_v1", "legacy_v53"):
+        raise ValueError("unknown V5.3 codec_version")
+    support_policy = {
+        "protect_ordinal_classes": codec_version == "legacy_v53",
+        "require_numeric_diversity": codec_version == "unit_gaussian_v1",
+    }
     if type(index) is not int or index < 0:
         raise ValueError("episode index must be a nonnegative integer")
     if partition not in ("train", "validation", "test"):
@@ -275,6 +284,7 @@ def build_episode(table: Table, recipe: dict, index: int, seeds: dict, device: s
                 plan, fraction, mask_seed,
                 numeric_query_guard=None if guard["kind"] == "none" else guard,
                 numeric_scale_floor=None if guard["kind"] == "none" else epsilon,
+                **support_policy,
             )
         else:
             a = table.target_column
@@ -283,6 +293,7 @@ def build_episode(table: Table, recipe: dict, index: int, seeds: dict, device: s
                 plan, fraction, mask_seed,
                 numeric_query_guard=None if guard["kind"] == "none" else guard,
                 numeric_scale_floor=None if guard["kind"] == "none" else epsilon,
+                **support_policy,
             )
             query = torch.zeros(size, table.width, dtype=torch.bool)
             query[:, a] = target_query[:, 0]
@@ -313,7 +324,7 @@ def build_episode(table: Table, recipe: dict, index: int, seeds: dict, device: s
         query = torch.zeros(len(row_ids), table.width, dtype=torch.bool)
         query[table.train_rows:, table.target_column] = True
         spec = table.schema[table.target_column]
-        if spec.kind != "numeric":
+        if spec.kind == "nominal" or (spec.kind == "ordinal" and codec_version == "legacy_v53"):
             support = set(table.values[table.target_column].tolist())
             labels = set(table.holdout_values[partition][table.target_column].tolist())
             if not labels <= support:
@@ -334,6 +345,7 @@ def build_episode(table: Table, recipe: dict, index: int, seeds: dict, device: s
         "query_row_fraction": len({r for r, _ in addresses}) / len(row_ids),
         "visible_per_column": inputs.visible.sum(0).cpu().tolist(),
         "numeric_query_guard": audit.get("numeric_query_guard", guard),
+        "codec_version": codec_version, "support_policy": support_policy,
         "protected_numeric_tail_cells": audit.get("protected_numeric_tail_cells", 0),
         "protected_discrete_cells": audit.get("protected_discrete_cells", 0),
         "mask_seed": mask_seed, "code_seed": code_seed, "window_seed": window_seed,

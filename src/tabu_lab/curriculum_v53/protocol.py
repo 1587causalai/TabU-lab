@@ -350,7 +350,14 @@ def _summary(spec):
         "execution_started": False, "experiment_id": spec["experiment_id"],
         "model": spec["model"], "optimizer": spec["optimizer"], "stages": stages,
         "table_count": len(spec["tables"]), "probes": spec["probes"],
-        "codec_boundary": "visible-only median/half-IQR with epsilon floor; shared episode codec",
+        "codec_boundary": {
+            "version": spec["model"]["codec_version"],
+            "numeric_scaling": spec["model"]["numeric_scaling"],
+            "statistics": "forward-visible values only, with epsilon scale floor",
+            "ordinal_domain": "complete declared ranks"
+            if spec["model"]["codec_version"] == "unit_gaussian_v1" else "visible class codes",
+            "scope": "shared input/answer codec within each episode",
+        },
         "training_boundary": "train-role tables and train rows only; no reserved truth in forward",
         "probe_boundary": "train fit is not held-out evidence; validation gates; "
                           "test is independent final evaluation "

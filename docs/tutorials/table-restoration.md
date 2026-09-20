@@ -5,6 +5,14 @@ of TAR's additive heads, checkpoints, or published fit results. Status is
 `local_unissued`: implementation verification is not F0 fit, benchmark readiness,
 an accepted claim, or evidence of unseen-table generalization.
 
+This tutorial describes the original fifth-generation Restoration contract:
+scalar numeric answers and per-target LL / full NW. The separate
+[V5.3 reference](../design/restoration-v53.md) uses affine numeric encoding and
+column-shared LL within Gen-5.x. Its versioned design snapshot, APIs and
+validation records are documented at that entry; they do not silently replace
+this path or its checkpoints. The protected parent canonical design remains
+`latex/model-factory/table-restoration/end-to-end-design.tex`.
+
 ## Boundaries and extension points
 
 | Step | Stable boundary | Implemented alternatives |

@@ -1,4 +1,13 @@
-# TAR implementation design snapshot
+# Implementation and curriculum designs
+
+[Pretraining curriculum specification](pretraining-curriculum.tex)
+([PDF](pretraining-curriculum.pdf)) is an independent consumer-side design:
+invariant semantics, revisable empirical probes, and replaceable adapters.
+Its [minimal Python interface](../tutorials/model-independent-curriculum.md)
+binds existing frozen data and checks selection/provenance without starting training.
+It does not replace the model designs below or turn historical results into a fixed pipeline.
+
+## TAR implementation design snapshot
 
 [tar-model-design.tex](tar-model-design.tex) is an exact, read-only snapshot of the
 owner-maintained `TabU/latex/model-factory/TabU-TAR/model-design.tex`.

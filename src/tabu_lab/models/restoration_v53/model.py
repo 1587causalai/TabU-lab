@@ -29,6 +29,8 @@ class V53Config:
     regression_width: int | None = None  # None is exact identity; explicit width enables P_R.
     center_chunk_size: int = 32
     slope_source: str = "shared_ll"
+    codec_version: str = "unit_gaussian_v1"
+    numeric_scaling: str = "zscore"
 
     def __post_init__(self):
         if self.backbone.width < ANSWER_WIDTH:
@@ -45,6 +47,10 @@ class V53Config:
             raise ValueError("center_chunk_size must be a positive integer")
         if self.slope_source not in ("shared_ll", "feature"):
             raise ValueError("slope_source must be shared_ll or feature")
+        if self.codec_version not in ("unit_gaussian_v1", "legacy_v53"):
+            raise ValueError("unknown V5.3 codec version")
+        if self.numeric_scaling not in ("zscore", "median_half_iqr"):
+            raise ValueError("unknown numeric scaling")
 
     def as_dict(self):
         return asdict(self)
@@ -52,6 +58,11 @@ class V53Config:
     @classmethod
     def from_dict(cls, values):
         values = dict(values)
+        if "codec_version" not in values or "numeric_scaling" not in values:
+            raise ValueError(
+                "V5.3 config lacks codec identity; historical configs require explicit "
+                "codec_version='legacy_v53', numeric_scaling='median_half_iqr'"
+            )
         values["backbone"] = BackboneConfig(**values["backbone"])
         return cls(**values)
 
@@ -91,7 +102,14 @@ class V53Model(nn.Module):
             raise ValueError("feature slope mode requires an explicit FeatureSlopeProvider")
         if feature_slope is not None and not isinstance(feature_slope, FeatureSlopeProvider):
             raise TypeError("feature_slope must implement FeatureSlopeProvider")
-        self.encoder = AffineValueEncoder(config.backbone.width, config.epsilon)
+        self.encoder = AffineValueEncoder(
+            config.backbone.width, config.epsilon, codec_version=config.codec_version,
+            numeric_scaling=config.numeric_scaling,
+        )
+        self.register_buffer("_codec_signature", torch.tensor([
+            {"legacy_v53": 0, "unit_gaussian_v1": 1}[config.codec_version],
+            {"median_half_iqr": 0, "zscore": 1}[config.numeric_scaling],
+        ], dtype=torch.long))
         self.backbone = AxialBackbone(config.backbone)
         self.unit_blocks = nn.ModuleList(OMAB(config.backbone) for _ in range(config.unit_layers))
         self.regression = (
@@ -99,6 +117,27 @@ class V53Model(nn.Module):
             else nn.Linear(config.backbone.width, config.regression_width, bias=False)
         )
         self.feature_slope = feature_slope
+
+    def _load_from_state_dict(
+        self, state_dict, prefix, local_metadata, strict, missing_keys, unexpected_keys, error_msgs,
+    ):
+        key = prefix + "_codec_signature"
+        signature = state_dict.get(key)
+        if signature is None:
+            if self.config.codec_version == "legacy_v53" and (
+                self.config.numeric_scaling == "median_half_iqr"
+            ):
+                # Explicit legacy construction is the only unversioned migration.
+                state_dict[key] = self._codec_signature.detach().clone()
+            else:
+                error_msgs.append("checkpoint lacks codec identity; select the explicit legacy "
+                                  "codec or perform a documented weights-only conversion")
+        elif not torch.equal(signature.cpu(), self._codec_signature.cpu()):
+            error_msgs.append("checkpoint codec identity does not match the V5.3 model config")
+            state_dict[key] = self._codec_signature.detach().clone()
+        super()._load_from_state_dict(
+            state_dict, prefix, local_metadata, strict, missing_keys, unexpected_keys, error_msgs,
+        )
 
     @torch.inference_mode(False)
     @torch.no_grad()

@@ -100,6 +100,7 @@ def numeric_tail_protection(
 def global_query_mask(
     table: TablePlan, fraction: float, seed: int,
     *, numeric_query_guard: dict | None = None, numeric_scale_floor: float | None = None,
+    protect_ordinal_classes: bool = True, require_numeric_diversity: bool = False,
 ) -> tuple[torch.Tensor, dict]:
     """Sample an exact global Query budget, retaining all observed classes.
 
@@ -107,6 +108,9 @@ def global_query_mask(
     may receive zero Query cells.  Invalid or unsupported budgets raise rather
     than silently reducing the requested count.  Rejection is bounded so even
     pathological high fractions cannot hang an experiment.
+    Historical callers protect every discrete class. A declared-rank ordinal
+    codec can disable ordinal class protection; numeric affine supervision can
+    require two distinct visible values via whole-candidate rejection.
     """
     if (isinstance(fraction, bool) or not isinstance(fraction, int | float)
             or not math.isfinite(fraction) or not 0 < fraction < 1):
@@ -117,6 +121,19 @@ def global_query_mask(
     if len(table.values) != width or any(column.ndim != 1 or len(column) != n
                                          for column in table.values):
         raise ValueError("table values must match the declared rows and columns")
+    if type(protect_ordinal_classes) is not bool or type(require_numeric_diversity) is not bool:
+        raise ValueError("support policies must be explicit booleans")
+    numeric_values = {
+        a: value.detach().cpu() for a, (spec, value) in
+        enumerate(zip(table.schema, table.values, strict=True))
+        if spec.kind == "numeric" and require_numeric_diversity
+    }
+    for column, values in numeric_values.items():
+        if not bool(torch.isfinite(values).all()) or len(torch.unique(values)) < 2:
+            raise ValueError(
+                f"no-valid-episode: {table.name} numeric column {column} "
+                "needs two distinct finite visible values"
+            )
 
     numeric_protected = None
     numeric_audit = {}
@@ -138,7 +155,7 @@ def global_query_mask(
         singleton_count = 0
         if spec.kind == "numeric" and numeric_protected is not None:
             keep = set(numeric_protected[:, column].nonzero().flatten().tolist())
-        elif spec.kind != "numeric":
+        elif spec.kind == "nominal" or (spec.kind == "ordinal" and protect_ordinal_classes):
             rows_by_class = {}
             for row, label in enumerate(table.values[column].tolist()):
                 rows_by_class.setdefault(int(label), []).append(row)
@@ -162,12 +179,18 @@ def global_query_mask(
         per_column = [0] * width
         for cell in sampled:
             per_column[cell % width] += 1
-        if all(value <= n - 2 for value in per_column):
-            break
+        if not all(value <= n - 2 for value in per_column):
+            continue
+        hidden = set(sampled)
+        if any(len(torch.unique(values[[row * width + column not in hidden
+                                         for row in range(n)]])) < 2
+               for column, values in numeric_values.items()):
+            continue
+        break
     else:
         raise ValueError(
-            f"{table.name}: could not sample the requested global query budget "
-            "within 1024 attempts while retaining two visible cells per column"
+            f"no-valid-episode: {table.name}: could not sample the requested global query budget "
+            "within 1024 attempts while retaining required visible support"
         )
 
     query = torch.zeros(n * width, dtype=torch.bool)

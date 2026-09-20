@@ -48,6 +48,13 @@ def prepare_episode(model: V53Model, inputs, request, truth) -> PreparedV53Episo
     # Reuse the established full-observation/state/codebook preflight. Its
     # custom-codec path invokes affine encode_targets, with truth confined here.
     encoded = _preflight(visible.inputs, visible.request, truth, visible.facts, visible.positions)
+    for a, schema in enumerate(visible.inputs.schema):
+        if (model.config.codec_version == "unit_gaussian_v1" and schema.kind == "numeric"
+                and len(visible.positions[a])):
+            values = visible.inputs.values[a][visible.facts[a].rows]
+            if len(values.unique()) < 2:
+                raise ValueError("no-valid-episode: supervised numeric column needs two distinct "
+                                 "visible values")
     targets = visible.request.targets
     numeric = torch.tensor(
         [s.kind == "numeric" for s in visible.inputs.schema],

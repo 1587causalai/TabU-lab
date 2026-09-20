@@ -8,6 +8,7 @@ from ..restoration.contracts import (
     TruthSidecar,
     make_episode,
 )
+from .answers import AffineOrdinalAnswers, GaussianNominalAnswers, ZScoreAnswers
 from .encoding import AffineNumericAnswers
 from .model import V53Config, V53Model
 from .readout import FeatureSlopeProvider
@@ -19,7 +20,9 @@ from .training import (
 )
 
 __all__ = [
-    "AffineNumericAnswers", "BackboneConfig", "ColumnSchema", "FeatureSlopeProvider",
+    "AffineNumericAnswers", "AffineOrdinalAnswers", "BackboneConfig", "ColumnSchema",
+    "FeatureSlopeProvider", "GaussianNominalAnswers",
     "RestorationInput", "RestorationRequest", "TruthSidecar", "V53Config", "V53LossConfig",
-    "V53Model", "make_episode", "prepare_episode", "score_episode", "score_prepared_episode",
+    "V53Model", "ZScoreAnswers", "make_episode", "prepare_episode", "score_episode",
+    "score_prepared_episode",
 ]

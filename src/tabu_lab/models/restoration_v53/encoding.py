@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
-import json
 import math
 from dataclasses import dataclass
 
@@ -14,27 +12,34 @@ from ..restoration._validation import finite, matrix, positive
 from ..restoration.answers import CategoricalAnswers, NumericAnswers
 from ..restoration.contracts import RestorationInput
 from ..restoration.encoding import EncodingLayout, prepare_features, visible_codes
-
-ANSWER_WIDTH = 128
+from .answers import (
+    ANSWER_WIDTH,
+    AffineOrdinalAnswers,
+    GaussianNominalAnswers,
+    ZScoreAnswers,
+    unit_gaussians,
+)
 
 
 @dataclass(frozen=True)
 class AffineNumericAnswers:
-    scalar: NumericAnswers
+    scalar: ZScoreAnswers | NumericAnswers
     origin: Tensor
     direction: Tensor
     encoded: Tensor
 
     @classmethod
-    def from_visible(cls, values: Tensor, *, epsilon: float, seed: int, key: str):
-        scalar = NumericAnswers.from_visible(values, epsilon=epsilon)
-        identity = json.dumps(["v53-affine", seed, key], ensure_ascii=True).encode()
-        local_seed = int.from_bytes(hashlib.sha256(identity).digest()[:8], "little")
-        generator = torch.Generator(device="cpu").manual_seed(local_seed)
+    def from_visible(
+        cls, values: Tensor, *, epsilon: float, seed: int, key: str,
+        scaling: str = "zscore",
+    ):
+        if scaling not in ("zscore", "median_half_iqr"):
+            raise ValueError("unknown numeric scaling")
+        scalar_type = ZScoreAnswers if scaling == "zscore" else NumericAnswers
+        scalar = scalar_type.from_visible(values, epsilon=epsilon)
         # Independent unit vectors, deliberately NOT orthogonalized. The local
         # generator consumes no process RNG and is stable under column reordering.
-        basis = torch.randn(2, ANSWER_WIDTH, generator=generator, dtype=torch.float64)
-        basis = (basis / torch.linalg.vector_norm(basis, dim=-1, keepdim=True)).to(values.device)
+        basis = unit_gaussians(["v53-affine", seed, key], 2, values.device)
         origin, direction = basis.unbind()
         encoded = origin + scalar.encoded * direction
         finite(encoded, "affine visible encoding")
@@ -57,20 +62,28 @@ class AffineNumericAnswers:
 @dataclass(frozen=True)
 class V53ColumnFacts:
     rows: Tensor
-    answers: AffineNumericAnswers | CategoricalAnswers
+    answers: (
+        AffineNumericAnswers | GaussianNominalAnswers | AffineOrdinalAnswers | CategoricalAnswers
+    )
     input_coordinates: Tensor
     rank: Tensor | None = None
 
 
 class AffineValueEncoder(nn.Module):
-    """Shared bias-free W_enc; same lift for numeric input and answer."""
+    """Shared bias-free W_enc; default typed input and answer lifts coincide."""
 
-    def __init__(self, width: int = 128, epsilon: float = 1e-6):
+    def __init__(self, width: int = 128, epsilon: float = 1e-6, *,
+                 codec_version: str = "unit_gaussian_v1", numeric_scaling: str = "zscore"):
         super().__init__()
         if type(width) is not int or width < ANSWER_WIDTH:
             raise ValueError("carrier width must be at least 128")
         positive(epsilon, "epsilon")
+        if codec_version not in ("unit_gaussian_v1", "legacy_v53"):
+            raise ValueError("unknown V5.3 codec version")
+        if numeric_scaling not in ("zscore", "median_half_iqr"):
+            raise ValueError("unknown numeric scaling")
         self.width, self.epsilon = width, epsilon
+        self.codec_version, self.numeric_scaling = codec_version, numeric_scaling
         self.projection = nn.Linear(ANSWER_WIDTH, width, bias=False)
         with torch.no_grad():
             q, _ = torch.linalg.qr(torch.randn(width, ANSWER_WIDTH), mode="reduced")
@@ -88,9 +101,10 @@ class AffineValueEncoder(nn.Module):
             rank = None
             if schema.kind == "numeric":
                 codec = AffineNumericAnswers.from_visible(
-                    values, epsilon=self.epsilon, seed=inputs.code_seed, key=schema.key
+                    values, epsilon=self.epsilon, seed=inputs.code_seed, key=schema.key,
+                    scaling=self.numeric_scaling,
                 )
-            else:
+            elif self.codec_version == "legacy_v53":
                 classes, codes = visible_codes(
                     values, width=ANSWER_WIDTH, seed=inputs.code_seed, key=schema.key
                 )
@@ -102,6 +116,15 @@ class AffineValueEncoder(nn.Module):
                         schema.rank_positions(), dtype=torch.float64, device=values.device
                     )
                     rank = positions[values] / max(schema.domain_size - 1, 1)
+            elif schema.kind == "nominal":
+                codec = GaussianNominalAnswers.from_visible(
+                    values, schema=schema, seed=inputs.code_seed
+                )
+            else:
+                codec = AffineOrdinalAnswers.from_visible(
+                    values, schema=schema, seed=inputs.code_seed
+                )
+                rank = codec.rank_by_label[values]
             facts.append(V53ColumnFacts(rows, codec, codec.encoded, rank))
         return tuple(facts)
 
@@ -120,7 +143,7 @@ class AffineValueEncoder(nn.Module):
         lifts = []
         for kind, coordinates, fixed_rank in layout.groups:
             lift = coordinates.to(weight)
-            if kind == "ordinal":
+            if kind == "ordinal" and self.codec_version == "legacy_v53":
                 lift = lift + fixed_rank.to(weight)[:, None]
             lifts.append(lift)
         h = h.flatten(0, 1).index_copy(

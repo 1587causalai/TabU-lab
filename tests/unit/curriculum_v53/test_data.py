@@ -137,3 +137,46 @@ def test_numeric_guard_is_explicit_and_uses_registered_epsilon(tmp_path):
     assert info["protected_numeric_tail_cells"] > 0
     with pytest.raises(ValueError, match="filter"):
         build_episode(table, recipe, 0, SEEDS, "cpu", evaluation=True, partition="test")
+
+
+def test_declared_ordinal_domain_allows_unseen_query_ranks(tmp_path):
+    entry, _ = write_table_fixture(
+        tmp_path, values=[[float(i), i] for i in range(6)],
+        features=[{"kind": "numeric"}, {"kind": "ordinal", "domain": list(range(6))}],
+        splits={"train": [0, 1, 2, 3], "test": [4, 5]},
+    )
+    table = load_table(entry, tmp_path)
+    recipe = {"kind": "supervised_row", "fraction": .25}
+    inputs, _, truth, info = build_episode(table, recipe, 0, SEEDS, "cpu")
+    assert info["query_count"] == 1
+    assert info["protected_discrete_cells"] == 0
+    assert not info["support_policy"]["protect_ordinal_classes"]
+    assert len(set(truth.values[1].tolist()) -
+               set(inputs.values[1][inputs.visible[:, 1]].tolist())) == 1
+    heldout = build_episode(table, recipe, 0, SEEDS, "cpu", evaluation=True, partition="test")
+    assert heldout[3]["query_addresses"] == [[4, 1], [5, 1]]
+    assert heldout[0].values[1][-2:].tolist() == [0, 0]
+    with pytest.raises(ValueError, match="capacity"):
+        build_episode(table, recipe, 0, SEEDS, "cpu", codec_version="legacy_v53")
+    with pytest.raises(ValueError, match="no-answer-code"):
+        build_episode(table, recipe, 0, SEEDS, "cpu", evaluation=True, partition="test",
+                      codec_version="legacy_v53")
+
+
+def test_numeric_support_rejects_constant_and_resamples_degenerate_masks(tmp_path):
+    entry, _ = write_table_fixture(tmp_path, target_column=0)
+    table = load_table(entry, tmp_path)
+    recipe = {"kind": "supervised_row", "fraction": .5}
+    constant = replace(table, values=(torch.zeros_like(table.values[0]), table.values[1]))
+    with pytest.raises(ValueError, match="no-valid-episode"):
+        build_episode(constant, recipe, 0, SEEDS, "cpu")
+    values = torch.zeros_like(table.values[0])
+    values[0] = 1
+    repeated = replace(table, values=(values, table.values[1]))
+    attempts = []
+    for index in range(20):
+        inputs, _, _, info = build_episode(repeated, recipe, index, SEEDS, "cpu")
+        assert info["query_count"] == 4
+        assert len(inputs.values[0][inputs.visible[:, 0]].unique()) == 2
+        attempts.append(info["sampling_attempts"])
+    assert max(attempts) > 1

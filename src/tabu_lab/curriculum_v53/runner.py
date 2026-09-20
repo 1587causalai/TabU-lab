@@ -110,7 +110,8 @@ def train_step(model, optimizer, plan, table, recipe, index, device, loss_config
             hashlib.sha256(f"{seeds[stream]}/{namespace}".encode()).digest()[:8], "little"
         )
     inputs, request, truth, info = build_episode(
-        table, recipe, index, seeds, device, epsilon=plan.config.epsilon
+        table, recipe, index, seeds, device, epsilon=plan.config.epsilon,
+        codec_version=plan.config.codec_version,
     )
     model.train()
     prepared = prepare_episode(model, inputs, request, truth)

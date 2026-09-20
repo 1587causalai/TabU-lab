@@ -1,0 +1,318 @@
+% !TEX program = xelatex
+% Independent consumer-side specification. Does not replace model design files.
+\documentclass[10pt,UTF8,fontset=fandol]{ctexart}
+\usepackage[a4paper,margin=22mm,headheight=15pt]{geometry}
+\usepackage{amsmath,amssymb,booktabs,tabularx,array,enumitem,xcolor,fancyhdr}
+\usepackage[unicode,colorlinks=true]{hyperref}
+\definecolor{ink}{RGB}{24,53,77}
+\definecolor{teal}{RGB}{26,120,113}
+\hypersetup{linkcolor=ink,urlcolor=teal,pdftitle={TabU 预训练课程包：独立设计规范},pdfauthor={TabU Project}}
+\ctexset{section={format=\Large\bfseries\color{ink}},subsection={format=\normalsize\bfseries\color{ink}}}
+\setlength{\parskip}{0.25em}
+\setlength{\emergencystretch}{3em}
+\setlist{leftmargin=1.7em,itemsep=0.15em,topsep=0.2em}
+\renewcommand{\arraystretch}{1.2}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\V}{\mathcal V}
+\newcommand{\Q}{\mathcal Q}
+\newcommand{\Obs}{\mathcal O}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small TabU / Pretraining Curriculum}
+\fancyhead[R]{\small 消费侧合同 / 2026-09-19}
+\fancyfoot[C]{\thepage}
+\begin{document}
+{\LARGE\bfseries\color{ink} TabU 预训练课程包}\par
+{\large 独立设计规范：冻结数据、可调用 episode 与证据阶梯}\par
+\smallskip
+\textbf{状态：}消费侧最小合同设计。本文规定数据与训练问题怎样登记、拆解和比较；
+不报告新的训练效果，不把历史 TAR 成绩转写为 Gen-5.x 成绩。
+现有可执行实现与本轮新增范围在第~\ref{sec:implementation} 节分别列明。
+
+\section{三层设计与当前参考探针}
+课程包应让不同 TabU 模型消费相同冻结数据、split、mask 与评估问题，独立替换编码、
+backbone 或 readout。它是 \code{tabu-lab/src/tabu_lab/curriculum} 下的\textbf{消费侧模块}，
+不新建仓库，不复制数据生成器。TFM-Data 继续拥有来源、world、纯数据供给与划分规则；
+TabU 拥有模型适配、训练、checkpoint 与模型结果。核心合同不导入 Torch 或具体模型。
+
+\textbf{A：不变语义。}来源与身份可追溯，模型可见证据和 scorer 真值分离；划分、比较条件、
+初始化与实际曝光明确；结论不超出证据。\par
+\textbf{B：可修订经验默认。}四阶段、8/120/120/12 表数、指标、mask 比例、预算和停止阈值
+来自当前问题与历史诊断，可以按新证据修订；应记录解析后的选择、假设和变化理由。\par
+\textbf{C：可替换部件。}生成器、数据来源、codec、模型、readout、trainer 与 scheduler
+通过显式合同组合。替换部件不应暗中改变 A 层，也不要求永远沿用 B 层。
+
+A 层的严格性服务于证据边界，而不是把研究过程写成机械流程。B 层除了可计量的默认值，
+也容纳暂时不能阈值化的研究判断；它们可以先作为带有条件和出处的观察保留，等待更多证据
+帮助澄清，而不必仓促伪装成统一规则。
+
+\paragraph{当前课程的朴素主线。}
+当前的方向先问一个很具体的问题：模型能否把一张训练表真正学会；随后才观察它能否在多张表上共同学习，
+以及规模增大、持续学习中的旧表保持和真实数据适配会带来什么新的困难。只有这些层面各自有相应证据时，
+未见表泛化才成为可以认真讨论的问题。这个主线用于组织问题和帮助定位失败，\textbf{不是}预先写死的执行
+顺序、表数门槛或自动升级规则；各探针如何组合、何时扩展、哪些现象值得长期记录，仍应随着新的证据保留为
+可修订的判断空间。
+
+\begin{center}\small
+\begin{tabularx}{\linewidth}{@{}p{24mm}YY@{}}\toprule
+参考探针 & 当前默认回答的问题 & 必须保留的界限 \\\midrule
+\code{fit8} & 八张合成表上的核心机制能否拟合 & 独立八模型与共享单模型须分开登记 \\
+\code{multi120} & 单组参数能否共同拟合 120 张合成表 & 固定训练表拟合不等于未见 world 泛化 \\
+\code{continual120} & 承接明确父权重后，能否学习严格分离的新 120 表 & 同时报告新表适应和旧表保留；继续旧表不算本阶段 \\
+\code{real12} & 十二张真实表的训练池拟合，以及冻结保留行预测 & 拟合与 scorer-only reserved $R^2$ 独立出具回执 \\\bottomrule
+\end{tabularx}
+\end{center}
+
+这些是\textbf{可组合的证据探针，不是强制线性 pipeline 或自动 checkpoint 链}。
+可单独选择、改变顺序、扩展阶段或建立 factorized ablation。每次指定初始化来源：随机初始化、
+weights-only 父权重或严格恢复。fit8 成功并不要求 multi120 必须承接其权重；历史 old120
+从随机初始化开始，不能补写为连续课程。若声称新表持续学习，则须绑定实际父 checkpoint
+及数据经历；不以父阶段的名字代替证据。旧表 replay 是单独的可调因素。
+
+\subsection{通过标准必须在实验前明确}
+每个探针登记问题、表集、预算、指标与阈值来源。manifest 被解析或校验通过不等于质量通过。
+未设质量阈值时，运行完成只记
+\code{completed}，不能记能力通过。训练池拟合指标可以回答容量诊断，不能挑选最终确认结果。
+对于已知、可比较的问题，是否进入上一级应由已有证据与预先说明的判断依据决定，不因更新次数
+耗尽自动升级。出现未预见的现象时，可先将其记为异常、未决问题或下一轮假设；不应为了填满
+通过/失败栏而临时重写解释或阈值。
+
+continual120 至少并列报告新表拟合变化与旧表退化。若记旧表损失为 $L_{\rm old}$，则
+\[
+\Delta L_{\rm old}=L_{\rm old}(\theta_{\rm after})-L_{\rm old}(\theta_{\rm before}).
+\]
+正值表示该固定诊断上的退化；其本身不能证明所有旧任务发生遗忘。换新数据时同时换优化器，
+无法仅将改善归因于课程。课程收益需另设曝光与预算匹配的 scratch、joint 或顺序对照。
+
+\newpage
+\section{冻结 catalog：身份先于表名}
+课程 manifest 引用原位冻结文件与已有 provenance，不搬运数据，不改写旧 manifest。
+一个目录名、cohort 标签或不同 seed 都不足以证明数据独立。
+
+\begin{center}\small
+\begin{tabularx}{\linewidth}{@{}p{34mm}Y@{}}\toprule
+身份层 & 最小记录与含义 \\\midrule
+版本与来源 & catalog schema/version、dataset ID、来源 kind、原 manifest 路径及 digest；生成器版本或真实 upstream snapshot；缺失项显式声明 \\
+冻结表 & 文件 URI/相对路径、原字节 SHA-256、表内容 fingerprint、typed schema；路径搬迁不改变数据身份 \\
+World / snapshot & 合成 world 的已有身份或真实来源快照；生成请求与 seed 的出处；不能从文件名制造 world 身份 \\
+表内 split & train/validation/reserved 原始行地址、split 规则与 seed（若有）、split digest；固定地址优先于重新随机切分 \\
+消费阶段 & cohort、使用用途、明确表列表、预期表数与父阶段；已观察 reserved 标记为 retrospective \\\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{三种不同的隔离}
+对于一张表的原始行地址集 $R$，要求
+\[
+R_{\rm train}\;\dot\cup\;R_{\rm validation}\;\dot\cup\;R_{\rm reserved}=R.
+\]
+地址唯一、合法、互斥且完整覆盖。此条件只证明\emph{表内行隔离}；不证明 world 或来源独立。
+自然缺失与人工隐藏另记，缺失值不得变成有监督目标。
+
+当一个新表探针声明严格分离时，必须相对于声明的前序训练表检查身份集合：表 ID 别名、原字节、
+规范化表内容和可获得的 world/snapshot 身份。首版内容哈希仅使用 values：保留列顺序，
+统一整数/浮点表示，对完整行排序后计算；排除 schema、split、格式空白和表名。
+因此相同 values 即使改变 schema 也会被保守拒绝；不声称检测列置换或任意变换。
+原始行顺序、类型和 split 地址另由来源字节与 split digest 绑定。
+相同 world 的新行应登记为同世界再采样，不能自动称为未见世界。
+
+分离结论必须注明证据层：\textbf{table-content-disjoint} 与
+\textbf{world-disjoint} 是两种声明。严格声明所需身份缺失时失败并报告缺项，
+不凭种子不同补足证明。旧数据缺少 world 身份时可保留表级诊断用途，但不能获得世界级独立标签。
+同一 cohort 内的重复也须显式去重或声明权重，避免别名让表数和训练曝光虚增。
+
+\subsection{版本与重放}
+manifest 的解析结果、数据与 split fingerprint、episode 配方、独立 seed streams
+共同确定课程身份。生成器、来源或 split 变化均生成新身份。原始字节哈希绑定版本，
+内容哈希辅助识别别名；二者不互相代替，也不单独证明 upstream 来源真实。
+
+校验器输出可读的\emph{缺失、冲突、已验证层次}，不重新生成一批相似数据填补历史缺口。
+读取 legacy 表需保留到原始行列的映射；TFM-Data 的数据 schema、历史 TAR typed JSON
+与模型输入对象分属不同合同，不因字段相近而隐式互换。
+
+\newpage
+\section{可调用 episode 与 scorer 真值边界}
+EpisodeFactory 接收冻结表引用、partition/purpose、episode index、配方与随机种子，
+返回分离的模型证据、目标地址、scorer 真值和无真值的 provenance receipt。
+核心接口描述语义；具体张量化与模型对象转换放在可选适配器。
+
+令 $\Obs$ 为自然观测 cell，$\Q\subseteq\Obs$ 为人工隐藏 Query，$\V=\Obs\setminus\Q$。
+当前全观测恢复默认请求 $T=\Obs$；目标集合与 state 权重属于可修改配方。
+V4 的 Query-only 与 V5 的 all-observed 目标不同，不能默认为相同任务：
+\[
+E_{\rm in}=\bigl(\mathrm{schema},\V,\Q,\{x_{ra}:(r,a)\in\V\}\bigr),
+\qquad T=\Obs,\qquad Y^\star=\{x_{ra}:(r,a)\in T\}.
+\]
+Query 和 Null 的 payload 在进入模型前物理擦除；隐藏值仅在 \code{TruthSidecar} 中保留。
+Forward、codec、支持选择与 readout 只接收 $E_{\rm in}$；真值在 scorer 与预测首次汇合。
+\[
+\widehat Y=F_\theta(E_{\rm in},T),\qquad
+\mathcal L=\mathrm{score}(\widehat Y,Y^\star).
+\]
+固定输入证据后替换 sidecar 真值，forward 必须不变。\code{detach()} 只处理梯度，不能替代隔离。
+
+\begin{center}\small
+\begin{tabularx}{\linewidth}{@{}p{34mm}Y@{}}\toprule
+接口对象 & 内容与允许的消费者 \\\midrule
+Episode request & 表与 split 身份、用途、index、recipe、seed namespace；由课程调度生成 \\
+模型证据与目标 & typed 可见值、visible/query/observed masks、目标地址；仅此部分给模型 \\
+Scorer truth & 原始观测真值与目标状态；只给 loss/evaluator，不放入一般 receipt \\
+Episode receipt & 数据/split/recipe 身份、实际行列映射、Query 地址、支持计数、有效 seed 与拒绝原因；不含隐藏值 \\\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{独立随机性与可复现性}
+把模型初始化、表顺序、窗口、mask、离散编码和评价分成独立 streams。
+生成器与 split 的 seed 属于数据 provenance，不挤进训练 RNG。一次事件可寻址为
+\[
+\xi_k=H(s_k,\mathrm{stage},\mathrm{table},\mathrm{partition},\mathrm{index},\mathrm{purpose}).
+\]
+命名固定 probe 使用固定 namespace，不随训练 update 重抽。receipt 记录实际地址与种子，
+窗口可重放不等于全行覆盖。恢复接续绝对 cursor，不重新从首个 episode 抽样。
+
+\subsection{共享任务语义与模型专属数值编码}
+每列支持数、类别覆盖、Query 比例和目标集合是任务规则，必须显式记录。
+若配方声明精确 Query 预算，则本适配器在无法满足时整次 episode 失败；其他接受、拒绝或
+再采样政策可替换，但须显式记录，不能静默缩小 loss 或删除难例。
+numeric tail guard 是改变问题的配方因素，默认关闭；reserved evaluation 禁止据标签筛难例。
+median/half-IQR 等统计只能由 episode-visible 证据计算，并在该 episode 的编码、scorer、
+decode 中一致使用。编码维度、基函数与 LL/NW 选择归模型配置，不固化到课程核心。
+
+\newpage
+\section{真实保留评估、因素分解与回执}
+\subsection{real12：训练拟合与 reserved \texorpdfstring{$R^2$}{R2} 分开}
+训练仅从 train 池构造 restoration episode。冻结评价时隐藏 reserved 的全部目标列，
+目标真值只交 scorer。若 reserved 的其他特征可见，必须标记 transductive；
+单条 Query 与联合 Query 是不同协议。已反复查看或用于选模型的历史 reserved 只能作为
+retrospective 诊断；需要新的、明确未接触确认集才能重获最终确认含义。
+
+对表 $t$ 的固定数值目标地址 $Q_t$，
+\[
+R_t^2=1-\frac{\sum_{i\in Q_t}(y_i-\hat y_i)^2}
+{\sum_{i\in Q_t}(y_i-\bar y_t)^2},
+\qquad \bar y_t=\frac{1}{|Q_t|}\sum_{i\in Q_t}y_i.
+\]
+保留逐表 $R_t^2$、目标数、分母与失败状态；分母为零时报告 undefined。
+宏平均必须同时给出有效表数和缺失原因，不能静默跳过失败表后称为完整 real12。
+分类表另报适当指标，不把编码 MSE 替代原值 $R^2$。
+
+\subsection{可替换因素的边界}
+\begin{center}\small
+\begin{tabularx}{\linewidth}{@{}p{28mm}YY@{}}\toprule
+因素 & 课程/数据合同 & 模型或执行合同 \\\midrule
+数据供给 & 表集、来源版本、split、world 关系 & 不控制生成器或重新抽取数据 \\
+任务 & mask、窗口、目标、支持与类别覆盖、probe & 编码、backbone、LL/NW、损失实现 \\
+调度 & cohort 权重、顺序、replay、stage 选择 & optimizer、学习率、精度、设备、batch \\
+证据 & 前后固定探针、隔离范围、预注册停止规则 & 父 checkpoint、实际更新与耗时、运行失败 \\\bottomrule
+\end{tabularx}
+\end{center}
+完整实验组合两侧配置并绑定身份；修改任意影响执行的因素形成新比较身份。
+多因素同时变化可作为实用方案，但不能归因于某个单一因素。
+
+\subsection{最小结果语义与停止推进规则}
+一次 receipt 至少含 schema/version、课程与数据身份、model/source/config 身份、
+父 checkpoint、stage/question、实际曝光、预算、状态、逐表指标、原始产物引用与 digest。
+\code{planned}、\code{completed}、\code{stopped}、\code{failed} 和质量 verdict 分开；
+实现检查通过、短 fit、保留评价与可泛化能力分别陈述。
+
+训练停在预注册 updates/time 上限、数值失败、数据身份漂移或阶段质量停止条件。
+失败保留最后有效 checkpoint 与 terminal receipt；不自动延长预算或改阈值寻找通过。停止一条
+路线并不否定其所有价值：负结果、异常模式和暂时无法归因的变化也应与其上下文一同保留，
+成为后续研究判断的材料，而非被当作噪声抹去。
+训练池 fit gate 只能认证该层拟合；validation 可以参与选型；final reserved 不能驱动调参。
+严格 resume 恢复 optimizer/RNG/cursor；weights-only 初始化另建身份，不能伪装成 resume。
+
+\newpage
+\section{既有执行器与本轮最小实现边界}\label{sec:implementation}
+\subsection{先复用已存在的 V5.3 工作}
+当前 \code{tabu-lab} 已有独立 \code{curriculum_v53}，由提交 \code{3266d1b}
+引入并在 \code{6293e95} 合并。它提供数据 SHA 校验、严格行划分、六路 seed、
+manifest 调度、固定 probe、FP64 本地 runner、原子 checkpoint 与严格恢复。
+其 \code{data/protocol/runner/evaluation} 直接依赖 V5.3；这是一条模型专属执行路径，
+不能直接称为跨模型课程包。其源码身份和历史恢复语义保持原样。
+
+现有实现保护训练行与 scorer truth 的边界，但 cohort 名称不证明新表独立：
+表条目目前只检查 ID 唯一，允许相同数据字节以不同别名加入 old/new。
+现有调度测试也刻意复用同一微型表来验证 120 表轮换。这是调度测试，不能拿来证明数据分离。
+本轮最小合同优先补齐\textbf{冻结 catalog、跨集合分离、阶段选择及公共 request/receipt}，
+不再制造第二套训练器。
+
+\subsection{本轮最小公开接口}
+\begin{center}\small
+\begin{tabularx}{\linewidth}{@{}p{44mm}Y@{}}\toprule
+接口 & 边界 \\\midrule
+\code{bind_table} & 校验预期文件 SHA，绑定表、cohort、kind 与 provenance，返回冻结 \code{BoundTable} \\
+\code{bind_legacy_corpus} & 引用已有 corpus manifest，保留其 SHA、record、seed 与可用 world 身份 \\
+\code{require_disjoint} & \code{level=table} 校验 bytes/content 及已知 world 冲突；\code{level=world} 另要求身份完整 \\
+\code{select_stage} & 通用阶段选择：任意 name/question，可选 expected count、kind、previous、separation level 与 reserved 要求 \\
+\code{reference_stage} & 提供 fit8/multi120/continual120/real12 的当前参考默认；允许显式覆盖并记录解析后的选择 \\
+\code{EpisodeRequest} & 配方、index、partition/purpose 与 masks/codes/windows/evaluation 种子；不混入模型配置 \\
+\code{V53EpisodeFactory} & 可选 lazy bridge，复用现有 \code{load_table/build_episode}，返回 inputs/request/truth/audit \\\bottomrule
+\end{tabularx}
+\end{center}
+上述接口属于 \code{tabu_lab.curriculum}。其中 catalog/阶段对象是纯 metadata，
+EpisodeFactory 为调用合同；V5.3 依赖只在可选 bridge 进入。API 接收当前已有 provenance，
+不会因字段被填写就证明 upstream 来源正确。
+
+\subsection{实现约束与后续验收}
+核心不加载模型，不执行 optimizer，不生成数据，不暴露 reserved 真值。
+适配器显式复用已有 mask/episode 实现；不修改原 runner 的源码哈希或恢复协议。
+模块验收覆盖别名/内容/world 冲突、split 重叠、seed 重放、缺失 provenance、
+显式数量/用途、自定义阶段与默认覆盖、隐藏值隔离，以及核心 import 不加载 Torch/模型。
+这些检查不构成训练成功。TFM-Data 持续供给、世界级训练/确认接入、GPU/大表与分布式执行
+需独立验证；本轮不训练、不移动数据、不改历史记录。
+
+结果 schema、自动质量 gate 和停止调度在本文中是建议合同，\textbf{本轮没有另写执行器}。
+此 metadata wedge 不证明任意第三方 factory 都正确实现隔离；具体 adapter 仍需 truth
+替换不影响 forward 的测试。现有 V5.3 adapter 不能直接装载 legacy TAR checkpoint。
+它支持的 recipe 种类只是本轮实现范围，不是对未来课程或其他模型的通用限制。
+首版可解析认证的 world 身份来自既有 legacy corpus record；其他来源的 provenance
+仍属引用与声明，不能仅靠自填不同 ID 通过严格 world 分离。
+
+\newpage
+\section{历史证据带来的具体设计选择}
+下表列出已存在的原始回执所支持的有限结论；不用于构造 V4 与 Gen-5.x 的等预算排名。
+原始 archive/research-proposals 路径均相对 TabU 项目根，\code{docs/} 与 \code{src/}
+路径则相对嵌套 \code{tabu-lab}。数据和 checkpoint 均原位引用。
+
+\begin{center}\small
+\begin{tabularx}{\linewidth}{@{}p{23mm}YY@{}}\toprule
+历史诊断 & 记录中已观察到的结果 & 对课程合同的直接要求 \\\midrule
+V4 八表独立拟合 & 八个模型各 1,024 updates；76 行训练池；数值 NMSE 约 0.00145--0.01582，XOR 100\% & 不能把八个独立模型叫作共享 fit8；不预填任意近零阈值 \\
+V4 old120 & train768 为 768 rounds / 92,160 updates；固定训练行；median NMSE 约 0.03824 & rounds 和 updates 并存；固定训练拟合不能充当 reserved 结果 \\
+V4 新表无 replay & 3,840 updates 后新表 median accuracy 60.48\% 至 90.99\%；旧表 99.26\% 至 80.88\% & 新表适应与旧表保留必须并列；仅新表改善不算完整持续学习结论 \\
+历史 real12 & legacy TAR reserved macro $R^2\approx0.76006$；后续 Restoration 全宽 continuation 约 0.65101 & 历史 reserved 已被观察，只能 retrospective；模型、目标和训练历程并不匹配 \\\bottomrule
+\end{tabularx}
+\end{center}
+
+\begingroup\raggedright
+八表记录来自 \path{archive/tar-unified-synthetic-nearzero-20260907/REPORT.md}；
+old120 来自 \path{archive/tar-diverse-120-fit-20260907/train768.REPORT.md}；
+新表与保留变化来自 \path{archive/tar-new120-muon-20260908/REPORT.md}。
+该新表实验还记录无 values、retry seed window 与可用机制身份重叠的 corpus audit，
+支持把\emph{实际身份审计}设为 continual120 的必需输入，而非依赖不同表名。
+\par\endgroup
+
+本轮消费侧 metadata 审计核对 old/new 共 240 张表的文件 SHA 并通过表内容分离检查；
+其中 96 张可由当前解析器认证 \code{world_hash}，144 张未取得这一层证明，严格 world
+分离因此不通过。这只说明当前解析范围，不能推断原始来源没有其他机制身份。
+
+real12 数字来自 \path{research-proposals/restoration-real12-rescue-20260917/REPORT.md}
+的 2026-09-18 effective-direction continuation terminal result；该节同时记录
+train macro $R^2$ 为 0.7330293、legacy 参照为 0.7541652。训练改善没有同步提高 reserved，
+所以两类结果必须分开报告。现有证据不支持只凭数字差异归因于某一编码或 readout 改动。
+
+保留原实验名称、source revision、命令、数据与 checkpoint 身份，并登记证据用途。
+新课程配置只引用旧数据与回执；历史 8/120/12 的结果不能被追溯写成一个已证明有效的统一课程。
+Gen-5.x 的编码与预测结构变化归模型设计记录，课程核心不借版本号改变 restoration 任务。
+当前 V5.3 新训练效果尚未在本规范中核验，不从本地 runner 资格推断其训练成功。
+
+\subsection{可核查的当前来源}
+\begin{itemize}\small
+\item TabU 项目 \code{README.md} 第 7、127 行及 TFM-Data \code{data-contract.md}：数据供给与模型消费归属。
+\item \code{docs/tutorials/v53-curriculum.md}：现有 runner 的 probe、seed、初始化与恢复语义。
+\item \code{docs/reviews/v53-curriculum-20260919/README.md}：已记录的本地执行资格与限制；本文未重跑训练。
+\item \code{src/tabu_lab/curriculum_v53/data.py}、\code{protocol.py}；
+      \code{tests/unit/curriculum_v53/test_protocol.py}：当前数据/split 校验与调度测试。
+\item \code{src/tabu_lab/models/restoration/contracts.py}：物理擦除隐藏值、完整观测目标与 TruthSidecar。
+\end{itemize}
+\end{document}

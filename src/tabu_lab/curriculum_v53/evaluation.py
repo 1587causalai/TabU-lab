@@ -55,6 +55,8 @@ def _finish(cells, columns):
                 "discrete_encoding_mse": mean([item["encoding"] for item in items])
                 if not numeric
                 else None,
+                "ordinal_rank_mae": mean([item["rank_ae"] for item in items])
+                if columns[column].kind == "ordinal" else None,
             }
         selected = [value for key, value in per_column.items() if key.startswith(state + "/")]
         for metric in (
@@ -64,6 +66,7 @@ def _finish(cells, columns):
             "numeric_normalized_mse",
             "discrete_accuracy",
             "discrete_encoding_mse",
+            "ordinal_rank_mae",
         ):
             result[f"{state}_{metric}"] = mean([item[metric] for item in selected])
         result[f"{state}_unique_targets"] = sum(item["unique_targets"] for item in selected)
@@ -105,6 +108,7 @@ def evaluate_probe(model, plan, probe, device, *, deadline=None):
                     evaluation=True,
                     partition=probe["partition"],
                     epsilon=plan.config.epsilon,
+                    codec_version=plan.config.codec_version,
                 )
                 score = score_prepared_episode(
                     model, prepare_episode(model, inputs, request, truth), decode=True
@@ -120,13 +124,18 @@ def evaluate_probe(model, plan, probe, device, *, deadline=None):
                     predicted = column.decoded.detach().cpu().tolist()
                     raw = expected.detach().cpu().tolist()
                     states = truth.states[rows, column.column].cpu().tolist()
+                    spec = table.schema[column.column]
+                    rank = ({label: index / max(spec.domain_size - 1, 1)
+                             for index, label in enumerate(spec.order or range(spec.domain_size))}
+                            if spec.kind == "ordinal" else None)
                     for j, row in enumerate(rows.cpu().tolist()):
                         label = "query" if states[j] == 1 else "retained"
                         address = int(info["row_ids"][row])
                         key = (label, column.column, address)
                         item = cells.setdefault(
                             key,
-                            dict(visits=0, encoding=0.0, sse=0.0, ae=0.0, correct=0.0, truth=0.0),
+                            dict(visits=0, encoding=0.0, sse=0.0, ae=0.0, correct=0.0,
+                                 truth=0.0, rank_ae=0.0),
                         )
                         numeric = table.schema[column.column].kind == "numeric"
                         item["visits"] += 1
@@ -137,6 +146,8 @@ def evaluate_probe(model, plan, probe, device, *, deadline=None):
                             item["truth"] += raw[j]
                         else:
                             item["correct"] += int(predicted[j] == raw[j])
+                            if rank is not None:
+                                item["rank_ae"] += abs(rank[predicted[j]] - rank[raw[j]])
                         if label == "query":
                             query_addresses.add((address, column.column))
                     query_rows = rows[truth.states[rows, column.column] == 1]
@@ -183,7 +194,12 @@ def evaluate_probe(model, plan, probe, device, *, deadline=None):
             "macro": macro,
             "by_table": reports,
             "aggregation": "mean squared errors per address; equal columns; equal tables",
-            "numeric_normalization": "each episode's forward-visible median/half-IQR codec",
+            "codec_version": plan.config.codec_version,
+            "numeric_normalization": {
+                "zscore": "each episode's forward-visible mean/population-std codec",
+                "median_half_iqr": "each episode's forward-visible median/half-IQR codec",
+            }[plan.config.numeric_scaling],
+            "ordinal_rank_metric": "absolute error of decoded normalized declared rank",
             "claim_boundary": "training-row masked fit"
             if probe["partition"] == "train"
             else "supervised heldout rows; heldout predictors are visible (transductive)",
