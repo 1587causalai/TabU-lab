@@ -11,6 +11,7 @@ from tabu_lab.experiments import (
 
 
 def test_query_row_classical_icl_requires_optional_xgboost() -> None:
+    pytest.importorskip("sklearn")
     pytest.importorskip("xgboost")
     result = run_query_row_classical_icl_benchmark(
         seed=1729,
@@ -46,6 +47,7 @@ def test_query_row_classical_icl_requires_optional_xgboost() -> None:
 
 
 def test_query_row_classical_icl_declares_no_accepted_claim() -> None:
+    pytest.importorskip("sklearn")
     pytest.importorskip("xgboost")
     result = run_query_row_classical_icl_benchmark(
         seed=1730,
