@@ -1,5 +1,6 @@
 """V5.3 reference implementation; distinct from historical Restoration/TAR."""
 
+from ..restoration.backbone import BackboneConfig
 from ..restoration.contracts import (
     ColumnSchema,
     RestorationInput,
@@ -16,7 +17,6 @@ from .answers import (
 )
 from .codec_versions import CODEC_VERSIONS, DEFAULT_CODEC_VERSION
 from .encoding import AffineNumericAnswers
-from .geometry import BackboneConfig
 from .model import V53Config, V53Model
 from .readout import FeatureSlopeProvider
 from .training import (

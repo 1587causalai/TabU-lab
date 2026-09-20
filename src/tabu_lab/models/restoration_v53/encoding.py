@@ -8,7 +8,6 @@ from dataclasses import dataclass
 import torch
 from torch import Tensor, nn
 from torch.nn import functional as F
-from torch.nn.utils import parametrize
 
 from ..restoration._validation import finite, matrix, positive
 from ..restoration.answers import CategoricalAnswers, NumericAnswers
@@ -25,7 +24,6 @@ from .answers import (
     unit_gaussians,
 )
 from .codec_versions import CODEC_VERSIONS, DEFAULT_CODEC_VERSION
-from .geometry import INPUT_PROJECTIONS, QRIsometry
 
 
 @dataclass(frozen=True)
@@ -91,8 +89,7 @@ class AffineValueEncoder(nn.Module):
     """Shared bias-free W_enc; default typed input and answer lifts coincide."""
 
     def __init__(self, width: int = 128, epsilon: float = 1e-6, *,
-                 codec_version: str = DEFAULT_CODEC_VERSION, numeric_scaling: str = "zscore",
-                 input_projection: str = "isometric_qr"):
+                 codec_version: str = DEFAULT_CODEC_VERSION, numeric_scaling: str = "zscore"):
         super().__init__()
         if type(width) is not int or width < ANSWER_WIDTH:
             raise ValueError("carrier width must be at least 128")
@@ -101,31 +98,15 @@ class AffineValueEncoder(nn.Module):
             raise ValueError("unknown V5.3 codec version")
         if numeric_scaling not in ("zscore", "median_half_iqr"):
             raise ValueError("unknown numeric scaling")
-        if input_projection not in INPUT_PROJECTIONS:
-            raise ValueError("unknown input projection")
         self.width, self.epsilon = width, epsilon
         self.codec_version, self.numeric_scaling = codec_version, numeric_scaling
-        self.input_projection = input_projection
         self.projection = nn.Linear(ANSWER_WIDTH, width, bias=False)
         with torch.no_grad():
             q, _ = torch.linalg.qr(torch.randn(width, ANSWER_WIDTH), mode="reduced")
-            self.projection.weight.copy_(q / 8 if input_projection == "legacy_scaled" else q)
-        if input_projection == "isometric_qr":
-            parametrize.register_parametrization(self.projection, "weight", QRIsometry())
+            self.projection.weight.copy_(q / 8)
         self.cell_seed = nn.Parameter(torch.randn(width) / math.sqrt(width))
         self.unit_seed = nn.Parameter(torch.randn(width) / math.sqrt(width))
         self.feature_seed = nn.Parameter(torch.randn(width) / math.sqrt(width))
-
-    @torch.no_grad()
-    def validate_projection(self):
-        weight = self.projection.weight
-        finite(weight, "input projection")
-        if self.input_projection == "isometric_qr":
-            identity = torch.eye(ANSWER_WIDTH, device=weight.device, dtype=weight.dtype)
-            error = torch.linalg.vector_norm(weight.T @ weight - identity)
-            tolerance = 32 * math.sqrt(self.width) * torch.finfo(weight.dtype).eps
-            if not bool(error <= tolerance):
-                raise FloatingPointError("input projection failed its isometry tolerance")
 
     @torch.no_grad()
     def prepare(self, inputs: RestorationInput) -> tuple[V53ColumnFacts, ...]:

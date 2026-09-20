@@ -29,8 +29,8 @@ The earlier 2026-09-20 Gaussian-default snapshot had SHA256
 `8d4ba6b21d0dd8d9395fd2bbaf72c1260e19386f04d8debe09cf12cafc3688e2`.
 The earlier combinatorial-default source snapshot had SHA256
 `b4ff4d612b2d577548930839ed88b1c8c87ab327c751b4ae634f4f71e04dfd2b`.
-The small-presence/isometric-input revision has SHA256
-`d5436f057f2781b6403e58b87a7de7addaf854bd3445565d1a3f54240cd170b4`.
+The current source snapshot has SHA256
+`6b8e72d6276bf7a207b7ba524a3f2a073ce93678fa64c2037388d08e611c3a29`.
 Main Steps 1–5 are the contract: raw constant-weight compositional coding is
 the default, while unit-Gaussian coding is an explicitly selected comparison
 mode; historical mechanisms require explicit opt-in.
@@ -44,8 +44,8 @@ this file must not be used to infer a newer default from an older snapshot.
 | Numeric value space | Visible z-score with epsilon floor; $e=q_a+zb_a$ for input and answer. Gaussian unit bases or two distinct raw 128/4 bases |
 | Nominal values | One unit Gaussian or raw 128/8 identity per visible category; scorer rejects hidden classes lacking a visible code |
 | Ordinal values | $e=q_a+r_a(c)b_a$: one shared affine line per column. The default uses unit Gaussian or raw 128/4 base/direction vectors; the complete declared rank domain is fixed before scoring |
-| Input projection | Shared bias-free $W_{\rm enc}$, unscaled thin QR initialization and isometric QR parameterization throughout training; single shared Cell/Unit/Feature seeds |
-| Backbone | Existing `AxialBackbone`: column collect/read, then direct row; default 256 slots, width 128, V5.3 presence threshold $10^{-6}$; direct-axis control remains configurable |
+| Input projection | Shared learned bias-free $W_{\rm enc}$, initialized with $Q/8$; single shared Cell/Unit/Feature seeds |
+| Backbone | Existing `AxialBackbone`: column collect/read, then direct row; default 256 slots, width 128, V5.3 presence threshold $1$; direct-axis control remains configurable |
 | Unit refinement | `unit_layers=0` is exact identity; positive depth uses OMAB with `visible.any(-1)` eligibility and does not write back Cells/Features |
 | Regression geometry | `regression_width=None` is identity; explicit width enables learned bias-free $P_R$ |
 | Column-shared LL | `readout.py`: all $N$ current Units as centers, $\pi_r=1/N$; one FP64 Cholesky factorization per requested supported column |
@@ -160,53 +160,24 @@ previous training objective also requires `old_loss`.
 field rather than treating an old configuration as the new default. A model
 state dictionary also records `_codec_signature`, and loading rejects a
 conflicting signature even with `strict=False`. Unversioned historical weights
-require both the explicit historical codec and the input-geometry selection
-below. This is codec compatibility, not permission to treat a changed codec or
+require the explicit historical codec. This is codec compatibility, not permission to treat a changed codec or
 data population as a strict optimizer resume. Record the full config,
 `code_seed`, schema, data/mask identity and source revision with experiment
 artifacts; prepared tensors are recreated from that visible episode.
 
-## Input isometry and presence scale
+## Shared input layer and presence scale
 
-V5.3's exported `BackboneConfig` defaults to `tau_presence=1.0`, making a
-unit-norm readout the half-participation point. The historical
-`restoration.backbone.BackboneConfig` retains the same default. The existing
-presence function and its independently learned readouts are unchanged. A
-smaller threshold such as `1e-6` is an explicit ablation rather than the
-default. The reference mass, norm epsilon, matching bandwidth, loss and clip
-threshold are independent settings and are not rescaled by this choice.
+The input layer is an ordinary bias-free `nn.Linear(128, width)`, initialized
+with $Q/8$ from the thin QR decomposition of a seeded Gaussian matrix, as in
+the frozen `v53-c1-combinatorial-20260920` source. The optimizer directly learns
+`encoder.projection.weight`. Visible inputs must produce finite, nonzero
+carriers. Codecs, answer spaces and decoder rules are independent of this
+learned input map.
 
-`input_projection="isometric_qr"` is the new default. Its effective matrix obeys
-$W_{\rm enc}^{\top}W_{\rm enc}=I_{128}$ for both square and tall matrices. A
-PyTorch parameterization maps the optimizer's full-rank coordinate matrix to
-the positive-diagonal thin QR factor. Therefore a plain AdamW step, the existing
-mixed Muon/AdamW optimizer, or checkpoint loading cannot silently release the
-isometry constraint. The raw coordinates are stored under
-`encoder.projection.parametrizations.weight.original`; `projection.weight`
-is the computed isometric matrix, not a separately updated parameter. The
-curriculum's existing optimizer partition keeps these coordinates in the
-non-decayed AdamW group, including after switching backbone weights to Muon.
-
-The encoder computes that matrix once per forward. Nonfinite or numerically
-rank-deficient coordinates fail explicitly. The runner validates the effective
-Gram matrix after each update, and checkpoint loading validates it again.
-This preserves raw codec energy (e.g. nominal C energy eight), not a unit-norm
-normalization of all values. No gradient-clip or fit improvement follows solely
-from this algebraic property; matched measurements are required.
-
-Historical replay must explicitly set `input_projection="legacy_scaled"`
-and the saved `backbone.tau_presence` (original default 1), alongside its codec
-and loss. That mode retains the original unscaled-parameter storage and $Q/8$
-initialization. `from_dict` requires explicit input geometry and presence
-identity; new curriculum manifests resolve and record both defaults. State
-dictionaries record `_geometry_signature`, rejecting different projection or
-presence configurations even with `strict=False`. Older states without that
-signature are accepted only in the explicitly selected legacy projection
-mode. A new parameterization is not a strict resume of old optimizer state.
-
-The QR implementation has CPU float32/float64 tests. Each accelerator must pass
-the existing device preflight; these checks do not qualify a CUDA/MPS backend
-or replace the separate FP32 readout compatibility work.
+`BackboneConfig` defaults to `tau_presence=1.0`, making a unit-norm readout
+the half-participation point. Presence readouts remain independently learned;
+reference mass, norm epsilon, matching bandwidth and clipping are separate
+settings. Formal runs record the full model and optimizer configuration.
 
 ## Feature slope extension seam
 
@@ -297,40 +268,7 @@ results. Earlier implementation snapshots and their validation notes remain in
 Git history. Adding rows changes the LL center population and is not promised
 to preserve existing slopes or predictions.
 
-### Input geometry validation, 2026-09-20
-
-The updated geometry passed **591 tests** across V5.3, its curriculum,
-historical restoration and the curriculum catalog; Ruff and diff checks passed.
-Coverage includes float32/float64 square/tall isometries after ordinary AdamW
-updates, QR finite differences, rank-deficient/nonfinite failure, exact
-AdamW/Muon checkpoint continuation, and projection/presence identity rejection.
-
-`examples/v53_gradient_audit.py` compares all four combinations of old/new
-projection and old/small presence threshold. The recorded CPU FP64 audit used
-three existing C1 tables, 32 updates per combination, the same masks/codecs,
-matched initial parameters outside the projection, and four fixed train-row
-evaluation masks. Learning rate, loss weights and clipping threshold **1**
-were held fixed. The compact receipt includes all 384 update losses and norms,
-episode hashes, source identity and the two subsequent cosmetic source diffs:
-[`v53-input-geometry-20260920.json`](../research/v53-input-geometry-20260920.json).
-
-| Table | Old median gradient norm | New default | Old/new median retained gradient fraction |
-|---|---:|---:|---:|
-| discoscm_048 | 64.06 | 8.97 | 1.57% / 11.15% |
-| xor_classification | 125.60 | 13.27 | 0.80% / 7.54% |
-| linear_numeric | 146.19 | 15.59 | 0.69% / 6.42% |
-
-These are the global optimizer gradient norms in each parameterization, not a
-parameterization-invariant sensitivity measure. Clipping remained active on
-**100% of updates** at threshold 1. Thus the change reduced the measured
-gradient magnitude and severity of clipping by about 7–9 times; it did not
-resolve the frequency of clipping. The small-threshold-only control did not
-consistently improve norms, and isometry with tau=1 had smaller norms than
-the new default in this short audit. The chosen small threshold expresses
-the intended presence semantics; it is not an empirically optimal setting.
-
-The new default's fixed-probe numeric NMSE changed from 1.0874 to 1.0673,
-1.0858 to 1.0751, and 1.1163 to 1.1123, respectively. These short runs do not
-establish useful fitting capacity, categorical improvement, long-run stability
-or generalization. Loss normalization and any threshold calibration remain
-separate questions; neither was silently changed to reduce the clipping count.
+The current V5.3 model, curriculum and catalog checks pass **202 tests**.
+Coverage includes learning input amplitude, exact AdamW/Muon continuation,
+current codec behavior and `tau_presence=1`. Against the frozen source,
+all input-layer tensors and RNG state match for two widths and two seeds.

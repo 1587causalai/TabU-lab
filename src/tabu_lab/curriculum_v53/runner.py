@@ -126,7 +126,6 @@ def train_step(model, optimizer, plan, table, recipe, index, device, loss_config
     )
     post_norm = torch.linalg.vector_norm(torch.stack([p.grad.norm() for p in parameters]))
     optimizer.step()
-    model.encoder.validate_projection()
     if not finite_state(model.state_dict()) or not finite_state(optimizer.state_dict()):
         raise FloatingPointError("nonfinite parameters/optimizer; last valid checkpoint retained")
     return {

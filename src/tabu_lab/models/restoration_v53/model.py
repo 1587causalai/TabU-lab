@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import struct
 from dataclasses import asdict, dataclass, field
 
 import torch
@@ -11,14 +10,13 @@ from torch import Tensor, nn
 from ..restoration._packing import column_positions
 from ..restoration._prepared import TensorVersions
 from ..restoration._validation import finite, positive
-from ..restoration.backbone import OMAB, AxialBackbone
+from ..restoration.backbone import OMAB, AxialBackbone, BackboneConfig
 from ..restoration.contracts import RestorationInput, RestorationRequest
 from ..restoration.encoding import EncodingLayout, prepare_features
 from ..restoration.model import ColumnPrediction
 from ..restoration.readout import EncodedRestoration
 from .codec_versions import CODEC_IDS, DEFAULT_CODEC_VERSION
 from .encoding import ANSWER_WIDTH, AffineValueEncoder, V53ColumnFacts
-from .geometry import INPUT_PROJECTIONS, BackboneConfig
 from .readout import FeatureSlopeProvider, evaluate_column, shared_slope
 
 
@@ -34,7 +32,6 @@ class V53Config:
     slope_source: str = "shared_ll"
     codec_version: str = DEFAULT_CODEC_VERSION
     numeric_scaling: str = "zscore"
-    input_projection: str = "isometric_qr"
 
     def __post_init__(self):
         if self.backbone.width < ANSWER_WIDTH:
@@ -55,8 +52,6 @@ class V53Config:
             raise ValueError("unknown V5.3 codec version")
         if self.numeric_scaling not in ("zscore", "median_half_iqr"):
             raise ValueError("unknown numeric scaling")
-        if self.input_projection not in INPUT_PROJECTIONS:
-            raise ValueError("unknown input projection")
 
     def as_dict(self):
         return asdict(self)
@@ -68,11 +63,6 @@ class V53Config:
             raise ValueError(
                 "V5.3 config lacks codec identity; historical configs require explicit "
                 "codec_version='legacy_v53', numeric_scaling='median_half_iqr'"
-            )
-        if "input_projection" not in values or "tau_presence" not in values.get("backbone", {}):
-            raise ValueError(
-                "V5.3 config lacks input geometry identity; historical configs require explicit "
-                "input_projection='legacy_scaled' and the original backbone.tau_presence"
             )
         values["backbone"] = BackboneConfig(**values["backbone"])
         return cls(**values)
@@ -116,17 +106,10 @@ class V53Model(nn.Module):
         self.encoder = AffineValueEncoder(
             config.backbone.width, config.epsilon, codec_version=config.codec_version,
             numeric_scaling=config.numeric_scaling,
-            input_projection=config.input_projection,
         )
         self.register_buffer("_codec_signature", torch.tensor([
             CODEC_IDS[config.codec_version],
             {"median_half_iqr": 0, "zscore": 1}[config.numeric_scaling],
-        ], dtype=torch.long))
-        # Encode the binary64 threshold as integer bits so .float()/.double()
-        # cannot round the checkpoint identity (also avoids MPS float64 buffers).
-        self.register_buffer("_geometry_signature", torch.tensor([
-            INPUT_PROJECTIONS[config.input_projection],
-            struct.unpack("q", struct.pack("d", config.backbone.tau_presence))[0],
         ], dtype=torch.long))
         self.backbone = AxialBackbone(config.backbone)
         self.unit_blocks = nn.ModuleList(OMAB(config.backbone) for _ in range(config.unit_layers))
@@ -135,25 +118,10 @@ class V53Model(nn.Module):
             else nn.Linear(config.backbone.width, config.regression_width, bias=False)
         )
         self.feature_slope = feature_slope
-        self.register_load_state_dict_post_hook(self._validate_loaded_geometry)
-
-    def _validate_loaded_geometry(self, module, incompatible_keys):
-        self.encoder.validate_projection()
 
     def _load_from_state_dict(
         self, state_dict, prefix, local_metadata, strict, missing_keys, unexpected_keys, error_msgs,
     ):
-        geometry_key = prefix + "_geometry_signature"
-        geometry = state_dict.get(geometry_key)
-        if geometry is None:
-            if self.config.input_projection != "legacy_scaled":
-                error_msgs.append("checkpoint lacks input geometry identity; select explicit "
-                                  "legacy_scaled with the original tau_presence")
-            else:
-                state_dict[geometry_key] = self._geometry_signature.detach().clone()
-        elif not torch.equal(geometry.cpu(), self._geometry_signature.cpu()):
-            error_msgs.append("checkpoint input geometry identity does not match model config")
-            state_dict[geometry_key] = self._geometry_signature.detach().clone()
         key = prefix + "_codec_signature"
         signature = state_dict.get(key)
         if signature is None:
