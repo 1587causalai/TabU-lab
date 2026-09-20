@@ -28,16 +28,7 @@ class QRIsometry(nn.Module):
 
     def forward(self, raw: Tensor) -> Tensor:
         finite(raw, "input projection coordinates")
-        # MPS currently has no ``aten::linalg_qr.out`` implementation.  Keep
-        # the geometry definition identical by running only this small,
-        # deterministic factorization on CPU and copying the differentiable
-        # result back to MPS.  ``Tensor.to`` retains the autograd path, so the
-        # unconstrained coordinates still receive gradients from the MPS
-        # training step.  Other devices stay on their native QR path.
-        qr_input = raw.to("cpu") if raw.device.type == "mps" else raw
-        q, r = torch.linalg.qr(qr_input, mode="reduced")
-        if raw.device.type == "mps":
-            q, r = q.to(raw.device), r.to(raw.device)
+        q, r = torch.linalg.qr(raw, mode="reduced")
         diagonal = r.diagonal()
         floor = torch.finfo(raw.dtype).eps * torch.linalg.vector_norm(raw)
         if bool((diagonal.abs() <= floor).any()):
