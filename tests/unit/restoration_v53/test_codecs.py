@@ -249,6 +249,6 @@ def test_numeric_diversity_rejected_before_forward_but_constant_inference_remain
     torch.testing.assert_close(model(inputs, request).columns[0].decoded,
                                torch.full((3,), 7.0).double())
     with torch.no_grad():
-        model.encoder.projection.weight.fill_(float("nan"))
+        next(model.encoder.projection.parameters()).fill_(float("nan"))
     with pytest.raises(ValueError, match="two distinct"):
         score_episode(model, inputs, request, truth)

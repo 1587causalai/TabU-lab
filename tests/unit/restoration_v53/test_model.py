@@ -200,7 +200,7 @@ def test_preflight_rejects_missing_codes_and_partial_training_before_network():
     inputs, request, truth = example_episode()
     model = V53Model(config()).double()
     with torch.no_grad():
-        model.encoder.projection.weight.fill_(float("nan"))
+        next(model.encoder.projection.parameters()).fill_(float("nan"))
     with pytest.raises(ValueError, match="all original observations"):
         score_episode(model, inputs, RestorationRequest(request.targets[:2]), truth)
     schema = (inputs.schema[0], ColumnSchema("category", "nominal", 4), inputs.schema[2])
