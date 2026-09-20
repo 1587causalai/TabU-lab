@@ -120,11 +120,18 @@ def evaluate_probe(model, plan, probe, device, *, deadline=None):
                     positions = column.target_indices
                     rows = request.targets[positions, 0]
                     expected = truth.values[column.column][rows]
-                    errors = score.per_target[positions].detach().cpu().tolist()
+                    spec = table.schema[column.column]
+                    if spec.kind == "numeric":
+                        # NMSE measures z-coordinate error. Raw sparse directions
+                        # multiply TRAINING loss by 4, not this evaluation metric.
+                        scale = score.output.facts[column.column].answers.scalar.scale
+                        errors = ((column.decoded - expected.double()) / scale).square()
+                    else:
+                        errors = score.per_target[positions]
+                    errors = errors.detach().cpu().tolist()
                     predicted = column.decoded.detach().cpu().tolist()
                     raw = expected.detach().cpu().tolist()
                     states = truth.states[rows, column.column].cpu().tolist()
-                    spec = table.schema[column.column]
                     rank = ({label: index / max(spec.domain_size - 1, 1)
                              for index, label in enumerate(spec.order or range(spec.domain_size))}
                             if spec.kind == "ordinal" else None)
@@ -199,6 +206,7 @@ def evaluate_probe(model, plan, probe, device, *, deadline=None):
                 "zscore": "each episode's forward-visible mean/population-std codec",
                 "median_half_iqr": "each episode's forward-visible median/half-IQR codec",
             }[plan.config.numeric_scaling],
+            "numeric_normalized_mse": "squared scalar-coordinate error; excludes code norm",
             "ordinal_rank_metric": "absolute error of decoded normalized declared rank",
             "claim_boundary": "training-row masked fit"
             if probe["partition"] == "train"

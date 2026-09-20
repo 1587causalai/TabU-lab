@@ -59,9 +59,10 @@ def test_affine_codec_is_fixed_local_random_state_and_roundtrips():
 
 @pytest.mark.parametrize("kind", ["direct", "inducing"])
 @pytest.mark.parametrize("unit_layers", [0, 1])
-def test_mixed_forward_backward_and_numeric_loss_scale(kind, unit_layers):
+@pytest.mark.parametrize("codec_version", ["unit_gaussian_v2", "constant_weight_v1"])
+def test_mixed_forward_backward_and_numeric_loss_scale(kind, unit_layers, codec_version):
     episode = example_episode(damage=True)
-    model = V53Model(config(kind, unit_layers)).double()
+    model = V53Model(replace(config(kind, unit_layers), codec_version=codec_version)).double()
     score = score_episode(model, *episode)
     score.loss.backward()
     gradients = [p.grad for p in model.parameters() if p.grad is not None]
@@ -74,14 +75,16 @@ def test_mixed_forward_backward_and_numeric_loss_scale(kind, unit_layers):
     codec = score.output.facts[0].answers
     rows = episode[1].targets[column.target_indices, 0]
     expected_loss = ((column.decoded - episode[2].values[0][rows]) / codec.scalar.scale).square()
+    expected_loss *= 4 if codec_version == "constant_weight_v1" else 1
     torch.testing.assert_close(score.per_target[column.target_indices], expected_loss)
     # LL closes on the numeric affine line without a post-hoc projection.
     restored_line = codec.encode_targets(column.decoded)
     torch.testing.assert_close(column.result.encoding, restored_line, atol=1e-11, rtol=1e-11)
-    torch.testing.assert_close(
-        score.loss, score.per_target[column.target_indices].mean()
-        + score.per_target[episode[1].targets[:, 1] != 0].mean()
-    )
+    targets = episode[1].targets
+    queries = episode[2].states[targets[:, 0], targets[:, 1]] == 1
+    expected = sum(score.per_target[queries & mask].mean()
+                   for mask in (targets[:, 1] == 0, targets[:, 1] != 0))
+    torch.testing.assert_close(score.loss, expected)
 
 
 def test_default_full_width_and_unit_identity():
@@ -110,15 +113,17 @@ def test_compiler_uses_same_affine_answers_and_declared_ordinal_order():
             ranks = rank_by_label[inputs.values[a][fact.rows]]
             torch.testing.assert_close(fact.rank, ranks)
             torch.testing.assert_close(
-                lift, fact.answers.origin + ranks[:, None] * fact.answers.direction
+                lift, fact.answers.identities[inputs.values[a][fact.rows]]
+                + ranks[:, None] * fact.answers.direction
             )
         torch.testing.assert_close(initial[fact.rows, a], model.encoder.projection(lift))
 
 
 @pytest.mark.parametrize("unit_layers", [0, 1])
-def test_request_subset_reordering_and_row_column_equivariance(unit_layers):
+@pytest.mark.parametrize("codec_version", ["unit_gaussian_v2", "constant_weight_v1"])
+def test_request_subset_reordering_and_row_column_equivariance(unit_layers, codec_version):
     inputs, request, _ = example_episode()
-    model = V53Model(config(unit_layers=unit_layers)).double()
+    model = V53Model(replace(config(unit_layers=unit_layers), codec_version=codec_version)).double()
     baseline = model(inputs, request)
     one = model(inputs, RestorationRequest(torch.tensor([[5, 0]])))
     torch.testing.assert_close(one.columns[0].result.encoding,

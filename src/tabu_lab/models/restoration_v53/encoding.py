@@ -15,10 +15,14 @@ from ..restoration.encoding import EncodingLayout, prepare_features, visible_cod
 from .answers import (
     ANSWER_WIDTH,
     AffineOrdinalAnswers,
+    ConstantWeightNominalAnswers,
     GaussianNominalAnswers,
+    IdentityOrdinalAnswers,
     ZScoreAnswers,
+    constant_weight_vectors,
     unit_gaussians,
 )
+from .codec_versions import CODEC_VERSIONS, DEFAULT_CODEC_VERSION
 
 
 @dataclass(frozen=True)
@@ -27,23 +31,31 @@ class AffineNumericAnswers:
     origin: Tensor
     direction: Tensor
     encoded: Tensor
+    direction_norm_squared: float = 1.0
 
     @classmethod
     def from_visible(
         cls, values: Tensor, *, epsilon: float, seed: int, key: str,
         scaling: str = "zscore",
+        codec_version: str = DEFAULT_CODEC_VERSION,
     ):
         if scaling not in ("zscore", "median_half_iqr"):
             raise ValueError("unknown numeric scaling")
         scalar_type = ZScoreAnswers if scaling == "zscore" else NumericAnswers
         scalar = scalar_type.from_visible(values, epsilon=epsilon)
-        # Independent unit vectors, deliberately NOT orthogonalized. The local
-        # generator consumes no process RNG and is stable under column reordering.
-        basis = unit_gaussians(["v53-affine", seed, key], 2, values.device)
+        # No orthogonalization or overlap screening. The local generator consumes
+        # no process RNG and is stable under column reordering.
+        if codec_version == "constant_weight_v1":
+            basis = constant_weight_vectors(["v53-affine-constant", seed, key], 2, 4, values.device)
+        elif codec_version in CODEC_VERSIONS:
+            basis = unit_gaussians(["v53-affine", seed, key], 2, values.device)
+        else:
+            raise ValueError("unknown V5.3 codec version")
         origin, direction = basis.unbind()
         encoded = origin + scalar.encoded * direction
         finite(encoded, "affine visible encoding")
-        return cls(scalar, origin, direction, encoded)
+        return cls(scalar, origin, direction, encoded,
+                   4.0 if codec_version == "constant_weight_v1" else 1.0)
 
     def encode_targets(self, values: Tensor) -> Tensor:
         """Scorer-only truth encoding with this episode's visible statistics."""
@@ -56,6 +68,8 @@ class AffineNumericAnswers:
         if encoded.shape[1] != ANSWER_WIDTH or encoded.device != self.origin.device:
             raise ValueError("affine predictions need 128 coordinates on the codec device")
         z = (encoded.double() - self.origin) @ self.direction
+        # Raw 128/4 directions have squared norm 4; Gaussian directions have 1.
+        z = z / self.direction_norm_squared
         return self.scalar.decode(z[:, None])
 
 
@@ -63,7 +77,8 @@ class AffineNumericAnswers:
 class V53ColumnFacts:
     rows: Tensor
     answers: (
-        AffineNumericAnswers | GaussianNominalAnswers | AffineOrdinalAnswers | CategoricalAnswers
+        AffineNumericAnswers | GaussianNominalAnswers | AffineOrdinalAnswers
+        | IdentityOrdinalAnswers | CategoricalAnswers
     )
     input_coordinates: Tensor
     rank: Tensor | None = None
@@ -73,12 +88,12 @@ class AffineValueEncoder(nn.Module):
     """Shared bias-free W_enc; default typed input and answer lifts coincide."""
 
     def __init__(self, width: int = 128, epsilon: float = 1e-6, *,
-                 codec_version: str = "unit_gaussian_v1", numeric_scaling: str = "zscore"):
+                 codec_version: str = DEFAULT_CODEC_VERSION, numeric_scaling: str = "zscore"):
         super().__init__()
         if type(width) is not int or width < ANSWER_WIDTH:
             raise ValueError("carrier width must be at least 128")
         positive(epsilon, "epsilon")
-        if codec_version not in ("unit_gaussian_v1", "legacy_v53"):
+        if codec_version not in CODEC_VERSIONS:
             raise ValueError("unknown V5.3 codec version")
         if numeric_scaling not in ("zscore", "median_half_iqr"):
             raise ValueError("unknown numeric scaling")
@@ -103,6 +118,7 @@ class AffineValueEncoder(nn.Module):
                 codec = AffineNumericAnswers.from_visible(
                     values, epsilon=self.epsilon, seed=inputs.code_seed, key=schema.key,
                     scaling=self.numeric_scaling,
+                    codec_version=self.codec_version,
                 )
             elif self.codec_version == "legacy_v53":
                 classes, codes = visible_codes(
@@ -117,12 +133,20 @@ class AffineValueEncoder(nn.Module):
                     )
                     rank = positions[values] / max(schema.domain_size - 1, 1)
             elif schema.kind == "nominal":
-                codec = GaussianNominalAnswers.from_visible(
+                nominal_type = (ConstantWeightNominalAnswers
+                                if self.codec_version == "constant_weight_v1"
+                                else GaussianNominalAnswers)
+                codec = nominal_type.from_visible(
                     values, schema=schema, seed=inputs.code_seed
                 )
-            else:
+            elif self.codec_version == "unit_gaussian_v1":
                 codec = AffineOrdinalAnswers.from_visible(
                     values, schema=schema, seed=inputs.code_seed
+                )
+                rank = codec.rank_by_label[values]
+            else:
+                codec = IdentityOrdinalAnswers.from_visible(
+                    values, schema=schema, seed=inputs.code_seed, codec_version=self.codec_version,
                 )
                 rank = codec.rank_by_label[values]
             facts.append(V53ColumnFacts(rows, codec, codec.encoded, rank))

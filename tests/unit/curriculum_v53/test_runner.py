@@ -3,6 +3,7 @@
 import copy
 import json
 import runpy
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -12,6 +13,7 @@ from tabu_lab.curriculum_v53.artifacts import load_checkpoint, sha256
 from tabu_lab.curriculum_v53.preflight import preflight
 from tabu_lab.curriculum_v53.protocol import load_plan
 from tabu_lab.curriculum_v53.runner import evaluate_checkpoint, run
+from tabu_lab.models.restoration_v53 import V53Model
 
 
 def _exact(actual, expected):
@@ -38,8 +40,8 @@ def _write_manifest(path, spec):
     return load_plan(path)
 
 
-@pytest.fixture(scope="module")
-def campaign(tmp_path_factory):
+@pytest.fixture(scope="module", params=["unit_gaussian_v2", "constant_weight_v1"])
+def campaign(tmp_path_factory, request):
     if not hasattr(torch.optim, "Muon"):
         pytest.skip("this integration campaign requires native torch.optim.Muon")
     root = tmp_path_factory.mktemp("v53-runner")
@@ -47,6 +49,7 @@ def campaign(tmp_path_factory):
     create_fixture = runpy.run_path(str(example))["create_fixture"]
     manifest = create_fixture(root / "data")
     spec = json.loads(manifest.read_text())
+    spec["model"]["codec_version"] = request.param
     for probe in spec["probes"]:
         if probe["partition"] == "train":
             probe["masks"] = 1
@@ -122,6 +125,29 @@ def test_frozen_final_test_preserves_checkpoint_and_existing_outputs(campaign):
     with pytest.raises(FileExistsError):
         evaluate_checkpoint(campaign["plan"], campaign["checkpoint"], output)
     assert sha256(campaign["checkpoint"]) == before
+
+
+def test_numeric_probe_metric_does_not_inherit_answer_loss_scale(campaign, monkeypatch):
+    from tabu_lab.curriculum_v53 import evaluation
+
+    plan = campaign["plan"]
+    model = V53Model(plan.config).double()
+    model.load_state_dict(campaign["payload"]["model"])
+    probe = plan.spec["probes"][0]
+    baseline = evaluation.evaluate_probe(model, plan, probe, "cpu")
+    original = evaluation.score_prepared_episode
+
+    def rescale_numeric_loss(*args, **kwargs):
+        score = original(*args, **kwargs)
+        numeric = args[1].numeric
+        return replace(score, per_target=torch.where(numeric, 97 * score.per_target,
+                                                      score.per_target))
+
+    monkeypatch.setattr(evaluation, "score_prepared_episode", rescale_numeric_loss)
+    changed = evaluation.evaluate_probe(model, plan, probe, "cpu")
+    assert changed["macro"] == baseline["macro"]
+    for actual, expected in zip(changed["by_table"], baseline["by_table"], strict=True):
+        assert actual["by_column"] == expected["by_column"]
 
 
 def test_strict_resume_rejects_drift_but_weights_only_records_new_lineage(campaign):

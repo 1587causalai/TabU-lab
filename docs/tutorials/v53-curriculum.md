@@ -64,6 +64,15 @@ PYTHONPATH=src python -m tabu_lab.cli curriculum-v53 evaluate --manifest /tmp/v5
 `probes` 与 `stages`。JSON 和 YAML 均可；以 fixture 生成的完整 JSON 为可运行模板。
 未知字段会报错，不能靠未解析的备注字段改变执行。
 
+默认 `model.codec_version=unit_gaussian_v2`、`numeric_scaling=zscore`；组合码设为
+`constant_weight_v1`。两者的 ordinal 都是类别身份 $q_{a,c}$ 加归一化秩方向
+$r_a(c)b_a$，按完整声明域做最近码解码。上一版 `unit_gaussian_v1` 保留共享基点方案，
+更早的 `legacy_v53` 也只作为显式候选；不能把旧 checkpoint 按新 codec 严格续训。
+
+阶段 `loss.state_weights` 的顺序为 retained、Query、Null、corrupted，默认 `[0,1,0,0]`。
+要加入 restore loss，设 `[lambda_restore,1,0,0]`；显式 `null` 才采用历史混合均值。
+预检仍要求全部原始真值地址和合法支持，不因 retained 系数为零而缩小契约。
+
 每张表登记 `id/path/sha256/cohort/kind`，并可指定 `role`、`target_column`、`window_rows`。
 `path` 相对于 manifest 目录，`sha256` 绑定文件原始字节。数据沿用已有
 `values[N,M] + features + splits` JSON；每列类型显式声明，离散值是 declared-domain 索引，
@@ -75,8 +84,9 @@ train 至少三行；`role=probe` 的表不能进入阶段采样。
 `synthetic` / `real` kind 选择 `random_cell` 或 `supervised_row`；监督目标来自每表
 `target_column`，默认为末列。表类别标签不提供真实数据来源证明。
 
-训练只使用 train 张量。随机cell mask保留每列至少两个支持值，并保留各可见类别的代表；
-监督行mask同样保护目标类别。无法满足精确Query预算时整个episode报错，不静默降低预算、
+训练只使用 train 张量。随机 cell mask 保留每列至少两个支持值，numeric 还须至少两个
+不同值；nominal 保留各可见类别代表。新 ordinal 码由完整 schema 建立，因此允许 Query
+等级未在支持中出现；监督行 mask 使用同样的类型边界。无法满足精确Query预算时整个episode报错，不静默降低预算、
 删掉难例或收窄loss。`numeric_query_guard` 默认为显式 `{"kind":"none"}`；如要排除numeric
 尾部Query，需把已有guard写入配方，并报告被保护数量。这会改变学习问题。
 
@@ -101,7 +111,8 @@ numeric、discrete、Query、retained分开报告，同时保留逐表数据与�
 
 validation/test只允许 `supervised_row`、`masks=1`：heldout目标列完全隐藏，真值只交scorer；
 heldout其他特征可见，所以这是显式transductive协议。所有模型统计仍从forward-visible
-证据求取。未被train支持的heldout目标类别会整次评价失败，不能跳过后再报告平均分。
+证据求取。未被 train 支持的 nominal 目标类别会整次评价失败；新 ordinal 的声明等级仍可评分。
+可评分不代表模型已学会恢复这些等级，不能跳过难例后再报告平均分。
 
 ## 恢复、初始化与优化器转换
 
@@ -131,7 +142,8 @@ checkpoint及其校验文件保留可恢复状态，`terminal.json`记录complet
 `report.md`是这些记录的可读投影：并列阶段问题、预算与实际verdict，比较同名固定probe的
 首末指标，并列出按表训练曝光、结束原因和原始记录链接。报告只读取此次attempt的评价文件；
 strict resume继承的累计更新与曝光会明确标为累计链，不补写父attempt的起始评价。
-numeric normalized MSE采用episode-visible codec尺度，不能直接替换历史固定方差NMSE。
+numeric normalized MSE 采用 episode-visible codec 尺度，报告 $(\hat z-z)^2$，
+不包含组合码训练损失的方向范数因子 4；也不能直接替换历史固定方差 NMSE。
 
 checkpoint以不可变代际存放在`checkpoints/<sha256>.pt`，`checkpoint-progress.pt`和阶段末
 checkpoint是原子切换的相对符号链接。搬移实验时携带整个attempt目录，保留`checkpoints/`

@@ -4,9 +4,9 @@ Status: local implementation preparation, `local_unissued`; no formal fit,
 reserved evaluation, GPU qualification, reviewed claim or release.
 
 This path implements the V5.3 default design while keeping historical
-Restoration/TAR model and checkpoint identities separate. The base is the
-locally checked `main` commit `431cb86a4a86e2d886fec98fa8efa35f240d0ec9`.
-Existing checkouts and their uncommitted work were not copied into this branch.
+Restoration/TAR model and checkpoint identities separate. The previous working
+implementation is preserved in Git commit `ae5a6ca`; new runs use the explicit
+codec and loss identities below.
 
 The protected canonical design in the parent TabU project remains
 `latex/model-factory/table-restoration/end-to-end-design.tex`. V5.3 is a
@@ -22,24 +22,25 @@ Versioned design source adopted by this implementation:
 The initial source snapshot read on 2026-09-19 had SHA256
 `e6803a713e807a39f484169d64e9f55485bb4f2329f8353dd8b971cde76ff7e7`.
 The current codec defaults follow the 2026-09-20 source snapshot with SHA256
-`b40f5c28a8f015992aae0d0f07d933f7dc8258b45c784fb5735555c74b1ec137`.
-Main Steps 1–5 are the contract; appendix alternatives require explicit opt-in.
+`8d4ba6b21d0dd8d9395fd2bbaf72c1260e19386f04d8debe09cf12cafc3688e2`.
+Main Steps 1–5 are the contract: Gaussian and raw constant-weight codecs are
+selectable modes; historical mechanisms require explicit opt-in.
 The living manuscript can advance independently of this recorded snapshot.
 
 ## Implemented path
 
 | Design | Code / behavior |
 |---|---|
-| Numeric value space | `encoding.py` / `answers.py`: visible mean and population standard deviation, with epsilon floor; independent normalized Gaussian $q_a,b_a\in\mathbb R^{128}$; $e=q_a+zb_a$ for input and answer |
-| Nominal values | One independent unit Gaussian code per visible category; scorer rejects hidden classes lacking a visible code |
-| Ordinal values | $e=q_a+r_a(c)b_a$ for input and answer, with normalized rank from the complete declared order; declared but unseen ranks remain scorable |
+| Numeric value space | Visible z-score with epsilon floor; $e=q_a+zb_a$ for input and answer. Gaussian unit bases or two distinct raw 128/4 bases |
+| Nominal values | One unit Gaussian or raw 128/8 identity per visible category; scorer rejects hidden classes lacking a visible code |
+| Ordinal values | $e=q_{a,c}+r_a(c)b_a$: one identity per declared category and a shared rank direction. Both use unit Gaussian or raw 128/4 vectors; the complete schema codebook is fixed before scoring |
 | Input projection | Shared bias-free $W_{\rm enc}$, thin QR $Q/8$ initialization; single shared Cell/Unit/Feature seeds |
 | Backbone | Existing `AxialBackbone`: column collect/read, then direct row; default 256 slots, width 128; direct-axis control remains configurable |
 | Unit refinement | `unit_layers=0` is exact identity; positive depth uses OMAB with `visible.any(-1)` eligibility and does not write back Cells/Features |
 | Regression geometry | `regression_width=None` is identity; explicit width enables learned bias-free $P_R$ |
 | Column-shared LL | `readout.py`: all $N$ current Units as centers, $\pi_r=1/N$; one FP64 Cholesky factorization per requested supported column |
-| Evaluation | $\widehat e_{ra}=\bar e_{ra}+B_a(c_{ra}-\bar c_{ra})$; numeric centered projection and inverse scale, nominal nearest visible code, ordinal centered projection and nearest declared rank (lower rank on ties) |
-| Loss | `training.py`: all original observed targets; numeric $128\times$ coordinate MSE, discrete coordinate MSE, separate type means |
+| Evaluation | $\widehat e_{ra}=\bar e_{ra}+B_a(c_{ra}-\bar c_{ra})$; numeric centered projection and inverse scale, nominal nearest visible code, ordinal nearest full declared identity-plus-rank code (lower declared rank on ties) |
+| Loss | All original observations remain in the scoring contract; numeric $128\times$ coordinate MSE and discrete coordinate MSE. Separate type/state means; Query coefficient 1, retained coefficient 0 by default |
 | Fixed episode reuse | Visible-only preparation snapshots, mutation guards; carriers, Unit weights and slopes recomputed after every parameter update |
 
 The default solves full 128-dimensional answer right-hand sides. Numeric scalar
@@ -88,35 +89,54 @@ case, not a missing-code error. Inference
 returns explicit `no-support` for empty columns. Invalid training episodes fail
 before the neural forward, with no silent target removal.
 
-The default loss gives each nonempty type its own mean and adds the two.
-`V53LossConfig` also permits explicit discrete and state weights. These do not
-change masking, curriculum sampling, or the codec. The historical fit CLI has
-not been switched to V5.3; callers must use this entry point so its loss scale
+The default loss is $\mathcal L_Q+\lambda_{\rm restore}\mathcal L_V$ with
+$\lambda_{\rm restore}=0$, represented by `V53LossConfig(state_weights=(0,1,0,0))`.
+Each nonempty numeric/discrete branch is averaged separately within each state.
+Set `(lambda_restore,1,0,0)` to enable retained reconstruction; explicit `None`
+retains the historical mixed-state mean. State weights do not change masking,
+curriculum sampling, or which truth-bearing addresses must pass preflight.
+The historical fit CLI has not been switched to V5.3; callers must use this entry point so its loss scale
 cannot silently fall back to the old scalar-answer assumptions.
 
 ## Codec identity and historical candidates
 
-New construction defaults to `V53Config(codec_version="unit_gaussian_v1",
-numeric_scaling="zscore")`. For each numeric column, the visible population
-standard deviation uses denominator $n_a$, and the scale is
-$\max(\sigma_a,\varepsilon)$. Constant/singleton inference uses the epsilon floor;
-empty columns return `no-support`. All types share the same fixed 128-dimensional
-input and answer lift. Gaussian bases are sampled with a local CPU generator
-from the episode seed and stable column key; nominal realizations also include
-the declared category index, so another visible class does not remap old codes.
-These tensors are nonlearned visible snapshots protected by mutation guards.
-
-The historical codec is an explicit candidate:
+New construction defaults to `V53Config(codec_version="unit_gaussian_v2",
+numeric_scaling="zscore")`. Numeric statistics use only visible values,
+$\sigma_a^2=n_a^{-1}\sum_i(x_i-\bar x_a)^2$, with scale
+$\max(\sigma_a,\varepsilon)$. `median_half_iqr` remains an independent option.
 
 ```python
+from tabu_lab.models.restoration_v53 import V53Config, V53LossConfig
+
+gaussian = V53Config()  # unit_gaussian_v2 + zscore
+combinatorial = V53Config(codec_version="constant_weight_v1")
+old_gaussian = V53Config(codec_version="unit_gaussian_v1")
 legacy = V53Config(codec_version="legacy_v53", numeric_scaling="median_half_iqr")
+old_loss = V53LossConfig(state_weights=None)
 ```
 
-It preserves median/half-IQR numeric scaling, 128/8 constant-weight discrete
-answers and the old ordinal rank addition to the input only. The two fields are
-independent explicit choices, allowing robust scaling with the new discrete
-codec or z-score with the historical discrete codec. Neither choice changes
-the numeric $128$ versus discrete $1$ loss multipliers.
+The new ordinal lift is $e_a(c)=q_{a,c}+r_a(c)b_a$. Identities cover the entire
+declared domain independently of support visibility and hidden truth. Inputs,
+answers and scorer reuse the same fixed tensors. Decoding minimizes full squared
+distance, including candidate norms; projection onto $b_a$ or dot-product-only
+comparison is generally incorrect. Training retains all 128 error coordinates.
+
+`constant_weight_v1` uses raw binary vectors without dividing by $\sqrt{k}$:
+numeric bases and ordinal identities/directions have four ones; nominal
+identities have eight. Numeric bases are distinct; same-column identities are
+sampled without replacement. The ordinal direction is independent and may
+overlap an identity. Capacity overflow fails explicitly. Sampling uses a local
+CPU generator, stable column identity and code seed. The nominal visible class
+set also fixes its sparse codebook; ordinal uses the full declared domain.
+Numeric decoding divides the centered dot product by $\|b_a\|^2$ (1 or 4).
+Consequently numeric loss is $(\hat z-z)^2$ in G and $4(\hat z-z)^2$ in C;
+nominal and ordinal retain coordinate MSE. A different sparse normalization
+would require its own codec version.
+
+`unit_gaussian_v1` preserves the old shared-origin ordinal line and projected
+nearest-rank decoder. `legacy_v53` preserves 128/8 discrete answer codes and
+ordinal rank addition to the input only. Both remain explicit historical
+candidates. Replaying the previous training objective also requires `old_loss`.
 
 `as_dict` records both fields; `from_dict` rejects configurations missing either
 field rather than treating an old configuration as the new default. A model
@@ -193,73 +213,26 @@ isolation. The current local checks do not authorize capability claims.
 
 ## Validation
 
-The 2026-09-20 codec-default update passed **45 V5.3 tests** and **176 adjacent
-historical codec/readout/model/prepared tests** (**221 passed** together), plus
-Ruff and `git diff --check`. Added coverage includes visible population z-score,
-constant/singleton and large-offset inputs, Gaussian nominal identity and
-missing-code rejection, full-schema ordinal rank geometry and lower-rank ties,
-ordinal continuous loss scaling, truth isolation, new codec mutation guards,
-explicit legacy behavior, config/state-dictionary identity checks and numeric
-diversity preflight. These are CPU implementation checks; they do not establish
-single-table fitting or multi-table generalization.
+On 2026-09-20, the regression selection below passed **365 tests**; Ruff and
+`git diff --check` also passed. Numeric probe NMSE measures scalar-coordinate
+error independently of the answer-code norm and training loss multiplier.
 
-The final main-checkout check on 2026-09-19 passed the full committed-scope suite:
-**982 passed**, with two expected W&B fallback warnings. It used CPU,
-PyTorch 2.13.0 and scikit-learn 1.9.0 for the optional classical-baseline tests.
-Ruff passed for the V5.3 implementation, tests and example. This is local
-implementation validation, not GPU qualification or a training result.
-
-Initial local validation on 2026-09-19, CPU / PyTorch 2.13.0:
-
-- 23 V5.3 tests plus 176 selected historical codec/readout/model/prepared tests:
-  **199 passed**.
-- Ruff passed for the new implementation, tests and smoke example.
-- The default smoke model had 1,066,112 parameters, restored 18 targets, and
-  completed a finite forward/backward and one AdamW update.
-
-The combined regression selection was:
+Regression checks cover both current codecs and the historical candidates:
+visible-only statistics/codebooks, complete declared ordinal identities,
+nearest-code decoding with unequal norms and rank-order ties, raw sparse scale,
+full-vector ordinal loss, Query-only and optional retained loss, hidden-truth
+isolation, mutation guards, row/column equivariance, and checkpoint identity.
+The curriculum tests exercise both current modes through training, evaluation,
+and exact optimizer/RNG continuation across AdamW-to-Muon stages.
 
 ```sh
-uv run pytest tests/unit/restoration_v53 \
+uv run pytest tests/unit/restoration_v53 tests/unit/curriculum_v53 \
+  tests/unit/test_curriculum_catalog.py \
   tests/unit/restoration/test_answers.py tests/unit/restoration/test_readout.py \
   tests/unit/restoration/test_model.py tests/unit/restoration/test_prepared.py -q
 ```
 
-These are local implementation checks, not issued research receipts.
-
-The subsequent numerical-stability and inference-context correction passed all
-**27 tests** in `test_readout.py` and `test_model.py`, plus Ruff on those tests and
-the changed `readout.py` / `model.py`. It adds an analytic two-support regression
-at Cell span $10^8$ and Unit separation $9$: the requested prediction is about
-$0.48132068$, whereas uncentered second-moment subtraction silently returned
-approximately zero. Three center chunk sizes agree. Public inference-mode
-forward and preparation are compared with `no_grad` output, including inputs
-created inside inference mode and rejection of later snapshot mutation.
-
-Correction-check commands, from the repository root with its development
-environment available:
-
-```sh
-uv run pytest \
-  tests/unit/restoration_v53/test_readout.py \
-  tests/unit/restoration_v53/test_model.py -q
-uv run ruff check \
-  src/tabu_lab/models/restoration_v53/readout.py \
-  src/tabu_lab/models/restoration_v53/model.py \
-  tests/unit/restoration_v53/test_readout.py \
-  tests/unit/restoration_v53/test_model.py
-```
-
-The tests compare shared LL with an independently constructed joint weighted
-least-squares system with one intercept per center and appended ridge rows.
-They also cover finite-difference gradients, gradients through unrequested
-centers, chunk/support permutation, constant and singleton supports, codec
-round-trip and RNG isolation, numeric affine closure and loss normalization,
-direct/inducing backbones, Unit eligibility and identity, request independence,
-row/column equivariance, Query insertion into an existing empty address, hidden
-truth isolation, invalid-episode preflight, prepared mutation rejection,
-checkpoint/optimizer continuation, and the explicitly injected Feature seam.
-
-Adding NEW rows changes $N$ and the fitted center population. Unlike inserting
-a Query into an existing empty address, that operation is not promised to
-preserve the column-shared slope or predictions.
+These are local CPU implementation checks, not training-fit or generalization
+results. Earlier implementation snapshots and their validation notes remain in
+Git history. Adding rows changes the LL center population and is not promised
+to preserve existing slopes or predictions.

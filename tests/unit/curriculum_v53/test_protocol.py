@@ -64,7 +64,10 @@ def test_defaults_expand_without_execution_and_preserve_probe_boundaries(tmp_pat
     assert plan.config.backbone.width == 128
     assert plan.optimizer.betas == (0.9, 0.95)
     assert plan.spec["optimizer"]["betas"] == [0.9, 0.95]
-    assert plan.spec["stages"][0]["loss"] == {"discrete_weight": 1.0, "state_weights": None}
+    assert plan.spec["stages"][0]["loss"] == {
+        "discrete_weight": 1.0, "state_weights": [0.0, 1.0, 0.0, 0.0],
+    }
+    assert plan.config.codec_version == "unit_gaussian_v2"
     assert plan.spec["stages"][0]["recipe"]["synthetic"]["numeric_query_guard"] == {"kind": "none"}
     assert plan.summary["status"] == "local_unissued"
     assert not plan.summary["execution_started"]
@@ -79,6 +82,7 @@ def test_source_identity_covers_new_and_reused_implementation_bytes():
     expected = {
         "curriculum_v53/protocol.py", "curriculum_v53/data.py",
         "models/restoration_v53/model.py", "models/restoration_v53/training.py",
+        "models/restoration_v53/answers.py", "models/restoration_v53/codec_versions.py",
         "models/restoration/contracts.py", "models/restoration/answers.py",
         "restoration_masking.py", "restoration_optimizers.py", "tar_data.py", "cli.py",
     }

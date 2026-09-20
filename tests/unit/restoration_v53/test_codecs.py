@@ -9,6 +9,7 @@ from tabu_lab.models.restoration.answers import NumericAnswers
 from tabu_lab.models.restoration.encoding import visible_codes
 from tabu_lab.models.restoration.end_to_end_checks import example_episode
 from tabu_lab.models.restoration_v53 import (
+    CODEC_VERSIONS,
     AffineNumericAnswers,
     AffineOrdinalAnswers,
     ColumnSchema,
@@ -161,7 +162,7 @@ def test_explicit_legacy_candidate_preserves_old_scalar_codes_and_ordinal_lift()
     assert torch.equal(robust.encoded, facts[0].answers.encoded)
 
 
-@pytest.mark.parametrize("codec_version", ["unit_gaussian_v1", "legacy_v53"])
+@pytest.mark.parametrize("codec_version", CODEC_VERSIONS)
 @pytest.mark.parametrize("numeric_scaling", ["zscore", "median_half_iqr"])
 def test_config_and_checkpoint_codec_identity_roundtrip(codec_version, numeric_scaling):
     selected = replace(config(), codec_version=codec_version, numeric_scaling=numeric_scaling)
@@ -191,14 +192,15 @@ def test_unversioned_and_mismatched_checkpoints_cannot_silently_become_new_defau
         model.load_state_dict(legacy.state_dict(), strict=False)
 
 
-def test_unseen_ordinal_truth_is_scorable_but_inference_remains_truth_free():
+@pytest.mark.parametrize("codec_version", ["unit_gaussian_v2", "constant_weight_v1"])
+def test_unseen_ordinal_truth_is_scorable_but_inference_remains_truth_free(codec_version):
     schema = (ColumnSchema("rank", "ordinal", 4, order=(2, 0, 3, 1)),)
     visible = torch.tensor([[True], [True], [False]])
     inputs = RestorationInput(schema, (torch.tensor([2, 1, 999]),), visible, ~visible, 14)
     request = RestorationRequest(torch.tensor([[0, 0], [1, 0], [2, 0]]))
     truth = TruthSidecar((torch.tensor([2, 1, 0]),), torch.tensor([[0], [0], [1]]))
     other_truth = TruthSidecar((torch.tensor([2, 1, 3]),), truth.states)
-    model = V53Model(config()).double()
+    model = V53Model(replace(config(), codec_version=codec_version)).double()
     first, second = prepare_episode(model, inputs, request, truth), prepare_episode(
         model, inputs, request, other_truth
     )
@@ -207,11 +209,13 @@ def test_unseen_ordinal_truth_is_scorable_but_inference_remains_truth_free():
     assert not torch.equal(first.encoded_truth[0], second.encoded_truth[0])
     a, b = score_prepared_episode(model, first), score_prepared_episode(model, second)
     torch.testing.assert_close(a.output.carriers, b.output.carriers, atol=0, rtol=0)
-    # Ordinal keeps chi=1: continuous rank error / 128, before hard decoding.
+    # Ordinal keeps the entire identity-plus-rank vector, before hard decoding.
     codec = first.visible.facts[0].answers
-    ranks = (a.output.columns[0].result.encoding - codec.origin) @ codec.direction
-    expected = (ranks - codec.rank_by_label[truth.values[0]]).square() / 128
+    error = a.output.columns[0].result.encoding - codec.codebook[truth.values[0]]
+    expected = error.square().mean(-1)
     torch.testing.assert_close(a.per_target, expected)
+    rank_only = (error @ codec.direction).square() / codec.direction.square().sum() / 128
+    assert a.per_target[-1] > rank_only[-1] + 1e-4
     codec.rank_by_label.add_(1)
     with pytest.raises(ValueError, match="mutated"):
         score_prepared_episode(model, first)

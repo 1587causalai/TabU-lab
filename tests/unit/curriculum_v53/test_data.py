@@ -139,7 +139,8 @@ def test_numeric_guard_is_explicit_and_uses_registered_epsilon(tmp_path):
         build_episode(table, recipe, 0, SEEDS, "cpu", evaluation=True, partition="test")
 
 
-def test_declared_ordinal_domain_allows_unseen_query_ranks(tmp_path):
+@pytest.mark.parametrize("codec_version", ["unit_gaussian_v2", "constant_weight_v1"])
+def test_declared_ordinal_domain_allows_unseen_query_ranks(tmp_path, codec_version):
     entry, _ = write_table_fixture(
         tmp_path, values=[[float(i), i] for i in range(6)],
         features=[{"kind": "numeric"}, {"kind": "ordinal", "domain": list(range(6))}],
@@ -147,13 +148,15 @@ def test_declared_ordinal_domain_allows_unseen_query_ranks(tmp_path):
     )
     table = load_table(entry, tmp_path)
     recipe = {"kind": "supervised_row", "fraction": .25}
-    inputs, _, truth, info = build_episode(table, recipe, 0, SEEDS, "cpu")
+    inputs, _, truth, info = build_episode(table, recipe, 0, SEEDS, "cpu",
+                                         codec_version=codec_version)
     assert info["query_count"] == 1
     assert info["protected_discrete_cells"] == 0
     assert not info["support_policy"]["protect_ordinal_classes"]
     assert len(set(truth.values[1].tolist()) -
                set(inputs.values[1][inputs.visible[:, 1]].tolist())) == 1
-    heldout = build_episode(table, recipe, 0, SEEDS, "cpu", evaluation=True, partition="test")
+    heldout = build_episode(table, recipe, 0, SEEDS, "cpu", evaluation=True, partition="test",
+                            codec_version=codec_version)
     assert heldout[3]["query_addresses"] == [[4, 1], [5, 1]]
     assert heldout[0].values[1][-2:].tolist() == [0, 0]
     with pytest.raises(ValueError, match="capacity"):

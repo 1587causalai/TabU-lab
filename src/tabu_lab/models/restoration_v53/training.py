@@ -19,7 +19,9 @@ from .model import PreparedV53, V53Model, V53Output
 @dataclass(frozen=True)
 class V53LossConfig:
     discrete_weight: float = 1.0
-    state_weights: tuple[float, float, float, float] | None = None
+    # Query coefficient 1; optional retained reconstruction is explicit.
+    # None preserves the historical mixed-state mean for controlled comparisons.
+    state_weights: tuple[float, float, float, float] | None = (0.0, 1.0, 0.0, 0.0)
 
     def __post_init__(self):
         positive(self.discrete_weight, "discrete_weight")
@@ -49,7 +51,7 @@ def prepare_episode(model: V53Model, inputs, request, truth) -> PreparedV53Episo
     # custom-codec path invokes affine encode_targets, with truth confined here.
     encoded = _preflight(visible.inputs, visible.request, truth, visible.facts, visible.positions)
     for a, schema in enumerate(visible.inputs.schema):
-        if (model.config.codec_version == "unit_gaussian_v1" and schema.kind == "numeric"
+        if (model.config.codec_version != "legacy_v53" and schema.kind == "numeric"
                 and len(visible.positions[a])):
             values = visible.inputs.values[a][visible.facts[a].rows]
             if len(values.unique()) < 2:

@@ -10,8 +10,11 @@ from .episodes import EpisodeRequest
 
 
 class V53EpisodeFactory:
-    def __init__(self, *, device="cpu", epsilon=1e-6, codec_version="unit_gaussian_v1"):
-        if codec_version not in ("unit_gaussian_v1", "legacy_v53"):
+    def __init__(self, *, device="cpu", epsilon=1e-6, codec_version="unit_gaussian_v2"):
+        # Keep construction Torch-free; the builder also validates this identity.
+        if codec_version not in (
+            "unit_gaussian_v2", "constant_weight_v1", "unit_gaussian_v1", "legacy_v53",
+        ):
             raise ValueError("unknown V5.3 codec_version")
         self.device = device
         self.epsilon = epsilon

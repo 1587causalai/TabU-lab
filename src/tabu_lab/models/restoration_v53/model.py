@@ -15,6 +15,7 @@ from ..restoration.contracts import RestorationInput, RestorationRequest
 from ..restoration.encoding import EncodingLayout, prepare_features
 from ..restoration.model import ColumnPrediction
 from ..restoration.readout import EncodedRestoration
+from .codec_versions import CODEC_IDS, DEFAULT_CODEC_VERSION
 from .encoding import ANSWER_WIDTH, AffineValueEncoder, V53ColumnFacts
 from .readout import FeatureSlopeProvider, evaluate_column, shared_slope
 
@@ -29,7 +30,7 @@ class V53Config:
     regression_width: int | None = None  # None is exact identity; explicit width enables P_R.
     center_chunk_size: int = 32
     slope_source: str = "shared_ll"
-    codec_version: str = "unit_gaussian_v1"
+    codec_version: str = DEFAULT_CODEC_VERSION
     numeric_scaling: str = "zscore"
 
     def __post_init__(self):
@@ -47,7 +48,7 @@ class V53Config:
             raise ValueError("center_chunk_size must be a positive integer")
         if self.slope_source not in ("shared_ll", "feature"):
             raise ValueError("slope_source must be shared_ll or feature")
-        if self.codec_version not in ("unit_gaussian_v1", "legacy_v53"):
+        if self.codec_version not in CODEC_IDS:
             raise ValueError("unknown V5.3 codec version")
         if self.numeric_scaling not in ("zscore", "median_half_iqr"):
             raise ValueError("unknown numeric scaling")
@@ -107,7 +108,7 @@ class V53Model(nn.Module):
             numeric_scaling=config.numeric_scaling,
         )
         self.register_buffer("_codec_signature", torch.tensor([
-            {"legacy_v53": 0, "unit_gaussian_v1": 1}[config.codec_version],
+            CODEC_IDS[config.codec_version],
             {"median_half_iqr": 0, "zscore": 1}[config.numeric_scaling],
         ], dtype=torch.long))
         self.backbone = AxialBackbone(config.backbone)

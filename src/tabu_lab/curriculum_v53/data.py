@@ -15,7 +15,12 @@ from pathlib import Path
 
 import torch
 
-from tabu_lab.models.restoration_v53 import ColumnSchema, make_episode
+from tabu_lab.models.restoration_v53 import (
+    CODEC_VERSIONS,
+    DEFAULT_CODEC_VERSION,
+    ColumnSchema,
+    make_episode,
+)
 from tabu_lab.restoration_masking import global_query_mask, validate_numeric_query_guard
 
 
@@ -239,7 +244,7 @@ def _recipe(recipe: dict) -> tuple[str, float, dict]:
 
 def build_episode(table: Table, recipe: dict, index: int, seeds: dict, device: str, *,
                   evaluation: bool = False, partition: str = "train", epsilon: float = 1e-6,
-                  codec_version: str = "unit_gaussian_v1"):
+                  codec_version: str = DEFAULT_CODEC_VERSION):
     """Build one episode; return inputs/request/truth plus original-address audit.
 
     Supervised training uses an exact rounded Query count and protects every
@@ -249,11 +254,11 @@ def build_episode(table: Table, recipe: dict, index: int, seeds: dict, device: s
     non-target heldout features are visible. Its target truth is scorer-only.
     """
     kind, fraction, guard = _recipe(recipe)
-    if codec_version not in ("unit_gaussian_v1", "legacy_v53"):
+    if codec_version not in CODEC_VERSIONS:
         raise ValueError("unknown V5.3 codec_version")
     support_policy = {
         "protect_ordinal_classes": codec_version == "legacy_v53",
-        "require_numeric_diversity": codec_version == "unit_gaussian_v1",
+        "require_numeric_diversity": codec_version != "legacy_v53",
     }
     if type(index) is not int or index < 0:
         raise ValueError("episode index must be a nonnegative integer")

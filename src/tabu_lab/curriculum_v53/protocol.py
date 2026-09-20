@@ -354,8 +354,12 @@ def _summary(spec):
             "version": spec["model"]["codec_version"],
             "numeric_scaling": spec["model"]["numeric_scaling"],
             "statistics": "forward-visible values only, with epsilon scale floor",
-            "ordinal_domain": "complete declared ranks"
-            if spec["model"]["codec_version"] == "unit_gaussian_v1" else "visible class codes",
+            "ordinal_domain": {
+                "legacy_v53": "visible class codes",
+                "unit_gaussian_v1": "complete declared ranks; shared origin",
+                "unit_gaussian_v2": "complete declared identity-plus-rank codes",
+                "constant_weight_v1": "complete declared identity-plus-rank codes",
+            }[spec["model"]["codec_version"]],
             "scope": "shared input/answer codec within each episode",
         },
         "training_boundary": "train-role tables and train rows only; no reserved truth in forward",
