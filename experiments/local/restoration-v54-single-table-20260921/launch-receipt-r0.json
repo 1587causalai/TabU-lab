@@ -1,0 +1,58 @@
+{
+  "active_replicates": [
+    {
+      "device": "cuda:0",
+      "host": "dgx2",
+      "manifest": "manifests/discoscm_095.r0.json",
+      "pid": 1739549,
+      "run_root": "runs/discoscm_095.r0",
+      "runtime_id": "wehub-train-dgx2-20260920",
+      "table": "discoscm_095"
+    },
+    {
+      "device": "cuda:0",
+      "host": "deepthought",
+      "manifest": "manifests/scm_mixed_v1_001.r0.json",
+      "pid": 2900584,
+      "run_root": "runs/scm_mixed_v1_001.r0",
+      "runtime_id": "wehub-train-deepthought-20260920",
+      "table": "scm_mixed_v1_001"
+    },
+    {
+      "device": "cpu",
+      "host": "gongqian-mini",
+      "manifest": "manifests/scm_mixed_v1_017.r0.json",
+      "pid": 4459,
+      "run_root": "runs/scm_mixed_v1_017.r0",
+      "runtime_id": "wehub-train-gongqian-mini-20260920",
+      "table": "scm_mixed_v1_017"
+    },
+    {
+      "device": "cpu",
+      "host": "zichao-mini",
+      "manifest": "manifests/scm_mixed_v1_040.r0.json",
+      "pid": 67311,
+      "run_root": "runs/scm_mixed_v1_040.r0",
+      "runtime_id": "wehub-train-zichao-mini-20260920",
+      "table": "scm_mixed_v1_040"
+    },
+    {
+      "device": "cpu",
+      "host": "dustinstudio",
+      "manifest": "manifests/discoscm_076.r0.json",
+      "pid": 43684,
+      "run_root": "runs/discoscm_076.r0",
+      "runtime_id": "wehub-train-dustinstudio-20260920",
+      "table": "discoscm_076"
+    }
+  ],
+  "captured_local": "2026-09-21T14:43:00+08:00",
+  "code_commit": "8613e4b3243696042fa6297c80ae60fc66493a3e",
+  "episode_kind": "supervised_row",
+  "panel_commit": "8876e07",
+  "remote_source_root": "~/tabu-v54-single-table-20260921-r1",
+  "replicates_per_table": 3,
+  "schema": "tabu.v54.single-table-launch-receipt.v1",
+  "status": "active_at_capture",
+  "updates_per_replicate": 16384
+}
