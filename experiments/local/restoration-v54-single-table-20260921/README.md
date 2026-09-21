@@ -34,3 +34,5 @@ backend comparison. MPS qualification is a subsequent experiment.
 Before a run, validate a manifest with `curriculum-v54 plan` and `preflight`.
 Every run gets a new output directory; no historical checkpoint is resumed.
 After a terminal receipt, evaluate `final_test` in a separate output directory.
+
+The fixed `queue_replicates.sh` helper may be launched after r0. It advances only after a preceding `terminal.json` says `outcome=completed`; it never retries a failed or wall-exhausted replicate.
