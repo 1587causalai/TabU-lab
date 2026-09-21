@@ -72,11 +72,12 @@
   "panel_queue_commit": "0ce95a4",
   "pending_hosts": [
     {
+      "center_chunk_size": 32,
       "device": "cuda:0",
       "dtype": "float64",
       "host": "deepthought",
       "manifest": "manifests/scm_mixed_v1_001.r0.json",
-      "reason": "WSL2 /dev/dxg CUDA driver unresponsive after preflight; preflight started.json exists but no terminal.json; no run launched",
+      "reason": "WSL2 /dev/dxg CUDA driver entered D-state on the first 128-chunk preflight; deepthought manifests are now explicitly capped at center_chunk_size=32; host recovery/retry is pending",
       "runtime_id": "wehub-train-deepthought-20260920",
       "source_root": "/home/windb/tabu-v54-single-table-20260921-b0f18b8",
       "table": "scm_mixed_v1_001"
@@ -91,7 +92,8 @@
     ],
     "pending": [
       "deepthought/scm_mixed_v1_001.r0"
-    ]
+    ],
+    "pending_reason": "deepthought 128-chunk preflight D-state; retry with explicit 32 after host recovery"
   },
   "replicates_per_table": 3,
   "schema": "tabu.v54.single-table-launch-receipt.v2",
