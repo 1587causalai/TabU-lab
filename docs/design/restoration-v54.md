@@ -100,9 +100,10 @@ optimizer settings, seeds and stage budgets stay explicit in the manifest.
 
 The current data adapter supports one `target_column` per table. The document's
 explicit multi-target supervised extension is not implemented by this adapter;
-unsupported fields are rejected. This reference runner remains single-process
-FP64 on CPU/CUDA. Multi-host experiments and MPS execution need their own
-recorded qualification; this commit does not change live experiments.
+unsupported fields are rejected. The reference runner supports single-process
+FP64 on CPU/CUDA and explicit MPS FP32 execution with CPU fallback disabled.
+MPS uses its own recorded runtime and bounded numerical comparison; it is not a
+bitwise-equivalent continuation of a CUDA FP64 trajectory.
 
 ## Local checks and preparation
 

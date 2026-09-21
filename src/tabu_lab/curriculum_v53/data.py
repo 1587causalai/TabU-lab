@@ -339,8 +339,16 @@ def build_episode(table: Table, recipe: dict, index: int, seeds: dict, device: s
             if not labels <= support:
                 raise ValueError("no-answer-code: reserved target class has no training support")
     query = query.to(device)
+    if device == "mps":
+        values = tuple(
+            value.to(device=device, dtype=torch.float32)
+            if value.is_floating_point() else value.to(device)
+            for value in values
+        )
+    else:
+        values = tuple(value.to(device) for value in values)
     inputs, request, truth = make_episode(
-        table.schema, tuple(v.to(device) for v in values), torch.ones_like(query), query,
+        table.schema, values, torch.ones_like(query), query,
         code_seed=code_seed,
     )
     addresses = [[row_ids[r], a] for r, a in query.cpu().nonzero().tolist()]

@@ -20,6 +20,7 @@ from tabu_lab.models.restoration_v53 import (
     prepare_episode,
     score_prepared_episode,
 )
+from tabu_lab.models.restoration._dtype import execution_dtype
 from tabu_lab.restoration_optimizers import adamw, switch_to_muon
 
 from .artifacts import (
@@ -39,12 +40,19 @@ from .reporting import write_report
 
 
 def configure_runtime(device):
-    if device not in ("cpu", "cuda:0"):
-        raise ValueError("qualified execution interface requires cpu or cuda:0, FP64")
+    if device not in ("cpu", "cuda:0", "mps"):
+        raise ValueError("qualified execution interface requires cpu, cuda:0 or mps")
+    if device == "mps":
+        if not torch.backends.mps.is_available():
+            raise RuntimeError("MPS unavailable; CPU fallback is forbidden")
+        if os.environ.get("PYTORCH_ENABLE_MPS_FALLBACK") != "0":
+            raise RuntimeError("PYTORCH_ENABLE_MPS_FALLBACK=0 must be set before importing torch")
+        if os.environ.get("PYTORCH_MPS_FAST_MATH", "0") != "0":
+            raise RuntimeError("PYTORCH_MPS_FAST_MATH must be disabled")
     os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
     if device == "cuda:0" and not torch.cuda.is_available():
         raise RuntimeError("CUDA unavailable; no CPU fallback")
-    torch.use_deterministic_algorithms(True)
+    torch.use_deterministic_algorithms(True, warn_only=device == "mps")
     torch.backends.cuda.matmul.allow_tf32 = False
     torch.backends.cudnn.allow_tf32 = False
     torch.backends.cudnn.deterministic = True
@@ -53,7 +61,7 @@ def configure_runtime(device):
     result = {
         "torch": str(torch.__version__),
         "device": device,
-        "dtype": "float64",
+        "dtype": str(execution_dtype(device)).removeprefix("torch."),
         "deterministic_algorithms": True,
         "threads": 1,
         "interop_threads": torch.get_num_interop_threads(),
@@ -68,6 +76,9 @@ def configure_runtime(device):
         result["cudnn"] = torch.backends.cudnn.version()
         result["cublas_workspace_config"] = os.environ["CUBLAS_WORKSPACE_CONFIG"]
         torch.cuda.reset_peak_memory_stats()
+    elif device == "mps":
+        result["mps_available"] = True
+        result["mps_cpu_fallback"] = False
     return result
 
 
@@ -326,7 +337,7 @@ def run(
     try:
         runtime = configure_runtime(device)
         _seed_model(plan)
-        model = make_model(plan).to(device=device, dtype=torch.float64)
+        model = make_model(plan).to(device=device, dtype=execution_dtype(device))
         optimizer = adamw(model, plan.optimizer)
         parent = resume or initialize_from
         if parent:
@@ -574,7 +585,7 @@ def evaluate_checkpoint(plan, checkpoint, output, *, device="cpu", probes=None):
             probe["name"] for probe in plan.spec["probes"]
         }:
             raise ValueError("unknown or duplicate probe names")
-        model = make_model(plan).to(device=device, dtype=torch.float64)
+        model = make_model(plan).to(device=device, dtype=execution_dtype(device))
         model.load_state_dict(payload["model"])
         reports = {
             probe["name"]: evaluate_probe(model, plan, probe, device)

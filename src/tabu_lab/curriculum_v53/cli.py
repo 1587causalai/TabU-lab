@@ -59,7 +59,7 @@ def _add_version(subparsers, version, schema):
         command.add_argument("--manifest", type=Path, required=True)
         command.add_argument("--output-root", type=Path, required=name != "plan")
         if name != "plan":
-            command.add_argument("--device", choices=("cpu", "cuda:0"), default="cpu")
+            command.add_argument("--device", choices=("cpu", "cuda:0", "mps"), default="cpu")
         if name == "run":
             parent = command.add_mutually_exclusive_group()
             parent.add_argument("--resume-checkpoint", type=Path)

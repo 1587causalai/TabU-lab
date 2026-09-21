@@ -11,6 +11,7 @@ import torch
 from torch import Tensor, nn
 
 from ..restoration._validation import finite, matrix, positive
+from ..restoration._dtype import solve_dtype
 from ..restoration.readout import EncodedRestoration, unit_kernel_logits
 
 
@@ -69,8 +70,9 @@ def shared_slope(
         raise ValueError("support rows must be distinct, in bounds and aligned")
     if any(t.device != units.device for t in (support_rows, support_cells, answers)):
         raise ValueError("readout tensors must share a device")
-    x = support_cells.double() - support_cells[:1].double()
-    y = answers.detach().double() - answers[:1].detach().double()
+    dtype = solve_dtype(units)
+    x = support_cells.to(dtype) - support_cells[:1].to(dtype)
+    y = answers.detach().to(dtype) - answers[:1].detach().to(dtype)
     source_units = units[support_rows]
     covariance = x.new_zeros(x.shape[1], x.shape[1])
     cross = x.new_zeros(x.shape[1], y.shape[1])
@@ -88,10 +90,13 @@ def shared_slope(
     system = system + ridge * torch.eye(x.shape[1], dtype=x.dtype, device=x.device)
     finite(system, "column-shared ridge system")
     finite(cross, "column-shared cross moment")
-    factor, info = torch.linalg.cholesky_ex(system)
+    solve_system, solve_cross = system, cross
+    if system.device.type == "mps":
+        solve_system, solve_cross = system.cpu(), cross.cpu()
+    factor, info = torch.linalg.cholesky_ex(solve_system)
     if bool((info != 0).any()):
         raise FloatingPointError("numerical-failure: column-shared LL Cholesky failed")
-    slope = torch.cholesky_solve(cross, factor).T
+    slope = torch.cholesky_solve(solve_cross, factor).T.to(system.device)
     finite(slope, "column-shared slope")
     return slope
 
@@ -110,16 +115,17 @@ def evaluate_column(
     """Local means + shared slope adjustment; vector answers remain unprojected."""
     if not len(support_rows):
         return EncodedRestoration("no-support", 0)
-    source_cells, source_units = cells[support_rows].double(), units[support_rows]
+    dtype = solve_dtype(units)
+    source_cells, source_units = cells[support_rows].to(dtype), units[support_rows]
     # Evaluate in shifted coordinates to avoid subtracting large local means.
     origin = source_cells[:1]
     x = source_cells - origin
-    answer_origin = answers[:1].detach().double()
-    y = answers.detach().double() - answer_origin
+    answer_origin = answers[:1].detach().to(dtype)
+    y = answers.detach().to(dtype) - answer_origin
     predictions = []
     for rows in target_rows.split(chunk_size):
         weights = normalized_weights(units[rows], source_units, bandwidth)
-        delta = (cells[rows].double() - origin) - weights @ x
+        delta = (cells[rows].to(dtype) - origin) - weights @ x
         encoded = answer_origin + weights @ y + delta @ slope.T
         finite(encoded, "V5.3 restored encoding")
         predictions.append(encoded)

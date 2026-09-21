@@ -11,6 +11,7 @@ import torch
 from torch import Tensor
 
 from ..restoration._validation import finite, matrix, positive
+from ..restoration._dtype import solve_dtype
 from ..restoration.contracts import ColumnSchema, validate_values
 from .codec_versions import DEFAULT_CODEC_VERSION, DEFAULT_COMPOSITION_CODEC_VERSION
 
@@ -21,7 +22,8 @@ def unit_gaussians(identity: list, count: int, device: torch.device) -> Tensor:
     """CPU realization independent of process RNG and traversal order."""
     digest = hashlib.sha256(json.dumps(identity, ensure_ascii=True).encode()).digest()
     generator = torch.Generator(device="cpu").manual_seed(int.from_bytes(digest[:8], "little"))
-    vectors = torch.randn(count, ANSWER_WIDTH, generator=generator, dtype=torch.float64)
+    dtype = torch.float32 if device.type == "mps" else torch.float64
+    vectors = torch.randn(count, ANSWER_WIDTH, generator=generator, dtype=dtype)
     vectors = vectors / torch.linalg.vector_norm(vectors, dim=-1, keepdim=True)
     finite(vectors, "unit Gaussian realization")
     return vectors.to(device)
@@ -37,7 +39,8 @@ def constant_weight_vectors(
         raise ValueError("requested vectors exceed constant-weight code capacity")
     digest = hashlib.sha256(json.dumps(identity, ensure_ascii=True).encode()).digest()
     generator = torch.Generator(device="cpu").manual_seed(int.from_bytes(digest[:8], "little"))
-    vectors = torch.zeros(count, ANSWER_WIDTH, dtype=torch.float64)
+    dtype = torch.float32 if device.type == "mps" else torch.float64
+    vectors = torch.zeros(count, ANSWER_WIDTH, dtype=dtype)
     seen = set()
     for i in range(count):
         while True:
@@ -83,7 +86,7 @@ class ZScoreAnswers:
         if values.ndim != 1 or not values.is_floating_point():
             raise ValueError("visible numeric answers must be a floating vector")
         finite(values, "numeric answers")
-        values = values.detach().double()
+        values = values.detach().to(solve_dtype(values))
         if not len(values):
             return cls(values[:, None], None, None)
         # Scale before reductions, but center in original units whenever that
@@ -91,7 +94,7 @@ class ZScoreAnswers:
         mean = (values / len(values)).sum()
         centered = values - mean
         if bool(torch.isfinite(centered).all()):
-            magnitude = centered.abs().amax().clamp_min(torch.finfo(torch.float64).tiny)
+            magnitude = centered.abs().amax().clamp_min(torch.finfo(values.dtype).tiny)
             std = (centered / magnitude).square().mean().sqrt() * magnitude
         else:
             magnitude = values.abs().amax()
@@ -118,7 +121,7 @@ class ZScoreAnswers:
             raise ValueError("no-support: numeric statistics are undefined")
         if values.device != self.encoded.device:
             raise ValueError("numeric targets and visible answers must share a device")
-        values = values.detach().double()
+        values = values.detach().to(self.encoded.dtype)
         centered = values - self.mean
         encoded = torch.where(
             torch.isfinite(centered), centered / self.scale,
@@ -156,7 +159,7 @@ class GaussianNominalAnswers:
         codes = [unit_gaussians(["v53-nominal", seed, schema.key, c], 1, labels.device)[0]
                  for c in classes.cpu().tolist()]
         codebook = (torch.stack(codes) if codes else
-                    torch.empty(0, ANSWER_WIDTH, dtype=torch.float64, device=labels.device))
+                    torch.empty(0, ANSWER_WIDTH, dtype=solve_dtype(labels), device=labels.device))
         if len(classes) != len(codebook.unique(dim=0)):
             raise FloatingPointError("numerical-failure: duplicate Gaussian nominal codes")
         positions = torch.searchsorted(classes, labels)
@@ -184,7 +187,7 @@ class GaussianNominalAnswers:
             raise ValueError("no-support: nominal decoding needs visible evidence")
         # Equal norms make maximum dot product equivalent to nearest code;
         # argmax's first entry gives declared-domain order on exact ties.
-        scores = encoded.double() @ self.codebook.T
+        scores = encoded.to(self.codebook.dtype) @ self.codebook.T
         finite(scores, "nominal code comparison")
         return self.classes[scores.argmax(-1)]
 
@@ -252,7 +255,7 @@ class CompositionNominalAnswers(GaussianNominalAnswers):
             raise ValueError("no-support: nominal decoding needs visible evidence")
         # The b_ac have equal norms; q_a+b_ac generally do not. Subtracting q_a
         # is essential, even for predictions outside the candidates' affine hull.
-        scores = (encoded.double() - self.origin) @ self.category_vectors.T
+        scores = (encoded.to(self.origin.dtype) - self.origin) @ self.category_vectors.T
         finite(scores, "nominal composition code comparison")
         return self.classes[scores.argmax(-1)]
 
@@ -274,7 +277,7 @@ class IdentityOrdinalAnswers:
         if schema.kind != "ordinal":
             raise ValueError("identity-rank codec requires an ordinal schema")
         validate_values(schema, labels)
-        positions = torch.tensor(schema.rank_positions(), dtype=torch.float64, device=labels.device)
+        positions = torch.tensor(schema.rank_positions(), dtype=solve_dtype(labels), device=labels.device)
         ranks = positions / max(schema.domain_size - 1, 1)
         if codec_version == "unit_gaussian_v2":
             identities = torch.stack([
@@ -321,7 +324,7 @@ class IdentityOrdinalAnswers:
             raise ValueError("no-support: ordinal decoding needs visible evidence")
         candidates = self.codebook[self.classes]
         # Drop only the common ||prediction||^2. Candidate norms are NOT equal.
-        distances = candidates.square().sum(-1) - 2 * (encoded.double() @ candidates.T)
+        distances = candidates.square().sum(-1) - 2 * (encoded.to(candidates.dtype) @ candidates.T)
         finite(distances, "ordinal nearest-code distances")
         return self.classes[distances.argmin(-1)]
 
@@ -348,7 +351,7 @@ class AffineOrdinalAnswers:
         if schema.kind != "ordinal":
             raise ValueError("affine ordinal codec requires an ordinal schema")
         validate_values(schema, labels)
-        positions = torch.tensor(schema.rank_positions(), dtype=torch.float64, device=labels.device)
+        positions = torch.tensor(schema.rank_positions(), dtype=solve_dtype(labels), device=labels.device)
         ranks = positions / max(schema.domain_size - 1, 1)
         if codec_version == "unit_gaussian_v1":
             origin, direction = unit_gaussians(
@@ -390,7 +393,7 @@ class AffineOrdinalAnswers:
         if not len(self.encoded):
             raise ValueError("no-support: ordinal decoding needs visible evidence")
         coordinate = (
-            (encoded.double() - self.origin) @ self.direction
+            (encoded.to(self.origin.dtype) - self.origin) @ self.direction
             / self.direction.square().sum()
         )
         finite(coordinate, "ordinal projected rank")

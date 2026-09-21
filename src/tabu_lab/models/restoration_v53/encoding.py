@@ -10,6 +10,7 @@ from torch import Tensor, nn
 from torch.nn import functional as F
 
 from ..restoration._validation import finite, matrix, positive
+from ..restoration._dtype import solve_dtype
 from ..restoration.answers import CategoricalAnswers, NumericAnswers
 from ..restoration.contracts import RestorationInput
 from ..restoration.encoding import EncodingLayout, prepare_features, visible_codes
@@ -76,7 +77,7 @@ class AffineNumericAnswers:
         matrix(encoded, "affine prediction")
         if encoded.shape[1] != ANSWER_WIDTH or encoded.device != self.origin.device:
             raise ValueError("affine predictions need 128 coordinates on the codec device")
-        z = (encoded.double() - self.origin) @ self.direction
+        z = (encoded.to(self.origin.dtype) - self.origin) @ self.direction
         # Raw 128/4 directions have squared norm 4; Gaussian directions have 1.
         z = z / self.direction_norm_squared
         return self.scalar.decode(z[:, None])
@@ -139,7 +140,7 @@ class AffineValueEncoder(nn.Module):
                 )
                 if schema.kind == "ordinal":
                     positions = torch.tensor(
-                        schema.rank_positions(), dtype=torch.float64, device=values.device
+                        schema.rank_positions(), dtype=solve_dtype(values), device=values.device
                     )
                     rank = positions[values] / max(schema.domain_size - 1, 1)
             elif schema.kind == "nominal":

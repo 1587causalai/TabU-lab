@@ -26,10 +26,10 @@ not a generalization claim.
 Initial host assignment is one table per host: `dgx2` → `discoscm_095`,
 `deepthought` → `scm_mixed_v1_001`, `gongqian-mini` → `scm_mixed_v1_017`,
 `zichao-mini` → `scm_mixed_v1_040`, and `dustinstudio` → `discoscm_076`.
-DGX2/DeepThought use CUDA FP64. The three Mac assignments use an explicit CPU
-FP64 invocation because the current V5.4 runner does not yet qualify MPS/FP32;
-that difference is recorded in the host receipts and must not be pooled as a
-backend comparison. MPS qualification is a subsequent experiment.
+DGX2/DeepThought use CUDA FP64. The three Mac assignments use MPS FP32 with
+CPU fallback disabled. Backend and dtype are part of the run identity; metrics
+from CUDA FP64 and MPS FP32 are reported per host and are not silently pooled
+as a bitwise-equivalent trajectory.
 
 Before a run, validate a manifest with `curriculum-v54 plan` and `preflight`.
 Every run gets a new output directory; no historical checkpoint is resumed.

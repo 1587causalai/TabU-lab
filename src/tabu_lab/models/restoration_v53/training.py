@@ -10,6 +10,7 @@ from torch import Tensor
 from ..restoration._prepared import TensorVersions
 from ..restoration._validation import finite, positive
 from ..restoration.losses import encoding_mse
+from ..restoration._dtype import solve_dtype
 from ..restoration.training import LossConfig as LegacyLossConfig
 from ..restoration.training import _masked_mean, _preflight
 from .encoding import ANSWER_WIDTH
@@ -76,7 +77,9 @@ def score_prepared_episode(
     config = loss_config or V53LossConfig()
     prepared.versions.validate()
     output = model.forward_prepared(prepared.visible, decode=decode)
-    losses = output.carriers.new_zeros(len(output.request.targets), dtype=torch.float64)
+    losses = output.carriers.new_zeros(
+        len(output.request.targets), dtype=solve_dtype(output.carriers)
+    )
     for column in output.columns:
         per_cell = encoding_mse(column.result.encoding, prepared.encoded_truth[column.column])
         if prepared.visible.inputs.schema[column.column].kind == "numeric":
