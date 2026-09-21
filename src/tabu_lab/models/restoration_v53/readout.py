@@ -1,8 +1,9 @@
 """One column-shared slope, fitted over ALL current Unit centers (pi=1/N).
 
-FP64 sufficient-statistic reference. Center chunks bound forward temporaries;
-autograd still retains intermediates across chunks. This is not yet a bounded
-training-memory implementation or a production throughput claim.
+The sufficient-statistic path supports the recorded FP64 CPU/CUDA and FP32
+MPS runtimes. Center chunks bound forward temporaries; autograd still retains
+intermediates across chunks. This is not yet a bounded training-memory
+implementation or a production throughput claim.
 """
 
 from __future__ import annotations
@@ -90,13 +91,17 @@ def shared_slope(
     system = system + ridge * torch.eye(x.shape[1], dtype=x.dtype, device=x.device)
     finite(system, "column-shared ridge system")
     finite(cross, "column-shared cross moment")
-    solve_system, solve_cross = system, cross
-    if system.device.type == "mps":
-        solve_system, solve_cross = system.cpu(), cross.cpu()
-    factor, info = torch.linalg.cholesky_ex(solve_system)
+    # Keep the solve on the execution device. The old MPS branch copied the
+    # sufficient statistics to CPU for Cholesky and copied the slope back on
+    # every training step. Besides making MPS materially slower, that split
+    # the forward graph across devices and made the advertised MPS/FP32 path
+    # false. Qualified PyTorch MPS runtimes implement both ``cholesky_ex`` and
+    # ``cholesky_solve`` for this small FP32 system, so the device-local path
+    # is the reference for every backend.
+    factor, info = torch.linalg.cholesky_ex(system)
     if bool((info != 0).any()):
         raise FloatingPointError("numerical-failure: column-shared LL Cholesky failed")
-    slope = torch.cholesky_solve(solve_cross, factor).T.to(system.device)
+    slope = torch.cholesky_solve(cross, factor).T
     finite(slope, "column-shared slope")
     return slope
 

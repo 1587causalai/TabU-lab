@@ -141,3 +141,37 @@ def test_overflow_is_not_an_empty_source():
     units[0, 0] = 1e308
     with pytest.raises(FloatingPointError, match="numerical-failure"):
         fit(units, cells, rows, answers)
+
+
+@pytest.mark.skipif(not torch.backends.mps.is_available(), reason="MPS is unavailable")
+def test_mps_shared_slope_stays_on_mps_through_cholesky_and_backward():
+    device = torch.device("mps")
+    units = torch.randn(7, 3, device=device, dtype=torch.float32, requires_grad=True)
+    cells = torch.randn(7, 4, device=device, dtype=torch.float32, requires_grad=True)
+    rows = torch.tensor([0, 1, 3, 5], device=device)
+    answers = torch.randn(4, 4, device=device, dtype=torch.float32)
+
+    slope = shared_slope(
+        units,
+        rows,
+        cells[rows],
+        answers,
+        ridge=0.17,
+        bandwidth=1.3,
+        center_chunk_size=2,
+    )
+    assert slope.device.type == "mps"
+    assert slope.dtype == torch.float32
+    # Some MPS backward kernels (including index_put accumulation) have no
+    # strict deterministic implementation. The runner already uses
+    # warn_only=True on MPS; isolate this device smoke from any strict global
+    # setting left by another test while preserving and restoring that state.
+    deterministic = torch.are_deterministic_algorithms_enabled()
+    torch.use_deterministic_algorithms(False)
+    try:
+        slope.square().sum().backward()
+    finally:
+        torch.use_deterministic_algorithms(deterministic)
+    torch.mps.synchronize()
+    assert units.grad is not None and units.grad.device.type == "mps"
+    assert torch.isfinite(slope).all()

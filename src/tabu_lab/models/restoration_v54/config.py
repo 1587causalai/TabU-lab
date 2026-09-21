@@ -41,6 +41,11 @@ class V54Config(V53Config):
     codec_version: str = DEFAULT_COMPOSITION_CODEC_VERSION
     size: str = "small"
     subtokens: int = 1
+    # V5.4's device-local shared LL readout benefits from larger center
+    # batches. 128 is the measured throughput point on the configured MPS
+    # runners while remaining below the 256-center population size; callers
+    # can still override it explicitly for memory-constrained runs.
+    center_chunk_size: int = 128
 
     def __post_init__(self):
         if not isinstance(self.size, str) or self.size.lower() not in _SIZE_FIELDS:

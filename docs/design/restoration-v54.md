@@ -102,8 +102,12 @@ The current data adapter supports one `target_column` per table. The document's
 explicit multi-target supervised extension is not implemented by this adapter;
 unsupported fields are rejected. The reference runner supports single-process
 FP64 on CPU/CUDA and explicit MPS FP32 execution with CPU fallback disabled.
-MPS uses its own recorded runtime and bounded numerical comparison; it is not a
-bitwise-equivalent continuation of a CUDA FP64 trajectory.
+The MPS shared-LL readout keeps Cholesky and triangular solve on `mps:0`; it
+does not copy sufficient statistics to CPU. V5.4 defaults to
+`center_chunk_size=128` for the device-local readout, with an explicit smaller
+override available for memory-constrained runs. MPS uses its own recorded
+runtime and bounded numerical comparison; it is not a bitwise-equivalent
+continuation of a CUDA FP64 trajectory.
 
 ## Local checks and preparation
 

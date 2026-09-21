@@ -98,19 +98,23 @@ def _model_source(identity):
 
 def _loss_terms(score, prepared, config):
     losses = score.per_target.detach()
-    result = {"retained_contribution": 0.0, "query_contribution": 0.0}
+    names = ("retained_contribution", "query_contribution")
+    result = {name: losses.new_zeros(()) for name in names}
     for mask, weight in ((prepared.numeric, 1.0), (~prepared.numeric, config.discrete_weight)):
-        total = int(mask.sum())
-        if not total:
-            continue
+        # Keep population counts on-device. The old int(mask.sum()) and
+        # int(selected.sum()) branches synchronized MPS/CUDA once per type and
+        # state before the actual metric transfer below.
+        total = mask.sum().clamp_min(1).to(losses.dtype)
         for state, name in ((0, "retained"), (1, "query")):
             selected = mask & (prepared.states == state)
-            count = int(selected.sum())
-            if count:
-                term = losses[selected].sum() / (count if config.state_weights else total)
-                multiplier = config.state_weights[state] if config.state_weights else 1.0
-                result[f"{name}_contribution"] += float(term) * multiplier * weight
-    return result
+            count = selected.sum().clamp_min(1).to(losses.dtype)
+            term = losses[selected].sum() / (count if config.state_weights else total)
+            multiplier = config.state_weights[state] if config.state_weights else 1.0
+            result[f"{name}_contribution"] += term * multiplier * weight
+    # Transfer the small metric vector once instead of synchronizing once per
+    # state/type term. The loss itself is already detached above.
+    values = torch.stack([result[name] for name in names]).cpu().tolist()
+    return dict(zip(names, values))
 
 
 def train_step(model, optimizer, plan, table, recipe, index, device, loss_config, *, namespace=""):
@@ -130,7 +134,10 @@ def train_step(model, optimizer, plan, table, recipe, index, device, loss_config
     score = score_prepared_episode(model, prepared, loss_config=loss_config)
     score.loss.backward()
     parameters = [parameter for parameter in model.parameters() if parameter.grad is not None]
-    if not parameters or not all(bool(torch.isfinite(p.grad).all()) for p in parameters):
+    # Reduce all gradient finiteness flags on-device and synchronize once.
+    # Checking every parameter with a separate bool() serializes MPS/CUDA
+    # launches and was a measurable part of the per-step cost.
+    if not parameters or not finite_state([parameter.grad for parameter in parameters]):
         raise FloatingPointError("missing or nonfinite gradients; update rejected")
     norm = torch.nn.utils.clip_grad_norm_(
         parameters, plan.optimizer.grad_clip, error_if_nonfinite=True

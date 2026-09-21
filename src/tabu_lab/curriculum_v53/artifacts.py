@@ -42,13 +42,40 @@ def append_event(path, value):
 
 
 def finite_state(value):
-    if isinstance(value, torch.Tensor):
-        return bool(torch.isfinite(value).all())
-    if isinstance(value, dict):
-        return all(finite_state(item) for item in value.values())
-    if isinstance(value, list | tuple):
-        return all(finite_state(item) for item in value)
-    return not isinstance(value, float) or math.isfinite(value)
+    """Return whether nested tensor state is finite with minimal host sync.
+
+    Tensor-by-tensor ``bool(torch.isfinite(...).all())`` checks force a device
+    synchronization for every parameter and optimizer slot. A curriculum
+    update can contain hundreds of tensors, which is particularly expensive on
+    MPS and also stalls CUDA launch overlap. Accumulate one scalar flag per
+    device and synchronize only once per device while preserving the same
+    fail-closed semantics, including mixed-device state dictionaries.
+    """
+    tensor_flags = {}
+    python_finite = True
+
+    def walk(item):
+        nonlocal python_finite
+        if isinstance(item, torch.Tensor):
+            tensor_flags.setdefault(item.device, []).append(
+                torch.isfinite(item).all().reshape(())
+            )
+        elif isinstance(item, dict):
+            for sub in item.values():
+                walk(sub)
+        elif isinstance(item, list | tuple):
+            for sub in item:
+                walk(sub)
+        elif isinstance(item, float) and not math.isfinite(item):
+            python_finite = False
+
+    walk(value)
+    if not python_finite:
+        return False
+    for flags in tensor_flags.values():
+        if not bool(torch.stack(flags).all()):
+            return False
+    return True
 
 
 def rng_state():

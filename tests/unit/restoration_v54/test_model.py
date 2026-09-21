@@ -59,6 +59,7 @@ def test_named_sizes_resolve_consistently_and_roundtrip(size, expected):
     assert cfg == V54Config.from_size(size) == V54Config.from_dict({"size": size.upper()})
     assert cfg == V54Config.from_dict(json.loads(json.dumps(cfg.as_dict())))
     assert cfg.codec_version == DEFAULT_CODEC_VERSION == "constant_weight_composition_v1"
+    assert cfg.center_chunk_size == 128
     assert cfg.numeric_scaling == "zscore" and cfg.slope_source == "shared_ll"
     assert cfg.subtokens == 1 and cfg.regression_width is None
     assert backbone.kind == "inducing" and backbone.tau_presence == 1
