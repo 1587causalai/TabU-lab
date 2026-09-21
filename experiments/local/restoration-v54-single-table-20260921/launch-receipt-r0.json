@@ -55,6 +55,21 @@
   "code_commit": "8613e4b3243696042fa6297c80ae60fc66493a3e",
   "episode_kind": "supervised_row",
   "panel_commit": "8876e07",
+  "power_guard": "caffeinate -dimsu -w attached to the active r0 and replicate-queue PIDs on Mac hosts; guards exit when their target exits",
+  "power_guard_pids": {
+    "dustinstudio": {
+      "queue": 45404,
+      "r0": 45361
+    },
+    "gongqian-mini": {
+      "queue": 4940,
+      "r0": 4912
+    },
+    "zichao-mini": {
+      "queue": 67748,
+      "r0": 67721
+    }
+  },
   "queue_script_commit": "538d174",
   "remote_source_root": "~/tabu-v54-single-table-20260921-r1",
   "replicates_per_table": 3,
