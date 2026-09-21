@@ -17,7 +17,6 @@ import torch
 
 from tabu_lab.models.restoration_v53 import (
     V53LossConfig,
-    V53Model,
     prepare_episode,
     score_prepared_episode,
 )
@@ -34,6 +33,7 @@ from .artifacts import (
 )
 from .data import build_episode
 from .evaluation import BudgetExhausted, evaluate_probe
+from .factory import artifact_schema, make_model
 from .protocol import schedule_entry
 from .reporting import write_report
 
@@ -252,7 +252,7 @@ def run(
     stop_requested = []
     previous_signals = {}
     result = {
-        "schema": "tabu.curriculum.v53.terminal.v1",
+        "schema": artifact_schema(plan.spec["schema"], "terminal"),
         "status": "local_unissued",
         "identity": plan.identity,
         "outcome": "started",
@@ -326,7 +326,7 @@ def run(
     try:
         runtime = configure_runtime(device)
         _seed_model(plan)
-        model = V53Model(plan.config).to(device=device, dtype=torch.float64)
+        model = make_model(plan).to(device=device, dtype=torch.float64)
         optimizer = adamw(model, plan.optimizer)
         parent = resume or initialize_from
         if parent:
@@ -374,6 +374,7 @@ def run(
             else:
                 if (
                     payload.get("purpose") != "training"
+                    or payload["identity"].get("schema") != plan.spec["schema"]
                     or payload["model_config"] != plan.config.as_dict()
                     or not _model_source(plan.identity)
                     or _model_source(payload["identity"]) != _model_source(plan.identity)
@@ -555,7 +556,7 @@ def evaluate_checkpoint(plan, checkpoint, output, *, device="cpu", probes=None):
     output = Path(output)
     output.mkdir(parents=True, exist_ok=False)
     result = {
-        "schema": "tabu.curriculum.v53.evaluation.v1",
+        "schema": artifact_schema(plan.spec["schema"], "evaluation"),
         "outcome": "started",
         "status": "local_unissued",
         "identity": plan.identity,
@@ -573,7 +574,7 @@ def evaluate_checkpoint(plan, checkpoint, output, *, device="cpu", probes=None):
             probe["name"] for probe in plan.spec["probes"]
         }:
             raise ValueError("unknown or duplicate probe names")
-        model = V53Model(plan.config).to(device=device, dtype=torch.float64)
+        model = make_model(plan).to(device=device, dtype=torch.float64)
         model.load_state_dict(payload["model"])
         reports = {
             probe["name"]: evaluate_probe(model, plan, probe, device)

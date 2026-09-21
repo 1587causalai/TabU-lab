@@ -12,7 +12,7 @@ from torch import Tensor
 
 from ..restoration._validation import finite, matrix, positive
 from ..restoration.contracts import ColumnSchema, validate_values
-from .codec_versions import DEFAULT_CODEC_VERSION
+from .codec_versions import DEFAULT_CODEC_VERSION, DEFAULT_COMPOSITION_CODEC_VERSION
 
 ANSWER_WIDTH = 128
 
@@ -48,6 +48,25 @@ def constant_weight_vectors(
         seen.add(positions)
         vectors[i, list(positions)] = 1
     return vectors.to(device)
+
+
+def composition_vectors(
+    identity: list, count: int, device: torch.device, *, codec_version: str,
+) -> Tensor:
+    """V5.4 bases with a distinct, versioned realization namespace.
+
+    Distinct sampled vectors are required within each bank. Separate origin
+    and category banks may overlap, including exact equality.
+    """
+    identity = ["v54-composition", codec_version, *identity]
+    if codec_version == "constant_weight_composition_v1":
+        return constant_weight_vectors(identity, count, 4, device)
+    if codec_version == "unit_gaussian_composition_v1":
+        vectors = unit_gaussians(identity, count, device)
+        if len(vectors.unique(dim=0)) != count:
+            raise FloatingPointError("numerical-failure: duplicate Gaussian composition bases")
+        return vectors
+    raise ValueError("unknown composition codec version")
 
 
 @dataclass(frozen=True)
@@ -189,6 +208,56 @@ class ConstantWeightNominalAnswers(GaussianNominalAnswers):
 
 
 @dataclass(frozen=True)
+class CompositionNominalAnswers(GaussianNominalAnswers):
+    """Visible nominal codes q_a+b_ac with a shared episode-local column origin.
+
+    Keep both components as dataclass tensors so prepared snapshots guard all
+    state used by the decoder, including tensors not present in the input lift.
+    Target lookup and its no-support/no-answer-code rules are inherited.
+    """
+
+    origin: Tensor
+    category_vectors: Tensor
+
+    @classmethod
+    def from_visible(
+        cls, labels: Tensor, *, schema: ColumnSchema, seed: int,
+        codec_version: str = DEFAULT_COMPOSITION_CODEC_VERSION,
+    ):
+        if schema.kind != "nominal":
+            raise ValueError("composition nominal codec requires a nominal schema")
+        validate_values(schema, labels)
+        classes = labels.unique(sorted=True)
+        origin = composition_vectors(
+            ["nominal-origin", seed, schema.key], 1, labels.device,
+            codec_version=codec_version,
+        )[0]
+        category_vectors = composition_vectors(
+            ["nominal-categories", seed, schema.key, classes.cpu().tolist()],
+            len(classes), labels.device, codec_version=codec_version,
+        )
+        codebook = origin + category_vectors
+        finite(codebook, "nominal composition codebook")
+        return cls(
+            codebook[torch.searchsorted(classes, labels)], labels.detach().clone(),
+            classes, codebook, schema.domain_size, origin, category_vectors,
+        )
+
+    @torch.no_grad()
+    def decode(self, encoded: Tensor) -> Tensor:
+        matrix(encoded, "nominal prediction")
+        if encoded.shape[1] != ANSWER_WIDTH or encoded.device != self.codebook.device:
+            raise ValueError("nominal predictions need 128 coordinates on the codec device")
+        if not len(self.classes):
+            raise ValueError("no-support: nominal decoding needs visible evidence")
+        # The b_ac have equal norms; q_a+b_ac generally do not. Subtracting q_a
+        # is essential, even for predictions outside the candidates' affine hull.
+        scores = (encoded.double() - self.origin) @ self.category_vectors.T
+        finite(scores, "nominal composition code comparison")
+        return self.classes[scores.argmax(-1)]
+
+
+@dataclass(frozen=True)
 class IdentityOrdinalAnswers:
     """Full schema identity codebook plus one shared normalized-rank direction."""
 
@@ -289,6 +358,13 @@ class AffineOrdinalAnswers:
             origin, direction = constant_weight_vectors(
                 ["v53-ordinal-affine-constant", seed, schema.key],
                 2, 4, labels.device,
+            )
+        elif codec_version in (
+            "constant_weight_composition_v1", "unit_gaussian_composition_v1",
+        ):
+            origin, direction = composition_vectors(
+                ["ordinal-affine", seed, schema.key], 2, labels.device,
+                codec_version=codec_version,
             )
         else:
             raise ValueError("shared-origin ordinal codec requires an affine codec version")

@@ -16,14 +16,16 @@ from ..restoration.encoding import EncodingLayout, prepare_features, visible_cod
 from .answers import (
     ANSWER_WIDTH,
     AffineOrdinalAnswers,
+    CompositionNominalAnswers,
     ConstantWeightNominalAnswers,
     GaussianNominalAnswers,
     IdentityOrdinalAnswers,
     ZScoreAnswers,
+    composition_vectors,
     constant_weight_vectors,
     unit_gaussians,
 )
-from .codec_versions import CODEC_VERSIONS, DEFAULT_CODEC_VERSION
+from .codec_versions import CODEC_VERSIONS, COMPOSITION_CODEC_VERSIONS, DEFAULT_CODEC_VERSION
 
 
 @dataclass(frozen=True)
@@ -48,6 +50,10 @@ class AffineNumericAnswers:
         # no process RNG and is stable under column reordering.
         if codec_version == "constant_weight_v1":
             basis = constant_weight_vectors(["v53-affine-constant", seed, key], 2, 4, values.device)
+        elif codec_version in COMPOSITION_CODEC_VERSIONS:
+            basis = composition_vectors(
+                ["numeric-affine", seed, key], 2, values.device, codec_version=codec_version,
+            )
         elif codec_version in CODEC_VERSIONS:
             basis = unit_gaussians(["v53-affine", seed, key], 2, values.device)
         else:
@@ -55,8 +61,10 @@ class AffineNumericAnswers:
         origin, direction = basis.unbind()
         encoded = origin + scalar.encoded * direction
         finite(encoded, "affine visible encoding")
-        return cls(scalar, origin, direction, encoded,
-                   4.0 if codec_version == "constant_weight_v1" else 1.0)
+        norm_squared = 4.0 if codec_version == "constant_weight_v1" else 1.0
+        if codec_version in COMPOSITION_CODEC_VERSIONS:
+            norm_squared = float(direction.square().sum())
+        return cls(scalar, origin, direction, encoded, norm_squared)
 
     def encode_targets(self, values: Tensor) -> Tensor:
         """Scorer-only truth encoding with this episode's visible statistics."""
@@ -79,6 +87,7 @@ class V53ColumnFacts:
     rows: Tensor
     answers: (
         AffineNumericAnswers | GaussianNominalAnswers | AffineOrdinalAnswers
+        | ConstantWeightNominalAnswers | CompositionNominalAnswers
         | IdentityOrdinalAnswers | CategoricalAnswers
     )
     input_coordinates: Tensor
@@ -134,13 +143,21 @@ class AffineValueEncoder(nn.Module):
                     )
                     rank = positions[values] / max(schema.domain_size - 1, 1)
             elif schema.kind == "nominal":
-                nominal_type = (ConstantWeightNominalAnswers
-                                if self.codec_version == "constant_weight_v1"
-                                else GaussianNominalAnswers)
-                codec = nominal_type.from_visible(
-                    values, schema=schema, seed=inputs.code_seed
-                )
-            elif self.codec_version in ("unit_gaussian_v1", "constant_weight_v1"):
+                if self.codec_version in COMPOSITION_CODEC_VERSIONS:
+                    codec = CompositionNominalAnswers.from_visible(
+                        values, schema=schema, seed=inputs.code_seed,
+                        codec_version=self.codec_version,
+                    )
+                else:
+                    nominal_type = (ConstantWeightNominalAnswers
+                                    if self.codec_version == "constant_weight_v1"
+                                    else GaussianNominalAnswers)
+                    codec = nominal_type.from_visible(
+                        values, schema=schema, seed=inputs.code_seed
+                    )
+            elif self.codec_version in (
+                "unit_gaussian_v1", "constant_weight_v1", *COMPOSITION_CODEC_VERSIONS,
+            ):
                 codec = AffineOrdinalAnswers.from_visible(
                     values, schema=schema, seed=inputs.code_seed,
                     codec_version=self.codec_version,

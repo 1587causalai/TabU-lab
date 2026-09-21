@@ -28,13 +28,14 @@ process part of the deliverable.
 
 ## What exists today
 
-Status as of **2026-09-16**: active experimental development. The repository contains
+Status as of **2026-09-21**: active experimental development. The repository contains
 implementation checks and exploratory training reports; broad unseen-table
 generalization remains an open research question.
 
 | Research asset | What a reader can inspect | What the evidence supports |
 | --- | --- | --- |
 | Table-restoration implementation | [Five-step guide](docs/tutorials/table-restoration.md), [implementation review](docs/reviews/restoration-five-step-20260915/README.md) | Typed value encoding, contextual representations, Unit-based geometry, and LL/NW restoration; bounded implementation checks |
+| V5.4 reference and curriculum | [Design, versioned API and episode defaults](docs/design/restoration-v54.md), [CPU example](examples/restoration_v54_smoke.py) | Shared-column composition codes, named sizes, Small with 3 Unit layers, Nano comparison, and supervised-row episodes; local implementation checks, not a fitting result |
 | V5.3 reference implementation | [Design and Python entry point](docs/design/restoration-v53.md), [CPU example](examples/restoration_v53_smoke.py) | Affine numeric encoding and column-shared LL, with local correctness checks; a separate API from the historical training CLI |
 | V5.3 curriculum runner | [Protocol and runnable fixture](docs/tutorials/v53-curriculum.md) | Explicit stage questions, frozen probes, train/validation/test isolation, budgets, atomic checkpoints, and exact local resume; single-process FP64 |
 | Reusable execution work | [Prepared-execution review](docs/reviews/restoration-prepared-20260916/README.md) | Scoped equivalence and timing checks, with source, configuration, and limitations recorded |

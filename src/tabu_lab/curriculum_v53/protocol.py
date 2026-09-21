@@ -1,4 +1,4 @@
-"""Strict, portable V5.3 curriculum plans and directly addressable schedules."""
+"""Versioned portable curriculum plans and directly addressable schedules."""
 
 from __future__ import annotations
 
@@ -18,6 +18,7 @@ from tabu_lab.restoration_masking import default_v53_query_guard, validate_numer
 from tabu_lab.restoration_optimizers import OptimizerConfig
 
 SCHEMA = "tabu.curriculum.v53.v1"
+V54_SCHEMA = "tabu.curriculum.v54.v1"
 _SEEDS = {"model", "order", "masks", "codes", "windows", "evaluation"}
 _TOP_FIELDS = {
     "schema", "experiment_id", "seeds", "model", "optimizer", "tables", "probes",
@@ -93,7 +94,19 @@ def _names(value, name, *, empty=False):
     return values
 
 
-def _model(value):
+def _model(value, schema=SCHEMA):
+    if schema == V54_SCHEMA:
+        from tabu_lab.models.restoration_v54 import V54Config
+
+        value = _mapping(value, "model", {field.name for field in fields(V54Config)})
+        try:
+            config = V54Config.from_dict(value)
+        except (TypeError, AttributeError) as error:
+            raise ValueError(f"invalid model configuration: {error}") from error
+        if config.slope_source != "shared_ll":
+            raise ValueError("curriculum requires serializable shared_ll; "
+                             "feature slope is unsupported")
+        return config
     value = _mapping(value, "model", {field.name for field in fields(V53Config)})
     backbone = _mapping(value.get("backbone", {}), "model.backbone",
                         {field.name for field in fields(BackboneConfig)})
@@ -104,6 +117,10 @@ def _model(value):
         config = V53Config.from_dict(resolved)
     except (TypeError, AttributeError) as error:
         raise ValueError(f"invalid model configuration: {error}") from error
+    if config.codec_version not in (
+        "legacy_v53", "unit_gaussian_v1", "unit_gaussian_v2", "constant_weight_v1"
+    ):
+        raise ValueError("V5.3 manifests require a V5.3 codec; use curriculum-v54 for composition")
     if config.slope_source != "shared_ll":
         raise ValueError("curriculum requires serializable shared_ll; feature slope is unsupported")
     return config
@@ -136,9 +153,11 @@ def _optimizer(value):
     return OptimizerConfig(**resolved)
 
 
-def _recipe(value, name):
+def _recipe(value, name, *, default_kind=None):
     value = _mapping(value, name, {"kind", "fraction", "numeric_query_guard"},
-                     {"kind", "fraction"})
+                     {"fraction"} if default_kind is not None else {"kind", "fraction"})
+    if default_kind is not None:
+        value.setdefault("kind", default_kind)
     if value["kind"] not in ("random_cell", "supervised_row"):
         raise ValueError(f"{name}.kind must be random_cell or supervised_row")
     fraction = _number(value["fraction"], f"{name}.fraction")
@@ -185,7 +204,7 @@ def _table_entries(value):
     return entries
 
 
-def _probes(value, cohorts):
+def _probes(value, cohorts, *, default_kind=None):
     probes, seen = [], set()
     allowed = {"name", "cohorts", "partition", "purpose", "recipe", "masks"}
     purposes = {"fit", "retention", "transfer", "validation", "final_test", "retrospective"}
@@ -202,7 +221,8 @@ def _probes(value, cohorts):
             raise ValueError(f"probe {name}: invalid partition")
         if probe["purpose"] not in purposes:
             raise ValueError(f"probe {name}: invalid purpose")
-        probe["recipe"] = _recipe(probe["recipe"], f"probe {name}.recipe")
+        probe["recipe"] = _recipe(probe["recipe"], f"probe {name}.recipe",
+                                   default_kind=default_kind)
         _integer(probe["masks"], f"probe {name}.masks")
         if probe["partition"] != "train" and (
             probe["recipe"]["kind"] != "supervised_row" or probe["masks"] != 1
@@ -219,7 +239,7 @@ def _probes(value, cohorts):
     return probes
 
 
-def _stages(value, tables, probes):
+def _stages(value, tables, probes, *, default_kind=None):
     result, seen = [], set()
     probe_by_name = {probe["name"]: probe for probe in probes}
     cohort_kinds: dict[str, set[str]] = {}
@@ -254,7 +274,8 @@ def _stages(value, tables, probes):
             sampling.append(item)
         stage["sampling"] = sampling
         recipes = _mapping(stage["recipe"], f"stage {name}.recipe", {"synthetic", "real"}, kinds)
-        stage["recipe"] = {kind: _recipe(recipe, f"stage {name}.recipe.{kind}")
+        stage["recipe"] = {kind: _recipe(recipe, f"stage {name}.recipe.{kind}",
+                                         default_kind=default_kind)
                            for kind, recipe in recipes.items()}
         if stage["optimizer"] not in ("adamw", "muon"):
             raise ValueError(f"stage {name}: optimizer must be adamw or muon")
@@ -316,12 +337,15 @@ def _digest(value):
     return hashlib.sha256(encoded).hexdigest()
 
 
-def _source_digest():
+def _source_digest(schema=SCHEMA):
     root = Path(__file__).resolve().parents[1]
     paths = [root / name for name in (
         "cli.py", "restoration_masking.py", "restoration_optimizers.py", "tar_data.py",
     )]
-    for relative in ("curriculum_v53", "models/restoration_v53", "models/restoration"):
+    directories = ["curriculum_v53", "models/restoration_v53", "models/restoration"]
+    if schema == V54_SCHEMA:
+        directories.append("models/restoration_v54")
+    for relative in directories:
         paths.extend(sorted((root / relative).rglob("*.py")))
     hashes = {path.relative_to(root).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
               for path in sorted(set(paths))}
@@ -346,7 +370,7 @@ def _summary(spec):
                        "optimizer": stage["optimizer"], "loss": stage["loss"],
                        "probes": stage["probes"], "gate": stage.get("gate")})
     return {
-        "schema": SCHEMA, "status": "local_unissued", "outcome": "planned",
+        "schema": spec["schema"], "status": "local_unissued", "outcome": "planned",
         "execution_started": False, "experiment_id": spec["experiment_id"],
         "model": spec["model"], "optimizer": spec["optimizer"], "stages": stages,
         "table_count": len(spec["tables"]), "probes": spec["probes"],
@@ -359,6 +383,8 @@ def _summary(spec):
                 "unit_gaussian_v1": "complete declared ranks; shared origin",
                 "unit_gaussian_v2": "complete declared identity-plus-rank codes",
                 "constant_weight_v1": "complete declared identity-plus-rank codes",
+                "unit_gaussian_composition_v1": "affine composition of column identity and rank",
+                "constant_weight_composition_v1": "affine composition of column identity and rank",
             }[spec["model"]["codec_version"]],
             "scope": "shared input/answer codec within each episode",
         },
@@ -370,27 +396,35 @@ def _summary(spec):
     }
 
 
-def load_plan(path: Path | str) -> Plan:
+def load_plan(path: Path | str, *, expected_schema: str = SCHEMA) -> Plan:
     """Read and validate a local manifest without running a model or downloading data."""
     from .data import data_fingerprint, load_table, table_summary
 
     path = Path(path).resolve()
-    spec = _mapping(yaml.safe_load(path.read_text(encoding="utf-8")), "manifest", _TOP_FIELDS,
+    raw = path.read_text(encoding="utf-8")
+    # PyYAML's YAML 1.1 resolver misreads JSON numbers such as 1e-06 as strings.
+    document = json.loads(raw) if path.suffix.lower() == ".json" else yaml.safe_load(raw)
+    spec = _mapping(document, "manifest", _TOP_FIELDS,
                     {"schema", "experiment_id", "seeds", "tables", "probes", "stages"})
-    if spec["schema"] != SCHEMA:
-        raise ValueError(f"manifest.schema must be {SCHEMA}")
+    if expected_schema not in (SCHEMA, V54_SCHEMA):
+        raise ValueError("unsupported curriculum schema")
+    if spec["schema"] != expected_schema:
+        raise ValueError(f"manifest.schema must be {expected_schema}")
     _name(spec["experiment_id"], "experiment_id")
     if "description" in spec and not isinstance(spec["description"], str):
         raise ValueError("description must be a string")
     spec["seeds"] = _mapping(spec["seeds"], "seeds", _SEEDS, _SEEDS)
     for name, seed in spec["seeds"].items():
         _integer(seed, f"seeds.{name}", minimum=0)
-    config, optimizer = _model(spec.get("model", {})), _optimizer(spec.get("optimizer", {}))
+    config = _model(spec.get("model", {}), expected_schema)
+    optimizer = _optimizer(spec.get("optimizer", {}))
     spec["model"], spec["optimizer"] = config.as_dict(), asdict(optimizer)
     spec["tables"] = _table_entries(spec["tables"])
     cohorts = {entry["cohort"] for entry in spec["tables"]}
-    spec["probes"] = _probes(spec["probes"], cohorts)
-    spec["stages"] = _stages(spec["stages"], spec["tables"], spec["probes"])
+    default_kind = "supervised_row" if expected_schema == V54_SCHEMA else None
+    spec["probes"] = _probes(spec["probes"], cohorts, default_kind=default_kind)
+    spec["stages"] = _stages(spec["stages"], spec["tables"], spec["probes"],
+                              default_kind=default_kind)
     # JSON-native normalized output also removes mutable caller-owned tuples/lists.
     spec = json.loads(json.dumps(spec, allow_nan=False))
     tables = tuple(load_table(entry, path.parent) for entry in spec["tables"])
@@ -411,7 +445,9 @@ def load_plan(path: Path | str) -> Plan:
     portable["tables"] = [{key: value for key, value in entry.items() if key != "path"}
                           for entry in spec["tables"]]
     identity = {
-        "schema": SCHEMA, "manifest_sha256": _digest(portable), "source": _source_digest(),
+        "schema": expected_schema, "manifest_sha256": _digest(portable),
+        "source": (_source_digest() if expected_schema == SCHEMA
+                   else _source_digest(expected_schema)),
         "datasets": {entry["id"]: entry["sha256"] for entry in spec["tables"]},
         "data_sha256": data_fingerprint(tables),
     }
@@ -422,6 +458,11 @@ def load_plan(path: Path | str) -> Plan:
         for table in tables
     ]
     return Plan(spec, tables, config, optimizer, identity, summary, path)
+
+
+def load_v54_plan(path: Path | str) -> Plan:
+    """Load only V5.4 manifests, with its explicit model and recipe defaults."""
+    return load_plan(path, expected_schema=V54_SCHEMA)
 
 
 def _seed(*parts):
@@ -462,4 +503,4 @@ def schedule_entry(plan: Plan, stage_index: int, cursor: int):
     return entries[position]
 
 
-__all__ = ["SCHEMA", "Plan", "load_plan", "schedule_entry"]
+__all__ = ["SCHEMA", "V54_SCHEMA", "Plan", "load_plan", "load_v54_plan", "schedule_entry"]

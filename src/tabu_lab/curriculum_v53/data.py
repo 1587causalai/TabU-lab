@@ -259,7 +259,7 @@ def build_episode(table: Table, recipe: dict, index: int, seeds: dict, device: s
     """
     kind, fraction, guard = _recipe(recipe)
     if codec_version not in CODEC_VERSIONS:
-        raise ValueError("unknown V5.3 codec_version")
+        raise ValueError("unknown restoration codec_version")
     support_policy = {
         "protect_ordinal_classes": codec_version == "legacy_v53",
         "require_numeric_diversity": codec_version != "legacy_v53",
