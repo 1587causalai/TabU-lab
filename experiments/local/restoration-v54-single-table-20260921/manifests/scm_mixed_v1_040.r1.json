@@ -1,0 +1,89 @@
+{
+  "description": "V5.4 single-table fit pilot: scm_mixed_v1_040, independent replicate 1, 16384 updates; fit only until final frozen test evaluation.",
+  "experiment_id": "v54-single-scm_mixed_v1_040-r1-20260921",
+  "model": {
+    "codec_version": "constant_weight_composition_v1",
+    "numeric_scaling": "zscore",
+    "size": "small"
+  },
+  "optimizer": {
+    "betas": [
+      0.9,
+      0.95
+    ],
+    "eps": 1e-08,
+    "grad_clip": 1.0,
+    "learning_rate": 0.0001,
+    "weight_decay": 0.01
+  },
+  "probes": [
+    {
+      "cohorts": [
+        "scm_mixed_v1_040"
+      ],
+      "masks": 8,
+      "name": "train_fit",
+      "partition": "train",
+      "purpose": "fit",
+      "recipe": {
+        "fraction": 0.25
+      }
+    },
+    {
+      "cohorts": [
+        "scm_mixed_v1_040"
+      ],
+      "masks": 1,
+      "name": "final_test",
+      "partition": "test",
+      "purpose": "final_test",
+      "recipe": {
+        "fraction": 0.25
+      }
+    }
+  ],
+  "schema": "tabu.curriculum.v54.v1",
+  "seeds": {
+    "codes": 540204,
+    "evaluation": 540206,
+    "masks": 540203,
+    "model": 540201,
+    "order": 540202,
+    "windows": 540205
+  },
+  "stages": [
+    {
+      "checkpoint_every": 512,
+      "evaluate_every": 1024,
+      "max_seconds": 172800.0,
+      "max_updates": 16384,
+      "name": "single_table_fit",
+      "optimizer": "adamw",
+      "probes": [
+        "train_fit"
+      ],
+      "question": "Can V5.4 composition learn this one table under supervised-row Query masking?",
+      "recipe": {
+        "synthetic": {
+          "fraction": 0.25
+        }
+      },
+      "sampling": [
+        {
+          "cohort": "scm_mixed_v1_040",
+          "episodes": 1
+        }
+      ]
+    }
+  ],
+  "tables": [
+    {
+      "cohort": "scm_mixed_v1_040",
+      "id": "scm_mixed_v1_040",
+      "kind": "synthetic",
+      "path": "../data/scm_mixed_v1_040.json",
+      "sha256": "1a120b122e7cabf5fe802f7658e901a9c593e76a334efb9305a0c43c46ac85a5",
+      "target_column": 11
+    }
+  ]
+}
