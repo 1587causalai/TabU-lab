@@ -4,7 +4,7 @@ This is the fresh first-wave single-table fit panel after commit `bd9a42d` (`per
 
 Each table receives three independent replicates. Each replicate has exactly **16,384 optimizer updates**, giving an initial budget of **16,384 × 3 per table**. Replicates have independent model/order/mask/code/window/evaluation seeds and are never strict continuations of one another.
 
-The baseline uses the current V5.4 default supervised-row Query masking with fraction 0.25, composition codec `constant_weight_composition_v1`, and V5.4 Small. `center_chunk_size=128` is explicit in every manifest. `random_cell` remains the first competing episode and is reserved for the next comparison after this baseline.
+The baseline uses the current V5.4 default supervised-row Query masking with fraction 0.25, composition codec `constant_weight_composition_v1`, and V5.4 Small. `center_chunk_size=128` is explicit for the three MPS manifests; the deepthought CUDA/FP64 manifests use an explicit `center_chunk_size=32` because its current WSL2 `/dev/dxg` path hangs during the first 128-chunk preflight. This host-specific override preserves the same model and codec while avoiding that backend fault. `random_cell` remains the first competing episode and is reserved for the next comparison after this baseline.
 
 Host allocation:
 
