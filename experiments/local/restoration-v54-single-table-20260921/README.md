@@ -1,7 +1,8 @@
 # V5.4 single-table fit panel (2026-09-21)
 
-This is the first executable V5.4 composition-fit panel. It is a fresh
-experiment identity on commit `8613e4b3243696042fa6297c80ae60fc66493a3e`.
+This is the first executable V5.4 composition-fit panel. The original CPU
+launch was superseded after the host configuration was corrected. The active
+MPS/FP32 rerun is a fresh execution identity on commit `9ec97ec`.
 
 Each registered table has three **independent** replicates. Each replicate has
 exactly 16,384 optimizer updates, so the initial fit budget is 49,152 updates
@@ -35,4 +36,7 @@ Before a run, validate a manifest with `curriculum-v54 plan` and `preflight`.
 Every run gets a new output directory; no historical checkpoint is resumed.
 After a terminal receipt, evaluate `final_test` in a separate output directory.
 
-The fixed `queue_replicates.sh` helper may be launched after r0. It advances only after a preceding `terminal.json` says `outcome=completed`; it never retries a failed or wall-exhausted replicate.
+The old `queue_replicates.sh` and its CPU outputs are historical invalid-device
+evidence. The active `queue_replicates_mps.sh` helper advances only after a
+preceding MPS/FP32 `terminal.json` says `outcome=completed`; it never retries a
+failed or wall-exhausted replicate.
