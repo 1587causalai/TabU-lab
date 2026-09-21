@@ -1,0 +1,89 @@
+{
+  "description": "V5.4 full-corpus single-table fit: scm_numeric_v0_098, independent replicate 2, 16384 updates.",
+  "experiment_id": "v54-single120-scm_numeric_v0_098-r2-20260921",
+  "model": {
+    "codec_version": "constant_weight_composition_v1",
+    "numeric_scaling": "zscore",
+    "size": "small"
+  },
+  "optimizer": {
+    "betas": [
+      0.9,
+      0.95
+    ],
+    "eps": 1e-08,
+    "grad_clip": 1.0,
+    "learning_rate": 0.0001,
+    "weight_decay": 0.01
+  },
+  "probes": [
+    {
+      "cohorts": [
+        "scm_numeric_v0_098"
+      ],
+      "masks": 8,
+      "name": "train_fit",
+      "partition": "train",
+      "purpose": "fit",
+      "recipe": {
+        "fraction": 0.25
+      }
+    },
+    {
+      "cohorts": [
+        "scm_numeric_v0_098"
+      ],
+      "masks": 1,
+      "name": "final_test",
+      "partition": "test",
+      "purpose": "final_test",
+      "recipe": {
+        "fraction": 0.25
+      }
+    }
+  ],
+  "schema": "tabu.curriculum.v54.v1",
+  "seeds": {
+    "codes": 541985,
+    "evaluation": 541987,
+    "masks": 541984,
+    "model": 541982,
+    "order": 541983,
+    "windows": 541986
+  },
+  "stages": [
+    {
+      "checkpoint_every": 512,
+      "evaluate_every": 1024,
+      "max_seconds": 172800.0,
+      "max_updates": 16384,
+      "name": "single_table_fit",
+      "optimizer": "adamw",
+      "probes": [
+        "train_fit"
+      ],
+      "question": "Can V5.4 composition learn this one frozen table under supervised-row Query masking?",
+      "recipe": {
+        "synthetic": {
+          "fraction": 0.25
+        }
+      },
+      "sampling": [
+        {
+          "cohort": "scm_numeric_v0_098",
+          "episodes": 1
+        }
+      ]
+    }
+  ],
+  "tables": [
+    {
+      "cohort": "scm_numeric_v0_098",
+      "id": "scm_numeric_v0_098",
+      "kind": "synthetic",
+      "path": "../../tar-diverse-120-fit/corpus/data/scm_numeric_v0_098.json",
+      "sha256": "de4e2b55a7995f353b6db241807f68036b6ab5b0ac1b8b9b25ec9d07d0f4fce8",
+      "target_column": 19
+    }
+  ]
+}

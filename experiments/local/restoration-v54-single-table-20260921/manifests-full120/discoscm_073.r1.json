@@ -1,0 +1,89 @@
+{
+  "description": "V5.4 full-corpus single-table fit: discoscm_073, independent replicate 1, 16384 updates.",
+  "experiment_id": "v54-single120-discoscm_073-r1-20260921",
+  "model": {
+    "codec_version": "constant_weight_composition_v1",
+    "numeric_scaling": "zscore",
+    "size": "small"
+  },
+  "optimizer": {
+    "betas": [
+      0.9,
+      0.95
+    ],
+    "eps": 1e-08,
+    "grad_clip": 1.0,
+    "learning_rate": 0.0001,
+    "weight_decay": 0.01
+  },
+  "probes": [
+    {
+      "cohorts": [
+        "discoscm_073"
+      ],
+      "masks": 8,
+      "name": "train_fit",
+      "partition": "train",
+      "purpose": "fit",
+      "recipe": {
+        "fraction": 0.25
+      }
+    },
+    {
+      "cohorts": [
+        "discoscm_073"
+      ],
+      "masks": 1,
+      "name": "final_test",
+      "partition": "test",
+      "purpose": "final_test",
+      "recipe": {
+        "fraction": 0.25
+      }
+    }
+  ],
+  "schema": "tabu.curriculum.v54.v1",
+  "seeds": {
+    "codes": 541254,
+    "evaluation": 541256,
+    "masks": 541253,
+    "model": 541251,
+    "order": 541252,
+    "windows": 541255
+  },
+  "stages": [
+    {
+      "checkpoint_every": 512,
+      "evaluate_every": 1024,
+      "max_seconds": 172800.0,
+      "max_updates": 16384,
+      "name": "single_table_fit",
+      "optimizer": "adamw",
+      "probes": [
+        "train_fit"
+      ],
+      "question": "Can V5.4 composition learn this one frozen table under supervised-row Query masking?",
+      "recipe": {
+        "synthetic": {
+          "fraction": 0.25
+        }
+      },
+      "sampling": [
+        {
+          "cohort": "discoscm_073",
+          "episodes": 1
+        }
+      ]
+    }
+  ],
+  "tables": [
+    {
+      "cohort": "discoscm_073",
+      "id": "discoscm_073",
+      "kind": "synthetic",
+      "path": "../../tar-diverse-120-fit/corpus/data/discoscm_073.json",
+      "sha256": "0445e8b161b4b0ab51bbd88b3f1cc1f651e7e75e3ff5570b1ce510cfaa66c056",
+      "target_column": 31
+    }
+  ]
+}
