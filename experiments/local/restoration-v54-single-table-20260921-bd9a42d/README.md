@@ -15,3 +15,5 @@ Host allocation:
 - `dustinstudio` → `discoscm_076` → MPS / FP32
 
 MPS runs require `PYTORCH_ENABLE_MPS_FALLBACK=0` and `PYTORCH_MPS_FAST_MATH=0`. The MPS shared-LL Cholesky and solve are device-local; a CPU fallback is an error. Each replicate uses a fresh output directory. A completed fit receipt establishes only single-table fit evidence; held-out final-test evaluation and generalization remain separate gates.
+
+The accompanying `queue_replicates.sh` waits for each preceding terminal receipt and refuses to advance after failure, timeout, or an existing output directory.
