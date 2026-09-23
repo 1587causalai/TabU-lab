@@ -126,8 +126,98 @@ is evidence of fitting ability or generalization. Use a fresh output directory
 for every run. To prepare the first alternative, pass `--episode-kind random_cell`
 to the fixture generator; to compare Nano, pass `--size nano`.
 
+## Training readout execution
+
+The V5.4 curriculum validates and encodes the complete observation episode
+before selecting the responses needed by the loss. CUDA/CPU training executes
+only targets with nonzero state weight. MPS training skips wholly inactive
+columns but retains the original requested rows inside each active column.
+This measured implementation is used for the first Nano runs. Changing the FP32
+readout GEMM row shapes exceeded the initial three-update optimizer comparison
+tolerance; this is a numerical diagnostic, not evidence that row pruning is
+unusable. The full table, source masks,
+visible support answers and **all N shared-LL fit centers** remain unchanged.
+Missing answer codes and invalid zero-weight columns still fail admission.
+
+Fixed evaluation keeps the full readout, including retained reconstruction.
+Skipped predictions are not produced or claimed to have passed output-finite
+checks during training. A pruned prepared snapshot rejects a loss configuration
+that enables an omitted state; reprepare the full episode for that change.
+`state_weights=None` retains the original full-observation mean. V5.3 curriculum
+execution keeps its historical full readout. Per-step receipts record
+`readout_scope` and `readout_targets`.
+
+The data adapter records the CPU-sampled mask audit before transfer to the
+training device, avoiding three immediate device-to-host readbacks. Every
+training index still resamples its original mask/code/window stream; this is
+not cross-step prepared-episode caching. Precision, finite guards, stable
+centered covariance and device-local solves are unchanged.
+
+For the current exploratory fitting stage, the owner prioritizes usable training
+and measured speed over matching individual gradients or optimizer updates.
+Small numerical differences do not veto an optimization. Assess candidates by
+runtime/finite-value checks, measured step time and fixed-Query fitting curves;
+keep data isolation, episode meaning and run provenance intact. Parameter-wise
+comparisons are optional diagnostics. They must not delay fitting merely because
+a tolerance was exceeded. More aggressive backend-specific execution remains an
+eligible candidate; record it as a separate run when it changes an active run's
+implementation.
+
+The bounded [Nano benchmark](../../experiments/local/v54-nano-speed-20260921/README.md)
+compares the same Nano, table, seeds and optimizer on each backend. These speed
+checks are separate from the
+[single-table fit panel](../../experiments/local/v54-nano-fit-20260921/README.md).
+
 Validation targets cover composition geometry and decoding, old codec stability,
 named-size configuration, forward/backward and prepared-state contracts,
 sampler/schema isolation, and exact local resume. Compare fitting variants on
 common original-value metrics: changed category-code distances make training
 loss alone unsuitable for ranking V5.3 and V5.4.
+
+## Old120 loss-prioritized extra training (2026-09-22)
+
+The owner chose a full balanced pass followed by bounded extra training. After
+120 normal updates (one per table), rank their original, pre-update Query losses
+once. The latest revision is additive P99 × 3, P95 × 2, P80 × 1. With 120 tables,
+ceil the selected proportions to top2, top6 and top24. Execute three full top2
+passes, two full top6 passes, then one top24 pass. The highest two tables thus
+receive six extras each, the next four receive three, and the next eighteen
+receive one. Each cycle has 120 normal + 42 extra = 162 actual optimizer updates.
+Resolve loss ties by table ID to keep the allocation exact. Extra losses do not change
+the current round's ranking. Extra episodes retain the supervised Query recipe
+and composition encoding, using a separate episode RNG namespace and per-table
+extra index; the normal episode stream remains directly addressable.
+
+This is the selected experimental strategy, not an empirical claim that uniform
+training is inferior. Existing manifests remain uniform unless they explicitly
+declare a `loss_replay` policy. The first deployed policy,
+`normal120_top5_top20_v1`, remains supported with its original top6 once + top24
+once (30 extras). The latest policy is `normal120_p99x3_p95x2_p80x1_v2`. Both
+support a single bounded 120-table stage. V2 records `normal_max_updates` (N),
+the complete-cycle `start_normal_cursor` (S), and inherited
+`start_extra_updates` (E). Its actual `max_updates` is N + E + (N−S)/120 × 42.
+Finish the parent's pending normal/replay cycle before migration; do not
+retroactively replay earlier cycles or erase inherited extra updates. V2
+has been used for gongqian-mini Small-H4, dgx2 standard Small and dustinstudio Nano
+as explicit migrations. Each retains its existing normal-update budget and
+ancestor history. A new weights-only experiment may also start this policy with
+S=E=0; that is a separate zero-exposure task, not a migration of parent updates.
+Migration receipts identify the first new-policy cycle and its added budget;
+historical uniform and V1 outputs retain their original semantics.
+
+The dated [old120 fit audit](../reports/v54-old120-fit-handoff-2026-09-23.md)
+found that all extra updates in the three running migrations went to numeric
+target tables, while some nominal and ordinal tables remained below their own
+visible-support majority reference. This is an observed limitation of ranking
+raw losses across target types, not a change to the frozen V5.4 policy or proof
+that an alternative policy is better. Type-stratified allocation and
+reference-normalized difficulty are next-design comparison candidates.
+
+`train_cycle` mean/median/P05/P95, plus P99 for V2, use only the normal 120 losses. Extra losses,
+normal and total update counts, and per-table extra exposure are recorded
+separately. Checkpoints retain the normal cursor, partial normal losses, frozen
+extra queue and its position, and per-table extra episode indices. A strategy
+change preserves model/optimizer/RNG/history through an explicit migration into
+a new identity and output; it is not an unchanged-recipe resume or a fresh
+weights-only start. Compare strategies using fixed training-row Query results
+at matched actual compute, never only smoother cycle curves.

@@ -106,6 +106,12 @@ easier for the next researcher to run.
 
 ## Explore the repository
 
+- [V5.4 training and monitoring playbook](docs/guides/v54-training-and-monitoring.md)
+  — reusable lessons on fitting, budgets, checkpoint lineage, CUDA/MPS speed and W&B
+- [V5.4 old120 fitting handoff](docs/reports/v54-old120-fit-handoff-2026-09-23.md)
+  — dated per-table evidence, frozen checkpoints and next-design questions
+- [Token dynamic model growth](docs/research/v54-model-growth/README.md)
+  — trained-backbone replication and distinct function-preserving growth routes
 - [Restoration experiments](experiments/local/restoration/README.md) and
   [TAR / historical experiment routes](experiments/README.md)
 - [Research reports](docs/reports/README.md) and [review records](docs/reviews/)
