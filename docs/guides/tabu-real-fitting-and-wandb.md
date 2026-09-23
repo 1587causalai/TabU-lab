@@ -1,5 +1,7 @@
 # TabUBase / TabUR 真实数据拟合与 W&B 实验教程
 
+> 本文保留 TabUBase / TabUR query-family 历史实验协议。V5.4 restoration 的 Nano/Small、old120、加训接续及独立 W&B 监控经验见 [V5.4 训练与监控经验手册](v54-training-and-monitoring.md)；请勿混用模型、检查点或运行时合同。
+
 本文是后续 TabU 实验的操作手册。它的目标不是给出一个固定的“最终训练脚本”，而是保证我们在改变数学设计、数据生成器、组件或训练配方之后，仍然能够回答：
 
 1. 模型本身有没有拟合能力？

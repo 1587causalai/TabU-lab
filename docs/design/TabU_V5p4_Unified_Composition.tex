@@ -1,0 +1,4993 @@
+% !TEX program = xelatex
+% TabU V5.4 -- V5.3 copy; encoding e_a = q_a + v_a(x); default Unit Transformer on (L_U=0 optional).
+% Technical lineage: V5.3 Refined Complete, itself from confirmed V5 and V5.2.
+% Compile with XeLaTeX twice or latexmk -xelatex. All dependencies are embedded.
+% Fourth-generation TabU-TAR is historical provenance only, not the update baseline.
+% Standard dependencies: a complete TeX Live / MiKTeX with ctex, Fandol, lm, tikz, and tcolorbox.
+\documentclass[11pt,UTF8,fontset=fandol]{ctexart}
+% Prefer embedded TrueType CJK fonts on macOS for PDF.js/Poppler portability.
+% Other hosts retain the TeX Live Fandol fallback.
+\IfFontExistsTF{Songti SC}{%
+  \setCJKmainfont{Songti SC}[ItalicFont=Songti SC,ItalicFeatures={FakeSlant=0.2}]
+  \setCJKsansfont[Script=Default]{Heiti SC}
+  \setCJKmonofont[Script=Default]{Heiti SC}
+}{}
+
+\usepackage[a4paper,margin=24mm,headheight=16pt]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools,bm}
+\usepackage{booktabs,array,longtable,tabularx,multirow}
+\usepackage{enumitem,graphicx,xcolor,fancyhdr,float}
+\usepackage{placeins,needspace,adjustbox}
+\usepackage[most]{tcolorbox}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,calc,matrix,decorations.pathreplacing}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage[unicode,bookmarksnumbered=true]{hyperref}
+\usepackage{bookmark,etoolbox}
+\definecolor{TabUBlue}{RGB}{25,63,96}
+\definecolor{TabUGray}{RGB}{70,77,84}
+\hypersetup{colorlinks=true,linkcolor=TabUBlue,urlcolor=TabUBlue,citecolor=TabUBlue,
+  pdftitle={TabU 第五代 V5.4：统一列身份组合编码},
+  pdfsubject={Unified column-value compositional encoding on the V5.3 restoration model}}
+% macOS XeLaTeX often cannot resolve the family name "Latin Modern Roman".
+% Prefer the TeX Live OpenType files; fall back to the family name if present.
+\IfFontExistsTF{lmroman10-regular.otf}{%
+  \setmainfont{lmroman10-regular.otf}[
+    BoldFont=lmroman10-bold.otf,
+    ItalicFont=lmroman10-italic.otf,
+    BoldItalicFont=lmroman10-bolditalic.otf,
+    Ligatures=TeX]
+  \setsansfont{lmsans10-regular.otf}[
+    BoldFont=lmsans10-bold.otf,
+    ItalicFont=lmsans10-oblique.otf,
+    BoldItalicFont=lmsans10-boldoblique.otf]
+  \setmonofont{lmmono10-regular.otf}[
+    Scale=0.90,
+    ItalicFont=lmmono10-italic.otf]
+}{%
+  \setmainfont{Latin Modern Roman}
+  \setsansfont{Latin Modern Sans}
+  \setmonofont{Latin Modern Mono}[Scale=0.90]
+}
+\ctexset{section={format=\Large\bfseries\color{TabUBlue}},
+  subsection={format=\large\bfseries},subsubsection={format=\normalsize\bfseries}}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.30em}
+\linespread{1.08}
+\setlist[itemize]{leftmargin=2em,itemsep=0.25em,topsep=0.4em}
+\setlist[enumerate]{leftmargin=2em,itemsep=0.3em,topsep=0.4em}
+\setcounter{tocdepth}{1}
+\setcounter{secnumdepth}{3}
+\numberwithin{equation}{section}
+\allowdisplaybreaks[2]
+\emergencystretch=2em
+\renewcommand{\arraystretch}{1.14}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\sffamily TabU V5.4 / 信息受损表格恢复}
+\fancyhead[R]{\small\sffamily 统一组合编码与完整推导}
+\fancyfoot[C]{\small\thepage}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[C]{\small\thepage}\renewcommand{\headrulewidth}{0pt}}
+\theoremstyle{definition}
+\newtheorem{definition}{定义}[section]
+\newtheorem{assumption}[definition]{假设}
+\newtheorem{proposition}[definition]{命题}
+\newtheorem{lemma}[definition]{引理}
+\newtheorem{theorem}[definition]{定理}
+\newtheorem{corollary}[definition]{推论}
+\newtheorem{remark}[definition]{说明}
+\renewcommand{\proofname}{证明}
+\newcommand{\Rset}{\mathcal U}
+\newcommand{\Fset}{\mathcal F}
+\newcommand{\Oset}{\mathcal O}
+\newcommand{\Vset}{\mathcal V}
+\newcommand{\Qset}{\mathcal Q}
+\newcommand{\Iset}{\mathcal I}
+\newcommand{\Sset}{\mathcal S}
+\newcommand{\TargetSet}{\mathcal T}
+\newcommand{\Eset}{\mathcal E}
+\newcommand{\Dset}{\mathcal D}
+\newcommand{\R}{\mathbb R}
+\newcommand{\ind}{\mathbb I}
+\newcommand{\Fstar}{\widetilde r}
+\newcommand{\Ustar}{\widetilde a}
+\newcommand{\NullTok}{\mathsf{Null}}
+\newcommand{\QueryTok}{\mathsf{Query}}
+\newcommand{\ValueTok}{\mathsf{Value}}
+\newcommand{\OAttn}{\operatorname{OAttn}}
+\newcommand{\OMAB}{\operatorname{OMAB}}
+\newcommand{\OTransformer}{\operatorname{OTransformer}}
+\newcommand{\TypedPrep}{\operatorname{TypedPrep}}
+\newcommand{\VE}{\operatorname{ValueEncoder}}
+\newcommand{\Terminal}{\operatorname{Terminal}}
+\newcommand{\Prob}{\operatorname{Prob}}
+\newcommand{\sg}{\operatorname{stopgrad}}
+
+% BEGIN embedded figures/visual-language
+
+% V5.3: local visual definitions; reconstructed because the referenced style was not attached.
+\definecolor{VFiveTeal}{HTML}{246B79}
+\definecolor{VFiveGold}{HTML}{A57834}
+\definecolor{VFiveLight}{HTML}{EDF4F6}
+\definecolor{VFiveLine}{HTML}{CCD8DF}
+\newcommand{\coreboxed}[1]{\boxed{#1}}
+\newtcolorbox{dnareadbox}[1][]{enhanced,breakable,colback=VFiveLight,colframe=VFiveTeal,
+ boxrule=.55pt,arc=1mm,left=3mm,right=3mm,top=2mm,bottom=2mm,
+ title={#1},fonttitle=\bfseries,coltitle=white}
+\newtcolorbox{vfivebox}[1][]{enhanced,breakable,colback=white,colframe=VFiveLine,
+ boxrule=.55pt,arc=1mm,left=3mm,right=3mm,top=2mm,bottom=2mm,
+ title={#1},fonttitle=\bfseries,coltitle=TabUBlue,colbacktitle=VFiveLight}
+\tikzset{v5box/.style={draw=VFiveLine,fill=VFiveLight,rounded corners=1.5pt,
+ align=center,inner sep=4pt,font=\small,minimum height=10mm},
+ v5plain/.style={v5box,fill=white},
+ v5arrow/.style={-{Latex[length=2mm]},draw=VFiveTeal,line width=.7pt},
+ v5opt/.style={v5arrow,dashed},
+ v5cell/.style={draw=VFiveLine,minimum width=16mm,minimum height=9mm,align=center,font=\scriptsize}}
+
+% END embedded figures/visual-language
+
+\begin{document}
+\hypersetup{pageanchor=false}
+\begin{titlepage}
+\setlength{\parindent}{0pt}
+{\small\sffamily\color{TabUBlue}TABU / FIFTH-GENERATION DESIGN / V5.4\par}
+\vspace{6mm}
+{\Huge\bfseries 变量空间中的表格恢复\par}
+\vspace{3mm}
+{\Large 第五代 V5.4 · 统一列身份组合编码 · 完整推导与开放接口\par}
+\vspace{4mm}
+{\small 从 V5.3 复制：\(e_a=q_a+v_a(x)\)；默认 Unit Transformer；Unit/Feature 默认 \(K=1\) \hfill 2026 年 9 月 21 日\par}
+\vspace{7mm}
+\begin{center}
+
+% BEGIN embedded figures/fig-overview
+
+% Reconstructed from the true V5 main-text interfaces; updated for V5.3.
+\begin{tikzpicture}[x=1mm,y=1mm]
+\node[v5box,text width=31mm] (e) at (0,0) {Typed table\\可见证据与角色};
+\node[v5box,text width=35mm] (c) at (46,0) {128 维值坐标\\$q_a+v_a(x)$};
+\node[v5box,text width=43mm] (h) at (102,0) {二维 OTransformer\\collect / read / row};
+\node[v5plain,text width=35mm] (u) at (102,-28) {Unit 精炼\\V5 Small：$L_U=3$};
+\node[v5box,text width=35mm] (r) at (46,-28) {列共享 LL\\局部截距保留};
+\node[v5plain,text width=31mm] (x) at (0,-28) {最近合法表示\\还原 Cell value};
+\draw[v5arrow] (e)--(c);\draw[v5arrow] (c)--(h);
+\draw[v5arrow] (h)--(u);\draw[v5arrow] (u)--node[above,font=\scriptsize] {Unit 核}(r);
+\draw[v5arrow] (h.south west)--node[above,sloped,font=\scriptsize] {Cell 特征}(r.north east);
+\draw[v5arrow] (r)--(x);
+\node[font=\small,align=center,text width=150mm] at (51,-49)
+{同一张 $(N+1)\times(M+1)$ 表持续更新；默认仅 Query 误差驱动训练。};
+\end{tikzpicture}
+
+% END embedded figures/fig-overview
+
+\end{center}
+\vspace{5mm}
+\begin{dnareadbox}[本稿的中心问题]
+给定一张信息受损的表，目标是利用仍可用的证据恢复 Cell 的 value；正文从遮挡任务出发。
+每列按数据类型成对定义编码与还原，所需状态由当前可见证据、独立 schema 与随机采样确定。
+三类变量共用 $e_a(x)=q_a+v_a(x)$：numeric 用 z-score 沿共享方向移动，ordinal 用归一化秩沿同一方向排列，nominal 用类别专属向量换方向、不赋予次序。
+正文默认使用恒重组合码，全部基础向量取自 $\mathcal H_4$（$128/4$）；单位高斯码保留为正文对照。列身份 $q_a$ 是 episode 内随机标识，不是可学习列 embedding。
+Unit 几何组织观测。本稿默认用 Unit Transformer 精炼这一几何；V5 Small 取 $L_U=3$。
+V5 Nano 无 Unit Transformer（$L_U=0$）。V5.3 默认关闭；本稿把 $L_U=0$ 留给 Nano 档，以及其他档位的可选旁路，不是默认前向，也不是第五代 Small 档。默认 LL 在同列共享斜率并保留局部截距。
+所有类型重建所选 codec 的 128 维 value 表示；numeric 投影反标准化，nominal 对 $q_a+b_{a,c}$ 匹配最近可见码，ordinal 投影后匹配完整声明秩，返回原始值。
+全 NW 与原稿逐目标 LL 保留为显式对照；默认 Query loss 系数为 1，可见自重建系数为 0。
+\end{dnareadbox}
+\vspace{2mm}
+\small
+本文定义 TabU 的第五代数学设计——一个独立的整表恢复模型：Cell、Unit、Feature 均为 $d$ 维向量；
+Unit 与 Feature 拼接形成匹配坐标。数值与类别共同采用所选 NW 或 LL，
+全 NW 不直接读取最终 Cell，全 LL 对所有类型读取 target/support Cell。
+同列匹配自然只比较 Unit，原始样本核可以跨列共享。
+可见 Cell 保留自身作为 terminal support；Query 接受直接监督，可见自重建单独监控。
+正文确定一套闭合的单轮默认；附录完整定义算子、证明、执行和训练课程，并声明可替换接口及其继承条件。
+\vfill
+{\footnotesize 本稿自包含全部数学定义与图源。模型结构、有限实例验收和训练性能是不同层次的证据；\par
+多维值空间、其他 codec 与多轮恢复为显式扩展，不混入默认前向。\par}
+\end{titlepage}
+\hypersetup{pageanchor=true}
+\pagenumbering{arabic}
+\begingroup
+\makeatletter
+\patchcmd{\l@section}{\addvspace{1.0em \@plus\p@}}{\addvspace{.40em \@plus\p@}}{}{}
+\makeatother
+\small
+\tableofcontents
+\endgroup
+\clearpage
+
+\section*{研究问题与阅读路线}
+\addcontentsline{toc}{section}{研究问题与阅读路线}
+给定一张不完整或受损的表，怎样用一套跨表共享的机制恢复其中的 Cell value，
+而不是为每张表、每一列重新训练专属预测头？TabU 将一次任务组织成一个 typed episode：
+输入提供可用事实与请求位置，模型建立上下文，再利用当前表的支持值形成预测。
+
+本稿沿五步说明一套完整的单轮模型。核心分工只有四项：\textbf{value 编码确定要恢复什么，
+Unit 表征组织参考证据，Cell 表征提供回归特征，decoder 将预测映回本列合法值域。}
+默认采用列共享局部线性读出（LL）：同列只拟合一个斜率矩阵，各 Unit 仍有自己的局部基准。
+这是一项参数共享假设，不是逐目标 LL 的无损加速。
+
+正文保留定义模型必需的公式与空间图；精确预处理、算子实现、推导和执行边界集中在附录。
+附录~\ref{v53:app:input}--\ref{v51:app:gradient} 连成当前默认的编码、拟合和反传主线；
+随后给出网络算子、训练与运行协议，最后分别列出完整对照和开放接口。
+完整默认表示给定合法配置后函数已经确定，并不表示任意扩展组合都已定义或经过训练验证。
+
+V5.4 从 V5.3 整份复制而来。编码收成 $e_a=q_a+v_a(x)$。
+另两项接口不同：V5.3 默认 $L_U=0$，本稿默认开启 Unit Transformer（V5 Small 取 $L_U=3$）；V5 Nano 取 $L_U=0$，$L_U=0$ 在其他档仍为可选旁路；
+V5.3 正文只按单 token 书写，本稿把 Unit/Feature 的 $K$ 个 subtokens 收成可选扩展，默认仍 $K=1$。
+backbone 算子、列共享 LL、Query 监督与其余附录保持原推导。
+
+\section{Step 1：明确事实、请求与恢复目标}
+\label{front:sec:step1}\label{sec:P:problem}
+设表有 $N$ 个 Unit（行）和 $M$ 个 Feature（列）。每列由 schema 声明为 numeric、nominal 或 ordinal；
+numeric 的默认输出域是实数，ordinal 额外声明类别全序，但不假定等级间有物理距离。
+自然观测地址为 $\Oset$。训练时从其中遮去一部分地址作为 $\Qset$，其余构成可见事实 $\Vset$：
+\begin{equation}
+ \boxed{\Vset=\Oset\setminus\Qset,\qquad
+ \TargetSet=\Oset=\Vset\mathbin{\dot\cup}\Qset.}
+ \label{v53:eq:task}
+\end{equation}
+$\TargetSet$ 是有真值的恢复评分域；\textbf{默认仅被遮挡 Cell 的 Query loss 进入训练目标}。
+可见 Cell 的自重建误差仍可报告，其 restore loss 系数默认为 0。
+自然缺失但没有真值的位置不构成训练标签。推理时可以单独请求这些位置的预测。
+
+当前 episode 默认采用监督式 \texttt{supervised-row} Query：只遮去选定 Query 行的目标标签，特征观测仍可见。
+\texttt{random-cell} 是第一备选；待训练稳定、实验经验充分后，希望将其升为默认。
+这是一项待实验推进的方向，不是已经完成的切换。两种协议怎样生成 $\Qset$，与 Query-only loss 怎样计权是两项独立选择；
+详见附录~\ref{v54:sec:episode-choice}。
+
+\begin{center}\small
+\begin{tabularx}{\linewidth}{lXX}
+\toprule
+输入角色 & 本轮可以读取什么 & 是否向其他地址供源\\\midrule
+Value & 自身实际输入值与允许的上下文 & 可以；资格由输入地址确定\\
+Query & 上下文；自身隐藏真值不进入 forward & 不可以\\
+Null & 零 carrier，保留地址 & 不可以\\\bottomrule
+\end{tabularx}
+\end{center}
+Query 角色不等于监督目标：Unit/Feature token 也接收信息，但没有独立标签。
+反过来，Value 虽已提供事实，也在全 Cell 目标中接受恢复评分。
+
+输入统计、随机编码、网络和 LL supports 只读取实际可见输入。隐藏真值放在独立 sidecar，
+预测形成后才交给 scorer。训练要求每个有真值的列至少保留两个可见 Cell，数值列还须有两个不同取值；离散列须有可用答案码。
+空支持、缺码和无合法 episode 返回明确状态。精确域与采样规则见附录~\ref{v53:app:input}、
+\ref{sec:T:training}。上述训练支持条件是训练协议，不是 ridge 可逆性的必要条件。
+
+\section{Step 2：为每个变量建立值空间}
+\label{front:sec:step2}\label{sec:E:encoding}
+\subsection{两种可选的 128 维 value codec}
+\label{v53:subsec:codec-options}
+正文并列定义恒重组合码 $C$ 与单位高斯向量码 $G$，由 ModelSpec 指定；当前默认模式为 $C$，$G$ 是明确的正文对照模式。
+两者共用同一外层；输入、支持答案与评分使用同一固定 realization：
+\begin{equation}
+ \boxed{e_a(x)=q_a+v_a(x)},\qquad
+ v_a(x)=\begin{cases}
+ z_a(x)b_a,&\text{numeric},\\
+ b_{a,c},&\text{nominal},\quad x=c,\\
+ r_a(c)b_a,&\text{ordinal},\quad x=c.
+ \end{cases}
+ \label{v53:eq:gaussian-code-option}
+\end{equation}
+$q_a$ 是这一列所有取值共享的原点，充当 episode 内的随机列身份，不是固定列号、列名语义或永久可学习 embedding。
+Numeric 用 z-score，ordinal 用声明全序的归一化秩；二者沿整列共享的方向 $b_a$ 移动。
+Nominal 换方向、不把类别编号当作乘法系数。同列两个编码相减时共同原点消失：$e_a(x)-e_a(x')=v_a(x)-v_a(x')$。
+加法分解不保证仅凭一个编码唯一反推出两个随机向量。
+
+\paragraph{模式 $C$：恒重组合码。}
+记 $\mathcal H_k=\{v\in\{0,1\}^{128}:\mathbf1^\top v=k\}$，采用原始 $0/1$ 尺度。
+全部基础向量 $q_a$、$b_a$、$b_{a,c}$ 都从 $\mathcal H_4$ 抽取，故 $\|u\|_2^2=4$。这些向量不要求正交，也不额外强制支持互斥：
+\begin{equation}
+ \begin{aligned}
+ \text{numeric}:&\quad q_a,b_a\in\mathcal H_4,\\
+ \text{nominal}:&\quad q_a,b_{a,c}\in\mathcal H_4,\\
+ \text{ordinal}:&\quad q_a,b_a\in\mathcal H_4.
+ \end{aligned}
+ \label{v53:eq:compositional-code-option}
+\end{equation}
+Numeric 与 ordinal 的两个基向量均按列固定；ordinal 不另为每个类别建立身份向量。
+同一列不同 nominal 类别必须使用互异的 $b_{a,c}$。不同列的类别编号 $0$ 无需共享同一个全局 $b_0$。
+V5.3 的独立 $128/8$ 身份码 $q_{a,c}\in\mathcal H_8$ 降为附录候选。
+采样规则、组合码几何及尺度变体见附录~\ref{v53:app:codec-geometry}；
+两种模式的推理解码见附录~\ref{subsec:R:value-codec}。
+
+\paragraph{模式 $G$：单位高斯向量码。}
+Numeric/ordinal 的 $q_a,b_a$ 与 nominal 的 $q_a,b_{a,c}$
+均由独立标准高斯向量归一化得到，不要求正交。外层仍是 $e_a=q_a+v_a(x)$。这是与默认组合码保持同一接口的正文对照，不由无参配置隐式启用。
+
+\subsection{数值：自己的基点、方向和坐标}
+\label{v51:sec:affine-main}\label{v52:sec:feature-spaces}
+每个数值列 $a$ 从实际可见值获得位置 $m_a$ 和正尺度 $s_a$。默认模式 $C$ 使用正文前述的 $128/4,128/4$ 恒重基向量；切换到模式 $G$ 时，独立抽取两个高斯向量并分别归一化为单位向量 $q_a,b_a\in\R^{128}$。
+默认位置尺度为可见均值与标准差（z-score）；median/half-IQR 及退化 RMS 候选完整列于附录~\ref{v53:app:input}。
+\textbf{同一列、同一次 episode 始终共用这一份状态，两个方向不要求正交。}
+两种模式的数值编码都写为 $e_a=q_a+z_a b_a$，但 $q_a,b_a$ 的 realization 由 codec mode 决定。
+\begin{equation}
+ \boxed{z_a(x)=\frac{x-m_a}{s_a},\qquad
+ e_a(x)=q_a+z_a(x)b_a\in\R^{128}.}
+ \label{v51:eq:affine-code}
+\end{equation}
+所有列共享环境空间 $\mathbb E=\R^{128}$，但每列在其中有自己的合法仿射空间：
+\begin{equation}
+ \mathsf V_a=\operatorname{span}\{b_a\},\qquad
+ \boxed{\mathcal M_a=q_a+\mathsf V_a.}
+ \label{v52:eq:feature-space}
+\end{equation}
+当前 value 是一个实数，因此合法空间只有一个自由坐标。$q_a$ 是本列坐标基点，不是额外的自由方向。
+标准化零值对应非零向量 $q_a$；同列编码距离按固定比例保留标准化数值距离。
+记 $\nu_a=\|b_a\|^2$，模式 $G$ 为 $1$、模式 $C$ 为 $4$。
+随机基点、方向与合法零值边界的精确定义见附录~\ref{v51:app:affine}。
+
+给定预测 value 向量 $\widehat e$，decoder 寻找它在本列合法空间中的最近表示，再读取坐标并反标准化：
+\begin{equation}
+ \boxed{\widehat z=\arg\min_{t\in\R}\|q_a+t b_a-\widehat e\|^2
+       =\frac{b_a^\top(\widehat e-q_a)}{\nu_a},\qquad
+        \widehat x=m_a+s_a\widehat z.}
+ \label{v51:eq:affine-decode}
+\end{equation}
+一次内积即可求解；不需要 Fourier 反演、离散分箱或连续搜索。
+这允许输出支持中从未出现过的有限实数。图~\ref{v51:fig:legal-value} 展示按列建立空间后进行投影的含义；
+中心化投影步骤和多维值扩展分别在附录~\ref{v51:app:affine} 与~\ref{v52:app:space-extension}。
+
+% BEGIN embedded figures/fig-feature-spaces
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm,>=Latex,font=\small]
+% Two column-indexed geometric windows. Coordinates use the same display scale.
+\draw[rounded corners=3pt,draw=VFiveLine,fill=VFiveLight!45] (0,0) rectangle (6.65,5.35);
+\draw[rounded corners=3pt,draw=VFiveLine,fill=VFiveLight!45] (7.05,0) rectangle (13.7,5.35);
+\node[anchor=west,font=\bfseries\color{TabUBlue}] at (.28,5.02) {变量 $a$：自己的基点与方向};
+\node[anchor=west,font=\bfseries\color{TabUBlue}] at (7.33,5.02) {变量 $b$：另一套合法空间};
+\node[anchor=west,font=\scriptsize,text=TabUGray] at (.28,4.56) {$\mathcal A_a=(m_a,s_a,q_a,b_a)$};
+\node[anchor=west,font=\scriptsize,text=TabUGray] at (7.33,4.56) {$\mathcal A_b=(m_b,s_b,q_b,b_b)$};
+\begin{scope}[shift={(1.0,1.12)}]
+ \coordinate (Oa) at (0,0);
+ \coordinate (Qa) at (.56,1.283121);
+ \coordinate (Pa) at (3.1,1.283121);
+ \coordinate (Va) at (3.1,2.65);
+ \draw[->,draw=VFiveLine] (-.45,0)--(4.85,0);
+ \draw[->,draw=VFiveLine] (0,-.3)--(0,3.1);
+ \draw[<->,line width=1.1pt,draw=VFiveTeal] (-.38,1.283121)--(4.8,1.283121);
+ \node[below right,font=\scriptsize,text=VFiveTeal] at (3.2,1.2) {$\mathcal M_a=q_a+\mathsf V_a$};
+ \draw[->,draw=TabUBlue,line width=.8pt] (Oa)--(Qa);
+ \node[left,font=\scriptsize] at (.26,.67) {$q_a$};
+ \draw[->,draw=VFiveGold,line width=.9pt] (Oa)--(1.4,0);
+ \node[below,font=\scriptsize] at (.9,0) {$b_a$};
+ \fill[TabUBlue] (Qa) circle(1.8pt);
+ \node[above right,font=\scriptsize] at (Qa) {$q_a\ (z=0)$};
+ \fill[VFiveGold] (Va) circle(2pt);
+ \node[above,font=\scriptsize] at (Va) {$v_{ra}\in\mathbb E$};
+ \draw[->,dashed,draw=VFiveGold,line width=.9pt] (Va)--(Pa);
+ \draw[draw=VFiveGold] (3.1,1.483121)--(3.3,1.483121)--(3.3,1.283121);
+ \fill[VFiveTeal] (Pa) circle(2pt);
+ \node[below left,font=\scriptsize] at (Pa) {$\Pi_{\mathcal M_a}(v_{ra})$};
+ \node[below left,font=\scriptsize] at (Oa) {$0$};
+\end{scope}
+\begin{scope}[shift={(8.22,1.02)}]
+ \coordinate (Ob) at (0,0);
+ \coordinate (Qb) at (.98,.999799980);
+ \coordinate (Pb) at (2.737985004,.528749318);
+ \coordinate (Vb) at (2.996804049,1.494675144);
+ \draw[->,draw=VFiveLine] (-.65,0)--(4.85,0);
+ \draw[->,draw=VFiveLine] (0,-.3)--(0,3.15);
+ \draw[<->,line width=1.1pt,draw=VFiveGold] (-.372296157,1.362146643)--(4.698814432,.003346657);
+ \node[below,font=\scriptsize,text=VFiveGold] at (3.25,-.40) {$\mathcal M_b=q_b+\mathsf V_b$};
+ \draw[->,draw=TabUBlue,line width=.8pt] (Ob)--(Qb);
+ \node[left,font=\scriptsize] at (.48,.5) {$q_b$};
+ \draw[->,draw=VFiveTeal,line width=.9pt] (Ob)--(1.352296157,-.362346663);
+ \node[below,font=\scriptsize] at (.95,-.23) {$b_b$};
+ \fill[TabUBlue] (Qb) circle(1.8pt);
+ \node[above right,font=\scriptsize] at (Qb) {$q_b\ (z=0)$};
+ \fill[VFiveTeal] (Vb) circle(2pt);
+ \node[above,font=\scriptsize] at (Vb) {$v_{rb}\in\mathbb E$};
+ \draw[->,dashed,draw=VFiveTeal,line width=.9pt] (Vb)--(Pb);
+ \fill[VFiveGold] (Pb) circle(2pt);
+ \node[below,font=\scriptsize] at (Pb) {$\Pi_{\mathcal M_b}(v_{rb})$};
+ \node[below left,font=\scriptsize] at (Ob) {$0$};
+\end{scope}
+\node[align=center,text width=135mm,font=\small] at (6.85,-.65)
+{同一 $\mathbb E=\mathbb R^{128}$ 中按列定义空间；两个窗口分开展示，不表示不同的神经网络。};
+\end{tikzpicture}
+\vspace{3mm}
+\begin{tikzpicture}[x=1mm,y=1mm,>=Latex,font=\small]
+ \node[v5plain,text width=30mm,minimum height=16mm] (v) at (0,0) {预测值向量\\$v_{ra}$};
+ \node[v5box,text width=34mm,minimum height=16mm] (m) at (43,0) {本列合法空间\\$\mathcal M_a$};
+ \node[v5plain,text width=31mm,minimum height=16mm] (p) at (86,0) {最近合法表示\\$e_{ra}^{\rm proj}$};
+ \node[v5box,text width=30mm,minimum height=16mm] (x) at (128,0) {本列坐标与单位\\$\widehat z\to\widehat x$};
+ \draw[v5arrow] (v)--(m);\draw[v5arrow] (m)--(p);\draw[v5arrow] (p)--(x);
+\end{tikzpicture}
+\caption{\textbf{按变量建立空间，再进行投影。}每个 numeric 列拥有自己的基点、方向和可见位置尺度；
+图中每对 $q,b$ 都使用相同显示比例；默认模式 $C$ 的尺度由 $\nu_a$ 记录，模式 $G$ 的方向为单位长度且不要求正交。
+浅色矩形只是环境空间的二维示意窗口，
+不是二维合法值域；当前标量的合法域是一维仿射空间。$v$ 表示允许线外输入的一般 decoder 接口；
+精确的当前 LL/NW 已满足仿射闭包，此时投影保持其输出不变。不同列方向的夹角不表示变量之间的统计关系。}
+\label{v51:fig:legal-value}
+\end{figure}
+
+% END embedded figures/fig-feature-spaces
+
+
+
+\subsection{离散值：类别身份与有序位置}
+三类变量共用列原点 $q_a$。Nominal 用类别专属向量改变方向；ordinal 与 numeric 共用列方向，在同一仿射直线上使用归一化秩。
+两者均在有限合法类别集上匹配最近码：
+\begin{equation}
+ \begin{gathered}
+ e_a(c)=\begin{cases}q_a+b_{a,c},&\text{nominal},\\q_a+r_a(c)b_a,&\text{ordinal},\end{cases}\\
+ r_a(c)=\frac{\operatorname{rank}_a(c)-1}{C_a^{\rm decl}-1}\quad(C_a^{\rm decl}>1),\\
+ \boxed{\widehat c=\arg\min_{c\in\mathcal C_a}\|\widehat e-e_a(c)\|^2},\qquad
+ \mathcal C_a=\begin{cases}\mathcal D_a^{\rm vis},&\text{nominal},\\\mathcal D_a,&\text{ordinal}.\end{cases}
+ \end{gathered}
+ \label{v53:eq:discrete-codec}
+\end{equation}
+单等级时 $r_a(c)=0$；等距按固定 schema 次序决定。
+Ordinal 的完整声明域和次序先于隐藏真值确定；nominal 只为可见类别建码。
+新的 nominal 候选一般不再等范数，最近码不能改写成 $\arg\max_c\widehat e^\top e_a(c)$，见附录~\ref{subsec:R:value-codec}。
+编码状态在同一 episode 内固定且不可学习。
+
+\subsection{统一输入投影与单 token 增广表}
+\label{subsec:E:value-codec}
+两种模式的输入 lift 均与答案编码相同：numeric 与 ordinal 用共享基点/方向的仿射编码，
+nominal 用列原点加类别向量。
+三者共同进入一个共享无偏置线性映射：
+\begin{equation}
+ h_{ra}^{\rm value}=W_{\rm enc}v_{ra}^{\rm lift},\qquad
+ v_{ra}^{\rm lift}=\begin{cases}
+ q_a+z_a(x_{ra})b_a,&\text{numeric},\\
+ q_a+b_{a,x_{ra}},&\text{nominal},\\
+ q_a+r_a(x_{ra})b_a,&\text{ordinal},
+ \end{cases}
+ \label{v53:eq:input-lift}
+\end{equation}
+默认 $W_{\rm enc}\in\R^{128\times128}$ 是跨类型共享的可学习无偏置矩阵。\footnote{输入矩阵不施加训练期正交或保范数约束。}
+这一输入映射不需要在解码时反演；初始化规则见编码附录。
+
+每行增加一个 Unit token、每列增加一个 Feature token，另有共享 Cell Query seed。
+三个非零 seed 跨地址共享，右下角为 Null，默认 $K=1$ 时编译后得到
+\begin{equation}
+ \boxed{H^{(0)}\in\R^{(N+1)\times(M+1)\times d},\qquad d=128.}
+ \label{v53:eq:table-shape}
+\end{equation}
+V5.4 允许把每个 Unit 与每个 Feature 扩成 $K$ 个同宽 subtokens，Cell 仍每格一个 token：
+\begin{equation}
+ U_r,F_a\in\R^{K\times d},\qquad K=1\text{ 为默认}.
+ \label{v54:eq:subtoken-k}
+\end{equation}
+$K=1$ 时式~\eqref{v54:eq:subtoken-k} 就是正文的单个 $u_r,f_a$，与 V5.3 的编译表相同。
+$K$ 不等于 attention head 数、inducing 槽数 $S$，也不等于值空间自由度 $k_a$。
+$K>1$ 须另写槽位编译、seed、供源资格、Unit Transformer 入口和匹配读出，见附录~\ref{v54:sec:subtokens}；
+开启前不得把正文单 token 公式直接改下标。
+图~\ref{fig:compiler} 给出 $K=1$ 的一次编译。精确地址集合、角色分支和随机状态管理见附录~\ref{v53:app:input}。
+% BEGIN embedded figures/fig-compiler
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[x=20mm,y=12mm]
+\foreach \j/\a in {0/1,1/2,2/3} {\node[font=\small] at (\j,.75) {$a=\a$};}
+\node[font=\small] at (3,.75) {Unit};
+\foreach \i/\r in {0/1,1/2,2/3} {\node[font=\small,anchor=east] at (-.6,-\i) {$r=\r$};
+ \foreach \j in {0,1,2} {\node[v5cell,fill=VFiveLight] at (\j,-\i) {$h^{(0)}$};}
+ \node[v5cell,fill=VFiveGold!12] at (3,-\i) {$q^U$};}
+\foreach \j in {0,1,2} {\node[v5cell,fill=VFiveGold!12] at (\j,-3) {$q^F$};}
+\node[font=\small,anchor=east] at (-.6,-3) {Feature};
+\node[v5cell,fill=white] at (1,-1) {$q^C$};
+\node[v5cell,fill=gray!8] at (2,-2) {$0$};
+\node[v5cell,fill=gray!8] at (3,-3) {$0$};
+\node[v5plain,text width=53mm,anchor=west] at (4,-1.1)
+{Value：读入可见值编码\\Query：只接收上下文\\Null：保持零向量\\[2pt]三个 seed 跨地址共享};
+\end{tikzpicture}
+\caption{默认 $K=1$ 的增广表。每行一个 Unit、每列一个 Feature，右下角为 Null；图按单 token 编译公式绘制。$K>1$ 只扩展 Unit/Feature，不画进本图。}
+\label{fig:compiler}\end{figure}
+
+% END embedded figures/fig-compiler
+
+
+\section{Step 3：在固定事实边界内形成上下文}
+\label{front:sec:step3}
+\subsection{二维 OTransformer}
+每个子层共享一张 carrier table，用固定 mask 区分接收与供源：
+\begin{equation}
+ \mathsf M_i^{\rm src}=\ind[i\in\Vset],\qquad
+ \overline h_i^Q=h_i,\qquad \overline h_i^{KV}=\mathsf M_i^{\rm src}h_i.
+ \label{front:eq:role-views}
+\end{equation}
+Value 的内容随层更新，但其供源资格不根据当前 carrier 重新判断。
+Query 可以接收却不把自己的估计传播给别的地址，Null 保持精确零。
+OAttention 通过独立读出后的 presence 控制参与度，默认 $\tau_{\rm pres}=1$，
+在读出接近零时平滑衰减，并使用固定正参考质量处理空 attention 源；
+完整多头算子、FFN、collect 空证据 gate 和它的非光滑边界分别见网络附录。
+
+默认在列内使用固定数量的 inducing slots（参考 $S=256$）先收集可见证据，再由原列回读；
+随后沿行做直接交互。一个 block 的顺序是
+\begin{equation}
+ H^{(\ell)}\xrightarrow{\rm collect/read}H^{(\ell,\rm col)}
+                   \xrightarrow{\rm row}H^{(\ell+1)}.
+ \label{front:eq:layer-order}
+\end{equation}
+Slots 是临时通信摘要，不是新增观测或 LL supports。
+所有层保留同样的二维输出形状；直接双轴版本是独立对照，不以 $S=0$ 或按样本数临时切换来替代。
+
+\subsection{Unit Transformer：默认精炼参考几何}
+\label{v51:sec:unit-main}
+从最终表读取 Cell $c_{ra}$、Unit $u_r^{(0)}$ 和 Feature $f_a$。
+Unit 支路继续建模各行关系，但不写回 Cell/Feature：
+\begin{equation}
+ \widetilde U=\begin{cases}
+ U^{(0)},&L_U=0,\\
+ \operatorname{OTransformer}_{U}^{(L_U)}(U^{(0)};m^U),&L_U>0,
+ \end{cases}\qquad
+ m_r^U=\ind[\exists a:(r,a)\in\Vset].
+ \label{v51:eq:unit-switch}
+\end{equation}
+本稿默认走下支：$L_U>0$。V5 Small 取 $L_U=3$，见附录~\ref{v54:app:sizes}。
+这与 V5.3 不同：V5.3 默认上支（$L_U=0$），正层数是可选模块。
+$L_U=0$ 在本稿仍是严格恒等旁路，不运行额外 Norm、投影或 FFN。
+它是 V5 Nano 的尺寸定义，也是其他档位的可选消融；
+不能把它叫做默认模型，也不能叫做 V5 Small。
+默认开启时，具有实际输入的行作为派生 Unit sources，空输入行只接收；不能误用把所有 Unit 排除的二维 Cell source mask。
+这是与是否 inducing、LL 特征宽度分别配置的模块。
+第四代 TAR 的 small（3 层、宽 96、FFN 192）不迁入第五代。
+% BEGIN embedded figures/fig-backbone
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[x=1mm,y=1mm]
+\node[v5box,text width=28mm] (h) at (0,0) {$H^{(0)}$\\完整增广表};
+\node[v5box,text width=39mm] (xy) at (47,0) {重复 $L$ 个 blocks\\Collect $\to$ Read $\to$ Row};
+\node[v5plain,text width=34mm] (c) at (111,17) {Cell / Feature\\$C,F$ 保留};
+\node[v5plain,text width=34mm] (u) at (111,-17) {Unit 初始表示\\$U^{(0)}$};
+\node[v5box,text width=52mm] (ref) at (71,-48)
+{Unit OTransformer\\V5 Small：$L_U=3$};
+\node[v5plain,text width=30mm] (ker) at (0,-48) {$\widetilde U\to K$\\局部参考总体};
+\draw[v5arrow] (h)--(xy);\draw[v5arrow] (xy.east)--(c.west);\draw[v5arrow] (xy.east)--(u.west);
+\draw[v5arrow] (u.south)--(ref.north east);\draw[v5arrow] (ref)--(ker);
+\node[font=\scriptsize,align=center,text width=150mm] at (56,-70)
+{默认精炼仅作用于独立派生分支，不写回 Cell；$L_U=0$ 旁路不执行额外归一化、投影或 FFN。};
+\end{tikzpicture}
+\caption{二维 backbone 后默认精炼 Unit 表征。V5 Small 使用 $L_U=3$；$L_U=0$ 为可选旁路。开关与列内是否使用 inducing 独立。}
+\label{fig:backbone}\label{v51:fig:unit-option}\end{figure}
+
+% END embedded figures/fig-backbone
+
+
+固定证据与随机 realization，只在已有空地址增加只接收的 Query，不会改变旧 carriers 和旧答案。
+改变证据、原始行集合或码本则不是同一种操作。行列重排时同步移动 schema、码本和 masks，得到地址等变。
+这些结构性质的条件与证明见附录~\ref{sec:A:invariants}、\ref{v51:app:unit}，不等于任务准确率保证。
+
+\section{Step 4：组织局部参考总体，每列拟合一次}
+\label{front:sec:step4}\label{sec:R:response}
+\subsection{参考谁与怎样预测分开}
+令 $u_r=\widetilde u_r$。同列支持地址为 $\mathcal C_a$，保留重复观测的地址与次数。
+参考关系先由 Unit 决定，各列再选自己的可见 supports 并归一化：
+\begin{equation}
+ \boxed{\kappa_{rs}=\exp\!\left(-\frac{\|u_r-u_s\|^2}{2\tau_{\rm match}^2}\right),\qquad
+ w_{rs}^a=\frac{\kappa_{rs}}{\sum_{j\in\mathcal C_a}\kappa_{rj}},\quad s\in\mathcal C_a.}
+ \label{v53:eq:kernel}
+\end{equation}
+这与保留的 concat 几何 $[u_r;f_a]$ 一致：同列 Feature 项在差分中抵消。
+因此\textbf{原始 Unit 核跨列共享，但每列的支持、Cell 特征与拟合规律不同}。
+默认同列路径中最终 Feature 不直接影响答案；Feature 条件关系是独立扩展，不假装已由当前图实现。
+
+Cell $c_{ra}$ 提供回归特征，$e_{sa}$ 提供实际要恢复的 value 坐标，两者不能因同为 128 维而互换。
+可选 $P_R$ 将 Cell 映为 $d_R$ 维回归特征，答案仍为 128 维；以下先写默认 $d_R=d$。
+
+\subsection{列共享斜率，Unit 保留局部截距}
+\label{v51:sec:ll-main}
+固定全部当前 $N$ 个 Unit 为拟合中心，$\pi_r=1/N$，不因这次返回多少答案而改变。
+每列求一个联合问题：
+\begin{equation}
+ \boxed{\min_{B_a,\{\beta_{ra}\}}
+ \sum_{r=1}^{N}\pi_r\sum_{s\in\mathcal C_a}w_{rs}^a
+ \|e_{sa}-\beta_{ra}-B_a(c_{sa}-c_{ra})\|^2
+ +\lambda_{\rm LL}\|B_a\|_F^2.}
+ \label{front:eq:cell-ll}
+\end{equation}
+$B_a\in\R^{128\times d}$ 同列共享；局部截距 $\beta_{ra}\in\R^{128}$ 不受惩罚。
+$\lambda_{\rm LL}>0$ 固定，拟合系数只是当前 forward 的临时结果，不是逐表持久参数。
+
+令 $\bar c_{ra},\bar e_{ra}$ 为相应参考权重下的局部均值。
+消去截距，得到一次正定求解及所有请求的求值：
+\begin{equation}
+ \boxed{(\bar\Sigma_a+\lambda_{\rm LL}I_d)B_a^\top=\bar J_a,\qquad
+ \widehat e_{ra}=\bar e_{ra}+B_a(c_{ra}-\bar c_{ra}).}
+ \label{v51:eq:shared-solve-main}
+\end{equation}
+$\bar\Sigma_a$ 是各中心局部 Cell 协方差的平均，$\bar J_a$ 是 Cell 与答案的局部交叉协方差平均。
+从目标函数到这两个矩阵的逐步推导、形状及无需逐中心存协方差的聚合方式见附录~\ref{v51:app:shared-ll}。
+其直觉是\textbf{共同的线性调整，加上该 Unit 的局部残差均值}。
+
+每列一次指一个 $d_R\times d_R$ 分解，不是 128 次独立分解；也不等于免除了参考权重的计算。
+完整向量 LL 在 numeric 的仿射空间中闭合，因此可精确地只解标量右端再重建向量。
+这是执行简化，不删除输入中的变量空间，也不改变外层损失。
+% BEGIN embedded figures/fig-readout
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[x=1mm,y=1mm]
+\node[v5plain,text width=37mm] (u) at (0,0) {精炼或旁路后的 Unit\\参考谁：$\mathsf W_a$};
+\node[v5plain,text width=37mm] (c) at (54,0) {支持 Cell 特征\\拟合坐标：$C_a$};
+\node[v5plain,text width=37mm] (e) at (108,0) {实际可见值编码\\响应：$E_a$};
+\node[v5box,text width=137mm] (m) at (54,-28)
+{全部固定 Unit 中心聚合局部矩：$\bar\Sigma_a,\bar J_a$\\
+$(\bar\Sigma_a+\lambda I)B_a^\top=\bar J_a$：每列一次分解};
+\foreach \n in {u,c,e} {\draw[v5arrow] (\n.south)--(\n.south|-m.north);}
+\node[v5box,text width=137mm] (p) at (54,-54)
+{在目标 Cell 处求值：$\widehat e_{ra}=\bar e_{ra}+B_a(c_{ra}-\bar c_{ra})$};
+\node[v5plain,text width=62mm] (n) at (16,-79)
+{Numeric：投影到仿射直线\\$\widehat x=m_a+s_a\nu_a^{-1} b_a^\top(\widehat e-q_a)$};
+\node[v5plain,text width=62mm] (d) at (92,-79)
+{Nominal：最近可见类别码\\Ordinal：最近声明等级码};
+\draw[v5arrow] (m)--(p);\draw[v5arrow] (p.south)--(n.north);\draw[v5arrow] (p.south)--(d.north);
+\end{tikzpicture}
+\caption{参考几何与响应拟合分开：列共享的是斜率，局部均值仍因 Unit 而异；全 NW 和逐目标 LL 均保留为显式对照。}
+\label{fig:readout}\end{figure}
+
+% END embedded figures/fig-readout
+
+
+\subsection{还原与可见自支持}
+最后按 Step 2 的规则解码：numeric 投影后反标准化；nominal 匹配可见的 $q_a+b_{a,c}$，ordinal 投影到共享仿射直线后在完整声明等级中匹配最近秩。
+可见目标保留自己作为合法 support；被遮挡目标没有自己的真值支持。
+可见自重建和遮挡恢复分别报告，不能以可见低误差代替缺失推断能力。
+
+全 NW 是令斜率为零的局部常数对照；逐目标 LL 则分别拟合各目标的斜率。
+二者在所有类型上使用同一模式，完整定义与反向、成本集中在附录~\ref{v51:app:target-baseline}。
+主线为列共享 LL，不能在一个 checkpoint 中无声明地互换这些估计器。
+
+\section{Step 5：在固定 value 坐标中监督恢复}
+\label{front:sec:step5}
+Scorer 用已经固定的 codec 将真值表示为 $e_{ra}^{\star}$；不重估统计量、不按隐藏答案补码。
+默认每个 Cell 的连续重建损失为
+\begin{equation}
+ \ell_{ra}=\frac{\chi_a}{p_a}\|\widehat e_{ra}-e_{ra}^{\star}\|^2,
+ \qquad p_a=128,\quad
+ \chi_a=\begin{cases}128,&\text{numeric},\\1,&\text{discrete}.\end{cases}
+ \label{front:eq:restoration-cell-loss}
+\end{equation}
+Numeric 损失为 $\nu_a(\widehat z-z^\star)^2$；模式 $G$ 中 $\nu_a=1$，原始组合码 $C$ 中为 $4$。
+Nominal 与 ordinal 均保留逐坐标向量 MSE，即 $\chi_a=1$；ordinal 的误差来自共享仿射编码的完整向量。
+硬最近码只用于输出与离散评价，不进入单轮训练的微分链。
+
+令 $\TargetSet_{\rm num}$ 为数值评分地址，$\TargetSet_{\rm disc}$ 合并 nominal/ordinal 地址。
+对状态 $A\in\{\Vset,\Qset\}$，令 $A_b=A\cap\TargetSet_b$，分别在各非空类型分支内平均：
+\begin{equation}
+ \begin{gathered}
+ \mathcal L_A(E):=\sum_{\substack{b\in\{\mathrm{num},\mathrm{disc}\}\\A_b\ne\varnothing}}
+ \frac{1}{|A_b|}\sum_{t\in A_b}\ell_t,\\
+ \boxed{\mathcal L(E)=\mathcal L_{\Qset}(E)+\lambda_{\rm restore}\mathcal L_{\Vset}(E)},
+ \qquad\lambda_{\rm restore}=0\quad\text{（默认）}.
+ \end{gathered}
+ \label{front:eq:all-cell-loss}
+\end{equation}
+这里 restore loss 专指可见 retained Cell 的自重建项，不是整个表格恢复任务。
+Query 系数固定为 1；默认先学习无自身真值支持的 Query 恢复。
+空状态/类型分支不形成均值，不计算 $0/0$ 或以 $0\times\mathrm{NaN}$ 代替关闭项；
+合法训练 episode 必须有非空 Query。不同 episodes 再等权平均。
+后续逐步恢复 $\lambda_{\rm restore}>0$、原 all-cell 平均与旧课程权重均为显式候选，见附录~\ref{sec:alternatives}。
+
+梯度从 Query 编码误差，经目标求值、共享 solve 和所有中心的聚合矩，回到支持 Cell 与 Unit 参考关系。
+$\lambda_{\rm restore}=0$ 只关闭可见预测的直接自重建项，不 detach 可见证据或共享求解。
+\textbf{未在本次返回集合中的中心，也可能通过共享斜率影响损失。}
+默认路径的完整反向见附录~\ref{v51:app:gradient}，不以旧逐目标的 target/support 公式代替。
+
+\section{开放性：当前默认、竞争选项与分层扩展}
+\label{v52:sec:open-design}
+默认模型在给定合法 ModelSpec 后闭合；层数、head/FFN 宽度和正超参数须记录在配置中。
+开放性体现在明确替换哪一个接口，而不是把所有候选都做成未说明的必经步骤。
+许多设置仍有同等重要、相互竞争的选项；当前证据尚不足以判定哪一项普遍更好。
+默认只固定当前执行与复现的起点，不代表已经胜出。研究重要性、定义完整性与实验验证状态分别说明。
+例如 V5 Nano 是必须实验验证的重要竞争方案；Small 的默认地位不降低 Nano 的研究重要性。
+\begin{center}\small
+\begin{tabularx}{\linewidth}{p{26mm}X}
+\toprule
+接口 & 当前选择与扩展边界\\\midrule
+Value 空间 & 默认 $e_a=q_a+v_a(x)$：scalar numeric/ordinal 的随机仿射直线、nominal 的有限码本 $q_a+b_{a,c}$；真实向量值可用满列秩基扩展，不能随意把标量放开成多自由度。\\
+输入 lift & 默认共享投影；类别旋转、MLP 配对和 Fourier 对照独立保留。新 lift 不自动改变答案空间。\\
+上下文与参考 & Direct/inducing；默认开启 Unit Transformer，V5 Small 取 $L_U=3$；$L_U=0$ 为可选旁路。Unit/Feature 默认 $K=1$ 个 token，可扩成 $K$ 个同宽 subtokens；低维 $P_R$ 有明确实现。新 Feature 条件核另查信息流与梯度。\\
+局部估计器 & Column LL 为主线，target LL/NW 为完整对照；改惩罚、权重依赖或输出非线性后重新核对闭式与闭包。\\
+任务与轮次 & 单轮、supervised-row episode 为当前默认；random-cell 为第一备选及未来默认方向。两者均采用 Query-only loss；损伤协议与多轮候选分别定义。\\\bottomrule
+\end{tabularx}
+\end{center}
+附录逐项标明\textbf{完整实例、配对仍待指定的接口、以及仅改变执行方式的精确优化}。
+改变答案空间时比较同一原始任务指标，不能直接排序不同尺度的训练 loss。
+数学核验不代替分别训练、跨表留出、覆盖率及资源评测。历史课程的参数记录与复现实验所需的数据清单也分开说明。
+
+\clearpage
+\appendix
+
+\section*{附录路线：默认推导、网络算子、执行协议与扩展}
+\addcontentsline{toc}{section}{附录路线}
+先读附录~\ref{v53:app:input} 的精确编码与投影，再读附录~\ref{v51:app:shared-ll} 的列共享拟合，
+最后按附录~\ref{v51:app:gradient} 追踪所有中心的梯度，即可闭合当前默认的数学主线。
+网络细节与训练/执行规范随后给出。逐目标 LL 的旧局部梯度和成本集中在其对照附录，
+不是默认列共享实现的一部分。每一项扩展的成熟度见附录~\ref{v53:sec:maturity}。
+附录~\ref{v53g:sec:growth} 从当前默认继续讨论局部规律、随机表示与可识别边界；
+这些研究路径不改变正文默认，完整候选与尚待回答的问题分别陈述。
+第五代各档模型的宽度、层数和 Unit Transformer 深度见附录~\ref{v54:app:sizes}。
+Unit/Feature 的 $K$ 个 subtokens 见附录~\ref{v54:sec:subtokens}；默认 $K=1$。
+
+\section{Typed episode、预处理与值空间的完整定义}
+\label{v53:app:input}
+
+\subsection{Unit、Feature 与自然观测}
+设原始行、列地址分别为
+\[
+\Rset=\{1,\ldots,N\},\qquad \Fset=\{1,\ldots,M\},\qquad
+\mathcal A=\Rset\times\Fset.
+\]
+Unit $r$ 与 Feature $a$ 共同定位 Cell $(r,a)$。
+自然观测集合为 $\Oset\subseteq\mathcal A$，带地址的观测值族为
+$X_{\Oset}=(x_{ra})_{(r,a)\in\Oset}$。
+自然缺失地址 $\mathcal A\setminus\Oset$ 没有本次训练可用的真值。
+Unit identity 是当前表内的关系地址，不使用跨表的 learned row-ID lookup。
+
+每个 Feature 的 schema 声明 answer space $\mathcal X_a$，并属于以下三种类型之一：
+\begin{itemize}
+\item Numeric：输入是有限实数，默认 LL 的输出域为 $\mathbb R$。
+正值、有界或整数输出不由此模型自动保证。
+\item Nominal：$\mathcal X_a=\mathcal D_a$ 为非空有限集合，不声明类别次序。
+\item Ordinal：$\mathcal X_a=\mathcal D_a$ 为带全序 $\prec_a$ 的非空有限集合。
+声明次序不等于已经给定类别之间的数值距离。
+\end{itemize}
+记三类列集为 $\Fset_{\rm num},\Fset_{\rm nom},\Fset_{\rm ord}$，则
+\[
+\Fset=\Fset_{\rm num}\mathbin{\dot\cup}\Fset_{\rm nom}
+      \mathbin{\dot\cup}\Fset_{\rm ord},\qquad
+\Fset_{\rm disc}=\Fset_{\rm nom}\mathbin{\dot\cup}\Fset_{\rm ord}.
+\]
+完整声明域与本次实际可见的类别集不同。Schema 和 ordinal order 必须在隐藏真值之外给定；
+不通过读取隐藏标签临时扩充它们。
+
+\subsection{输入、目标与真值的三个边界}
+\label{sec:P:input}
+前向输入为
+\begin{equation}
+\Eset_{\rm in}=
+\bigl(\Rset,\Fset,(\mathcal X_a)_{a\in\Fset},X_{\Vset},\Qset\bigr),
+\qquad \Vset\cap\Qset=\varnothing.
+\label{eq:P:forward-input}
+\end{equation}
+$\Vset$ 为 Value 地址，$\Qset$ 为 Cell Query 地址。
+Query 表示缺少自身具体值但请求上下文的位置；它在初始化时使用共享 seed，
+行列关系通过后续通信域进入表征，不加入每个地址独有的可学习坐标。
+
+训练时从自然观测中抽取非空 $\Qset$，并定义\footnote{以下尾部保护仅对 table random-cell masking 默认启用；
+table supervised row masking 默认关闭，不依据目标值大小筛选监督 Query 行。
+在随机 Cell 遮盖前的原始 TRAIN 观测池内，逐列计算总体标准差
+$\sigma_a^{\rm train}$（方差分母为该列训练观测数）与完整四分位距
+$I_a^{\rm train}=Q_{0.75}-Q_{0.25}$。若
+$\sigma_a^{\rm train}>k\max(I_a^{\rm train},\varepsilon_a)$，则该数值列的全部 Cell
+均不进入 Query 池（当前新配置默认 $k=2$、$\varepsilon_a=10^{-6}$，分位数线性插值；
+等号仍可遮盖）。这是整列筛选，取代逐 Cell 的 median/half-IQR 尾部筛选；历史配置保留原规则。
+受保护列保持可见并报告 retained 误差；仅在启用非零 restore 系数时贡献直接自重建损失。其余列仍按全表总预算随机采样，无逐列等额配额，
+安全候选不足时明确失败而不缩减预算。不裁剪值或预测，也不改变编码器仅用可见值求
+所选统计量（当前默认 z-score）及 TruthSidecar 边界。
+训练与固定评估的 Query 指标均以可遮盖池为条件，并报告保护覆盖率；减小 $k$ 会缩窄 Query 覆盖，
+不能仅凭较低 loss 判定恢复能力更好。推理不借此判定未知值。}
+\begin{equation}
+\varnothing\ne\Qset\subseteq\Oset,\qquad
+\Vset=\Oset\setminus\Qset,\qquad
+\boxed{\TargetSet=\Oset=\Vset\mathbin{\dot\cup}\Qset.}
+\label{eq:P:training-targets}
+\end{equation}
+$\TargetSet$ 是完整恢复评分域，包含可见与被遮去的有真值 Cell；默认有权训练目标为 $\Qset$。
+Unit/Feature Query 虽然也是 receiver，却没有单独的监督标签。
+隐藏真值保留在
+\begin{equation}
+Y^\star_{\Qset}=(x_{ra})_{(r,a)\in\Qset}
+\label{eq:P:truth-sidecar}
+\end{equation}
+中，只在 scorer 读取。可见目标的真值来自 $X_{\Vset}$；
+无需把已合法可见的信息伪装成隐藏标签。
+预处理统计、码本、ValueEncoder、backbone 与 terminal 都不读取 $Y^\star_{\Qset}$。
+
+\subsection{支持数、数值多样性与推理}
+\label{sec:P:validity}
+记
+\begin{equation}
+\Vset_a=\{s:(s,a)\in\Vset\},\qquad n_a=|\Vset_a|,\qquad
+\TargetSet_a=\{r:(r,a)\in\TargetSet\}.
+\label{eq:P:visible-column}
+\end{equation}
+训练同时检查可见 Cell 数与数值支持的不同取值数。对数值列记
+$n_a^{\rm distinct}:=|\{x_{sa}:s\in\Vset_a\}|$，要求
+\begin{equation}
+\begin{aligned}
+ n_a&\ge2 &&\text{对每个 }\TargetSet_a\ne\varnothing\text{ 的列 }a,\\
+ n_a^{\rm distinct}&\ge2 &&\text{对每个上述数值列 }a.
+\end{aligned}
+\label{eq:P:support-floor}
+\end{equation}
+不同取值按当前可见的有限原始数值判定；不读取 Query 真值，不用容差合并近值，
+也不把支持库去重：重复值仍保留全部地址及其 multiplicity。
+条件必须在遮挡后成立，不能以遮挡前原表的多样性代替。
+无自然观测且无监督目标的列可保持空列。
+任一有真值列支持不足，或任一有真值数值列只剩一个不同取值，均须在输入构造阶段拒绝或重采样；
+不能在 loss 中静默删去该列目标。若原始训练观测中的某个数值列恒定，
+任何 mask 都无法满足此条件；当前全列准入协议返回 \texttt{no-valid-episode} 或重新抽表。
+非空 Query、已声明遮挡预算与上述条件须同时满足；没有合法 mask 时明确失败，
+不缩减预算或制造零损失样本。采样接受率及拒绝原因应一并记录。
+两个不同原值经同一正尺度仿射 codec 后仍不同，其编码的仿射包覆盖整条合法数值直线。
+该修订排除常数支持的硬限制，但不保证良好条件数、可识别性或训练能够拟合。
+单 support 在正 ridge 下仍可做 LL；本条是训练域约束，不是可逆性必要条件。
+Nominal 监督还要求真值在当前可见码表中有对应答案码。scorer 查询不到时返回
+\texttt{no-answer-code}，整次 episode 不计为有效训练样本；不静默删目标，
+不把缺码当成零损失，也不据隐藏真值补建码本。此条件与支持数及数值多样性分别检查；
+Ordinal 的全部合法等级由预先声明的全序和固定 seed 建立共享基点加秩码，不要求每个被监督等级均在支持中出现；
+声明域外的标签是 schema 错误，不能据此扩充声明域。单类别离散列不另加两个类别的要求；
+ordinal 若可见等级全相同，LL 只能返回该等级的编码，此退化应报告，不能视为已学到等级变化。
+
+推理时不要求存在训练 sidecar，也不要求 $\Qset\subseteq\Oset$：
+用户可请求自然缺失位置。给定前向输入后，恢复请求为
+$\TargetSet\subseteq\Vset\cup\Qset$；请求一个不可见地址时，先将其登记为 Cell Query。
+默认只返回请求地址的 typed predictions。推理读出的数学定义域为 $n_a\ge1$；
+$n_a=0$ 时返回带 count 的 \texttt{no-support}。单 support 时两种模式都返回唯一
+support 的答案编码，解码为该可见数值或类别。数值列即使有多个支持，若不同取值数为一，
+两种模式仍只能返回该常数；结果须报告支持数、不同取值数及该退化情形，不能解释为已恢复未知变化。
+训练策略与推理的非空证据条件分别使用；增加 Query 请求不增加事实供源地址。
+
+\subsection{每列的编码与还原规则}
+
+对每个有可见支持的列 $a$，用 $\operatorname{Encode}_a$ 与 $\operatorname{Decode}_a$
+分别表示编码与还原；$\mathcal A_a$ 记录二者共用的可见统计量或类别码表。
+其默认规则如下，精确定义见附录~\ref{subsec:R:value-codec}。
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{lXX}
+\toprule
+列类型 & 编码：原始值 $\to$ value 坐标 & 还原：预测坐标 $\to$ 原始值\\
+\midrule
+Numeric & $e=q_a+z_a(x)b_a$，列共享所选 codec 的仿射直线
+        & $\widehat x=m_a+s_a\nu_a^{-1}b_a^\top(\widehat e-q_a)$，投影后逆标准化\\
+Nominal & $e_a(c)=q_a+b_{a,c}$，列原点加类别向量
+        & 在可见类别码表中对 $q_a+b_{a,c}$ 匹配最近码\\
+Ordinal & $e_a(c)=q_a+r_a(c)b_a$，共享基点加声明秩方向
+        & 在完整声明域中投影后匹配最近秩\\
+\bottomrule
+\end{tabularx}
+\end{center}
+V5.4 两种正文 codec 的三类答案宽度均为 $p_a=128$；模式 $G$ 使用单位高斯基向量，
+模式 $C$ 的全部基础向量使用 $128/4$，nominal 为 $q_a+b_{a,c}$。V5.3 的独立 $128/8$ 身份码保留为候选。
+Ordinal 的合法域是完整声明等级在同一仿射直线上的有限码集。
+原稿 32/8 首备仍保留为独立候选，其答案宽度 $p_a=32$ 须明确记录，不混入默认的统一 128 维配置。
+同一编码规则用于可见 supports 和评分真值，还原规则用于输出；
+一次 forward 与评分共用固定的 $\mathcal A_a$，隐藏真值不参与其建立或更新。
+Nominal 必须已有可见码；ordinal 使用预先声明的秩域。缺码边界沿用第~\ref{sec:P:validity}~节。
+
+Value 坐标 $\bm e$ 与 backbone carrier $\bm h^{(0)}$ 职责不同。
+输入支路仍由 $\TypedPrep$ 解释可见值，再由 $\VE$ 形成可学习 carrier；
+沿用 \texttt{type\_aware\_relational\_geometrical} 定义。
+还原原始值时只投影到仿射直线或匹配类别码；不反演 backbone、输入 MLP 或共享投影。
+
+
+\subsection{Numeric 输入支路：可见列的 z-score 标准化}
+对 $a\in\Fset_{\rm num}$ 且 $n_a>0$，只用本列当前可见的有限数值建立坐标。
+默认采用均值与总体标准差（分母为 $n_a$，不是 $n_a-1$）：
+\begin{equation}
+\begin{aligned}
+ \mu_a&=\frac1{n_a}\sum_{s\in\Vset_a}x_{sa},&
+ \sigma_a^2&=\frac1{n_a}\sum_{s\in\Vset_a}(x_{sa}-\mu_a)^2,\\
+ m_a&=\mu_a,&s_a&=\max\{\sigma_a,\varepsilon_a\},\qquad\varepsilon_a>0,\\
+ z_a(x)&=\frac{x-m_a}{s_a},&s^{\rm enc}_{ra}&=z_a(x_{ra}).
+\end{aligned}
+\label{eq:E:numeric-prep}
+\end{equation}
+当 $\sigma_a\ge\varepsilon_a$ 时，可见标准化值均值为零、总体方差为一；
+下限激活时不声称方差为一。单支持与常数列使用正尺度下限，空支持不建立 codec。
+训练数值列仍须满足遮挡后至少两个不同取值；尺度下限不能替代这个准入条件。
+$\varepsilon_a$ 在本列原单位下预先声明，不通过隐藏真值选择。
+
+输入、support 答案、scorer 与逆变换共用固定的 $(m_a,s_a)$。
+统计只来自当前实际可见输入；不能借用干净原表或 Query truth，也不因新增 Query 请求而重估。
+原始值不截断，z-score 不使平方损失自动具有稳健性。若 $x'=\gamma x+\beta$、$\gamma>0$，
+同时令 $\varepsilon'_a=\gamma\varepsilon_a$，标准化坐标不变。
+原默认 median/half-IQR 与其退化 RMS 变体完整保留在候选节~\ref{v53c:robust-option}。
+
+
+\subsection{Numeric：每列独立的随机仿射表示}
+
+沿用上一节的可见位置与尺度 $(m_a,s_a)$，将标准化标量另记为
+$z_a(x)=(x-m_a)/s_a$。数值的答案空间改为 128 维，但不为每个不同实数分配身份码。
+每个数值列独立采样两个高斯向量并分别归一化：
+\begin{equation}
+ g_a^{(q)},g_a^{(b)}\overset{\mathrm{iid}}\sim\mathcal N(0,I_{128}),\qquad
+ q_a=\frac{g_a^{(q)}}{\|g_a^{(q)}\|},\quad
+ b_a=\frac{g_a^{(b)}}{\|g_a^{(b)}\|}.
+ \label{v51:eq:random-directions}
+\end{equation}
+两个向量不做 Gram--Schmidt，不要求 $q_a^\top b_a=0$。它们属于本次任务的固定编码状态，
+不是每列新增的持久可学习参数。同列所有输入、支持响应、监督与 decoder 共用同一 realization；
+行列重排时将同一对向量随列移动，而不是按新遍历顺序重抽。
+采用正文式~\eqref{v51:eq:affine-code}。
+合法数值是仿射直线 $\mathcal M_a=q_a+\mathbb Rb_a$ 上的点。参考模式 $G$ 中 $b_a$ 单位化，
+\begin{equation}
+ \|e_a(x)-e_a(x')\|^2=\bigl(z_a(x)-z_a(x')\bigr)^2.
+ \label{v51:eq:isometry}
+\end{equation}
+这保留标准化数值间距，允许编码从未在支持中出现的有限实数。标准化零值对应 $q_a\ne0$，
+不是 Null；非共线条件保证编码直线不经过原点。共享输入映射后的非零性按实际 carrier 检查。
+
+LL 返回 $\widehat e$ 后，所有类型都寻找最近的合法 value 表示。数值采用
+采用正文式~\eqref{v51:eq:affine-decode}。
+减去 $q_a$ 不能省略；独立归一化不等于正交。离散类型按所选模式匹配合法码；ordinal 的共享基点和秩方向同时用于输入与答案。
+数值 codec 的默认求解不增加 Fourier、数值分箱或迭代搜索。下面从变量专属空间解释这一构造；
+其投影闭式与 LL 仿射闭包分别见附录~\ref{v51:app:affine} 和~\ref{v52:app:space-extension}。
+
+\subsection{随机仿射 codec 的成立条件}
+\label{v51:app:affine}
+\subsubsection{非正交单位向量的最近点}
+固定 $q,b\in\mathbb R^{128}$、$\|q\|=\|b\|=1$，记 $\rho=q^\top b$。
+对于任意 $v\in\mathbb R^{128}$，令 $f(t)=\|q+tb-v\|^2$。
+由 $f'(t)=2b^\top(q+tb-v)$、$f''(t)=2$，唯一最优点为
+\begin{equation}
+ t^*=b^\top(v-q),\qquad e^*=q+t^*b,\qquad b^\top(v-e^*)=0.
+ \label{v51:eq:projection-proof}
+\end{equation}
+无需 $q\perp b$。对非单位方向，分母恢复为 $\|b\|^2$；执行时可用该一般式补偿浮点归一化的微小误差。
+任意合法编码 $q+zb$ 的投影坐标恰为 $z$，因此可见值和未见有限值的 codec 往返一致。
+
+\subsubsection{整条直线的非零边界}
+直接配方得到
+\begin{equation}
+ \|q+zb\|^2=1+2\rho z+z^2=(z+\rho)^2+1-\rho^2,
+ \quad \min_z\|q+zb\|^2=1-\rho^2.
+ \label{v51:eq:line-zero-bound}
+\end{equation}
+两个独立归一化高斯方向在 128 维中几乎必然不共线，故几乎必然 $|\rho|<1$。
+这不提供对每次采样都相同的正下界；不将“高维通常近正交”替代精确公式。
+实现检查向量有限、归一化分母非零；恰好零范数或数值共线是显式数值失败，可重新采样并记录。
+不对普通非零相关性作正交化或阈值筛选，以免暗中改变采样分布。
+输入编译检查实际非 Null carrier 有限且非零；后续动力学与 presence 读出另有参数。
+
+
+\subsubsection{默认 z-score 与稳健坐标候选}
+默认 z-score 正是原稿 mean/RMS 配置的均值中心化实例：
+\begin{equation}
+ m_a=\frac1{n_a}\sum_{s\in\Vset_a}x_{sa},\qquad
+ s_a=\max\!\left\{\sqrt{\frac1{n_a}\sum_{s\in\Vset_a}(x_{sa}-m_a)^2},\varepsilon_a\right\}.
+ \label{v51:eq:mean-rms-option}
+\end{equation}
+此标签保留以便历史引用；该配置现已升为默认。Median/half-IQR 及退化 RMS 则为显式候选。
+任何一套都须由输入、支持、scorer 和逆变换共用；不再叠加会抵消前一套尺度的同列 min--max。
+RMS 型 token normalization 属于另一层级，不与原始数据标准化混用。
+
+
+\subsection{三个空间层次及 decoder 的输出类型}
+令 $\mathbb E=\mathbb R^p$ 取标准欧氏内积，默认 $p=128$。
+数值列的 codec 状态给出 $q_a$、方向空间 $\mathsf V_a$ 与合法域
+$\mathcal M_a=q_a+\mathsf V_a$。对应的\emph{投影}是
+$\Pi_{\mathcal M_a}:\mathbb E\to\mathcal M_a$；
+\emph{坐标读取}是 $\mathcal M_a\to\mathbb R^{k_a}$；
+\emph{原值还原}是该坐标空间到已声明 value 域的映射。
+三者复合才是 $\operatorname{Decode}_a$。
+
+当前 $k_a=1$，$\mathsf V_a=\operatorname{span}\{b_a\}$，数值域无约束，
+坐标还原是 $x=m_a+s_az$。若 $q_a,b_a$ 不共线，
+$\mathsf T_a=\operatorname{span}\{q_a,b_a\}$ 为二维线性包络，而
+$\mathcal M_a\subset\mathsf T_a$ 只有一维自由度。
+例如 $v=2q_a$ 已位于 $\mathsf T_a$，投影到 $\mathsf T_a$ 什么也不改变；
+但 $2q_a$ 不在 $\mathcal M_a$。因此把 $\mathsf T_a$ 画成“当前所有合法数值的平面”会改变 decoder。
+
+默认选择不要求每个 Feature 都有互不重叠的表示空间。不同列可以使用相同 $p$，
+其 $q,b$ 甚至可以在一个对照中固定为同一对；这时单列可逆性仍成立，但输入中的列间区别会变化。
+反过来，随机方向之间的距离不应被解释为已知的变量因果关系或语义相似度。
+
+\subsection{正交投影、距离分解与稳定性}
+对 numeric 令 $\nu_a=\|b_a\|^2>0$、$P_a=\nu_a^{-1}b_ab_a^\top$。它满足
+\begin{equation}
+ P_a^\top=P_a,\qquad P_a^2=P_a,\qquad
+ \operatorname{im}P_a=\mathsf V_a,\qquad \ker P_a=\mathsf V_a^\perp.
+ \label{v52:eq:projector-laws}
+\end{equation}
+对一般输入 $v$ 定义 $e^{\rm proj}=q_a+P_a(v-q_a)$。
+若 $e^\star=q_a+z^\star b_a$ 是任意合法真值，则
+\begin{equation}
+ \boxed{\|v-e^\star\|^2
+ =\|v-e^{\rm proj}\|^2+\|e^{\rm proj}-e^\star\|^2
+ =\|v-e^{\rm proj}\|^2+\nu_a(\widehat z-z^\star)^2.}
+ \label{v52:eq:pythagorean}
+\end{equation}
+第一项是无法由该变量表达的正交残差；第二项是变量坐标上的估计误差。
+证明只需注意 $v-e^{\rm proj}\perp b_a$，展开平方中的交叉项为零。
+因此投影不会增大相对于任何合法真值的向量平方误差；
+但对离散候选最近码，不能直接套用这一正交分解或同样的非扩张结论。
+
+对两个 decoder 输入 $v,w$，有
+\begin{equation}
+ \|\Pi_{\mathcal M_a}(v)-\Pi_{\mathcal M_a}(w)\|\le\|v-w\|,
+ \quad |\widehat z(v)-\widehat z(w)|\le\nu_a^{-1/2}\|v-w\|,
+ \quad |\widehat x(v)-\widehat x(w)|\le s_a\nu_a^{-1/2}\|v-w\|.
+ \label{v52:eq:projection-stability}
+\end{equation}
+这些是固定 codec 下的 decoder 稳定性，不是关于 backbone 扰动或训练收敛的保证。
+默认精确 LL 有仿射闭包，式~\eqref{v52:eq:pythagorean} 的第一项为零；
+对未来其他 readout、有限精度误差或外部输入，此项提供可监控的\emph{空间外残差}。
+它不是自动校准的不确定性，也不能单独当作异常标签。
+
+投影的 Jacobian 为 $P_a$，坐标读取的 Jacobian 为 $\nu_a^{-1}b_a^\top$；
+两者在固定 codec 下处处存在。单轮训练若直接对投影前 $v$ 使用 MSE，则同时惩罚空间外残差；
+若改为只对投影后的值评分，空间外方向的梯度消失。
+在当前精确闭包模型中两种数值计算一致；在任意新的线外 readout 上不应宣称训练目标等价。
+
+\subsection{中心化投影的执行顺序}
+给定 decoder 的一般输入 $v\in\mathbb E$，先移到本列的坐标原点，再做空间投影：
+\begin{equation}
+ \begin{aligned}
+  \delta_a&=v-q_a,&P_a&=\nu_a^{-1}b_ab_a^\top,\\
+  \delta_a^{\parallel}&=P_a\delta_a\in\mathsf V_a,&
+  e_a^{\rm proj}&=q_a+\delta_a^{\parallel}\in\mathcal M_a,\\
+  \widehat z_a&=\nu_a^{-1}b_a^\top\delta_a,&
+  \widehat x_a&=m_a+s_a\widehat z_a.
+ \end{aligned}
+ \label{v52:eq:projection-pipeline}
+\end{equation}
+\textbf{空间投影返回一个合法向量，坐标读取返回一个标量，逆标准化再返回原始数值。}
+这三个动作不应混成一个含糊的“解码箭头”。$P_a$ 是本列固定的值空间投影，
+不是 backbone 参数，也不是可选的 LL 特征映射 $P_R$。
+
+% BEGIN embedded figures/fig-centered-projection
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm,>=Latex,font=\small]
+\node[font=\bfseries,text=TabUBlue,anchor=west] at (0,3.92) {1\quad 先移到变量 $a$ 的坐标原点};
+\node[font=\bfseries,text=TabUBlue,anchor=west] at (7.05,3.92) {2\quad 在线性空间 $\mathsf V_a$ 中投影};
+\begin{scope}[shift={(.5,.6)}]
+ \coordinate (O) at (0,0);\coordinate (Q) at (.6,1.3);
+ \coordinate (V) at (3.65,2.65);
+ \draw[->,draw=VFiveLine] (-.25,0)--(5.45,0);
+ \draw[->,draw=VFiveLine] (0,-.2)--(0,3.0);
+ \draw[<->,draw=VFiveTeal,line width=1pt] (-.1,1.3)--(5.4,1.3);
+ \draw[->,draw=TabUBlue,line width=.8pt] (O)--(Q);
+ \draw[->,draw=VFiveGold,line width=.85pt] (Q)--(V);
+ \fill[TabUBlue] (Q) circle(2pt);\node[above left] at (Q) {$q_a$};
+ \fill[VFiveGold] (V) circle(2pt);\node[above] at (V) {$v$};
+ \node[above,sloped,font=\scriptsize] at (2.25,2.1) {$v-q_a$};
+ \node[below,font=\scriptsize] at (4.5,1.3) {$\mathcal M_a=q_a+\mathsf V_a$};
+ \node[below left,font=\scriptsize] at (O) {$0$};
+\end{scope}
+\begin{scope}[shift={(7.7,1.9)}]
+ \coordinate (O) at (0,0);\coordinate (D) at (3.05,1.35);\coordinate (P) at (3.05,0);
+ \draw[->,draw=VFiveLine] (0,-1.1)--(0,1.85);
+ \draw[<->,draw=VFiveTeal,line width=1.3pt] (-.5,0)--(5.25,0);
+ \draw[->,draw=VFiveGold,line width=.9pt] (O)--(D);
+ \draw[->,draw=TabUBlue,line width=1pt] (O)--(P);
+ \draw[->,dashed,draw=VFiveGold,line width=.8pt] (D)--(P);
+ \draw[draw=VFiveGold] (3.05,.2)--(3.25,.2)--(3.25,0);
+ \fill[VFiveGold] (D) circle(2pt);\node[above] at (D) {$\delta_a=v-q_a$};
+ \fill[TabUBlue] (P) circle(2pt);
+ \node[below,font=\scriptsize] at (2.25,-.12) {$P_a\delta_a=\widehat z_ab_a$};
+ \node[above,font=\scriptsize,text=VFiveTeal] at (4.7,.1) {$\mathsf V_a$};
+ \node[below left,font=\scriptsize] at (O) {$0_a$};
+ \node[align=center,font=\scriptsize,text width=53mm] at (2.2,-.91)
+ {$\delta_a-P_a\delta_a\perp\mathsf V_a$\\只保留该变量可表达的分量};
+\end{scope}
+\node[v5plain,text width=132mm,minimum height=15mm,align=center] at (6.8,-.22)
+{$\displaystyle \Pi_{\mathcal M_a}(v)=q_a+P_a(v-q_a),\quad P_a=\nu_a^{-1}b_ab_a^\top$\\[3pt]
+$\displaystyle \widehat z_a=\nu_a^{-1}b_a^\top(v-q_a),\qquad \widehat x_a=m_a+s_a\widehat z_a$};
+\end{tikzpicture}
+\caption{\textbf{投影发生在变量自己的方向空间中。}左图将 $q_a$ 当作该变量的坐标基点；
+右图平移到此基点后，合法方向空间过原点，正交投影 $P_a$ 返回可表达分量。
+点的位置、箭头及去基点步骤一一对应。将 $q_a$ 直接当作垂足、或者不减 $q_a$ 就投影，
+一般都不是当前非正交编码的 decoder。}
+\label{v52:fig:centered-projection}
+\end{figure}
+
+% END embedded figures/fig-centered-projection
+
+\subsection{Ordinal：共享基点加归一化秩方向}
+对 $a\in\Fset_{\rm ord}$，schema 独立声明完整有限域 $\mathcal D_a$ 及全序 $\prec_a$。
+令 $C_a^{\rm decl}=|\mathcal D_a|$，$\operatorname{rank}_a(c)=1+|\{b\in\mathcal D_a:b\prec_a c\}|$，
+\begin{equation}
+ r_a(c)=\begin{cases}
+ \dfrac{\operatorname{rank}_a(c)-1}{C_a^{\rm decl}-1},&C_a^{\rm decl}>1,\\[4pt]
+ 0,&C_a^{\rm decl}=1,
+ \end{cases}\qquad s^{\rm enc}_{ra}=r_a(x_{ra}).
+ \label{eq:E:ordinal-prep}
+\end{equation}
+为整列建立共享基点 $q_a$ 与共享方向 $b_a$；模式 $G$ 对二者独立使用高斯单位化规则，
+模式 $C$ 均取 $128/4$ 恒重向量。同一列的所有等级共用这两个向量，输入、答案、评分及解码共用固定状态：
+\begin{equation}
+ \boxed{e_a(c)=q_a+r_a(c)b_a},\qquad
+ \mathcal M_a=\{q_a+r_a(c)b_a:c\in\mathcal D_a\}.
+ \label{v53c:eq:ordinal-affine}
+\end{equation}
+等间距 rank 是表示约定，不假定原问题中的等级具有等距物理意义；不另做 z-score。
+所有声明等级的合法码均由 schema、seed 和稳定列 ID 确定，不查看隐藏目标，也不等某等级成为监督目标后再补码。
+未在支持中出现的声明等级仍有合法码；这不保证只用当前支持的 LL/NW 能准确恢复该码。
+
+\subsection{两种 codec 的采样、几何与尺度}
+\label{v53:app:codec-geometry}
+模式 $G$ 的单位高斯定义见式~\eqref{v51:eq:random-directions}，numeric/ordinal 的基点与方向及 nominal 的 $q_a,b_{a,c}$ 均按各自稳定 ID 重放。
+模式 $C$ 中，每个 $\mathcal H_k$ 向量均匀抽取 $k$ 个不同坐标置 $1$。
+Numeric 与 ordinal 的 $q_a,b_a\in\mathcal H_4$ 若完全相同则重抽，以免合法直线经过零；
+同列不同 nominal 的 $b_{a,c}\in\mathcal H_4$ 无重复抽取。$q_a$ 与某个 $b_{a,c}$ 允许支持重叠，不另设互斥。
+Ordinal 不另设类别身份向量；因 $r_a(c)\ge0$，共享基点与方向的组合不导致零码。
+除上述完全重复条件外，不作重叠阈值或距离筛选；超过恒重码本容量时显式失败。
+Nominal 的身份索引来自可见类别集，ordinal 来自完整声明域；同一次 episode 不重采样。
+
+令 $\delta r=r_a(c)-r_a(c')$，则两种模式均有
+\begin{equation}
+ \|e_a(c)-e_a(c')\|^2
+ =\|b_a\|^2(\delta r)^2.
+ \label{v53:eq:ordinal-identity-geometry}
+\end{equation}
+因此相邻等级的距离严格随秩差单调，且模式 $G$ 中距离为 $|\delta r|$，模式 $C$ 中距离为 $2|\delta r|$。
+这是一种表示约定，不把相邻等级的秩差解释成原问题中的物理等距。
+
+模式 $C$ 保留以下恒等式：
+\begin{equation}
+ \begin{aligned}
+ \mathbf1^\top e_a(x)&=4(1+z_a(x)),&&\text{numeric},\\
+ \mathbf1^\top e_a(c)&=4(1+r_a(c)),&&\text{ordinal},\\
+ \|e_a(x)-e_a(x')\|^2&=4(z_a(x)-z_a(x'))^2,&&\text{numeric}.
+ \end{aligned}
+ \label{v53:eq:compositional-properties}
+\end{equation}
+Ordinal 的秩可沿共享方向投影读取；对任意预测向量仍应按仿射直线投影后匹配合法秩。
+模式 $C$ 中原始组合码满足
+$\|e_a(c)\|^2=4+2r_a(c)q_a^\top b_a+4r_a(c)^2$，不要求各等级等范数。
+向量中的非零坐标数、坐标总和与平方范数是不同量。
+Nominal 设 $s=|\operatorname{supp}(q_a)\cap\operatorname{supp}(b_{a,c})|$，则
+$e_a(c)\in\{0,1,2\}^{128}$，$\|e_a(c)\|_0=8-s$，$\sum_j e_{a,c,j}=8$，$\|e_a(c)\|_2^2=8+2s$。
+两个 4-hot 相加不等于一个独立抽样的 8-hot；不同类别的最终范数可以不同。
+V5.3 独立 $128/8$ 码的平方范数恒为 $8$，现为候选。
+若对 $\mathcal H_k$ 码除以 $\sqrt{k}$，须作为独立尺度变体登记，并同步输入、答案、评分及 decoder；
+它不会自动保持原始组合码的损失权重。
+
+\subsection{Nominal：列原点加类别向量}
+两种模式均为当前可见类别集 $\mathcal D_a^{\rm vis}$ 中每个类别 $c$ 采样一个取值向量 $b_{a,c}$，并与列原点相加：
+\begin{equation}
+ \boxed{e_a(c)=q_a+b_{a,c}}.
+ \label{v53c:eq:nominal-gaussian}
+\end{equation}
+模式 $G$ 对 $q_a$ 与各 $b_{a,c}$ 独立采样标准高斯并分别归一化；同列不同类别的 $b_{a,c}$ 互异，不做正交化或距离筛选。
+因 $\|q_a+b_{a,c}\|_2^2=2+2q_a^\top b_{a,c}$ 随 realization 变化，类别差仍满足
+\begin{equation}
+ \|e_a(c)-e_a(c')\|^2
+ =\|b_{a,c}-b_{a,c'}\|^2
+ =2-2b_{a,c}^\top b_{a,c'},\qquad
+ \mathbb E\|b_{a,c}-b_{a,c'}\|^2=2\quad(c\ne c').
+ \label{v53c:eq:gaussian-code-geometry}
+\end{equation}
+模式 $C$ 取 $q_a,b_{a,c}\in\mathcal H_4$，类别差 $\|e_a(c)-e_a(c')\|_2^2=8-2t$，其中 $t$ 为两个类别码的支持重叠；采样与重叠范数见第~\ref{v53c:constant-weight-option}~节。
+固定 episode seed、稳定列 ID 与确定的可见类别遍历顺序可重放码本；跨训练 episodes 可重抽，
+同一次 forward、评分与解码不重抽。隐藏目标不参与分配，缺码返回 \texttt{no-answer-code}。
+码本是非学习任务状态；实现检查有限值、非零采样范数及数值重复，失败时显式重采样并记录。
+32/8 等其他码宽以及 V5.3 的独立 $128/8$ 身份码继续作为候选保留。
+
+
+
+\subsection{类型分支与共享线性变换}
+默认输入 lift 等于答案编码，类型标签仅用于选择分支，不另加 learned type token：
+\begin{equation}
+ \bm v^{\rm typed}_{ra}=\begin{cases}
+ (\mathsf{numeric},q_a+z_a(x_{ra})b_a),&a\in\Fset_{\rm num},\\
+ (\mathsf{nominal},q_a+b_{a,x_{ra}}),&a\in\Fset_{\rm nom},\\
+ (\mathsf{ordinal},q_a+r_a(x_{ra})b_a),&a\in\Fset_{\rm ord}.
+ \end{cases}
+ \label{eq:E:continuous-tag}
+\end{equation}
+\begin{equation}
+ \VE_\theta(\mathsf{type},e)=W_{\rm enc}e,\qquad
+ W_{\rm enc}\in\R^{d\times128},\quad d\ge128.
+ \label{eq:E:nominal-encode}
+\end{equation}
+三条分支共享同一无偏置矩阵，跨类型、列与 episodes 学习。
+实现沿用旧实验的初始化：由模型 seed 生成 $d\times128$ 的高斯矩阵，
+取其薄 QR 分解的 $Q$，令 $W_{\rm enc}^{(0)}=Q/8$；随后由优化器直接更新矩阵参数。
+输入编译检查实际非 Null carrier 有限且非零。
+答案仍位于固定 codec 空间，输入矩阵的学习不改变答案编码、损失类型系数或解码规则。
+\path{type_aware_relational_geometrical} 是既有接口名；codec 须另记录版本与 realization。
+两种正文 codec 分别登记；Fourier 与旧 ordinal lift 继续作为独立候选。
+
+\subsection{三个共享 seeds 与完整 slot compiler}
+\label{subsec:E:compiler}
+模型另有三个非零的共享可学习向量
+\begin{equation}
+\bm q^C,\bm q^U,\bm q^F\in\R^d.
+\label{eq:E:semantic-seeds}
+\end{equation}
+它们分别初始化 Cell、Unit、Feature Queries；参数量为 $3d$，不随行列数增长。
+每行只有一个 Unit receiver，每列只有一个 Feature receiver；当前默认 token 维度为
+$d=128$，默认 $K=1$。\footnote{单个 token 宽度保持为 $d$。V5.4 允许把 Unit 与 Feature
+各扩成 $K$ 个 subtokens，$\bm U_r=[\bm u_{r,1},\ldots,\bm u_{r,K}]^\top\in\R^{K\times d}$，
+Feature 同形。正文与本 compiler 公式按 $K=1$ 书写。$K$ 与 attention head 数、inducing slot 数 $S$
+及值空间自由度 $k_a$ 分开配置；开启 $K>1$ 见附录~\ref{v54:sec:subtokens}。}
+
+记额外行地址为 $\Fstar$、额外列地址为 $\Ustar$：
+\begin{equation}
+\Rset^+=\Rset\mathbin{\dot\cup}\{\Fstar\},\qquad
+\Fset^+=\Fset\mathbin{\dot\cup}\{\Ustar\},\qquad
+\Iset=\Rset^+\times\Fset^+.
+\label{eq:E:augmented-addresses}
+\end{equation}
+设
+\[
+\Iset_{\rm query}
+=\Qset\mathbin{\dot\cup}(\Rset\times\{\Ustar\})
+ \mathbin{\dot\cup}(\{\Fstar\}\times\Fset),\qquad
+\Iset_{\rm null}=\Iset\setminus(\Vset\cup\Iset_{\rm query}).
+\]
+完整初始化为
+\begin{equation}
+\bm h_i^{(0)}=
+\begin{cases}
+\VE_\theta(\bm v^{\rm typed}_{ra}),&i=(r,a)\in\Vset,\\
+\bm q^C,&i=(r,a)\in\Qset,\\
+\bm q^U,&i=(r,\Ustar),\ r\in\Rset,\\
+\bm q^F,&i=(\Fstar,a),\ a\in\Fset,\\
+\bm0_d,&i\in\Iset_{\rm null}.
+\end{cases}
+\label{eq:E:slot-compiler}
+\end{equation}
+因此
+\begin{equation}
+\boxed{H^{(0)}\in\R^{(N+1)\times(M+1)\times d}.}
+\label{eq:E:carrier-shape}
+\end{equation}
+右下 $(\Fstar,\Ustar)$ 是一个 Null。未请求的自然缺失 Cell 也是 Null。
+真实数值为零时仍走 ValueEncoder；它不等于语义缺失或 Null。
+共享 seed 初始可以在不同地址相同，随后读取各自的行列证据形成不同状态。
+
+
+
+Null 的结构角色由地址集合给定，不以训练后 carrier 的范数重新分类。
+所有非 Null 初始 carriers 应检查有限且非零；训练中的 presence 可为零，
+其语义与 carrier 内容、离散角色仍分别定义。
+这次编译只产生一张 carrier table，不产生独立的 Query 网络或 Value 网络。
+
+\subsection{读出边界与合法还原的精确定义}
+\label{sec:R:terminal}
+\subsubsection{模式、输入与支持资格}
+固定整模型模式 $\mathsf R\in\{\mathrm{NW},\mathrm{LL}\}$。
+对 $t=(r,a)$，$\mathcal S_t=\{(s,a):s\in\mathcal C_a\}$ 只由可见地址决定。
+接口为
+\begin{equation}
+ \widehat{\bm e}_t=\operatorname{Readout}_{\mathsf R,g_{\rm LL}}
+       (\mathsf W_a,E_a;C_a,\bm c_t),\qquad
+ \widehat x_t=\operatorname{Decode}_a(\widehat{\bm e}_t,\mathcal A_a).
+ \label{eq:R:terminal-interface}
+\end{equation}
+$\mathsf W_a$ 收集全部固定中心的参考权重；NW 或逐目标对照只需当前行权重。
+$E_a$ 收集由该列 $\operatorname{Encode}_a$ 给出的 value 坐标，
+$C_a$ 在本接口中收集支持 Cell 特征；
+$\operatorname{Readout}_{\rm NW}$ 不接入 $C_a,\bm c_t$ 的计算路径。
+下标 $a$ 指定该列的编码、还原规则及所用统计量或码表，不选择 learned head 或 NW/LL 模式。
+$\mathcal A_a$ 由当前可见输入建立，包含数值统计量，或类别码表与声明域；
+编码、还原和评分共用该状态。解码不接收 $\bm w_t$ 或逐 support 标签，
+它们只通过 readout 影响预测坐标。
+接口不写回 carriers，也不再次调用 backbone。可见 target 保留自身 support；
+Query 隐藏值只用于 scorer。
+
+匹配与 ridge 使用共享固定正超参数，数值列另声明原单位下的正尺度下限：
+\begin{equation}
+ \tau_{\rm match}>0,\quad\lambda_{\rm LL}>0,\quad\varepsilon_a>0.
+ \label{eq:R:positive-parameters}
+\end{equation}
+全 NW 不使用 $\lambda_{\rm LL}$。合法 support logits 采用稳定 softmax；
+非空支持、有限输入下，实数权重 $w_s>0$ 且 $\sum_s w_s=1$。
+
+\subsubsection{每列成对的编码与还原}
+\label{subsec:R:value-codec}
+
+
+\paragraph{数值的编码与还原。}
+复用式~\eqref{eq:E:numeric-prep} 的可见 z-score 统计：
+\begin{equation}
+ \begin{gathered}
+ m_a=\mu_a,\quad s_a=\max\{\sigma_a,\varepsilon_a\},\qquad
+ z_{sa}=(x_{sa}-m_a)/s_a,\\
+ e_{sa}=q_a+z_{sa}b_a,\qquad
+ \widehat x_t=m_a+s_a\nu_a^{-1}b_a^\top(\widehat e_t-q_a).
+ \end{gathered}
+ \label{eq:R:numeric-statistics}
+\end{equation}
+Median/half-IQR 与退化 RMS 是独立候选；任何配置都共用同一状态生成支持响应与真值编码。
+模式 $G$ 中 $b_a$ 单位化；模式 $C$ 使用 $\nu_a=4$ 的一般投影式。
+实现可直接用 $\|b_a\|^2$ 计算分母，以补偿浮点误差。
+隐藏值不参与统计；无约束数值输出不隐含取整、正值限制或 clip。
+
+\paragraph{Nominal：列原点加类别向量与最近码还原。}
+沿用固定可见码 $e_a(c)=q_a+b_{a,c}$，不重采样读出码表或读取隐藏 labels：
+\begin{equation}
+ \widehat c_t=\arg\min_{c\in\mathcal D_a^{\rm vis}}
+ \|\widehat e_t-(q_a+b_{a,c})\|^2
+ =\arg\max_{c\in\mathcal D_a^{\rm vis}}(\widehat e_t-q_a)^\top b_{a,c}.
+ \label{eq:R:nearest-code}
+\end{equation}
+最后一个等式利用所有 $b_{a,c}$ 范数相同（模式 $C$ 为 $2$，模式 $G$ 为 $1$）。
+\textbf{不能}沿用旧 8-hot 的 $\arg\max_c\widehat e_t^\top e_a(c)$，因为 $e_a(c)=q_a+b_{a,c}$ 一般不再等范数。
+等距按固定 schema 次序打破平局；单类别总返回该类别。
+MSE 监督还原前坐标，不定义类别概率。
+
+\paragraph{Ordinal：在完整声明域中投影后匹配最近秩。}
+令 $e_a(c)=q_a+r_a(c)b_a$，同一基点与方向用于输入、答案和 decoder：
+\begin{equation}
+ \widehat r_t=\frac{b_a^\top(\widehat e_t-q_a)}{\|b_a\|^2},\qquad
+ \boxed{\widehat c_t=\arg\min_{c\in\mathcal D_a}
+ \left|\widehat r_t-r_a(c)\right|.}
+ \label{v53c:eq:ordinal-decode}
+\end{equation}
+等距按声明次序，单等级直接返回唯一等级。合法候选秩包含未在支持中出现的声明等级，
+但秩域由独立 schema 预先建立，不能根据隐藏目标补建。
+这是同一仿射直线上的欧氏最近码判决；预测向量偏离该直线的正交分量不影响判决。
+训练监督完整向量，硬匹配不进入单轮反向链。
+
+\paragraph{实际码间隔给出还原裕度。}
+对 nominal 取 $\mathcal C_a=\mathcal D_a^{\rm vis}$，对 ordinal 取 $\mathcal C_a=\mathcal D_a$。
+当至少两个合法类别时定义实际最小间隔
+$\Delta_a=\min_{c\ne c'\in\mathcal C_a}\|e_a(c)-e_a(c')\|$，则
+\begin{equation}
+ \boxed{\|\widehat e_t-e_a(c^\star)\|<\Delta_a/2
+ \quad\Longrightarrow\quad\widehat c_t=c^\star.}
+ \label{eq:R:code-recovery-margin}
+\end{equation}
+任一其他码到预测的距离至少为 $\Delta_a-\|\widehat e_t-e_a(c^\star)\|$，严格大于真码误差。
+有限且互异的 nominal 码具有 $\Delta_a>0$；默认恒重组合码还具有统一的 $\sqrt2$ 下界，单位高斯对照模式没有这一固定下界。
+Ordinal 使用完整声明秩码的实际 $\Delta_a=\|b_a\|\min_{c\ne c'}|r_a(c)-r_a(c')|$；
+两种模式均检查有限值与非零基点/方向，失败时显式重采样并记录。单类别无需间隔条件。
+这只给定 realization 上的条件保证，不证明优化能达到此误差；编码 MSE 最优解也未必使类别错误率最小。
+
+
+\section{当前默认：参考总体与列共享 LL 的完整推导}
+\label{v51:app:shared-ll}
+第三步返回整张增广 carrier table $\bm H^{(L)}$。
+按地址读取每个 Cell、Unit 和 Feature 的最终表示：
+\begin{equation}
+\begin{aligned}
+ \bm c_{ra}&:=\bm H^{(L)}_{r,a,:}\in\R^d,\\
+ \bm u_r^{(0)}&:=\bm H^{(L)}_{r,M+1,:}\in\R^d,\\
+ \bm f_a&:=\bm H^{(L)}_{N+1,a,:}\in\R^d.
+\end{aligned}
+\label{front:eq:single-token-views}
+\end{equation}
+三类初始表示来自同一次二维 forward。每个 Unit、Feature 都只有一个 $d$ 维 token。
+下文匹配用 $u_r:=\widetilde u_r$，即式~\eqref{v51:eq:unit-switch} 的旁路或精炼结果；$c_{ra},f_a$ 不写回。
+
+\subsection{用该列的编码值作为回归目标}
+沿用第~\ref{subsec:E:value-codec}~节的编码规则，
+每个可见 support 提供 value 坐标 $\bm e_{sa}\in\R^{p_a}$。
+$\bm c_{sa}$ 是上下文回归特征，$\bm e_{sa}$ 是被预测值的坐标；
+前者经过 backbone，后者保留 numeric/ordinal 仿射编码或 nominal 的 $q_a+b_{a,c}$；两种模式均为 128 维。
+
+\subsection{共享几何决定借用哪些观测}
+本步先为目标 Unit 的响应估计组织参考证据，回答“借用谁的观测、各占多大比重”，
+再由 readout 决定怎样使用这些证据。固定模型级选择
+$\mathsf R\in\{\mathrm{NW},\mathrm{LL}\}$，它在所有列、类型与请求之间一致，
+并随实验配置和 checkpoint 记录，不按列类型路由。
+\begin{equation}
+ \coreboxed{\bm s_{ra}=[\bm u_r;\bm f_a]\in\R^{2d},\qquad
+ \text{全 LL 的预测特征为 }\bm c_{ra}\in\R^d.}
+ \label{front:eq:restoration-response}
+\end{equation}
+全 NW 只汇总几何权重下的可见答案编码，不直接读取最终 Cell；
+全 LL 用最终 target/support Cell 拟合这些编码，数值与类别均如此。
+这里 Cell 提供局部关系的拟合与求值坐标，不是只能承担数值回归的专属坐标。
+实现保留一个可选的低维回归特征：启用 $d_R<d$ 时，在全 LL
+中以可学习的 $\bm\zeta_{ra}=P_{\!R}\bm c_{ra}\in\R^{d_R}$ 替换
+$\bm c_{ra}$，而 backbone carrier 和答案编码的宽度不变；默认省略该映射，
+即 $d_R=d$。它只改变 LL 的回归特征，不按类型或列增加 readout head。
+
+Concat 不增加可学习投影或 gates，且
+\begin{equation}
+ \|\bm s_{ra}-\bm s_{sb}\|^2
+ =\|\bm u_r-\bm u_s\|^2+\|\bm f_a-\bm f_b\|^2.
+ \label{front:eq:concat-distance}
+\end{equation}
+同一列固定 Feature，因此
+\begin{equation}
+ \coreboxed{\|\bm s_{ra}-\bm s_{sa}\|^2=\|\bm u_r-\bm u_s\|^2.}
+ \label{front:eq:feature-cancellation}
+\end{equation}
+两种 readout 均保留这一抵消。在当前同列 concat 读出下，最终 Feature 及其独立 seed
+没有任务损失梯度；改变支持轴或采用附录的交互映射后，其作用需按新计算图分析。
+
+\subsection{一份样本核，各列取用自己的可见证据}
+训练的完整评分域为 $\TargetSet=\Oset=\Vset\mathbin{\dot\cup}\Qset$，默认仅 $\Qset$ 的误差有非零权重；
+推理目标为调用方请求的 Cell 地址。
+目标集合决定预测位置，支持集合由可见值决定。对列 $a$，记
+\begin{equation}
+ \mathcal C_a:=\{s\in\Rset:(s,a)\in\Vset\},\qquad
+ n_a:=|\mathcal C_a|.
+ \label{front:eq:visible-supports}
+\end{equation}
+所有列共用原始样本核，再按各列支持集合归一化：
+\begin{equation}
+\begin{aligned}
+ \kappa_{rs}
+ &:=\exp\!\left(-\frac{\|\bm u_r-\bm u_s\|^2}
+                         {2\tau_{\mathrm{match}}^2}\right),\\
+ \alpha_{ra}^{(s)}
+ &:=\frac{\kappa_{rs}}{\sum_{j\in\mathcal C_a}\kappa_{rj}},
+ \qquad s\in\mathcal C_a,\quad \tau_{\mathrm{match}}>0.
+\end{aligned}
+\label{front:eq:gaussian-matching}
+\end{equation}
+带宽为跨列、跨 episodes 共享的固定正超参数。
+可见集合相同的列获得相同权重；集合不同时，各自选取和归一化。
+对目标 Unit $r$，这组权重在列 $a$ 的可见观测上形成一个 contextual 软参考子总体。
+跨列共享的是参考几何，而不是响应规律：即使支持与权重相同，全 LL 仍可用各列的
+Cell 内容与答案拟合不同的局部关系。共享几何是当前的建模假设，其适用范围须由恢复任务检验。
+
+
+
+\subsection{当前默认的联合问题}
+固定一列，支持数为 $n$，中心为当前表全部 $N$ 个 Unit，$\pi_r=1/N$。
+用 $w_{rs}$ 简记同列归一化权重，$c_s,c_r\in\mathbb R^{d_R}$ 为回归特征，
+默认 $d_R=d$；$e_s\in\mathbb R^p$ 为实际输入响应，默认 $p=128$。
+内层问题是正文式~\eqref{front:eq:cell-ll}。其参考权重在内层拟合前确定，
+不读取隐藏响应；外层训练仍对这些权重反传。默认每个中心 $\pi_r=1/N>0$。
+
+\subsection{消去全部局部截距}
+定义 $\bar c_r=\sum_s w_{rs}c_s$、$\bar e_r=\sum_s w_{rs}e_s$。
+对每个未正则化截距求导，有
+\begin{equation}
+ \beta_r=\bar e_r+B(c_r-\bar c_r).
+ \label{v51:eq:intercept-elimination}
+\end{equation}
+代回得一个共享斜率问题：
+\begin{equation}
+ \min_B\sum_r\pi_r\sum_s w_{rs}
+ \|(e_s-\bar e_r)-B(c_s-\bar c_r)\|^2+\lambda\|B\|_F^2.
+ \label{v51:eq:shared-centered}
+\end{equation}
+目标 Cell 的坐标从斜率拟合中消掉，仍出现在最后求值中；因此增加一个 Query 的 Cell 状态不会改变共享拟合。
+定义
+\begin{equation}
+ \begin{aligned}
+ \Sigma_r&=\sum_s w_{rs}(c_s-\bar c_r)(c_s-\bar c_r)^\top,\\
+ J_r&=\sum_s w_{rs}(c_s-\bar c_r)(e_s-\bar e_r)^\top,\\
+ \bar\Sigma&=\sum_r\pi_r\Sigma_r,\qquad \bar J=\sum_r\pi_rJ_r,\qquad
+ A=\bar\Sigma+\lambda I_{d_R}.
+ \end{aligned}
+ \label{v51:eq:aggregate-moments}
+\end{equation}
+一阶条件给出 $AB^\top=\bar J$。对 $v\ne0$，
+\begin{equation}
+ v^\top Av=\sum_r\pi_r\sum_s w_{rs}[v^\top(c_s-\bar c_r)]^2+\lambda\|v\|^2>0.
+ \label{v51:eq:shared-spd}
+\end{equation}
+于是 $B$ 和所有截距唯一，不要求 $n\ge d_R$，也不要求 $p\le d_R$。
+“每列一次”是一次 $d_R\times d_R$ 分解加 $p$ 个响应右端，不是一个标量方程。
+$B=0$ 或 $\lambda\to\infty$ 时回到相同参考权重下的 NW。
+
+
+\paragraph{逐步展开，而不是把聚合当作新的假设。}
+对每个中心，利用 $\sum_s w_{rs}=1$，两次交叉项与一次均值项合并为
+\begin{equation}
+ \Sigma_r=\sum_s w_{rs}c_sc_s^\top-\bar c_r\bar c_r^\top,\qquad
+ J_r=\sum_s w_{rs}c_se_s^\top-\bar c_r\bar e_r^\top.
+ \label{v53:eq:expanded-local-moments}
+\end{equation}
+再对中心按 $\pi_r$ 加权，令 $\nu_s=\sum_r\pi_rw_{rs}$，得到
+\begin{equation}
+ \begin{aligned}
+ \bar\Sigma&=\sum_s\nu_sc_sc_s^\top-\sum_r\pi_r\bar c_r\bar c_r^\top,\\
+ \bar J&=\sum_s\nu_sc_se_s^\top-\sum_r\pi_r\bar c_r\bar e_r^\top.
+ \end{aligned}
+ \label{v53:eq:expanded-global-moments}
+\end{equation}
+第一项按支持地址累加，第二项只需各中心的局部均值；这正是下面矩阵形式的来源。
+没有把不同中心的局部协方差假设成相等，也没有把逐目标的斜率平均成共享斜率。
+
+\subsection{由参考核生成加权中心化矩阵}
+令 $C\in\mathbb R^{n\times d_R}$、$E\in\mathbb R^{n\times p}$ 分别收集支持特征与编码，
+$\mathsf W\in\mathbb R^{N\times n}$ 逐行归一化；$\Pi=\operatorname{diag}(\pi)$、$\nu=\mathsf W^\top\pi$。
+定义
+\begin{equation}
+ L_{\mathsf W}=\operatorname{diag}(\nu)-\mathsf W^\top\Pi \mathsf W.
+ \label{v51:eq:kernel-centering}
+\end{equation}
+对于任意 $a\in\mathbb R^n$，
+\begin{equation}
+ a^\top L_{\mathsf W} a=\sum_r\pi_r\left[\sum_s w_{rs}a_s^2-(\sum_s w_{rs}a_s)^2\right]\ge0,
+ \quad L_{\mathsf W}\bm1=0.
+ \label{v51:eq:centering-psd}
+\end{equation}
+这是局部方差的加权和；不要求原始非负参考关系本身是对称 Gram 矩阵。
+由展开局部中心化可得
+\begin{equation}
+ \bar\Sigma=C^\top L_{\mathsf W}C,\qquad\bar J=C^\top L_{\mathsf W}E,\qquad
+ (C^\top L_{\mathsf W}C+\lambda I)B^\top=C^\top L_{\mathsf W}E.
+ \label{v51:eq:kernel-normal}
+\end{equation}
+实现不必物化 $L_{\mathsf W}$ 或逐中心协方差。记 $\bar C=\mathsf W C$、$\bar E=\mathsf W E$，则
+\begin{equation}
+ \begin{aligned}
+ \bar\Sigma&=C^\top\operatorname{diag}(\nu)C-\bar C^\top\Pi\bar C,\\
+ \bar J&=C^\top\operatorname{diag}(\nu)E-\bar C^\top\Pi\bar E.
+ \end{aligned}
+ \label{v51:eq:efficient-moments}
+\end{equation}
+第二矩相减可能有消减误差，须使用足够精度与对称化；必要时以局部中心化累积核对。
+不能靠未声明的额外大 jitter、截断特征值或伪逆改变模型。
+
+\subsection{读取集合、有效系数与固定拟合中心}
+令 $R$ 表示实际读取的行，$\mathsf W_R$ 取对应参考权重，$C_R$ 收集目标 Cell 特征。
+\begin{equation}
+ \widehat E_R=\mathsf W_R E+(C_R-\mathsf W_R C)B^\top=\mathcal S_R E,
+ \quad
+ \mathcal S_R=\mathsf W_R+(C_R-\mathsf W_R C)A^{-1}C^\top L_{\mathsf W}.
+ \label{v51:eq:shared-effective}
+\end{equation}
+因为 $L_{\mathsf W}\bm1=0$，所以 $\mathcal S_R\bm1=\bm1$。有效系数可以为负，不能解释为概率。
+这立即给出附录~\ref{v51:app:affine} 的仿射闭包、标量化以及未知数值的连续外推接口。
+固定输入与特征时，共同平移支持/目标 Cell 不改变预测；正交变换保持各向同性 ridge。
+
+共享斜率改变了估计器：$B$ 依赖全部拟合中心的参考权重，不仅依赖当前目标一行权重。
+因此新行即使没有目标标签，也可能通过中心集合改变列级解；这不是 query 插入一致性所覆盖的操作。
+固定证据上只增删返回地址，不改变中心集合和 $B$。
+
+\subsection{单支持、常数响应与自支持极限}
+单支持时每个局部总体只有同一个点，$L_{\mathsf W}=0$、$B=0$，返回该支持编码；空支持走状态分支。
+常数响应也有 $\bar J=0$，精确重现常数，无法通过调整 backbone 产生其他数值答案；
+故训练数值列须满足式~\eqref{eq:P:support-floor} 的不同取值条件。
+一般非恒定响应下，Null 目标使用 $c_r=0$，预测为 $\bar e_r-B\bar c_r$，
+仍可以由不同的 Unit 权重获得不同答案。
+
+若有限支持特征和编码固定、$\lambda>0$ 固定，而可见目标自己的 $w_{rr}\to1$，则
+$\bar e_r\to e_r$、$\bar c_r\to c_r$。共享目标与 $B=0$ 候选比较给出 $B$ 的有界性，
+于是 $\widehat e_r\to e_r$。原稿逐目标 LL 的单目标最优性不等式不直接用于共享目标；
+本段用有界共享斜率证明对应极限，不把全列耦合忽略掉。
+
+\subsection{残差均值解释与共享的代价}
+等价解释是
+\begin{equation}
+ \widehat e_{ra}=B_ac_{ra}+\sum_s\alpha_{ra}^{(s)}(e_{sa}-B_ac_{sa}).
+ \label{v51:eq:local-residual}
+\end{equation}
+即共同的线性调整加上该 Unit 的局部残差均值。共享方向是一项新的建模约束，
+不是逐目标 LL 的无损加速。原稿逐目标 LL 的完整推导保留在附录作为对照，
+新联合问题的消元、矩阵聚合与全部梯度见附录~\ref{v51:app:shared-ll}。
+
+\subsection{固定读出下的仿射闭包与标量化}
+令 $\widehat E=\mathcal S E$ 为固定 Cell 特征、参考权重与 ridge 后的编码读出，
+且 $\mathcal S\bm1_n=\bm1_N$。全 NW、原稿逐目标 LL 与本版列共享 LL 都满足这一常数复现条件。
+数值支持矩阵是 $E=\bm1_nq^\top+z b^\top$，所以
+\begin{equation}
+ \boxed{\widehat E=\bm1_Nq^\top+(\mathcal S z)b^\top.}
+ \label{v51:eq:affine-closure}
+\end{equation}
+因此所有精确预测已在本列的合法直线上。可以仅对 $z$ 求标量响应，再乘回 $b$、加回 $q$。
+这是同一模型的精确计算化简；它不意味着可以从输入编码中删除 $q,b$，因为编码会改变已经形成的 Cell 与 Unit。
+若方向不再列内共享，或增加输出非线性、响应坐标不同的 ridge、逐坐标裁剪，则可能破坏此等价条件。
+
+对于合法 truth $e^*=q+z^*b$，有
+\begin{equation}
+ \|\widehat e-e^*\|^2=\nu_a(\widehat z-z^*)^2,
+ \qquad (\widehat x-x^*)^2=s_a^2(\widehat z-z^*)^2.
+ \label{v51:eq:value-loss-isometry}
+\end{equation}
+数值 loss 使用 $\chi_a=p_a=128$ 补偿逐坐标平均；模式 $G$ 保留一维误差口径，
+原始模式 $C$ 因 $\nu_a=4$ 得到四倍标量平方误差。跨模式比较须同时报告原值或统一标量指标。
+Nominal 与 ordinal 仍 $\chi_a=1$。对于 ordinal，令 $q_a$ 为共享基点，
+$\bm r_a$ 是支持秩向量，则
+\begin{equation}
+ E_a=\bm1 q_a^\top+\bm r_a b_a^\top,\qquad
+ \widehat E_a=\bm1 q_a^\top+(\mathcal S\bm r_a)b_a^\top.
+ \label{v53:eq:ordinal-identity-readout}
+\end{equation}
+因此 ordinal 与 numeric 一样可沿共享方向化简，但训练仍保留完整向量误差。
+对一个目标记 $\widehat r_t=(\mathcal S\bm r_a)_t$，并令
+$\delta r_t=\widehat r_t-r_a(c^\star)$，则
+\begin{equation}
+ \ell_t^{\rm ord}=\frac{\nu_a(\delta r_t)^2}{128}.
+ \label{v53:eq:ordinal-identity-loss}
+\end{equation}
+这里的 $\widehat r_t$ 是沿共享方向的响应分量；线外预测还包含正交残差，
+所以实现仍以完整向量 MSE 为准，不能把该化简误当作改变训练损失。
+不补偿的统一坐标均方误差可作另一显式对照，但会将 numeric 分支缩小 128 倍。
+对于一般线外 decoder 输入，向量误差还包含正交残差；那时不能仅由投影后的标量误差反推完整向量误差。
+
+
+\section{当前默认：从损失到所有中心的完整反传}
+\label{v51:app:gradient}
+\subsection{统一编码 MSE 直接回传}
+对任意类型，scorer 的答案真值 $\bm e_t^\star$ 与可见统计、码本均固定，故
+\begin{equation}
+ \mathrm d\ell_t=\frac{2\chi_a}{p_a}
+ (\widehat{\bm e}_t-\bm e_t^\star)^\top\mathrm d\widehat{\bm e}_t.
+ \label{eq:T:encoding-mse-gradient}
+\end{equation}
+缺码是 \texttt{no-answer-code}，不是一个零梯度的有效 score。
+误差只经预测编码回到所选 readout：全 NW 经编码均值回到权重，
+全 LL 经局部拟合与求值回到 Unit 权重和 Cell。
+正文单轮训练直接监督连续预测，不对输出类别的 $\arg\min$ 求导；
+迭代附录另将硬判决用于下一轮反馈，并明确其梯度边界。
+
+\subsection{内层线性系统与全部中心路径}
+固定数据、codec、地址、正超参数及 $\pi$，不固定可学习表征或参考权重。
+记 $D=B^\top$、$A=C^\top L_{\mathsf W}C+\lambda I$、$G=C^\top L_{\mathsf W}E$。
+\begin{equation}
+ \begin{aligned}
+ \mathrm d\nu&=(\mathrm d\mathsf W)^\top\pi,\\
+ \mathrm dL_{\mathsf W}&=\operatorname{diag}(\mathrm d\nu)-(\mathrm d\mathsf W)^\top\Pi \mathsf W-\mathsf W^\top\Pi\mathrm d\mathsf W,\\
+ \mathrm dA&=(\mathrm dC)^\top L_{\mathsf W}C+C^\top(\mathrm dL_{\mathsf W})C+C^\top L_{\mathsf W}\mathrm dC,\\
+ \mathrm dG&=(\mathrm dC)^\top L_{\mathsf W}E+C^\top(\mathrm dL_{\mathsf W})E,\\
+ A\,\mathrm dD&=\mathrm dG-(\mathrm dA)D.
+ \end{aligned}
+ \label{v51:eq:shared-differentials}
+\end{equation}
+这里 $E$ 是固定实际支持响应；若研究对输入值的灵敏度，可另补 $C^\top L_{\mathsf W}\mathrm dE$，
+但普通模型参数训练不优化输入数据或随机码。这里 $\nu=\mathsf W^\top\pi$，$\Pi=\operatorname{diag}(\pi)$，
+与前向的符号完全一致。
+对读取集合 $R$，
+\begin{equation}
+ \mathrm d\widehat E_R=(\mathrm d\mathsf W_R)E+
+ (\mathrm dC_R-(\mathrm d\mathsf W_R)C-\mathsf W_R\mathrm dC)D+(C_R-\mathsf W_R C)\mathrm dD.
+ \label{v51:eq:prediction-differential}
+\end{equation}
+全部中心经 $\mathrm dL_{\mathsf W}$ 影响 $D$，即使某个中心不在返回集合 $R$ 中，该路径也可能非零。
+反传从所有列汇聚到同一个 $\widetilde U$，再穿过默认 Unit 支路和二维网络；$L_U=0$ 时该段为恒等。
+若 $D$ 的上游 adjoint 为 $\overline D$，解 $A^\top P=\overline D$，
+则 $\overline G=P$、$\overline A=-PD^\top$；对称表示使用其对称部分。
+同一分解可复用于这些右端，不形成显式逆矩阵。
+
+
+\subsection{逐层反向：显式列出每一条路径}
+本小节给出默认列共享路径的一个完整 reverse-mode 实现。固定某列的支持顺序，
+$C\in\R^{n\times d_R}$、$E\in\R^{n\times p}$，全部中心权重为
+$\mathsf W\in\R^{N\times n}$，$\Pi=\operatorname{diag}(\pi)$。
+读取集合 $R$ 有 $t$ 个地址，$J_R\in\{0,1\}^{t\times N}$ 是对应行选择器，
+$\mathsf W_R=J_R\mathsf W$；$C_R$ 收集这些目标的回归特征。
+下面所有上横线表示 loss adjoint，不是局部加权均值；局部均值在本节明确写作 $\mathsf W C$、$\mathsf W E$。
+
+首先从完整的 episode loss 汇集
+$F=\partial\mathcal L/\partial\widehat E_R\in\R^{t\times p}$。
+对地址 $i=(r,a)$，状态与类型的归约权重为
+\begin{equation}
+ \omega_i=\begin{cases}
+ |\Qset_{b(a)}|^{-1},&i\in\Qset,\\
+ \lambda_{\rm restore}|\Vset_{b(a)}|^{-1},&i\in\Vset,
+ \end{cases}
+ \qquad F_i=\frac{2\chi_a\omega_i}{p_a}(\widehat e_i-e_i^\star).
+ \label{v53q:eq:loss-adjoint}
+\end{equation}
+这里 $b(a)$ 对 numeric 取 $\mathrm{num}$，对 nominal/ordinal 合并取 $\mathrm{disc}$；所属分支必非空。
+默认 retained 预测行的 $F_i=0$，但它作为 support 或拟合中心的其他梯度路径仍保留。
+其他显式类型系数在此一次性乘入，后续不能重复归约。
+
+\paragraph{1. 求值路径。}
+令 $D=B_a^\top$、$Q_R=C_R-\mathsf W_R C$。由
+$\widehat E_R=\mathsf W_R E+Q_RD$，有
+\begin{equation}
+ \begin{aligned}
+ \overline D&=Q_R^\top F,&
+ \overline C_R^{\rm eval}&=FD^\top,\\
+ \overline{\mathsf W}_R^{\rm eval}&=F(E-CD)^\top,&
+ \overline C^{\rm eval}&=-\mathsf W_R^\top FD^\top,\\
+ \overline E^{\rm eval}&=\mathsf W_R^\top F.
+ \end{aligned}
+ \label{v53:eq:reverse-evaluation}
+\end{equation}
+
+\paragraph{2. 共享线性系统。}
+解一次伴随系统 $A^\top P=\overline D$，不显式求逆。令
+\begin{equation}
+ T=\operatorname{sym}(-PD^\top),\qquad
+ \operatorname{sym}(X)=\tfrac12(X+X^\top),\qquad
+ S_L=CTC^\top+\operatorname{sym}(CPE^\top).
+ \label{v53:eq:reverse-system}
+\end{equation}
+$T$ 是对称矩阵 $A$ 的 adjoint，$S_L$ 是对称的 $L_{\mathsf W}$ 的 adjoint。
+对称化来自可行扰动 $\mathrm dA,\mathrm dL_{\mathsf W}$ 为对称矩阵，
+不是另给前向求解加一项正则。
+
+\paragraph{3. 支持特征、编码与全部中心权重。}
+将 $A=C^\top L_{\mathsf W}C+\lambda I$ 和 $G=C^\top L_{\mathsf W}E$ 的路径相加：
+\begin{equation}
+ \begin{aligned}
+ \overline C^{\rm fit}&=2L_{\mathsf W}CT+L_{\mathsf W}EP^\top,\\
+ \overline E^{\rm fit}&=L_{\mathsf W}CP,\\
+ \overline{\mathsf W}^{\rm fit}
+ &=\pi\operatorname{diag}(S_L)^\top-2\Pi\mathsf W S_L,\\
+ \overline C&=\overline C^{\rm eval}+\overline C^{\rm fit},\qquad
+ \overline E=\overline E^{\rm eval}+\overline E^{\rm fit},\\
+ \overline{\mathsf W}&=J_R^\top\overline{\mathsf W}_R^{\rm eval}
+                       +\overline{\mathsf W}^{\rm fit}.
+ \end{aligned}
+ \label{v53:eq:reverse-moments}
+\end{equation}
+此处 $\operatorname{diag}(S_L)$ 是对角线\emph{向量}，而
+$\operatorname{diag}(\mathsf W^\top\pi)$ 是用向量构造的对角\emph{矩阵}。
+默认数据、答案码和尺度不属于可训练参数，$\overline E$ 用来核对完整数据依赖，
+不会让优化器更新 support 标签。若以后学习答案码，应另外声明 target 的导数或 stop-gradient 约定。
+
+上式显式物化 $S_L\in\R^{n\times n}$ 只用于说明与小型验算；
+生产实现可按原计算图反传或使用乘积因子，不要求保存这个稠密矩阵。
+对前向聚合中所用的中心分块，反向必须汇集相同的全中心贡献。
+
+\paragraph{4. 行归一化与共享 Unit 核。}
+设 $\psi_{rs}^a$ 为同列支持上的 logit，$w_{rs}^a=\operatorname{softmax}_s(\psi_{rs}^a)$。
+令 $H_{rs}^a$ 为 logits adjoint：
+\begin{equation}
+ H_{rs}^a=w_{rs}^a\left[
+ \overline{\mathsf W}_{rs}^a-
+ \sum_{j\in\mathcal C_a}w_{rj}^a\overline{\mathsf W}_{rj}^a\right].
+ \label{v53:eq:reverse-softmax}
+\end{equation}
+默认 Gaussian logits 给每个中心 $r$ 和 support $s$ 两个入口的贡献
+\begin{equation}
+ \Delta\overline u_r=-\frac{H_{rs}^a}{\tau_{\rm match}^2}(u_r-u_s),\qquad
+ \Delta\overline u_s=+\frac{H_{rs}^a}{\tau_{\rm match}^2}(u_r-u_s).
+ \label{v53:eq:reverse-unit}
+\end{equation}
+遍历\emph{全部列、全部拟合中心及其支持}后累加到同一个 Unit 表征。
+$r=s$ 时差向量为零，自配对的距离导数为零，但它的 softmax 权重仍受其他配对影响。
+未返回中心的 $\overline{\mathsf W}^{\rm fit}$ 不能删去；这正是列共享与旧逐目标反传的区别。
+
+\paragraph{5. 地址绑定、低维映射与网络。}
+$C_R$ 的求值贡献和 $C$ 的支持贡献按真实 Cell 地址 scatter-add，
+同一个可见 Cell 同时是 target 和 support 时两条贡献相加，而非当作两个独立对象更新。
+启用 $\zeta_i=P_Rc_i$ 后，从各次使用汇总 $\overline\zeta_i$，再使用
+\begin{equation}
+ \overline c_i=P_R^\top\overline\zeta_i,\qquad
+ \overline P_R=\sum_i\overline\zeta_i c_i^\top.
+ \label{v53:eq:reverse-lowdim}
+\end{equation}
+Unit adjoint 经默认精炼层回到 $U^{(0)}$；Cell 与 Unit 的所有入口一起经过二维 backbone 反传。
+选用 $L_U=0$ 旁路时只是把同一个 Unit adjoint 直接传回，不产生一套额外参数。
+三个 Query seeds 的梯度分别在编译器广播地址处求和，ValueEncoder 的参数梯度从全部实际 Value 地址累计。
+默认 Feature 的直接路径与 NW 的 Cell Query 边界在本附录末节单列。
+
+\paragraph{完整性与验证范围。}
+式~\eqref{v53:eq:reverse-evaluation}--\eqref{v53:eq:reverse-lowdim} 与前述正向微分是同一计算图的两种写法。
+可以用自动微分与有限差分分别核对 $C,C_R,E,\psi$ 及 $P_R$，其中 $C$ 与 $C_R$ 的同地址绑定另测。
+它们假定当前所有算子分支处于相应可微区域；网络 collect 硬 gate 的切换边界见
+附录~\ref{v53:sec:empty-gate-boundary}。不能据线性 solve 可微宣称整张网络处处光滑。
+
+\subsection{Feature 与 Query seeds 的边界}
+在正文的同列 concat 匹配、纯 Query 角色与分离读出下，两种模式均有
+\begin{equation}
+ \partial\mathcal L/\partial\bm f_a=0,\qquad
+ \partial\mathcal L/\partial\bm q^F=0.
+ \label{eq:T:split-readout-gradient}
+\end{equation}
+Feature Query 不供源，不能绕道影响 Unit/Cell；Cell Query 也不供源，
+因而全 NW 另有 $\partial\mathcal L/\partial\bm q^C=0$。
+共享 backbone 参数继续通过可见 carriers 与 Unit 路径学习；
+全 LL 另外具有全部类型的最终 Cell 路径。
+Loss 梯度为零与含 weight decay 或既有 optimizer state 的参数更新应分别判断。
+这些结论针对当前计算图；交互映射或估计反馈引入的新路径应重新分析。
+
+
+\section{带零元语义的轴向注意力}
+\label{sec:A:attention}
+
+本节把已经编译好的 token table 作为输入，定义其内部唯一的跨地址通信算子。
+输入的构造见第~\ref{sec:E:encoding}~节；这里固定 episode、增广地址集合
+$\Iset=\Rset^+\times\Fset^+$、可见集合 $\Vset$ 及模型参数。
+除特别说明外，所有等式均在精确实数算术下理解。
+数值实现还必须满足第~\ref{subsec:A:numeric}~节给出的执行条件。
+
+\subsection{地址、角色与两种投影视图}
+\label{subsec:A:views}
+
+在任意一个 attention 子层开始时，输入是
+\begin{equation}
+  \bm H=(\bm h_i)_{i\in\Iset},
+  \qquad \bm h_i\in\R^d.
+  \label{eq:A:input-table}
+\end{equation}
+局部下标 $i,j$ 始终表示二维增广地址，而不是额外的序列身份。
+将 $i$ 写为 $(r_i,a_i)$ 时，两个坐标可以分别是原始地址或扩展地址。
+固定的 source eligibility mask 是
+\begin{equation}
+  \mathsf M_i^{\mathrm{src}}=\ind[i\in\Vset].
+  \label{eq:A:source-mask}
+\end{equation}
+它由 episode 的可见集合生成，在该次 forward 的所有层与两个轴上复用。
+不能根据当前 carrier 是否像 Value、是否已经吸收上下文，重新决定 source eligibility。
+
+\begin{definition}[Receiver/source views]
+给定当前 carrier table 与固定 source mask，定义
+\begin{equation}
+  \overline{\bm h}^{Q}_i=\bm h_i,
+  \qquad
+  \overline{\bm h}^{KV}_i
+  =\mathsf M_i^{\mathrm{src}}\bm h_i.
+  \label{eq:A:views}
+\end{equation}
+第一种视图用于该地址接收信息，第二种视图用于该地址向其他地址提供信息。
+视图是当前 carrier 的函数，不是两套独立状态，也不增加可学习参数。
+\end{definition}
+
+投影在每个子层内部对所有地址共享。
+一个 attention head 的投影写为
+\begin{equation}
+ \begin{aligned}
+  \bm q_i&=\operatorname{Proj}_Q(\overline{\bm h}^{Q}_i)\in\R^{d_k},\\
+  \bm k_j&=\operatorname{Proj}_K(\overline{\bm h}^{KV}_j)\in\R^{d_k},\\
+  \bm v_j&=\operatorname{Proj}_V(\overline{\bm h}^{KV}_j)\in\R^{d_v}.
+ \end{aligned}
+ \label{eq:A:qkv}
+\end{equation}
+不同层、不同轴、不同 head 可以使用不同参数；相同子层与 head 内不按 Unit、Feature
+或语义 token 编号另建投影。
+默认 $\operatorname{Proj}_Q,\operatorname{Proj}_K,\operatorname{Proj}_V$ 与下一节的 presence
+读出一样，都是 bias-free 线性映射，因而
+$\operatorname{Proj}_K(\bm0)=\bm0$、$\operatorname{Proj}_V(\bm0)=\bm0$。
+带偏置的仿射投影是可选扩展：启用后零 carrier 的 $K,V$ 可以非零，但 source deletion
+的依据仍须位于这些投影之前，不能只检查 $K$ 或 $V$ 的数值。
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{lccX}
+\toprule
+地址角色 & receiver view & source view & 该角色在本子层中的含义\\
+\midrule
+Value & $\bm h_i$ & $\bm h_i$ & 具备提供信息的资格，实际 presence 由读出 $W_A^{P}\bm h_i$ 决定。\\
+Query & $\bm h_i$ & $\bm0$ & 接收信息；无论状态更新多少次，都不向其他地址供源。\\
+Null & $\bm0$ & $\bm0$ & 保留 tensor 地址，attention 更新与最终写回均为零。\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+表中的 Null 行以 Null carrier 在子层输入处已经为精确零为前提。
+第~\ref{subsec:A:zero-closure}~节将证明该性质逐层闭合。
+这里的 Value 包括原始数值恰好为 $0$ 的观测；它的 carrier 由 ValueEncoder 生成，
+不等于以向量零表示的 Null。
+
+
+
+\subsection{连续 presence 与离散 source eligibility}
+\label{subsec:A:presence}
+
+Presence 使用标量映射
+\begin{equation}
+  \rho(\bm h)
+  :=\frac{\|\bm h\|_2^2}{\tau_{\mathrm{pres}}+\|\bm h\|_2^2},
+  \qquad \tau_{\mathrm{pres}}>0.
+  \label{eq:A:presence}
+\end{equation}
+默认固定 $\tau_{\rm pres}=1$，使单位范数读出位于半参与点；
+这也是当前 V5.3 的默认 presence 尺度。$10^{-6}$ 等更小阈值只作为显式消融，
+不能在未登记的情况下替换默认设置。
+把它作用在无偏置线性读出之后：一个 carrier 的 presence 是
+$\rho(W^{P}\bm h)$。$W^{P}=I_d$ 时回到原来的 $\rho(\bm h)$。
+Attention 与 FFN 使用独立读出
+\begin{equation}
+  W_A^{P},W_F^{P}\in\R^{d\times d},
+  \label{eq:A:presence-readouts}
+\end{equation}
+默认初始化为 $W_A^{P}=W_F^{P}=I_d$。
+二者是独立可学习的参与度读出。
+
+\paragraph{默认阈值与幅度尺度。}
+令 $s=\|W^{P}\bm h\|^2$，则 $\rho=s/(\tau_{\rm pres}+s)$，
+半参与点位于 $s=\tau_{\rm pres}=1$，对应范数为 $1$；
+当 $s=1$ 时，$\rho=1/2$。因此通常幅度的非零读出保留可学习的参与度差异，
+零附近仍连续衰减；这不是把非零值硬设为 $1$。
+若显式取 $\tau_{\rm pres}=10^{-6}$，单位范数读出为
+$\rho=1/(1+10^{-6})\approx0.999999$，属于需要单独登记的饱和型消融。
+更一般地，对 $\alpha>0$ 有
+\begin{equation}
+ \rho_{\tau}(\alpha\bm y)=\rho_{\tau/\alpha^2}(\bm y),\qquad
+ \rho_{\tau}(\bm y):=\frac{\|\bm y\|^2}{\tau+\|\bm y\|^2}.
+ \label{v53:eq:presence-scale}
+\end{equation}
+例如在线性 presence 读出固定时，将其输入整体除以 $8$ 等效于把阈值放大 $64$ 倍。
+阈值 $\tau_{\rm pres}$、attention 参考质量 $\eta$、Norm 的数值稳定项和匹配带宽
+$\tau_{\rm match}$ 是不同参数，不能互相代替或随本默认一起更改。
+
+小阈值也不是梯度稳定性的充分条件。对读出向量 $\bm y$，
+\begin{equation}
+ \nabla_{\bm y}\rho_\tau(\bm y)
+ =\frac{2\tau\bm y}{(\tau+\|\bm y\|^2)^2},\qquad
+ \max_{\bm y}\|\nabla_{\bm y}\rho_\tau(\bm y)\|
+ =\frac{3\sqrt3}{8\sqrt\tau}.
+ \label{v53:eq:presence-derivative-scale}
+\end{equation}
+最大值在 $\|\bm y\|^2=\tau/3$ 处取得。减小阈值会使远离零的读出更饱和，
+同时使零附近的过渡更窄、更陡；整网梯度还需结合 $W^{P}$、残差动力学与 LL 求解检查。
+
+该参数化满足
+\begin{equation}
+ \rho(\bm0)=0,
+ \qquad
+ 0\le\rho(W^{P}\bm h)<1,
+ \qquad
+ \rho(W^{P}\bm h)=0\ \Longleftrightarrow\ \bm h\in\ker W^{P},
+ \qquad
+ \lim_{\|W^{P}\bm h\|\to\infty}\rho(W^{P}\bm h)=1.
+ \label{eq:A:presence-properties}
+\end{equation}
+因为默认读出无偏置，$W^{P}\bm0=\bm0$，零 carrier 的 presence 仍为零。
+非零 carrier 不必具有正 presence：$\bm h\in\ker W^{P}$ 且 $\bm h\ne\bm0$ 时，
+内容留在残差路径上，当前参与为零。
+仅当 $W^{P}$ 满秩、特别是 $W^{P}=I$ 时，才有
+$\bm h\ne\bm0\Rightarrow 0<\rho(W^{P}\bm h)<1$。满秩读出仍然可以改变不同方向的相对 presence。
+
+Receiver 与 source 分别读取
+\begin{equation}
+  p_i^R=\rho(W_A^{P}\bm h_i),
+  \qquad
+  p_j^S=\rho\bigl(W_A^{P}(\mathsf M_j^{\mathrm{src}}\bm h_j)\bigr)
+       =\mathsf M_j^{\mathrm{src}}\rho(W_A^{P}\bm h_j).
+  \label{eq:A:two-presences}
+\end{equation}\begingroup\makeatletter\protected@edef\@currentlabel{\p@equation\theequation}\label{front:eq:presence}\endgroup
+最后一个等式利用 $\mathsf M_j^{\mathrm{src}}\in\{0,1\}$ 与 $W_A^{P}$ 的线性。
+它明确区分两个问题：$\Vset$ 决定一个地址是否允许供源，$W_A^{P}$ 决定允许供源的
+当前 carrier 沿哪些方向具有多少 presence。
+即使 $j\in\Vset$，若 $W_A^{P}\bm h_j=\bm0$，该地址在此时也没有实际 source mass。
+
+Presence 在每个子层的输入处重新计算。
+列子层结束后，Value carrier 可能改变，因此行子层读到的 $p^S$ 通常不同；
+不变的是 source eligibility mask。
+若实现加入 token-local normalization，presence 的计算对象仍须保持为式
+~\eqref{eq:A:two-presences} 指定的 carrier view。
+从带偏置的 normalization 输出计算 presence 可能使零 carrier 重新获得质量，
+属于不同算子，不能作为无影响的实现替换。
+给 $W_A^{P}$ 或 $W_F^{P}$ 加偏置同样是可选扩展：$\rho(W^{P}\bm0+\bm b)$ 一般不再为零，
+会破坏下一节依赖 $W^{P}\bm0=\bm0$ 的零 carrier 闭合。
+
+\begin{remark}[Presence 不等于角色编码]
+$\rho(W_A^{P}\bm h)$ 只读取经过读出的向量，并不知道一个地址在语义上是 Value 还是 Query。
+非零 Query 可以具有正的 receiver presence，同时仍有 $p^S=0$。
+因此仅使用 $\rho(W_A^{P}\bm h_j)$ 而省略固定 source mask，会让已经非零的 Query 参与供源，
+破坏本模型的信息边界。
+\end{remark}
+
+\subsection{轴域与实际 source 集合}
+\label{subsec:A:domains}
+
+对于 $g\in\{\mathrm{col},\mathrm{row}\}$，定义
+\begin{equation}
+ \begin{aligned}
+  \Dset_{\mathrm{col}}(i)
+   &=\{j\in\Iset:a_j=a_i\},\\
+  \Dset_{\mathrm{row}}(i)
+   &=\{j\in\Iset:r_j=r_i\}.
+ \end{aligned}
+ \label{eq:A:axis-domains}
+\end{equation}
+这些集合包含整个对应增广列或增广行。
+行列关系由算子的计算域表达，不额外引入学习的 pairwise relation score。
+Source mask 与 axis domain 的职责分别是“谁有供源资格”和“这个 receiver
+在哪条轴上读取”。
+
+下面两个集合应当分开：
+\begin{equation}
+ \begin{aligned}
+  \Sset_i^g&=\Dset_g(i)\cap\Vset,
+       &&\text{具备资格的同轴 Value 地址},\\
+  \mathcal A_i^g&=\{j\in\Dset_g(i):p_j^S>0\}
+       \subseteq\Sset_i^g,
+       &&\text{当前实际非零的 sources}.
+ \end{aligned}
+ \label{eq:A:support-active}
+\end{equation}
+$\Sset_i^g$ 在 episode 内固定，$\mathcal A_i^g$ 可以随层变化。
+这里的 attention support 不是 terminal 使用的 same-column support 数据结构，
+尽管两者都以 $\Vset$ 为事实边界。
+
+对三类 Query，具备资格的同轴集合具体为
+\begin{equation}
+ \begin{aligned}
+  \Sset_{(r,\Ustar)}^{\mathrm{row}}
+    &=\{(r,b)\in\Vset:b\in\Fset\},
+  &\Sset_{(r,\Ustar)}^{\mathrm{col}}&=\varnothing,\\
+  \Sset_{(\Fstar,a)}^{\mathrm{col}}
+    &=\{(s,a)\in\Vset:s\in\Rset\},
+  &\Sset_{(\Fstar,a)}^{\mathrm{row}}&=\varnothing,\\
+  \Sset_{(r,a)}^{\mathrm{row}}
+    &=\{(r,b)\in\Vset:b\in\Fset\},
+  &\Sset_{(r,a)}^{\mathrm{col}}
+    &=\{(s,a)\in\Vset:s\in\Rset\}.
+ \end{aligned}
+ \label{eq:A:query-domains}
+\end{equation}
+原始 Value 地址也可读取自己，因为定义中没有 self-exclusion。
+若加入 self-exclusion 或特殊对角 mask，须记录为新的架构配置。
+
+\subsection{单头 OAttention 的精确定义}
+\label{subsec:A:single-head}
+
+固定一个 head、一个轴与一个 receiver，令
+\begin{equation}
+ \begin{aligned}
+  s_{ij}&=\frac{\bm q_i^\top\bm k_j}{\sqrt{d_k}},\\
+  \widetilde w_{ij}&=p_j^S\exp(s_{ij}),\\
+  Z_i^S&=\sum_{j\in\Dset_g(i)}\widetilde w_{ij}.
+ \end{aligned}
+ \label{eq:A:attention-mass}
+\end{equation}
+在参数、输入与投影均有限的条件下，$\exp(s_{ij})>0$，因而
+\begin{equation}
+  Z_i^S>0\quad\Longleftrightarrow\quad\mathcal A_i^g\ne\varnothing.
+  \label{eq:A:mass-nonempty}
+\end{equation}
+固定与 $\tau_{\mathrm{pres}}$ 独立的分母常数 $\eta>0$，定义混合结果与 attention residual update：
+\begin{equation}
+ \begin{aligned}
+  \bm y_i
+    &=\frac{\sum_{j\in\Dset_g(i)}\widetilde w_{ij}\bm v_j}{\eta+Z_i^S},\\
+  \bm a_i
+    &=\operatorname{Proj}_O(p_i^R\bm y_i)\in\R^d.
+ \end{aligned}
+ \label{eq:A:oattention-single}
+\end{equation}
+\label{eq:oattention}
+分母始终至少为 $\eta$，不按 $Z_i^S$ 是否为零切换表达式。
+全部真实 source 质量为零时，$\bm y_i=\bm0/\eta=\bm0$。
+默认 $\operatorname{Proj}_O:\R^{d_v}\to\R^d$ 无偏置，故空源时
+$\bm a_i=\bm0$；receiver gate 先关掉该 head 的混合，再进入输出投影。
+同一更新也可写成
+$\bm a_i=\operatorname{Proj}_O\bigl(\sum_j
+p_i^R\widetilde w_{ij}(\eta+Z_i^S)^{-1}\bm v_j\bigr)$：
+这些系数之和为 $p_i^R Z_i^S/(\eta+Z_i^S)$，不必是概率。
+这是同一算子的重写，不是新机制。
+当 $p_i^R$ 对所有 head 相同且 $\operatorname{Proj}_O$ 线性无偏置时，
+先乘 $p_i^R$ 再投影，与先投影再乘同一标量给出同一映射。
+后者曾是带 output bias 时的写法，用来在投影后消掉偏置。
+带 output bias 的仿射 $\operatorname{Proj}_O$ 仍是可选扩展；若启用，空源处
+$\operatorname{Proj}_O(\bm0)$ 一般非零，那时才需要显式非空 gate 或其他等价保护。
+
+\begin{remark}[固定参考质量]
+$\eta$ 使真实源的总质量进入归一化：相对分配仍由 $p_j^S\exp(s_{ij})$ 决定，
+但真实源合计权重为 $Z_i^S/(\eta+Z_i^S)$。
+插入 $p_j^S=0$ 的源不改变分子与分母；把每个真实源统一复制 $m$ 次则使
+$Z_i^S\mapsto mZ_i^S$，从而相对 $\eta$ 改变总质量。
+当 $\eta\ll Z_i^S$ 时，这与无参考质量的 softmax 充分接近，本稿把该差别当作可接受的近似。
+历史的空集分支（非空时分母等于 $Z_i^S$）不是当前算子。
+\end{remark}
+
+Source presence 同时进入分子与分母。
+因此 $p_j^S=0$ 时，$j$ 对结果完全没有贡献。
+只把 $\bm v_j$ 写零、却保留一个与 $\eta$ 无关的有限 softmax logit，会继续占据分母质量，
+不能实现相同的 source deletion 语义。
+
+\subsection{多头组合}
+\label{subsec:A:multihead}
+
+设 head 数为 $H_{\mathrm{att}}$，第 $h$ 个 head 的投影维度为
+$d_k^{(h)},d_v^{(h)}$。
+每个 head 使用相同的 source mask、同轴 domain 与投影前 presence 读出 $W_A^{P}$，
+但有独立的 $Q,K,V$ 投影和内容分数 $s_{ij}^{(h)}$。
+按式~\eqref{eq:A:attention-mass} 与式~\eqref{eq:A:oattention-single}，分别得到
+$\bm y_i^{(h)}\in\R^{d_v^{(h)}}$；每个 head 的分母都是 $\eta+Z_i^{S,(h)}$。
+
+由于 $W_A^{P}$ 与 domain 对 head 共享，有限实数条件下所有 head 的真实源集合相同。
+Canonical 多头输出可写为
+\begin{equation}
+ \begin{aligned}
+  \bm\delta_i^{(h)}
+    &=p_i^R\bm y_i^{(h)},\\
+  \bm a_i^{(g)}
+    &=\operatorname{Proj}_{O,g}\Bigl(
+      \operatorname{Concat}_{h=1}^{H_{\mathrm{att}}}\bm\delta_i^{(h)}\Bigr),\\
+  \operatorname{Proj}_{O,g}&:
+     \R^{\sum_h d_v^{(h)}}\longrightarrow\R^d.
+ \end{aligned}
+ \label{eq:A:oattention-multi}
+\end{equation}
+默认 $\operatorname{Proj}_{O,g}$ 无偏置。各头先乘同一 $p_i^R$，再拼接并投影。
+Head concatenation 与 output projection
+只在同一 receiver 内操作，不建立任何额外的跨地址信息通路。
+单头定义是 $H_{\mathrm{att}}=1$ 的特例。
+若把 presence 读出改成逐 head 矩阵，先门控再投影才是对应的推广，
+那时不再与投影后乘一个公共标量等价。
+
+这一写法并未规定各 head 的具体宽度，宽度属于 checkpoint 的架构参数。
+若某实现为每个 head 使用不同 source eligibility、加入 head-specific
+source pruning，或把 presence 读出改成逐 head 矩阵，则不能直接使用本节的等价性结论。
+除非单独声明扩展，原始 source graph 在每个 head 中都应完整保留。
+
+\subsection{稳定 masked-softmax 的等价实现}
+\label{subsec:A:softmax}
+
+以单个 head 为例，对实际 active sources 定义调整后 logit：
+\begin{equation}
+  \ell_{ij}
+  =\begin{cases}
+     s_{ij}+\log p_j^S,&j\in\mathcal A_i^g,\\
+     -\infty,&j\in\Dset_g(i)\setminus\mathcal A_i^g.
+   \end{cases}
+  \label{eq:A:masked-logits}
+\end{equation}
+该定义只在 $p_j^S>0$ 的分支计算 $\log p_j^S$。
+不应先对所有 entries 求 $\log p_j^S$，再期待事后的乘零自动消除非法中间值。
+
+式~\eqref{eq:A:oattention-single} 的推荐实现是始终追加一个零值参考 $\bot$，
+其值为 $\bm v_\bot=\bm0$，logit 为常数
+\begin{equation}
+  \ell_{i\bot}=\log\eta.
+  \label{eq:A:reference-logit}
+\end{equation}
+在 $\Dset_g(i)\cup\{\bot\}$ 上执行 stable softmax，再计算
+\begin{equation}
+  \alpha_{ij}
+    =\operatorname{softmax}_{t\in\Dset_g(i)\cup\{\bot\}}(\ell_{it})_j,
+  \qquad
+  \bm y_i=\sum_{j\in\Dset_g(i)}\alpha_{ij}\bm v_j.
+  \label{eq:A:dummy-realization}
+\end{equation}
+真实源权重之和为 $Z_i^S/(\eta+Z_i^S)$，剩余质量分给该参考；参考值为零，故不改变分子。
+所有真实 logits 与 $\log\eta$ 共享同一次数值移位。
+
+\begin{proposition}[固定参考质量的逐值等价性]
+在精确实数运算、有限 active logits 与有限 value vectors 条件下，
+式~\eqref{eq:A:dummy-realization} 与式~\eqref{eq:A:oattention-single}
+中的混合 $\bm y_i$ 相等，包括空 source domain。
+\end{proposition}
+\begin{proof}
+参考项对分子贡献零，对分母贡献 $\eta$。
+若 $\mathcal A_i^g\ne\varnothing$，真实权重为
+$p_j^S\exp(s_{ij})/(\eta+Z_i^S)$，混合即原有理式。
+若 $\mathcal A_i^g=\varnothing$，唯一有限质量来自参考，输出为 $\bm0/\eta=\bm0$。
+\end{proof}
+
+该参考只存在于 kernel 的临时计算域内，不是增广表的新 token，
+不增加 row、column、query seed 或 readout 地址，也没有自己的 presence 读出。
+它实现分母常数，并不把零 presence 源变成正质量。
+仅在空源时打开、非空时关闭的条件 dummy 实现的是历史无质量算子，不能代替 $\eta$。
+
+以上单 head 实现复用固定 source mask，以 presence-weighted logits、始终可见的参考项和投影前 receiver gate 执行同一算子。
+
+
+\subsection{数值执行条件与边界分支}
+\label{subsec:A:numeric}
+
+以上公式给出语义定义，下面是保持该语义的实现要求。
+它们不改变模型参数化，而是防止浮点运算产生定义之外的值。
+
+\begin{enumerate}[leftmargin=2.2em]
+ \item 在 exponentiation、log-sum-exp 与 weighted sum 之前排除 inactive sources。
+  不计算 $0\cdot\exp(s)$ 来表示零权重；当 $\exp(s)$ 溢出时，浮点数中的
+  $0\cdot\infty$ 会产生 NaN。
+ \item 空集判断以 active mask 为准，不依赖对未稳定化 $Z_i^S$ 的数值求和结果。
+  非空 source mass 很小，不等于数学上的空集；二者都进入同一个 $\eta+Z$ 表达式。
+ \item 若 logits 或 active value 已经非有限，应报告数值失败或采用明确声明的数值保护。
+  不能把非有限 values 乘以 gate 后当作精确零，因为 $0\cdot\mathrm{NaN}$ 仍是 NaN。
+ \item fully masked row 使用同一 $\log\eta$ 参考，或任何与 $\eta+Z$ 逐值等价的 kernel。
+  默认实现先对各 head 的混合结果乘 $p_i^R$，再拼接并做无偏置 output projection。
+  各头共享 $p_i^R$ 且投影线性无偏置时，这与投影后再乘同一标量相同。
+  只有可选的 output bias 才额外需要非空保护。
+ \item 对明确的 Null 与零更新，可以直接赋值零向量并跳过无效计算。
+  这种 branch/scatter 实现必须与 $\eta+Z$ 的有理式一致，也避免先产生 NaN 再乘零。
+\end{enumerate}
+
+$\rho(W^{P}\bm h)$ 的平方范数也应以合适的累加精度计算。
+若大范数直接造成 $\|W^P\bm h\|^2=\infty$，表达式可能出现 $\infty/\infty$。
+工程实现可通过稳定范数或等价的分段计算避免这一点。
+对于已知正 presence 的 source，调整后 logit 也可通过稳定的
+$\log\rho(W_A^{P}\bm h)$ 公式计算，减少先将极小 presence 下溢为零的风险。
+这些方法需要保持原函数，不能用任意阈值把小的非零 source 重新定义为空。
+
+在有限精度下，实数上严格相等的两种合法求和顺序可能产生舍入差异。
+因此算子等价、置换等变和后面的 projectivity，默认对应数值容差内的验收。
+若要求 bitwise equality，还需要固定 kernel、归约顺序、精度模式、packing 顺序
+以及随机数映射；只固定随机 seed 并不足够。
+
+
+\section{OMAB、双轴动力学与信息传播}
+\label{sec:A:dynamics}
+
+\subsection{Token-local residual 与精确零写回}
+\label{subsec:A:omab}
+
+OAttention 给出唯一的跨地址 residual update。
+OMAB 再用 token-local FFN 更新同一个地址。
+记 $\Iset_{\mathrm{null}}$ 为本次输入编译得到的 Null 地址集合，
+并令 $\bm a_i^{(g)}$ 为式~\eqref{eq:A:oattention-multi} 的多头结果。
+Canonical 最小 OMAB 是
+\begin{equation}
+ \begin{aligned}
+  \bm r_i^{(g)}
+    &=\bm h_i+\bm a_i^{(g)},\\
+  \bm b_i^{(g)}
+    &=\rho(W_F^{P}\bm r_i^{(g)})\,
+      \operatorname{FFN}_g\!\left(
+        \operatorname{Norm}_g(\bm r_i^{(g)})\right),\\
+  \OMAB_g(\bm H)_i
+    &=\begin{cases}
+       \bm r_i^{(g)}+\bm b_i^{(g)},&i\notin\Iset_{\mathrm{null}},\\
+       \bm0_d,&i\in\Iset_{\mathrm{null}}.
+      \end{cases}
+ \end{aligned}
+ \label{eq:A:omab}
+\end{equation}
+最后一行是原始显式 Null write-back gate 的分段写法。
+在所有中间量有限时，它也等于
+$\ind[i\notin\Iset_{\mathrm{null}}](\bm r_i^{(g)}+\bm b_i^{(g)})$。
+
+$\operatorname{Norm}_g$ 必须只读取当前 token 的特征维，
+$\operatorname{FFN}_g$ 同样只读取该 token。
+默认二者与 $W_F^{P}$ 一样无偏置；其在零输入处的输出必须有定义且有限。
+例如，采用带正稳定常数、无仿射项的逐 token RMSNorm，
+可以满足这项有限性条件，但具体 normalization 形式并未由结构设计唯一指定。
+仿射 Norm/FFN 是可选扩展，不得用来计算 presence。
+
+FFN 外的 $\rho(W_F^{P}\bm r_i^{(g)})$ 与 attention receiver presence 使用同一个标量映射 $\rho$，
+但读出矩阵与读取的 carrier 都不同：前者用 $W_F^{P}$ 读 attention residual 之后的 $\bm r_i^{(g)}$，
+后者用 $W_A^{P}$ 读该子层开始时的 $\bm h_i$。
+将两者混用会改变更新函数。
+显式 Null write-back、attention receiver gate 与 FFN presence gate
+分别位于不同位置，不能因数学上某些特殊参数配置下冗余而无条件删除。
+
+若使用 dropout，应将其放在相应 residual branch 内：
+\begin{equation}
+ \begin{aligned}
+  \bm r_i^{(g)}
+   &=\bm h_i+\operatorname{Drop}_{A,g}(\bm a_i^{(g)}),\\
+  \bm b_i^{(g)}
+   &=\operatorname{Drop}_{F,g}\!\left[
+        \rho(W_F^{P}\bm r_i^{(g)})
+        \operatorname{FFN}_g(\operatorname{Norm}_g(\bm r_i^{(g)}))
+      \right].
+ \end{aligned}
+ \label{eq:A:dropout-branches}
+\end{equation}
+关闭 dropout 时回到式~\eqref{eq:A:omab}。
+Attention 权重上的 dropout 若另行使用，必须同时声明其随机性与不变量条件；
+独立地给复制 sources 采样 dropout 不保持逐次实现的 replication equality。
+
+\begin{remark}[空 source 不等于整个 block 为恒等映射]
+若 $\mathcal A_i^g=\varnothing$，attention update 为零，故
+$\bm r_i^{(g)}=\bm h_i$。
+空集既可以来自没有合格可见地址，也可以来自合格地址都满足 $W_A^{P}\bm h_j=\bm0$。
+非 Null receiver 仍然执行 token-local FFN，门控是 $\rho(W_F^{P}\bm r_i)$，
+与 $W_A^{P}$ 独立。因此该 OMAB 的输出未必等于输入：
+它没有接收到新的跨地址信息，但仍可能局部变换既有信息，从而离开 $\ker W_A^{P}$。
+\end{remark}
+
+
+
+\subsection{一个可执行的 token-local 参数化实例}
+
+结构合同允许多种 token-local Norm/FFN。为明确其输入输出形状，下面给出一个
+\textbf{可选的完整实例}；采用其他满足条件的 realization 时应在 ModelSpec 中替换并记录。
+对 carrier $\bm r\in\R^d$，取
+\begin{equation}
+\begin{aligned}
+ \operatorname{Norm}_g(\bm r)
+ &:=\bm\gamma_g\odot
+   \frac{\bm r}{\sqrt{d^{-1}\sum_{j=1}^d r_j^2+\varepsilon_{\rm norm}}}
+   ,\qquad\varepsilon_{\rm norm}>0,\\
+ \operatorname{FFN}_g(\bm x)
+ &:=W_{2,g}\,\phi(W_{1,g}\bm x),
+\end{aligned}
+\end{equation}
+其中 $\bm\gamma_g\in\R^d$，
+$W_{1,g}\in\R^{d_{\rm ff}\times d}$、
+$W_{2,g}\in\R^{d\times d_{\rm ff}}$，
+$\phi$ 逐坐标作用。例如可取 $\phi(t)=t\Phi(t)$，其中 $\Phi$ 为标准正态 CDF。
+该归一化是无偏置的 RMS 型逐 token 映射；它只在 carrier 的特征维上归约。
+在有限输入处其分母严格为正，零输入处输出有限，故与本章的显式 gates 一起满足零元合同。
+此例中的所有参数在同一子层内跨地址共享；列、行和不同层可以独立参数化。
+仿射项、GELU、RMS 型归一化和具体 $d_{\rm ff}$ 并非原结构已经冻结的唯一选择；
+若加入 $\bm\beta_g$ 或 FFN bias，须单独记录为可选扩展。
+
+\subsection{Without inducing：持续保留的直接轴向 baseline}
+\label{subsec:A:direct-baseline}
+
+TAR 从直接轴向 attention 发展到单轴 inducing。\textbf{无 inducing 的版本保留为
+可独立定义和评估的 baseline}，用于判断新增槽位结构的作用；不只保留为归档或复杂度备注。
+两种版本共享 typed input、增广表、visible-source eligibility、零元 OMAB 原语、
+concat 匹配、模型级全 NW／全 LL、统一答案编码与默认 Query 损失。
+它们的区别位于列内通信算子，不构成新的读出 gate。
+两支各自从输入编译得到的初始 carrier table 开始。固定同一编译结果 $\bm H^{(0)}$
+时可以作算子级比较；分别训练时，encoder 与 query seeds 属于各自模型，
+不强制两个 checkpoint 产生相同的初始 carriers。
+
+Without inducing 直接使用前文定义的列内 OMAB：每个 receiver 读取同列 visible
+carriers，再执行 token-local remainder。对 $\ell=0,\ldots,L-1$，
+\begin{equation}
+ \begin{aligned}
+  \bm H_{\rm direct}^{(\ell,\mathrm{col})}
+   &=\OMAB_{\mathrm{col}}^{(\ell)}
+        (\bm H_{\rm direct}^{(\ell)};\mathsf M^{\mathrm{src}}),\\
+  \bm H_{\rm direct}^{(\ell+1)}
+   &=\OMAB_{\mathrm{row}}^{(\ell)}
+        (\bm H_{\rm direct}^{(\ell,\mathrm{col})};\mathsf M^{\mathrm{src}}).
+ \end{aligned}
+ \label{eq:A:direct-baseline-block}
+\end{equation}
+完整 baseline 是这些列后行 blocks 的有序复合：
+\begin{equation}
+ \OTransformer_{\rm direct}
+  =(\OMAB_{\rm row}^{(L-1)}\circ\OMAB_{\rm col}^{(L-1)})
+    \circ\cdots\circ
+    (\OMAB_{\rm row}^{(0)}\circ\OMAB_{\rm col}^{(0)}).
+ \label{eq:A:direct-baseline-composition}
+\end{equation}
+各原语均沿用本稿的 masks、presence、residual、FFN 与 Null 写回；
+故该公式没有省略另一套额外的直接 attention 实现约定。
+该分支没有 inducing seeds 或摘要参数，$S$ 不适用。
+尤其不能以 $S=0$ 实现 baseline：空槽位会让回读失去 source，无法恢复直接列交互。
+
+无 inducing 不等于无上下文，也不意味着删除 Unit/Feature tokens。
+其输出仍为 $(N+1)\times(M+1)\times d$，后续按同一地址读取 Cell、Unit、Feature
+views，并通过相同模型级 NW／LL 模式、值的编码与还原规则及 loss 定义完成端到端计算。
+
+
+% BEGIN embedded figures/fig-inducing-slots
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[x=1mm,y=1mm]
+\node[v5box,text width=54mm,minimum height=18mm] (v) at (0,0)
+{原始可见列\\$H_{\mathcal V_a,a}\in\mathbb R^{n_a\times d}$};
+\node[v5plain,text width=54mm,minimum height=18mm] (i) at (84,0)
+{共享可学习 seeds\\$I^{(\ell)}\in\mathbb R^{S\times d}$};
+\node[v5box,text width=54mm,minimum height=18mm] (g) at (42,-29)
+{Collect + 空证据 gate\\本列摘要 $G_a^{(\ell)}$};
+\node[v5plain,text width=54mm,minimum height=18mm] (recv) at (0,-61)
+{原列 Cell / Feature receivers\\$(N+1)\times d$};
+\node[v5box,text width=54mm,minimum height=18mm] (out) at (84,-61)
+{Read 更新原列\\随后沿行更新，Unit 读同行};
+\draw[v5arrow] (v.south)--(g.north west);
+\draw[v5arrow] (i.south)--(g.north east);
+\draw[v5arrow] (g.south)--(out.north);
+\draw[v5arrow] (recv)--(out);
+\node[font=\small,align=center,text width=148mm] at (42,-82)
+{$M$ 个原始列并行形成 $S\times M\times d$ 摘要表；$S=256$ 为原稿参考配置。\\
+Unit 扩展列不分配摘要，但保留空源 read 的 residual / FFN。};
+\end{tikzpicture}
+\caption{列内 inducing 的输入、收集、回读与输出接口。Slots 是临时通信摘要，不是新的观测或 terminal supports；无有效可见源时整列摘要为零。}
+\label{fig:inducing-slots}\end{figure}
+
+% END embedded figures/fig-inducing-slots
+
+\subsection{默认单轴、固定槽位的列内 inducing 算子}
+\label{subsec:A:inducing}
+
+本版将列内沿样本轴的直接 attention 替换为固定槽位的两阶段读取；
+行内沿 Feature 轴仍采用直接 OMAB。\textbf{单轴指只有一个轴使用 inducing，
+并非删除另一个轴的上下文交互。}这是本稿继承的默认配置。
+取固定正整数 $S$，参考配置为 $S=256$。$S$ 在模型构造时确定，训练和冻结推理
+使用同一数量，不设 $S\leq N$ 的约束，也不采用 $\min(S,N)$、按查询数量改槽位
+或小样本自动 bypass。具体数值是可比较的模型配置，不是已证明的最优值。
+每层具有一个持久可学习 seed 矩阵
+\begin{equation}
+ \bm I^{(\ell)}=(\bm i_s^{(\ell)})_{s=1}^S\in\R^{S\times d}.
+ \label{eq:A:inducing-seeds}
+\end{equation}
+它在本层跨列共享，不读取原始列编号；不同层可以使用独立参数。
+初始 seeds 应满足 $\rho(W_A^{P}\bm i_s)>0$；
+$W_A^{P}=I$ 时这就是非零。只保证向量非零，不能排除它落在 $\ker W_A^{P}$ 中。
+每个列子层均从该层 seeds 和当前 visible carriers 重新计算摘要，
+不把上一张表或上一层的摘要作为持久状态。
+$S$ 只控制列内通信的摘要数量；Unit/Feature 各为一个 $d$ 维 token，
+匹配 concat 为 $2d$ 维，Cell 回归为 $d_R$ 维（默认 $d_R=d$）。Inducing slots 不占用增广表地址，
+不成为 Cell、Unit、Feature Query 或 terminal support。
+
+为复用前文原语，记 $\OMAB_\nu(\bm Q;\bm X)$ 为矩形 cross-attention 版本：
+receiver carriers 来自 $\bm Q$，source carriers 来自显式给定的 $\bm X$；
+用式~\eqref{eq:A:oattention-multi} 的 presence 读出、固定参考质量 $\eta$ 与多头合并，
+再对 receiver 执行式~\eqref{eq:A:omab} 的 residual 和 token-local FFN。
+两组 carriers 不必具有相同长度。收集、回读和行内 OMAB 的参数分别以
+$\nu=\mathrm{collect},\mathrm{read},\mathrm{row}$ 标识，可独立学习，
+但各自在本层跨列或跨行共享。只有表格 receivers 使用其原有 Null 写回规则。
+
+仅对原始列 $a\in\Fset$ 建立 inducing slots，令
+\begin{equation}
+ \begin{aligned}
+  \bm X_a^{(\ell)}&=(\bm h_{ra}^{(\ell)})_{r:(r,a)\in\Vset},\\
+  e_a^{(\ell)}&=\ind\!\left[\sum_{r:(r,a)\in\Vset}
+                                  \rho(W_A^{P}\bm h_{ra}^{(\ell)})>0\right],\\
+  \bm G_a^{(\ell)}&=
+   \begin{cases}
+    \OMAB_{\mathrm{collect}}^{(\ell)}
+       (\bm I^{(\ell)};\bm X_a^{(\ell)}),&e_a^{(\ell)}=1,\\
+    \bm0_{S\times d},&e_a^{(\ell)}=0,
+   \end{cases}\\
+  \bm H_{:a}^{(\ell,\mathrm{col})}
+    &=\OMAB_{\mathrm{read}}^{(\ell)}
+       (\bm H_{:a}^{(\ell)};\bm G_a^{(\ell)}).
+ \end{aligned}
+ \label{eq:A:inducing-column}
+\end{equation}
+此处 $\bm G_a^{(\ell)}\in\R^{S\times d}$ 是本次 forward 的列局部摘要；
+并排形成 $S\times M\times d$ 的摘要表。Unit 扩展列不建 slots，
+但必须保留原 read 在零 source 下的局部 remainder：
+\begin{equation}
+ \bm H_{:,M+1}^{(\ell,\mathrm{col})}
+ =\OMAB_{\mathrm{read}}^{(\ell)}
+   (\bm H_{:,M+1}^{(\ell)};\bm0_{S\times d}).
+ \label{eq:A:unit-local-read}
+\end{equation}
+右侧零矩阵仅定义与原算子等价的零 source 行为，不要求实际分配摘要；
+attention 注入为零，receiver residual、presence-gated FFN 与 Null 写回仍执行。
+公式中 $e_a^{(\ell)}$ 的 $W_A^P$ 明确使用 collect 子层的
+$W_{A,\mathrm{collect}}^{P,(\ell)}$，与该次 collect 的 source presence 一致。
+Read 的 source 与 receiver presence 则使用 read 自己的
+$W_{A,\mathrm{read}}^{P,(\ell)}$；两个子层的 FFN 也各用自己的 $W_F^P$。
+共享的是标量函数 $\rho$ 及定义方式，不是跨子层的读出矩阵。
+Collect 只读取 immutable visible set 中的表格地址，排除所有 Query 与 Null；
+read 的 $K,V$ 则来自这些经过空证据门控的摘要，其 source presence 为
+$\rho(W_A^{P}\bm G_{a,s}^{(\ell)})$。这是明确的中间通信层，不把摘要登记为新的可见事实。
+$e_a^{(\ell)}$ 看的是可见地址上的 presence 之和，不是 carrier 是否非零：
+同列可见 Value 若都落在 $\ker W_A^{P}$，即使向量非零，摘要仍被置零。
+摘要不跨列混合，不反向收集 read receivers；右侧 Unit-query 扩展列没有 visible
+sources，故不为其分配摘要，按式~\eqref{eq:A:unit-local-read} 执行局部更新。
+原始列的空证据 gate 则阻止 seed residual 或 FFN bias 冒充证据。
+
+记上述整列收集与回读构成的 tensor operator 为
+$\operatorname{OISAB}_{\mathrm{col}}^{(\ell)}$。
+给定只有 20 行证据的列，参考配置仍得到 256 个摘要，再由该列 receivers 回读；
+槽位数固定，seed 参数通过训练学习，摘要值随当前证据变化。
+两阶段算子通常不等于直接 full attention，即使 $S\geq N$ 也不保证等价。
+小样本下也不保证节省计算或提高效果。
+
+
+
+
+\subsection{空证据硬 gate：分支内可微，不保证边界连续}
+\label{v53:sec:empty-gate-boundary}
+式~\eqref{eq:A:inducing-column} 中的整列 gate 与 OAttention 的 $\eta+Z$ 分母承担不同职责。
+后者让 attention 混合在空源时有定义；前者把包含 learnable seed residual 的\emph{整块 collect 输出}
+清零，防止无证据摘要仍携带 seed 内容。这一硬分支不自动连续。
+
+\begin{proposition}[完整 collect gate 可在空证据边界跳变]
+保持原始可见地址不变，令其中一个 source carrier 连续趋于零。
+即使所有投影无偏置、attention 分母有固定 $\eta>0$，
+经式~\eqref{eq:A:inducing-column} 空证据 gate 后的摘要也可能不连续。
+\end{proposition}
+\begin{proof}
+取一个非零 seed $i$，一个 source $h(\epsilon)=\epsilon v$，$v\ne0$、$\epsilon\ge0$。
+令 $Q,K$ 投影为零、$V,O$ 为恒等，presence 读出为恒等，FFN 为零。
+记 $p_R=\rho(i)>0$、$p_S(\epsilon)=\rho(\epsilon v)$。
+未经过整列 gate 的 collect 输出为
+\begin{equation}
+ G_{\rm raw}(\epsilon)=i+
+ p_R\frac{p_S(\epsilon)}{\eta+p_S(\epsilon)}\epsilon v.
+ \label{v53:eq:empty-gate-counterexample}
+\end{equation}
+对 $\epsilon>0$，gate 为 1，$G(\epsilon)=G_{\rm raw}(\epsilon)\to i$；
+对 $\epsilon=0$，gate 为 0，$G(0)=0$。
+故 $\lim_{\epsilon\downarrow0}G(\epsilon)=i\ne G(0)$。
+\end{proof}
+
+该反例说明“可能跳变”，不说明每个训练状态或整个最终预测都必然跳变。
+当前默认保留这项空证据语义，不新增软 gate 来掩盖差别。
+普通反向在当前分支内求导：正分支对 collect 的连续计算求导，零分支按常量摘要处理；
+精确切换点不能继承处处可微或连续的结论。极小但非零 presence 也不能未经声明改判为空源。
+
+这不推翻固定证据与固定 states 下的零 source 删除、Query 插入一致性或行列置换证明：
+这些证明比较相同 source 分支的入口，或精确为零的同一贡献。
+但它限制了对跨该边界的扰动稳定性和梯度检查的解释。
+数值核验应同时包括分支内有限差分、精确空源输出和趋零但非零 source 的两侧值，不能只测一次零输入。
+
+
+\paragraph{保持的结构性质与新的证明边界。}
+一次列更新的显式信息路径为 visible carrier $\to$ 列内摘要 $\to$ receiver。
+固定参数后，摘要只依赖该列原有 visible carriers：因此后文在表格地址层面的
+依赖图仍给出上界，但图中的一条列边现在折叠了两次 attention。
+跨列和跨 block 的表格中继仍只能经过 visible 地址；摘要只存在于本列子层内部。
+零 receiver 与 Null 闭合由 read 的 gates 保持；空列由 $e_a=0$ 保持零 attention。
+对固定其余 carriers 的零 source 删除，collect 的原语不变量先保证
+摘要相同，随后 read 相同；统一复制只在 $\eta\ll Z$ 时近似保持。
+不据此声称整张原始表重复采样后预测相同。
+Query projectivity 和置换等变还要求 $S$、共享 seeds 及参数不依赖 Query 集合或
+原始行列编号；后文证明按 collect、read、row 的顺序展开。
+
+\paragraph{可微路径与缓存。}
+Collect 与 read 均属于同一计算图，训练时不 detach 摘要。
+在固定 active 分支的可微点，记 $\bar{\bm G}_a$ 为 read 对摘要的上游梯度，则
+\begin{equation}
+ \nabla_{\bm I^{(\ell)}}\mathcal L
+ =\sum_{a\in\Fset}
+   (D_{\bm I^{(\ell)}}\bm G_a^{(\ell)})^{\!\top}\bar{\bm G}_a.
+ \label{eq:A:inducing-gradient}
+\end{equation}
+同样的 chain rule 把梯度继续传给 visible carriers 与 collect/read 参数；
+零 source 边界的可微性仍受本稿已有条件限制。
+冻结推理可在固定证据、参数、预处理与层状态下复用摘要；行分块应回读同一份
+全列证据摘要。分别从各 row chunk 重算局部摘要通常改变模型。
+分块大小是执行配置，与是否启用 inducing、固定槽位数 $S$ 分开。
+
+
+\subsection{With / without 的共同接口与比较边界}
+\label{subsec:A:backbone-comparison}
+
+显式架构配置记为 $b_{\rm ind}\in\{0,1\}$，其中 0 表示保留的直接 baseline，
+1 表示当前默认的单轴固定槽位设计。它在模型构造时确定，不是每个 episode
+按样本数自动切换的 gate，本稿不再设置 readout gates。
+统一写作
+\begin{equation}
+ \begin{aligned}
+  \mathcal C_b^{(\ell)}&=
+    \begin{cases}
+      \OMAB_{\mathrm{col}}^{(\ell)},&b=0,\\
+      \operatorname{OISAB}_{\mathrm{col}}^{(\ell)},&b=1,
+    \end{cases}\\
+  \bm H_b^{(\ell+1)}
+    &=\OMAB_{\mathrm{row}}^{(\ell)}
+       \bigl(\mathcal C_b^{(\ell)}
+        (\bm H_b^{(\ell)};\mathsf M^{\mathrm{src}});\mathsf M^{\mathrm{src}}\bigr).
+ \end{aligned}
+ \label{eq:A:backbone-variants}
+\end{equation}
+这里共享算子名称表示相同接口与定义，不要求两支使用相同的已训练参数。
+正文图~\ref{fig:backbone} 只展示当前默认路径。
+
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{lXX}
+\toprule
+维度 & Without inducing：$b=0$ & With inducing：$b=1$\\
+\midrule
+列内通信 & receiver 直接读 visible column & seeds 收集 visible column，receiver 回读摘要\\
+行内通信 & 直接 row OMAB & 直接 row OMAB\\
+新增状态 & 无 inducing 状态，$S$ 不适用 & 固定 $S$；可学习 seeds 与证据相关摘要\\
+小样本 & 保持直接列交互 & 保持固定 $S$ 与 collect/read\\
+共同边界 & visible-only、Null 零元、完整增广输出 & 同左；空证据摘要额外置零\\
+下游 & concat 匹配、统一编码 NW／LL、默认 Query loss & 同一数学定义，预测不保证相同\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+两者的 Query projectivity 与置换等变各自依赖后文列明的条件；共同不变量不说明
+两种函数等价，也不说明其中一个严格更有表达力或更准确。直接版的列子层可直接使用
+OMAB 的证明；induced 版需依次通过 collect/read 的可见性与空证据条件。
+比较时固定 episode、预处理 realization、$d,L$、head/FFN、读出、terminal
+及训练目标等可匹配条件，并分别报告参数量、计算量和训练预算。
+新增 collect/read 会改变参数量与计算深度，仅固定 $d,L$ 不构成等参数或等算力比较。
+若声称等资源收益，需另设明确的匹配对照。
+不能把对同一 checkpoint 强行切换 $b$ 视为有效消融，也不能从结构图推断性能排序；
+本稿保留比较对象，尚未声称完成两支的训练或评估。
+
+
+\subsection{Canonical 列后行更新与完整输出}
+\label{subsec:A:axis-composition}
+
+对 $\ell=0,\ldots,L-1$，每个 block 依次执行
+\begin{equation}
+ \begin{aligned}
+  \bm H^{(\ell,\mathrm{col})}
+    &=\operatorname{OISAB}_{\mathrm{col}}^{(\ell)}
+       (\bm H^{(\ell)};\mathsf M^{\mathrm{src}}),\\
+  \bm H^{(\ell+1)}
+    &=\OMAB_{\mathrm{row}}^{(\ell)}
+       (\bm H^{(\ell,\mathrm{col})};\mathsf M^{\mathrm{src}}).
+ \end{aligned}
+ \label{eq:A:two-axis}
+\end{equation}
+列子层先同步完成各列 collect，再同步完成 read；行子层内部各地址同步更新。
+行子层读取已经完成的整张列子层输出，不允许因遍历顺序读取部分已更新的行结果。
+这保证定义是同步的 tensor operator，而不是依赖 Python 循环顺序的逐地址更新。
+
+完整动力学为
+\begin{equation}
+  \OTransformer_\theta
+   =\bigl(\OMAB_{\mathrm{row}}^{(L-1)}
+         \circ\operatorname{OISAB}_{\mathrm{col}}^{(L-1)}\bigr)
+      \circ\cdots\circ
+     \bigl(\OMAB_{\mathrm{row}}^{(0)}
+         \circ\operatorname{OISAB}_{\mathrm{col}}^{(0)}\bigr).
+  \label{eq:A:composition}
+\end{equation}
+其实际返回值保持完整增广 shape：
+\begin{equation}
+  \bm H^{(L)}
+   =\OTransformer_\theta(\bm H^{(0)};\mathsf M^{\mathrm{src}})
+   \in\R^{(N+1)\times(M+1)\times d}.
+  \label{eq:A:full-output}
+\end{equation}
+Cell block、一个 Unit Query column、一个 Feature Query row 与一个 Null corner 均保留。
+Unit、Feature 与 Cell 信息是后续按地址读取的 views，
+不意味着 OTransformer 在内部裁剪为三个独立输出。
+第~\ref{sec:R:response}~节在此统一输出边界之后分别定义匹配坐标与 Cell 回归特征。
+
+
+
+Value eligibility 固定不意味着 Value carriers 固定。
+一个 Value 可以先从同列 Values 吸收信息，再在行子层把这些信息提供给同行 receivers。
+因此跨列及跨 block 传播上下文的表格中继地址始终位于 $\Vset$；
+列内 inducing 摘要仅作为本子层内部的局部中继。
+Query Unit/Feature tokens 是信息接收端，不能充当跨列、跨行或跨 block 的中继。
+
+\subsection{逐子层依赖图}
+\label{subsec:A:dependency-graph}
+
+在表格地址层面，将 $2L$ 个轴向更新依次编号为 $t=0,\ldots,2L-1$，
+其中列更新折叠 collect 与 read 两次 attention；内部路径见式~\eqref{eq:A:inducing-column}。
+其轴为 $g_t$，其中偶数子层为列、奇数子层为行。
+构造一个分层有向图，其节点是 $(t,i)$。
+从 $(t,j)$ 到 $(t+1,i)$ 的结构上允许的信息边分为两类：
+\begin{equation}
+ \begin{aligned}
+  (t,i)&\longrightarrow(t+1,i),
+       &&\text{本地址 residual 与局部变换},\\
+  (t,j)&\longrightarrow(t+1,i),
+       &&j\in\Vset\cap\Dset_{g_t}(i).
+ \end{aligned}
+ \label{eq:A:dependency-edges}
+\end{equation}
+第二类边还会受 $p_j^S=0$ 与 $p_i^R=0$ 的数值门控而失活。
+这个图表达可能的函数依赖；一条结构边存在不保证该参数点上的导数非零。
+例如某个投影为零、激活饱和或不同路径抵消，都可能让实际依赖变弱。
+
+可以把每个初始 visible carrier 当作独立输入变量，固定 query seeds 与全部参数。
+令 $\mathcal B_t(i)\subseteq\Vset$ 表示 $\bm h_i^{[t]}$
+可能依赖的初始 visible carrier 地址，则
+\begin{equation}
+ \begin{aligned}
+  \mathcal B_0(i)
+    &=\begin{cases}\{i\},&i\in\Vset,\\\varnothing,&i\notin\Vset,\end{cases}\\
+  \mathcal B_{t+1}(i)
+    &\subseteq\mathcal B_t(i)
+      \cup\!\bigcup_{j\in\Vset\cap\Dset_{g_t}(i)}\mathcal B_t(j).
+ \end{aligned}
+ \label{eq:A:receptive-recursion}
+\end{equation}
+这是上界递推，而非声称所有可能依赖都被学到。
+Null 的实际依赖集合始终为空，因为其输出被写回常数零。
+
+\begin{remark}[依赖图的输入层级]
+式~\eqref{eq:A:receptive-recursion} 的原子是已经编码的初始 visible carriers。
+回溯到原始数据值时，visible-only 列统计、类别编码与其他预处理还可能引入额外依赖。
+因此不能从 $\mathcal B_0(i)=\{i\}$ 推断初始 carrier 只依赖一个原始 scalar。
+原始数值的完整依赖图必须把第~\ref{sec:E:encoding}~节的预处理图接在前面。
+\end{remark}
+
+在正文固定供源协议中，对原始 Value 地址构造无向辅助图：两个不同可见地址若同行或同列即相邻。
+OTransformer 可以沿这些可见地址传播，但实际传播仍须遵循列、行交替的子层时间顺序。
+一个 Query 可以接收其同轴多个 Value 分支，却不能把这些分支连接给其他 receiver。
+所以可见图中没有连接的两个部分，不会仅因新增一个同时能读取两者的 Query 而互通。
+
+\subsection{列后行顺序造成的语义 token 非对称性}
+\label{subsec:A:asymmetry}
+
+一个 block 内的信息到达时间如下。
+“无同轴事实注入”只指该 attention branch 为空，局部 FFN 仍然执行。
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{lXX}
+\toprule
+Receiver & 列子层 & 随后的行子层\\
+\midrule
+Unit Query $(r,\Ustar)$ & 扩展列没有 Value，只有本地状态变换。 & 读取同行 Values；这些 Values 已经过本 block 的列交互。\\
+Feature Query $(\Fstar,a)$ & 读取同列 Values。 & 扩展行没有 Value，仅局部变换刚收到的列信息。\\
+Cell Query $(r,a)$ & 读取同列 Values。 & 保留自身列信息，并读取已更新的同行 Values。\\
+Value $(r,a)$ & 读取同列 Values，并更新自身。 & 读取已完成列更新的同行 Values，继续更新自身。\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+因此在第一个 block 内，某个 Unit token 已可以通过
+\begin{equation}
+ (s,b)\in\Vset
+ \xrightarrow{\mathrm{col}}
+ (r,b)\in\Vset
+ \xrightarrow{\mathrm{row}}
+ (r,\Ustar)
+ \label{eq:A:unit-two-hop}
+\end{equation}
+读取两跳信息，其中中间地址 $(r,b)$ 必须是 visible Value。
+第一 block 的 Feature token 则在行交互之前完成其唯一一次跨地址读取。
+它最早在下一个 block 的列子层读取已经经历行交互的 Value carriers。
+这是一项确定的计算顺序差异，不意味着Unit 与 Feature tokens 的表达力已被证明具有严格包含关系。
+
+以下替换通常改变模型：将行列顺序反转；把两轴邻域取并集后只归一化一次；
+让两轴从同一旧状态并行更新后相加；允许语义 token Query 向其他地址供源。
+它们分别改变中间 Value 状态、归一化或信息图。
+若比较这些方案，应作为独立架构配置，而不是作为式~\eqref{eq:A:two-axis} 的等价加速。
+
+
+\section{结构不变量及其准确适用范围}
+\label{sec:A:invariants}
+
+\subsection{Null、零 carrier 与空 source 的闭合}
+\label{subsec:A:zero-closure}
+
+\begin{assumption}[本节共同的良定义条件]
+\label{ass:A:finite-local}
+Token table 与所有参数有限；投影、token-local normalization、FFN 在所用输入处
+有定义且有限；source mask、axis domain 按上述公式构造；
+全部跨地址通信仅由 OAttention 完成，包括列内 collect/read；
+列摘要按式~\eqref{eq:A:inducing-column} 使用空证据 gate；
+Null 写回采用式~\eqref{eq:A:omab}。
+除非明确讨论随机性，本节关闭 dropout。
+\end{assumption}
+
+\begin{proposition}[Exact-zero receiver 与 Null 闭合]
+\label{prop:A:null-closure}
+在假设~\ref{ass:A:finite-local} 下，若某子层输入满足 $\bm h_i=\bm0$，
+则其 OAttention update 与 OMAB 输出都为零。
+特别地，若编译时所有 Null carriers 为零，则任意列、行子层及最终输出中的
+同一 Null 地址都为精确零。
+\end{proposition}
+\begin{proof}
+默认 $W_A^{P}$ 无偏置，故 $W_A^{P}\bm0=\bm0$，$\rho(W_A^{P}\bm0)=0$，从而 $p_i^R=0$。
+Receiver gate 令 $\bm a_i=\bm0$，无论该地址的同轴 source domain 是否非空。
+于是 $\bm r_i=\bm0$；默认 $W_F^{P}$ 同样无偏置，故 $\rho(W_F^{P}\bm r_i)=0$，FFN branch 为零。
+若 $i$ 为非 Null，输出为两个零项之和；若 $i$ 为 Null，显式写回同样为零。
+对所有子层归纳即得多层闭合。
+\end{proof}
+
+\begin{proposition}[Empty-source attention update]
+\label{prop:A:empty}
+在假设~\ref{ass:A:finite-local} 下，对一次直接或矩形 OAttention 调用，
+若其实际 source 集合 $\mathcal A_i^g=\varnothing$，
+则该 receiver 在此轴的每个 head mixture 与最终 attention update 都为零。
+其非 Null OMAB 输出仍可因 token-local FFN 而非零。
+\end{proposition}
+\begin{proof}
+每个 head 的分母至少为 $\eta$，真实源质量和为零时 $\bm y_i^{(h)}=\bm0/\eta=\bm0$。
+默认 $\operatorname{Proj}_O$ 无偏置，故 $\bm a_i=\bm0$。
+OMAB 随后作用于 $\bm r_i=\bm h_i$，局部 FFN 的输入不必为零。
+若原始列没有 active visible source，式~\eqref{eq:A:inducing-column} 先将摘要置零，
+read 同样得到零 attention 更新；Unit 扩展列由式~\eqref{eq:A:unit-local-read} 直接保持此性质。
+\end{proof}
+
+\begin{proposition}[读出核上的内容保持]
+\label{prop:A:joint-kernel}
+在假设~\ref{ass:A:finite-local} 与默认无偏置读出下，令
+\begin{equation}
+  \mathcal K^{P}=\ker W_A^{P}\cap\ker W_F^{P}.
+  \label{eq:A:joint-kernel}
+\end{equation}
+若某地址的当前 carrier $\bm z\in\mathcal K^{P}$，则该 OMAB 的输出仍为 $\bm z$，
+且它不改变任何其他地址的分子、分母或输出。
+$W_A^{P}=W_F^{P}=I$ 时 $\mathcal K^{P}=\{\bm0\}$，回到命题~\ref{prop:A:null-closure}。
+\end{proposition}
+\begin{proof}
+$\rho(W_A^{P}\bm z)=0$，故该地址的 $p^R=p^S=0$。
+作为 source，它对每个 head 的分子与 $\eta+Z$ 都贡献零，删除它不改变其他 receiver 的消息。
+作为 receiver，attention 增量为零，故 $\bm r=\bm z$；
+再由 $\rho(W_F^{P}\bm z)=0$，FFN 增量亦为零，输出为 $\bm z$。
+FFN 是 token-local，其他地址的完整输出因此也不变。
+\end{proof}
+该保证只针对当前算子的这对读出。后一层可以使用不同的 $W^{P}$，
+从而使同一非零内容重新获得 presence。只关闭 $W_A^{P}$ 并不足够：
+若 $\bm z\notin\ker W_F^{P}$，FFN 仍可改写它。内容映射或相消也可以让核外状态碰巧不更新；
+这里不声称 $\mathcal K^{P}$ 是最大不活跃集合。
+
+\begin{remark}[零吸收与读出核]
+命题~\ref{prop:A:null-closure} 没有要求 $i$ 在语义上属于 Null。
+精确零 carrier 仍是吸收态：$W^{P}\bm0=\bm0$，两个 gate 都关。
+这与读出核不同。非零 $\bm h\in\ker W_A^{P}$ 不供源、也不接收 attention，
+但只要 $\bm h\notin\ker W_F^{P}$，FFN 仍可更新它。
+只有同时落在 $\mathcal K^{P}$ 中的状态，在当前算子下内容不变、也不影响他人。
+因此非 Null 初始 carrier 非零只排除零吸收，不能推出正 presence，
+也不能由“可学习参数”自动得到。默认输入编译只检查实际非 Null carrier 有限且非零；
+后续动力学仍可能将 carrier 送入 $\{\bm0\}$ 或 $\mathcal K^{P}$；
+若需要排除其中一种，须另外声明约束。
+\end{remark}
+
+\subsection{Exact source deletion 与统一复制的近似}
+\label{subsec:A:source-invariants}
+
+\begin{proposition}[Zero-source deletion]
+\label{prop:A:source-deletion}
+固定 receiver、其 carrier、一个轴及所有剩余 source 的投影值与 presence。
+对任意 $j_0$ 满足 $p_{j_0}^S=0$，在该局部 attention domain 中保留或删除
+$j_0$，OAttention 输出完全相同。
+\end{proposition}
+\begin{proof}
+该 entry 对分子与分母均贡献零，删除它不改变其他项，也不改变固定的 $\eta$。
+Receiver gate 与 output projection 的输入因此相同。
+每个 head 都成立，因此多头输出也成立。
+\end{proof}
+
+此命题是固定局部 domain 中的 source 列表恒等式。
+将它推广到改变整张表的行列数量，需要另外验证预处理、地址对应、其他 receivers
+及后续层的依赖；不能仅凭局部 source deletion 自动得到所有扩表操作的预测不变性。
+
+\begin{proposition}[局部统一 source replication 的 $\eta$ 近似]
+\label{prop:A:replication}
+固定一个 receiver 及其投影，把当前局部 domain 中每一个真实 source entry
+复制相同的正整数 $m$ 次，每个副本保持相同的 $K,V,p^S$ 与分数。
+在无 dropout 的 OAttention 中，
+\begin{equation}
+  \bm y_i^{(m)}
+    =\frac{m\sum_jp_j^S\exp(s_{ij})\bm v_j}
+           {\eta+m\sum_jp_j^S\exp(s_{ij})}
+    =\frac{mZ_i^S}{\eta+mZ_i^S}\,
+     \frac{\sum_jp_j^S\exp(s_{ij})\bm v_j}{Z_i^S},
+  \label{eq:A:replication-proof}
+\end{equation}
+其中后一个分数在 $Z_i^S=0$ 时不使用：那时 $\bm y_i^{(m)}=\bm0$。
+因而统一复制精确改变的是真实源相对 $\eta$ 的总质量，不是相对分配。
+当 $\eta\ll Z_i^S$ 时，$\bm y_i^{(m)}$ 与未复制混合充分接近；本稿接受这一近似。
+\end{proposition}
+
+只有统一复制才保持相对分配。
+若仅复制某一个 source，或不同 sources 使用不同倍数，通常同时改变相对质量与总质量。
+此结论也不等于“原始数据重复若干行后整个 TabU 预测不变”：
+数据复制可能改变 typed preprocessing、行/列结构、语义 token 状态与 terminal 拟合。
+独立 attention dropout 还会使副本权重不同，不能声称单次随机 forward 保持该近似。
+
+\subsection{固定证据下的 Query-insertion projectivity}
+\label{subsec:A:projectivity}
+
+本性质考察“在同一份证据上多问几个问题”。
+固定 $\Iset,\Vset,\bm X_{\Vset}$、预处理随机性与模型参数，令
+\begin{equation}
+ \begin{aligned}
+  \Qset'&=\Qset\mathbin{\dot\cup}\Delta\Qset,\\
+  \Delta\Qset&\subseteq
+  (\Rset\times\Fset)\setminus(\Vset\cup\Qset).
+ \end{aligned}
+ \label{eq:A:query-extension}
+\end{equation}
+只把这些已有原始 Cell 地址从 Null 改成 Cell Query。
+旧 Value carriers、旧 Query carriers、Unit/Feature tokens 的初始 carriers 以及所有地址均不变。
+两次运行的 Null 地址集合相应不同，但只有 $\Delta\Qset$ 发生变化。
+
+\begin{theorem}[Carrier projectivity]
+\label{thm:A:projectivity}
+除假设~\ref{ass:A:finite-local} 外，假设输入编译满足上述地址局部性，
+source mask 与 axis domain 不依赖 Query 个数，所有非 attention 组件均 token-local。
+则两次确定性 forward 满足
+\begin{equation}
+ \begin{aligned}
+  \bm h_i^{(\ell)}[\Qset']
+    &=\bm h_i^{(\ell)}[\Qset],
+    &&i\notin\Delta\Qset,\quad \ell=0,\ldots,L,\\
+  \bm h_i^{(\ell,\mathrm{col})}[\Qset']
+    &=\bm h_i^{(\ell,\mathrm{col})}[\Qset],
+    &&i\notin\Delta\Qset,\quad \ell=0,\ldots,L-1.
+ \end{aligned}
+ \label{eq:A:projectivity}
+\end{equation}
+\end{theorem}
+\begin{proof}
+初始等式由输入编译假设成立。
+对任意一个轴向更新，假设其输入在 $\Iset\setminus\Delta\Qset$ 上相同。
+Without inducing 的列子层与直接行子层使用同一个 visible-source 归纳论证；以下补充默认 induced 列子层。
+列更新中，两次运行的 collect 读取相同 visible carriers，使用相同 $S$、seeds 与空证据 gate，
+故得到相同摘要；read 的旧 receivers 及摘要均相同，因而旧地址输出相同。
+行更新仍直接读取 visible carriers，全部合法 sources 位于 $\Vset\subseteq\Iset\setminus\Delta\Qset$，
+所以它们的 carrier、投影、presence 与所有内容分数对旧 receiver 完全相同。
+$\Delta\Qset$ 中的地址在两次运行中都有 $p^S=0$，
+故由命题~\ref{prop:A:source-deletion} 不贡献分子或分母。
+旧 receiver 自己的 carrier 相同，故 receiver gate、$\eta+Z$ 混合、attention 输出与局部 FFN 相同。
+旧地址的 Null 写回规则也相同，因为只改变了 $\Delta\Qset$ 的角色。
+因此子层输出在所有旧地址上相同。
+依次对每个列子层与行子层归纳得到结论。
+\end{proof}
+
+这就是 Query-insertion 的 no-ripple 边界：新 Query 只改变自己的 receiver carrier，
+不向其他地址供源，也不改写既有 Value、既有 Query 或Unit/Feature tokens。
+
+\begin{corollary}[Canonical 既有答案的 projectivity]
+\label{cor:A:answer-projectivity}
+在定理~\ref{thm:A:projectivity} 的条件下，采用式~\eqref{front:eq:restoration-response}
+与只读取同列 visible support 的 canonical terminal 时，
+所有旧 Query 的预测保持不变。
+\end{corollary}
+\begin{proof}
+由定理~\ref{thm:A:projectivity}，既有 $\bm c_{ra}$、$\bm f_a$、$\bm u_r$ 不变，
+故匹配坐标 $\bm s_{ra}$ 与 Cell 回归特征都不变。
+旧 Query 的同列 support 地址属于固定的 $\Vset$，其 Unit/Cell 表征、$x_{sa}$
+以及 visible-only 统计因此也不变。
+Unit 支路读取相同的初始 Unit 与派生 source mask，故输出也不变；$L_U=0$ 时该支路为恒等。
+列共享模式的固定中心不变，全部中心权重、支持 Cell 与编码相同，共享斜率不变。
+同一确定性 terminal 读到的全部入口相同，输出相同。
+\end{proof}
+
+该推论覆盖第~\ref{sec:R:response}~节的 concat 匹配与 Cell 回归，
+以及第~\ref{sec:R:terminal}~节的 canonical LL/NW terminal。
+Unit/Feature 匹配坐标由不变的表征按地址读取，跨列复用原始核也不改变预测。
+它不覆盖读取其他 Cell Query 的全局 readout，也不覆盖依赖 Query 个数的温度、
+跨 token BatchNorm、global pooling、按活跃 token 总量归一化或共享容量竞争的 routing。
+这些旁路会破坏归纳证明中的地址局部性。
+
+训练时重新采样 mask，通常把原先的 Value 变成 Query，导致 $\Vset$ 改变。
+增加新行列、改变可见数据、重算不同随机 codebook 或改变参数，也不符合该定理的固定条件。
+这些情况下预测可以合理地改变，不能以 projectivity 要求两次答案相同。
+附录~\ref{sec:alt:iterative-restoration} 的估计反馈扩展了供源地址，也不属于本定理的固定条件。
+
+\subsection{独立行、列置换等变}
+\label{subsec:A:permutation}
+
+令 $\pi_U$ 是原始 Unit 集合的置换，$\pi_F$ 是原始 Feature 集合的置换。
+将它们扩展到增广坐标时，保持新增语义行列固定：
+\begin{equation}
+ \begin{aligned}
+  \pi_U^+(r)&=\pi_U(r),
+  &\pi_U^+(\Fstar)&=\Fstar,\\
+  \pi_F^+(a)&=\pi_F(a),
+  &\pi_F^+(\Ustar)&=\Ustar.
+ \end{aligned}
+ \label{eq:A:extended-permutation}
+\end{equation}
+定义二维置换 $P(i)=(\pi_U^+(r_i),\pi_F^+(a_i))$，
+其作用于 tensor 为 $(P\bm H)_{P(i)}=\bm h_i$。
+同时移动可见 mask、Null 地址集合以及所有与原始地址绑定的输入元数据。
+
+\begin{theorem}[Encoded OTransformer 的独立置换等变]
+\label{thm:A:equivariance}
+在假设~\ref{ass:A:finite-local} 下，若投影与局部 maps 不读取原始行列编号，
+且重排后的初始 tensor 是原 tensor 的 $P$ 置换，则
+\begin{equation}
+  \OTransformer_\theta(P\bm H^{(0)};P\mathsf M^{\mathrm{src}})
+   =P\OTransformer_\theta(\bm H^{(0)};\mathsf M^{\mathrm{src}}).
+  \label{eq:A:equivariance}
+\end{equation}
+两个原始轴可以分别独立重排，新增语义行列的地址保持固定。
+\end{theorem}
+\begin{proof}
+$P$ 在每个轴域之间给出双射：
+$P(\Dset_g(i))=\Dset_g(P(i))$。
+共同移动 source mask 后，source 与 receiver views、presence 和各 head 投影
+都随相同地址置换而共变。
+对应的 source 内容分数相同，分子与分母只是相同有限项的重排；固定参考质量 $\eta$ 不随地址重排改变。
+故每个 head 的混合、多头输出与对应旧 receiver 的结果相同。
+局部 residual、Norm、FFN 以及共变的 Null 写回规则分别与 $P$ 交换。
+列内 collect 的 seeds 跨列共享且不依赖行编号；行置换只重排其求和项，
+列置换只重排对应摘要组。因此摘要对原始行置换不变、对列置换共变；
+read 随其表格 receivers 共变。行内直接 OMAB 同样等变，按列后行顺序复合仍然等变。
+\end{proof}
+
+要从原始表格得到端到端等变，还需输入编译与 readout 同样共变。
+列重排时须移动对应类型、声明域、visible-only 统计及 codebook；
+不能把重排后的位置编号当作新的语义 Feature 身份。
+若预处理包含随机性，要获得逐值等式，需要把同一随机对象随地址一起移动。
+仅在新遍历顺序下用相同全局 seed 重新采样，可能得到不同的随机对象分配。
+
+\begin{remark}[三种不同的变换]
+独立行列重排不交换两个轴的语义。
+将整个表转置需要交换 Unit/Feature 角色、编码规则、两个语义 token 与轴向参数，
+还会反转列后行的计算顺序；原设计不保证转置等变。
+同样，重新抽取离散身份码本或 numeric/ordinal 的基向量并非对原 tensor 的地址置换，
+也不保证同一输入的逐值预测不变。
+若随机编码机制具有适当交换性，可以另外研究分布层面的对称性，
+但这不同于本定理证明的确定性等式。
+\end{remark}
+
+
+
+\section{Unit Transformer 的完整接口与不变量}
+\label{v51:app:unit}
+二维网络输出 $U^{(0)}\in\mathbb R^{N\times d}$ 后，默认的 Unit 支路使用同一个矩形 OMAB 原语，
+但参数独立，source mask 为 $m^U$，没有原始 Cell 的 Null mask。其每层为
+\begin{equation}
+ U^{(j+1)}=\operatorname{OMAB}_{U,j}
+ \left(U^{(j)};\{u_s^{(j)}:m_s^U=1\}\right),\quad j=0,\ldots,L_U-1.
+ \label{v51:eq:unit-block}
+\end{equation}
+每个 receiver 可读取全部合格 Unit sources，包括自身；按原稿的投影前 presence、$\eta$ 参考、
+无偏置投影、residual 与 token-local FFN 执行。空输入行不成为派生 source，即使经过接收后状态非零，
+其资格也不自动改变。选用 $L_U=0$ 旁路时整个支路就是恒等映射；空源 OMAB 的 FFN 不等于恒等映射，
+不能以“运行零源一层”实现关闭。这是可选对照，不是本稿默认。
+
+\begin{proposition}[固定证据下的 Query 一致性]
+固定原始行列、可见证据、编码随机性、参数和拟合中心。只激活已有 Null Cell 为只接收 Query，
+则 $U^{(0)}$、$m^U$、$\widetilde U$、原始核、各列聚合矩与共享斜率均不变；旧答案不变。
+\end{proposition}
+\begin{proof}
+本稿二维 backbone 的 carrier projectivity 保证 Unit 和全部可见 Cell 不变。
+$m^U$ 仅由可见地址决定，所以 Unit 支路逐层读取相同入口；得到相同的 $\widetilde U$ 和核。
+列级矩只使用支持特征、支持编码、全部固定中心的 Unit 权重，不使用新增 Query 的 Cell 特征，故共享解不变。
+旧目标的求值坐标不变，输出不变。
+\end{proof}
+增加原始行、改变可见证据或重抽 codec 不属于此命题。
+在固定表示条件下，同列 Feature 拼接项仍抵消，最终 Feature 的直接 loss 梯度仍为零。
+Unit 支路不写回 Cell/Feature，不能将其描述为又一轮二维表格传播。
+
+\paragraph{置换与梯度。}
+不使用行位置编码，所有 Unit 局部参数共享，随行搬运 $m^U$ 后该分支行置换等变；
+与原稿独立行列置换证明复合得到端到端性质。
+Unit 的梯度从各列全部中心权重汇聚，再穿过新增层回到 $U^{(0)}$ 和二维 backbone。
+不对 $\widetilde U$ 或 kernel detach。若共享斜率模式下仅按当前目标与支持行累加 Unit 梯度，
+会漏掉其他拟合中心经 $B_a$ 的路径，详见附录~\ref{v51:app:gradient}。
+
+\paragraph{成本与开关对照。}
+完整 Unit attention 的一个层有 $O(Nd^2+Nd\,d_{\rm ff}+NN_Ud)$ 算术量，
+$N_U=\sum_s m_s^U\le N$。层数乘以 $L_U$；选用 $L_U=0$ 旁路时该增量和专属参数都为零。
+对照需分别训练默认正层数与 $L_U=0$，报告计算预算；临时关闭已训练模块不等于另一个配置已训练到位。
+
+
+
+\section{训练协议、损失归约与历史课程}
+\label{sec:T:training}
+
+\subsection{Episode 的当前默认、第一备选与未来方向}
+\label{v54:sec:episode-choice}
+Episode 协议决定从哪些地址生成 $\Qset$，损失协议决定对生成后的哪些误差赋予权重。
+\textbf{Query-only loss 不等于 supervised-row masking}：以下两种 episode 当前都取 Query 系数 1、restore 系数 0。
+
+\paragraph{当前默认：监督式 Query（supervised-row）。}
+先由任务声明目标列集合 $\mathcal A_{\rm target}$，再在当前训练行池内抽取 Query 行 $\mathcal R_Q$，令
+\begin{equation}
+ \Qset_{\rm sup}=(\mathcal R_Q\times\mathcal A_{\rm target})\cap\Oset(D),
+ \qquad \Vset=\Oset(D)\setminus\Qset_{\rm sup}.
+ \label{v54:eq:supervised-query}
+\end{equation}
+单目标任务取一个目标列；多目标任务须显式登记目标列集合。
+只隐藏这些行的目标标签，其余自然观测的特征与支持行标签仍可见；自然缺失不被补成观测。
+Query 行不依据隐藏目标值大小筛选，默认不启用 random-cell 的尾部保护。
+该默认适用于当前基础拟合课程，不按合成表或真实表自动切换协议。
+
+\paragraph{第一备选：random-cell。}
+从训练表的合法可遮盖 Cell 池内按已声明的全表预算抽取非空 $\Qset$，可以覆盖不同列，
+不预设逐列等额配额。沿用附录~\ref{v53:app:input} 的尾部保护、遮挡后支持数与数值多样性要求，
+并记录保护覆盖率、接受率及拒绝原因。它是要实际实验比较的重要竞争选项。
+两种协议都遵守 TruthSidecar 与缺码边界；目标列、Query 行数或 Cell 预算、mask seed、保护规则须记入实验清单。
+
+\paragraph{未来方向与比较口径。}
+希望在训练稳定、实验经验充分之后，将 random-cell 升为默认，以扩展任意 Cell 恢复的训练覆盖。
+何时切换由稳定性、逐表恢复表现和覆盖率等实验经验共同判断，本稿不预设自动切换阈值或固定日程。
+在作出该调整前，supervised-row 保持当前默认；random-cell 保持第一备选。
+两种协议改变任务分布，须分别报告各自的固定 Query 结果；直接比较时另用共同评估面板，不能只排序训练 loss。
+本节规定当前选择；下文按数据来源分流的历史课程保留原始身份，不覆盖本节。
+
+\subsection{合法 episode 与总体训练目标}
+对原始表 $D$，自然观测集合为 $\Oset(D)$。
+按前述 episode 协议先选非空隐藏集合 $\Qset\subseteq\Oset(D)$，
+再令 $\Vset=\Oset(D)\setminus\Qset$、$\TargetSet=\Oset(D)$。
+若 $\Oset_a(D):=\{r:(r,a)\in\Oset(D)\}$，
+合法隐藏集合必须满足
+\begin{equation}
+\begin{split}
+ \mathfrak Q(D):=\bigl\{Q\subseteq\Oset(D):\;&Q\ne\varnothing,\\
+ &|\{s:(s,a)\in\Oset(D)\setminus Q\}|\ge2\\
+ &\qquad\text{对每个 }\Oset_a(D)\ne\varnothing\text{ 的列 }a,\\
+ &|\{x_{sa}:(s,a)\in\Oset(D)\setminus Q\}|\ge2\\
+ &\qquad\text{对每个上述数值列 }a\bigr\}.
+\end{split}
+\label{eq:T:admissible-masks}
+\end{equation}
+尽管默认只由 Query 误差反传，本版保留全部有真值列的准入检查；
+这是完整评分域的协议选择，不是 query-only 优化的数学必要条件。数值多样性仅取候选 mask 后的可见值。
+地址采样器的支持包含于 $\mathfrak Q(D)$；
+若该集合为空，应在构建阶段返回 \texttt{no-valid-episode} 或重新抽表，
+不在计算 loss 时删除不合法 targets 或把空结果当作零损失样本。
+
+正文式~\eqref{front:eq:all-cell-loss} 定义每个 episode 的目标。
+令 $\xi$ 合并预处理和已声明的模型随机性，$\Theta$ 为共享编码器、
+二维 OTransformer、默认 Unit 支路、可选 $P_R$ 及三个共享 Query seeds 的参数；$L_U=0$ 旁路不计入 Unit 专属参数。模式与固定 decoder 不增加逐表持久 readout 参数。
+总体目标和一个 $B$-episode batch 的目标分别为
+\begin{equation}
+ \mathcal J(\Theta)
+ :=\mathbb E_{D,Q,\xi}\!\left[\mathcal L(\Theta;D,Q,\xi)\right],
+ \qquad
+ \mathcal L_{\mathrm{batch}}:=\frac1B\sum_{j=1}^B\mathcal L(E_j).
+ \label{eq:T:population-objective}
+\end{equation}
+这里的表分布是实际通过合法性检查而进入训练的分布，
+mask 采样不依赖模型参数，预处理随机性只以 forward-visible input 为条件。
+上述期望的有效训练域还要求 scorer 能在固定可见码表中查到每个 nominal 真值的答案码，
+ordinal 真值则须属于预先声明的完整秩域；
+否则返回 \texttt{no-answer-code}，由数据协议显式处理整个无效 episode，
+不以删除目标、零分或隐式重编码修补。
+状态内的类型平均消除的是同状态、同类型目标数量对该分支总权重的影响，
+不保证不同类型的损失数值、难度或梯度范数相等。
+训练 loss 为答案编码的逐坐标 MSE 加显式 numeric 维度补偿；不据此宣称模型学习了预测方差或类别概率。
+
+\begin{vfivebox}[原稿训练课程：保留，不冒充新编码的已验证配方]
+下面整段预算、数据池、sampler、优化器切换和接续变体来自上传的第五代原稿，按原文保留。
+TAR 在此只表示第四代对照的训练预算来源。V5.3 的编码与共享粒度改变后，
+这些课程可作复现实验配置，不据此宣称新模型已执行相同训练或继承旧成绩。
+其中「合成表 random-cell、真实表 supervised-row」是历史分流；当前默认与第一备选以本附录~\ref{v54:sec:episode-choice} 为准。
+\end{vfivebox}
+\subsection{按数据来源切换的 TAR 对齐训练课程}
+为检验同一个 restoration 模型能否承受与 TabU-TAR 同量级的训练过程，
+Small-128 采用三段连续、从同一随机初始化开始的课程。第一段遍历冻结的
+old120 合成表，第二段共同打乱 recent120 与 old120 replay，第三段共同打乱
+12 张 OpenML 真实表和合成 replay。三段的墙钟预算分别为
+26,824、28,800 和 7,200 秒；这些预算包含评估、checkpoint 与最终保存，
+不把未用时间转移到下一段。阶段交接保存模型、优化器、随机状态和调度游标，
+因此可在验证过的边界继续，而不能把不同源码版本的 checkpoint 当作同一课程。
+第一段每轮为 120 次更新，第二段每轮为 150 次更新（120 张 recent120
+加 30 张 old120，每四轮覆盖一次 old120）；第三段以 15-step block
+（12 张真实表加 3 张合成 replay）组织训练，每 80 个 block 汇成一个
+1,200-step 调度与损失统计周期。第三段在第 15、1,200、2,400、4,800、7,200、9,600
+次更新评估真实表，其中第 0、2,400、4,800、7,200、9,600 次同时评估全部合成表；
+墙钟终点仍作完整评估，同一模型状态已有完整结果时不重复计算。\footnote{课程与阶段预算
+对齐不等于累计训练暴露相等：若旧 TAR 对照 checkpoint 包含此前的 old3、new9
+训练或后续追加训练，须另行披露，不能将其最终成绩视作仅经历本节三阶段的结果。}
+真实表沿用冻结的历史训练池：Airfoil、Concrete 和
+QSARfish 使用完整训练池，其余九表使用既定的至多 204 行窗口；reserved
+行不进入训练或评分。
+
+合成表的 episode 使用 table random-cell mask：全表约 2.5\% 的 Cell 随机进入
+Query 池；新配置按训练列的总体标准差与完整 IQR 之比实施 $k=2$ 整列保护，
+受保护列不产生任何 Query。真实表的 episode 使用
+table supervised row mask：只把选定 Query 行的最终目标标签隐藏，特征仍可见，
+且默认不启用尾部保护。两种 episode 都保留
+$\TargetSet=\Oset$ 的全 observed-cell 目标，Query 与 retained 分开评分和监控。
+课程的分状态加权变体采用式~\eqref{eq:alt:separate-state-loss}，取
+$\gamma_{\mathrm V}=0.05$、$\gamma_{\mathrm Q}=0.95$：每种类型内先对两种状态
+各自平均，再加权求和。\footnote{该变体保留全部 observed-cell targets，作为独立配置
+注册；从已有 checkpoint 接续时须记录配置与源码迁移，历史类型内 all-cell 平均配置
+不被改写。权重是损失系数，不保证实际损失或
+梯度恰好按 5\%/95\% 分配；Query 损失训练整个模型，并非只训练 Query seed。
+尾部保护仍仅约束 random-cell 的 Query 采样，可见尾部支持对 LL 预测的影响并未截断，
+因此分状态加权本身不保证消除损失或梯度峰值。}
+另设类型尺度校正配置：数值系数取 $1$，nominal/ordinal 系数取 $16$，
+再施加上述 retained/Query 状态权重。对当前 128/8 类别码，这等价于将
+类别平方误差由除以 $128$ 改为除以码能量 $8$；原始逐坐标 MSE 和准确率
+仍单独报告。该校正不保证梯度范数相等；从已有 checkpoint 切换时须记录
+权重、源码与阶段迁移，不能将切换前后的总 loss 直接拼作同一口径的下降曲线。
+针对数值列的有限重尾梯度峰值，另注册一个仅改变训练系数的接续变体：
+保留 median/half-IQR 的输入、答案和解码坐标，对每个数值目标的编码平方误差
+乘以
+
+\begin{equation}
+  \kappa_a^2\, ,\qquad
+  \kappa_a:=\min\!\left\{1,\frac{h_a}{\max\{\operatorname{sd}(\Vset_a),h_a\}}\right\},
+  \label{eq:T:visible-std-loss-scale}
+\end{equation}
+
+其中 $h_a$ 是当前可见支持的 half-IQR，标准差只用于该系数而不进入 codec。
+这会降低可见标准差远大于中央尺度的列对反向传播的影响，并保留原始编码 MSE、
+原单位误差和覆盖率的独立报告；它不是推理时的输出重标定。
+\footnote{该变体只在显式注册的 continuation 中启用，且将
+$\kappa_a\ge10^{-6}$ 作为有限下限。它不删除目标、不改变 Query 采样或
+supervised-row mask，也不把 protected random-cell 列变成 Query；从已有 checkpoint
+切换时须绑定父 checkpoint、loss 配置和源码摘要，切换前后的总 loss 不直接拼接。}
+第一段使用 AdamW，第二段把 backbone 的二维 Linear 权重切换到
+Muon，其余参数保留 AdamW 状态，第三段继承这一混合分组。学习率固定为
+$10^{-4}$，AdamW 仅对矩阵权重使用 $0.01$ weight decay；Muon 使用
+momentum $0.95$、Nesterov 和五步 Newton--Schulz，并匹配 AdamW 的 RMS
+尺度。该课程是训练调度和
+mask 合同的对齐实验，不把 restoration 的 readout、数值编码或全 Cell 目标
+改写成旧 TAR 的模型定义。
+
+\paragraph{迁移到 V5.3 的口径。}
+上述课程段落是原配置的历史记录，其中“当前 128/8”与 $16$ 倍类型系数均指旧恒重码。
+当前配置采用 z-score、nominal 的 $q_a+b_{a,c}$ 与 ordinal 共享基点加秩方向，不自动继承该 $16$ 倍校正或可见 std 降权。
+当前默认仍为 $\chi_{\rm num}=128$、$\chi_{\rm nom}=\chi_{\rm ord}=1$；
+当前 Query 系数为 1、retained restore 系数为 0；旧 $0.05/0.95$ 配方降为历史候选。
+任何额外类型权重或后续 restore 系数须独立注册，不能从旧码能量直接移植。
+这一监督选择使训练任务更接近第四代 TAR，但不令两者的编码、readout 或模型结构等价。
+可见 std 降权仅与历史稳健 codec 配对，现降为候选。若 half-IQR 与 std 同时为零，比例式的 $0/0$ 须显式定义为 1；
+其他情况再按原稿的有限下限裁定。此边界约定是补全实现，不是新的训练结果。
+\subsection{Query 真值隔离}
+固定 $\Theta$、visible input、schema 和随机 realization，
+只改变隔离保存的 $X_{\Qset}$ 时，所有预测保持相同，
+只有 scorer 的值、缺码状态和参数梯度可以变化。
+原因是编码、信息传播、response 与 terminal 均不读取这些真值。
+对于 $t\in\Vset$，其值同时是输入证据与可见重建评分真值；默认不贡献直接自重建损失，
+仍通过 Query 恢复的证据路径参与训练；
+这与隐藏 Query truth 的隔离是两条不同的信息条件。
+
+% BEGIN embedded figures/fig-loss
+
+\begin{figure}[htbp]\centering
+\begin{tikzpicture}[x=1mm,y=1mm]
+\node[v5box,text width=40mm] (in) at (0,0) {实际输入 $X_{\mathcal V}$\\可见统计与码本};
+\node[v5box,text width=40mm] (model) at (59,0) {Backbone + readout\\$\widehat e_{\mathcal T}$};
+\node[v5plain,text width=40mm] (truth) at (0,-29) {Scorer：原始真值\\$X_{\mathcal O}$};
+\node[v5box,text width=59mm] (loss) at (78,-29) {固定 codec 下的向量恢复误差\\$\mathcal L=\mathcal L_{\mathcal Q}+0\mathcal L_{\mathcal V}$};
+\draw[v5arrow] (in)--(model);\draw[v5arrow] (model.south)--(loss.north);
+\draw[v5arrow,draw=VFiveGold] (truth)--(loss);
+\draw[v5opt] (in.south east)--node[above,sloped,font=\scriptsize] {仅复用固定 codec}(loss.north west);
+\node[font=\small,align=center,text width=146mm] at (46,-52)
+{默认仅 Query 误差反传；可见重建单独监控；隐藏真值不进入前向。};
+\end{tikzpicture}
+\caption{完整评分域保留原始观测，默认 restore 系数为 0；numeric 仍补偿响应维度，保持原标量误差口径。}
+\label{fig:loss}\end{figure}
+
+% END embedded figures/fig-loss
+
+\subsection{模型定义完整与历史实验复现是两项要求}
+\label{v53:sec:manifest}
+本文给出模型与训练协议的数学定义；给定一个合法 ModelSpec 和实际表，就能确定一次前向、损失与梯度。
+上面的历史课程则引用特定冻结数据池。仅有 \texttt{old120}、\texttt{recent120} 等名称和墙钟预算，
+不能让一个新读者复现同一次历史实验；它们也不构成当前版本已经训练的证据。
+
+复现实验应随独立 experiment manifest 提供：各表 ID/版本/内容摘要与合成生成器配置，
+每表训练/保留行及窗口索引，schema/类别域与 masking 随机状态，
+完整 ModelSpec、优化器分组/状态及父 checkpoint、评估计划与运行环境。
+本稿不虚构未给出的九张真实表名称、冻结划分或生成器参数。
+缺这些材料时可以实现和验证模型，但不声称已复现那段历史课程。
+
+可复用的课程主体保持原文；本版本的主线仍按自己的 codec、列共享 LL 与显式损失系数执行。
+课程选择、公式核验和任务性能在实验记录中分别报告。
+
+\section{接口、计算量与验收边界}
+\label{sec:T:runtime}
+\subsection{从数学对象到实现接口}
+以下规定各阶段的输入、输出与信息边界；接口实现、完整训练与恢复效果分别依据对应验证记录判断。
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{lX}
+\toprule
+阶段 & 输入、输出与边界\\
+\midrule
+构建 episode & 生成 $\Eset_{\rm in}$、恢复请求 $\TargetSet$，训练时另存 $Y^\star_{\Qset}$。
+在生成前向输入前检查全部有真值列的支持数及数值列不同取值数。\\
+编译 & 只读取 $\Eset_{\rm in}$ 和固定预处理 realization，返回
+$H^{(0)}$、source mask、Null mask、schema 与可见统计。\\
+上下文更新 & 接收完整增广表，执行固定 $L$ 个 blocks，返回同 shape 的 $H^{(L)}$。\\
+表征读出 & 默认用 Unit Transformer 精炼 Unit（V5 Small 取 $L_U=3$）；$L_U=0$ 为可选旁路。不写回 Cell；$s_{ra}=[u_r;f_a]$ 用于相似性；全 LL 对所有类型读取 $c_{ra}$，全 NW 不直接读取最终 Cell。\\
+恢复 & 共享原始 Unit 核，各列选取可见支持并归一化；
+所有类型按模式做 NW、列共享 LL 或逐目标 LL 对照；共享模式固定全部 Unit 中心，保留编码用于显式缩放 MSE，另按类型解码。
+空支持返回状态及 count。\\
+评分 & 使用 $X_{\Vset}$ 中的可见目标值和独立 $Y^\star_{\Qset}$；
+状态内按非空类型分支平均再相加；默认 Query 系数为 1、restore 系数为 0，episode 之间等权。\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+Token 宽度为 $d$，LL 特征宽度为 $d_R$（默认 $d_R=d$），concat 匹配宽度为 $2d$。
+V5.3 默认 ValueEncoder 的矩阵含 $128d$ 个独立可训练参数，
+$d=128$ 时为 $16384$。
+原稿 Fourier 对照另有 64 个频率。三种 semantic seeds 共 $3d$ 个参数，
+concat 匹配不新增参数；全 LL 对数值与类别直接读取最终 Cell，全 NW 无此入口，
+两种模式与固定的编码、还原规则均不新增逐表持久读出参数。可选 $P_R$ 有 $d_Rd$ 个参数，
+默认 Unit Transformer 按档位层数计入参数；$L_U=0$ 旁路不另计。$q_a,b_a$ 及 LL 系数属于临时任务状态。
+其余参数由所选 OTransformer 的 $L$、head widths、FFN widths、各层 presence 读出与
+inducing seeds 决定。$W_A^P,W_F^P$ 属于 backbone，不能因删除旧 readout 而删去。
+Inducing seeds 按每层 $Sd$ 计数；它们与本次计算的 $G_a$ 摘要是不同对象。
+本稿的数学定义允许 $d\ge128$；第五代命名尺寸从 V5 Nano 起算，见附录~\ref{v54:app:sizes}，不沿用第四代 TAR 的 96 宽 small。
+这里不另设独立的数值宽度或总参数预算，二者均随所选 backbone 配置记录。
+
+
+\subsection{一个可执行配置需要填写的最小字段}
+\label{v53:sec:modelspec}
+ModelSpec 是完整模型定义的实参，不是隐藏的外部算法。
+本稿对固定实参给出唯一 forward；未固定的层数、宽度等由实现选择并记录，不能从文件名猜测。
+\begin{center}\small
+\begin{tabularx}{\linewidth}{p{33mm}XX}
+\toprule
+字段组 & 正文参考或已固定规则 & 必须另外记录的实参\\\midrule
+输入/答案 & $p=128$，默认 $K=1$（单 Unit/Feature）；$\mathrm{codec\_mode}\in\{G,C\}$；两类模式均用 $e_a=q_a+v_a(x)$；$C$ 的基础向量取 $\mathcal H_4$，$G$ 用单位高斯；ordinal 为共享基点加秩方向，nominal 为 $q_a+b_{a,c}$ & codec 尺度模式、$\varepsilon_a$、realization 与稳定列映射；$K>1$ 时的槽位编译与匹配读出\\
+共享输入变换 & 可学习无偏置矩阵，初始化为 $Q/8$ & $d\ge128$、模型 seed、优化器配置\\
+二维网络 & 默认列 inducing、行直接；各命名档的 $L$、$d_{\rm ff}$、head 与 $S$ 见附录~\ref{v54:app:sizes} & 非已登记档须另记 $L$、head 数、$d_{\rm ff}$、激活、Norm 稳定项、dropout\\
+参与度 & 独立无偏置 $W_A^P,W_F^P$，恒等初始化；默认 $\tau_{\rm pres}=1$ & 独立的 $\eta>0$、数值 dtype；非默认阈值须显式记录\\
+参考/回归 & Gaussian Unit 核、column LL；默认开启 Unit Transformer，V5 Small 取 $L_U=3$；V5 Nano 取 $L_U=0$ & $\tau_{\rm match}>0,\lambda_{\rm LL}>0$；非已登记档的 $L_U$；Small 上关闭旁路须显式写 $L_U=0$；可选 $d_R,P_R$\\
+数据/损失 & episode 默认 supervised-row，第一备选 random-cell；Query 系数 1、restore 系数 0；状态内类型平均 & 目标列、Query 预算、mask seed、保护规则；续训 restore 系数、独立类型权重与有效域\\
+执行 & 稳定 solve、完整支持与固定中心 & chunk 策略、缓存 identity、求解/累加精度及失败协议\\\bottomrule
+\end{tabularx}
+\end{center}
+配套数学核验使用自己的小规模明确配置，不将其小宽度或超参数当作生产训练推荐。
+给定的数据还应包含所有列的 schema 与 ordinal 次序。
+训练课程引用的数据 manifest 与这个 ModelSpec 是两份不同的复现材料，见附录~\ref{v53:sec:manifest}。
+命名尺寸档（V5 Nano / Small / Medium / Standard / Large）单独写在附录~\ref{v54:app:sizes}，不在本表里展开。
+
+\subsection{单 token 后的计算量}
+令
+\[
+\widetilde N=N+1,\quad \widetilde M=M+1,\quad
+P_{\rm slot}=\widetilde N\widetilde M,\qquad
+A=|\Vset|+|\Qset|+N+M.
+\]
+$A$ 为非 Null receivers 数量，包含 Values 与各类 Queries；
+几何恢复目标的数目不是这个数量。
+设 $n_a^{Q}=|\{r:(r,a)\in\Qset\}|$、
+$v_r=|\{a:(r,a)\in\Vset\}|$、
+$n_r^{Q}=|\{a:(r,a)\in\Qset\}|$，
+所有 attention heads 的总投影宽度为 $O(d)$。
+直接双轴版本的 receiver--source 配对数为
+\begin{equation}
+P_{\rm axial}=\sum_a n_a(n_a+n_a^{Q}+1)
+              +\sum_r v_r(v_r+n_r^{Q}+1).
+\label{eq:cost:axial}
+\end{equation}
+单个 packed block 的基本成本为
+$O(A(d^2+d\,d_{\rm ff})+P_{\rm axial}d)$。
+默认列 inducing、行直接更新的配对数上界为
+\begin{equation}
+P_{\rm ind}=S\sum_a(2n_a+n_a^{Q}+1)
+              +\sum_r v_r(v_r+n_r^{Q}+1),
+\label{eq:cost:inducing}
+\end{equation}
+其 packed block 成本为
+$O((A+MS)(d^2+d\,d_{\rm ff})+P_{\rm ind}d)$。
+所有列求和均遍历 $a\in\Fset$；默认不分配 Unit 扩展列的摘要，
+但仍保留其非 Null receiver 的局部 remainder。摘要激活存储为 $O(MSd)$。
+Dense 默认执行的上界可写为
+\begin{equation}
+O\!\left((P_{\rm slot}+MS)(d^2+d\,d_{\rm ff})
+          +(M\widetilde N S+P_{\rm slot}\widetilde M)d\right).
+\end{equation}
+总 backbone 成本随 $L$ 倍增。固定 $M,S,d$ 时，其默认主算术量对 $N$ 为线性，
+这不包含下面可能更大的全 Cell terminal 成本。
+
+令 $t_a=|\TargetSet_a|$；完整训练评分时 $t_a=n_a+n_a^{Q}$。
+仅计算默认优化目标且不报告 retained 预测时，读取数可取 $t_a=n_a^Q$；拟合中心仍为全部 $N$ 个 Unit。
+将请求涉及的不同 Unit 行组成
+$\mathcal R_{\TargetSet}:=\{r:\exists a,\ (r,a)\in\TargetSet\}$，
+并记 $q=|\mathcal R_{\TargetSet}|$。
+$q$ 统计请求行，$t_a$ 统计第 $a$ 列的请求 Cell；同一行可请求多列。
+按地址读取 Unit/Feature 与 Cell 不增加矩阵投影，concat 也可按需表达。
+
+\subsection{每列一次的前向伪代码}
+\begin{enumerate}
+\item 从实际可见输入建立所选可见标准化与离散码本；numeric/ordinal 固定列级 $q_a,b_a$，nominal 固定列级 $q_a$ 与可见类别的 $b_{a,c}$；根据所选模式生成支持编码。
+\item 按单 token compiler 构造增广表，执行 direct 或 inducing 的二维 backbone。
+\item 默认在派生 Unit sources 上执行独立 Unit Transformer；选用 $L_U=0$ 旁路时直接使用初始 Unit bank。
+\item 固定中心为全部当前 Unit。逐列对完整支持归一化，累计 $\nu,\mathsf W C,\mathsf W E$ 及聚合矩；空支持返回状态。
+\item LL-column 解一次 $AB^\top=\bar J$；LL-target 使用原稿独立对照；NW 不做矩阵分解。
+\item 按请求地址计算预测 value 向量，数值投影反标准化，类别最近码匹配。
+\item 训练时由独立 scorer 读取原始真值，按固定 codec 编码；默认聚合 Query 损失，可见自重建另行监控。
+\end{enumerate}
+没有从解码结果反向构造同一轮权重的循环。训练不可 detach 局部矩、支持 Cell、Unit kernel 或共享解。
+数值的标量右端优化只替代第 5--6 步响应算术，不改变编码、kernel 或外层 loss 的缩放。
+
+\subsection{精确分块与冷启动、缓存读取}
+按中心分块时，$\pi_r=1/N$ 固定，每个中心仍在本列完整支持上归一化；先累计全部中心统计并求出共享解，
+再对读取集合输出。每个 chunk 独立拟合一个 $B$ 不是同一个模型。
+冻结推理在证据、codec、参数与原始行集合固定时可缓存列级解和分层 source 轨迹。
+只缓存最终 Cell 不能代替新 Query 在每一层应读取的 source 状态。
+
+令 $n_a$ 为支持数、$t_a$ 为读取数，响应宽度为 $p_a$。在 kernel 已可供访问时，
+一个列级冷启动拟合与读取的直接成本为
+\begin{equation}
+ \begin{split}
+ O\bigl(&Nn_a(d_R+p_a)+(n_a+N)(d_R^2+d_Rp_a)\\
+       &+d_R^3+d_R^2p_a+t_a(n_a(d_R+p_a)+d_Rp_a)\bigr).
+ \end{split}
+ \label{v51:eq:cold-cost}
+\end{equation}
+当所有行已作为中心读取时，最后的局部均值可复用而不重复计算。
+全表近似全可见、$p_a,d_R=O(d)$ 时，主项为
+$O(MN^2d+MNd^2+Md^3)$；此外还要计二维 backbone、$O(N^2d)$ Unit 核及可选精炼。
+拟合中心为全部 Unit 意味着\textbf{冷启动少量 Query 也不能直接继承原稿的 $O(qN)$ 拟合成本}。
+得到固定列级解后，新增读取才是按请求访问支持、构造局部均值与求值。
+
+\begin{center}\small
+\begin{tabular}{lrr}
+\toprule
+$d_R=128,M=32$，FP32 & 逐目标矩阵全存 & 列共享矩阵全存\\\midrule
+$N=512$ & 1 GiB & 2 MiB\\
+$N=1024$ & 2 GiB & 2 MiB\\
+$N=2048$ & 4 GiB & 2 MiB\\\bottomrule
+\end{tabular}
+\end{center}
+这只计正规矩阵，不含 Cell 激活、权重、响应、斜率、反传和优化器。默认 $p=128$ 的 32 个斜率矩阵另为 2 MiB。
+全局核和各列归一化权重仍有二次规模，可用重计算控制存储，但不能把存储优化描述为消除了全部二次算术。
+
+\Needspace{6\baselineskip}
+\subsection{必要验收场景}
+\label{subsec:T:acceptance}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.23\linewidth}
+                  >{\raggedright\arraybackslash}p{0.70\linewidth}}
+\toprule
+检查 & 应满足的判据\\
+\midrule
+\endfirsthead
+\toprule 检查 & 应满足的判据\\\midrule
+\endhead
+输入真值隔离 & 固定可见输入、schema 与预处理 realization，仅改变隐藏训练真值：
+所有 forward 输出不变，loss 或缺码状态可以变化。\\
+数值仿射 codec & 默认可见 z-score，稳健尺度仅作候选；检查随机 $q,b$、非正交投影、单支持、常数列、
+重复值、尾部扰动与单位变换。输入、答案、还原和评分共用可见统计，encode/decode 往返一致。\\
+单 token 编译 & 默认 $K=1$：每行一个 Unit、每列一个 Feature，corner 一个 Null；
+输出 shape 为 $(N+1)\times(M+1)\times d$，semantic seeds 恰为三个共享向量。$K>1$ 不在本项默认检查内。\\
+输入映射与参与度 & 检查矩阵梯度和更新后的参数有限，幅度学习与 checkpoint 续训一致；
+presence 默认 $\tau_{\rm pres}=1$，核对零、半参与点、通常幅度和零附近导数。\\
+完整训练域 & 完整评分域 $\TargetSet=\Oset$、$\Qset\ne\varnothing$；每个有真值列 $n_a\ge2$，数值列另须 $n_a^{\rm distinct}\ge2$。
+每个 nominal 真值须在可见码表有定义，否则报 \texttt{no-answer-code}；
+ordinal 由独立 schema 定义全部合法秩。无自然缺失伪标签，无 loss 阶段静默删目标或零分兜底。\\
+零与空证据 & 数值零仍走 Value 编码；Null 每子层精确为零。
+空证据列摘要为零；Query 的 token-local remainder 仍按 OMAB 定义执行。\\
+Query 插入 & 固定证据，只增加原 Null 上的 Query：
+旧 carriers、Unit/Feature 匹配坐标、Cell 回归特征及旧请求答案保持一致。\\
+行列置换 & 同步移动 schema、码本、masks 与地址：
+输出按对应地址共变；不以重新随机编码替代固定 realization 的比较。\\
+模型级 readout & 数值和类别同用 NW 或同用 LL；检查 column/target 粒度不混用、$L_U=0$ 严格旁路与开启时派生 sources；NW 对最终 Cell 改动不变，LL 在非退化例中依赖 target/support Cell；
+同列 Feature 抵消，原始 Unit 核跨列共享，无新增投影和 gates。\\
+恢复与支持 & 每个目标使用同列全部可见支持；可见目标含自身，
+隐藏目标不含自身。重复值保留不同地址的 multiplicity。\\
+反向传播 & 全 LL 的所有类型分别汇合 Unit 与 Cell 的 target/support 梯度；全 NW 最终 Cell 及独立 Cell Query seed 的任务梯度为零；
+可见自配对差值及微分为零，自身归一化权重仍受其他 logits 影响。\\
+LL 求解 & 正 ridge、无惩罚截距，默认每列共享 $d_R$ 维系统；核对联合问题、截距消元、核矩阵聚合与标量化。逐目标对照保留原 centered solve；
+共线或重合坐标仍可解。核对向量正规方程、单右端和等价系数预测一致，有限差分与 solve 微分一致。\\
+离散还原 & Nominal 匹配最近可见码，ordinal 投影到共享仿射直线后匹配完整声明域的最近秩；等距按 schema 顺序。
+检查合法值往返、单等级、未见声明等级与一般预测向量；不以无范数项的内积最大化替代 ordinal 解码。
+硬判决不参与向量 MSE 反传。\\
+Loss 聚合 & 检查 numeric 的 $\chi_a=128$ 维度补偿及独立类型/状态权重；构造 Query/Value 数量不相等及单类型、双类型例子，
+核对单格逐坐标 MSE、精确编码零损失及梯度；状态内各类型平均后相加，无二次除以类型数或空均值。
+默认 retained 预测的直接梯度为零，非退化 Query 仍可经 supports/共享中心反传；恢复非零系数后符合式~\eqref{v53q:eq:loss-adjoint}。\\
+不足或恒定支持 & 训练准入列 $n_a<2$ 或数值列 $n_a^{\rm distinct}<2$ 时拒绝或重采样；
+检查重复支持不能冒充不同值、遮挡后多样性、恒定列无合法 mask，以及不同值但零 IQR 的情况。
+推理 $n_a=0$ 返回 \texttt{no-support}；单支持或常数响应返回相应唯一值，并报告数值支持退化。\\
+\bottomrule
+\end{longtable}
+
+解析恒等式默认精确实数；数值验证须按 dtype、尺度与条件数选择容差。
+非有限输入、梯度或 solve 失败应显式报告，不自动换模型后仍称原合同通过。
+每个样本的 support 梯度不一定非零：同标签、完全重合、权重饱和或零损失
+都可能产生合法零梯度。测试应选非退化实例。
+
+\Needspace{8\baselineskip}
+\subsection{空间诊断与证据范围}
+\label{v51:sec:revision-audit}
+完整实现首先检查 codec 往返、非正交数值投影、零与常数列、有限码本解码，
+再检查联合 LL 与截距消元、核矩阵聚合、梯度、低维 $P_R$ 与数值标量化。
+Unit 支路的关闭和开启、原始与派生 source masks、两种二维 backbone 均需单独验收。
+多维空间或其他 codec 只有完成各自的投影/还原测试后，才可宣称符合对应扩展定义。
+
+空间诊断应区分四件事：原值误差、合法空间内的坐标误差、空间外残差，以及基/LL 系统条件数。
+这些量回答不同问题：合法空间内仍可能有错误值，低空间外残差不代表准确性；
+列级 ridge 正定不意味着任何低精度求解都稳定。非有限值和无支持状态应显式报告。
+
+配套脚本中的随机小实例用于核对公式、梯度与边界，不训练基座模型，也不构成泛化证据。
+任务验证另需固定数据来源、训练与留出划分、候选覆盖率、受损协议、码本 realization 与预算。
+数学定义、数值核验、完整训练和新表性能四类证据分别报告。
+
+本文件给出模型定义与扩展探索。文档编译、组件测试、完整训练和新表评估分别提供不同层面的证据。
+后续评价应分别报告可见自重建与被遮挡位置恢复，再根据明确的数据划分判断迁移或泛化；
+可见自匹配带来的低 loss 和旧模型的实验成绩都不能代替这一步。
+
+
+\section{完整对照：全 NW、逐目标 LL 与 Fourier 输入}
+\label{v51:app:target-baseline}
+本节保留第五代原稿的逐目标 LL。下面 $w_s,A,B_t^{\rm loc},\bm v_t$ 均属于单个目标，
+默认列共享模式使用附录~\ref{v51:app:shared-ll} 的联合系统，不能混用两个共享粒度。
+两支可以使用同一 V5.3 codec，也可以按编码对照采用原稿的标量/Fourier 配对；配置必须明确。
+\subsection{全 NW：局部常数恢复}
+对任意答案维度 $p_a$，
+\begin{equation}
+ \widehat{\bm e}_t^{\rm NW}=\bar{\bm e}_t:=\sum_s w_s\bm e_{sa}
+ =\arg\min_{\bm a}\sum_s w_s\|\bm e_{sa}-\bm a\|^2.
+ \label{eq:R:encoded-nw}
+\end{equation}\begingroup\makeatletter\protected@edef\@currentlabel{\p@equation\theequation}\label{front:eq:encoded-nw}\endgroup
+按该列的规则还原后，数值就是 $\sum_s w_s x_{sa}$；
+类别取连续均值的最近码，一般不等同于直接类别投票。
+两种类型均不直接读取最终 target/support Cell。
+
+
+
+\subsection{全 LL：同一个向量 ridge 问题}
+下列 LL 公式为简洁起见仍写作 $\bm c$ 与 $d$；启用可选 response 映射时，
+应将其解释为 $\bm\zeta=P_{\!R}\bm c$ 与 $d_R$，其余权重、答案坐标和常数复现条件不变。
+记 $\bm\delta_s=\bm c_{sa}-\bm c_t$。对任意 $p_a$ 求
+\begin{equation}
+ \min_{\bm a\in\R^{p_a},\,B_t^{\rm loc}\in\R^{p_a\times d}}
+ \sum_s w_s\|\bm e_{sa}-\bm a-B_t^{\rm loc}\bm\delta_s\|^2
+             +\lambda_{\rm LL}\|B_t^{\rm loc}\|_F^2,
+ \qquad\widehat{\bm e}_t^{\rm LL}=\bm a.
+ \label{eq:R:ll-objective}
+\end{equation}
+截距不受惩罚。定义
+\begin{equation}
+ \begin{aligned}
+ \bm m&=\sum_s w_s\bm c_{sa},&\widetilde c_s&=\bm c_{sa}-\bm m,&
+ \bar{\bm e}&=\sum_s w_s\bm e_{sa},\\
+ C&=\sum_s w_s\widetilde c_s\widetilde c_s^\top,&
+ H&=\sum_s w_s\widetilde c_s(\bm e_{sa}-\bar{\bm e})^\top.
+ \end{aligned}
+ \label{eq:R:centered-statistics}
+\end{equation}
+截距的一阶条件为 $\bm a=\bar{\bm e}+B_t^{\rm loc}(\bm c_t-\bm m)$。
+代回目标并对 $B_t^{\rm loc}$ 求导，得到 $A(B_t^{\rm loc})^\top=H$，其中 $A=C+\lambda_{\rm LL}I_d$。
+\begin{equation}
+ \bm q^\top A\bm q=\sum_s w_s(\bm q^\top\widetilde c_s)^2
+                    +\lambda_{\rm LL}\|\bm q\|^2>0\quad(\bm q\ne0).
+ \label{eq:R:ll-positive-definite}
+\end{equation}
+因此斜率与截距唯一，即使 supports 少于 $d$ 或特征共线亦成立。
+闭式拟合使用固定的当前输入与权重；外层训练仍通过这些入口反传。
+
+\paragraph{单目标只解一个右端。}
+预测无需形成 $B_t^{\rm loc}\in\R^{p_a\times d}$ 或 $H\in\R^{d\times p_a}$：
+\begin{equation}
+ \boxed{\begin{aligned}
+ A\bm v_t&=\bm c_t-\bm m,\\
+ \ell_{ts}&=w_s(1+\widetilde c_s^\top\bm v_t),\\
+ \widehat{\bm e}_t^{\rm LL}&=\sum_s\ell_{ts}\bm e_{sa}
+                           =\bar{\bm e}+H^\top\bm v_t.
+ \end{aligned}}
+ \label{eq:R:centered-solve}
+\end{equation}
+$\sum_s w_s\widetilde c_s=0$ 给出 $\sum_s\ell_{ts}=1$。
+等价系数可为负，所以数值可超出支持值范围，类别预测码也可离开码的凸包；
+它们不是参考子总体的质量，也不是类别概率；参考质量始终由非负的 $w_s$ 给出。
+两种类型均按第~\ref{subsec:R:value-codec}~节中对应列的规则还原。
+$p_a=1$ 时此式严格等于原标量 LL，没有新增全局分类头。
+采用 Cholesky 与三角求解，不显式求逆。闭式解不等于没有计算成本；
+每个目标仍有 $d\times d$ 的统计及求解，不能一般跨 targets 共用分解。
+
+\subsection{闭式边界、单支持与可见自匹配}
+每轮的距离解码只在求出编码后执行，不反馈到同一轮的内层拟合权重。
+若同时让权重依赖待求 $B_t^{\rm loc}$，或以内层交叉熵取代平方误差，
+上述二次问题的闭式解就不再适用。
+训练沿用式~\eqref{eq:P:support-floor} 的支持数与数值不同取值条件；推理 $n_a=0$ 返回 \texttt{no-support} 和 count。
+$n_a=1$ 时 $C=H=0$、$B_t^{\rm loc}=0$，两种模式都返回唯一 support 的编码；
+类别解码为其唯一可见类别。这里 $\bm v_t$ 是求值向量，不必为零。
+
+可见目标的自身差为零，Unit 自配对亦为零，且
+\begin{equation}
+ w_r=\frac1{1+\sum_{s\ne r}\exp(-\|\bm u_s-\bm u_r\|^2/(2\tau_{\rm match}^2))}.
+ \label{eq:R:self-weight}
+\end{equation}
+自身答案固定时，将 LL 最优目标与 $(\bm a,B_t^{\rm loc})=(\bm e_{ra},0)$ 比较：
+\[
+ w_r\|\widehat{\bm e}_t-\bm e_{ra}\|^2
+ \le\sum_{s\ne r}w_s\|\bm e_{sa}-\bm e_{ra}\|^2.
+\]
+所以 $w_r\to1$ 时 LL 与 NW 的编码均趋向自身码。
+由于类别码彼此不同，最近码判决最终恢复自身类别 $b_r=x_{ra}$。
+此时两种类型的编码 MSE 都趋于零。
+在默认遮挡任务中，可见重建检验已知信息经统一读出后的保持，Query 恢复检验缺少自身值时的推断。
+上述极限说明可见低误差的一种来源；它不能单独证明缺失恢复能力，也不能据此判定 all-cell 监督无效。
+
+\subsection{Feature 抵消与 Cell 平移不变性}
+在默认 concat 匹配与分离的 Cell 回归读出中，同列 Feature 抵消，最终 Feature 不影响预测。
+固定 Unit 权重与答案编码，全 LL 对所有参与同列读出的 Cell 作共同平移时，$\widetilde c_s$ 与
+$\bm c_t-\bm m$ 不变，预测不变。全 NW 在固定 Unit 与可见答案时，
+对最终 Cell 的任意改变都不变，因为没有该直接入口。
+
+
+\subsection{仅适用于逐目标 LL/NW 的局部反传}
+在固定 episode 中令
+状态权重 $\omega_t$ 由式~\eqref{v53q:eq:loss-adjoint} 定义；默认 retained 的该直接权重为零。
+原稿逐目标 LL/NW 的单个 score 入口如下；列共享模式还通过 $B_a$ 依赖全部中心的 Unit 权重，
+完整主线微分见式~\eqref{v51:eq:shared-differentials}--\eqref{v51:eq:prediction-differential}。
+下列 target/support 局部入口表达适用于保留对照，不用于漏掉共享中心路径。单个 score 的形式入口可写为
+\[
+ \ell_t\bigl(\bm u_r,(\bm u_s)_{s\in\mathcal C_a};
+             \bm c_t,(\bm c_i)_{i\in\mathcal S_t}\bigr),
+ \qquad t=(r,a).
+\]
+Unit 入口在两种模式中生成匹配权重；Cell 入口在全 LL 的全部类型中使用，
+全 NW 对最终 Cell 的直接偏导为零。
+同地址的 target 与 support 入口绑定到同一个 carrier。
+对 Cell 地址 $i$，其 final Cell adjoint 为
+\begin{equation}
+\begin{aligned}
+ \bm g_i^C:=\frac{\partial\mathcal L}{\partial\bm c_i}
+ =\mathbf1\{\mathsf R=\mathrm{LL}\}\sum_{t\in\TargetSet}\omega_t\bigl[
+ &\mathbf1\{i=t\}\,\partial^{\rm target}_{\bm c_t}\ell_t\\
+ &+\mathbf1\{i\in\mathcal S_t\}\,
+        \partial^{\rm support}_{\bm c_i}\ell_t\bigr].
+\end{aligned}
+\label{eq:T:dual-role-adjoint}
+\end{equation}
+对保留的逐目标模式，行 $s$ 的 Unit adjoint 汇集各列恢复任务如下；列共享模式必须额外包括其他拟合中心经 $B_a$ 的路径：
+\begin{equation}
+\begin{aligned}
+ \bm g_s^U:=\frac{\partial\mathcal L}{\partial\bm u_s}
+ =\sum_{t=(r,a)\in\TargetSet}\omega_t\bigl[
+ &\mathbf1\{s=r\}\,\partial^{\rm target}_{\bm u_r}\ell_t\\
+ &+\mathbf1\{s\in\mathcal C_a\}\,
+        \partial^{\rm support}_{\bm u_s}\ell_t\bigr].
+\end{aligned}
+\label{eq:T:unit-dual-role-adjoint}
+\end{equation}
+两个指示项不互斥：visible target 在自己的 score 中也有 support 入口，
+并为其他 targets 提供支持。每条路径按 chain rule 累计到对应状态。
+
+Self-pair 的 Unit 差与 Cell 差的微分均为零：
+$\mathrm d(\bm u_r-\bm u_r)=\bm0$、
+$\mathrm d(\bm c_{ra}-\bm c_{ra})=\bm0$。
+但自身归一化权重仍随其他 logits 改变，不能把整个自身权重当作常数。
+全 NW 的全部 final Cell 均不直接进入预测；更早的 visible Cell carrier 仍可经 backbone
+影响 Unit，从而获得上下文路径的梯度。在正文单轮协议中，Cell Query 不供源，故全 NW 的独立
+Cell Query seed $\bm q^C$ 也没有任务损失梯度；全 LL 为所有类型的 Query 建立直接路径。
+这些是计算图的路径结论，不保证每个样本的实际梯度非零。
+
+\subsection{权重、编码恢复与 solve 的微分}
+原始答案、码本与随机 $q,b$ realization、可见统计、schema 与固定超参数在模型微分中为常量。
+本小节的单目标 solve 微分保留用于 $g_{\rm LL}=\mathrm{target}$；column 模式使用前述联合系统微分。
+对 $\psi_{rs}=-\|\bm u_s-\bm u_r\|^2/(2\tau_{\rm match}^2)$，有
+\begin{equation}
+ \begin{aligned}
+ \mathrm d\psi_{rs}&=-\tau_{\rm match}^{-2}(\bm u_s-\bm u_r)^\top
+                                     (\mathrm d\bm u_s-\mathrm d\bm u_r),\\
+ \mathrm dw_s&=w_s(\mathrm d\psi_{rs}-\sum_jw_j\mathrm d\psi_{rj}).
+ \end{aligned}
+ \label{eq:T:matching-differential}
+\end{equation}
+全 NW 的编码微分为 $\mathrm d\widehat{\bm e}_t=\sum_s\bm e_{sa}\,\mathrm dw_s$。
+全 LL 令 $\bm r_t=\bm c_t-\bm m$、$A\bm v_t=\bm r_t$，则
+\begin{equation}
+ \begin{aligned}
+ A\,\mathrm d\bm v_t&=\mathrm d\bm r_t-(\mathrm dC)\bm v_t,\\
+ \mathrm d\ell_{ts}&=(1+\widetilde c_s^\top\bm v_t)\mathrm dw_s
+                  +w_s[(\mathrm d\widetilde c_s)^\top\bm v_t+\widetilde c_s^\top\mathrm d\bm v_t],\\
+ \mathrm d\widehat{\bm e}_t&=\sum_s\bm e_{sa}\,\mathrm d\ell_{ts}.
+ \end{aligned}
+ \label{eq:T:ll-differential}
+\end{equation}
+$\mathrm d\bm m$、$\mathrm dC$ 包含权重与支持 Cell 的全部贡献。
+反向若 solve 输出 adjoint 为 $\bar{\bm v}$，解 $A^\top\bm p=\bar{\bm v}$，
+传回 $\bar{\bm r}=\bm p$、$\bar A=-\bm p\bm v_t^\top$，再穿过统计。
+不 detach 权重、统计、解或同地址某次使用。数值解码
+$\mathrm d\widehat x_t=s_a\nu_a^{-1}b_a^\top\mathrm d\widehat e_t$；原稿标量对照则为 $s_a\mathrm d\widehat z_t$。
+
+\paragraph{V5.3 列共享模式的执行范围。}
+当前冷启动、缓存读取与中心分块成本使用式~\eqref{v51:eq:cold-cost}；
+正层数 Unit 精炼的成本另加，不能因保留原稿少量 Query 公式而遗漏冷启动的全中心拟合。
+下面从请求行开始构核的式子与单目标工作区，\textbf{完整保留为 NW/逐目标 LL 的成本对照}，
+不用于声称列共享模式在首次少量 Query 请求时只需 $O(qN)$ 拟合。
+\paragraph{原稿对照：共享匹配与逐目标回归。}
+原始 Unit 核只需按请求行生成：
+\begin{equation}
+ \mathcal K_{\TargetSet}=(\kappa_{rs})_
+       {r\in\mathcal R_{\TargetSet},\,s\in\Rset}\in\R^{q\times N},
+ \qquad O(qNd).
+ \label{eq:cost:matching}
+\end{equation}
+同列 Feature 抵消，故无需显式形成全部 $N\times M\times2d$ 匹配坐标。
+各列从原始核选取对应行及可见 supports，归一化成本为
+$O(\sum_a t_an_a)$。这些列权重可按需要形成，原始核只有一份。
+
+在权重给定后，令答案维度为 $p_a$，一般密集编码的恢复成本为
+\begin{equation}
+ \begin{aligned}
+ \text{全 NW：}&\quad O\!\left(\sum_a t_a n_a p_a\right),\\
+ \text{全 LL：}&\quad O\!\left(\sum_a t_a(n_a d^2+d^3+n_a p_a)\right).
+ \end{aligned}
+ \label{eq:cost:ll}
+\end{equation}
+全 LL 为每种类型的每个目标构造 Cell 二阶统计并解一个右端，
+不物化逐 Cell 的 $p_a\times d$ 系数矩阵。不同目标权重、不同列 Cell 特征
+通常不同，因此不能一般共用 Cholesky 分解。
+模式 $G$ 的 nominal/ordinal 编码汇总均为 $O(n_ap_a)$，
+nominal 最近码判决为 $O(p_a|\mathcal D_a^{\rm vis}|)$，ordinal 的共享方向投影与秩匹配为 $O(p_a+C_a^{\rm decl})$，可流式比较。
+模式 $C$ 可利用稀疏身份：nominal 每个取值是两个 $4$-hot 相加，汇总为 $O(8n_a+p_a)$，判决先减 $q_a$ 再与 $b_{a,c}$ 做内积，为 $O(4|\mathcal D_a^{\rm vis}|)$；
+ordinal 汇总为 $O(4n_a+p_a)$，共享秩方向内积算一次后，判决为 $O(C_a^{\rm decl}+4)$。
+两种模式的编码 MSE 均为 $O(p_a)$；
+numeric 显式向量投影为 $O(p_a)$，其精确标量闭包路径的逆变换为 $O(1)$。
+全 LL 额外工作区可为 $O(d^2+p_a)$，全 NW 为 $O(p_a)$，
+既有支持表征、输入块和训练保存量另计。类别全 LL 仍有二阶统计和求解成本，
+稀疏组合码只省编码侧聚合，不把 LL 变成 NW 同成本计算。
+
+\subsection{原稿逐目标 LL 的窗口与少量 query 成本（保留对照）}
+\label{subsec:cost:window-memory}
+
+\paragraph{一次训练由窗口决定。}
+设预训练语料总量为 $N_{\rm data}$，每次采样一个 $N_{\rm win}$ 行、$M$ 列的窗口。
+Episode 中 $N=N_{\rm win}$；本段按原 all-cell 候选或完整评分计算成本，读取域为全部有真值的
+$\TargetSet=\Oset=\Vset\mathbin{\dot\cup}\Qset$。
+一千万行描述可用语料总量，$N_{\rm win}$ 描述一次训练的表格规模。
+
+训练原始样本核至多为 $N_{\rm win}\times N_{\rm win}$，其距离计算为 $O(N_{\rm win}^2d)$。
+各列取用权重的配对数则为
+\begin{equation}
+ P_{\rm col}=\sum_a t_an_a\le MW^2.
+ \label{eq:cost:window-pairs}
+\end{equation}
+前者是共享的几何相似信息，后者是各列使用证据的关系数量。
+相加旧方案的 Cell 参与每列匹配；若以 TAR 的 $K$ 维匹配响应计，
+距离计算约为 $O(MW^2K)$。当前方案的共享 Unit 核只需
+$O(N_{\rm win}^2d)$，因此消除了旧方案中按列重复的这部分计算；
+比较时仍应同时记录旧 $K$ 与当前 $d$ 的宽度。
+若全 LL 且近似全可见，所有类型的 LL 统计与求解主项均为
+$O(MW^2d^2+MWd^3)$，最后评分再对每个预测计算标量 loss。
+
+\paragraph{权重与回归矩阵分别计数。}
+以全 LL、$M=32,d=128$、全部 Cell 均为恢复 targets 为例，
+按 $n_a\le N_{\rm win}$ 列出 FP32 单份数组大小：
+\begin{center}
+\begin{tabular}{@{}rrrrr@{}}
+\toprule
+$N_{\rm win}$ & 目标数 & 共享原始核 & 各列权重全存 & 全部 LL 矩阵\\
+\midrule
+512  & 16\,384 & 1 MiB  & 32 MiB  & 1 GiB\\
+1024 & 32\,768 & 4 MiB  & 128 MiB & 2 GiB\\
+2048 & 65\,536 & 16 MiB & 512 MiB & 4 GiB\\
+\bottomrule
+\end{tabular}
+\end{center}
+MiB/GiB 分别为 $2^{20}/2^{30}$ 字节。共享原始核与各列归一化权重是不同对象，
+不需要同时保存所有列的权重副本。
+全 LL 的系统矩阵数量由全部 targets 决定，与原始核共享是两项不同的存储因素。
+
+\paragraph{十万行推理只按请求生成预测。}
+推理令 $n_a^{\rm req}$ 为第 $a$ 列请求数，$q$ 仍为这些请求涉及的不同 Unit 行数。
+访问整张表的可见 supports 时，读出的基本规模为
+\begin{equation}
+\begin{aligned}
+ \text{共享原始核：}&\quad O(qNd),\qquad
+ \text{列归一化：}\quad O\!\left(\sum_a n_a^{\rm req}n_a\right),\\
+ \text{全 LL 主项：}&\quad
+ O\!\left(\sum_a
+       n_a^{\rm req}(n_a d^2+d^3)\right).
+\end{aligned}
+\label{eq:cost:requested-inference}
+\end{equation}
+全 NW 的编码聚合、以及两模式的类别 decoder 成本按式~\eqref{eq:cost:ll}
+及其后定义取 $t_a=n_a^{\rm req}$；上式仅单列全 LL 的统计与求解主项。
+固定 $q,M,d$ 时，访问支持与累加统计的主要工作随 $N$ 线性增长。
+旧方案在少量 query 时也无需构建 $N\times N$ 推理核；
+新方案进一步使同一批请求行预测多列时复用样本核。
+
+取 $N=100000,q=8,M=32,d=128$，FP32 数组大小为：
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}lXr@{}}
+\toprule
+对象 & 形状或数量 & 大小\\
+\midrule
+共享原始核 & $8\times100000$ & 3.2 MB\\
+按 32 列完整复制核 & $32\times8\times100000$ & 102.4 MB\\
+一个 LL 系统矩阵 & $128\times128$ & 64 KiB\\
+$8\times32$ 个 LL 矩阵 & $256\times128^2$ & 16 MiB\\
+\bottomrule
+\end{tabularx}
+\end{center}
+这里 MB 为 $10^6$ 字节，KiB 为 $2^{10}$ 字节。
+表中给出读出的具体数组大小；backbone 表征及其计算沿用前节，
+求解工作区、训练反传保存量和优化器状态须在实际峰值中另计。
+
+\paragraph{加权统计与分块。}
+全 LL 对任意类型沿式~\eqref{eq:R:centered-statistics} 累计 $\bm m,C$，
+求解 $A\bm v_t=\bm c_t-\bm m$，再扫支持累计 $\sum_s\ell_{ts}\bm e_{sa}$。
+需要重扫或保存支持块，并不是“无需访问支持”。固定权重时，
+$\bm m,C$ 不依赖目标 Cell；目标通过求值右端进入编码预测。
+\begin{equation}
+ \widehat{\bm e}_t=\bar{\bm e}+H^\top(C+\lambda_{\rm LL}I)^{-1}(\bm c_t-\bm m).
+ \label{eq:cost:ll-as-correction}
+\end{equation}
+全 NW 只累计权重和答案编码，不构造这些 Cell 统计。
+两种模式都按完整支持集合归一化。采用当前损失时，按整个窗口的状态与类型总数归约；
+默认只累计 Query，不能对每个 chunk 各自平均。原 all-cell 候选才按各类型全部目标总数归约。
+全 LL 保留 Unit 与 Cell 的所有 target/support 梯度；全 NW 保留几何路径。
+Forward 小工作区不自动等于训练峰值；反向保存或重计算策略另计。
+
+全 NW 与全 LL 是并列的模型设计选择，不能在推理时无声明地互换 checkpoint 的读出。
+相同窗口、可见划分、码本、decoder 与请求地址下比较速度、恢复质量和梯度，
+才能判断增加 Cell 局部拟合的价值。局部残差均值解释和仿射闭包见正文 Step 4 与附录~\ref{v51:app:shared-ll}。
+
+\subsection{原稿 Fourier 输入作为对照保留}
+原稿使用 $J=64$ 个可学习频率构造
+\begin{equation}
+ \phi_\Omega(z)=(\sin\omega_1z,\ldots,\sin\omega_{64}z,
+ \cos\omega_1z,\ldots,\cos\omega_{64}z)^\top,
+ \qquad\|\phi_\Omega(z)\|^2=64.
+ \label{eq:E:fourier}
+\end{equation}
+其 numeric 输入为 $W_{\rm enc}\phi_\Omega(z)$，答案为一维 $z$，逆标准化恢复原值。
+这条 标量/Fourier 配对路径作为编码对照保留，不是 V5.3 默认。原来频率的 64 个持久参数不进入新默认模型。
+Fourier 的有界幅度被仿射编码的线性范数增长取代：即使保留稳健标准化，极端 $z$ 仍可能带来大的
+$\|q+zb\|$。原稿关于尾部保护、尺度回退、损失重标与数值失败的监控需要继续保留，
+不能把 codec 的可逆性当成尾部优化稳定性的保证。
+
+
+
+\section{保留为候选的最小改变}
+\label{sec:alternatives}
+
+当前采用 concat 匹配、统一答案编码、整模型全 NW／全 LL、visible self-support
+和 Query 系数 1、restore 系数 0 的分状态损失；主线为列共享 LL。全 NW 与逐目标 LL 的实证对照仍需分别训练。
+以下两个融合候选保留为另一类对照：它们用单一坐标 $\bm r^{\rm alt}$
+同时承担匹配与 LL 回归，改变当前分开的证据组织与响应拟合两项职责。
+若采用，需分别标记匹配映射与回归映射，不能混入默认公式。
+
+\subsection{联合非线性融合}
+一种共享坐标候选是
+\begin{equation}
+ \bm r^{\rm alt}_{ra}=g_\phi\!\left(
+          [\bm c_{ra};\bm u_r;\bm f_a]\right)\in\R^d,
+ \qquad g_\phi:\R^{3d}\to\R^d.
+ \label{eq:alt:joint-fusion}
+\end{equation}
+$g_\phi$ 在 cells 与 episodes 间共享。
+联合非线性使 Feature 可通过与 Cell/Unit 的交互改变同列差分。
+若只采用线性 concat projection，Feature 输出仍是同列公共平移。
+这一候选增加可训练参数；默认 concat 匹配保留其原有的结构分工。
+
+\subsection{逐元素交互}
+另一个共享坐标候选不增加 semantic token：
+\begin{equation}
+\begin{aligned}
+ \bm r^{\rm alt}_{ra}&=\bm c_{ra}+\bm u_r\odot\bm f_a\in\R^d,\\
+ \bm r^{\rm alt}_{sa}-\bm r^{\rm alt}_{ra}
+ &=\bm c_{sa}-\bm c_{ra}+(\bm u_s-\bm u_r)\odot\bm f_a.
+\end{aligned}
+ \label{eq:alt:elementwise-interaction}
+\end{equation}
+$\odot$ 是逐元素乘积，使 Feature 参与 Unit 差分的逐维作用。
+两种候选都只改变读出定义，Step 3 的供源规则保持相同；
+其预测与训练成本需按候选自己的映射计算。
+
+\subsection{候选：恢复可见自重建权重与原 all-cell 平均}
+通用分状态公式保留，以容纳当前默认和历史配置。定义
+$\Vset_b:=\Vset\cap\TargetSet_b$、
+$\Qset_b:=\Qset\cap\TargetSet_b$，并选固定非负权重
+$\gamma_{\mathrm V},\gamma_{\mathrm Q}$：
+\begin{equation}
+ \mathcal L_{\mathrm{sep}}
+ :=\sum_{b\in\{\mathrm{num},\mathrm{disc}\}}
+   \sum_{\substack{A\in\{\Vset,\Qset\}\\A_b\ne\varnothing}}
+    \frac{\gamma_A}{|A_b|}\sum_{t\in A_b}\ell_t.
+ \label{eq:alt:separate-state-loss}
+\end{equation}
+其中 $\gamma_{\Vset}:=\gamma_{\mathrm V}$、
+$\gamma_{\Qset}:=\gamma_{\mathrm Q}$。
+当前默认取 $(\gamma_{\mathrm V},\gamma_{\mathrm Q})=(0,1)$。
+后续续训可保持 $\gamma_{\mathrm Q}=1$，逐步提高 $\gamma_{\mathrm V}=\lambda_{\rm restore}\ge0$；
+增加时机、步长与最终系数由实验配置声明，本稿不预设调度或要求最终恢复为 1。
+固定 Query 评估与可见误改分别监控；系数改变前后的总 loss 不能直接拼作同口径曲线。
+
+原默认降为以下独立候选：
+\begin{equation}
+ \mathcal L_{\rm all}(E)=\sum_{\substack{b\in\{\mathrm{num},\mathrm{disc}\}\\\TargetSet_b\ne\varnothing}}
+ \frac{1}{|\TargetSet_b|}\sum_{t\in\TargetSet_b}\ell_t.
+ \label{v53q:eq:all-cell-candidate}
+\end{equation}
+其中状态 $A$ 在类型 $b$ 的总份额为 $|A_b|/|\TargetSet_b|$，随实际数量变化；
+它一般不等于两种状态分别平均后取相同系数。
+分状态加权不排除 self-support，也不改变 visible 表征已看过自身值的事实。
+
+\subsection{候选：median/half-IQR 与退化 RMS 标准化}\label{v53c:robust-option}
+
+对 $a\in\Fset_{\rm num}$ 且 $n_a>0$，只用本列当前可见的有限数值建立坐标。
+记 $Q_a(q)$ 为样本 $q$ 分位数，本候选用中位数定位、半四分位距
+（half-IQR）度量中央尺度：
+\begin{equation}
+\begin{aligned}
+  m_a&:=Q_a(1/2),&
+  h_a&:=\frac{Q_a(3/4)-Q_a(1/4)}{2},\\
+  s_a&:=\max\{h_a,\varepsilon_a\},&
+  s^{\rm enc}_{ra}&:=\frac{x_{ra}-m_a}{s_a},\qquad\varepsilon_a>0.
+\end{aligned}
+\label{v53c:eq:robust-prep}
+\end{equation}
+这里的 $s_a$ 是中央尺度，不要求它等于标准差，也不乘正态一致性因子。
+$\varepsilon_a$ 是本列原单位下预先声明的正尺度下限，可以采用共享默认值，
+但不通过隐藏真值选择。本候选在单支持、常数列或 IQR 因重复值而为零时使用同一下限，
+不回退到标准差；空支持不建立数值 codec，推理返回状态。
+训练的两个不同取值并不保证 IQR 非零，因此正尺度下限仍须保留；单支持与常数列属于推理或算子边界。\footnote{历史真实表续训另显式注册
+退化尺度变体：仅当 $h_a\le\varepsilon_a$ 时，将 $s_a$ 改为
+$\max\{\varepsilon_a,\sqrt{n_a^{-1}\sum_{r\in\Vset_a}(x_{ra}-m_a)^2}\}$。
+该 RMS 只取当前可见支持，并同时用于输入、答案、评分和逆变换；非退化列仍用 half-IQR，
+常数列仍取下限。此变体处理 ``IQR 为零但并非常数'' 的点质量分布，避免仅除以
+$\varepsilon_a$ 同时放大编码幅度、重建误差和梯度；它不是 Query 采样保护，
+不改变 supervised row mask。切换须记录配置与 checkpoint 谱系，切换前后总 loss
+不视为同一数值口径。}
+
+为固定分位数约定，将可见值排序为 $x_{(1)}\le\cdots\le x_{(n_a)}$，对 $q\in[0,1]$ 定义
+\begin{equation}
+ \begin{gathered}
+ v=1+(n_a-1)q,\qquad j=\lfloor v\rfloor,\qquad\delta=v-j,\\
+ Q_a(q)=(1-\delta)x_{(j)}+\delta x_{(\min\{j+1,n_a\})}.
+ \end{gathered}
+ \label{eq:E:numeric-quantile}
+\end{equation}
+例如可见值为 $8,9,\ldots,16$ 时，$m_a=12$、$h_a=2$；
+仅把最后一个值改为 $16000$，这两个统计量仍不变。
+这个例子说明对该尾部值幅度变化的稳定性，不保证任意污染下坐标不变。
+
+\begin{remark}[输入、答案与评分共用稳健坐标]
+输入支路、support 答案、真值评分与最终还原共用一次建立并固定的 $(m_a,s_a)$，
+因此 $s^{\rm enc}_{ra}=z_a(x_{ra})$；本候选的 numeric 答案向量是 $e_{ra}=q_a+z_a(x_{ra})b_a$，
+不再将标量坐标与答案向量混用。稳健统计减少尾部值对整列坐标的拖动，但仿射向量范数随 $|z|$ 增长。
+原始数值不截断；同一 codec 支持输入、监督、投影与逆标准化。
+\end{remark}
+
+统计只来自当前可见输入；受损输入也不能借用干净原表或 query truth 的统计量。
+固定证据时新增 Query 不重估统计。若单位变换为 $x'=\gamma x+\beta$（$\gamma>0$），
+同时令 $\varepsilon'_a=\gamma\varepsilon_a$，标准化坐标保持不变；
+仅改变数值而固定绝对下限时不保证这一性质。
+
+
+
+\paragraph{恒重基向量的尺度与稀疏度候选。}\label{v53c:sparse-bases}
+正文模式 $C$ 已固定全部基础向量为原始 $128/4$。
+另取 $k=8$ 或对 $\mathcal H_k$ 向量除以 $\sqrt{k}$，均是需独立记录的消融，
+不能与当前原始 $128/4$ 混称。改变稀疏度、总和通道或范数会同时影响输入投影、presence 与损失，
+任何改善都不能单独归因于稀疏性。
+
+\subsection{恒重组合码细节与旧独立身份码候选}\label{v53c:constant-weight-option}
+
+本节给出正文模式 $C$ 的 nominal 默认 $q_a+b_{a,c}$（二者均在 $\mathcal H_4$），并保留 V5.3 独立 $128/8$ 身份码与旧 ordinal identity+rank lift 作为非默认候选。
+类别标签没有天然的数值坐标。列原点提供共同身份，类别向量区分类别，使类别 value 既可作为连续回归的目标，又可由最近码还原。
+同类别共用 $b_{a,c}$；不同类别保持分离。
+
+对每列当前可见类别集
+$\mathcal D_a^{\rm vis}:=\{x_{sa}:s\in\Vset_a\}$，另为整列采样 $q_a\in\mathcal H_4$，并为每个类别 $c$ 分配
+$S_{a,c}\subseteq\{1,\ldots,128\}$，$|S_{a,c}|=4$，定义
+\begin{equation}
+ b_{a,i}(c)=\mathbf1\{i\in S_{a,c}\},\qquad
+ \bm b_a(c)\in\{0,1\}^{128},\qquad \bm1^\top\bm b_a(c)=4,
+ \qquad e_a(c)=q_a+\bm b_a(c).
+ \label{eq:E:constant-weight-code}
+\end{equation}
+每次均匀无放回地抽取四个位置，仅在整个位置组合在同列类别间重复时重抽；$q_a$ 与 $b_{a,c}$ 允许重叠。
+同列不同可见类别必须使用不同组合，同类别的重复观测共享组合。
+码本容量为 $\binom{128}{4}=10{,}668{,}000$。
+固定 episode seed、稳定列 ID 和确定的可见类别遍历顺序可重放码本；隐藏目标不参与分配。
+跨训练 episodes 可重抽码本。正文 ordinal 仍使用列级 $q_a,b_a\in\mathcal H_4$。
+码本不是可学习参数。
+
+若两个类别码重叠 $t$ 个位置，则
+\begin{equation}
+ \|e_a(c)-e_a(c')\|_2^2=\|\bm b_a(c)-\bm b_a(c')\|_2^2=8-2t\in\{2,4,6,8\}.
+ \label{eq:E:code-geometry}
+\end{equation}
+因此不同类别间的距离在闭区间 $[\sqrt2,2\sqrt2]$ 内：下界留下还原裕度。
+设 $s=|\operatorname{supp}(q_a)\cap\operatorname{supp}(b_{a,c})|$，最终码满足 $\sum_j e_{a,c,j}=8$ 且 $\|e_a(c)\|_2^2=8+2s$，一般不再等范数。
+以后 LL 的连续预测只要距真实类别码小于 $\Delta_a/2$，最近码就一定返回该类别，这是式~\eqref{eq:R:code-recovery-margin} 的特例。
+这解释了为什么可以直接回归类别 value 的坐标，而不要求先恢复精确的二进制位。
+
+\paragraph{候选：V5.3 独立 $128/8$ 身份码。}
+V5.3 曾令 $e_a(c)=q_{a,c}\in\mathcal H_8$，不设共享列原点。若两个不同 8-hot 码重叠 $t$ 个位置，则
+$\|q_{a,c}-q_{a,c'}\|_2^2=16-2t\in\{2,4,\ldots,16\}$，且 $\|q_{a,c}\|_2^2=8$。
+该候选等范数，最近码可写成 $\arg\max_c\widehat e^\top q_{a,c}$；当前默认不能沿用这一简化。
+32/8 原码也满足同样的 8-hot 界。随机重叠不表示类别语义。
+本候选不将码除以 $\sqrt8$；该缩放只属于独立的 nominal-only 码本对照模式。
+
+
+\paragraph{旧 ordinal 身份加秩候选。}
+本配对用 $\bm b_a(c)$ 作答案，用 $\bm b_a(c)+r_a(c)\bm1$ 作输入，
+ordinal 的输入与答案在此历史候选中不同；当前默认则两者均为 $q_a+r_a(c)b_a$，详见正文。
+因为 $\bm1^\top\bm b_a(c)=8$，旧候选在共享投影前满足
+\begin{equation}
+ r=\frac1{128}\bm1^\top(\bm b+r\bm1)-\frac1{16},\qquad
+ \|(\bm b_i+r_i\bm1)-(\bm b_j+r_j\bm1)\|^2
+ =16-2t+128(r_i-r_j)^2.
+ \label{v53c:eq:legacy-ordinal-lift}
+\end{equation}
+这里 $t$ 为两码重叠位置数。身份差与 rank 差在投影前正交；总距离未必随 rank 差单调。
+不能在本候选的 lift 与投影之间加入普通 LayerNorm，因为按维去均值会消去 $r\bm1$。
+本候选的 nominal/ordinal lift 平方范数分别为 $8$ 与 $8+16r+128r^2$，均非零。
+旧恒重答案只为可见类别分配，ordinal 在此候选中同样受可见类别覆盖及
+\texttt{no-answer-code} 约束，不沿用新默认的完整声明秩域解码。
+
+\subsection{候选：恒重类别输入的四种方案与共同接口}
+\label{subsec:alt:categorical-input}
+
+本节说明恒重码的四种输入扩展；当前默认答案是 $q_a+b_{a,c}$。单位高斯向量码保留为正文对照。下面四种方案是 V5.3 留下的输入扩展，其中候选 A 对应旧的独立 $128/8$ 身份码。输入按同一条路径组织：先为可见类别分配身份分量，再映到 128 维特征空间，
+最后接跨类型共享的 $W_{\rm enc}$。记原码维度为 $p$、公共特征宽度为 $m=128$，
+则 nominal 分支为
+\begin{equation}
+ \bm b_a^{(p)}(c)\in\{0,1\}^{p},\quad
+ \bm1^\top\bm b_a^{(p)}(c)=8,\qquad
+ \bm v=F_\eta^{(p)}\!\left(\bm b_a^{(p)}(c)\right)\in\R^{m},\quad
+ \bm h=W_{\rm enc}\bm v\in\R^d.
+ \label{eq:alt:categorical-interface}
+\end{equation}
+$p$ 决定身份码空间，$m$ 决定类型分支交给共享投影的接口宽度，$d$ 决定 token 宽度。
+当前四种方案只选择 $(p,F_\eta^{(p)})$，均使用 $m=128$；原码和公共接口的宽度
+不必相等。可学习映射在类别、列与 episodes 间共享，每个模型选择一种类别输入方案。
+
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{l l X l}
+\toprule
+定位 & 原码 & 映射到 128 维的方式 & 新增可学习参数\\
+\midrule
+候选 A & 128/8 & 恒等映射，V5.3 独立身份码 & $0$\\
+候选 B & 32/8 & 四份二维配对旋转后拼接 & $64$\\
+候选 C & 32/8 & Simple MLP 非线性升维 & $161h_{\rm mlp}+128$\\
+候选 D & 256/8 & Simple MLP 非线性降维 & $385h_{\rm mlp}+128$\\
+\bottomrule
+\end{tabularx}
+\end{center}
+表中 $p/8$ 表示 $p$ 维、恰有八个 1 的原码；参数量仅计 $F_\eta^{(p)}$，
+不重复计入共享 $W_{\rm enc}$ 的矩阵存储与约束参数化。MLP 两项按下文单隐藏层实例计数。
+四项均非当前默认；下文“首备”仅保留历史探索顺序，不表示已有性能优越性结论。
+
+\subsubsection{首备：32 维恒重身份码的旋转拼接升维}
+\label{subsec:alt:rotary-code}
+
+为简化记号，本候选将 $\bm b_a^{(32)}(c)$ 写为 $\widetilde{\bm b}_a(c)$。
+
+\paragraph{身份码与四份旋转。}
+以 $\widetilde{\bm b}_a(c)\in\{0,1\}^{32}$、
+$\bm1^\top\widetilde{\bm b}_a(c)=8$ 为原始身份码，码空间容量为
+$\binom{32}{8}=10{,}518{,}300$。沿用同列可见类别内不重复分配、同类别重复观测
+共享编码，以及跨训练 episodes 重采样的规则；隐藏目标不参与码本分配。
+将坐标固定分为 $(1,2),\ldots,(31,32)$ 共 16 对，定义
+\begin{equation}
+ Q(\alpha)=
+ \begin{pmatrix}\cos\alpha&-\sin\alpha\\\sin\alpha&\cos\alpha\end{pmatrix},
+ \qquad
+ R_k=\operatorname{diag}\bigl(Q(\vartheta_{k1}),\ldots,Q(\vartheta_{k,16})\bigr)
+ \in\R^{32\times32},\quad k=1,\ldots,4.
+ \label{eq:alt:rotary-blocks}
+\end{equation}
+这里只借用 \href{https://arxiv.org/abs/2104.09864}{RoPE} 的二维配对旋转参数化。
+标准 RoPE 的角度随位置变化，用于 attention 中的位置关系；这里的
+$\vartheta_{kj}$ 是跨类别、列与 episodes 共享的模型参数，不依赖输入码或位置。
+因此升维模块只新增 $4\times16=64$ 个可学习角度，不随类别数增长。
+
+本候选使用\emph{未归一化}的拼接：
+\begin{equation}
+ T_{\vartheta}:=
+ \begin{bmatrix}R_1\\R_2\\R_3\\R_4\end{bmatrix}\in\R^{128\times32},
+ \qquad
+ \phi_{\rm rot}(\widetilde{\bm b})=T_{\vartheta}\widetilde{\bm b},
+ \qquad
+ \bm h=W_{\rm enc}\phi_{\rm rot}(\widetilde{\bm b}).
+ \label{eq:alt:rotary-lift}
+\end{equation}
+
+\paragraph{共享投影之前的几何。}
+每个 $R_k$ 都正交，因此对任意固定的旋转参数，
+\begin{equation}
+ \boxed{T_{\vartheta}^{\top}T_{\vartheta}
+ =\sum_{k=1}^{4}R_k^{\top}R_k=4I_{32}.}
+ \label{eq:alt:rotary-isometry}
+\end{equation}
+直接得到
+\begin{equation}
+ \begin{gathered}
+ \|\phi_{\rm rot}(\widetilde{\bm b})\|^2=4\cdot8=32,\\
+ \|\phi_{\rm rot}(\widetilde{\bm b})-
+       \phi_{\rm rot}(\widetilde{\bm b}')\|^2
+   =4\|\widetilde{\bm b}-\widetilde{\bm b}'\|^2,\\
+ \phi_{\rm rot}(\widetilde{\bm b})^\top
+       \phi_{\rm rot}(\widetilde{\bm b}')
+   =4\widetilde{\bm b}^{\top}\widetilde{\bm b}'.
+ \end{gathered}
+ \label{eq:alt:rotary-geometry}
+\end{equation}
+故该升维是缩放等距的线性嵌入：不丢失原始身份码信息，保持相对距离关系与余弦相似度。
+$T_{\vartheta}$ 满列秩；固定角度时，所有输出均落在其像空间这一 32 维线性子空间内。
+若改用 $\tfrac12\phi_{\rm rot}$，则严格保距且与原码同范数；这是另一种尺度约定，
+不可与本节未归一化版本无声明地互换。
+
+\paragraph{线性等价式与跨类型共享。}
+将 $W_{\rm enc}=[W_1\;W_2\;W_3\;W_4]$ 按列分块，
+$W_k\in\R^{d\times32}$。拼接与共享投影之间没有非线性时，
+\begin{equation}
+ \boxed{\bm h=W_{\rm enc}\phi_{\rm rot}(\widetilde{\bm b})
+ =\left(\sum_{k=1}^{4}W_kR_k\right)\widetilde{\bm b}
+ =W_{\rm eff}\widetilde{\bm b},\qquad W_{\rm eff}\in\R^{d\times32}.}
+ \label{eq:alt:rotary-effective}
+\end{equation}
+类别输入分支仍等价于一个 $32\to d$ 的线性编码，相对于不受约束的直接线性编码，
+旋转拼接本身未增加非线性表达能力。
+但 $W_{\rm enc}$ 跨类型共享：固定该矩阵时，调整旋转角度可以改变类别表示进入
+共同空间的方向，而不直接改变数值分支的 $W_{\rm enc}(q_a+zb_a)$（原稿配对为 $W_{\rm enc}\phi_\Omega(s)$）。
+式~\eqref{eq:alt:rotary-effective} 是类别分支的等价表达，不意味着能在保持其他类型
+映射不变的同时，任意从整个模型中消去这些角度。
+本候选因而定位为保持统一输入接口的低参数量类别线性参数化；共享投影下的表示对齐、
+优化行为与预测效果仍需单独评估。
+
+\subsubsection{两种探索：simple MLP 升维与降维}
+
+两项采用同一类映射，分别取 $p=32$ 与 $p=256$。一个简单的单隐藏层实例为
+\begin{equation}
+ F_\eta^{(p)}(\bm b)=B_2\,\sigma(B_1\bm b+\bm a_1)+\bm a_2,
+ \qquad
+ B_1\in\R^{h_{\rm mlp}\times p},\quad
+ B_2\in\R^{128\times h_{\rm mlp}},
+ \label{eq:alt:categorical-mlp}
+\end{equation}
+其中 $\bm a_1\in\R^{h_{\rm mlp}}$、$\bm a_2\in\R^{128}$，
+$\sigma$ 为逐元素非线性激活。隐藏宽度 $h_{\rm mlp}$ 与激活函数作为该映射的配置，
+此处不固定其数值或具体函数。按两层仿射均有偏置计，参数量为
+\begin{equation}
+ p h_{\rm mlp}+h_{\rm mlp}+128h_{\rm mlp}+128
+ =(p+129)h_{\rm mlp}+128.
+ \label{eq:alt:categorical-mlp-parameters}
+\end{equation}
+例如同取 $h_{\rm mlp}=128$，两项分别新增 $20{,}736$ 和 $49{,}408$ 个参数。
+非线性位于两层仿射之间；若去掉该非线性，两层只相当于一次仿射映射。
+
+32/8 加 MLP 与首备可复用同一份原码，考察非线性映射的作用；256/8 加 MLP 则
+考察更大的原码空间经压缩进入同一接口的行为。两项都能改变输入码的几何关系，
+其效果由学习得到的映射决定，不继承旋转拼接的等距或等范数保证。
+256 维降至 128 维也不自动意味着有限类别发生碰撞。
+对有效 Value，仍需满足本稿要求的有限、非零初始 carrier 条件。
+
+\subsubsection{实现成熟度与尚未配对的接口}
+四项表格首先定义的是 nominal 的\emph{输入映射}。128/8 候选配 128 维原码答案，32/8 旋转配 32 维原码答案，
+已给出成对的 nominal 输入/答案/解码实例。两种 MLP 的层形状与参数量也已定义，
+但其完整答案配对没有唯一冻结；启用前需给出答案码宽和 decoder。
+非默认三种输入 lift 下，ordinal 的 rank 合并方式同样仍是\textbf{开放接口}，
+不是本稿已经定义了三套完整 ordinal codec。不得仅凭模块输出同为 128 维就沿用旧恒重 ordinal lift 的正交分解证明。
+
+这一区分保留全部候选而不增加隐含默认。需要开展实验时，先将配套状态补入 ModelSpec，
+验证同一 codec 的输入、support、scorer 与还原闭合，再把它列为完整 realization。
+
+\subsubsection{组件边界与候选的生长方式}
+
+码本与映射分别承担稳定职责。码本负责可见类别到原码的对应、维度与重放所需的
+随机状态；同列不同类别不重复，同类别重复观测共享编码，跨训练 episodes 重采样，
+隐藏真值不参与。映射只接收码向量并输出 128 维特征；
+$W_{\rm enc}$ 独立承担从公共特征空间到 token 空间的共享投影。
+实现时用一个类别输入配置选择表中的配套方案，并校验原码维度与映射输入维度一致。
+这样可替换或发展码本生成、旋转或 MLP 映射，而下游继续使用相同的 token 接口。
+
+上述四项定义候选类别\emph{身份分量}的输入路径。旧 ordinal 候选的 rank 继续作为显式信息
+传递，候选需配套声明其与身份特征的合并方式；正文 $\bm b+r\bm1$ 的正交与
+可恢复结论不能直接套用于新的映射。Numeric 在 V5.3 使用随机仿射分支并共享 $W_{\rm enc}$；原稿 Fourier 仍可作为独立编码对照。
+
+值的编码与还原规则和输入映射分别定义，通过同一份可见类别表对齐。128/8 候选仍复用同一份
+128/8 原码作为答案码；32/8 旋转首备的配套答案端直接复用 32 维原码，$p_a=32$。
+输入的 $p$、公共宽度 $m$ 与答案维度 $p_a$ 分别记录；其他配套方案也须明确答案码，
+不能在解码时临时重采样，不要求反演输入 MLP。两种码宽均使用逐坐标 MSE 与最近码解码。
+NW／LL 的估计器选择继续独立于输入方案。
+
+若另将旋转后的 128 维向量作为答案，固定同一次 LL 的特征、权重与 ridge，
+线性求解给出 $\widehat{\bm z}_t=T_\vartheta\widehat{\bm e}_t$。由
+式~\eqref{eq:alt:rotary-isometry}，
+\begin{equation}
+ \frac1{128}\|\widehat{\bm z}_t-T_\vartheta\bm e_t^\star\|^2
+ =\frac1{32}\|\widehat{\bm e}_t-\bm e_t^\star\|^2.
+ \label{eq:alt:rotary-answer-mse}
+\end{equation}
+最近码判决也不变，因此答案端无需这次升维。此逐坐标 MSE 等式使用了该旋转映射的
+四倍平方范数与四倍维度；一般 MLP 不满足它。默认监督真值仍是固定原码。
+
+候选比较固定数据划分、可见掩码与训练预算；单独比较输入映射时也固定值的编码与还原规则。
+若比较整套输入／答案配对，须显式记录答案码宽及 MSE 尺度的变化，不能只归因于输入映射。
+原码维度相同的方案可复用同一码本 realization。另记录原码维度、特征尺度与参数量的差异：默认对首备
+同时改变码宽与映射，两个 MLP 在相同隐藏宽度下也有不同参数量。
+这些差异需随比较报告，才能判断收益来自编码几何、非线性或优化行为。
+
+
+
+\section{完整扩展：真正的多维 value 空间}
+\label{v52:app:space-extension}
+本节处理确实含多个数值自由坐标的 value；默认 scalar 仍只有一维。
+\subsection{向量型 value：同一结构的完整推广}
+考虑确实包含 $k_a$ 个实数自由坐标的 value，例如一个被明确声明为向量的测量。
+令标准化为 $z=T_a(x)\in\mathbb R^{k_a}$，$T_a$ 在声明域上可逆。
+选取满列秩矩阵
+\begin{equation}
+ \Gamma_a=[\gamma_{a1},\ldots,\gamma_{ak_a}]\in\mathbb R^{p\times k_a},
+ \quad \operatorname{rank}\Gamma_a=k_a\le p,\qquad
+ e_a(x)=q_a+\Gamma_aT_a(x).
+ \label{v52:eq:general-affine-code}
+\end{equation}
+这里 $\Gamma_a$ 是值空间的基，不是 LL 的共享斜率矩阵 $B_a$。
+当前默认恰好是 $k_a=1$、$\Gamma_a=b_a$。
+当 $T_a(\mathcal X_a)=\mathbb R^{k_a}$ 时，合法集合为完整的
+$\mathcal M_a=q_a+\operatorname{col}(\Gamma_a)$。
+给定 $v$，唯一坐标与投影为
+\begin{equation}
+ \boxed{(\Gamma_a^\top\Gamma_a)\widehat z=\Gamma_a^\top(v-q_a),\qquad
+ \Pi_{\mathcal M_a}(v)=q_a+\Gamma_a\widehat z,\qquad
+ \widehat x=T_a^{-1}(\widehat z).}
+ \label{v52:eq:general-affine-decode}
+\end{equation}
+因为 $\Gamma_a^\top\Gamma_a\succ0$，坐标解唯一；不要求基向量彼此正交。
+用 QR/SVD 或正定求解实现，数学中的逆记号不要求显式形成逆。
+固定 codec 后，其小型分解可以复用；解码的分解维度为 $k_a$，与 LL 的 $d_R$ 分开。
+
+对应正交投影矩阵为
+\begin{equation}
+ P_a=\Gamma_a(\Gamma_a^\top\Gamma_a)^{-1}\Gamma_a^\top,
+ \quad P_a^2=P_a=P_a^\top,\quad
+ \Gamma_a^\top(v-\Pi_{\mathcal M_a}(v))=0.
+ \label{v52:eq:general-projector}
+\end{equation}
+坐标稳定性由 $\|\Gamma_a^+\|=1/\sigma_{\min}(\Gamma_a)$ 控制；
+仅将每列基向量单位化，不会自动使一个多维基的条件数良好。
+需要良好条件数的扩展可显式采用正交基或奇异值约束，但不能把它混入当前“独立归一化、无需正交化”的标量默认。
+
+% BEGIN embedded figures/fig-general-affine-space
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm,>=Latex,font=\small]
+% Axonometric display of a two-dimensional affine value space in a larger ambient space.
+\coordinate (Q) at (1.0,1.3);
+\coordinate (A) at (.25,.85);\coordinate (B) at (5.5,.85);
+\coordinate (C) at (7.35,2.35);\coordinate (D) at (2.1,2.35);
+\filldraw[fill=VFiveLight,draw=VFiveTeal,line width=.8pt] (A)--(B)--(C)--(D)--cycle;
+\node[text=VFiveTeal,font=\small,align=center] at (5.25,1.72)
+ {$\mathcal M_a=q_a+\operatorname{col}(\Gamma_a)$\\$k_a=2$ 的示意};
+\draw[->,draw=TabUBlue,line width=.8pt] (-.45,-.15)--(Q);
+\node[below left] at (-.45,-.15) {$0$};
+\node[left,font=\scriptsize] at (.15,.72) {$q_a$};
+\draw[->,draw=TabUBlue,line width=.9pt] (Q)--(3.0,1.3) node[pos=.8,below] {$\gamma_{a1}$};
+\draw[->,draw=TabUBlue,line width=.9pt] (Q)--(2.1,2.19) node[pos=.8,left] {$\gamma_{a2}$};
+\fill[TabUBlue] (Q) circle(2pt);\node[below] at (Q) {$q_a$};
+\coordinate (P) at (3.5,1.91);\coordinate (V) at (3.5,3.75);
+\fill[VFiveGold] (V) circle(2pt);\node[above] at (V) {$v\in\mathbb R^p$};
+\draw[->,dashed,draw=VFiveGold,line width=.9pt] (V)--(P);
+\fill[VFiveTeal] (P) circle(2pt);\node[above right,font=\scriptsize] at (P) {$e^{\rm proj}$};
+\node[align=left,text width=56mm,font=\small] at (11.3,2.0)
+ {\textbf{独立扩展，不是标量默认}\\[4pt]
+ $e=q_a+\Gamma_a z,\ z\in\mathbb R^2$\\[4pt]
+ $\Gamma_a^\top(v-e^{\rm proj})=0$\\[4pt]
+ 投影到该变量的合法空间，\\再读取两个已声明的值坐标。};
+\end{tikzpicture}
+\caption{当一个 value 确实含有多个数值自由度时，合法空间可以是高维仿射子空间。
+本图用透视示意二维平面；屏幕上的角度不代表高维内积，残差正交由公式而不是纸面直角标记确定。
+当前 scalar numeric 保持 $k_a=1$，不能把这个平面直接替代其合法直线。}
+\label{v52:fig:general-affine}
+\end{figure}
+
+% END embedded figures/fig-general-affine-space
+
+\subsection{多维扩展的零元边界与损失几何}
+\begin{equation}
+ \min_z\|q_a+\Gamma_a z\|^2=\|(I-P_a)q_a\|^2.
+ \label{v52:eq:general-nonzero}
+\end{equation}
+因此，合法域不含零当且仅当 $q_a\notin\operatorname{col}(\Gamma_a)$。
+当 $k_a<p$、$\Gamma_a$ 满列秩且独立连续随机采样 $q_a$ 时，该条件几乎必然成立，
+但没有对所有随机 realization 都相同的正裕度。
+若 $k_a=p$，完整仿射域就是整个 $\mathbb R^p$，必然包含零；
+这时必须另外定义 Value 存在性通道、增加环境维度或限制合法域，不能沿用非零直线证明。
+
+坐标差与编码差满足
+\begin{equation}
+ \|e(x)-e(x')\|^2
+ =[T_a(x)-T_a(x')]^\top(\Gamma_a^\top\Gamma_a)[T_a(x)-T_a(x')].
+ \label{v52:eq:general-code-metric}
+\end{equation}
+只有 $\Gamma_a^\top\Gamma_a=I$ 时，才精确保留欧氏坐标距离。
+因此答案空间变宽、换基或改损失度量时，均需同步说明监督尺度，不以维度相同代替几何相同。
+
+\subsection{仿射闭包如何推广，何时不能推广}
+固定同列的 $q_a,\Gamma_a$，若所有支持响应构成
+$E=\bm1q_a^\top+Z\Gamma_a^\top$，且读出满足
+$\widehat E=\mathcal S E$、$\mathcal S\bm1=\bm1$，则
+\begin{equation}
+ \widehat E=\bm1q_a^\top+(\mathcal SZ)\Gamma_a^\top.
+ \label{v52:eq:general-closure}
+\end{equation}
+所以同一 NW/LL 可以先解 $k_a$ 维坐标响应，再精确重建 $p$ 维向量。
+这保持内层问题，但不意味着可以从输入路径删除列空间本身。
+
+若仍然预测一个标量，却采用 $e(x)=q_a+\Gamma_a\psi(x)$、
+$\psi:\mathbb R\to\mathbb R^{k_a}$ 为非线性嵌入，则合法集合通常只是一条曲线，
+不是完整的仿射平面。对平面做投影只能得到一个松弛解；它一般不属于 $\psi(\mathbb R)$。
+最近合法曲线点可能不唯一，也可能需要非线性求解；当前的坐标闭式式不能直接使用。
+\textbf{扩展维数必须对应真实的自由坐标或明确定义的合法集合。}
+
+\subsection{约束域与其他投影度量}
+若标量原值必须在闭区间 $[l_a,u_a]$ 中，单调仿射标准化后只允许
+$z\in[(l_a-m_a)/s_a,(u_a-m_a)/s_a]$。在单位方向下，受约束最近点就是将无约束
+$\widehat z$ 投影到该区间，再重建向量。对整数域须定义最近合法整数和确定的平局规则；
+对开区间或非闭集合，最近点未必存在。默认仍为完整实数域，没有隐藏的 clip 或取整。
+
+若显式把编码距离改为固定正定度量 $G_a\succ0$，解码则为
+\begin{equation}
+ (\Gamma_a^\top G_a\Gamma_a)\widehat z
+ =\Gamma_a^\top G_a(v-q_a).
+ \label{v52:eq:metric-projection}
+\end{equation}
+这是一项新的度量配置，需要同时解释损失和条件数；不再直接沿用欧氏内积下的残差正交式。
+当前主线取 $G_a=I$，没有额外学习的列度量参数。
+
+
+
+\section{可扩展设计的接口合同与继承条件}
+\label{v52:app:open-contracts}
+本节把“完整”与“开放”放在同一个依赖结构里：默认配置先确定一个可执行函数，
+扩展再作为具备输入、输出与成立条件的独立 realization 注册。
+公开接口不是声明任意组合都合法，也不是加入许多未实现的必选模块。
+
+
+\subsection{完整实例、开放接口与精确优化的分级}
+\label{v53:sec:maturity}
+“开放”不等于所有组合已经完成。本文采用以下分级，防止把一个同形状输出的接口误称为完整模型。
+\begin{center}\small
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{28mm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X}
+\toprule
+成熟度 & 本稿实例 & 使用前需要什么\\\midrule
+完整参考 & 模式 $C$：$e_a=q_a+v_a(x)$、column LL、单轮 supervised-row episode 与 Query-only loss；$K=1$；V5 Small & 给定合法 ModelSpec 与输入状态即可确定函数；默认地位不表示性能已经胜出\\
+完整竞争实例 & V5 Nano 及其他命名档；random-cell episode（第一备选）；模式 $G$；Direct/inducing、$P_R$、NW/target LL、稳健尺度、多维 value、两种反馈、斜率收缩、旧 $128/8$ 码及非 Nano 档的 $L_U=0$ 旁路 & 填写各实例实参；尺寸见附录~\ref{v54:app:sizes}。Nano 须实际实验验证；定义完整不表示已有性能结论\\
+部分定义的配对/接口 & $K>1$ 的 Unit/Feature subtokens；非默认 ordinal 的 rank 合并、MLP 类别输入的答案配对、自适应派生选址/置信质量与预测分布 & 先补齐选择规则与 codec/供源/损失配对，不能直接称为已实现方案\\
+精确执行优化 & Numeric 响应标量化、完整中心/支持分块、固定证据缓存 & 核对等价条件，不增加预测自由度、不更改前向函数\\\bottomrule
+\end{tabularx}
+\end{center}
+其中“完整竞争”描述可定义的实例，不降低非默认选项的研究重要性，也不表示其任务性能已经验证。
+不同完整实例随意组合后，不保证仍保留所有性质；尚未闭合的接口仍须补齐定义再比较。
+对实际数据分布或 damage sampler 的开放选择，须在实验清单中给出策略；这与算子接口已经闭合不矛盾。
+
+
+\subsection{Codec：一个新类型至少需要提供哪些定义}
+每列使用固定的 codec state $\mathcal A_a$，可抽象为
+\begin{equation}
+ \mathfrak C_a=
+ (\mathcal X_a,\mathcal X_a^{\rm enc},\mathbb E_a,\mathcal M_a,
+  \operatorname{Encode}_a,\operatorname{Decode}_a,\operatorname{Lift}_a,
+  \ell_a,\mathcal A_a).
+ \label{v52:eq:codec-interface}
+\end{equation}
+$\mathcal X_a$ 是声明域，$\mathcal X_a^{\rm enc}$ 是当前可编码域，默认 numeric 为所有有限实数，
+nominal 为当前可见类别，ordinal 为完整声明等级；三者不能混同。$\mathbb E_a=\mathbb R^{p_a}$ 是答案环境空间，
+$\mathcal M_a=\operatorname{Encode}_a(\mathcal X_a^{\rm enc})$ 是合法像集。
+$\operatorname{Lift}_a$ 将已知值的表示及合法辅助信息送到共享输入宽度，
+不要求它与答案编码相同，也不要求其可逆。
+
+一个可接入的 codec 必须声明下列条件，而不是只返回一个同形状 tensor：
+\begin{enumerate}
+\item \textbf{信息来源。}统计、码表、随机基点与方向由实际可见输入及独立 schema 建立，
+一次 forward/评分/解码冻结同一 state；不存在由隐藏真值扩充的前向字段。
+\item \textbf{合法编码与还原。}$\operatorname{Decode}_a(\operatorname{Encode}_a(x))=x$
+在声明的可编码域上成立，或明确说明量化/近似误差；离散最近码的平局规则确定。
+\item \textbf{定义域与存在性。}新预测不一定落在合法像集，须定义在整个所用 decoder 输入域上的行为。
+闭仿射域的投影唯一；有限码表的最小值存在但可能平局；非闭或非凸域另行分析。
+\item \textbf{向量尺度与零元。}列明答案维度、输入 lift 尺度、误差归约和补偿；
+合法观测不能未经说明地与 Null 编成同一个零 carrier。
+\item \textbf{输出身份与概率。}预测码或最近码距离不自动是概率。若输出改成分布，
+须明确参数化、支持域、归一化和 scoring rule，不能直接把 LL 的负系数当作质量。
+\end{enumerate}
+固定 codebook realization 后的置换测试，与换一个随机码本后的性能测试，是两个不同问题。
+可学习输入映射通常不改变答案目标；若连答案码或基也学习，则必须完整处理 target 对参数的导数，
+或明确 stop-gradient 约定，并检查坍缩与可辨识性。默认 $q_a,b_a,b_{a,c}$ 不是可学习目标。
+
+\subsection{输入 lift、答案空间和数值维度分别扩展}
+默认输入接口为 128 维、carrier 为 $d$ 维、LL 特征为 $d_R$ 维、答案为 $p_a$ 维。
+它们在默认实例中部分相等，但修改一个维度不要求全部一起改。
+\begin{equation}
+ x\xrightarrow{\operatorname{Encode}_a}e\in\mathbb R^{p_a},\qquad
+ x\xrightarrow{\operatorname{Lift}_a}v\in\mathbb R^{128}
+ \xrightarrow{W_{\rm enc}}h\in\mathbb R^d,
+ \qquad c\xrightarrow{P_R}\zeta\in\mathbb R^{d_R}.
+ \label{v52:eq:dimension-contract}
+\end{equation}
+旧 ordinal 身份答案与额外 rank 输入是候选中的分层例子；当前默认输入与答案均为共享基点加秩方向编码。
+类别的 32/8 旋转、32/8 MLP 与 256/8 MLP 方案完整见附录~\ref{subsec:alt:categorical-input}，
+不因为默认答案统一为 128 维就删除这些研究接口。
+
+向量型 numeric 采用附录~\ref{v52:app:space-extension} 的 $k_a$ 维坐标时，
+答案仍可保持 $p_a=128$。只要 $\Gamma_a$ 列内固定且满列秩，精确坐标化允许仅处理 $k_a$ 个响应右端。
+LL 的主要分解仍为 $d_R\times d_R$，不是 $p_a\times p_a$ 或 $k_a\times k_a$；
+$k_a\times k_a$ 是另一项可缓存的值空间解码分解。
+对于标量默认，后者就是除以 $\|b_a\|^2$，单位方向时为一次内积。
+
+\subsection{参考核：正定求解需要的是非负归一化权重}
+可以把默认 Unit Gaussian 核换成在拟合前已确定的非负关系
+$k_{rs}^a\ge0$，再按本列 supports 归一化：
+\begin{equation}
+ w^a_{rs}=\frac{k^a_{rs}}{\sum_{j\in\mathcal C_a}k^a_{rj}}.
+ \label{v52:eq:generic-weight-interface}
+\end{equation}
+每个中心分母必须为正，否则走显式无参考状态。
+在 $\mathsf W_a\ge0$、$\mathsf W_a\bm1=\bm1$、$\pi\ge0$ 且 $\sum_r\pi_r=1$ 下，
+$L_{\mathsf W}=\operatorname{diag}(\mathsf W^\top\pi)-\mathsf W^\top\operatorname{diag}(\pi)\mathsf W\succeq0$。
+因此采用正 ridge 的共享正规矩阵仍正定，\emph{不要求原始关系矩阵自身对称或半正定}。
+非对称 Q/K 关系、Feature 条件关系均可由这个接口表达。
+若某个拟合中心的 $\pi_r=0$，联合目标不唯一确定它的截距；请求该中心时，仍须用已声明的局部均值与共享斜率公式定义求值。
+
+但数学可解与信息流不变量不同。若共享斜率的中心权重依赖会随请求激活改变的 Query Cell 状态，
+新增 Query 可能经全列共享矩阵改变旧答案。继承当前 Query projectivity 的一个充分条件是：
+\textbf{用于构造共享拟合的所有中心描述、支持描述和权重，只由固定证据与固定中心集合决定，
+不依赖新增请求的可变状态。}替换核时要独立检查这个条件。
+Feature 条件核还可能使原来“同列 Feature 抵消、其最终梯度为零”的结论失效；
+不能一边启用交互式 Feature 核，一边继续引用零梯度证明。
+
+\subsection{Unit/Feature subtokens：默认 $K=1$}
+\label{v54:sec:subtokens}
+默认每个 Unit、每个 Feature 各一个 token，即 $K=1$。
+V5.4 把 $K>1$ 收成可选扩展，不再只写在「若容量不足」的脚注里；V5.3 正文没有这一接口。
+Cell 始终每格一个 token，不随 $K$ 复制。
+
+开启时，每个 Unit 与每个 Feature 持有 $K$ 个宽度仍为 $d$ 的 subtokens：
+\begin{equation}
+ U_r=\bigl[u_{r,1},\ldots,u_{r,K}\bigr]^\top\in\R^{K\times d},\qquad
+ F_a=\bigl[f_{a,1},\ldots,f_{a,K}\bigr]^\top\in\R^{K\times d}.
+ \label{v54:eq:subtoken-banks}
+\end{equation}
+$K=1$ 时上式就是正文的 $u_r,f_a\in\R^d$，compiler、Unit Transformer 和 concat 匹配都不改写。
+$K$ 与 attention head 数、inducing 槽数 $S$、值空间自由度 $k_a$ 是四种不同数量。
+第四代 TAR 的匹配响应维数是另一代记号，本稿不再用 $K$ 表示它。
+
+$K>1$ 尚未闭合为完整实例。启用前必须一次写全：
+\begin{enumerate}
+\item 槽位如何进入二维表或独立 Unit/Feature bank，是否共享或分槽 seed；
+\item 各槽的供源资格与 Null 规则；Cell 地址是否仍单 token；
+\item Unit Transformer 读取 $NK$ 个还是 $N$ 个对象，输出怎样写回；
+\item 匹配核与 LL 读哪几个槽；不得默认 $\operatorname{vec}(U_r)$ 而不声明。
+\end{enumerate}
+一个可写的对照是：固定槽序，以 $\operatorname{vec}(U_r)\in\R^{Kd}$ 作为 Unit 关系输入。
+此时原始行置换仍可等变，但关系宽度变为 $Kd$，须另证 Query 一致性与同列 Feature 抵消。
+另一种先聚合到 $d_U$ 维再匹配的方法属于不同参数化。
+
+未写全上列配对时，不得把 $K>1$ 称为已实现方案，也不得按档名推断 $K$。
+各尺寸档默认仍是 $K=1$。
+
+\subsection{更多计算与大表}
+为了大表而减少 supports、只采样中心或采用近似检索，会改变局部统计，不能称作精确分块。
+中心采样可以将 $\pi$ 改成一个显式稀疏分布，从而仍有良定义的正定系统；
+但它不再是全部 $N$ 个中心的原估计器。精确 streaming 保持完整中心和完整支持的归一化。
+采用分块或融合 attention 主要改变存储；若声称二次算术也降低，须给出相应的近似或低秩假设。
+冷启动适配与同证据多次查询的缓存成本继续分开报告。
+
+\subsection{估计器：哪些改变仍保留闭式结构}
+\begin{center}\small
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{41mm}X}
+\toprule
+改变 & 可以继承什么，以及不能直接继承什么\\\midrule
+固定非负权重、共享输出坐标的正 ridge & 二次目标、自由截距消元、正定求解和仿射常数复现继续成立。\\
+低维 $P_R$ 或其他已形成的 Cell 特征 & 对给定特征的 LL 推导不变；整体函数与表达容量会改变。\\
+按列改为逐目标、全 NW & 各有完整公式；不是运行时无差别的后端替换，分别训练与评价。\\
+Huber/其他非二次残差，残差依赖的重加权 & 原一次闭式解一般不再成立；每次重加权的条件二次解不等于整体问题一次求解。\\
+跨列共享或全 Cell 池化 & 不同列的答案空间必须对齐，或在特征/解码中提供明确的列条件；不能只因向量同宽就把随机方向当成共同物理坐标。\\
+非线性输出、逐坐标裁剪或不同响应惩罚 & 需重查仿射闭包、标量化、损失等价和投影残差。\\
+\bottomrule
+\end{tabularx}
+\end{center}
+内层求解中权重固定，并不意味着端到端训练把权重 detach。
+当前梯度始终通过 kernel、聚合矩和 solve；非二次扩展要另给出可微求解或近似梯度的定义。
+
+\subsection{扩展的最小验证矩阵}
+每个新增 realization 至少完成四层检查：
+\textbf{定义层}核对所有形状、合法域、数据来源和 codec 往返；
+\textbf{代数层}核对正定、投影/解码、闭包或明确失效的边界；
+\textbf{执行层}核对有限差分、状态保存、精确分块与模式开关；
+\textbf{任务层}分别训练后报告恢复、污染修复、跨表泛化及资源。
+前面三层通过不替代第四层。
+
+默认保留的几何与方法对照包括：非正交随机方向、固定共享方向、可选低维 $P_R$、
+Unit 精炼开/关、直接/inducing、列共享/逐目标/NW，以及类别四套输入配对。
+额外比较闭包残差和原值误差，但不将残差小解释成预测一定正确：
+一个错误的标准化数值也对应合法空间内的点。
+
+
+
+\section{更一般的信息受损与统一原值监督}
+\label{sec:alt:damage-restoration}
+本节在正文的固定证据规则上明确扩展受损方式。原始观测、实际输入与恢复目标分开记录；
+这些扩展不改变“隐藏真值仅用于评分”的边界。
+
+\subsection{遮挡、Null 替换与仍可供源的 Value 扰动}
+设原始观测 $\Oset$ 被划分为 retained 集、Query 遮挡集、Null 替换集与 Value 污染集；
+所有原始观测仍属于完整评分域 $\TargetSet=\Oset$。
+若要直接训练 Null/污染修复，须为相应 damage 状态另行声明损失系数；
+正文的 Query-only 默认不自动激活这些误差，也不把四种状态混成原来的二分状态。
+模型接收受损后的实际输入 $\widetilde X_{\Vset}$ 和 Query 地址，
+不知道 retained 与 polluted Value 的区分；污染 Value 的供源资格仍为 1。
+前向统计、码本与基向量只用这份实际输入、独立 schema 和固定 seed 建立；backbone 及 terminal 支持不读取隐藏真值。
+干净原值保存在 scorer 中，不另提供干净支持库。
+Nominal 真值若在可见码本中没有定义，仍返回 \texttt{no-answer-code}，不暗中补码。
+
+\subsection{Null 与 Query 在同一 LL 中求值}
+\label{subsec:alt:damage-ll}
+为读出原 Null，可将恢复请求扩展到原始 Cell rectangle，不必将每个目标都激活为 Query。
+在固定输入与 codec 下，列共享 LL 对 Null 使用 $c_t=0$：
+\begin{equation}
+ \widehat e_t^{\rm Null}=\bar e_t-B_a\bar c_t,\qquad
+ \widehat e_t^{\rm Query}-\widehat e_t^{\rm Null}=B_ac_t^{\rm Query}.
+ \label{v51:eq:damage-null-query}
+\end{equation}
+Unit 表征仍依赖该行其他输入，所以不同 Null 可有不同预测；不按角色切换成另一种估计器。
+Query 插入不改变原证据，因此共享 $B_a$ 与 supports 不变。
+全 NW 则完全不使用最终 Cell，其两种读取相同。
+这些等式不保证 Query 优于 Null，也不证明污染一定能被识别或修复。
+
+\subsection{损伤配方、覆盖率与评价}
+按原稿的 table random-cell 和 supervised row 协议分别记录隐藏比例、保护规则、
+支持数量、数值不同取值数、nominal 类别覆盖与 ordinal 声明域；损伤训练时，式~\eqref{eq:P:support-floor} 检查受损后实际可见的答案支持，
+不在干净 sidecar 上检查，也不以估计值补足。可加入数值尺度误写、局部替换、类别替换等有限同类型扰动，
+但不能以匿名整列一致单位变化作为一定可修复的错误而不提供单位证据。
+分别报告隐藏恢复、污染修复、retained 误改与原始单位误差。
+前向鲁棒尺度、Query 保护与 loss 降权是三个不同位置的选择，不互相替代。
+带平方残差的 LL 不是因使用中位数标准化就自动成为鲁棒回归。
+
+
+
+\section{迭代式信息恢复：固定 codec 与来源明确的反馈}
+\label{sec:alt:iterative-restoration}
+本节并列给出 receiver-only 与 context-source 两个完整反馈候选：前者只改变目标自身的接收路径，
+后者允许估计参与下一轮上下文，但两者都保持原始答案支持。
+更一般的自适应选址、置信质量与派生答案支持仍是开放接口；单轮是独立默认，多轮不会自动加入主模型。
+
+\subsection{一轮是完整模型，多轮需声明状态}
+固定初始实际输入 $E_0$、标准化状态、nominal 的 $q_a,\{b_{a,c}\}$ 及 numeric/ordinal 各列所需的 $q_a,b_a$。
+维护 value 坐标表 $Y^{(k)}$，每轮共享同一网络参数：
+\begin{equation}
+ \widehat Y^{(k+1)}=\mathcal R_{\Theta}(Y^{(k)};E_0),\qquad
+ Y^{(k+1)}=(1-\alpha)Y^{(k)}+\alpha\widehat Y^{(k+1)},\quad0<\alpha\le1.
+ \label{v51:eq:iterative-update}
+\end{equation}
+可靠锚点可以固定而不写回，其余位置先全部形成提议再同步更新。
+固定所有输入不写回时，确定性多次调用只重复同一个结果，不构成迭代推断。
+数值的仿射闭包使同列合法编码的仿射混合仍在同一条直线上；必要时可显式投影后重新编码。
+类别反馈可选择硬最近码重编译，或在原固定码表上构造明确的连续混合；前者切断离散决策处的普通梯度，
+后者不是自动校准的类别概率。Ordinal 的连续状态一般不在一条共享秩直线上；
+硬反馈须匹配最近声明等级，再按 $q_a+r_a(c)b_a$ 重编码；连续反馈保留完整向量状态。
+
+\subsection{原始事实与估计来源不能混同}
+可以只让 $E_0$ 的原始可见响应进入 terminal，让估计仅改变上下文；
+也可以让部分估计在后续轮成为降权 supports，但须分别记录地址、估计来源和权重。
+同一 Cell 的估计不能因重复迭代就被当作许多条独立证据。
+若允许原 Query 地址在下一轮供源，必须显式改变 source mask，并可用独立置信质量乘在 source presence 上；
+不能声称这仍满足单轮 Query receiver-only 的原始不变量。
+
+\subsection{每轮重新适配与监督}
+改变当前表征或允许新的支持后，各列权重和共享斜率在该轮重新计算；
+不能一边更新 kernel，一边把旧 $B_a$ 当成新内层问题的精确解。
+若对 $K_{\rm iter}$ 轮展开训练，可使用
+\begin{equation}
+ \mathcal L_{\rm path}=\sum_{k=1}^{K_{\rm iter}}\nu_k\mathcal L_{\rm rec}^{(k)},
+ \quad\nu_k\ge0,\quad\sum_k\nu_k=1.
+ \label{v51:eq:iterative-loss}
+\end{equation}
+对于正文的遮挡任务，每轮采用
+$\mathcal L_{\rm rec}^{(k)}=\mathcal L_{\Qset_0}^{(k)}+\lambda_{\rm restore}\mathcal L_{\Vset_0}^{(k)}$，
+按原始 $\Vset_0,\Qset_0$ 和非空类型分支归约，默认 $\lambda_{\rm restore}=0$。
+估计后来参与供源不改变原始评分状态；更一般的 damage 使用其显式注册的状态系数。
+所有轮次用同一份原始真值和固定 codec，不能把上一轮预测当成新的干净真值。
+阻尼并不保证收敛，收敛也不保证恢复正确。评价须报告每轮原值误差、正常值保持、总预算与估计反馈规则。
+
+
+\subsection{一个完整的 receiver-only 反馈实例}
+\label{v52:subsec:receiver-feedback}
+为使“估计只改变上下文”有可执行含义，先固定原始证据 $E_0$、原始 Value 集 $\Vset_0$、
+一个预先登记的 Query 集 $\Qset_0$ 和所有 codec。令 $n_{a,0}$ 为原始列支持数，
+$\mathcal Q_+=\{(r,a)\in\Qset_0:n_{a,0}>0\}$。第 1 轮就是正文 forward，仅对可估计 Query 初始化
+\begin{equation}
+ \mathcal T_{\rm upd}:=\mathcal Q_+,\qquad
+ y_t^{(1)}:=\widehat e_t^{(1)}\quad(t\in\mathcal Q_+),\qquad K_{\max}\ge1.
+ \label{v53:eq:iteration-initialization}
+\end{equation}
+本实例不引入 $y^{(0)}$，也不在第一次预测前做未定义的阻尼。
+$K_{\max}$ 计总 forward 次数；$K_{\max}=1$ 精确回到单轮。
+原始 Value 是固定输入锚点，不从 scorer 选择“真实无污染”地址；其第一轮预测保留为 retained 输出，
+只对 $\mathcal Q_+$ 更新状态。无支持 Query 保持原角色、返回 \texttt{no-support}，不建立连续状态或解码；
+训练仍按原始 $\Vset_0$ 检查式~\eqref{eq:P:support-floor}，估计不计入不同支持值；
+全部原始评分目标仍须可评分，不能以 $\mathcal Q_+$ 静默筛去目标。空更新集不运行额外轮次。
+对 $k=1,\ldots,K_{\max}-1$，用上一轮\emph{全部完成}的状态先令
+\begin{equation}
+ \widetilde x_t^{(k)}=\operatorname{Decode}_a(y_t^{(k)};\mathcal A_a),\qquad
+ h_t^{(0,k+1)}=q^C+
+ \operatorname{ValueEncoder}_{\Theta}
+ \bigl(\operatorname{TypedPrep}(\widetilde x_t^{(k)};\mathcal A_a)\bigr),
+ \quad t\in\mathcal Q_+.
+ \label{v52:eq:receiver-feedback}
+\end{equation}
+这里只为 Query 初始化添加自己的上轮估计，不改变其 source eligibility。
+Value、Unit/Feature seeds、Null 初始化沿用原值；TypedPrep 复用已冻结的统计与码本，不重估位置尺度或随机方向。
+随后运行相同 backbone 和 readout，得到 $\widehat y^{(k+1)}$；再对全部 $\mathcal Q_+$ 同步计算
+$y_t^{(k+1)}=(1-\alpha)y_t^{(k)}+\alpha\widehat y_t^{(k+1)}$，不原位交替读写。
+完成整轮后才检查停止条件。可估计 Query 的最终输出为 $\operatorname{Decode}_a(y_t^{(k)})$。
+路径损失中的第 $k$ 轮预测在 Query 上使用这个已阻尼状态、在 retained 上使用第一轮预测，
+均对同一原始真值评分，retained 项仅在 restore 系数非零时计入训练；
+未阻尼提议可以记录，但不能混作同一个损失定义。
+Query 初始 carrier 如发生精确相消，按非零接收端的数值协议报告，而不是隐式赋予新的角色。
+
+这一 realization 的原始 sources 全部不变，Query 永不供源，因此支持 Cell、Unit、原始核和列级解
+都保持不变，可以复用；变化只来自目标 Query 自身的初始化及其接收路径。
+所以它不是“通过预测创造了新的 Unit 参考证据”。Numeric 的 decode/encode 是仿射投影，
+普通梯度可穿过它；离散硬最近码使被选输入码在局部为常量，硬判决处的反馈路径没有普通导数。
+阻尼状态仍保留 $(1-\alpha)y^{(k)}$ 的直接梯度，两条路径不能混同。
+若改用温度混合或其他梯度估计，必须注册为不同反馈规则。
+
+\subsection{完整候选：估计参与上下文，原始观测提供答案}
+\label{v53g:subsec:context-feedback}
+原第五代的独立迭代附录已给出一个无需置信度头的最小方案：让估计参与上下文供源，
+但不把估计追加到 terminal 的答案库。本节把这条设计路径接到本版仿射 codec 与列共享 LL 上，
+与上一节并列；它是已有设计的适配，不是由 receiver-only 的缓存性质推导出来的优化。
+
+固定 $E_0$、原始行列、$\Vset_0,\Qset_0$、codec、参数及全部 $N$ 个拟合中心。
+令 $n_{a,0}=|\{s:(s,a)\in\Vset_0\}|$，定义
+\begin{equation}
+ \mathcal R_+=\{(r,a)\in\Vset_0\cup\Qset_0:n_{a,0}>0\},\qquad
+ \mathcal Q_{\rm fb}=\Qset_0\cap\mathcal R_+.
+ \label{v53g:eq:feedback-domain}
+\end{equation}
+第 1 轮为正文单轮，在 $\mathcal R_+$ 上得到 $y_t^{(1)}=\widehat e_t^{(1)}$。
+无原始支持的 Query 每轮返回 \texttt{no-support}，不建立数值状态、不参与反馈或阻尼。
+训练仍按原始 $\Vset_0$ 检查式~\eqref{eq:P:support-floor}，估计不计入不同支持值；
+全部原始评分目标须可评分，不能借此筛掉缺码或不满足支持条件的目标。
+
+第 $k+1$ 轮从原始输入重新编译：Values 固定为 $X_{\Vset_0}$，
+对 $t\in\mathcal Q_{\rm fb}$ 用固定 decoder 将 $y_t^{(k)}$ 还原，
+再以同一 TypedPrep/ValueEncoder 编成估计 carrier；此处不额外加 $q^C$。
+Numeric 的 decode/encode 保持本列仿射坐标；nominal 按固定可见码表最近码判决，
+ordinal 投影到共享仿射直线后匹配最近声明等级，再按同一共享基点/秩方向 codec 重编码。其余 Query、Unit/Feature seeds 与 Null 沿用初始规则。
+从第二轮起，表格上下文的 source mask 为
+\begin{equation}
+ \mathsf M_i^{{\rm src},(k+1)}
+ =\ind[i\in\Vset_0\cup\mathcal Q_{\rm fb}],\qquad k\ge1.
+ \label{v53g:eq:context-source-mask}
+\end{equation}
+原始观测与估计地址的资格均为 1，实际参与度仍由原来的 presence 算子给出；
+不额外假设估计已正确。原 Query 的 provenance 保留，但通信角色成为估计 source。
+列 collect 的 Cell 源域及空证据 gate、行更新的源域都采用扩展后的资格，
+read 仍只读取临时摘要；不能只修改一个全局 mask 却仍枚举原始 Values。
+默认 Unit Transformer 每轮重算；本最小候选固定
+$m_r^U=\ind[\exists a:(r,a)\in\Vset_0]$。资格不因估计写入而扩张。
+选用 $L_U=0$ 旁路时该段为恒等，资格规则仍按上式。
+
+每轮的 terminal 则始终使用
+\begin{equation}
+ \mathcal C_{a,0}=\{s:(s,a)\in\Vset_0\},\qquad
+ e_{sa,0}=\operatorname{Encode}_a(x_{sa};\mathcal A_{a,0}).
+ \label{v53g:eq:original-answer-bank}
+\end{equation}
+估计不增加答案数。由于支持 Cell、Unit 与参考权重现在可以变化，
+每轮重新执行 backbone、默认 Unit 支路、全部固定中心的聚合与列共享 solve；
+不能复用上一轮 $B_a$ 作为本轮精确解。
+
+所有 $t\in\mathcal R_+$ 先同时形成下一轮提议，再同步更新
+$y_t^{(k+1)}=(1-\alpha)y_t^{(k)}+\alpha\widehat e_t^{(k+1)}$。
+这里 retained 的\emph{输入}仍锚定原值，但其\emph{预测与评分状态}每轮更新；
+不能沿用上一节固定第一轮 retained 输出的规则。最终按 $\operatorname{Decode}_a(y_t^{(K)})$ 返回请求，
+路径损失使用已阻尼状态及正文 $\chi_a/p_a$，按原始状态取 Query loss 加 restore 系数乘 retained loss；
+默认 restore 系数为 0，跨轮默认等权平均。
+令 $\mathcal T_{\rm upd}=\mathcal R_+$，给定 $K_{\max}$、$\alpha$ 和可选变化阈值后，
+采用本附录的同步终止规则，$K$ 表示实际完成轮数；$K_{\max}=1$ 精确回到单轮。
+$\mathcal Q_{\rm fb}=\varnothing$ 时直接在第一轮结束。
+Numeric 反馈与 solve 可以反传，离散硬选择的导数边界沿用上一节，不隐含 straight-through。
+
+此候选保留隐藏真值隔离、固定 codec 和原始答案支持；在同步更新、固定随机状态下可保留行列置换等变。
+它不再保证新增反馈 Query 不影响旧答案，也不保证误差逐轮下降。
+可观察的问题是：估计供源能否改善后续参考几何，还是会放大第一轮错误？
+应与 receiver-only 在相同初始证据和总预算下比较，并分别报告 Query 恢复、retained 误改及逐轮变化。
+
+\subsection{开放接口：自适应估计供源与派生答案支持}
+\label{v52:subsec:derived-feedback}
+上一节已固定“全部可估计 Query 进入上下文、资格为 1、答案库不扩张”的完整实例。
+本分支进一步允许自适应派生选址、置信质量或答案支持扩张，\textbf{这些策略尚未唯一指定}。
+成为完整算法之前，必须指定每轮的地址生成、质量函数、上下文与 terminal 的接入位置、初始化及锚点规则。
+若需要估计在下一轮影响其他 Unit，另外声明派生地址集 $\mathcal E_k$、它与原始
+$\Vset_0$ 的区分，以及派生质量 $g_i^{(k)}\in[0,1]$。例如原始输入质量为 $1$，
+派生输入用给定的 $g_i^{(k)}$；这些质量从当前可见状态或预先声明的策略得到，不读取真值或污染标签。
+所有派生响应先投影/匹配到固定合法空间，再作为下一轮明确标识的输入。
+
+若也允许派生响应进入 terminal，令 $\mathcal C_a^{(k)}$ 是已声明的有效支持集，
+归一化权重可以写为
+\begin{equation}
+ w_{rs}^{a,(k)}
+ =\frac{k_{rs}^{a,(k)}g_{sa}^{(k)}}
+ {\sum_{j\in\mathcal C_a^{(k)}}k_{rj}^{a,(k)}g_{ja}^{(k)}},
+ \qquad s\in\mathcal C_a^{(k)}.
+ \label{v52:eq:derived-support-weight}
+\end{equation}
+分母为零时返回状态；每轮的质量和核在该轮 LL 拟合前确定，所以条件二次求解仍适用。
+原始 mask $\mathbf1_{\Vset_0}$ 与本轮有效 source mask 是两个不同字段。
+此 realization 明确改变了原来的 Query receiver-only 图，不能无条件继承单轮 Query 插入一致性。
+改变支持集、kernel 或支持 Cell 后，该轮重新计算列级解，不能继续复用旧解作为精确最优解。
+
+可靠锚点若要固定，必须由调用方或独立于隐藏真值的协议指定。污染恢复任务不能从 scorer 获取
+“哪些观测其实正确”再决定锚点。重复迭代一个估计也不增加独立观测数量。
+
+\subsection{终止条件与评价}
+\label{v52:subsec:iteration-stop}
+任何多轮实例都给定有限 $K_{\max}$，并可在固定、非空的被更新集合 $\mathcal T_{\rm upd}$ 上检查
+\begin{equation}
+ \Delta_k^2=\frac1{|\mathcal T_{\rm upd}|}
+ \sum_{t\in\mathcal T_{\rm upd}}
+ \frac{\|y_t^{(k+1)}-y_t^{(k)}\|^2}{p_{a(t)}}\le\varepsilon_{\rm iter}^2.
+ \label{v52:eq:iteration-stop}
+\end{equation}
+空更新集合直接结束；非有限状态返回数值失败。$\varepsilon_{\rm iter}$、阻尼和最大轮数属于配置，
+不能用未见真值选择停止时刻。该条件只说明状态变化小，不证明存在唯一固定点或原值正确。
+若要给出收敛保证，需对完整反馈算子额外证明压缩性等条件；正 ridge 或每步正交投影本身并不足够。
+比较多轮时报告逐轮误差、正常值误改、支持来源、壁钟时间和峰值内存，并与同等预算的单轮模型区分。
+
+
+
+\section{从当前默认生长的研究路径}
+\label{v53g:sec:growth}
+当前默认在三个位置作了明确选择：同列共享斜率、每次使用一份随机 codec、以单个 value 恢复原值。\footnote{一种潜在扩展是由 Feature 表征经共享线性映射生成列斜率，如 $\operatorname{vec}(B_a)=W_Bf_a$，并保留 Unit 的局部残差校正。此处仅记录这一可能性，暂不采用；本文仍由当前可见证据闭式拟合 $B_a$。}
+本节沿这些选择提出可逐步检验的延伸。先给出能闭合的最小实例，再指出它能回答什么问题；
+不把更多参数、更长迭代或更低训练误差预先视为改进。
+
+\subsection{列共享与 Unit 局部规律之间：斜率收缩}
+\label{v53g:subsec:shrinkage}
+Unit-specific 的预测不要求每个 Unit 都有独立参数，但也不必永久要求各处具有同一斜率。
+固定一列的证据、全部中心及 $\pi_r>0$、$\sum_r\pi_r=1$，沿用附录~\ref{v51:app:shared-ll}
+的局部矩 $\Sigma_r,J_r$。令 $B_r\in\R^{p\times d_R}$，定义其加权均值
+$\bar B=\sum_r\pi_rB_r$，并引入跨中心收缩系数 $\mu\ge0$：
+\begin{equation}
+ \begin{split}
+ \min_{\{\beta_r,B_r\}}\quad&
+ \sum_r\pi_r\left[\sum_s w_{rs}
+ \|e_s-\beta_r-B_r(c_s-c_r)\|^2+\lambda\|B_r\|_F^2\right]\\
+ &+\mu\sum_r\pi_r\|B_r-\bar B\|_F^2,\qquad \lambda=\lambda_{\rm LL}>0.
+ \end{split}
+ \label{v53g:eq:shrinkage-objective}
+\end{equation}
+本候选固定 $\mu$ 为配置参数，默认中心权重仍为 $1/N$；它与 attention 的正参考质量 $\eta$ 无关。
+原来的 $\lambda$ 对每个局部斜率保留，且与局部残差共用 $\pi_r$，这是连接两个既有端点所需的归一化。
+
+\paragraph{同一个目标的两个端点。}
+$\mu=0$ 时各中心独立，精确回到相同 $\lambda$ 的逐目标 LL；
+约束所有 $B_r=B$ 时，$\sum_r\pi_r\lambda\|B\|_F^2=\lambda\|B\|_F^2$，
+精确回到正文列共享 LL。有限维、固定输入下，$\mu\to\infty$ 的解收敛到这一共享解：
+以共享最优解作可行比较，ridge 保证斜率有界，收缩项使中心间方差趋零，
+任一极限再由共享目标的唯一性确定。执行共享端点时直接使用正文系统，不用巨大 $\mu$ 近似约束。
+若写 $B_r=B_0+\Delta_r$，需令 $\sum_r\pi_r\Delta_r=0$；对应正则恰为
+$\lambda\|B_0\|_F^2+(\lambda+\mu)\sum_r\pi_r\|\Delta_r\|_F^2$。
+只给 $B_0$ 加 ridge、遗漏局部斜率的正则，不具有上述两个端点。
+
+\paragraph{求解与唯一性。}
+截距仍可消去，$\widehat e_r=\bar e_r+B_r(c_r-\bar c_r)$。
+令 $Z_r=B_r^\top$、$\bar Z=\sum_r\pi_rZ_r$，一阶条件为
+\begin{equation}
+ [\Sigma_r+(\lambda+\mu)I]Z_r-\mu\bar Z=J_r.
+ \label{v53g:eq:shrinkage-normal}
+\end{equation}
+将各 $Z_r$ 纵向堆叠，系统矩阵为
+\begin{equation}
+ H=\operatorname{blockdiag}_r\!\bigl(\pi_r(\Sigma_r+\lambda I)\bigr)
+   +\mu(\operatorname{diag}\pi-\pi\pi^\top)\otimes I_{d_R},\qquad
+ HZ=\operatorname{stack}_r(\pi_rJ_r).
+ \label{v53g:eq:shrinkage-spd}
+\end{equation}
+对非零堆叠向量 $v=(v_r)$，令 $\bar v=\sum_r\pi_rv_r$，有
+$v^\top Hv=\sum_r\pi_rv_r^\top\Sigma_rv_r+
+\lambda\sum_r\pi_r\|v_r\|^2+\mu\sum_r\pi_r\|v_r-\bar v\|^2>0$。
+故有限 $\mu$ 的斜率和截距唯一；不要求支持数大于特征维数。
+
+无需物化 $Nd_R$ 阶大矩阵。记 $A_r=\Sigma_r+(\lambda+\mu)I$，可先解
+\begin{equation}
+ \begin{aligned}
+ G\bar Z&=\sum_r\pi_r A_r^{-1}J_r,&
+ G&=\sum_r\pi_r A_r^{-1}(\Sigma_r+\lambda I),\\
+ Z_r&=A_r^{-1}(J_r+\mu\bar Z).&&
+ \end{aligned}
+ \label{v53g:eq:shrinkage-elimination}
+\end{equation}
+$G=I-\mu\sum_r\pi_rA_r^{-1}\succ0$；前一种表达避免直接相减接近的矩阵，
+每项因 $A_r$ 与 $\Sigma_r+\lambda I$ 可交换而为对称正定。
+逆记号均以 solve 实现，仍需检查浮点对称性和条件数。
+有限正 $\mu$ 通常需要逐中心局部矩与约 $N$ 次 $d_R$ 阶分解，外加一个同阶系统；
+不能继承正文“每列一次”的成本。$\mu=0$ 的独立端点可仅拟合请求中心。
+
+\paragraph{能继承什么，以及值得测什么。}
+固定特征、权重与正则时，解对答案线性，常数答案给出 $J_r=0$、$B_r=0$，
+因此仍有常数复现和仿射闭包；numeric 可精确标量化。
+外层对耦合 solve 完整反传；若记右端为 $Y$，则
+$\mathrm dZ=H^{-1}(\mathrm dY-\mathrm dH\,Z)$，不能漏掉未返回中心经耦合产生的路径。
+固定中心与证据描述时，只增加已有空地址的 receiver Query 仍不改变拟合。
+
+一个直接问题是：什么支持密度和局部关系差异下，独立斜率的适配收益大于共享的稳定性收益？
+可分别训练共享端点、有限 $\mu$ 与独立端点，报告遮挡误差、retained 误差和求解预算，
+并观察 $\sum_r\pi_r\|B_r-\bar B\|_F^2$；该斜率差异依赖 Cell 坐标尺度，不能脱离表征作跨模型比较。
+若有限收缩有效，再探索少量斜率组或低秩局部变化；这些是新的近似结构，不自动等于上式精确解。
+
+\subsection{随机值空间：区分答案换坐标与输入机制}
+\label{v53g:subsec:codec-sensitivity}
+每列的 $q_a,b_a$ 与类别码本既能规定答案坐标，也会通过输入改变 backbone。
+要判断随机表示的作用，先把这两条路径拆开。
+固定所有 Cell、Unit、权重和 ridge，仅将一列答案与候选码同时变为
+$e'_s=R_ae_s+v_a^{\rm shift}$，其中 $R_a\in\R^{p_a\times p_a}$、$R_a^\top R_a=I$、
+$v_a^{\rm shift}\in\R^{p_a}$，则各 LL/NW 对照满足
+\begin{equation}
+ \widehat e'_r=R_a\widehat e_r+v_a^{\rm shift},\qquad
+ \|\widehat e'_r-e_r^{\star\prime}\|^2
+ =\|\widehat e_r-e_r^\star\|^2.
+ \label{v53g:eq:answer-coordinate-equivariance}
+\end{equation}
+自由截距吸收平移，响应方向的正交变换保持 Frobenius ridge；
+decoder 同步还原坐标后，原值预测与最近码判决不变。
+Numeric 对应 $q'_a=R_aq_a+v_a^{\rm shift}$、$b'_a=R_ab_a$；此答案侧对照不要求 $q'_a$ 继续满足默认单位基点的采样规则。
+这是一个\emph{固定输入路径的代数对照}，并不意味着任意重抽类别码本都只是正交换基，
+也不意味着把变换后的编码重新送入固定网络仍保持预测不变。
+
+对 numeric，一条有用的消融是固定答案 codec，仅改变输入 lift 的随机 realization 或尺度。
+例如 $h^{\rm value}=W_{\rm enc}[\gamma_{\rm in}(q_a+z_ab_a)]$，$\gamma_{\rm in}>0$ 是显式配置，
+答案与 decoder 仍使用原 codec。默认 $\gamma_{\rm in}=1$，$W_{\rm enc}$ 自由训练。
+对所有类型统一的输入缩放可以吸收到自由矩阵中，但改变初始化尺度仍须显式记录；
+仅改变 numeric 分支的尺度不能一般地吸收到跨类型共享矩阵而保持其他分支不变。
+原 Fourier lift 的平方范数为 64，而仿射 lift 的平方范数为
+$\|q_a\|^2+2z_aq_a^\top b_a+z_a^2\nu_a$；模式 $G$ 为
+$1+2z_aq_a^\top b_a+z_a^2$，模式 $C$ 为 $4+2z_aq_a^\top b_a+4z_a^2$。
+在含 presence 的网络中，输入尺度还可能改变参与强度，所以它需要单独训练的对照。
+输入 lift 与答案接口可以分开定义；不能借此改动已固定的评分尺度或从隐藏值估计归一化量。
+
+\paragraph{一份编码与多份编码的敏感性。}
+固定实际可见输入、schema 和模型参数，记随机 codec realization 为 $\xi$。
+重复采样 $\xi$ 时，每次都冻结该 realization 完成 forward、评分和 decode。
+这检验的是表示选择敏感性，与固定随机状态下的行列置换等变不同。
+一个完整的可选推理对照是：预先给定 $J_{\rm enc}\ge1$ 个随机种子，各跑一次完整模型，
+numeric 在原单位平均已解码预测；离散值按类别身份多数票，平局按固定 schema 顺序决定。
+所有 realization 使用相同 nominal 可见候选和 ordinal 声明秩域；数值失败按既有协议显式返回，不静默丢弃失败轮次。
+不同随机空间中的原始答案向量不能直接平均。$J_{\rm enc}=1$ 回到选定的单次模型。
+
+若只重抽方向/码本且固定数值标准化，对固定真值有
+\begin{equation}
+ \mathbb E_\xi[(\widehat z_\xi-z^\star)^2]
+ =(\mathbb E_\xi\widehat z_\xi-z^\star)^2
+   +\operatorname{Var}_\xi(\widehat z_\xi).
+ \label{v53g:eq:codec-risk}
+\end{equation}
+独立同分布且方差有限时，$J_{\rm enc}$ 次平均把此项方差变为其 $1/J_{\rm enc}$，偏差项不变。
+这是对编码随机性的期望风险结论，不保证某次有限集成比某个单次结果好，也不适用于类别多数票的同一推导。
+应同时报告种子间波动、原值误差与计算倍数；这种波动不自动是数据噪声或经校准的预测区间。
+
+\subsection{恢复能力的边界：合法输出不等于真值可识别}
+\label{v53g:subsec:identifiability}
+设两张可能的完整表在当前协议下给出相同 $E_0$、schema 和固定 codec，
+但某个隐藏 numeric 的标准化真值分别为 $z_1,z_2$。
+固定参数与随机种子后，任何由同一输入确定的恢复过程都会输出相同 $f$，并满足
+\begin{equation}
+ (f-z_1)^2+(f-z_2)^2
+ =2\left(f-\frac{z_1+z_2}{2}\right)^2+\frac{(z_1-z_2)^2}{2}
+ \ge\frac{(z_1-z_2)^2}{2}.
+ \label{v53g:eq:identifiability}
+\end{equation}
+多轮自身估计仍是同一输入的函数，不能凭迭代消除这个信息限制；
+随机模型对两者也具有相同输出分布，上式可以取期望。
+训练所得规律能够提供跨表先验，但不能保证对所有与可见证据相容的完整表同时恢复正确。
+
+由此可区分三种问题：输出是否属于合法 value 空间、是否符合从训练中学到的关系、
+以及当前证据是否足以唯一确定原值。投影闭包回答第一项，恢复实验涉及后两项；
+低空间外残差、可见自重建良好或迭代变化很小，都不能单独替代隐藏真值评价。
+匿名整列一致的单位改变若也与现有证据相容，就需要外部单位声明或其他锚点才能判为错误。
+
+当相同证据确实允许多个合理答案时，可以研究条件分布或预测集合。
+这一接口需另给出输出域、归一化、训练评分与留出校准，当前点估计 LL 尚未定义这些机制。
+有符号 LL 系数、ridge 大小、最近码距离、编码种子方差与迭代稳定性，都不直接充当概率或覆盖率。
+
+\subsection{怎样让探索逐项提供可解释的反馈}
+\label{v53g:subsec:research-questions}
+上述扩展分别改变局部共享程度、表示随机性和反馈信息流，可以独立提出问题。
+初次比较固定数据划分、可见证据、训练目标与共同超参数，只改变正在讨论的接口；
+需要调参时使用相同调参预算，冻结评估真值不进入选择过程。
+能力比较在同一原始任务指标上进行，另报告冷启动、重复查询和多轮的总成本。
+先识别单项效应，再组合有证据支持的改变，能避免把互相补偿的尺度变化解释为机制成功。
+
+\begin{center}\small
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{25mm}XX}
+\toprule
+研究问题 & 最小比较 & 能支持的判断\\\midrule
+局部规律是否需要独立变化 & 共享、有限收缩、逐目标 LL & Query 收益是否值得新增局部求解；retained 改善不能单独回答\\
+数值空间改变了哪条路径 & 固定输入的答案换坐标；另做输入 lift/尺度对照 & 区分代数重参数化与上下文机制改变\\
+随机 codec 是否带来明显波动 & 固定证据多种子；单次与解码后集成 & 测量表示敏感性和预算收益，不据此宣称概率校准\\
+估计供源是否利用了更多关系 & 单轮、receiver-only、context-source & 分别看逐轮 Query、retained 误改、核变化及总预算\\\bottomrule
+\end{tabularx}
+\end{center}
+这些比较是可以继续生长的研究入口，不要求一次完成所有组合。
+本次附录给出数学定义与有限实例核验；是否采用为默认，仍由分别训练和留出恢复结果决定。
+
+\section{第五代模型尺寸档}
+\label{v54:app:sizes}\label{v54:sec:size-family}
+本附录专门登记第五代各档模型。编码、列共享 LL、Query 监督和 backbone 算子不随档位改写；
+档位只选择宽度、层数、head、FFN、Unit Transformer 深度和 inducing 槽数。
+换一个名字不等于换一套数学。未在本附录闭合的档位，不能靠第四代 TAR 的文件名或参数量去猜。
+
+\subsection{尺寸档管什么}
+一个第五代尺寸档必须同时固定下面六项，缺一项就还不是档位，只是一次实验配置：
+\begin{center}\small
+\begin{tabularx}{\linewidth}{lX}
+\toprule
+字段 & 含义\\\midrule
+backbone 层数 $L$ & 二维 OTransformer 的 block 数\\
+宽度 $d$ & Cell / Unit / Feature token 与答案环境空间宽度；须 $d\ge 128$\\
+heads & 每层注意力头数；须整除 $d$\\
+FFN 宽度 $d_{\rm ff}$ & OMAB 局部 FFN 隐层宽度\\
+Unit 层数 $L_U$ & 独立 Unit Transformer 深度；不写回 Cell / Feature\\
+inducing 槽数 $S$ & 列内固定摘要槽；不等于几何维数\\\bottomrule
+\end{tabularx}
+\end{center}
+下列内容\textbf{不属于}尺寸档，各档共用，除非另开修订：value codec、共享 $W_{\rm enc}$、
+$\tau_{\rm pres}=1$、列共享 LL、Query 系数 1、restore 系数 0、训练准入与解码规则，以及默认 $K=1$。
+相对 V5.3：V5.3 ModelSpec 写「最小 $L_U=0$」，Unit Transformer 是可选组件。
+本稿的命名默认档仍是 V5 Small，取 $L_U=3$。
+V5 Nano 是另一档，定义上无 Unit Transformer（$L_U=0$）。
+把 Small 的 Unit 关掉，仍是 3 层、8 heads 的 Small 消融，不等于 Nano。
+$K$ 也不是尺寸档字段。各档默认单 token；$K>1$ 记在 ModelSpec，见附录~\ref{v54:sec:subtokens}。
+
+\subsection{不沿用第四代 TAR 档位}
+TAR 代码里的命名尺寸是另一代模型的参数表，身份保持 TAR：
+\begin{center}\small
+\begin{tabularx}{\linewidth}{llll}
+\toprule
+TAR 名称 & blocks & 宽 & FFN\\\midrule
+\texttt{small} & $3$ & $96$ & $192$\\
+\texttt{small-128} & $3$ & $128$ & $256$\\
+\texttt{medium} & $6$ & $192$ & $384$\\
+\texttt{standard} & $15$ & $384$ & $768$\\\bottomrule
+\end{tabularx}
+\end{center}
+第五代\textbf{不采用} TAR \texttt{small} 的 3 层 / 宽 96 / FFN 192。
+TAR 没有名为 \texttt{large} 的代码档。V5 Small 的 128 宽也不是把 TAR \texttt{small-128} 改个名字；
+第五代另有 3 层 Unit Transformer，TAR 档位没有这一项。
+
+\subsection{一览}
+\begin{center}\small
+\begin{tabularx}{\linewidth}{lcccccc}
+\toprule
+档位 & $L$ & $d$ & heads & $d_{\rm ff}$ & $L_U$ & $S$\\\midrule
+V5 Nano & $2$ & $128$ & $4$ & $256$ & $0$ & $256$\\
+V5 Small & $3$ & $128$ & $8$ & $256$ & $3$ & $256$\\
+V5 Medium & $6$ & $192$ & $8$ & $384$ & $3$ & $256$\\
+V5 Standard & $12$ & $256$ & $8$ & $512$ & $6$ & $256$\\
+V5 Large & $24$ & $384$ & $12$ & $768$ & $6$ & $256$\\
+\bottomrule
+\end{tabularx}
+\end{center}
+五档的尺寸字段均已闭合；本稿讨论默认前向时仍以 Small 为准。
+Medium、Standard、Large 是本稿登记的容量配置，尚不构成训练效果或设备适配的验证。
+
+\paragraph{递增原则。}
+从 Small 起，backbone 深度依次为 $3,6,12,24$，宽度依次为 $128,192,256,384$；
+各档保持 $d_{\rm ff}=2d$。Heads 取 $8,8,8,12$，对应每头宽度 $16,24,32,32$。
+Unit 深度取 $3,3,6,6$：先扩大二维表征，再增加行间精炼深度；Large 保留 6 层 Unit，
+避免两条支路同时按 backbone 比例加深。此取舍是待实验检验的设计选择。
+各档固定 $S=256$、$K=1$，列 inducing、行直接，避免换档时同时改变摘要槽数和 token 编译。
+输入及答案 codec 的原始宽度保持 $p=128$，共享输入映射为 $W_{\rm enc}\in\R^{d\times128}$；
+默认 LL 特征宽度仍为 $d_R=d$。更宽档的 $d_R\times d_R$ 求解也随之增大，
+采用低维 $P_R$ 须单独登记，不能在换档时隐式加入。
+
+\subsection{V5 Nano（当前闭合）}
+\label{v54:subsec:size-nano}
+V5 Nano 是第五代最小命名尺寸：2 层 backbone，无 Unit Transformer。
+\begin{equation}
+ L=2,\quad d=128,\quad \mathrm{heads}=4,\quad
+ d_{\rm ff}=256,\quad L_U=0,\quad S=256.
+ \label{v54:eq:v5-nano}
+\end{equation}
+列 inducing、行直接。$L_U=0$ 在本档是尺寸定义：不实例化 Unit 支路，Unit bank 保持二维网络输出。
+宽度仍与答案空间 $p=128$ 对齐，故 $W_{\rm enc}\in\R^{128\times128}$。
+head 数取 4，与代码 \texttt{BackboneConfig} 默认及 Small 之前的 2 层实验配置一致，不是把 Small 的 8 heads 原样缩小层数。
+
+本档不是 V5.3 的隐式默认，也不是 Small 的 $L_U=0$ 消融。
+Nano 与 Small 是同等重要的竞争方案；Nano 必须纳入基础拟合实验比较，不能因当前默认 Small 而省略。
+默认地位只确定当前起点，不预断容量、优化难度或计算效率的优劣。
+与 Small 比较时，同时改变了 $L$、heads 和 $L_U$；不能把差异单独归因于 Unit Transformer。
+本附录不把任何拟合曲线写成 V5 Nano 已经够用或已经更差。
+
+\subsection{V5 Small（当前闭合）}
+\label{v54:subsec:size-small}
+V5 Small 是第五代当前的命名默认档：
+\begin{equation}
+ L=3,\quad d=128,\quad \mathrm{heads}=8,\quad
+ d_{\rm ff}=256,\quad L_U=3,\quad S=256.
+ \label{v54:eq:v5-small}
+\end{equation}
+列 inducing、行直接；默认 Unit 支路为 3 层 OTransformer，具有可见输入的行作派生 sources。
+宽度与答案空间 $p=128$ 对齐，因此默认 $W_{\rm enc}\in\R^{128\times128}$。
+V5.3 默认 $L_U=0$，本档把 3 层 Unit Transformer 收进默认，而不是另开可选模块。
+相对 V5 Nano，本档同时加深 backbone、增加 heads，并打开 3 层 Unit；不是只打开 Unit。
+
+近期实验名「Small-128＋3 Unit」的结构字段与本档一致，但那是一次实验身份：
+数据、mask、seed、预算和 codec realization 仍按该次 manifest 记录。
+本附录不把任何拟合曲线写成 V5 Small 已经更好。
+
+\subsection{V5 Medium（当前闭合）}
+\label{v54:subsec:size-medium}
+\begin{equation}
+ L=6,\quad d=192,\quad \mathrm{heads}=8,\quad
+ d_{\rm ff}=384,\quad L_U=3,\quad S=256.
+ \label{v54:eq:v5-medium}
+\end{equation}
+相对 Small，backbone 深度翻倍、宽度增加一半，FFN 同比例扩大；Unit 保持 3 层，
+以较温和的第一档扩容检查二维表征容量。每头宽度为 24，$W_{\rm enc}\in\R^{192\times128}$。
+6 / 192 / 384 与 TAR medium 的三个字段相同，是按上述第五代递增原则显式选定；
+本档另含 3 层 Unit、第五代组合编码及列共享 LL，不继承 TAR 的其余配置或实验结论。
+
+\subsection{V5 Standard（当前闭合）}
+\label{v54:subsec:size-standard}
+\begin{equation}
+ L=12,\quad d=256,\quad \mathrm{heads}=8,\quad
+ d_{\rm ff}=512,\quad L_U=6,\quad S=256.
+ \label{v54:eq:v5-standard}
+\end{equation}
+相对 Medium，backbone 深度翻倍，宽度从 192 增至 256，Unit 从 3 层增至 6 层。
+本档同时增加表内建模和行间参考几何容量；每头宽度为 32，$W_{\rm enc}\in\R^{256\times128}$。
+它是第五代的中间扩容档，不沿用 TAR standard 的 15 / 384 / 768。
+
+\subsection{V5 Large（当前闭合）}
+\label{v54:subsec:size-large}
+\begin{equation}
+ L=24,\quad d=384,\quad \mathrm{heads}=12,\quad
+ d_{\rm ff}=768,\quad L_U=6,\quad S=256.
+ \label{v54:eq:v5-large}
+\end{equation}
+相对 Standard，backbone 深度翻倍、宽度增加一半，heads 增至 12 以保持每头宽度 32；
+Unit 仍为 6 层，$W_{\rm enc}\in\R^{384\times128}$。
+本档用于前序档已有拟合证据后的进一步容量检验；更大的容量不预先代表更好的拟合或泛化。
+TAR 代码枚举里没有 \texttt{large}，本档不对应任何 TAR 配置。
+
+\subsection{怎样登记下一档}
+写入新档或修订已有尺寸定义时：
+\begin{enumerate}
+\item 六项字段一次给全，head 数整除 $d$，$d\ge 128$。
+\item 同步更新本节一览表、对应小节，以及 README 修订记录。
+\item ModelSpec 若只写档名，以本附录为准；若字段与档名冲突，以显式字段为准并记录偏离。
+\item 换档比较同一原始任务指标。不同 $d$、$L$ 或 $L_U$ 的训练 loss 不可直接排序。
+\item 不要把已有档的单项消融登记成新档名。例如 Small 取 $L_U=0$ 仍叫 Small 消融，不叫 Nano。
+\end{enumerate}
+
+\section{符号与设计来源}
+\label{sec:symbols}
+\begingroup\small\renewcommand{\arraystretch}{1.06}
+\begin{longtable}{l p{0.75\linewidth}}
+\toprule
+符号 & 单一职责\\
+\midrule
+\endfirsthead
+\toprule 符号 & 单一职责\\\midrule
+\endhead
+$\Oset,\Vset,\Qset$ & 自然观测、输入可见与 Cell Query 地址；训练时 $\Oset=\Vset\dot\cup\Qset$。\\
+$\TargetSet$ & 恢复评分域，训练时为 $\Oset$；默认有权训练域为 $\Qset$。不表示 token table。\\
+$\Fstar,\Ustar$ & 新增 Feature Query 行和 Unit Query 列，各一个。\\
+$d,d_R$ & Carrier 宽度与 LL 回归特征宽度；V5 Small 取 $d_R=d=128$，可选 $P_R$ 使二者不同。Concat 匹配为 $2d$，同列有效距离为 $d$。\\
+$K$ & Unit/Feature 的 subtoken 数，默认 $K=1$；不等于 heads、$S$ 或 $k_a$。$K>1$ 为可选扩展，见附录~\ref{v54:sec:subtokens}。第四代 TAR 匹配响应维数是另一代记号，本文不再用 $K$ 表示。\\
+$n_a,n_a^{\rm distinct},n_a^{Q},N_{\rm win}$ & 列内可见 Cell 数、数值不同取值数、Query 数与窗口行数。\\
+$S$ & 每层固定 inducing slot 数；当前五档均为 $S=256$，不等于几何维度。\\
+$\bm q^C,\bm q^U,\bm q^F$ & 三种跨地址共享的可学习初始化 seeds。\\
+$c_{ra},u_r,f_a$ & Cell、Unit、Feature 的最终表征；默认 $K=1$ 时各为 $d$ 维。$K>1$ 时 $u_r,f_a$ 为 $K\times d$，Cell 仍为 $d$ 维。\\
+$s_{ra},\kappa_{rs}$ & Concat 匹配坐标与跨列共享的原始 Unit 核。\\
+$\alpha_{ra}^{(s)},\bm\delta_{ra}^{(s)}$ & 同列归一化权重与全 LL 的 target/support Cell 差；分别来自 Unit 与 Cell，覆盖全部答案类型。\\
+$W_A^P,W_F^P$ & Backbone attention/FFN 的 presence 读出，不是恢复 readout。\\
+$W_{\rm enc}$ & 跨类型共享的可学习无偏置输入矩阵。\\
+$\tau_{\rm pres},\eta$ & Presence 的正尺度（默认 $1$）与独立的 OAttention 固定正参考质量。\\
+$\tau_{\rm match},\lambda_{\rm LL}$ & Gaussian matching 带宽与 LL 的正 ridge。\\
+$\bm a,B_t^{\rm loc}$ & 原稿逐目标 LL 对照的局部截距与斜率；当前默认用列共享 $B_a$ 和局部 $\beta_{ra}$。\\
+$\mathsf R,g_{\rm LL},p_a,\bm e$ & 模式、LL 共享粒度、答案宽度与编码；默认全类型 128 维，类别 32/8 候选另行记录。\\
+$\mathcal A_a$ & 该列编码、还原与评分共用的可见统计量或类别码表。\\
+$\lambda_{\rm restore},\mathcal L_{\Qset},\mathcal L_{\Vset}$ & 可见自重建系数（默认 0）、Query 损失与 retained 损失；Query 系数固定为 1。\\
+$\bm e_t^\star,\ell_t,\chi_a$ & scorer 的固定真值、显式维度补偿后的 MSE 及补偿系数；不经硬类别判决求导。\\
+$\mathbb E,\mathsf V_a,\mathcal M_a$ & 答案环境空间、变量方向子空间、numeric/ordinal 的合法仿射空间；其维数分别为 $128,1,1$，ordinal 合法集是该直线上的有限秩码。\\
+$P_a,\Pi_{\mathcal M_a}$ & 值空间的线性投影及其仿射投影；$P_a=\nu_a^{-1}b_ab_a^\top$（模式 $G$ 时 $\nu_a=1$），不等于 Cell 特征映射 $P_R$。\\
+$\Gamma_a,k_a$ & 多维值扩展的满列秩基矩阵与真实坐标自由度；scalar numeric 取 $\Gamma_a=b_a,k_a=1$；不据此将 ordinal 化为单坐标响应。\\
+$m_a,\mu_a,\sigma_a,s_a,\varepsilon_a$ & 默认可见均值、总体标准差、共同尺度与正下限；$h_a$ 为稳健候选的 half-IQR。\\
+$q_a,b_a,z_a,r_a$ & Numeric/ordinal 的列基点、共享方向、z-score 与归一化秩；三类变量共用 $e_a=q_a+v_a(x)$。\\
+$b_{a,c},\Delta_a$ & Nominal 的类别向量（编码为 $q_a+b_{a,c}$）及完整合法码集的实际最小间隔。\\
+$L_U,m^U,\widetilde U$ & Unit 层数、派生供源资格及精炼/旁路结果；本稿默认 $L_U>0$，V5 Small 取 $L_U=3$，V5 Nano 取 $L_U=0$。\\
+$\mathsf W_a,L_{\mathsf W},\bar\Sigma_a,\bar J_a,B_a$ & 全中心权重、加权中心化矩阵、聚合矩及列共享斜率。\\
+$\mu,B_r,\bar B$ & 非默认斜率收缩强度、各中心斜率及其加权均值；$\mu$ 不表示 attention 参考质量。\\
+$\mathcal Q_{\rm fb},\mathcal R_+$ & Context-source 候选中可估计的反馈 Query 与全部可估计地址；答案支持始终为原始 Values。\\
+$\xi,J_{\rm enc},\gamma_{\rm in}$ & 随机 codec realization、解码后集成次数和独立输入尺度对照。\\
+\bottomrule
+\end{longtable}
+
+\endgroup
+
+\paragraph{设计来源。}
+本文属于 TabU 第五代，默认算子与图源均在本文件内。第四代原语谱系、基线差分及原件缺失后的重绘/补写范围见源包，不构成隐藏依赖。
+
+\end{document}

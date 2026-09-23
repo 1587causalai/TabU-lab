@@ -13,6 +13,9 @@ from pathlib import Path
 
 import torch
 
+from .factory import artifact_schema
+from .protocol import SCHEMA, V54_SCHEMA
+
 CHECKPOINT_SCHEMA = "tabu.curriculum.v53.checkpoint.v1"
 
 
@@ -39,13 +42,40 @@ def append_event(path, value):
 
 
 def finite_state(value):
-    if isinstance(value, torch.Tensor):
-        return bool(torch.isfinite(value).all())
-    if isinstance(value, dict):
-        return all(finite_state(item) for item in value.values())
-    if isinstance(value, list | tuple):
-        return all(finite_state(item) for item in value)
-    return not isinstance(value, float) or math.isfinite(value)
+    """Return whether nested tensor state is finite with minimal host sync.
+
+    Tensor-by-tensor ``bool(torch.isfinite(...).all())`` checks force a device
+    synchronization for every parameter and optimizer slot. A curriculum
+    update can contain hundreds of tensors, which is particularly expensive on
+    MPS and also stalls CUDA launch overlap. Accumulate one scalar flag per
+    device and synchronize only once per device while preserving the same
+    fail-closed semantics, including mixed-device state dictionaries.
+    """
+    tensor_flags = {}
+    python_finite = True
+
+    def walk(item):
+        nonlocal python_finite
+        if isinstance(item, torch.Tensor):
+            tensor_flags.setdefault(item.device, []).append(
+                torch.isfinite(item).all().reshape(())
+            )
+        elif isinstance(item, dict):
+            for sub in item.values():
+                walk(sub)
+        elif isinstance(item, list | tuple):
+            for sub in item:
+                walk(sub)
+        elif isinstance(item, float) and not math.isfinite(item):
+            python_finite = False
+
+    walk(value)
+    if not python_finite:
+        return False
+    for flags in tensor_flags.values():
+        if not bool(torch.stack(flags).all()):
+            return False
+    return True
 
 
 def rng_state():
@@ -66,8 +96,9 @@ def restore_rng(state):
 def save_checkpoint(path, *, plan, model, optimizer, state, runtime, lineage, purpose="training"):
     if not finite_state(model.state_dict()) or not finite_state(optimizer.state_dict()):
         raise FloatingPointError("refusing to checkpoint nonfinite model or optimizer state")
+    schema = artifact_schema(plan.spec["schema"], "checkpoint")
     payload = {
-        "schema": CHECKPOINT_SCHEMA,
+        "schema": schema,
         "purpose": purpose,
         "identity": plan.identity,
         "model_config": model.config.as_dict(),
@@ -104,7 +135,7 @@ def save_checkpoint(path, *, plan, model, optimizer, state, runtime, lineage, pu
     atomic_json(
         path.with_suffix(".json"),
         {
-            "schema": CHECKPOINT_SCHEMA,
+            "schema": schema,
             "sha256": digest,
             "update": state["update"],
             "stage_index": state["stage_index"],
@@ -139,7 +170,10 @@ def load_checkpoint(path):
     if expected != digest:
         raise ValueError("checkpoint checksum mismatch")
     payload = torch.load(resolved, map_location="cpu", weights_only=True)
-    if payload.get("schema") != CHECKPOINT_SCHEMA:
+    identity_schema = payload.get("identity", {}).get("schema")
+    if identity_schema not in (SCHEMA, V54_SCHEMA) or payload.get("schema") != artifact_schema(
+        identity_schema, "checkpoint"
+    ):
         raise ValueError("checkpoint schema or identity mismatch")
     if not finite_state(payload["model"]) or not finite_state(payload["optimizer"]):
         raise FloatingPointError("nonfinite checkpoint state")

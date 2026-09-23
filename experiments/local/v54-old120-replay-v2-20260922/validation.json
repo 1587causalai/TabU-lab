@@ -1,0 +1,107 @@
+{
+  "utc": "2026-09-22T04:33:49.893719+00:00",
+  "migration_tests": {
+    "command": ".venv/bin/python -m pytest -q experiments/local/v54-old120-replay-v2-20260922/test_migrate_replay_v2.py",
+    "passed": 15,
+    "elapsed_seconds": 2.14
+  },
+  "independent_migration_review": "passed: old identity, clean full replay boundary, inherited extras, formula, allowed 3 source files, exact preserved tensors/state, content-addressed checkpoint readback",
+  "training_source_freeze": "0dfd1f3a6e350d5a5434f128ec25ce4277699f1a240f9891444b31374534c421",
+  "deployment": "all three running; initial state and real first162 verified",
+  "core_tests": {
+    "passed": 93,
+    "elapsed_seconds": 14.35
+  },
+  "full_curriculum_regression": {
+    "passed": 209,
+    "elapsed_seconds": 24.09
+  },
+  "ruff": "5 edited source/test files passed",
+  "monitoring_tests": {
+    "cycle_and_outbox_passed": 29,
+    "generic_monitor_passed": 8,
+    "coverage": [
+      "inherited extra counters and exposure",
+      "42-extra pass/poll boundaries",
+      "SQLite reopen",
+      "late fixed evaluation",
+      "v1 compatibility",
+      "normal120 P99"
+    ]
+  },
+  "root_independent_readback": {
+    "small": {
+      "utc": "2026-09-22T04:45:40.179997+00:00",
+      "state": "running",
+      "update": 124503,
+      "normal_update": 123183,
+      "extra_updates": 1320,
+      "new_actual_updates": 873,
+      "new_extra_updates": 210,
+      "identity_matches": true,
+      "source_matches": true,
+      "data_matches": true,
+      "initial_state_and_first_cycle": "receipt checked, passed"
+    },
+    "nano": {
+      "utc": "2026-09-22T04:45:38.265877+00:00",
+      "state": "running",
+      "update": 205769,
+      "normal_update": 203387,
+      "extra_updates": 2382,
+      "new_actual_updates": 1079,
+      "new_extra_updates": 252,
+      "identity_matches": true,
+      "source_matches": true,
+      "data_matches": true,
+      "initial_state_and_first_cycle": "receipt checked, passed"
+    },
+    "small-h4": {
+      "utc": "2026-09-22T04:48:22.806880+00:00",
+      "state": "running",
+      "update": 26684,
+      "normal_update": 24116,
+      "extra_updates": 2568,
+      "new_actual_updates": 764,
+      "new_extra_updates": 168,
+      "identity_matches": true,
+      "source_matches": true,
+      "data_matches": true,
+      "initial_state_and_first_cycle": "receipt checked, passed"
+    }
+  },
+  "automation": {
+    "id": "tabu-nano",
+    "status": "ACTIVE",
+    "rrule": "RRULE:FREQ=MINUTELY;INTERVAL=120",
+    "v2_policy_verified": true
+  },
+  "updated_utc": "2026-09-22T04:52:17.343727+00:00",
+  "wandb_cloud": {
+    "small": {
+      "utc": "2026-09-22T04:46:58.621292+00:00",
+      "url": "https://wandb.ai/zj3712/restoration/runs/v54-small-replay-v2-old120-dgx2-20260922",
+      "normal_cycles": 6,
+      "extra_points": 252,
+      "raw_sample_points": 10,
+      "metadata_and_fixed_snapshot_all_match": true
+    },
+    "nano": {
+      "utc": "2026-09-22T04:46:58.720922+00:00",
+      "url": "https://wandb.ai/zj3712/restoration/runs/v54-nano-replay-v2-old120-dustin-20260922",
+      "normal_cycles": 8,
+      "extra_points": 336,
+      "raw_sample_points": 13,
+      "metadata_and_fixed_snapshot_all_match": true
+    },
+    "small-h4": {
+      "utc": "2026-09-22T04:51:31.176770+00:00",
+      "url": "https://wandb.ai/zj3712/restoration/runs/v54-small-h4-replay-v2-old120-gq-20260922",
+      "normal_cycles": 4,
+      "extra_points": 168,
+      "raw_sample_points": 7,
+      "metadata_and_fixed_snapshot_all_match": true
+    }
+  },
+  "outcome": "completed: all three v2 trainers and W&B verified"
+}

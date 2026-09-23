@@ -125,7 +125,7 @@ def evaluate_probe(model, plan, probe, device, *, deadline=None):
                         # NMSE measures z-coordinate error. Raw sparse directions
                         # multiply TRAINING loss by 4, not this evaluation metric.
                         scale = score.output.facts[column.column].answers.scalar.scale
-                        errors = ((column.decoded - expected.double()) / scale).square()
+                        errors = ((column.decoded - expected.to(column.decoded.dtype)) / scale).square()
                     else:
                         errors = score.per_target[positions]
                     errors = errors.detach().cpu().tolist()

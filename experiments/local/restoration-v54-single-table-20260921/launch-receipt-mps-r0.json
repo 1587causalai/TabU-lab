@@ -1,0 +1,52 @@
+{
+  "active_replicates": [
+    {
+      "device": "mps",
+      "dtype": "float32",
+      "host": "gongqian-mini",
+      "manifest": "manifests/scm_mixed_v1_017.r0.json",
+      "pid": 8383,
+      "queue_pid": 8413,
+      "power_guard_pids": {"r0": 8493, "queue": 8494},
+      "run_root": "runs-mps/scm_mixed_v1_017.r0",
+      "runtime_id": "wehub-train-gongqian-mini-20260920",
+      "table": "scm_mixed_v1_017"
+    },
+    {
+      "device": "mps",
+      "dtype": "float32",
+      "host": "zichao-mini",
+      "manifest": "manifests/scm_mixed_v1_040.r0.json",
+      "pid": 70657,
+      "queue_pid": 70686,
+      "power_guard_pids": {"r0": 70768, "queue": 70769},
+      "run_root": "runs-mps/scm_mixed_v1_040.r0",
+      "runtime_id": "wehub-train-zichao-mini-20260920",
+      "table": "scm_mixed_v1_040"
+    },
+    {
+      "device": "mps",
+      "dtype": "float32",
+      "host": "dustinstudio",
+      "manifest": "manifests/discoscm_076.r0.json",
+      "pid": 56517,
+      "queue_pid": 56598,
+      "power_guard_pids": {"r0": 56967, "queue": 56968},
+      "run_root": "runs-mps/discoscm_076.r0",
+      "runtime_id": "wehub-train-dustinstudio-20260920",
+      "table": "discoscm_076"
+    }
+  ],
+  "code_commit": "3441837",
+  "episode_kind": "supervised_row",
+  "mps_cpu_fallback": false,
+  "preflight": {
+    "gongqian-mini": "runs-mps-preflight/scm_mixed_v1_017.r0",
+    "zichao-mini": "runs-mps-preflight/scm_mixed_v1_040.r0",
+    "dustinstudio": "runs-mps-preflight/discoscm_076.r0"
+  },
+  "replicates_per_table": 3,
+  "schema": "tabu.v54.single-table-mps-launch-receipt.v1",
+  "status": "active_at_capture",
+  "updates_per_replicate": 16384
+}

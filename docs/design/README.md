@@ -7,6 +7,24 @@ Its [minimal Python interface](../tutorials/model-independent-curriculum.md)
 binds existing frozen data and checks selection/provenance without starting training.
 It does not replace the model designs below or turn historical results into a fixed pipeline.
 
+## V5.4 restoration implementation
+
+[V5.4 implementation and episode choices](restoration-v54.md) describes the
+versioned Python and curriculum entry points, Small/Nano comparisons, and the
+current supervised-row default with random-cell as the first alternative.
+The linked [V5.4 TeX snapshot](TabU_V5p4_Unified_Composition.tex) preserves the
+owner design used for this code version; its source path and digest are recorded
+in the implementation note. V5.3 remains a distinct historical entry point.
+The [frozen V5.4 design package](TabU_V5p4_Unified_Composition/README.md) also
+archives the matching [TeX](TabU_V5p4_Unified_Composition/TabU_V5p4_Unified_Composition.tex)
+and [74-page PDF](TabU_V5p4_Unified_Composition/TabU_V5p4_Unified_Composition.pdf)
+in this repository. Its README identifies links that belong to the original
+owner workspace.
+
+[Next-design research handoff](vnext-research-handoff-2026-09-23.md) collects
+dated V5.4 fitting evidence and competing questions for a future owner design.
+It does not set a new model or training default.
+
 ## TAR implementation design snapshot
 
 [tar-model-design.tex](tar-model-design.tex) is an exact, read-only snapshot of the

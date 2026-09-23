@@ -14,6 +14,7 @@ import torch
 from torch import Tensor
 
 from ._validation import finite, matrix, positive
+from ._dtype import solve_dtype
 
 
 def unit_kernel_logits(
@@ -35,8 +36,9 @@ def unit_kernel_logits(
         raise ValueError("target and source Units must share a nonzero width")
     if target_units.device != source_units.device:
         raise ValueError("target and source Units must share a device")
-    targets = target_units.to(torch.float64)
-    sources = source_units.to(torch.float64)
+    dtype = solve_dtype(target_units)
+    targets = target_units.to(dtype)
+    sources = source_units.to(dtype)
     if not len(targets):
         return targets[:, :1] @ sources[:, :1].T
     blocks = []

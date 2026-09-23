@@ -18,6 +18,7 @@ from ..restoration.readout import EncodedRestoration
 from .codec_versions import CODEC_IDS, DEFAULT_CODEC_VERSION
 from .encoding import ANSWER_WIDTH, AffineValueEncoder, V53ColumnFacts
 from .readout import FeatureSlopeProvider, evaluate_column, shared_slope
+from ..restoration._dtype import solve_dtype
 
 
 @dataclass(frozen=True)
@@ -197,7 +198,7 @@ class V53Model(nn.Module):
                 if (slope.shape != (ANSWER_WIDTH, cells.shape[1])
                         or not slope.is_floating_point() or slope.device != h.device):
                     raise ValueError("Feature slope must have floating [128,d_R] shape on device")
-                slope = slope.double()
+                slope = slope.to(solve_dtype(slope))
                 finite(slope, "Feature slope")
             slopes[a] = slope
             result = evaluate_column(

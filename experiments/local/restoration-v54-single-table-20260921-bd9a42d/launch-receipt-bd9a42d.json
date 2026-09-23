@@ -1,0 +1,103 @@
+{
+  "active_replicates": [
+    {
+      "device": "cuda:0",
+      "dtype": "float64",
+      "host": "dgx2",
+      "manifest": "manifests/discoscm_095.r0.json",
+      "pid": 1832548,
+      "queue_pid": 1832723,
+      "run_root": "runs-bd9a42d/discoscm_095.r0",
+      "runtime_id": "wehub-train-dgx2-20260920",
+      "source_root": "/home/cms/tabu-v54-single-table-20260921-b0f18b8",
+      "table": "discoscm_095"
+    },
+    {
+      "device": "mps",
+      "dtype": "float32",
+      "host": "gongqian-mini",
+      "manifest": "manifests/scm_mixed_v1_017.r0.json",
+      "pid": 10797,
+      "power_guards": [
+        10802,
+        10803
+      ],
+      "queue_pid": 10801,
+      "run_root": "runs-bd9a42d/scm_mixed_v1_017.r0",
+      "runtime_id": "wehub-train-gongqian-mini-20260920",
+      "source_root": "/Users/gongqian/tabu-v54-single-table-20260921-b0f18b8",
+      "table": "scm_mixed_v1_017"
+    },
+    {
+      "device": "mps",
+      "dtype": "float32",
+      "host": "zichao-mini",
+      "manifest": "manifests/scm_mixed_v1_040.r0.json",
+      "pid": 72504,
+      "power_guards": [
+        72508,
+        72509
+      ],
+      "queue_pid": 72507,
+      "run_root": "runs-bd9a42d/scm_mixed_v1_040.r0",
+      "runtime_id": "wehub-train-zichao-mini-20260920",
+      "source_root": "/Users/shicho/tabu-v54-single-table-20260921-b0f18b8",
+      "table": "scm_mixed_v1_040"
+    },
+    {
+      "device": "mps",
+      "dtype": "float32",
+      "host": "dustinstudio",
+      "manifest": "manifests/discoscm_076.r0.json",
+      "pid": 66452,
+      "power_guards": [
+        66470,
+        66471
+      ],
+      "queue_pid": 66469,
+      "run_root": "runs-bd9a42d/discoscm_076.r0",
+      "runtime_id": "wehub-train-dustinstudio-20260920",
+      "source_root": "/Users/dustinstudio/tabu-v54-single-table-20260921-b0f18b8",
+      "table": "discoscm_076"
+    }
+  ],
+  "captured_local": "2026-09-21T18:48:00+08:00",
+  "center_chunk_size": 128,
+  "code_commit": "b0f18b8",
+  "codec_version": "constant_weight_composition_v1",
+  "episode_kind": "supervised_row",
+  "mps_cpu_fallback": false,
+  "old_panel": "stopped_before_launch",
+  "panel_budget_per_table": "16384 x 3 independent replicates",
+  "panel_queue_commit": "0ce95a4",
+  "pending_hosts": [
+    {
+      "availability": "temporarily_unavailable",
+      "center_chunk_size": 32,
+      "device": "cuda:0",
+      "dtype": "float64",
+      "host": "deepthought",
+      "manifest": "manifests/scm_mixed_v1_001.r0.json",
+      "reason": "User-confirmed temporarily unavailable; no WSL restart or launch attempted",
+      "runtime_id": "wehub-train-deepthought-20260920",
+      "source_root": "/home/windb/tabu-v54-single-table-20260921-b0f18b8",
+      "table": "scm_mixed_v1_001"
+    }
+  ],
+  "preflight": {
+    "passed": [
+      "dgx2/discoscm_095.r0",
+      "gongqian-mini/scm_mixed_v1_017.r0",
+      "zichao-mini/scm_mixed_v1_040.r0",
+      "dustinstudio/discoscm_076.r0"
+    ],
+    "pending": [
+      "deepthought/scm_mixed_v1_001.r0"
+    ],
+    "pending_reason": "deepthought temporarily unavailable; four-host panel remains active"
+  },
+  "replicates_per_table": 3,
+  "schema": "tabu.v54.single-table-launch-receipt.v2",
+  "status": "active_4_host_deepthought_unavailable",
+  "updates_per_replicate": 16384
+}

@@ -6,11 +6,11 @@ import json
 from pathlib import Path
 
 from .artifacts import atomic_json
-from .protocol import load_plan
+from .protocol import SCHEMA, V54_SCHEMA, load_plan
 
 
 def handle(args):
-    plan = load_plan(args.manifest)
+    plan = load_plan(args.manifest, expected_schema=args.curriculum_schema)
     if args.curriculum_command == "plan":
         result = {
             "outcome": "planned_not_run",
@@ -47,14 +47,19 @@ def handle(args):
 
 
 def add_commands(subparsers):
-    parser = subparsers.add_parser("curriculum-v53", help="reusable, bounded V5.3 curricula")
+    for version, schema in (("v53", SCHEMA), ("v54", V54_SCHEMA)):
+        _add_version(subparsers, version, schema)
+
+
+def _add_version(subparsers, version, schema):
+    parser = subparsers.add_parser(f"curriculum-{version}", help=f"bounded {version} curricula")
     commands = parser.add_subparsers(dest="curriculum_command", required=True)
     for name in ("plan", "preflight", "run", "evaluate"):
         command = commands.add_parser(name)
         command.add_argument("--manifest", type=Path, required=True)
         command.add_argument("--output-root", type=Path, required=name != "plan")
         if name != "plan":
-            command.add_argument("--device", choices=("cpu", "cuda:0"), default="cpu")
+            command.add_argument("--device", choices=("cpu", "cuda:0", "mps"), default="cpu")
         if name == "run":
             parent = command.add_mutually_exclusive_group()
             parent.add_argument("--resume-checkpoint", type=Path)
@@ -67,4 +72,4 @@ def add_commands(subparsers):
             )
         elif name == "preflight":
             command.add_argument("--max-seconds", type=float, default=120.0)
-        command.set_defaults(handler=handle)
+        command.set_defaults(handler=handle, curriculum_schema=schema)

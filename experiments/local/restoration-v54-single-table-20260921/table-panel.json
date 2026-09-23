@@ -1,0 +1,99 @@
+{
+  "budget_per_table": {
+    "replicates": 3,
+    "total_updates": 49152,
+    "updates_per_replicate": 16384
+  },
+  "episode_default": "supervised_row",
+  "experiment_id": "v54-single-table-panel-20260921",
+  "future_alternative": "random_cell",
+  "model": {
+    "codec_version": "constant_weight_composition_v1",
+    "numeric_scaling": "zscore",
+    "size": "small"
+  },
+  "schema": "tabu.v54.single-table-panel.v1",
+  "status": "local_unissued",
+  "tables": [
+    {
+      "feature_kinds": {
+        "nominal": 0,
+        "numeric": 12,
+        "ordinal": 0
+      },
+      "host": "deepthought",
+      "path": "data/scm_mixed_v1_001.json",
+      "rows": 256,
+      "sha256": "dac26a217f72464f9b97c1985024dcf9ab342f5583391c61f10ac36e92d80075",
+      "source": "experiments/local/tar-diverse-120-fit/corpus/data/scm_mixed_v1_001.json",
+      "table": "scm_mixed_v1_001",
+      "target_column": 11,
+      "target_kind": "numeric",
+      "width": 12
+    },
+    {
+      "feature_kinds": {
+        "nominal": 4,
+        "numeric": 2,
+        "ordinal": 2
+      },
+      "host": "gongqian-mini",
+      "path": "data/scm_mixed_v1_017.json",
+      "rows": 256,
+      "sha256": "6f846dc3a40bc9b6d2877ba3f0b7030dc0209a5a18e6f13dd7798e0b29f221e7",
+      "source": "experiments/local/tar-diverse-120-fit/corpus/data/scm_mixed_v1_017.json",
+      "table": "scm_mixed_v1_017",
+      "target_column": 7,
+      "target_kind": "nominal",
+      "width": 8
+    },
+    {
+      "feature_kinds": {
+        "nominal": 6,
+        "numeric": 5,
+        "ordinal": 1
+      },
+      "host": "zichao-mini",
+      "path": "data/scm_mixed_v1_040.json",
+      "rows": 256,
+      "sha256": "1a120b122e7cabf5fe802f7658e901a9c593e76a334efb9305a0c43c46ac85a5",
+      "source": "experiments/local/tar-diverse-120-fit/corpus/data/scm_mixed_v1_040.json",
+      "table": "scm_mixed_v1_040",
+      "target_column": 11,
+      "target_kind": "nominal",
+      "width": 12
+    },
+    {
+      "feature_kinds": {
+        "nominal": 7,
+        "numeric": 16,
+        "ordinal": 9
+      },
+      "host": "dustinstudio",
+      "path": "data/discoscm_076.json",
+      "rows": 256,
+      "sha256": "fdee7c02c82515ff63e0bd60afc155c5bf69edf615f16e64cba60da48ffb4c6b",
+      "source": "experiments/local/tar-diverse-120-fit/corpus/data/discoscm_076.json",
+      "table": "discoscm_076",
+      "target_column": 31,
+      "target_kind": "numeric",
+      "width": 32
+    },
+    {
+      "feature_kinds": {
+        "nominal": 23,
+        "numeric": 7,
+        "ordinal": 2
+      },
+      "host": "dgx2",
+      "path": "data/discoscm_095.json",
+      "rows": 256,
+      "sha256": "e698b370e478a6930e59eff63ac7c360cdeec2ddae45c886ba148afc3ffda8f8",
+      "source": "experiments/local/tar-diverse-120-fit/corpus/data/discoscm_095.json",
+      "table": "discoscm_095",
+      "target_column": 31,
+      "target_kind": "nominal",
+      "width": 32
+    }
+  ]
+}

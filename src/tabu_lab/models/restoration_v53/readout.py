@@ -1,8 +1,9 @@
 """One column-shared slope, fitted over ALL current Unit centers (pi=1/N).
 
-FP64 sufficient-statistic reference. Center chunks bound forward temporaries;
-autograd still retains intermediates across chunks. This is not yet a bounded
-training-memory implementation or a production throughput claim.
+The sufficient-statistic path supports the recorded FP64 CPU/CUDA and FP32
+MPS runtimes. Center chunks bound forward temporaries; autograd still retains
+intermediates across chunks. This is not yet a bounded training-memory
+implementation or a production throughput claim.
 """
 
 from __future__ import annotations
@@ -11,6 +12,7 @@ import torch
 from torch import Tensor, nn
 
 from ..restoration._validation import finite, matrix, positive
+from ..restoration._dtype import solve_dtype
 from ..restoration.readout import EncodedRestoration, unit_kernel_logits
 
 
@@ -69,8 +71,9 @@ def shared_slope(
         raise ValueError("support rows must be distinct, in bounds and aligned")
     if any(t.device != units.device for t in (support_rows, support_cells, answers)):
         raise ValueError("readout tensors must share a device")
-    x = support_cells.double() - support_cells[:1].double()
-    y = answers.detach().double() - answers[:1].detach().double()
+    dtype = solve_dtype(units)
+    x = support_cells.to(dtype) - support_cells[:1].to(dtype)
+    y = answers.detach().to(dtype) - answers[:1].detach().to(dtype)
     source_units = units[support_rows]
     covariance = x.new_zeros(x.shape[1], x.shape[1])
     cross = x.new_zeros(x.shape[1], y.shape[1])
@@ -88,6 +91,13 @@ def shared_slope(
     system = system + ridge * torch.eye(x.shape[1], dtype=x.dtype, device=x.device)
     finite(system, "column-shared ridge system")
     finite(cross, "column-shared cross moment")
+    # Keep the solve on the execution device. The old MPS branch copied the
+    # sufficient statistics to CPU for Cholesky and copied the slope back on
+    # every training step. Besides making MPS materially slower, that split
+    # the forward graph across devices and made the advertised MPS/FP32 path
+    # false. Qualified PyTorch MPS runtimes implement both ``cholesky_ex`` and
+    # ``cholesky_solve`` for this small FP32 system, so the device-local path
+    # is the reference for every backend.
     factor, info = torch.linalg.cholesky_ex(system)
     if bool((info != 0).any()):
         raise FloatingPointError("numerical-failure: column-shared LL Cholesky failed")
@@ -110,16 +120,17 @@ def evaluate_column(
     """Local means + shared slope adjustment; vector answers remain unprojected."""
     if not len(support_rows):
         return EncodedRestoration("no-support", 0)
-    source_cells, source_units = cells[support_rows].double(), units[support_rows]
+    dtype = solve_dtype(units)
+    source_cells, source_units = cells[support_rows].to(dtype), units[support_rows]
     # Evaluate in shifted coordinates to avoid subtracting large local means.
     origin = source_cells[:1]
     x = source_cells - origin
-    answer_origin = answers[:1].detach().double()
-    y = answers.detach().double() - answer_origin
+    answer_origin = answers[:1].detach().to(dtype)
+    y = answers.detach().to(dtype) - answer_origin
     predictions = []
     for rows in target_rows.split(chunk_size):
         weights = normalized_weights(units[rows], source_units, bandwidth)
-        delta = (cells[rows].double() - origin) - weights @ x
+        delta = (cells[rows].to(dtype) - origin) - weights @ x
         encoded = answer_origin + weights @ y + delta @ slope.T
         finite(encoded, "V5.3 restored encoding")
         predictions.append(encoded)

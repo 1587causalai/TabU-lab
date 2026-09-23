@@ -1,0 +1,89 @@
+{
+  "description": "V5.4 full-corpus single-table fit: scm_mixed_v1_029, independent replicate 0, 16384 updates.",
+  "experiment_id": "v54-single120-scm_mixed_v1_029-r0-20260921",
+  "model": {
+    "codec_version": "constant_weight_composition_v1",
+    "numeric_scaling": "zscore",
+    "size": "small"
+  },
+  "optimizer": {
+    "betas": [
+      0.9,
+      0.95
+    ],
+    "eps": 1e-08,
+    "grad_clip": 1.0,
+    "learning_rate": 0.0001,
+    "weight_decay": 0.01
+  },
+  "probes": [
+    {
+      "cohorts": [
+        "scm_mixed_v1_029"
+      ],
+      "masks": 8,
+      "name": "train_fit",
+      "partition": "train",
+      "purpose": "fit",
+      "recipe": {
+        "fraction": 0.25
+      }
+    },
+    {
+      "cohorts": [
+        "scm_mixed_v1_029"
+      ],
+      "masks": 1,
+      "name": "final_test",
+      "partition": "test",
+      "purpose": "final_test",
+      "recipe": {
+        "fraction": 0.25
+      }
+    }
+  ],
+  "schema": "tabu.curriculum.v54.v1",
+  "seeds": {
+    "codes": 541773,
+    "evaluation": 541775,
+    "masks": 541772,
+    "model": 541770,
+    "order": 541771,
+    "windows": 541774
+  },
+  "stages": [
+    {
+      "checkpoint_every": 512,
+      "evaluate_every": 1024,
+      "max_seconds": 172800.0,
+      "max_updates": 16384,
+      "name": "single_table_fit",
+      "optimizer": "adamw",
+      "probes": [
+        "train_fit"
+      ],
+      "question": "Can V5.4 composition learn this one frozen table under supervised-row Query masking?",
+      "recipe": {
+        "synthetic": {
+          "fraction": 0.25
+        }
+      },
+      "sampling": [
+        {
+          "cohort": "scm_mixed_v1_029",
+          "episodes": 1
+        }
+      ]
+    }
+  ],
+  "tables": [
+    {
+      "cohort": "scm_mixed_v1_029",
+      "id": "scm_mixed_v1_029",
+      "kind": "synthetic",
+      "path": "../../tar-diverse-120-fit/corpus/data/scm_mixed_v1_029.json",
+      "sha256": "9151c2dd43595168d8e6d9f6838aa30398055614a62a57bf4a00825566b3591c",
+      "target_column": 11
+    }
+  ]
+}

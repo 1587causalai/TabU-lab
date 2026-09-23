@@ -8,10 +8,12 @@ from pathlib import Path
 
 import torch
 
-from tabu_lab.models.restoration_v53 import V53LossConfig, V53Model
+from tabu_lab.models.restoration_v53 import V53LossConfig
+from tabu_lab.models.restoration._dtype import execution_dtype
 from tabu_lab.restoration_optimizers import adamw, switch_to_muon
 
 from .artifacts import atomic_json, load_checkpoint, restore_rng, save_checkpoint
+from .factory import artifact_schema, make_model
 from .runner import _new_state, _seed_model, configure_runtime, train_step
 
 
@@ -22,7 +24,7 @@ def preflight(plan, output, *, device="cpu", max_seconds=120.0):
     output.mkdir(parents=True, exist_ok=False)
     started = time.monotonic()
     result = {
-        "schema": "tabu.curriculum.v53.preflight.v1",
+        "schema": artifact_schema(plan.spec["schema"], "preflight"),
         "status": "local_unissued",
         "outcome": "started",
         "identity": plan.identity,
@@ -51,7 +53,7 @@ def preflight(plan, output, *, device="cpu", max_seconds=120.0):
                 if time.monotonic() - started >= max_seconds:
                     raise TimeoutError("preflight budget exhausted before next probe")
                 _seed_model(plan)
-                model = V53Model(plan.config).to(device=device, dtype=torch.float64)
+                model = make_model(plan).to(device=device, dtype=execution_dtype(device))
                 optimizer = adamw(model, plan.optimizer)
                 if stage["optimizer"] == "muon":
                     optimizer, _ = switch_to_muon(optimizer, model, plan.optimizer)
@@ -81,7 +83,7 @@ def preflight(plan, output, *, device="cpu", max_seconds=120.0):
                     purpose="preflight",
                 )
                 payload, _digest = load_checkpoint(checkpoint)
-                clone = V53Model(plan.config).to(device=device, dtype=torch.float64)
+                clone = make_model(plan).to(device=device, dtype=execution_dtype(device))
                 clone.load_state_dict(payload["model"])
                 other = adamw(clone, plan.optimizer)
                 if stage["optimizer"] == "muon":

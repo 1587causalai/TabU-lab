@@ -22,6 +22,7 @@ import torch
 from torch import Tensor, nn
 
 from ._validation import finite, positive
+from ._dtype import solve_dtype
 
 
 @dataclass(frozen=True)
@@ -84,7 +85,8 @@ class OMAB(nn.Module):
         source. The output check below reports it without adding a host sync here.
         """
         projection = self.ff_presence if local else self.attention_presence
-        projected = torch.nn.functional.linear(carriers.double(), projection.weight.double())
+        dtype = solve_dtype(carriers)
+        projected = torch.nn.functional.linear(carriers.to(dtype), projection.weight.to(dtype))
         finite_projection = torch.isfinite(projected).all(-1)
         scale = projected.abs().amax(-1)
         active = scale > 0
@@ -160,15 +162,16 @@ class OMAB(nn.Module):
         q = self.q(receivers).reshape(batch, n_receivers, heads, dim).transpose(1, 2)
         k = self.k(sources).reshape(batch, -1, heads, dim).transpose(1, 2)
         v = self.v(sources).reshape(batch, -1, heads, dim).transpose(1, 2)
-        content = q.double() @ k.double().transpose(-1, -2) / math.sqrt(dim)
+        dtype = solve_dtype(q)
+        content = q.to(dtype) @ k.to(dtype).transpose(-1, -2) / math.sqrt(dim)
         logits = content + log_p_source[:, None, None, :]
         reference = logits.new_full(
             (*logits.shape[:-1], 1), math.log(self.config.reference_mass)
         )
         weights = torch.cat((logits, reference), -1).softmax(-1)[..., :-1]
-        mixed = (weights @ v.double()).transpose(1, 2).reshape(batch, n_receivers, -1)
+        mixed = (weights @ v.to(dtype)).transpose(1, 2).reshape(batch, n_receivers, -1)
         update = torch.nn.functional.linear(
-            self.presence(receivers)[..., None] * mixed, self.out.weight.double()
+            self.presence(receivers)[..., None] * mixed, self.out.weight.to(dtype)
         ).to(receivers)
         residual = receivers + update
         normalized = (
@@ -178,7 +181,7 @@ class OMAB(nn.Module):
         )
         local_update = self.presence(residual, local=True)[..., None] * self.ff(
             normalized
-        ).double()
+        ).to(residual)
         result = residual + local_update.to(residual)
         finite(result, "OMAB output")
         return result, log_p_source
