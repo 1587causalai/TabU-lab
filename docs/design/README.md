@@ -15,6 +15,11 @@ current supervised-row default with random-cell as the first alternative.
 The linked [V5.4 TeX snapshot](TabU_V5p4_Unified_Composition.tex) preserves the
 owner design used for this code version; its source path and digest are recorded
 in the implementation note. V5.3 remains a distinct historical entry point.
+The [frozen V5.4 design package](TabU_V5p4_Unified_Composition/README.md) also
+archives the matching [TeX](TabU_V5p4_Unified_Composition/TabU_V5p4_Unified_Composition.tex)
+and [74-page PDF](TabU_V5p4_Unified_Composition/TabU_V5p4_Unified_Composition.pdf)
+in this repository. Its README identifies links that belong to the original
+owner workspace.
 
 [Next-design research handoff](vnext-research-handoff-2026-09-23.md) collects
 dated V5.4 fitting evidence and competing questions for a future owner design.
