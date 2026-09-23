@@ -17,6 +17,8 @@ from tabu_lab.models.restoration_v53 import BackboneConfig, V53Config, V53LossCo
 from tabu_lab.restoration_masking import default_v53_query_guard, validate_numeric_query_guard
 from tabu_lab.restoration_optimizers import OptimizerConfig
 
+from . import loss_replay
+
 SCHEMA = "tabu.curriculum.v53.v1"
 V54_SCHEMA = "tabu.curriculum.v54.v1"
 _SEEDS = {"model", "order", "masks", "codes", "windows", "evaluation"}
@@ -248,7 +250,7 @@ def _stages(value, tables, probes, *, default_kind=None):
             cohort_kinds.setdefault(table["cohort"], set()).add(table["kind"])
     required = {"name", "question", "max_updates", "max_seconds", "sampling", "recipe",
                 "optimizer", "evaluate_every", "checkpoint_every", "probes"}
-    allowed = required | {"gate", "loss"}
+    allowed = required | {"gate", "loss", "loss_replay"}
     previous_optimizer = "adamw"
     for raw in _list(value, "stages"):
         stage = _mapping(raw, "stage", allowed, required)
@@ -273,6 +275,38 @@ def _stages(value, tables, probes, *, default_kind=None):
             _integer(item["episodes"], "sampling.episodes")
             sampling.append(item)
         stage["sampling"] = sampling
+        if "loss_replay" in stage:
+            if default_kind != "supervised_row":
+                raise ValueError("loss_replay requires a V5.4 plan")
+            policy = _mapping(stage["loss_replay"], "loss_replay",
+                              {"kind", "normal_max_updates", "start_normal_cursor",
+                               "start_extra_updates"},
+                              {"kind", "normal_max_updates"})
+            extra_cycle = loss_replay.extras_per_cycle(policy["kind"])
+            if policy["kind"] == loss_replay.V1:
+                if "start_extra_updates" in policy:
+                    raise ValueError("loss_replay v1 does not accept start_extra_updates")
+                start_extra = 0
+            else:
+                if "start_extra_updates" not in policy:
+                    raise ValueError("loss_replay v2 requires explicit start_extra_updates")
+                start_extra = _integer(policy["start_extra_updates"],
+                                       "start_extra_updates", minimum=0)
+            normal = _integer(policy["normal_max_updates"], "normal_max_updates")
+            start = _integer(policy.get("start_normal_cursor", 0),
+                             "start_normal_cursor", minimum=0)
+            if normal % 120 or start % 120 or start >= normal:
+                raise ValueError("loss_replay needs complete remaining 120-table cycles")
+            selected = [table for table in tables
+                        if table["role"] == "train" and table["cohort"] in sampled]
+            if (len(selected) != 120 or len(sampling) != 1
+                    or sampling[0]["episodes"] != 120):
+                raise ValueError("loss_replay requires one cohort with exactly 120 train tables")
+            actual = normal + start_extra + (normal - start) // 120 * extra_cycle
+            if stage["max_updates"] != actual:
+                raise ValueError(f"loss_replay max_updates must be {actual} actual optimizer steps")
+            policy["start_normal_cursor"] = start
+            stage["loss_replay"] = policy
         recipes = _mapping(stage["recipe"], f"stage {name}.recipe", {"synthetic", "real"}, kinds)
         stage["recipe"] = {kind: _recipe(recipe, f"stage {name}.recipe.{kind}",
                                          default_kind=default_kind)
@@ -329,6 +363,8 @@ def _stages(value, tables, probes, *, default_kind=None):
                                  "states 2/3 must be zero and states 0/1 need positive weight")
         stage["loss"] = asdict(resolved_loss)
         result.append(stage)
+    if len(result) != 1 and any("loss_replay" in stage for stage in result):
+        raise ValueError("loss_replay supports a single bounded stage")
     return result
 
 
@@ -369,6 +405,18 @@ def _summary(spec):
                        "cycle_updates": length, "exposure": exposure,
                        "optimizer": stage["optimizer"], "loss": stage["loss"],
                        "probes": stage["probes"], "gate": stage.get("gate")})
+        if "loss_replay" in stage:
+            policy = stage["loss_replay"]
+            extra_cycle = loss_replay.extras_per_cycle(policy["kind"])
+            stages[-1].update(loss_replay=policy, normal_cycle_updates=120,
+                              extra_cycle_updates=extra_cycle,
+                              actual_cycle_updates=120 + extra_cycle,
+                              extra_max_updates=stage["max_updates"]
+                              - policy["normal_max_updates"])
+            if policy["kind"] == loss_replay.V2:
+                stages[-1]["new_extra_max_updates"] = (
+                    stage["max_updates"] - policy["normal_max_updates"]
+                    - policy["start_extra_updates"])
     return {
         "schema": spec["schema"], "status": "local_unissued", "outcome": "planned",
         "execution_started": False, "experiment_id": spec["experiment_id"],

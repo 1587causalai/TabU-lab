@@ -338,6 +338,11 @@ def build_episode(table: Table, recipe: dict, index: int, seeds: dict, device: s
             labels = set(table.holdout_values[partition][table.target_column].tolist())
             if not labels <= support:
                 raise ValueError("no-answer-code: reserved target class has no training support")
+    # The mask is sampled on CPU. Record its audit before device transfer so
+    # accelerator episodes do not immediately copy it and its counts back.
+    addresses = [[row_ids[r], a] for r, a in query.nonzero().tolist()]
+    query_per_column = query.sum(0).tolist()
+    visible_per_column = [len(row_ids) - count for count in query_per_column]
     query = query.to(device)
     if device == "mps":
         values = tuple(
@@ -351,16 +356,15 @@ def build_episode(table: Table, recipe: dict, index: int, seeds: dict, device: s
         table.schema, values, torch.ones_like(query), query,
         code_seed=code_seed,
     )
-    addresses = [[row_ids[r], a] for r, a in query.cpu().nonzero().tolist()]
     info = {
         **audit, "table": table.name, "cohort": table.cohort, "kind": table.kind,
         "role": table.role, "partition": partition, "evaluation": evaluation,
         "index": index, "mask_mode": kind, "fraction": fraction,
         "row_ids": list(row_ids), "query_addresses": addresses,
-        "query_count": len(addresses), "query_per_column": query.sum(0).cpu().tolist(),
+        "query_count": len(addresses), "query_per_column": query_per_column,
         "query_cell_fraction": len(addresses) / (len(row_ids) * table.width),
         "query_row_fraction": len({r for r, _ in addresses}) / len(row_ids),
-        "visible_per_column": inputs.visible.sum(0).cpu().tolist(),
+        "visible_per_column": visible_per_column,
         "numeric_query_guard": audit.get("numeric_query_guard", guard),
         "codec_version": codec_version, "support_policy": support_policy,
         "protected_numeric_tail_cells": audit.get("protected_numeric_tail_cells", 0),

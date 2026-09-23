@@ -15,14 +15,16 @@ from pathlib import Path
 
 import torch
 
+from tabu_lab.models.restoration._dtype import execution_dtype
 from tabu_lab.models.restoration_v53 import (
     V53LossConfig,
     prepare_episode,
     score_prepared_episode,
 )
-from tabu_lab.models.restoration._dtype import execution_dtype
+from tabu_lab.models.restoration_v53.training import prepare_training_episode
 from tabu_lab.restoration_optimizers import adamw, switch_to_muon
 
+from . import loss_replay
 from .artifacts import (
     append_event,
     atomic_json,
@@ -35,7 +37,7 @@ from .artifacts import (
 from .data import build_episode
 from .evaluation import BudgetExhausted, evaluate_probe
 from .factory import artifact_schema, make_model
-from .protocol import schedule_entry
+from .protocol import V54_SCHEMA, schedule_entry
 from .reporting import write_report
 
 
@@ -114,10 +116,11 @@ def _loss_terms(score, prepared, config):
     # Transfer the small metric vector once instead of synchronizing once per
     # state/type term. The loss itself is already detached above.
     values = torch.stack([result[name] for name in names]).cpu().tolist()
-    return dict(zip(names, values))
+    return dict(zip(names, values, strict=True))
 
 
-def train_step(model, optimizer, plan, table, recipe, index, device, loss_config, *, namespace=""):
+def train_step(model, optimizer, plan, table, recipe, index, device, loss_config, *, namespace="",
+               full_readout=False):
     started = time.monotonic()
     seeds = dict(plan.spec["seeds"])
     for stream in ("masks", "codes", "windows"):
@@ -129,7 +132,14 @@ def train_step(model, optimizer, plan, table, recipe, index, device, loss_config
         codec_version=plan.config.codec_version,
     )
     model.train()
-    prepared = prepare_episode(model, inputs, request, truth)
+    # V5.4's zero retained weight does not require fitting every feature column
+    # or reconstructing retained cells on every optimizer step. Admission is
+    # still full-episode; fixed evaluations retain the full readout. The switch
+    # keeps an executable reference for same-backend speed/numerical checks.
+    active_readout = plan.spec["schema"] == V54_SCHEMA and not full_readout
+    prepared = (prepare_training_episode(model, inputs, request, truth, loss_config,
+                                         keep_zero_weight_rows=device == "mps")
+                if active_readout else prepare_episode(model, inputs, request, truth))
     optimizer.zero_grad(set_to_none=True)
     score = score_prepared_episode(model, prepared, loss_config=loss_config)
     score.loss.backward()
@@ -156,6 +166,9 @@ def train_step(model, optimizer, plan, table, recipe, index, device, loss_config
         "clipped_gradient_norm": float(post_norm),
         "seconds": time.monotonic() - started,
         "episode": info,
+        "readout_scope": ("nonzero_loss_columns" if device == "mps" else "nonzero_loss_targets")
+                         if active_readout else "all_observations",
+        "readout_targets": len(prepared.visible.request.targets),
     }
 
 
@@ -169,6 +182,10 @@ def _exposure(state, row):
             "query_row_visits": {},
         },
     )
+    if "update_kind" in row:
+        item.setdefault("normal_updates", item["updates"])
+        item.setdefault("extra_updates", 0)
+        item["normal_updates" if row["update_kind"] == "normal" else "extra_updates"] += 1
     item["updates"] += 1
     item["query_cells"] += row["episode"]["query_count"]
     for address in row["episode"]["row_ids"]:
@@ -193,6 +210,47 @@ def _new_state(stages):
         "exposure": {},
         "stage_verdicts": [],
     }
+
+
+def _replay_tables(plan, stage):
+    cohorts = {entry["cohort"] for entry in stage["sampling"]}
+    return sorted(table.name for table in plan.tables
+                  if table.role == "train" and table.cohort in cohorts)
+
+
+def _replay_progress(state):
+    replay = state.get("loss_replay")
+    if replay is None:
+        return {}
+    return {"normal_update": replay["normal_cursor"],
+            "extra_updates": replay["extra_updates"],
+            "normal_cycle": replay["cycle_index"]}
+
+
+def _validate_replay_progress(replay, plan, stage):
+    policy = stage["loss_replay"]
+    loss_replay.validate_state(replay, _replay_tables(plan, stage))
+    if replay.get("kind", loss_replay.V1) != policy["kind"]:
+        raise ValueError("checkpoint loss_replay kind disagrees with policy")
+    base_extras = policy.get("start_extra_updates", 0)
+    if sum(replay.get("base_extra_by_table", {}).values()) != base_extras:
+        raise ValueError("checkpoint loss_replay inherited extra baseline disagrees with policy")
+    if not policy["start_normal_cursor"] <= replay["normal_cursor"] <= policy["normal_max_updates"]:
+        raise ValueError("checkpoint loss_replay counters disagree with policy")
+    per_cycle = loss_replay.extras_per_cycle(policy["kind"])
+    due = base_extras + (replay["normal_cursor"] - policy["start_normal_cursor"]) // 120 * per_cycle
+    pending = per_cycle - replay["queue_cursor"] if replay["queue"] else 0
+    if replay["extra_updates"] != due - pending:
+        raise ValueError("checkpoint loss_replay skipped or duplicated an extra cycle")
+
+
+def _initial_replay_state(plan, stage, cursor):
+    policy = stage["loss_replay"]
+    if cursor != policy["start_normal_cursor"] or policy.get("start_extra_updates", 0):
+        raise ValueError("loss_replay continuation requires an explicit migrated checkpoint")
+    return loss_replay.new_state(_replay_tables(plan, stage),
+                                 start_normal_cursor=policy["start_normal_cursor"],
+                                 kind=policy["kind"])
 
 
 def _validate_resume(payload, plan, runtime):
@@ -235,6 +293,24 @@ def _validate_resume(payload, plan, runtime):
         and not 0 <= state["cursor"] <= plan.spec["stages"][index]["max_updates"]
     ):
         raise ValueError("checkpoint cursor outside the stage")
+    if index < len(plan.spec["stages"]):
+        stage = plan.spec["stages"][index]
+        policy = stage.get("loss_replay")
+        if policy:
+            replay = state.get("loss_replay")
+            _validate_replay_progress(replay, plan, stage)
+            if state["cursor"] != replay["normal_cursor"] + replay["extra_updates"]:
+                raise ValueError("checkpoint loss_replay counters disagree with policy")
+        elif "loss_replay" in state:
+            raise ValueError("checkpoint has undeclared loss_replay state")
+    elif plan.spec["stages"][-1].get("loss_replay"):
+        stage = plan.spec["stages"][-1]
+        replay = state.get("loss_replay")
+        _validate_replay_progress(replay, plan, stage)
+        if (replay["normal_cursor"] != stage["loss_replay"]["normal_max_updates"]
+                or replay["normal_cursor"] + replay["extra_updates"] != stage["max_updates"]
+                or replay["queue"] or replay["partial"]):
+            raise ValueError("completed checkpoint has unfinished loss_replay budget")
 
 
 def run(
@@ -331,6 +407,7 @@ def run(
                 "stage": stage["name"],
                 "update": state["update"],
                 "cursor": state["cursor"],
+                **_replay_progress(state),
                 "probes": values,
             },
         )
@@ -403,6 +480,11 @@ def run(
                 model.load_state_dict(payload["model"])
                 # Explicit initialization resets optimizer, RNG and scheduling.
                 _seed_model(plan)
+        if state["stage_index"] < len(stages):
+            initial_stage = stages[state["stage_index"]]
+            policy = initial_stage.get("loss_replay")
+            if policy and "loss_replay" not in state:
+                state["loss_replay"] = _initial_replay_state(plan, initial_stage, state["cursor"])
         first_update = state["update"]
         save()
         # Also check a resumed completed cursor: final checkpoint IO may have
@@ -481,13 +563,32 @@ def run(
                 )
                 if state["stage_index"] == len(stages):
                     state["phase"] = "completed"
+                else:
+                    state.pop("loss_replay", None)
                 save(f"stage-{old_index:03d}-final.pt", attribution=old_index)
                 save(attribution=old_index)
                 if state["stage_seconds"][old_index] >= stage["max_seconds"]:
                     raise BudgetExhausted(f"stage {stage['name']} final saving exceeded budget")
                 continue
             budget()
-            table, index = schedule_entry(plan, state["stage_index"], state["cursor"])
+            policy = stage.get("loss_replay")
+            update_kind, namespace = "normal", stage["name"]
+            if policy:
+                if "loss_replay" not in state:
+                    state["loss_replay"] = _initial_replay_state(plan, stage, state["cursor"])
+                extra = loss_replay.next_extra(state["loss_replay"])
+                if extra:
+                    table = next(table for table in plan.tables if table.name == extra["table"])
+                    index, update_kind = extra["table_episode_index"], extra["update_kind"]
+                    namespace += ("/loss_replay_v2" if policy["kind"] == loss_replay.V2
+                                  else "/loss_replay_v1")
+                else:
+                    normal_cursor = state["loss_replay"]["normal_cursor"]
+                    if normal_cursor >= policy["normal_max_updates"]:
+                        raise ValueError("normal budget exhausted before actual-step budget")
+                    table, index = schedule_entry(plan, state["stage_index"], normal_cursor)
+            else:
+                table, index = schedule_entry(plan, state["stage_index"], state["cursor"])
             row = train_step(
                 model,
                 optimizer,
@@ -497,8 +598,13 @@ def run(
                 index,
                 device,
                 V53LossConfig(**stage.get("loss", {})),
-                namespace=stage["name"],
+                namespace=namespace,
             )
+            if policy:
+                state["loss_replay"] = (
+                    loss_replay.record_normal(state["loss_replay"], table.name, row["loss"])
+                    if update_kind == "normal" else loss_replay.record_extra(state["loss_replay"]))
+                row.update(update_kind=update_kind, **_replay_progress(state))
             state["update"] += 1
             state["cursor"] += 1
             _exposure(state, row)
@@ -549,6 +655,7 @@ def run(
             exposure=state["exposure"],
             stage_verdicts=state["stage_verdicts"],
             lineage=lineage,
+            **_replay_progress(state),
             checkpoint="checkpoint-progress.pt" if checkpoint_digest else None,
             checkpoint_sha256=checkpoint_digest,
         )
