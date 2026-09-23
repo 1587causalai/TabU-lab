@@ -2,6 +2,8 @@
 
 2026-09-23 09:54–09:57（Asia/Shanghai）只读快照。三路 replay-v2 当时均在训练，**没有终态**；数字只表示训练行固定 Query 拟合，不涉及 reserved / final_test 或未见表泛化。完整的 120 表逐表曲线、来源身份、曝光和参考线保存在 [dgx2 Small 状态](../../experiments/local/v54-small-replay-v2-old120-20260922/status-20260923T015407Z.json)、[dustinstudio Nano 状态](../../experiments/local/v54-nano-replay-v2-old120-20260922/status-20260923T015405Z.json)、[gongqian-mini Small-H4 状态](../../experiments/local/v54-small-h4-replay-v2-old120-20260922/status-20260923T015406Z.json)。本报告是有时间戳的阶段证据，不取代后续终态。
 
+上述三份完整状态 JSON 与检查点保留在原工作区，不随 Git 分发；Git 中的本报告和冻结索引只保存摘要、路径及 SHA，不能替代原始逐表回执或权重。
+
 | 任务 | 实际 / 正常更新 | 最近完整固定 Query | 57 张数值表 R² 中位数 | 43 张 nominal 准确率中位数 | 20 张 ordinal 准确率中位数 |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | dgx2 标准 Small，3 层／8 heads／Unit3 | 363,975 / 300,579 | 353,280 | 0.799 | 0.686 | 0.460 |

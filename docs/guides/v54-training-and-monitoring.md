@@ -4,6 +4,8 @@
 
 本文把已经用过、遇到过问题并核验过的做法整理为后续操作依据。**训练目标、数据权限和预算以用户最新指令及对应实验 manifest / decisions 为准；运行状态以带时间戳的真实读回为准。** 本文不把历史快照当实时状态，不替代设计文档或启动授权。
 
+Git 只归档复用所需的协议、脚本、摘要与冻结索引。文中部分状态 JSON、原始数据、训练日志和权重链接指向原工作区的本机实验产物；新 checkout 不含这些产物，不能仅凭本文恢复检查点或复核完整逐表曲线。
+
 - 数学设计与实现合同：[V5.4 设计入口](../design/restoration-v54.md)。
 - 当前加训合同：[old120 replay-v2](../../experiments/local/v54-old120-replay-v2-20260922/README.md)。
 - 日常查看：[restoration5.4 专用工作区](https://wandb.ai/zj3712/restoration?nw=brg2pegawui)。

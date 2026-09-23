@@ -16,10 +16,10 @@
 
 本地 repo：`/Users/cms/.openclaw/workspace/projects/causal-superintelligence/TabU/tabu-lab`。
 
-以下链接均相对此文：
+以下两个代码路径相对仓库根目录，其他链接相对此文；原始数据、manifest 和运行状态保留在本机实验目录，未随 Git 分发。仓库中的本文只保存阶段性结论和索引：
 
-- [r0 manifests](../../experiments/local/v54-nano-fit-20260921/manifests/)
-- [冻结数据](../../experiments/local/v54-nano-fit-20260921/data/)
+- `experiments/local/v54-nano-fit-20260921/manifests/`：本机 r0 manifests
+- `experiments/local/v54-nano-fit-20260921/data/`：本机冻结数据
 - [常数参考及逐表指标](../../experiments/local/v54-nano-fit-20260921/naive-query-reference.json)
 - [当前主线预算与调度来源](../../experiments/local/v54-nano-fit-20260921/ALLOCATION.md)
 - [主线状态记录](../../experiments/local/v54-nano-fit-20260921/followup-decisions.json)
