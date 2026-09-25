@@ -1,5 +1,7 @@
 # 标准 Small H8 old120：replay v2 接续
 
+**当前终态（2026-09-25）：用户主动提前收束，已封存 checkpoint；不再训练。** 终态、预算差额、固定 Query 与 W&B 回执见 [CLOSURE.md](CLOSURE.md)。下文的启动和运行说明保留其历史时间含义。
+
 UTC2026-09-22 04:41:11在dgx2启动唯一正式接续，实际Python宿主PID2371967，容器PID1。沿用标准Small H8/backbone3/Unit3、CUDA FP64与train-20260920固定镜像；模型源码、数据、optimizer超参及固定训练行Query bank不变。当前状态以decisions.json、CURRENT.md和时间戳回执为准。
 
 每120表各一次正常更新后，按这些原始normal loss降序、table ID升序冻结排名。3个完整top2 pass、2个完整top6 pass、1个top24 pass，共42extra、每轮162actual；最高2表各额外6次，接下4表各3次，其后18表各1次。normal namespace/顺序/episode索引不变；extra使用loss_replay_v2独立namespace，但逐表episode index继续旧extra累计。train_cycle统计只取正常120条，extra另记，不能当固定checkpoint评估。

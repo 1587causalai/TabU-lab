@@ -1,5 +1,7 @@
 # TabU V5.4 训练与监控经验手册
 
+**状态更新（2026-09-25）：** V5.4 old120 三路 replay-v2 均已主动提前收束并封存；见[当前收口报告](../reports/v54-old120-fit-closure-2026-09-25.md)。本手册中的旧运行快照仅作方法与历史证据。
+
 整理日期：2026-09-22，2026-09-23 补充阶段拟合审计。适用范围：V5.4 Nano 单表、五表联合、old120、old120 replay-v2 三路及独立的 Token dynamic 扩深准备。
 
 本文把已经用过、遇到过问题并核验过的做法整理为后续操作依据。**训练目标、数据权限和预算以用户最新指令及对应实验 manifest / decisions 为准；运行状态以带时间戳的真实读回为准。** 本文不把历史快照当实时状态，不替代设计文档或启动授权。
@@ -9,7 +11,7 @@ Git 只归档复用所需的协议、脚本、摘要与冻结索引。文中部�
 - 数学设计与实现合同：[V5.4 设计入口](../design/restoration-v54.md)。
 - 当前加训合同：[old120 replay-v2](../../experiments/local/v54-old120-replay-v2-20260922/README.md)。
 - 日常查看：[restoration5.4 专用工作区](https://wandb.ai/zj3712/restoration?nw=brg2pegawui)。
-- 最新有界结论：[old120 逐表拟合与下一代设计输入](../reports/v54-old120-fit-handoff-2026-09-23.md)。
+- 当前终态与复用边界：[old120 训练收口](../reports/v54-old120-fit-closure-2026-09-25.md)；此前的[逐表拟合与下一代设计输入](../reports/v54-old120-fit-handoff-2026-09-23.md)保留为 2026-09-23 阶段快照。
 - 本文审阅所用最近一次训练快照：[2026-09-22 15:32–15:35 回查](../../experiments/local/v54-old120-wandb-20260922/heartbeat-report-20260922T0731Z.md)。当时三路仍在训练，不能据此宣称完成。
 
 ## 1. 保留下来的基本判断

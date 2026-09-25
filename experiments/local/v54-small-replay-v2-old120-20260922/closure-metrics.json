@@ -1,0 +1,2170 @@
+{
+  "schema": "v54_old120_owner_stop_fixed_query_summary_v1",
+  "snapshot_utc": "2026-09-25T01:00:42.221285+00:00",
+  "technical_terminal_outcome": "interrupted",
+  "user_confirmed_intentional_stop": true,
+  "budget_completed": false,
+  "actual_update": 902240,
+  "normal_update": 699278,
+  "extra_updates": 202962,
+  "last_complete_fixed_query_update": 890880,
+  "fixed_query_gap_actual_updates": 11360,
+  "checkpoint_sha256": "a129f9aded559862c5416e57589c271e98316588c542c80b339cd6ff68af58f7",
+  "metric_scope": "fixed training-row Query only; current is last complete bank; best is within this v2 output",
+  "tables": [
+    {
+      "table": "discoscm_048",
+      "target_column": 11,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 35,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5862,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 35,
+      "current": 0.9979946812580475,
+      "best": 0.9980493327049901,
+      "best_update": 798720,
+      "reference": {
+        "mse": 0.4865976898312803,
+        "nmse": 0.9802253980438645,
+        "r2": -0.01881550627585904
+      }
+    },
+    {
+      "table": "discoscm_049",
+      "target_column": 19,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.9677716390423572,
+      "best": 0.9737569060773481,
+      "best_update": 860160,
+      "reference": {
+        "accuracy": 0.5359116022099447
+      }
+    },
+    {
+      "table": "discoscm_050",
+      "target_column": 19,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 93,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5920,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 93,
+      "current": 0.9973989479744191,
+      "best": 0.9974615377803179,
+      "best_update": 829440,
+      "reference": {
+        "mse": 2.3529381947383063,
+        "nmse": 0.9218398936287021,
+        "r2": -0.00592382803665048
+      }
+    },
+    {
+      "table": "discoscm_051",
+      "target_column": 31,
+      "target_kind": "ordinal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.5402852049910873,
+      "best": 0.6120320855614974,
+      "best_update": 783360,
+      "reference": {
+        "accuracy": 0.5508021390374331
+      }
+    },
+    {
+      "table": "discoscm_052",
+      "target_column": 19,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 436,
+      "inherited_model_updates": 1023,
+      "cumulative_model_updates": 6265,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 438,
+      "current": 0.9951677563216392,
+      "best": 0.9969795490357173,
+      "best_update": 875520,
+      "reference": {
+        "mse": 2.714986035509888,
+        "nmse": 1.050907721575455,
+        "r2": -0.015459766960368881
+      }
+    },
+    {
+      "table": "discoscm_053",
+      "target_column": 31,
+      "target_kind": "ordinal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.5787234042553191,
+      "best": 0.6419326241134752,
+      "best_update": 276480,
+      "reference": {
+        "accuracy": 0.36179078014184396
+      }
+    },
+    {
+      "table": "discoscm_054",
+      "target_column": 31,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 1559,
+      "inherited_model_updates": 1028,
+      "cumulative_model_updates": 7393,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 1566,
+      "current": 0.9940248922778978,
+      "best": 0.994823567883021,
+      "best_update": 875520,
+      "reference": {
+        "mse": 6.52602677563759,
+        "nmse": 1.0748787822547012,
+        "r2": -0.016135382866248715
+      }
+    },
+    {
+      "table": "discoscm_055",
+      "target_column": 11,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 233,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 6060,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 233,
+      "current": 0.13535087719298244,
+      "best": 0.16333333333333333,
+      "best_update": 875520,
+      "reference": {
+        "accuracy": 0.08464912280701754
+      }
+    },
+    {
+      "table": "discoscm_056",
+      "target_column": 11,
+      "target_kind": "numeric",
+      "normal_new": 4807,
+      "extra_new": 3,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5831,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 3,
+      "current": 0.9983179339769532,
+      "best": 0.9986945109361343,
+      "best_update": 860160,
+      "reference": {
+        "mse": 2.1655364331896014,
+        "nmse": 1.0618969795171478,
+        "r2": -0.011121083420423172
+      }
+    },
+    {
+      "table": "discoscm_057",
+      "target_column": 19,
+      "target_kind": "ordinal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.727336860670194,
+      "best": 0.727336860670194,
+      "best_update": 890880,
+      "reference": {
+        "accuracy": 0.7566137566137566
+      }
+    },
+    {
+      "table": "discoscm_058",
+      "target_column": 19,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 105,
+      "inherited_model_updates": 1022,
+      "cumulative_model_updates": 5933,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 106,
+      "current": 0.9967676844134892,
+      "best": 0.9976929879913998,
+      "best_update": 875520,
+      "reference": {
+        "mse": 2.694530833325458,
+        "nmse": 1.0221302560567387,
+        "r2": -0.006548207162932362
+      }
+    },
+    {
+      "table": "discoscm_059",
+      "target_column": 31,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 30,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5857,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 30,
+      "current": 0.2626177024482109,
+      "best": 0.2626177024482109,
+      "best_update": 890880,
+      "reference": {
+        "accuracy": 0.11741996233521657
+      }
+    },
+    {
+      "table": "discoscm_060",
+      "target_column": 19,
+      "target_kind": "numeric",
+      "normal_new": 4807,
+      "extra_new": 1726,
+      "inherited_model_updates": 1034,
+      "cumulative_model_updates": 7567,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 1739,
+      "current": 0.9941913618397997,
+      "best": 0.9951461081281354,
+      "best_update": 798720,
+      "reference": {
+        "mse": 5.672604378703329,
+        "nmse": 0.9997346413798788,
+        "r2": -0.0032724128346741654
+      }
+    },
+    {
+      "table": "discoscm_061",
+      "target_column": 31,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 3,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5830,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 3,
+      "current": 0.3849074074074074,
+      "best": 0.3909259259259259,
+      "best_update": 875520,
+      "reference": {
+        "accuracy": 0.15
+      }
+    },
+    {
+      "table": "discoscm_062",
+      "target_column": 31,
+      "target_kind": "numeric",
+      "normal_new": 4807,
+      "extra_new": 17,
+      "inherited_model_updates": 1022,
+      "cumulative_model_updates": 5846,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 18,
+      "current": 0.9973044490178387,
+      "best": 0.9979355940800313,
+      "best_update": 798720,
+      "reference": {
+        "mse": 7.714752833760743,
+        "nmse": 0.9494164270691265,
+        "r2": -0.009375306429097341
+      }
+    },
+    {
+      "table": "discoscm_063",
+      "target_column": 11,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.975177304964539,
+      "best": 0.975177304964539,
+      "best_update": 890880,
+      "reference": {
+        "accuracy": 0.5319148936170213
+      }
+    },
+    {
+      "table": "discoscm_064",
+      "target_column": 19,
+      "target_kind": "numeric",
+      "normal_new": 4807,
+      "extra_new": 9,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5837,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 9,
+      "current": 0.9968465451303038,
+      "best": 0.9977580205902848,
+      "best_update": 860160,
+      "reference": {
+        "mse": 0.29941921974239455,
+        "nmse": 0.966684843117471,
+        "r2": -0.01835914567973429
+      }
+    },
+    {
+      "table": "discoscm_065",
+      "target_column": 31,
+      "target_kind": "ordinal",
+      "normal_new": 4807,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5828,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 0,
+      "current": 0.9017543859649123,
+      "best": 0.9021929824561403,
+      "best_update": 875520,
+      "reference": {
+        "accuracy": 0.5526315789473685
+      }
+    },
+    {
+      "table": "discoscm_066",
+      "target_column": 31,
+      "target_kind": "numeric",
+      "normal_new": 4807,
+      "extra_new": 4,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5832,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 4,
+      "current": 0.9981553088593325,
+      "best": 0.9982180665384722,
+      "best_update": 875520,
+      "reference": {
+        "mse": 5.217534707835521,
+        "nmse": 1.0677229887680173,
+        "r2": -0.007024432790373902
+      }
+    },
+    {
+      "table": "discoscm_067",
+      "target_column": 11,
+      "target_kind": "nominal",
+      "normal_new": 4807,
+      "extra_new": 2,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5830,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 2,
+      "current": 0.5448148148148148,
+      "best": 0.5448148148148148,
+      "best_update": 890880,
+      "reference": {
+        "accuracy": 0.45555555555555555
+      }
+    },
+    {
+      "table": "discoscm_068",
+      "target_column": 31,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 3296,
+      "inherited_model_updates": 1055,
+      "cumulative_model_updates": 9157,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 3330,
+      "current": 0.9943579391083043,
+      "best": 0.9943579391083043,
+      "best_update": 890880,
+      "reference": {
+        "mse": 0.3136232250625637,
+        "nmse": 1.0529306910345901,
+        "r2": -0.017469130931051513
+      }
+    },
+    {
+      "table": "discoscm_069",
+      "target_column": 11,
+      "target_kind": "nominal",
+      "normal_new": 4807,
+      "extra_new": 38,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5866,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 38,
+      "current": 0.31757246376811593,
+      "best": 0.31757246376811593,
+      "best_update": 890880,
+      "reference": {
+        "accuracy": 0.03913043478260869
+      }
+    },
+    {
+      "table": "discoscm_070",
+      "target_column": 11,
+      "target_kind": "numeric",
+      "normal_new": 4807,
+      "extra_new": 5769,
+      "inherited_model_updates": 1035,
+      "cumulative_model_updates": 11611,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 5783,
+      "current": 0.9886071666951943,
+      "best": 0.9902782796590726,
+      "best_update": 875520,
+      "reference": {
+        "mse": 0.5025828788964315,
+        "nmse": 1.1029835379790014,
+        "r2": -0.012356676267758049
+      }
+    },
+    {
+      "table": "discoscm_071",
+      "target_column": 19,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.9743589743589745,
+      "best": 0.9743589743589745,
+      "best_update": 890880,
+      "reference": {
+        "accuracy": 0.9340659340659341
+      }
+    },
+    {
+      "table": "discoscm_072",
+      "target_column": 19,
+      "target_kind": "numeric",
+      "normal_new": 4807,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5828,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 0,
+      "current": 0.9981068709188576,
+      "best": 0.9991622431266551,
+      "best_update": 768000,
+      "reference": {
+        "mse": 3.1349256298566104,
+        "nmse": 1.0225974077158086,
+        "r2": -0.012416711651758172
+      }
+    },
+    {
+      "table": "discoscm_073",
+      "target_column": 31,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 83,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5910,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 83,
+      "current": 0.2130952380952381,
+      "best": 0.2130952380952381,
+      "best_update": 890880,
+      "reference": {
+        "accuracy": 0.14203296703296703
+      }
+    },
+    {
+      "table": "discoscm_074",
+      "target_column": 31,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 811,
+      "inherited_model_updates": 1024,
+      "cumulative_model_updates": 6641,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 814,
+      "current": 0.9938037764787053,
+      "best": 0.9951126402797199,
+      "best_update": 814080,
+      "reference": {
+        "mse": 1.3247123841300505,
+        "nmse": 0.9583314617259204,
+        "r2": -0.026210574253728414
+      }
+    },
+    {
+      "table": "discoscm_075",
+      "target_column": 11,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.9725274725274725,
+      "best": 0.9796703296703297,
+      "best_update": 860160,
+      "reference": {
+        "accuracy": 0.7142857142857143
+      }
+    },
+    {
+      "table": "discoscm_076",
+      "target_column": 31,
+      "target_kind": "numeric",
+      "normal_new": 4807,
+      "extra_new": 153,
+      "inherited_model_updates": 1031,
+      "cumulative_model_updates": 5991,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 163,
+      "current": 0.9983014517199689,
+      "best": 0.9983014517199689,
+      "best_update": 890880,
+      "reference": {
+        "mse": 0.8832595446066388,
+        "nmse": 1.0797676948716801,
+        "r2": -0.014977017104939927
+      }
+    },
+    {
+      "table": "discoscm_077",
+      "target_column": 11,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.9663023679417122,
+      "best": 0.9717668488160291,
+      "best_update": 783360,
+      "reference": {
+        "accuracy": 0.6502732240437158
+      }
+    },
+    {
+      "table": "discoscm_078",
+      "target_column": 11,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 5747,
+      "inherited_model_updates": 1055,
+      "cumulative_model_updates": 11608,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 5781,
+      "current": 0.9914127570678101,
+      "best": 0.9914127570678101,
+      "best_update": 890880,
+      "reference": {
+        "mse": 0.5400792105330389,
+        "nmse": 1.0637568673585385,
+        "r2": -0.008198706400945444
+      }
+    },
+    {
+      "table": "discoscm_079",
+      "target_column": 19,
+      "target_kind": "ordinal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.5643979057591623,
+      "best": 0.5712041884816753,
+      "best_update": 798720,
+      "reference": {
+        "accuracy": 0.5445026178010471
+      }
+    },
+    {
+      "table": "discoscm_080",
+      "target_column": 31,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 4437,
+      "inherited_model_updates": 1047,
+      "cumulative_model_updates": 10290,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 4463,
+      "current": 0.9799823752821022,
+      "best": 0.9934123339267812,
+      "best_update": 798720,
+      "reference": {
+        "mse": 127.9069008385568,
+        "nmse": 3.4781106979896235,
+        "r2": -0.004476079910940012
+      }
+    },
+    {
+      "table": "discoscm_081",
+      "target_column": 11,
+      "target_kind": "nominal",
+      "normal_new": 4807,
+      "extra_new": 2,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5830,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 2,
+      "current": 0.39039855072463764,
+      "best": 0.4404891304347826,
+      "best_update": 875520,
+      "reference": {
+        "accuracy": 0.3695652173913043
+      }
+    },
+    {
+      "table": "discoscm_082",
+      "target_column": 11,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 7099,
+      "inherited_model_updates": 1055,
+      "cumulative_model_updates": 12960,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 7133,
+      "current": 0.9890983078791455,
+      "best": 0.9919016540392124,
+      "best_update": 875520,
+      "reference": {
+        "mse": 201.54720851625356,
+        "nmse": 3.428085926370065,
+        "r2": -0.007454747054588928
+      }
+    },
+    {
+      "table": "discoscm_083",
+      "target_column": 19,
+      "target_kind": "nominal",
+      "normal_new": 4807,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5828,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 0,
+      "current": 0.9834229390681003,
+      "best": 0.9834229390681003,
+      "best_update": 890880,
+      "reference": {
+        "accuracy": 0.6827956989247311
+      }
+    },
+    {
+      "table": "discoscm_084",
+      "target_column": 11,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 17098,
+      "inherited_model_updates": 1066,
+      "cumulative_model_updates": 22970,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 17143,
+      "current": 0.884812335562235,
+      "best": 0.884812335562235,
+      "best_update": 890880,
+      "reference": {
+        "mse": 679.1779843188212,
+        "nmse": 1.692014296119222,
+        "r2": -0.007744482153479559
+      }
+    },
+    {
+      "table": "discoscm_085",
+      "target_column": 19,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.9565018315018315,
+      "best": 0.9565018315018315,
+      "best_update": 890880,
+      "reference": {
+        "accuracy": 0.4726190476190476
+      }
+    },
+    {
+      "table": "discoscm_086",
+      "target_column": 19,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 6509,
+      "inherited_model_updates": 1049,
+      "cumulative_model_updates": 12364,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 6537,
+      "current": 0.9929605063533014,
+      "best": 0.9945881921632299,
+      "best_update": 675840,
+      "reference": {
+        "mse": 15059.016840189443,
+        "nmse": 2.0414764253495226,
+        "r2": -0.011551251475661495
+      }
+    },
+    {
+      "table": "discoscm_087",
+      "target_column": 31,
+      "target_kind": "ordinal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.2207182320441989,
+      "best": 0.29263351749539596,
+      "best_update": 875520,
+      "reference": {
+        "accuracy": 0.35359116022099446
+      }
+    },
+    {
+      "table": "discoscm_088",
+      "target_column": 31,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 16,
+      "inherited_model_updates": 1022,
+      "cumulative_model_updates": 5844,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 17,
+      "current": 0.9986661347428923,
+      "best": 0.9990906437891619,
+      "best_update": 844800,
+      "reference": {
+        "mse": 1.7019920755542908,
+        "nmse": 1.0658986274501594,
+        "r2": -0.009496788173712467
+      }
+    },
+    {
+      "table": "discoscm_089",
+      "target_column": 11,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.9472222222222222,
+      "best": 0.9472222222222222,
+      "best_update": 890880,
+      "reference": {
+        "accuracy": 0.6722222222222223
+      }
+    },
+    {
+      "table": "discoscm_090",
+      "target_column": 11,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 9977,
+      "inherited_model_updates": 1037,
+      "cumulative_model_updates": 15820,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 9993,
+      "current": 0.6029100485972152,
+      "best": 0.6445037187625015,
+      "best_update": 614400,
+      "reference": {
+        "mse": 155.04088610167415,
+        "nmse": 16.515731089460605,
+        "r2": -0.011322051346600803
+      }
+    },
+    {
+      "table": "discoscm_091",
+      "target_column": 19,
+      "target_kind": "ordinal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.6458110516934046,
+      "best": 0.6831550802139037,
+      "best_update": 829440,
+      "reference": {
+        "accuracy": 0.5080213903743316
+      }
+    },
+    {
+      "table": "discoscm_092",
+      "target_column": 11,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 20304,
+      "inherited_model_updates": 1063,
+      "cumulative_model_updates": 26173,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 20346,
+      "current": 0.9105448584201095,
+      "best": 0.9228328402305852,
+      "best_update": 814080,
+      "reference": {
+        "mse": 0.6340303425799354,
+        "nmse": 1.001713449427858,
+        "r2": -0.003929174212740305
+      }
+    },
+    {
+      "table": "discoscm_093",
+      "target_column": 19,
+      "target_kind": "ordinal",
+      "normal_new": 4807,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5828,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 0,
+      "current": 0.5316228070175439,
+      "best": 0.5573684210526316,
+      "best_update": 829440,
+      "reference": {
+        "accuracy": 0.49473684210526314
+      }
+    },
+    {
+      "table": "discoscm_094",
+      "target_column": 19,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 854,
+      "inherited_model_updates": 1022,
+      "cumulative_model_updates": 6682,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 855,
+      "current": 0.9969550998204305,
+      "best": 0.997283147755818,
+      "best_update": 737280,
+      "reference": {
+        "mse": 226.81212435298718,
+        "nmse": 1.1160799752899602,
+        "r2": -0.003959777267320774
+      }
+    },
+    {
+      "table": "discoscm_095",
+      "target_column": 31,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 43,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5870,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 43,
+      "current": 0.25458801498127337,
+      "best": 0.2614232209737828,
+      "best_update": 798720,
+      "reference": {
+        "accuracy": 0.11666666666666667
+      }
+    },
+    {
+      "table": "scm_mixed_v1_000",
+      "target_column": 7,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 3182,
+      "inherited_model_updates": 1024,
+      "cumulative_model_updates": 9012,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 3185,
+      "current": 0.9898553096757251,
+      "best": 0.9911235589397119,
+      "best_update": 798720,
+      "reference": {
+        "mse": 0.009150575117139568,
+        "nmse": 1.0483491112230203,
+        "r2": -0.010007405331076802
+      }
+    },
+    {
+      "table": "scm_mixed_v1_001",
+      "target_column": 11,
+      "target_kind": "numeric",
+      "normal_new": 4807,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5828,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 0,
+      "current": 0.9979988739635474,
+      "best": 0.9979988739635474,
+      "best_update": 890880,
+      "reference": {
+        "mse": 2.8748365712229367,
+        "nmse": 0.9850423705159744,
+        "r2": -0.00919776288298868
+      }
+    },
+    {
+      "table": "scm_mixed_v1_002",
+      "target_column": 11,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 563,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 6390,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 563,
+      "current": 0.995433646260214,
+      "best": 0.9961384873850028,
+      "best_update": 875520,
+      "reference": {
+        "mse": 0.02461037560047405,
+        "nmse": 0.9960876101085376,
+        "r2": -0.016046316685109252
+      }
+    },
+    {
+      "table": "scm_mixed_v1_003",
+      "target_column": 19,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 33,
+      "inherited_model_updates": 1022,
+      "cumulative_model_updates": 5861,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 34,
+      "current": 0.9959432712996047,
+      "best": 0.997457838497936,
+      "best_update": 844800,
+      "reference": {
+        "mse": 1.2799861689270458,
+        "nmse": 1.0107978869576582,
+        "r2": -0.00942766817591334
+      }
+    },
+    {
+      "table": "scm_mixed_v1_004",
+      "target_column": 11,
+      "target_kind": "numeric",
+      "normal_new": 4807,
+      "extra_new": 1619,
+      "inherited_model_updates": 1024,
+      "cumulative_model_updates": 7450,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 1622,
+      "current": 0.9932107190694269,
+      "best": 0.9950363405763945,
+      "best_update": 875520,
+      "reference": {
+        "mse": 0.012613573696080821,
+        "nmse": 1.046441646961123,
+        "r2": -0.014579009586339842
+      }
+    },
+    {
+      "table": "scm_mixed_v1_005",
+      "target_column": 19,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 631,
+      "inherited_model_updates": 1054,
+      "cumulative_model_updates": 6491,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 664,
+      "current": 0.9968417743106335,
+      "best": 0.9974021020589716,
+      "best_update": 706560,
+      "reference": {
+        "mse": 1.3998003647930515,
+        "nmse": 1.0354126616608084,
+        "r2": -0.01595827987030729
+      }
+    },
+    {
+      "table": "scm_mixed_v1_006",
+      "target_column": 19,
+      "target_kind": "numeric",
+      "normal_new": 4807,
+      "extra_new": 7757,
+      "inherited_model_updates": 1072,
+      "cumulative_model_updates": 13636,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 7808,
+      "current": 0.9907633825040552,
+      "best": 0.9915212464368065,
+      "best_update": 814080,
+      "reference": {
+        "mse": 0.0026818707557531413,
+        "nmse": 0.9808026759526645,
+        "r2": -0.00796485117322443
+      }
+    },
+    {
+      "table": "scm_mixed_v1_007",
+      "target_column": 7,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 3313,
+      "inherited_model_updates": 1022,
+      "cumulative_model_updates": 9141,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 3314,
+      "current": 0.9937995399063386,
+      "best": 0.9942599005033949,
+      "best_update": 875520,
+      "reference": {
+        "mse": 0.3225652311645313,
+        "nmse": 1.0222319640208575,
+        "r2": -0.011916872044539728
+      }
+    },
+    {
+      "table": "scm_mixed_v1_008",
+      "target_column": 19,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 7419,
+      "inherited_model_updates": 1071,
+      "cumulative_model_updates": 13296,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 7469,
+      "current": 0.9915075509054422,
+      "best": 0.9915075509054422,
+      "best_update": 890880,
+      "reference": {
+        "mse": 3.6055069234703727,
+        "nmse": 1.068117907838942,
+        "r2": -0.005322556828786906
+      }
+    },
+    {
+      "table": "scm_mixed_v1_009",
+      "target_column": 7,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 5772,
+      "inherited_model_updates": 1060,
+      "cumulative_model_updates": 11638,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 5811,
+      "current": 0.9826477941697976,
+      "best": 0.982966630649282,
+      "best_update": 860160,
+      "reference": {
+        "mse": 3.084493533435196,
+        "nmse": 1.0184807891397238,
+        "r2": -0.010063703064433716
+      }
+    },
+    {
+      "table": "scm_mixed_v1_010",
+      "target_column": 7,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 3318,
+      "inherited_model_updates": 1058,
+      "cumulative_model_updates": 9182,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 3355,
+      "current": 0.9941280697527936,
+      "best": 0.9941280697527936,
+      "best_update": 890880,
+      "reference": {
+        "mse": 3.3343235143845296,
+        "nmse": 1.0015930075050927,
+        "r2": -0.006405543203647168
+      }
+    },
+    {
+      "table": "scm_mixed_v1_011",
+      "target_column": 11,
+      "target_kind": "numeric",
+      "normal_new": 4807,
+      "extra_new": 1670,
+      "inherited_model_updates": 1047,
+      "cumulative_model_updates": 7524,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 1696,
+      "current": 0.9942391667345235,
+      "best": 0.9949139150856717,
+      "best_update": 875520,
+      "reference": {
+        "mse": 2.8210155535088237,
+        "nmse": 0.9940236257101881,
+        "r2": -0.009538211775325767
+      }
+    },
+    {
+      "table": "scm_mixed_v1_012",
+      "target_column": 11,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.9946808510638298,
+      "best": 0.9946808510638298,
+      "best_update": 138240,
+      "reference": {
+        "accuracy": 0.9946808510638298
+      }
+    },
+    {
+      "table": "scm_mixed_v1_013",
+      "target_column": 19,
+      "target_kind": "nominal",
+      "normal_new": 4807,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5828,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 0,
+      "current": 0.9973262032085561,
+      "best": 0.9973262032085561,
+      "best_update": 890880,
+      "reference": {
+        "accuracy": 0.6524064171122995
+      }
+    },
+    {
+      "table": "scm_mixed_v1_014",
+      "target_column": 19,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.9945945945945946,
+      "best": 0.9945945945945946,
+      "best_update": 875520,
+      "reference": {
+        "accuracy": 0.8324324324324325
+      }
+    },
+    {
+      "table": "scm_mixed_v1_015",
+      "target_column": 7,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.9384057971014492,
+      "best": 0.9510869565217391,
+      "best_update": 844800,
+      "reference": {
+        "accuracy": 0.6141304347826086
+      }
+    },
+    {
+      "table": "scm_mixed_v1_016",
+      "target_column": 19,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.9793906810035842,
+      "best": 0.9793906810035842,
+      "best_update": 890880,
+      "reference": {
+        "accuracy": 0.7150537634408602
+      }
+    },
+    {
+      "table": "scm_mixed_v1_017",
+      "target_column": 7,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.8456238361266295,
+      "best": 0.8470204841713223,
+      "best_update": 783360,
+      "reference": {
+        "accuracy": 0.5698324022346368
+      }
+    },
+    {
+      "table": "scm_mixed_v1_018",
+      "target_column": 7,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.9824324324324324,
+      "best": 0.9932432432432432,
+      "best_update": 814080,
+      "reference": {
+        "accuracy": 0.5891891891891892
+      }
+    },
+    {
+      "table": "scm_mixed_v1_019",
+      "target_column": 11,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.9918478260869565,
+      "best": 0.9954710144927535,
+      "best_update": 875520,
+      "reference": {
+        "accuracy": 0.6086956521739131
+      }
+    },
+    {
+      "table": "scm_mixed_v1_020",
+      "target_column": 7,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 4,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5831,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 4,
+      "current": 1.0,
+      "best": 1.0,
+      "best_update": 138240,
+      "reference": {
+        "accuracy": 0.5303867403314917
+      }
+    },
+    {
+      "table": "scm_mixed_v1_021",
+      "target_column": 11,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 24,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5851,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 24,
+      "current": 0.49907407407407406,
+      "best": 0.5726851851851852,
+      "best_update": 860160,
+      "reference": {
+        "accuracy": 0.5388888888888889
+      }
+    },
+    {
+      "table": "scm_mixed_v1_022",
+      "target_column": 11,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.9537234042553192,
+      "best": 0.9697695035460993,
+      "best_update": 798720,
+      "reference": {
+        "accuracy": 0.6861702127659575
+      }
+    },
+    {
+      "table": "scm_mixed_v1_023",
+      "target_column": 19,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.7981382978723405,
+      "best": 0.8061170212765958,
+      "best_update": 860160,
+      "reference": {
+        "accuracy": 0.5531914893617021
+      }
+    },
+    {
+      "table": "scm_mixed_v1_024",
+      "target_column": 19,
+      "target_kind": "ordinal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.7498198198198198,
+      "best": 0.8322522522522523,
+      "best_update": 261120,
+      "reference": {
+        "accuracy": 0.6324324324324324
+      }
+    },
+    {
+      "table": "scm_mixed_v1_025",
+      "target_column": 7,
+      "target_kind": "ordinal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.7459484346224678,
+      "best": 0.7642725598526704,
+      "best_update": 829440,
+      "reference": {
+        "accuracy": 0.35359116022099446
+      }
+    },
+    {
+      "table": "scm_mixed_v1_026",
+      "target_column": 7,
+      "target_kind": "ordinal",
+      "normal_new": 4807,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5828,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 0,
+      "current": 0.9398198198198199,
+      "best": 0.9434234234234234,
+      "best_update": 629760,
+      "reference": {
+        "accuracy": 0.9027027027027027
+      }
+    },
+    {
+      "table": "scm_mixed_v1_027",
+      "target_column": 11,
+      "target_kind": "ordinal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.860648148148148,
+      "best": 0.860648148148148,
+      "best_update": 890880,
+      "reference": {
+        "accuracy": 0.37222222222222223
+      }
+    },
+    {
+      "table": "scm_mixed_v1_028",
+      "target_column": 7,
+      "target_kind": "ordinal",
+      "normal_new": 4807,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5828,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 0,
+      "current": 0.9429590017825312,
+      "best": 0.9572192513368984,
+      "best_update": 737280,
+      "reference": {
+        "accuracy": 0.9251336898395722
+      }
+    },
+    {
+      "table": "scm_mixed_v1_029",
+      "target_column": 11,
+      "target_kind": "ordinal",
+      "normal_new": 4807,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5828,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 0,
+      "current": 0.5578853046594981,
+      "best": 0.5907706093189965,
+      "best_update": 814080,
+      "reference": {
+        "accuracy": 0.23655913978494625
+      }
+    },
+    {
+      "table": "scm_mixed_v1_030",
+      "target_column": 11,
+      "target_kind": "ordinal",
+      "normal_new": 4807,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5828,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 0,
+      "current": 0.42597517730496454,
+      "best": 0.7066489361702127,
+      "best_update": 783360,
+      "reference": {
+        "accuracy": 0.43617021276595747
+      }
+    },
+    {
+      "table": "scm_mixed_v1_031",
+      "target_column": 19,
+      "target_kind": "ordinal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.4559139784946236,
+      "best": 0.49050179211469536,
+      "best_update": 860160,
+      "reference": {
+        "accuracy": 0.27956989247311825
+      }
+    },
+    {
+      "table": "scm_mixed_v1_032",
+      "target_column": 11,
+      "target_kind": "ordinal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.8851063829787235,
+      "best": 0.9288120567375887,
+      "best_update": 768000,
+      "reference": {
+        "accuracy": 0.36781914893617024
+      }
+    },
+    {
+      "table": "scm_mixed_v1_033",
+      "target_column": 19,
+      "target_kind": "ordinal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.5217668488160292,
+      "best": 0.6230418943533698,
+      "best_update": 737280,
+      "reference": {
+        "accuracy": 0.6065573770491803
+      }
+    },
+    {
+      "table": "scm_mixed_v1_034",
+      "target_column": 19,
+      "target_kind": "ordinal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.9011049723756905,
+      "best": 0.9271639042357274,
+      "best_update": 706560,
+      "reference": {
+        "accuracy": 0.6298342541436464
+      }
+    },
+    {
+      "table": "scm_mixed_v1_035",
+      "target_column": 7,
+      "target_kind": "ordinal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.47192513368983957,
+      "best": 0.4832442067736185,
+      "best_update": 875520,
+      "reference": {
+        "accuracy": 0.20320855614973263
+      }
+    },
+    {
+      "table": "scm_mixed_v1_036",
+      "target_column": 7,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.7244047619047619,
+      "best": 0.7261904761904762,
+      "best_update": 875520,
+      "reference": {
+        "accuracy": 0.7142857142857143
+      }
+    },
+    {
+      "table": "scm_mixed_v1_037",
+      "target_column": 11,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 13,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5840,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 13,
+      "current": 0.3533697632058288,
+      "best": 0.3736794171220401,
+      "best_update": 875520,
+      "reference": {
+        "accuracy": 0.20765027322404372
+      }
+    },
+    {
+      "table": "scm_mixed_v1_038",
+      "target_column": 11,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.978494623655914,
+      "best": 0.978494623655914,
+      "best_update": 737280,
+      "reference": {
+        "accuracy": 0.8709677419354839
+      }
+    },
+    {
+      "table": "scm_mixed_v1_039",
+      "target_column": 19,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.6915719696969697,
+      "best": 0.7168560606060607,
+      "best_update": 875520,
+      "reference": {
+        "accuracy": 0.26988636363636365
+      }
+    },
+    {
+      "table": "scm_mixed_v1_040",
+      "target_column": 11,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.998901098901099,
+      "best": 0.998901098901099,
+      "best_update": 890880,
+      "reference": {
+        "accuracy": 0.521978021978022
+      }
+    },
+    {
+      "table": "scm_mixed_v1_041",
+      "target_column": 19,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.7344506517690875,
+      "best": 0.7509310986964618,
+      "best_update": 875520,
+      "reference": {
+        "accuracy": 0.2849162011173184
+      }
+    },
+    {
+      "table": "scm_mixed_v1_042",
+      "target_column": 19,
+      "target_kind": "nominal",
+      "normal_new": 4807,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5828,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 0,
+      "current": 0.912568306010929,
+      "best": 0.912568306010929,
+      "best_update": 890880,
+      "reference": {
+        "accuracy": 0.366120218579235
+      }
+    },
+    {
+      "table": "scm_mixed_v1_043",
+      "target_column": 7,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.7108378870673954,
+      "best": 0.7427140255009107,
+      "best_update": 860160,
+      "reference": {
+        "accuracy": 0.5409836065573771
+      }
+    },
+    {
+      "table": "scm_mixed_v1_044",
+      "target_column": 19,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.9944444444444445,
+      "best": 0.9944444444444445,
+      "best_update": 890880,
+      "reference": {
+        "accuracy": 0.5722222222222222
+      }
+    },
+    {
+      "table": "scm_mixed_v1_045",
+      "target_column": 7,
+      "target_kind": "nominal",
+      "normal_new": 4807,
+      "extra_new": 589,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 6417,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 589,
+      "current": 0.04806629834254143,
+      "best": 0.09152854511970535,
+      "best_update": 399360,
+      "reference": {
+        "accuracy": 0.12154696132596685
+      }
+    },
+    {
+      "table": "scm_mixed_v1_046",
+      "target_column": 7,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.8725325884543762,
+      "best": 0.8977653631284915,
+      "best_update": 768000,
+      "reference": {
+        "accuracy": 0.29459962756052144
+      }
+    },
+    {
+      "table": "scm_mixed_v1_047",
+      "target_column": 11,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 204,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 6031,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 204,
+      "current": 0.19064171122994653,
+      "best": 0.19064171122994653,
+      "best_update": 890880,
+      "reference": {
+        "accuracy": 0.05900178253119429
+      }
+    },
+    {
+      "table": "scm_numeric_v0_096",
+      "target_column": 5,
+      "target_kind": "numeric",
+      "normal_new": 4807,
+      "extra_new": 7293,
+      "inherited_model_updates": 1072,
+      "cumulative_model_updates": 13172,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 7344,
+      "current": 0.990233101928816,
+      "best": 0.990233101928816,
+      "best_update": 890880,
+      "reference": {
+        "mse": 0.010920407884276086,
+        "nmse": 1.0377171478012985,
+        "r2": -0.005960169618524747
+      }
+    },
+    {
+      "table": "scm_numeric_v0_097",
+      "target_column": 5,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 6503,
+      "inherited_model_updates": 1072,
+      "cumulative_model_updates": 12381,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 6554,
+      "current": 0.9932020003043067,
+      "best": 0.9932020003043067,
+      "best_update": 890880,
+      "reference": {
+        "mse": 0.09618101867625327,
+        "nmse": 1.049291615957361,
+        "r2": -0.004539482990128629
+      }
+    },
+    {
+      "table": "scm_numeric_v0_098",
+      "target_column": 19,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 7408,
+      "inherited_model_updates": 1069,
+      "cumulative_model_updates": 13283,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 7456,
+      "current": 0.9923591541740033,
+      "best": 0.9923591541740033,
+      "best_update": 890880,
+      "reference": {
+        "mse": 0.009692142084848237,
+        "nmse": 1.068514052177409,
+        "r2": -0.022266309626201908
+      }
+    },
+    {
+      "table": "scm_numeric_v0_099",
+      "target_column": 19,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 7068,
+      "inherited_model_updates": 1072,
+      "cumulative_model_updates": 12946,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 7119,
+      "current": 0.9898911936012682,
+      "best": 0.9928953673306955,
+      "best_update": 829440,
+      "reference": {
+        "mse": 0.09540398160306043,
+        "nmse": 0.9733570246183983,
+        "r2": -0.01734634552019476
+      }
+    },
+    {
+      "table": "scm_numeric_v0_100",
+      "target_column": 5,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 3540,
+      "inherited_model_updates": 1029,
+      "cumulative_model_updates": 9375,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 3548,
+      "current": 0.990174601077654,
+      "best": 0.9910581082901814,
+      "best_update": 875520,
+      "reference": {
+        "mse": 0.02344138451745565,
+        "nmse": 1.0190367900616222,
+        "r2": -0.008376512858338847
+      }
+    },
+    {
+      "table": "scm_numeric_v0_101",
+      "target_column": 5,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 995,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 6822,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 995,
+      "current": 0.9964545430991655,
+      "best": 0.9964545430991655,
+      "best_update": 890880,
+      "reference": {
+        "mse": 1.226889417332901,
+        "nmse": 1.0530577234988763,
+        "r2": -0.01973586993917409
+      }
+    },
+    {
+      "table": "scm_numeric_v0_102",
+      "target_column": 19,
+      "target_kind": "numeric",
+      "normal_new": 4807,
+      "extra_new": 2281,
+      "inherited_model_updates": 1045,
+      "cumulative_model_updates": 8133,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 2305,
+      "current": 0.9942705895518762,
+      "best": 0.9953009565086147,
+      "best_update": 814080,
+      "reference": {
+        "mse": 0.02589260966755128,
+        "nmse": 0.9956802511522258,
+        "r2": -0.006556425087504758
+      }
+    },
+    {
+      "table": "scm_numeric_v0_103",
+      "target_column": 19,
+      "target_kind": "numeric",
+      "normal_new": 4807,
+      "extra_new": 1512,
+      "inherited_model_updates": 1040,
+      "cumulative_model_updates": 7359,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 1531,
+      "current": 0.995327564321593,
+      "best": 0.9959079718009058,
+      "best_update": 844800,
+      "reference": {
+        "mse": 0.5694859142229387,
+        "nmse": 1.0237234282206948,
+        "r2": -0.00138688705933121
+      }
+    },
+    {
+      "table": "scm_numeric_v0_104",
+      "target_column": 5,
+      "target_kind": "numeric",
+      "normal_new": 4807,
+      "extra_new": 6040,
+      "inherited_model_updates": 1058,
+      "cumulative_model_updates": 11905,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 6077,
+      "current": 0.9910584491226259,
+      "best": 0.9927805563110851,
+      "best_update": 814080,
+      "reference": {
+        "mse": 0.013420711956938286,
+        "nmse": 1.1213094246063906,
+        "r2": -0.008714438812587488
+      }
+    },
+    {
+      "table": "scm_numeric_v0_105",
+      "target_column": 5,
+      "target_kind": "numeric",
+      "normal_new": 4807,
+      "extra_new": 1317,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 7145,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 1317,
+      "current": 0.9954032534249686,
+      "best": 0.9954032534249686,
+      "best_update": 890880,
+      "reference": {
+        "mse": 0.4499618108461048,
+        "nmse": 1.0347856461949128,
+        "r2": -0.015992822359174985
+      }
+    },
+    {
+      "table": "scm_numeric_v0_106",
+      "target_column": 19,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 1006,
+      "inherited_model_updates": 1032,
+      "cumulative_model_updates": 6844,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 1017,
+      "current": 0.9969124215926873,
+      "best": 0.9969124215926873,
+      "best_update": 890880,
+      "reference": {
+        "mse": 0.07762310585333464,
+        "nmse": 1.1063894403486987,
+        "r2": -0.010847966244308394
+      }
+    },
+    {
+      "table": "scm_numeric_v0_107",
+      "target_column": 19,
+      "target_kind": "numeric",
+      "normal_new": 4807,
+      "extra_new": 6186,
+      "inherited_model_updates": 1069,
+      "cumulative_model_updates": 12062,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 6234,
+      "current": 0.9930730654587177,
+      "best": 0.9932927517477296,
+      "best_update": 814080,
+      "reference": {
+        "mse": 0.09472259284078478,
+        "nmse": 1.0814260661008397,
+        "r2": -0.009473272734867644
+      }
+    },
+    {
+      "table": "sklearn_synthetic_108",
+      "target_column": 5,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.9991495063496504,
+      "best": 0.9992670223184853,
+      "best_update": 875520,
+      "reference": {
+        "mse": 23592.201354906152,
+        "nmse": 1.0053871154899625,
+        "r2": -0.022310249423837636
+      }
+    },
+    {
+      "table": "sklearn_synthetic_109",
+      "target_column": 11,
+      "target_kind": "numeric",
+      "normal_new": 4807,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5828,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 0,
+      "current": 0.9983254634636645,
+      "best": 0.9989311331294762,
+      "best_update": 875520,
+      "reference": {
+        "mse": 36606.55763981745,
+        "nmse": 1.0552734577487817,
+        "r2": -0.01118873875732862
+      }
+    },
+    {
+      "table": "sklearn_synthetic_110",
+      "target_column": 19,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 449,
+      "inherited_model_updates": 1025,
+      "cumulative_model_updates": 6280,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 453,
+      "current": 0.9978654736727823,
+      "best": 0.9978654736727823,
+      "best_update": 890880,
+      "reference": {
+        "mse": 37178.932513475884,
+        "nmse": 1.0177201545727055,
+        "r2": -0.004304217148948464
+      }
+    },
+    {
+      "table": "sklearn_synthetic_111",
+      "target_column": 5,
+      "target_kind": "nominal",
+      "normal_new": 4807,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5828,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 0,
+      "current": 0.9891304347826086,
+      "best": 0.9891304347826086,
+      "best_update": 875520,
+      "reference": {
+        "accuracy": 0.47454710144927537
+      }
+    },
+    {
+      "table": "sklearn_synthetic_112",
+      "target_column": 11,
+      "target_kind": "nominal",
+      "normal_new": 4806,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5827,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 0,
+      "current": 0.9981785063752276,
+      "best": 1.0,
+      "best_update": 875520,
+      "reference": {
+        "accuracy": 0.4810694769711163
+      }
+    },
+    {
+      "table": "sklearn_synthetic_113",
+      "target_column": 19,
+      "target_kind": "nominal",
+      "normal_new": 4807,
+      "extra_new": 0,
+      "inherited_model_updates": 1021,
+      "cumulative_model_updates": 5828,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 0,
+      "current": 1.0,
+      "best": 1.0,
+      "best_update": 829440,
+      "reference": {
+        "accuracy": 0.4797872340425532
+      }
+    },
+    {
+      "table": "sklearn_synthetic_114",
+      "target_column": 5,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 3234,
+      "inherited_model_updates": 1038,
+      "cumulative_model_updates": 9078,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 3251,
+      "current": 0.9938387529546538,
+      "best": 0.9946198794362561,
+      "best_update": 798720,
+      "reference": {
+        "mse": 29.41488261672059,
+        "nmse": 1.0483312817519206,
+        "r2": -0.011109954739220607
+      }
+    },
+    {
+      "table": "sklearn_synthetic_115",
+      "target_column": 11,
+      "target_kind": "numeric",
+      "normal_new": 4807,
+      "extra_new": 1471,
+      "inherited_model_updates": 1038,
+      "cumulative_model_updates": 7316,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 1488,
+      "current": 0.9955662176583048,
+      "best": 0.9963958027175603,
+      "best_update": 875520,
+      "reference": {
+        "mse": 24.60323780549979,
+        "nmse": 1.0174815560590398,
+        "r2": -0.01183459900243733
+      }
+    },
+    {
+      "table": "sklearn_synthetic_116",
+      "target_column": 19,
+      "target_kind": "numeric",
+      "normal_new": 4806,
+      "extra_new": 2368,
+      "inherited_model_updates": 1049,
+      "cumulative_model_updates": 8223,
+      "cumulative_normal_updates": 5827,
+      "cumulative_extra_updates": 2396,
+      "current": 0.9976396272082203,
+      "best": 0.9982170959546872,
+      "best_update": 798720,
+      "reference": {
+        "mse": 21.233968072259064,
+        "nmse": 1.0305224349956104,
+        "r2": -0.009060195496598311
+      }
+    },
+    {
+      "table": "sklearn_synthetic_117",
+      "target_column": 5,
+      "target_kind": "numeric",
+      "normal_new": 4807,
+      "extra_new": 6993,
+      "inherited_model_updates": 1065,
+      "cumulative_model_updates": 12865,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 7037,
+      "current": 0.9896771054773585,
+      "best": 0.9904364758133778,
+      "best_update": 875520,
+      "reference": {
+        "mse": 0.0032771703475699275,
+        "nmse": 1.0328103826307313,
+        "r2": -0.005096363599835563
+      }
+    },
+    {
+      "table": "sklearn_synthetic_118",
+      "target_column": 11,
+      "target_kind": "numeric",
+      "normal_new": 4807,
+      "extra_new": 7051,
+      "inherited_model_updates": 1070,
+      "cumulative_model_updates": 12928,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 7100,
+      "current": 0.9907988432788756,
+      "best": 0.9907988432788756,
+      "best_update": 890880,
+      "reference": {
+        "mse": 0.0035202531879999738,
+        "nmse": 0.9834661257765054,
+        "r2": -0.0028220539878951456
+      }
+    },
+    {
+      "table": "sklearn_synthetic_119",
+      "target_column": 19,
+      "target_kind": "numeric",
+      "normal_new": 4807,
+      "extra_new": 6535,
+      "inherited_model_updates": 1068,
+      "cumulative_model_updates": 12410,
+      "cumulative_normal_updates": 5828,
+      "cumulative_extra_updates": 6582,
+      "current": 0.9908330065824418,
+      "best": 0.992266525181799,
+      "best_update": 814080,
+      "reference": {
+        "mse": 0.0015781012973802816,
+        "nmse": 1.0771674945572027,
+        "r2": -0.006775364866492772
+      }
+    }
+  ]
+}

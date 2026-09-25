@@ -1,5 +1,7 @@
 # V5.4 old120 拟合阶段读回与下一代设计输入
 
+**后续状态（2026-09-25）：** 本文是 2026-09-23 阶段快照。三路 V5.4 old120 replay-v2 后来均已主动提前收束并封存；当前终态、checkpoint 与固定 Query 证据见[收口报告](v54-old120-fit-closure-2026-09-25.md)。
+
 2026-09-23 09:54–09:57（Asia/Shanghai）只读快照。三路 replay-v2 当时均在训练，**没有终态**；数字只表示训练行固定 Query 拟合，不涉及 reserved / final_test 或未见表泛化。完整的 120 表逐表曲线、来源身份、曝光和参考线保存在 [dgx2 Small 状态](../../experiments/local/v54-small-replay-v2-old120-20260922/status-20260923T015407Z.json)、[dustinstudio Nano 状态](../../experiments/local/v54-nano-replay-v2-old120-20260922/status-20260923T015405Z.json)、[gongqian-mini Small-H4 状态](../../experiments/local/v54-small-h4-replay-v2-old120-20260922/status-20260923T015406Z.json)。本报告是有时间戳的阶段证据，不取代后续终态。
 
 上述三份完整状态 JSON 与检查点保留在原工作区，不随 Git 分发；Git 中的本报告和冻结索引只保存摘要、路径及 SHA，不能替代原始逐表回执或权重。

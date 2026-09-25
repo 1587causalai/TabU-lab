@@ -1,5 +1,7 @@
 # Small-H4 variant backbone3,4 heads,Unit3; not standard Small old120 replay-v2
 
+**当前终态（2026-09-25）：用户主动提前收束，已封存 checkpoint；不再训练。** 终态、预算差额、固定 Query 与 W&B 回执见 [CLOSURE.md](CLOSURE.md)。下文的启动和运行说明保留其历史时间含义。
+
 用户授权既有任务采用120正常更新后top2三轮、top6两轮、top24一轮额外训练，共42 extra，每周期162实际步。排名冻结自同轮120个normal loss，按loss降序、表ID升序打破并列。top2各6 extra、接下来4张各3 extra、接下来18张各1 extra；正常覆盖每表一次。
 
 起点actual=25920，normal=23520，已发生历史extra=2400。正常上限保持983040；剩余normal=959520；未来V2 extra=335832；最终累计extra=338232；实际总上限=1321272，本接续最多1295352步。旧extra不归零、不重算，也不追补既往normal轮。base_counts包含normal和旧extra，base_extra_counts单列，逐表曝光不均摊。
