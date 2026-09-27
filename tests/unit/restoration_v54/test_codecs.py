@@ -231,11 +231,13 @@ def test_empty_columns_are_no_support_without_reading_hidden_placeholders(versio
 def test_historical_id_defaults_and_realization_namespaces_are_unchanged():
     assert DEFAULT_CODEC_VERSION == V53Config().codec_version == "constant_weight_v1"
     assert DEFAULT_COMPOSITION_CODEC_VERSION == "constant_weight_composition_v1"
-    assert CODEC_IDS == {
+    historical_ids = {
         "legacy_v53": 0, "unit_gaussian_v1": 1, "unit_gaussian_v2": 2,
         "constant_weight_v1": 3, "constant_weight_composition_v1": 4,
         "unit_gaussian_composition_v1": 5,
     }
+    assert {name: CODEC_IDS[name] for name in historical_ids} == historical_ids
+    assert len(set(CODEC_IDS.values())) == len(CODEC_IDS)
     inputs, _, _ = example_episode()
     for version in ("legacy_v53", "unit_gaussian_v1", "unit_gaussian_v2", "constant_weight_v1"):
         facts = AffineValueEncoder(codec_version=version).prepare(inputs)

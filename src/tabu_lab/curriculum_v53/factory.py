@@ -2,16 +2,20 @@
 
 from __future__ import annotations
 
-from .protocol import SCHEMA, V54_SCHEMA
+from .protocol import SCHEMA, V54_SCHEMA, V55_SCHEMA
 
 
 def artifact_schema(schema: str, kind: str) -> str:
-    if schema not in (SCHEMA, V54_SCHEMA):
+    if schema not in (SCHEMA, V54_SCHEMA, V55_SCHEMA):
         raise ValueError("unsupported curriculum schema")
     return f"{schema.removesuffix('.v1')}.{kind}.v1"
 
 
 def make_model(plan):
+    if plan.spec["schema"] == V55_SCHEMA:
+        from tabu_lab.models.restoration_v55 import V55Model
+
+        return V55Model(plan.config)
     if plan.spec["schema"] == V54_SCHEMA:
         from tabu_lab.models.restoration_v54 import V54Model
 

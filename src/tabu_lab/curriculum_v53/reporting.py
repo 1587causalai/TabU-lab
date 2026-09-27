@@ -90,7 +90,10 @@ def write_report(output: Path, plan, terminal: dict) -> Path:
     identity = terminal.get("identity", plan.identity)
     runtime = terminal.get("runtime", {})
     device = runtime.get("device", "未记录")
-    version = "V5.4" if plan.spec.get("schema") == "tabu.curriculum.v54.v1" else "V5.3"
+    version = {
+        "tabu.curriculum.v54.v1": "V5.4",
+        "tabu.curriculum.v55.v1": "V5.5",
+    }.get(plan.spec.get("schema"), "V5.3")
     lines = [
         f"# {version} 课程实验报告", "",
         f"实验：`{_cell(plan.spec['experiment_id'])}`；状态："

@@ -16,12 +16,13 @@ from pathlib import Path
 import torch
 
 from tabu_lab.models.restoration._dtype import execution_dtype
+from tabu_lab.models.restoration._validation import finite
 from tabu_lab.models.restoration_v53 import (
     V53LossConfig,
     prepare_episode,
     score_prepared_episode,
 )
-from tabu_lab.models.restoration_v53.training import prepare_training_episode
+from tabu_lab.models.restoration_v53.training import V53Score, prepare_training_episode
 from tabu_lab.restoration_optimizers import adamw, switch_to_muon
 
 from . import loss_replay
@@ -30,6 +31,7 @@ from .artifacts import (
     atomic_json,
     finite_state,
     load_checkpoint,
+    load_warm_start,
     restore_rng,
     save_checkpoint,
     sha256,
@@ -37,7 +39,7 @@ from .artifacts import (
 from .data import build_episode
 from .evaluation import BudgetExhausted, evaluate_probe
 from .factory import artifact_schema, make_model
-from .protocol import V54_SCHEMA, schedule_entry
+from .protocol import V54_SCHEMA, V55_SCHEMA, schedule_entry
 from .reporting import write_report
 
 
@@ -119,8 +121,31 @@ def _loss_terms(score, prepared, config):
     return dict(zip(names, values, strict=True))
 
 
+def _objective_score(score, prepared, config, objective=None):
+    """Apply an opt-in outer transform to each complete encoded Query loss."""
+    objective = objective or {"kind": "squared"}
+    if objective["kind"] == "squared":
+        return score
+    if (objective["kind"] != "query_log1p_scaled"
+            or config.state_weights is None
+            or tuple(config.state_weights) != (0.0, 1.0, 0.0, 0.0)):
+        raise ValueError("unsupported or non-Query-only outer objective")
+    tau = objective["tau"]
+    losses = tau * torch.log1p(score.per_target / tau)
+    query = prepared.states == 1
+    terms = []
+    for mask, weight in ((prepared.numeric, 1.0),
+                         (~prepared.numeric, config.discrete_weight)):
+        selected = query & mask
+        count = selected.sum().clamp_min(1).to(losses.dtype)
+        terms.append(weight * losses[selected].sum() / count)
+    objective_loss = sum(terms, start=losses.new_zeros(()))
+    finite(objective_loss, "scaled per-Cell Query log loss")
+    return V53Score(objective_loss, losses, score.output)
+
+
 def train_step(model, optimizer, plan, table, recipe, index, device, loss_config, *, namespace="",
-               full_readout=False):
+               full_readout=False, objective=None):
     started = time.monotonic()
     seeds = dict(plan.spec["seeds"])
     for stream in ("masks", "codes", "windows"):
@@ -136,12 +161,13 @@ def train_step(model, optimizer, plan, table, recipe, index, device, loss_config
     # or reconstructing retained cells on every optimizer step. Admission is
     # still full-episode; fixed evaluations retain the full readout. The switch
     # keeps an executable reference for same-backend speed/numerical checks.
-    active_readout = plan.spec["schema"] == V54_SCHEMA and not full_readout
+    active_readout = plan.spec["schema"] in (V54_SCHEMA, V55_SCHEMA) and not full_readout
     prepared = (prepare_training_episode(model, inputs, request, truth, loss_config,
                                          keep_zero_weight_rows=device == "mps")
                 if active_readout else prepare_episode(model, inputs, request, truth))
     optimizer.zero_grad(set_to_none=True)
-    score = score_prepared_episode(model, prepared, loss_config=loss_config)
+    squared_score = score_prepared_episode(model, prepared, loss_config=loss_config)
+    score = _objective_score(squared_score, prepared, loss_config, objective)
     score.loss.backward()
     parameters = [parameter for parameter in model.parameters() if parameter.grad is not None]
     # Reduce all gradient finiteness flags on-device and synchronize once.
@@ -160,8 +186,12 @@ def train_step(model, optimizer, plan, table, recipe, index, device, loss_config
         "table": table.name,
         "cohort": table.cohort,
         "table_episode_index": index,
-        "loss": float(score.loss.detach()),
-        **_loss_terms(score, prepared, loss_config),
+        # Keep replay ranking and cross-objective monitoring on the raw square scale.
+        "loss": float(squared_score.loss.detach()),
+        "objective_loss": float(score.loss.detach()),
+        "objective_kind": (objective or {}).get("kind", "squared"),
+        "objective_tau": (objective or {}).get("tau"),
+        **_loss_terms(squared_score, prepared, loss_config),
         "gradient_norm": float(norm),
         "clipped_gradient_norm": float(post_norm),
         "seconds": time.monotonic() - started,
@@ -425,16 +455,49 @@ def run(
         optimizer = adamw(model, plan.optimizer)
         parent = resume or initialize_from
         if parent:
-            payload, digest = load_checkpoint(parent)
-            lineage = [
-                *payload.get("lineage", []),
-                {
-                    "mode": "resume" if resume else "weights_only_initialization",
-                    "checkpoint_sha256": digest,
-                    "parent_update": payload["state"]["update"],
-                    "parent_identity": payload["identity"],
-                },
-            ]
+            if resume and Path(parent).name.startswith("model-only-"):
+                raise ValueError("model-only warm start cannot be used for strict resume")
+            is_model_only_warm_start = bool(
+                initialize_from and plan.spec["schema"] == V55_SCHEMA
+                and Path(parent).name.startswith("model-only-")
+            )
+            if is_model_only_warm_start:
+                from .warm_start import validate_v55_warm_start, validate_warm_start
+
+                payload, digest = load_warm_start(parent)
+                parent_schema = payload.get("parent", {}).get("identity", {}).get("schema")
+                if parent_schema == V54_SCHEMA:
+                    validate_warm_start(payload, plan, model)
+                elif parent_schema == V55_SCHEMA:
+                    validate_v55_warm_start(payload, plan, model)
+                else:
+                    raise ValueError("unsupported model-only warm-start parent schema")
+                donor = payload["parent"]
+                lineage = [
+                    *payload.get("parent_lineage", []),
+                    {
+                        "mode": "weights_only_initialization",
+                        "checkpoint_sha256": donor["checkpoint_sha256"],
+                        "initialization_artifact_sha256": digest,
+                        "parent_update": donor["checkpoint_update"],
+                        "parent_identity": donor["identity"],
+                        "codec_signature": payload["conversion"]["codec_signature"],
+                    },
+                ]
+                model.load_state_dict(payload["model"], strict=True)
+                # Fresh scheduler/optimizer/RNG/exposure were created above.
+                _seed_model(plan)
+            else:
+                payload, digest = load_checkpoint(parent)
+                lineage = [
+                    *payload.get("lineage", []),
+                    {
+                        "mode": "resume" if resume else "weights_only_initialization",
+                        "checkpoint_sha256": digest,
+                        "parent_update": payload["state"]["update"],
+                        "parent_identity": payload["identity"],
+                    },
+                ]
             if resume:
                 _validate_resume(payload, plan, runtime)
                 state = copy.deepcopy(payload["state"])
@@ -466,7 +529,7 @@ def run(
                 optimizer.load_state_dict(payload["optimizer"])
                 model.load_state_dict(payload["model"])
                 restore_rng(payload["rng"])
-            else:
+            elif not is_model_only_warm_start:
                 if (
                     payload.get("purpose") != "training"
                     or payload["identity"].get("schema") != plan.spec["schema"]
@@ -589,6 +652,9 @@ def run(
                     table, index = schedule_entry(plan, state["stage_index"], normal_cursor)
             else:
                 table, index = schedule_entry(plan, state["stage_index"], state["cursor"])
+            objective_kwargs = (
+                {"objective": stage["objective"]} if "objective" in stage else {}
+            )
             row = train_step(
                 model,
                 optimizer,
@@ -599,6 +665,7 @@ def run(
                 device,
                 V53LossConfig(**stage.get("loss", {})),
                 namespace=namespace,
+                **objective_kwargs,
             )
             if policy:
                 state["loss_replay"] = (

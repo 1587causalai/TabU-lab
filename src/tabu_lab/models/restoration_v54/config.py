@@ -47,6 +47,10 @@ class V54Config(V53Config):
     # can still override it explicitly for memory-constrained runs.
     center_chunk_size: int = 128
 
+    def _allowed_codec_versions(self) -> tuple[str, ...]:
+        """Keep V5.4's codec set frozen while newer configs reuse its size resolver."""
+        return COMPOSITION_CODEC_VERSIONS
+
     def __post_init__(self):
         if not isinstance(self.size, str) or self.size.lower() not in _SIZE_FIELDS:
             raise ValueError(f"V5.4 size must be one of {V54_SIZES}")
@@ -64,8 +68,10 @@ class V54Config(V53Config):
             object.__setattr__(self, "unit_layers", unit_layers)
         if type(self.subtokens) is not int or self.subtokens != 1:
             raise ValueError("V5.4 supports only subtokens=1; K>1 is not yet defined")
-        if self.codec_version not in COMPOSITION_CODEC_VERSIONS:
-            raise ValueError("V5.4 requires an explicit composition codec identity")
+        if self.codec_version not in self._allowed_codec_versions():
+            raise ValueError(
+                "model version requires an explicit compatible composition codec identity"
+            )
         super().__post_init__()
 
     @classmethod

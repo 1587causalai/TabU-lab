@@ -11,10 +11,21 @@ CODEC_IDS = {
     "constant_weight_v1": 3,  # Raw 128/4 bases and 128/8 nominal identities.
     "constant_weight_composition_v1": 4,  # V5.4: all bases raw 128/4, nominal q+b.
     "unit_gaussian_composition_v1": 5,  # V5.4: unit bases, nominal q+b.
+    "constant_weight_composition_v2": 6,  # V5.5: ordinal q+b_c+r*b, raw 128/4 bases.
+    "unit_gaussian_composition_v2": 7,  # V5.5: ordinal q+b_c+r*b, unit bases.
+    "constant_weight_composition_v3": 8,  # Candidate: nominal q+b_c+b; numeric/ordinal v2.
 }
 CODEC_VERSIONS = tuple(CODEC_IDS)
+# Keep this historical set narrow: V5.4 manifests must not accept V5.5 codecs.
 COMPOSITION_CODEC_VERSIONS = (
     "constant_weight_composition_v1",
     "unit_gaussian_composition_v1",
 )
 DEFAULT_COMPOSITION_CODEC_VERSION = COMPOSITION_CODEC_VERSIONS[0]
+V55_DEFAULT_CODEC_VERSION = "constant_weight_composition_v2"
+V55_NEW_CODEC_VERSIONS = (
+    V55_DEFAULT_CODEC_VERSION,
+    "unit_gaussian_composition_v2",
+    "constant_weight_composition_v3",
+)
+V55_CODEC_VERSIONS = (*V55_NEW_CODEC_VERSIONS, *COMPOSITION_CODEC_VERSIONS)

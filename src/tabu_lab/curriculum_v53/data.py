@@ -54,6 +54,7 @@ class Table:
     digest: str
     holdout_values: dict[str, tuple[torch.Tensor, ...]]
     holdout_row_ids: dict[str, tuple[int, ...]]
+    window_sampling: str | None = None
 
     @property
     def id(self) -> str:
@@ -77,7 +78,7 @@ class Table:
 
 def table_summary(table: Table) -> dict:
     """JSON-safe identity and split counts, without raw values."""
-    return {
+    result = {
         "id": table.name, "cohort": table.cohort, "kind": table.kind, "role": table.role,
         "path": str(table.path), "sha256": table.digest, "train_rows": table.train_rows,
         "reserved_rows": table.reserved_rows, "width": table.width,
@@ -90,6 +91,9 @@ def table_summary(table: Table) -> dict:
         "train_row_ids": list(table.row_ids),
         "holdout_row_ids": {k: list(v) for k, v in table.holdout_row_ids.items()},
     }
+    if table.window_sampling is not None:
+        result["window_sampling"] = table.window_sampling
+    return result
 
 
 def data_fingerprint(tables) -> str:
@@ -160,7 +164,7 @@ def _split_rows(splits, rows: int, name: str) -> dict[str, tuple[int, ...]]:
 def load_table(entry: dict, base_dir: Path) -> Table:
     """Load legacy values/features/splits JSON after validating its byte digest."""
     required = {"id", "path", "sha256", "cohort", "kind"}
-    allowed = required | {"window_rows", "target_column", "role"}
+    allowed = required | {"window_rows", "window_sampling", "target_column", "role"}
     if not isinstance(entry, dict) or not required <= set(entry) or set(entry) - allowed:
         raise ValueError("table entry needs id/path/sha256/cohort/kind and known optional fields")
     for field in ("id", "path", "cohort"):
@@ -200,6 +204,14 @@ def load_table(entry: dict, base_dir: Path) -> Table:
     window = entry.get("window_rows")
     if window is not None and (type(window) is not int or window < 3):
         raise ValueError("window_rows must be an integer at least three or null")
+    window_sampling = entry.get("window_sampling")
+    if window_sampling is not None:
+        if window_sampling != "query_cycle" or window is None:
+            raise ValueError("window_sampling=query_cycle requires window_rows")
+        if role != "train" or schema[target].kind != "numeric":
+            raise ValueError("query_cycle requires a train-role table with numeric target")
+        if window > len(splits["train"]):
+            raise ValueError("query_cycle window_rows exceeds the training pool")
     columns = []
     for a, spec in enumerate(schema):
         raw_column = [row[a] for row in values]
@@ -216,7 +228,7 @@ def load_table(entry: dict, base_dir: Path) -> Table:
     return Table(entry["id"], entry["cohort"], entry["kind"], schema, partitions["train"],
                  splits["train"], len(values) - len(splits["train"]), window, target, role,
                  path, digest, {p: partitions[p] for p in ("validation", "test")},
-                 {p: splits[p] for p in ("validation", "test")})
+                 {p: splits[p] for p in ("validation", "test")}, window_sampling)
 
 
 @dataclass(frozen=True)
@@ -244,6 +256,80 @@ def _recipe(recipe: dict) -> tuple[str, float, dict]:
     if guard != {"kind": "none"}:
         guard = validate_numeric_query_guard(guard)
     return kind, float(fraction), dict(guard)
+
+
+def _query_cycle_window(table: Table, fraction: float, index: int, seeds: dict,
+                        window_seed: int) -> tuple[list[int], list[int], dict]:
+    """Address a fixed-size numeric Query batch in a seeded cyclic pool permutation.
+
+    The first ceil(pool_rows / query_rows) episode indices cover every training
+    target once. Wrapping within an episode uses the same permutation, so its
+    Query rows remain distinct even when the pool size is not a multiple of the
+    Query budget. Support is sampled independently from the Query complement.
+    """
+    size = table.window_rows
+    if size is None or table.window_sampling != "query_cycle":
+        raise ValueError("query_cycle requires an explicit training window")
+    pool = table.train_rows
+    count = max(1, math.floor(size * fraction + 0.5))
+    support_count = size - count
+    if size > pool or support_count < 2:
+        raise ValueError("query_cycle needs an in-pool window with at least two support rows")
+    cycle_seed = _seed(seeds["windows"], "query_cycle", table.name, "train")
+    generator = torch.Generator(device="cpu").manual_seed(cycle_seed)
+    permutation = torch.randperm(pool, generator=generator).tolist()
+    absolute_start = index * count
+    query_rows = [permutation[(absolute_start + offset) % pool]
+                  for offset in range(count)]
+    query_set = set(query_rows)
+    remaining = torch.tensor([row for row in range(pool) if row not in query_set],
+                             dtype=torch.long)
+    generator.manual_seed(window_seed)
+    support_order = remaining[torch.randperm(len(remaining), generator=generator)]
+    support = support_order[:support_count].clone()
+    target = table.values[table.target_column]
+    if len(torch.unique(target[support])) < 2:
+        alternate = support_order[support_count:]
+        alternate = alternate[target[alternate] != target[support[0]]]
+        if not len(alternate):
+            raise ValueError(f"no-valid-episode: {table.name} query_cycle has no "
+                             "two-distinct-value numeric support")
+        support[-1] = alternate[0]
+    selected = sorted(query_rows + support.tolist())
+    local_query = [position for position, row in enumerate(selected) if row in query_set]
+    if len(selected) != size or len(local_query) != count or len(set(selected)) != size:
+        raise AssertionError("query_cycle lost a Query or duplicated a window row")
+    per_column = [count if column == table.target_column else 0
+                  for column in range(table.width)]
+    eligible = [size if column == table.target_column else 0
+                for column in range(table.width)]
+    capacity = [size - 2 if column == table.target_column else 0
+                for column in range(table.width)]
+    audit = {
+        "query_count": count,
+        "query_fraction": float(fraction),
+        "query_per_column": per_column,
+        "eligible_per_column": eligible,
+        "capacity_per_column": capacity,
+        "protected_discrete_cells": 0,
+        "unmaskable_discrete_classes": 0,
+        "singleton_discrete_classes": 0,
+        "singleton_classes_per_column": [0] * table.width,
+        "query_coverage": count / size,
+        "sampling_attempts": 1,
+        "window_sampling": "query_cycle",
+        "query_cycle": {
+            "pool_rows": pool,
+            "window_rows": size,
+            "query_rows_per_episode": count,
+            "permutation_seed": cycle_seed,
+            "cycle_index": absolute_start // pool,
+            "cycle_offset": absolute_start % pool,
+            "first_pass_query_rows_seen": min(pool, absolute_start + count),
+            "first_pass_complete": absolute_start + count >= pool,
+        },
+    }
+    return selected, local_query, audit
 
 
 def build_episode(table: Table, recipe: dict, index: int, seeds: dict, device: str, *,
@@ -280,14 +366,24 @@ def build_episode(table: Table, recipe: dict, index: int, seeds: dict, device: s
     audit = {}
     if partition == "train":
         size = min(table.window_rows or table.train_rows, table.train_rows)
-        if size == table.train_rows:
-            selected = list(range(size))
+        if table.window_sampling == "query_cycle" and not evaluation:
+            if kind != "supervised_row" or guard["kind"] != "none":
+                raise ValueError("query_cycle requires unguarded supervised_row masking")
+            selected, local_query, audit = _query_cycle_window(
+                table, fraction, index, seeds, window_seed,
+            )
         else:
-            generator = torch.Generator(device="cpu").manual_seed(window_seed)
-            selected = torch.randperm(table.train_rows, generator=generator)[:size].tolist()
+            if size == table.train_rows:
+                selected = list(range(size))
+            else:
+                generator = torch.Generator(device="cpu").manual_seed(window_seed)
+                selected = torch.randperm(table.train_rows, generator=generator)[:size].tolist()
         values = tuple(v[selected] for v in table.values)
         row_ids = tuple(table.row_ids[r] for r in selected)
-        if kind == "random_cell":
+        if table.window_sampling == "query_cycle" and not evaluation:
+            query = torch.zeros(size, table.width, dtype=torch.bool)
+            query[local_query, table.target_column] = True
+        elif kind == "random_cell":
             plan = _MaskTable(table.name, values, table.schema)
             query, audit = global_query_mask(
                 plan, fraction, mask_seed,
@@ -311,6 +407,8 @@ def build_episode(table: Table, recipe: dict, index: int, seeds: dict, device: s
                 if key in audit:
                     audit[key] = [audit[key][0] if column == a else 0
                                   for column in range(table.width)]
+        if table.window_sampling == "query_cycle" and evaluation:
+            audit["window_sampling"] = "random_window"
         if "numeric_query_guard" in audit:
             audit["numeric_query_guard"]["reference_scope"] = (
                 "selected training window before masking" if size < table.train_rows
