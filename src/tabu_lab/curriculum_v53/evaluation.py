@@ -9,7 +9,7 @@ import time
 import torch
 
 from tabu_lab.models.restoration_v53 import prepare_episode, score_prepared_episode
-from tabu_lab.models.restoration_v53.readout import normalized_weights
+from tabu_lab.models.restoration_v53.readout import normalized_weights_and_logits
 
 from .artifacts import restore_rng, rng_state
 from .data import build_episode
@@ -22,6 +22,87 @@ class BudgetExhausted(RuntimeError):
 def mean(values):
     values = [value for value in values if value is not None]
     return math.fsum(values) / len(values) if values else None
+
+
+_KERNEL_PATHS = ("query_to_support", "ll_centers_to_support")
+_KERNEL_METRICS = ("ess", "relative_ess", "support_count", "max_weight", "logit_gap")
+
+
+def _empty_kernel_samples():
+    return {name: [] for name in _KERNEL_METRICS}
+
+
+def _extend_kernel_samples(destination, source):
+    for name in _KERNEL_METRICS:
+        destination[name].extend(source[name])
+
+
+def _distribution(values):
+    """A compact, deterministic empirical distribution; quantiles interpolate linearly."""
+    if not values:
+        return {key: 0 if key == "count" else None
+                for key in ("count", "min", "p05", "median", "p95", "max", "mean")}
+    ordered = sorted(values)
+    if not all(math.isfinite(value) for value in ordered):
+        raise FloatingPointError("nonfinite kernel diagnostic")
+
+    def quantile(fraction):
+        position = (len(ordered) - 1) * fraction
+        left = math.floor(position)
+        return ordered[left] + (position - left) * (ordered[math.ceil(position)] - ordered[left])
+
+    return {
+        "count": len(ordered), "min": ordered[0], "p05": quantile(0.05),
+        "median": quantile(0.5), "p95": quantile(0.95), "max": ordered[-1],
+        "mean": math.fsum(ordered) / len(ordered),
+    }
+
+
+def _summarize_kernel_samples(samples):
+    result = {name: _distribution(samples[name]) for name in _KERNEL_METRICS}
+    result["center_count"] = result["ess"]["count"]
+    return result
+
+
+@torch.no_grad()
+def _kernel_samples(units, support_rows, query_rows, bandwidth, *, chunk_size=32,
+                    deadline=None):
+    """Measure the same Gaussian/softmax weights used by the LL and query readout.
+
+    All Unit rows are LL fitting centers. Query centers are the requested query
+    target rows, including repeated requests if present. The top-two logit gap
+    stays informative when FP32 softmax rounds the second weight down to zero.
+    It is undefined when a column has just one support.
+    """
+    if not len(support_rows):
+        raise ValueError("kernel diagnostics require visible supports")
+    if type(chunk_size) is not int or chunk_size < 1:
+        raise ValueError("kernel diagnostic chunk_size must be a positive integer")
+    samples = {path: _empty_kernel_samples() for path in _KERNEL_PATHS}
+    sources = units[support_rows]
+    requested = query_rows.cpu().tolist()
+    count = len(support_rows)
+    for start in range(0, len(units), chunk_size):
+        if deadline is not None and time.monotonic() >= deadline:
+            raise BudgetExhausted("kernel diagnostics exceeded probe time budget")
+        centers = units[start:start + chunk_size]
+        weights, logits = normalized_weights_and_logits(centers, sources, bandwidth)
+        ess = weights.square().sum(-1).reciprocal()
+        maximum = weights.max(-1).values
+        components = [ess, ess / count, torch.full_like(ess, count), maximum]
+        if count > 1:
+            best = logits.topk(2, dim=-1).values
+            components.append(best[:, 0] - best[:, 1])
+        rows = torch.stack(components, dim=-1).cpu().tolist()
+        query_indices = [row - start for row in requested if start <= row < start + len(rows)]
+        for path, indices in (("ll_centers_to_support", range(len(rows))),
+                              ("query_to_support", query_indices)):
+            target = samples[path]
+            for index in indices:
+                values = rows[index]
+                for metric, value in zip(_KERNEL_METRICS, values, strict=False):
+                    target[metric].append(value)
+    return samples
 
 
 def _finish(cells, columns):
@@ -88,7 +169,8 @@ def evaluate_probe(model, plan, probe, device, *, deadline=None):
     reports = []
     try:
         for table in tables:
-            cells, exposures, ess, maximum = {}, 0, [], []
+            cells, exposures = {}, 0
+            kernel_by_column = {path: {} for path in _KERNEL_PATHS}
             query_addresses = set()
             for index in range(probe["masks"]):
                 if deadline is not None and time.monotonic() >= deadline:
@@ -125,7 +207,8 @@ def evaluate_probe(model, plan, probe, device, *, deadline=None):
                         # NMSE measures z-coordinate error. Raw sparse directions
                         # multiply TRAINING loss by 4, not this evaluation metric.
                         scale = score.output.facts[column.column].answers.scalar.scale
-                        errors = ((column.decoded - expected.to(column.decoded.dtype)) / scale).square()
+                        residual = column.decoded - expected.to(column.decoded.dtype)
+                        errors = (residual / scale).square()
                     else:
                         errors = score.per_target[positions]
                     errors = errors.detach().cpu().tolist()
@@ -159,17 +242,38 @@ def evaluate_probe(model, plan, probe, device, *, deadline=None):
                             query_addresses.add((address, column.column))
                     query_rows = rows[truth.states[rows, column.column] == 1]
                     supports = score.output.facts[column.column].rows
-                    for chunk in query_rows.split(32):
-                        if not len(chunk):
-                            continue
-                        weights = normalized_weights(
-                            score.output.units[chunk],
-                            score.output.units[supports],
-                            plan.config.bandwidth,
+                    column_samples = _kernel_samples(
+                        score.output.units, supports, query_rows, plan.config.bandwidth,
+                        deadline=deadline,
+                    )
+                    for path in _KERNEL_PATHS:
+                        target = kernel_by_column[path].setdefault(
+                            str(column.column), _empty_kernel_samples(),
                         )
-                        ess.extend((1 / weights.square().sum(-1)).cpu().tolist())
-                        maximum.extend(weights.max(-1).values.cpu().tolist())
+                        _extend_kernel_samples(target, column_samples[path])
             metrics, per_column = _finish(cells, table.schema)
+            kernel = {
+                "mode": "gaussian_unit_softmax",
+                "bandwidth": float(plan.config.bandwidth),
+            }
+            for path in _KERNEL_PATHS:
+                aggregate = _empty_kernel_samples()
+                for values in kernel_by_column[path].values():
+                    _extend_kernel_samples(aggregate, values)
+                kernel[path] = {
+                    **_summarize_kernel_samples(aggregate),
+                    "by_column": {
+                        column: _summarize_kernel_samples(values)
+                        for column, values in sorted(kernel_by_column[path].items())
+                    },
+                }
+            # Preserve the historical flat Query fields for existing readers.
+            query_kernel = kernel["query_to_support"]
+            kernel.update({
+                "query_ess_mean": query_kernel["ess"]["mean"],
+                "query_ess_min": query_kernel["ess"]["min"],
+                "query_max_weight_mean": query_kernel["max_weight"]["mean"],
+            })
             reports.append(
                 {
                     "table": table.name,
@@ -180,11 +284,7 @@ def evaluate_probe(model, plan, probe, device, *, deadline=None):
                     "query_exposures": exposures,
                     "unique_query_cells": len(query_addresses),
                     "query_rows": sorted({address[0] for address in query_addresses}),
-                    "kernel": {
-                        "query_ess_mean": mean(ess),
-                        "query_ess_min": min(ess, default=None),
-                        "query_max_weight_mean": mean(maximum),
-                    },
+                    "kernel": kernel,
                 }
             )
         keys = reports[0]["metrics"] if reports else {}

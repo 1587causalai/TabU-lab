@@ -8,8 +8,8 @@ from pathlib import Path
 
 import torch
 
-from tabu_lab.models.restoration_v53 import V53LossConfig
 from tabu_lab.models.restoration._dtype import execution_dtype
+from tabu_lab.models.restoration_v53 import V53LossConfig
 from tabu_lab.restoration_optimizers import adamw, switch_to_muon
 
 from .artifacts import atomic_json, load_checkpoint, restore_rng, save_checkpoint
@@ -68,6 +68,7 @@ def preflight(plan, output, *, device="cpu", max_seconds=120.0):
                     device,
                     loss,
                     namespace=stage["name"],
+                    objective=stage.get("objective"),
                 )
                 state = _new_state(plan.spec["stages"])
                 state.update(update=1, optimizer_kind=stage["optimizer"])
@@ -100,6 +101,7 @@ def preflight(plan, output, *, device="cpu", max_seconds=120.0):
                     device,
                     loss,
                     namespace=stage["name"],
+                    objective=stage.get("objective"),
                 )
                 restore_rng(payload["rng"])
                 restored = train_step(
@@ -112,11 +114,14 @@ def preflight(plan, output, *, device="cpu", max_seconds=120.0):
                     device,
                     loss,
                     namespace=stage["name"],
+                    objective=stage.get("objective"),
                 )
-                equal = actual["loss"] == restored["loss"] and all(
+                equal = (actual["loss"] == restored["loss"]
+                         and actual["objective_loss"] == restored["objective_loss"]
+                         and all(
                     torch.equal(value, clone.state_dict()[key])
                     for key, value in model.state_dict().items()
-                )
+                ))
                 if not equal:
                     raise AssertionError("checkpoint next-update parity failed")
                 result["probes"].append(

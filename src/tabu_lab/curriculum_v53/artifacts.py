@@ -14,9 +14,10 @@ from pathlib import Path
 import torch
 
 from .factory import artifact_schema
-from .protocol import SCHEMA, V54_SCHEMA
+from .protocol import SCHEMA, V54_SCHEMA, V55_SCHEMA
 
 CHECKPOINT_SCHEMA = "tabu.curriculum.v53.checkpoint.v1"
+WARM_START_SCHEMA = "tabu.curriculum.v55.warm_start.v1"
 
 
 def sha256(path):
@@ -72,10 +73,7 @@ def finite_state(value):
     walk(value)
     if not python_finite:
         return False
-    for flags in tensor_flags.values():
-        if not bool(torch.stack(flags).all()):
-            return False
-    return True
+    return all(bool(torch.stack(flags).all()) for flags in tensor_flags.values())
 
 
 def rng_state():
@@ -171,10 +169,60 @@ def load_checkpoint(path):
         raise ValueError("checkpoint checksum mismatch")
     payload = torch.load(resolved, map_location="cpu", weights_only=True)
     identity_schema = payload.get("identity", {}).get("schema")
-    if identity_schema not in (SCHEMA, V54_SCHEMA) or payload.get("schema") != artifact_schema(
-        identity_schema, "checkpoint"
-    ):
+    if (identity_schema not in (SCHEMA, V54_SCHEMA, V55_SCHEMA)
+            or payload.get("schema") != artifact_schema(identity_schema, "checkpoint")):
         raise ValueError("checkpoint schema or identity mismatch")
     if not finite_state(payload["model"]) or not finite_state(payload["optimizer"]):
         raise FloatingPointError("nonfinite checkpoint state")
+    return payload, digest
+
+
+def save_warm_start(output, payload):
+    """Write one immutable, content-addressed model-only initialization file."""
+    output = Path(output)
+    if payload.get("schema") != WARM_START_SCHEMA or (
+        payload.get("purpose") != "weights_only_initialization"
+    ):
+        raise ValueError("invalid warm-start purpose or schema")
+    if not finite_state(payload.get("model")):
+        raise FloatingPointError("refusing a nonfinite warm-start model")
+    temporary = output / f".{uuid.uuid4().hex}.tmp"
+    try:
+        with temporary.open("wb") as handle:
+            torch.save(payload, handle)
+            handle.flush()
+            os.fsync(handle.fileno())
+        digest = sha256(temporary)
+        artifact = output / f"model-only-{digest}.pt"
+        if artifact.exists():
+            raise FileExistsError(f"warm-start artifact already exists: {artifact}")
+        os.replace(temporary, artifact)
+        descriptor = os.open(output, os.O_RDONLY)
+        try:
+            os.fsync(descriptor)
+        finally:
+            os.close(descriptor)
+    finally:
+        temporary.unlink(missing_ok=True)
+    return artifact, digest
+
+
+def load_warm_start(path):
+    """Check the immutable filename digest before trusting a model-only payload."""
+    path = Path(path)
+    match = re.fullmatch(r"model-only-([0-9a-f]{64})\.pt", path.name)
+    if match is None:
+        raise ValueError("warm-start artifact needs its content-addressed filename")
+    digest = sha256(path.resolve(strict=True))
+    if match.group(1) != digest:
+        raise ValueError("warm-start artifact checksum mismatch")
+    payload = torch.load(path, map_location="cpu", weights_only=True)
+    if payload.get("schema") != WARM_START_SCHEMA or (
+        payload.get("purpose") != "weights_only_initialization"
+    ):
+        raise ValueError("not a V5.5 model-only warm-start artifact")
+    if any(key in payload for key in ("optimizer", "rng", "state")):
+        raise ValueError("warm-start artifact must contain model weights only")
+    if not isinstance(payload.get("model"), dict) or not finite_state(payload["model"]):
+        raise FloatingPointError("invalid or nonfinite warm-start model")
     return payload, digest

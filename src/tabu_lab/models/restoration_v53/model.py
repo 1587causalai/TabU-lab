@@ -7,6 +7,7 @@ from dataclasses import asdict, dataclass, field
 import torch
 from torch import Tensor, nn
 
+from ..restoration._dtype import solve_dtype
 from ..restoration._packing import column_positions
 from ..restoration._prepared import TensorVersions
 from ..restoration._validation import finite, positive
@@ -18,7 +19,6 @@ from ..restoration.readout import EncodedRestoration
 from .codec_versions import CODEC_IDS, DEFAULT_CODEC_VERSION
 from .encoding import ANSWER_WIDTH, AffineValueEncoder, V53ColumnFacts
 from .readout import FeatureSlopeProvider, evaluate_column, shared_slope
-from ..restoration._dtype import solve_dtype
 
 
 @dataclass(frozen=True)

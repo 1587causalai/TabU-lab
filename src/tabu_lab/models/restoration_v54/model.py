@@ -11,7 +11,7 @@ class V54Model(V53Model):
     def __init__(
         self, config: V54Config | None = None, *, feature_slope: FeatureSlopeProvider | None = None
     ):
-        if config is not None and not isinstance(config, V54Config):
+        if config is not None and type(config) is not V54Config:
             raise TypeError(
                 "V54Model requires V54Config; legacy configs keep their own entry point"
             )

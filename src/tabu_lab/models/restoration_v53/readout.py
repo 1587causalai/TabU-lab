@@ -11,8 +11,8 @@ from __future__ import annotations
 import torch
 from torch import Tensor, nn
 
-from ..restoration._validation import finite, matrix, positive
 from ..restoration._dtype import solve_dtype
+from ..restoration._validation import finite, matrix, positive
 from ..restoration.readout import EncodedRestoration, unit_kernel_logits
 
 
@@ -29,11 +29,18 @@ class FeatureSlopeProvider(nn.Module):
         raise NotImplementedError("provide a Feature-to-slope module explicitly")
 
 
-def normalized_weights(centers: Tensor, supports: Tensor, bandwidth: float) -> Tensor:
+def normalized_weights_and_logits(
+    centers: Tensor, supports: Tensor, bandwidth: float,
+) -> tuple[Tensor, Tensor]:
+    """Return the exact readout weights and their pre-softmax kernel logits."""
     logits = unit_kernel_logits(centers, supports, bandwidth=bandwidth)
     weights = logits.log_softmax(-1).exp()
     finite(weights, "V5.3 normalized Unit weights")
-    return weights
+    return weights, logits
+
+
+def normalized_weights(centers: Tensor, supports: Tensor, bandwidth: float) -> Tensor:
+    return normalized_weights_and_logits(centers, supports, bandwidth)[0]
 
 
 def shared_slope(

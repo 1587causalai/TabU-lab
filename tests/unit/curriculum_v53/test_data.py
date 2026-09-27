@@ -205,3 +205,66 @@ def test_numeric_support_rejects_constant_and_resamples_degenerate_masks(tmp_pat
         assert len(inputs.values[0][inputs.visible[:, 0]].unique()) == 2
         attempts.append(info["sampling_attempts"])
     assert max(attempts) > 1
+
+
+def test_query_cycle_covers_full_numeric_train_pool_with_fixed_window(tmp_path):
+    pool = 323
+    entry, _ = write_table_fixture(
+        tmp_path,
+        values=[[float(i % 3), float(i)] for i in range(pool + 4)],
+        features=[{"kind": "numeric"}, {"kind": "numeric"}],
+        splits={"train": list(range(pool)), "validation": [pool, pool + 1],
+                "test": [pool + 2, pool + 3]},
+        target_column=0, window_rows=204, window_sampling="query_cycle",
+    )
+    table = load_table(entry, tmp_path)
+    assert table.window_sampling == "query_cycle"
+    assert table.summary()["window_sampling"] == "query_cycle"
+    recipe = {"kind": "supervised_row", "fraction": 0.25}
+    state = torch.get_rng_state().clone()
+    seen = set()
+    for index in range(7):
+        inputs, _, truth, info = build_episode(table, recipe, index, SEEDS, "cpu")
+        assert len(info["row_ids"]) == 204
+        assert info["query_count"] == 51
+        assert info["query_cycle"]["first_pass_query_rows_seen"] == min(pool, (index + 1) * 51)
+        query_rows = {row for row, column in info["query_addresses"] if column == 0}
+        assert len(query_rows) == 51
+        assert query_rows <= set(info["row_ids"])
+        assert inputs.query[:, 0].sum().item() == 51
+        assert inputs.visible[:, 0].sum().item() == 153
+        assert len(torch.unique(truth.values[0][inputs.visible[:, 0]])) >= 2
+        if index < 6:
+            assert not seen.intersection(query_rows)
+        seen.update(query_rows)
+        repeat = build_episode(table, recipe, index, SEEDS, "cpu")
+        assert repeat[3] == info
+        assert torch.equal(repeat[0].query, inputs.query)
+    assert seen == set(range(pool))
+    assert torch.equal(torch.get_rng_state(), state)
+    assert build_episode(table, recipe, 6, SEEDS, "cpu")[3]["query_cycle"][
+        "first_pass_complete"
+    ]
+
+
+def test_query_cycle_keeps_numeric_support_diverse_or_fails_explicitly(tmp_path):
+    entry, _ = write_table_fixture(
+        tmp_path,
+        values=[[float(i % 3), i % 2] for i in range(30)],
+        features=[{"kind": "numeric"}, {"kind": "nominal", "domain": [0, 1]}],
+        splits={"train": list(range(26)), "validation": [26, 27], "test": [28, 29]},
+        target_column=0, window_rows=8, window_sampling="query_cycle",
+    )
+    table = load_table(entry, tmp_path)
+    recipe = {"kind": "supervised_row", "fraction": 0.25}
+    for index in range(20):
+        inputs, _, truth, info = build_episode(table, recipe, index, SEEDS, "cpu")
+        assert info["query_count"] == 2
+        assert len(torch.unique(truth.values[0][inputs.visible[:, 0]])) >= 2
+    probe = build_episode(table, recipe, 0, SEEDS, "cpu", evaluation=True)
+    assert probe[3]["window_sampling"] == "random_window"
+    assert "query_cycle" not in probe[3]
+    with pytest.raises(ValueError, match="unguarded supervised_row"):
+        build_episode(table, {"kind": "random_cell", "fraction": 0.25}, 0, SEEDS, "cpu")
+    with pytest.raises(ValueError, match="numeric target"):
+        load_table({**entry, "target_column": 1}, tmp_path)

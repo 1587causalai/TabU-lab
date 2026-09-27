@@ -10,10 +10,15 @@ from dataclasses import dataclass
 import torch
 from torch import Tensor
 
-from ..restoration._validation import finite, matrix, positive
 from ..restoration._dtype import solve_dtype
+from ..restoration._validation import finite, matrix, positive
 from ..restoration.contracts import ColumnSchema, validate_values
-from .codec_versions import DEFAULT_CODEC_VERSION, DEFAULT_COMPOSITION_CODEC_VERSION
+from .codec_versions import (
+    DEFAULT_CODEC_VERSION,
+    DEFAULT_COMPOSITION_CODEC_VERSION,
+    V55_DEFAULT_CODEC_VERSION,
+    V55_NEW_CODEC_VERSIONS,
+)
 
 ANSWER_WIDTH = 128
 
@@ -56,15 +61,22 @@ def constant_weight_vectors(
 def composition_vectors(
     identity: list, count: int, device: torch.device, *, codec_version: str,
 ) -> Tensor:
-    """V5.4 bases with a distinct, versioned realization namespace.
+    """Composition bases with stable realizations across ordinal-only revisions.
 
     Distinct sampled vectors are required within each bank. Separate origin
     and category banks may overlap, including exact equality.
     """
-    identity = ["v54-composition", codec_version, *identity]
-    if codec_version == "constant_weight_composition_v1":
+    # Later versions reuse V5.4 basis realizations. V5.5 v2 changes ordinal
+    # geometry; the v3 candidate adds a nominal column direction only.
+    basis_version = {
+        "constant_weight_composition_v2": "constant_weight_composition_v1",
+        "constant_weight_composition_v3": "constant_weight_composition_v1",
+        "unit_gaussian_composition_v2": "unit_gaussian_composition_v1",
+    }.get(codec_version, codec_version)
+    identity = ["v54-composition", basis_version, *identity]
+    if basis_version == "constant_weight_composition_v1":
         return constant_weight_vectors(identity, count, 4, device)
-    if codec_version == "unit_gaussian_composition_v1":
+    if basis_version == "unit_gaussian_composition_v1":
         vectors = unit_gaussians(identity, count, device)
         if len(vectors.unique(dim=0)) != count:
             raise FloatingPointError("numerical-failure: duplicate Gaussian composition bases")
@@ -212,7 +224,7 @@ class ConstantWeightNominalAnswers(GaussianNominalAnswers):
 
 @dataclass(frozen=True)
 class CompositionNominalAnswers(GaussianNominalAnswers):
-    """Visible nominal codes q_a+b_ac with a shared episode-local column origin.
+    """Visible nominal codes q_a+b_ac, optionally with a shared direction b_a.
 
     Keep both components as dataclass tensors so prepared snapshots guard all
     state used by the decoder, including tensors not present in the input lift.
@@ -221,6 +233,7 @@ class CompositionNominalAnswers(GaussianNominalAnswers):
 
     origin: Tensor
     category_vectors: Tensor
+    direction: Tensor | None = None
 
     @classmethod
     def from_visible(
@@ -239,11 +252,19 @@ class CompositionNominalAnswers(GaussianNominalAnswers):
             ["nominal-categories", seed, schema.key, classes.cpu().tolist()],
             len(classes), labels.device, codec_version=codec_version,
         )
+        direction = None
+        if codec_version == "constant_weight_composition_v3":
+            direction = composition_vectors(
+                ["nominal-direction", seed, schema.key], 1, labels.device,
+                codec_version=codec_version,
+            )[0]
         codebook = origin + category_vectors
+        if direction is not None:
+            codebook = codebook + direction
         finite(codebook, "nominal composition codebook")
         return cls(
             codebook[torch.searchsorted(classes, labels)], labels.detach().clone(),
-            classes, codebook, schema.domain_size, origin, category_vectors,
+            classes, codebook, schema.domain_size, origin, category_vectors, direction,
         )
 
     @torch.no_grad()
@@ -253,9 +274,10 @@ class CompositionNominalAnswers(GaussianNominalAnswers):
             raise ValueError("nominal predictions need 128 coordinates on the codec device")
         if not len(self.classes):
             raise ValueError("no-support: nominal decoding needs visible evidence")
-        # The b_ac have equal norms; q_a+b_ac generally do not. Subtracting q_a
-        # is essential, even for predictions outside the candidates' affine hull.
-        scores = (encoded.to(self.origin.dtype) - self.origin) @ self.category_vectors.T
+        # The b_ac have equal norms; translated codebook entries generally do not.
+        # Decode relative to the complete common center q_a (+ b_a for v3).
+        center = self.origin if self.direction is None else self.origin + self.direction
+        scores = (encoded.to(self.origin.dtype) - center) @ self.category_vectors.T
         finite(scores, "nominal composition code comparison")
         return self.classes[scores.argmax(-1)]
 
@@ -277,7 +299,9 @@ class IdentityOrdinalAnswers:
         if schema.kind != "ordinal":
             raise ValueError("identity-rank codec requires an ordinal schema")
         validate_values(schema, labels)
-        positions = torch.tensor(schema.rank_positions(), dtype=solve_dtype(labels), device=labels.device)
+        positions = torch.tensor(
+            schema.rank_positions(), dtype=solve_dtype(labels), device=labels.device,
+        )
         ranks = positions / max(schema.domain_size - 1, 1)
         if codec_version == "unit_gaussian_v2":
             identities = torch.stack([
@@ -330,6 +354,71 @@ class IdentityOrdinalAnswers:
 
 
 @dataclass(frozen=True)
+class CompositionOrdinalAnswers:
+    """V5.5 full-domain ordinal code q_a + b_a,c + r_a(c) b_a."""
+
+    encoded: Tensor
+    origin: Tensor
+    direction: Tensor
+    category_vectors: Tensor  # Declared-domain index order, including unseen levels.
+    rank_by_label: Tensor
+    classes: Tensor  # Increasing declared-rank order for exact-distance ties.
+    codebook: Tensor  # Declared-domain index order.
+
+    @classmethod
+    def from_visible(
+        cls, labels: Tensor, *, schema: ColumnSchema, seed: int,
+        codec_version: str = V55_DEFAULT_CODEC_VERSION,
+    ):
+        if schema.kind != "ordinal":
+            raise ValueError("composition ordinal codec requires an ordinal schema")
+        if codec_version not in V55_NEW_CODEC_VERSIONS:
+            raise ValueError("V5.5 ordinal composition requires a V5.5 codec version")
+        validate_values(schema, labels)
+        positions = torch.tensor(
+            schema.rank_positions(), dtype=solve_dtype(labels), device=labels.device,
+        )
+        ranks = positions / max(schema.domain_size - 1, 1)
+        origin, direction = composition_vectors(
+            ["ordinal-affine", seed, schema.key], 2, labels.device,
+            codec_version=codec_version,
+        ).unbind()
+        category_vectors = composition_vectors(
+            ["ordinal-categories", seed, schema.key], schema.domain_size, labels.device,
+            codec_version=codec_version,
+        )
+        codebook = origin + category_vectors + ranks[:, None] * direction
+        finite(codebook, "ordinal composition codebook")
+        if len(codebook.unique(dim=0)) != schema.domain_size:
+            raise FloatingPointError("numerical-failure: duplicate ordinal composition codes")
+        return cls(codebook[labels], origin, direction, category_vectors,
+                   ranks, positions.argsort(), codebook)
+
+    def encode_targets(self, labels: Tensor) -> Tensor:
+        if labels.ndim != 1 or labels.dtype != torch.long:
+            raise ValueError("ordinal targets must be an int64 vector")
+        if labels.device != self.codebook.device:
+            raise ValueError("ordinal targets and codec must share a device")
+        if bool(((labels < 0) | (labels >= len(self.classes))).any()):
+            raise ValueError("ordinal target outside the declared domain")
+        if not len(self.encoded):
+            raise ValueError("no-support: ordinal targets need visible evidence")
+        return self.codebook.detach()[labels]
+
+    @torch.no_grad()
+    def decode(self, encoded: Tensor) -> Tensor:
+        matrix(encoded, "ordinal prediction")
+        if encoded.shape[1] != ANSWER_WIDTH or encoded.device != self.codebook.device:
+            raise ValueError("ordinal predictions need 128 coordinates on the codec device")
+        if not len(self.encoded):
+            raise ValueError("no-support: ordinal decoding needs visible evidence")
+        candidates = self.codebook[self.classes]
+        distances = candidates.square().sum(-1) - 2 * (encoded.to(candidates.dtype) @ candidates.T)
+        finite(distances, "ordinal composition nearest-code distances")
+        return self.classes[distances.argmin(-1)]
+
+
+@dataclass(frozen=True)
 class AffineOrdinalAnswers:
     """Shared-origin ordinal codec, matching numeric's affine geometry.
 
@@ -351,7 +440,9 @@ class AffineOrdinalAnswers:
         if schema.kind != "ordinal":
             raise ValueError("affine ordinal codec requires an ordinal schema")
         validate_values(schema, labels)
-        positions = torch.tensor(schema.rank_positions(), dtype=solve_dtype(labels), device=labels.device)
+        positions = torch.tensor(
+            schema.rank_positions(), dtype=solve_dtype(labels), device=labels.device,
+        )
         ranks = positions / max(schema.domain_size - 1, 1)
         if codec_version == "unit_gaussian_v1":
             origin, direction = unit_gaussians(

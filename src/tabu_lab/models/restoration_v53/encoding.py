@@ -9,8 +9,8 @@ import torch
 from torch import Tensor, nn
 from torch.nn import functional as F
 
-from ..restoration._validation import finite, matrix, positive
 from ..restoration._dtype import solve_dtype
+from ..restoration._validation import finite, matrix, positive
 from ..restoration.answers import CategoricalAnswers, NumericAnswers
 from ..restoration.contracts import RestorationInput
 from ..restoration.encoding import EncodingLayout, prepare_features, visible_codes
@@ -18,6 +18,7 @@ from .answers import (
     ANSWER_WIDTH,
     AffineOrdinalAnswers,
     CompositionNominalAnswers,
+    CompositionOrdinalAnswers,
     ConstantWeightNominalAnswers,
     GaussianNominalAnswers,
     IdentityOrdinalAnswers,
@@ -26,7 +27,13 @@ from .answers import (
     constant_weight_vectors,
     unit_gaussians,
 )
-from .codec_versions import CODEC_VERSIONS, COMPOSITION_CODEC_VERSIONS, DEFAULT_CODEC_VERSION
+from .codec_versions import (
+    CODEC_VERSIONS,
+    COMPOSITION_CODEC_VERSIONS,
+    DEFAULT_CODEC_VERSION,
+    V55_CODEC_VERSIONS,
+    V55_NEW_CODEC_VERSIONS,
+)
 
 
 @dataclass(frozen=True)
@@ -51,7 +58,7 @@ class AffineNumericAnswers:
         # no process RNG and is stable under column reordering.
         if codec_version == "constant_weight_v1":
             basis = constant_weight_vectors(["v53-affine-constant", seed, key], 2, 4, values.device)
-        elif codec_version in COMPOSITION_CODEC_VERSIONS:
+        elif codec_version in V55_CODEC_VERSIONS:
             basis = composition_vectors(
                 ["numeric-affine", seed, key], 2, values.device, codec_version=codec_version,
             )
@@ -63,7 +70,7 @@ class AffineNumericAnswers:
         encoded = origin + scalar.encoded * direction
         finite(encoded, "affine visible encoding")
         norm_squared = 4.0 if codec_version == "constant_weight_v1" else 1.0
-        if codec_version in COMPOSITION_CODEC_VERSIONS:
+        if codec_version in V55_CODEC_VERSIONS:
             norm_squared = float(direction.square().sum())
         return cls(scalar, origin, direction, encoded, norm_squared)
 
@@ -88,7 +95,7 @@ class V53ColumnFacts:
     rows: Tensor
     answers: (
         AffineNumericAnswers | GaussianNominalAnswers | AffineOrdinalAnswers
-        | ConstantWeightNominalAnswers | CompositionNominalAnswers
+        | ConstantWeightNominalAnswers | CompositionNominalAnswers | CompositionOrdinalAnswers
         | IdentityOrdinalAnswers | CategoricalAnswers
     )
     input_coordinates: Tensor
@@ -144,7 +151,7 @@ class AffineValueEncoder(nn.Module):
                     )
                     rank = positions[values] / max(schema.domain_size - 1, 1)
             elif schema.kind == "nominal":
-                if self.codec_version in COMPOSITION_CODEC_VERSIONS:
+                if self.codec_version in V55_CODEC_VERSIONS:
                     codec = CompositionNominalAnswers.from_visible(
                         values, schema=schema, seed=inputs.code_seed,
                         codec_version=self.codec_version,
@@ -156,6 +163,12 @@ class AffineValueEncoder(nn.Module):
                     codec = nominal_type.from_visible(
                         values, schema=schema, seed=inputs.code_seed
                     )
+            elif self.codec_version in V55_NEW_CODEC_VERSIONS:
+                codec = CompositionOrdinalAnswers.from_visible(
+                    values, schema=schema, seed=inputs.code_seed,
+                    codec_version=self.codec_version,
+                )
+                rank = codec.rank_by_label[values]
             elif self.codec_version in (
                 "unit_gaussian_v1", "constant_weight_v1", *COMPOSITION_CODEC_VERSIONS,
             ):

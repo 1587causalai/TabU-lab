@@ -21,6 +21,7 @@ from . import loss_replay
 
 SCHEMA = "tabu.curriculum.v53.v1"
 V54_SCHEMA = "tabu.curriculum.v54.v1"
+V55_SCHEMA = "tabu.curriculum.v55.v1"
 _SEEDS = {"model", "order", "masks", "codes", "windows", "evaluation"}
 _TOP_FIELDS = {
     "schema", "experiment_id", "seeds", "model", "optimizer", "tables", "probes",
@@ -97,6 +98,18 @@ def _names(value, name, *, empty=False):
 
 
 def _model(value, schema=SCHEMA):
+    if schema == V55_SCHEMA:
+        from tabu_lab.models.restoration_v55 import V55Config
+
+        value = _mapping(value, "model", {field.name for field in fields(V55Config)})
+        try:
+            config = V55Config.from_dict(value)
+        except (TypeError, AttributeError) as error:
+            raise ValueError(f"invalid model configuration: {error}") from error
+        if config.slope_source != "shared_ll":
+            raise ValueError("curriculum requires serializable shared_ll; "
+                             "feature slope is unsupported")
+        return config
     if schema == V54_SCHEMA:
         from tabu_lab.models.restoration_v54 import V54Config
 
@@ -181,7 +194,8 @@ def _recipe(value, name, *, default_kind=None):
 
 def _table_entries(value):
     entries, seen = [], set()
-    allowed = {"id", "path", "sha256", "cohort", "kind", "window_rows", "target_column", "role"}
+    allowed = {"id", "path", "sha256", "cohort", "kind", "window_rows",
+               "window_sampling", "target_column", "role"}
     for raw in _list(value, "tables"):
         entry = _mapping(raw, "table", allowed, {"id", "path", "sha256", "cohort", "kind"})
         for key in ("id", "path", "cohort"):
@@ -200,6 +214,11 @@ def _table_entries(value):
             raise ValueError("table.role must be train or probe")
         if entry.get("window_rows") is not None:
             _integer(entry["window_rows"], "table.window_rows", minimum=3)
+        if "window_sampling" in entry:
+            if entry["window_sampling"] != "query_cycle" or entry.get("window_rows") is None:
+                raise ValueError("table.window_sampling=query_cycle requires window_rows")
+            if entry["role"] != "train":
+                raise ValueError("query_cycle requires a train-role table")
         if "target_column" in entry:
             _integer(entry["target_column"], "table.target_column", minimum=0)
         entries.append(entry)
@@ -241,7 +260,7 @@ def _probes(value, cohorts, *, default_kind=None):
     return probes
 
 
-def _stages(value, tables, probes, *, default_kind=None):
+def _stages(value, tables, probes, *, default_kind=None, schema=SCHEMA):
     result, seen = [], set()
     probe_by_name = {probe["name"]: probe for probe in probes}
     cohort_kinds: dict[str, set[str]] = {}
@@ -250,7 +269,7 @@ def _stages(value, tables, probes, *, default_kind=None):
             cohort_kinds.setdefault(table["cohort"], set()).add(table["kind"])
     required = {"name", "question", "max_updates", "max_seconds", "sampling", "recipe",
                 "optimizer", "evaluate_every", "checkpoint_every", "probes"}
-    allowed = required | {"gate", "loss", "loss_replay"}
+    allowed = required | {"gate", "loss", "loss_replay", "objective"}
     previous_optimizer = "adamw"
     for raw in _list(value, "stages"):
         stage = _mapping(raw, "stage", allowed, required)
@@ -362,6 +381,23 @@ def _stages(value, tables, probes, *, default_kind=None):
                 raise ValueError("curriculum loss supports retained/query states only: "
                                  "states 2/3 must be zero and states 0/1 need positive weight")
         stage["loss"] = asdict(resolved_loss)
+        if "objective" in stage:
+            if schema != V55_SCHEMA:
+                raise ValueError("stage.objective requires a V5.5 plan")
+            objective = _mapping(stage["objective"], f"stage {name}.objective",
+                                 {"kind", "tau"}, {"kind"})
+            if objective["kind"] == "squared":
+                if "tau" in objective:
+                    raise ValueError("squared objective does not accept tau")
+            elif objective["kind"] == "query_log1p_scaled":
+                if "tau" not in objective:
+                    raise ValueError("query_log1p_scaled requires tau")
+                objective["tau"] = _number(objective["tau"], "objective.tau")
+                if resolved_loss.state_weights != (0.0, 1.0, 0.0, 0.0):
+                    raise ValueError("query_log1p_scaled requires Query-only loss")
+            else:
+                raise ValueError("unsupported stage.objective kind")
+            stage["objective"] = objective
         result.append(stage)
     if len(result) != 1 and any("loss_replay" in stage for stage in result):
         raise ValueError("loss_replay supports a single bounded stage")
@@ -379,8 +415,10 @@ def _source_digest(schema=SCHEMA):
         "cli.py", "restoration_masking.py", "restoration_optimizers.py", "tar_data.py",
     )]
     directories = ["curriculum_v53", "models/restoration_v53", "models/restoration"]
-    if schema == V54_SCHEMA:
+    if schema in (V54_SCHEMA, V55_SCHEMA):
         directories.append("models/restoration_v54")
+    if schema == V55_SCHEMA:
+        directories.append("models/restoration_v55")
     for relative in directories:
         paths.extend(sorted((root / relative).rglob("*.py")))
     hashes = {path.relative_to(root).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
@@ -405,6 +443,8 @@ def _summary(spec):
                        "cycle_updates": length, "exposure": exposure,
                        "optimizer": stage["optimizer"], "loss": stage["loss"],
                        "probes": stage["probes"], "gate": stage.get("gate")})
+        if "objective" in stage:
+            stages[-1]["objective"] = stage["objective"]
         if "loss_replay" in stage:
             policy = stage["loss_replay"]
             extra_cycle = loss_replay.extras_per_cycle(policy["kind"])
@@ -433,6 +473,14 @@ def _summary(spec):
                 "constant_weight_v1": "complete declared identity-plus-rank codes",
                 "unit_gaussian_composition_v1": "affine composition of column identity and rank",
                 "constant_weight_composition_v1": "affine composition of column identity and rank",
+                "unit_gaussian_composition_v2":
+                    "complete declared category identity plus rank and column origin",
+                "constant_weight_composition_v2":
+                    "complete declared category identity plus rank and column origin",
+                "constant_weight_composition_v3": (
+                    "V5.5 v2 numeric/ordinal; nominal category identity plus "
+                    "column origin and direction"
+                ),
             }[spec["model"]["codec_version"]],
             "scope": "shared input/answer codec within each episode",
         },
@@ -454,7 +502,7 @@ def load_plan(path: Path | str, *, expected_schema: str = SCHEMA) -> Plan:
     document = json.loads(raw) if path.suffix.lower() == ".json" else yaml.safe_load(raw)
     spec = _mapping(document, "manifest", _TOP_FIELDS,
                     {"schema", "experiment_id", "seeds", "tables", "probes", "stages"})
-    if expected_schema not in (SCHEMA, V54_SCHEMA):
+    if expected_schema not in (SCHEMA, V54_SCHEMA, V55_SCHEMA):
         raise ValueError("unsupported curriculum schema")
     if spec["schema"] != expected_schema:
         raise ValueError(f"manifest.schema must be {expected_schema}")
@@ -469,13 +517,31 @@ def load_plan(path: Path | str, *, expected_schema: str = SCHEMA) -> Plan:
     spec["model"], spec["optimizer"] = config.as_dict(), asdict(optimizer)
     spec["tables"] = _table_entries(spec["tables"])
     cohorts = {entry["cohort"] for entry in spec["tables"]}
-    default_kind = "supervised_row" if expected_schema == V54_SCHEMA else None
+    default_kind = "supervised_row" if expected_schema in (V54_SCHEMA, V55_SCHEMA) else None
     spec["probes"] = _probes(spec["probes"], cohorts, default_kind=default_kind)
     spec["stages"] = _stages(spec["stages"], spec["tables"], spec["probes"],
-                              default_kind=default_kind)
+                              default_kind=default_kind, schema=expected_schema)
     # JSON-native normalized output also removes mutable caller-owned tuples/lists.
     spec = json.loads(json.dumps(spec, allow_nan=False))
     tables = tuple(load_table(entry, path.parent) for entry in spec["tables"])
+    for table in tables:
+        if table.window_sampling != "query_cycle":
+            continue
+        if expected_schema != V55_SCHEMA:
+            raise ValueError("query_cycle requires a V5.5 manifest")
+        for stage in spec["stages"]:
+            if table.cohort not in {item["cohort"] for item in stage["sampling"]}:
+                continue
+            recipe = stage["recipe"][table.kind]
+            if (recipe["kind"] != "supervised_row"
+                    or recipe["numeric_query_guard"] != {"kind": "none"}):
+                raise ValueError("query_cycle requires unguarded supervised_row training")
+        for probe in spec["probes"]:
+            if table.cohort not in probe["cohorts"] or probe["partition"] != "train":
+                continue
+            if (probe["recipe"]["kind"] != "supervised_row"
+                    or probe["recipe"]["numeric_query_guard"] != {"kind": "none"}):
+                raise ValueError("query_cycle requires unguarded supervised_row train probes")
     for entry, table in zip(spec["tables"], tables, strict=True):
         entry["target_column"] = table.target_column
         entry["window_rows"] = table.window_rows
@@ -511,6 +577,11 @@ def load_plan(path: Path | str, *, expected_schema: str = SCHEMA) -> Plan:
 def load_v54_plan(path: Path | str) -> Plan:
     """Load only V5.4 manifests, with its explicit model and recipe defaults."""
     return load_plan(path, expected_schema=V54_SCHEMA)
+
+
+def load_v55_plan(path: Path | str) -> Plan:
+    """Load only V5.5 manifests, preserving their codec and source identity."""
+    return load_plan(path, expected_schema=V55_SCHEMA)
 
 
 def _seed(*parts):
@@ -551,4 +622,5 @@ def schedule_entry(plan: Plan, stage_index: int, cursor: int):
     return entries[position]
 
 
-__all__ = ["SCHEMA", "V54_SCHEMA", "Plan", "load_plan", "load_v54_plan", "schedule_entry"]
+__all__ = ["SCHEMA", "V54_SCHEMA", "V55_SCHEMA", "Plan", "load_plan", "load_v54_plan",
+           "load_v55_plan", "schedule_entry"]

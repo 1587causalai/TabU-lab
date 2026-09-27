@@ -250,6 +250,36 @@ def test_digest_binds_objective_sampling_and_bytes_but_allows_relocation(tmp_pat
         load_plan(_save(tmp_path, spec))
 
 
+def test_v55_query_cycle_is_identity_bound_and_roundtrips(tmp_path, monkeypatch):
+    monkeypatch.setattr(protocol, "_source_digest",
+                        lambda *_args: {"files": {}, "sha256": "source"})
+    spec = _manifest(tmp_path)
+    spec["schema"] = protocol.V55_SCHEMA
+    spec["tables"][0].update(target_column=0, window_rows=3,
+                              window_sampling="query_cycle")
+    supervised = {"kind": "supervised_row", "fraction": 0.25}
+    spec["stages"][0]["recipe"] = {"synthetic": supervised}
+    spec["probes"][0]["recipe"] = supervised
+    manifest = _save(tmp_path, spec)
+    plan = load_plan(manifest, expected_schema=protocol.V55_SCHEMA)
+    assert plan.tables[0].window_sampling == "query_cycle"
+    assert plan.spec["tables"][0]["window_sampling"] == "query_cycle"
+    assert plan.summary["tables"][0]["window_sampling"] == "query_cycle"
+    normalized = tmp_path / "normalized.json"
+    normalized.write_text(json.dumps(plan.spec))
+    restored = load_plan(normalized, expected_schema=protocol.V55_SCHEMA)
+    assert restored.identity == plan.identity
+    assert restored.tables[0].summary() == plan.tables[0].summary()
+    changed = copy.deepcopy(spec)
+    del changed["tables"][0]["window_sampling"]
+    changed_plan = load_plan(_save(tmp_path, changed), expected_schema=protocol.V55_SCHEMA)
+    assert changed_plan.identity != plan.identity
+    changed = copy.deepcopy(spec)
+    changed["stages"][0]["recipe"]["synthetic"] = {"kind": "random_cell", "fraction": 0.25}
+    with pytest.raises(ValueError, match="unguarded supervised_row"):
+        load_plan(_save(tmp_path, changed), expected_schema=protocol.V55_SCHEMA)
+
+
 def test_schedule_has_fair_replay_and_resume_uses_absolute_address(tmp_path):
     spec = _manifest(tmp_path)
     template = spec["tables"][0]
