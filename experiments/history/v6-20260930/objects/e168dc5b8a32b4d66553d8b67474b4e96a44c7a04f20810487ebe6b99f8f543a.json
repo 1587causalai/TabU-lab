@@ -1,0 +1,35 @@
+{
+  "name": "v6-branchsample50-all730-2h-20260929",
+  "tables": 730,
+  "broadcast_loss": "V6 target_only original own target encoding squared",
+  "unbroadcast_loss": "V55 original Query squared",
+  "branch_probability": [
+    0.5,
+    0.5
+  ],
+  "selected_loss_weight": 1,
+  "forwards_per_update": 1,
+  "optimizer_steps_per_update": 1,
+  "randommix2": false,
+  "training_seconds_per_host": 7200,
+  "evaluation_cumulative_seconds": [
+    1800,
+    3600,
+    5400,
+    7200
+  ],
+  "window_rows": {
+    "openml12": 512,
+    "history718": 204
+  },
+  "preserve": [
+    "model",
+    "optimizer",
+    "learning_rate",
+    "RNG",
+    "episode_offsets",
+    "schedule_cursor"
+  ],
+  "branch_sampler": "independent dedicated Python RNG saved per successful update",
+  "seed": 2026092901
+}

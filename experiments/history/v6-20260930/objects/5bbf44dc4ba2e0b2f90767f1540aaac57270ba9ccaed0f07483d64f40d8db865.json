@@ -1,0 +1,18 @@
+{
+  "tables": 730,
+  "families": {
+    "old618": 618,
+    "sparse100": 100,
+    "openml12": 12
+  },
+  "sampling": "equal_table",
+  "successful_seconds": 3600,
+  "every_seconds": 1800,
+  "openml_window": 512,
+  "history_window": 204,
+  "supervision": {
+    "dustinstudio": "target_only"
+  },
+  "continuation_of": "v6-all730-hostloss-5h-20260929",
+  "change": "joint_all to target_only; sampling and optimizer unchanged"
+}

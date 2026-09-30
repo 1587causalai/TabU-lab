@@ -1,0 +1,19 @@
+{
+  "outcome": "passed",
+  "audited_utc": "2026-09-29T13:48:14.781852+00:00",
+  "source_hash_matched": true,
+  "split_disjoint": true,
+  "selection_before_test": true,
+  "best_validation_rounds_verified": true,
+  "refit_rounds_completed": true,
+  "prediction_metrics_independently_recomputed": true,
+  "models": [
+    "mlp-128x3",
+    "mlp-256x3",
+    "xgboost-depth12",
+    "xgboost-depth6"
+  ],
+  "predictions_per_model": 8192,
+  "bank_sha256": "2364ad568abe0541dc2e35c31a858d82db50c30fcdb35efa9486673932a135f9",
+  "remote_audit": "audit.py via pinned train-20260920; exit 0"
+}

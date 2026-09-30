@@ -1,0 +1,2184 @@
+{
+  "utc": "2026-09-27T23:50:09.517182+00:00",
+  "status": {
+    "outcome": "completed",
+    "started_utc": "2026-09-27T18:22:01.573939+00:00",
+    "start_update": 29082,
+    "start_successful_seconds": 0,
+    "additional_seconds_target": 18000,
+    "start_sha256": "19c210152e1c9a481dd0fbab529fdd7547ab8fdefcb8bfee2ff23096672356cc",
+    "sampling": "OpenML12 equal:12 + history618:8 per 20 updates",
+    "supervision": "target_only",
+    "completed_training_seconds": 18001.36556225829,
+    "phase": "hour5",
+    "additional_successful_seconds": 18001.36556225829,
+    "checkpoint_sha256": "ec1aa503ab3ec7eb5a2d7c7e9dca88e41377957a0f634a49166652d0a111545f",
+    "checkpoint_update": 72715,
+    "evaluations": {
+      "hour1": {
+        "macro": {
+          "r2": 0.7289109528920261,
+          "slog": 0.6590505263506424
+        },
+        "checkpoint_sha256": "0e88f6d47aaf3cab0f1858e6f526534c402f4954f618894240b43e709beac662"
+      },
+      "hour2": {
+        "macro": {
+          "r2": 0.7381960192031652,
+          "slog": 0.6675147860400622
+        },
+        "checkpoint_sha256": "f21f820e0c4b41b953b503d3e9656095bf3bbbb4e43e9a48f18143b875f7af25"
+      },
+      "hour3": {
+        "macro": {
+          "r2": 0.7370612508536274,
+          "slog": 0.6593470149459432
+        },
+        "checkpoint_sha256": "d6db37c6b9b85314d8728175f08b5a1ceda4cb02aeff049827f844b4a85677bc"
+      },
+      "hour4": {
+        "macro": {
+          "r2": 0.7426313519493356,
+          "slog": 0.6673402245893696
+        },
+        "checkpoint_sha256": "05b3cb9bb7be51784ef50cc6eba64bcc78367f2b735a15ed04e312d549d65f7f"
+      },
+      "hour5": {
+        "macro": {
+          "r2": 0.7539275680519015,
+          "slog": 0.6799737642167544
+        },
+        "checkpoint_sha256": "ec1aa503ab3ec7eb5a2d7c7e9dca88e41377957a0f634a49166652d0a111545f"
+      }
+    },
+    "completed_utc": "2026-09-27T23:28:10.749956+00:00"
+  },
+  "before": {
+    "bank_sha256": "2090f8d9074c3b80c40667aeb2995db80ef1799a801b8c5c6b8badffe6d413d4",
+    "checkpoint_sha256": "19c210152e1c9a481dd0fbab529fdd7547ab8fdefcb8bfee2ff23096672356cc",
+    "checkpoint_update": 29082,
+    "evaluation": "all train support + all test Query in one forward per table",
+    "identity": {
+      "code": {
+        "source/src/tabu_lab/models/restoration_v6/__init__.py": "e75a42c4c5a6ffc5334a59b2868968525cf41e496b2466d1cd2f4c8d1c56119a",
+        "source/src/tabu_lab/models/restoration_v6/model.py": "8c0d47aabcad1c7eb484197539dfe21ca5e23b2a25cb651af95f1c71effa8432",
+        "source/src/tabu_lab/models/restoration_v6/training.py": "923da21540c92cae19c2016c085dd1bedf4db96791073637ccccdd125ca64adb",
+        "train_jointall.py": "c996bc56f818fd79f0855203f6cdfa8cd001d678adb3c88038bd7702f020581f",
+        "training_support.py": "6c0d77318134d63f60b3caeca283597aff503a0b9b7ff687665153f551c162bd"
+      },
+      "model_config": {
+        "backbone": {
+          "ff_width": 256,
+          "heads": 4,
+          "kind": "inducing",
+          "layers": 3,
+          "norm_eps": 1e-06,
+          "reference_mass": 1.0,
+          "slots": 256,
+          "tau_presence": 1.0,
+          "width": 128
+        },
+        "bandwidth": 1.0,
+        "center_chunk_size": 128,
+        "codec_version": "constant_weight_composition_v2",
+        "epsilon": 1e-06,
+        "numeric_scaling": "zscore",
+        "regression_width": null,
+        "ridge": 0.001,
+        "size": "small",
+        "slope_source": "shared_ll",
+        "subtokens": 1,
+        "unit_layers": 3
+      },
+      "parent_identity_sha256": "0ad1116fb111ccbe489606f5007b0bce70dd70ec15d2cd5bf08c0871320aecac",
+      "parent_manifest_sha256": "3a4a612ccc301b955cb32ae840518f5caf5aac0b35e177cbfc53793d7d71082d",
+      "parent_sha256": "de3ce4561dfb3e0efe1a0591aecb8d3d3428f778b68a2379706414bd6f7380ef",
+      "runtime": {
+        "deterministic_algorithms": true,
+        "device": "mps",
+        "dtype": "float32",
+        "interop_threads": 10,
+        "mps_available": true,
+        "mps_cpu_fallback": false,
+        "platform": [
+          "Darwin",
+          "25.5.0",
+          "arm64"
+        ],
+        "python": "3.12.13",
+        "threads": 1,
+        "torch": "2.13.0",
+        "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+      },
+      "sampling": [
+        {
+          "cohort": "focus2",
+          "episodes": 2
+        },
+        {
+          "cohort": "other10",
+          "episodes": 10
+        },
+        {
+          "cohort": "history618",
+          "episodes": 3
+        }
+      ],
+      "schema": "tabu.v6.jointall-continuation.v1",
+      "sha256": "fc27c93fc9c8c24d11daabbbb8c8dbc8032b2c9a1c4621ea15076ac24bd702f1",
+      "supervision": "target_only"
+    },
+    "macro": {
+      "r2": 0.7288278119025738,
+      "slog": 0.6471295711802889
+    },
+    "model_state_sha256": "7715897c61c8f25e3b87bebc2607c7a7fbc6be922d55738cdcf587f87a40d39e",
+    "optimizer_updates": 0,
+    "outcome": "completed",
+    "runtime": {
+      "deterministic_algorithms": true,
+      "device": "mps",
+      "dtype": "float32",
+      "interop_threads": 10,
+      "mps_available": true,
+      "mps_cpu_fallback": false,
+      "platform": [
+        "Darwin",
+        "25.5.0",
+        "arm64"
+      ],
+      "python": "3.12.13",
+      "threads": 1,
+      "torch": "2.13.0",
+      "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+    },
+    "schema": "tabu.v6.broadcast-explicit-supervision.full-context.v1",
+    "tables": {
+      "airfoil_self_noise": {
+        "forward_rows": 1503,
+        "mae": 1.2570491756806734,
+        "n": 301,
+        "query_rows": 301,
+        "r2": 0.9286412871140519,
+        "rmse": 1.728240593062855,
+        "seconds": 0.7579417089000344,
+        "slog": 0.8728647991415265,
+        "support_rows": 1202
+      },
+      "bodyfat": {
+        "forward_rows": 252,
+        "mae": 0.4093909693699257,
+        "n": 51,
+        "query_rows": 51,
+        "r2": 0.992460602674347,
+        "rmse": 0.7086221220955289,
+        "seconds": 0.24778679106384516,
+        "slog": 0.9845396381723929,
+        "support_rows": 201
+      },
+      "cars": {
+        "forward_rows": 804,
+        "mae": 1605.5067621797361,
+        "n": 161,
+        "query_rows": 161,
+        "r2": 0.9554235929758678,
+        "rmse": 2337.925010342423,
+        "seconds": 0.48363874945789576,
+        "slog": 0.8521907103396952,
+        "support_rows": 643
+      },
+      "concrete_compressive_strength": {
+        "forward_rows": 1030,
+        "mae": 3.4469327825809586,
+        "n": 206,
+        "query_rows": 206,
+        "r2": 0.9020825381421917,
+        "rmse": 5.262591043701404,
+        "seconds": 0.48279641661792994,
+        "slog": 0.8354495309706004,
+        "support_rows": 824
+      },
+      "cpu_activity": {
+        "forward_rows": 8192,
+        "mae": 3.104064075593326,
+        "n": 1639,
+        "query_rows": 1639,
+        "r2": 0.9279166427577777,
+        "rmse": 4.789574670305512,
+        "seconds": 14.353259249590337,
+        "slog": 0.6709995972244915,
+        "support_rows": 6553
+      },
+      "energy_efficiency": {
+        "forward_rows": 768,
+        "mae": 0.5913717536430854,
+        "n": 154,
+        "query_rows": 154,
+        "r2": 0.9939075428744546,
+        "rmse": 0.8039711450197323,
+        "seconds": 0.34882675018161535,
+        "slog": 0.987494824092923,
+        "support_rows": 614
+      },
+      "kin8nm": {
+        "forward_rows": 8192,
+        "mae": 0.10897310089240556,
+        "n": 1639,
+        "query_rows": 1639,
+        "r2": 0.7116699819743207,
+        "rmse": 0.14095409179667232,
+        "seconds": 12.947111625224352,
+        "slog": 0.5817129224094169,
+        "support_rows": 6553
+      },
+      "pumadyn32nh": {
+        "forward_rows": 8192,
+        "mae": 0.017679981586437035,
+        "n": 1639,
+        "query_rows": 1639,
+        "r2": 0.619011758070521,
+        "rmse": 0.022297263592881728,
+        "seconds": 15.48853512480855,
+        "slog": 0.4330973728578148,
+        "support_rows": 6553
+      },
+      "qsar_fish_toxicity": {
+        "forward_rows": 908,
+        "mae": 0.7715408683085179,
+        "n": 182,
+        "query_rows": 182,
+        "r2": 0.4808464686417906,
+        "rmse": 1.0727215325273955,
+        "seconds": 0.3991775829344988,
+        "slog": 0.38155047833650746,
+        "support_rows": 726
+      },
+      "red_wine": {
+        "forward_rows": 1599,
+        "mae": 0.4792763993144035,
+        "n": 320,
+        "query_rows": 320,
+        "r2": 0.36073426805589803,
+        "rmse": 0.6396327606089491,
+        "seconds": 0.8812228748574853,
+        "slog": 0.4382489198735888,
+        "support_rows": 1279
+      },
+      "space_ga": {
+        "forward_rows": 3107,
+        "mae": 0.10093819784060538,
+        "n": 622,
+        "query_rows": 622,
+        "r2": 0.47778965274164675,
+        "rmse": 0.13929113416369127,
+        "seconds": 2.1803910825401545,
+        "slog": 0.3915887149583609,
+        "support_rows": 2485
+      },
+      "white_wine": {
+        "forward_rows": 4898,
+        "mae": 0.5478237234816259,
+        "n": 980,
+        "query_rows": 980,
+        "r2": 0.3954494068080171,
+        "rmse": 0.7112563495148521,
+        "seconds": 5.242527041584253,
+        "slog": 0.3358173457861485,
+        "support_rows": 3918
+      }
+    },
+    "total_predictions": 7894
+  },
+  "hours": {
+    "hour1": {
+      "campaign": {
+        "balanced_manifest": "/Users/gongqian/experiments/v6-replay40-5h-20260928/balanced-manifest.json",
+        "checkpoint": "/Users/gongqian/experiments/v6-replay40-5h-20260928/hour1/run/checkpoints/0e88f6d47aaf3cab0f1858e6f526534c402f4954f618894240b43e709beac662.pt",
+        "checkpoint_sha256": "0e88f6d47aaf3cab0f1858e6f526534c402f4954f618894240b43e709beac662",
+        "checkpoint_update": 37804,
+        "cohort_updates": {
+          "focus2": 872,
+          "history618": 3489,
+          "other10": 4361
+        },
+        "continuation": "new_stage_preserve_weights_optimizer_rng_sampling_cursor_episode_positions",
+        "first_cycle": [
+          "white_wine",
+          "airfoil_self_noise",
+          "qsar_fish_toxicity",
+          "red_wine",
+          "pumadyn32nh",
+          "kin8nm",
+          "space_ga",
+          "bodyfat",
+          "cars",
+          "energy_efficiency",
+          "cpu_activity",
+          "concrete_compressive_strength"
+        ],
+        "host": "gongqian-mini",
+        "identity": {
+          "code": {
+            "source/src/tabu_lab/models/restoration_v6/__init__.py": "e75a42c4c5a6ffc5334a59b2868968525cf41e496b2466d1cd2f4c8d1c56119a",
+            "source/src/tabu_lab/models/restoration_v6/model.py": "8c0d47aabcad1c7eb484197539dfe21ca5e23b2a25cb651af95f1c71effa8432",
+            "source/src/tabu_lab/models/restoration_v6/training.py": "923da21540c92cae19c2016c085dd1bedf4db96791073637ccccdd125ca64adb",
+            "train_jointall.py": "bb98be6e0c1d466e04c118ea6bf21069f0da376c57abc8beba6b693170a1e244",
+            "training_support.py": "6c0d77318134d63f60b3caeca283597aff503a0b9b7ff687665153f551c162bd"
+          },
+          "model_config": {
+            "backbone": {
+              "ff_width": 256,
+              "heads": 4,
+              "kind": "inducing",
+              "layers": 3,
+              "norm_eps": 1e-06,
+              "reference_mass": 1.0,
+              "slots": 256,
+              "tau_presence": 1.0,
+              "width": 128
+            },
+            "bandwidth": 1.0,
+            "center_chunk_size": 128,
+            "codec_version": "constant_weight_composition_v2",
+            "epsilon": 1e-06,
+            "numeric_scaling": "zscore",
+            "regression_width": null,
+            "ridge": 0.001,
+            "size": "small",
+            "slope_source": "shared_ll",
+            "subtokens": 1,
+            "unit_layers": 3
+          },
+          "parent_identity_sha256": "fc27c93fc9c8c24d11daabbbb8c8dbc8032b2c9a1c4621ea15076ac24bd702f1",
+          "parent_manifest_sha256": "5fa1094d06e45c368c58980873f44094de16056f52c58ca42962b9288ddaf260",
+          "parent_sha256": "19c210152e1c9a481dd0fbab529fdd7547ab8fdefcb8bfee2ff23096672356cc",
+          "runtime": {
+            "deterministic_algorithms": true,
+            "device": "mps",
+            "dtype": "float32",
+            "interop_threads": 10,
+            "mps_available": true,
+            "mps_cpu_fallback": false,
+            "platform": [
+              "Darwin",
+              "25.5.0",
+              "arm64"
+            ],
+            "python": "3.12.13",
+            "threads": 1,
+            "torch": "2.13.0",
+            "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+          },
+          "sampling": [
+            {
+              "cohort": "focus2",
+              "episodes": 2
+            },
+            {
+              "cohort": "other10",
+              "episodes": 10
+            },
+            {
+              "cohort": "history618",
+              "episodes": 8
+            }
+          ],
+          "schema": "tabu.v6.jointall-continuation.v1",
+          "sha256": "eb1a73516c3d5303a650feea4a14f1778638dca845048c32656d424ba57ba942",
+          "supervision": "target_only"
+        },
+        "openml_table_updates": {
+          "airfoil_self_noise": 436,
+          "bodyfat": 436,
+          "cars": 436,
+          "concrete_compressive_strength": 436,
+          "cpu_activity": 436,
+          "energy_efficiency": 436,
+          "kin8nm": 436,
+          "pumadyn32nh": 436,
+          "qsar_fish_toxicity": 436,
+          "red_wine": 436,
+          "space_ga": 437,
+          "white_wine": 436
+        },
+        "optimizer_restored": true,
+        "outcome": "training_completed",
+        "parent": "/Users/gongqian/experiments/v6-balanced-loss-continue60m-20260928/half2/run/checkpoints/19c210152e1c9a481dd0fbab529fdd7547ab8fdefcb8bfee2ff23096672356cc.pt",
+        "parent_sha256": "19c210152e1c9a481dd0fbab529fdd7547ab8fdefcb8bfee2ff23096672356cc",
+        "parent_update": 29082,
+        "per_table_episode_positions_preserved": true,
+        "rng_restored": true,
+        "runtime": {
+          "deterministic_algorithms": true,
+          "device": "mps",
+          "dtype": "float32",
+          "interop_threads": 10,
+          "mps_available": true,
+          "mps_cpu_fallback": false,
+          "platform": [
+            "Darwin",
+            "25.5.0",
+            "arm64"
+          ],
+          "python": "3.12.13",
+          "threads": 1,
+          "torch": "2.13.0",
+          "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+        },
+        "sampling": "each OpenML table once plus 8 history618 per 20 updates",
+        "schedule_cursor_reset": true,
+        "successful_update_seconds": 3600.1321968305856,
+        "successful_update_seconds_target": 3600.0,
+        "supervision": "target_only"
+      },
+      "eval": {
+        "bank_sha256": "2090f8d9074c3b80c40667aeb2995db80ef1799a801b8c5c6b8badffe6d413d4",
+        "checkpoint_sha256": "0e88f6d47aaf3cab0f1858e6f526534c402f4954f618894240b43e709beac662",
+        "checkpoint_update": 37804,
+        "evaluation": "all train support + all test Query in one forward per table",
+        "identity": {
+          "code": {
+            "source/src/tabu_lab/models/restoration_v6/__init__.py": "e75a42c4c5a6ffc5334a59b2868968525cf41e496b2466d1cd2f4c8d1c56119a",
+            "source/src/tabu_lab/models/restoration_v6/model.py": "8c0d47aabcad1c7eb484197539dfe21ca5e23b2a25cb651af95f1c71effa8432",
+            "source/src/tabu_lab/models/restoration_v6/training.py": "923da21540c92cae19c2016c085dd1bedf4db96791073637ccccdd125ca64adb",
+            "train_jointall.py": "bb98be6e0c1d466e04c118ea6bf21069f0da376c57abc8beba6b693170a1e244",
+            "training_support.py": "6c0d77318134d63f60b3caeca283597aff503a0b9b7ff687665153f551c162bd"
+          },
+          "model_config": {
+            "backbone": {
+              "ff_width": 256,
+              "heads": 4,
+              "kind": "inducing",
+              "layers": 3,
+              "norm_eps": 1e-06,
+              "reference_mass": 1.0,
+              "slots": 256,
+              "tau_presence": 1.0,
+              "width": 128
+            },
+            "bandwidth": 1.0,
+            "center_chunk_size": 128,
+            "codec_version": "constant_weight_composition_v2",
+            "epsilon": 1e-06,
+            "numeric_scaling": "zscore",
+            "regression_width": null,
+            "ridge": 0.001,
+            "size": "small",
+            "slope_source": "shared_ll",
+            "subtokens": 1,
+            "unit_layers": 3
+          },
+          "parent_identity_sha256": "fc27c93fc9c8c24d11daabbbb8c8dbc8032b2c9a1c4621ea15076ac24bd702f1",
+          "parent_manifest_sha256": "5fa1094d06e45c368c58980873f44094de16056f52c58ca42962b9288ddaf260",
+          "parent_sha256": "19c210152e1c9a481dd0fbab529fdd7547ab8fdefcb8bfee2ff23096672356cc",
+          "runtime": {
+            "deterministic_algorithms": true,
+            "device": "mps",
+            "dtype": "float32",
+            "interop_threads": 10,
+            "mps_available": true,
+            "mps_cpu_fallback": false,
+            "platform": [
+              "Darwin",
+              "25.5.0",
+              "arm64"
+            ],
+            "python": "3.12.13",
+            "threads": 1,
+            "torch": "2.13.0",
+            "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+          },
+          "sampling": [
+            {
+              "cohort": "focus2",
+              "episodes": 2
+            },
+            {
+              "cohort": "other10",
+              "episodes": 10
+            },
+            {
+              "cohort": "history618",
+              "episodes": 8
+            }
+          ],
+          "schema": "tabu.v6.jointall-continuation.v1",
+          "sha256": "eb1a73516c3d5303a650feea4a14f1778638dca845048c32656d424ba57ba942",
+          "supervision": "target_only"
+        },
+        "macro": {
+          "r2": 0.7289109528920261,
+          "slog": 0.6590505263506424
+        },
+        "model_state_sha256": "8bbc68d7fbfa11ff4c71b5defc94f22ae01c7ce65b0839db40f902e908fa03de",
+        "optimizer_updates": 0,
+        "outcome": "completed",
+        "runtime": {
+          "deterministic_algorithms": true,
+          "device": "mps",
+          "dtype": "float32",
+          "interop_threads": 10,
+          "mps_available": true,
+          "mps_cpu_fallback": false,
+          "platform": [
+            "Darwin",
+            "25.5.0",
+            "arm64"
+          ],
+          "python": "3.12.13",
+          "threads": 1,
+          "torch": "2.13.0",
+          "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+        },
+        "schema": "tabu.v6.broadcast-explicit-supervision.full-context.v1",
+        "tables": {
+          "airfoil_self_noise": {
+            "forward_rows": 1503,
+            "mae": 1.1354239576979728,
+            "n": 301,
+            "query_rows": 301,
+            "r2": 0.9471249092601123,
+            "rmse": 1.4876688192503906,
+            "seconds": 0.7636379171162844,
+            "slog": 0.8986670122513526,
+            "support_rows": 1202
+          },
+          "bodyfat": {
+            "forward_rows": 252,
+            "mae": 0.43312659918093216,
+            "n": 51,
+            "query_rows": 51,
+            "r2": 0.9918051679273637,
+            "rmse": 0.7387821944410768,
+            "seconds": 0.235296499915421,
+            "slog": 0.9833109145308568,
+            "support_rows": 201
+          },
+          "cars": {
+            "forward_rows": 804,
+            "mae": 1523.195766935171,
+            "n": 161,
+            "query_rows": 161,
+            "r2": 0.9564215034495275,
+            "rmse": 2311.607891045967,
+            "seconds": 0.48284220788627863,
+            "slog": 0.8604279477372202,
+            "support_rows": 643
+          },
+          "concrete_compressive_strength": {
+            "forward_rows": 1030,
+            "mae": 3.3366675429907215,
+            "n": 206,
+            "query_rows": 206,
+            "r2": 0.8975463478767258,
+            "rmse": 5.3831102006742775,
+            "seconds": 0.47506375052034855,
+            "slog": 0.8383788059758076,
+            "support_rows": 824
+          },
+          "cpu_activity": {
+            "forward_rows": 8192,
+            "mae": 1.9222649742438345,
+            "n": 1639,
+            "query_rows": 1639,
+            "r2": 0.9778998694466704,
+            "rmse": 2.6520204293570653,
+            "seconds": 14.354636832140386,
+            "slog": 0.8365592611575898,
+            "support_rows": 6553
+          },
+          "energy_efficiency": {
+            "forward_rows": 768,
+            "mae": 0.4953101295867523,
+            "n": 154,
+            "query_rows": 154,
+            "r2": 0.9956296518204474,
+            "rmse": 0.6809296419862667,
+            "seconds": 0.348019290715456,
+            "slog": 0.9910178701203646,
+            "support_rows": 614
+          },
+          "kin8nm": {
+            "forward_rows": 8192,
+            "mae": 0.11392884434577334,
+            "n": 1639,
+            "query_rows": 1639,
+            "r2": 0.6977315486814751,
+            "rmse": 0.14432088007062796,
+            "seconds": 12.96636954229325,
+            "slog": 0.5561270812207879,
+            "support_rows": 6553
+          },
+          "pumadyn32nh": {
+            "forward_rows": 8192,
+            "mae": 0.01833372476197744,
+            "n": 1639,
+            "query_rows": 1639,
+            "r2": 0.5874549872602477,
+            "rmse": 0.023202322144952613,
+            "seconds": 15.478352124802768,
+            "slog": 0.4059687295549107,
+            "support_rows": 6553
+          },
+          "qsar_fish_toxicity": {
+            "forward_rows": 908,
+            "mae": 0.7238301505623282,
+            "n": 182,
+            "query_rows": 182,
+            "r2": 0.5118286897511994,
+            "rmse": 1.0402200445666434,
+            "seconds": 0.3853022903203964,
+            "slog": 0.4299733623768105,
+            "support_rows": 726
+          },
+          "red_wine": {
+            "forward_rows": 1599,
+            "mae": 0.4843927785754204,
+            "n": 320,
+            "query_rows": 320,
+            "r2": 0.3561852839516957,
+            "rmse": 0.6419045242642513,
+            "seconds": 0.8826920827850699,
+            "slog": 0.43277350335847575,
+            "support_rows": 1279
+          },
+          "space_ga": {
+            "forward_rows": 3107,
+            "mae": 0.10739928984072766,
+            "n": 622,
+            "query_rows": 622,
+            "r2": 0.4374861851370455,
+            "rmse": 0.1445663894340326,
+            "seconds": 2.178017499856651,
+            "slog": 0.34099633008895924,
+            "support_rows": 2485
+          },
+          "white_wine": {
+            "forward_rows": 4898,
+            "mae": 0.5496752296175276,
+            "n": 980,
+            "query_rows": 980,
+            "r2": 0.38981729014180266,
+            "rmse": 0.7145617734920608,
+            "seconds": 5.245214999653399,
+            "slog": 0.33440549783457296,
+            "support_rows": 3918
+          }
+        },
+        "total_predictions": 7894
+      }
+    },
+    "hour2": {
+      "campaign": {
+        "balanced_manifest": "/Users/gongqian/experiments/v6-replay40-5h-20260928/balanced-manifest.json",
+        "checkpoint": "/Users/gongqian/experiments/v6-replay40-5h-20260928/hour2/run/checkpoints/f21f820e0c4b41b953b503d3e9656095bf3bbbb4e43e9a48f18143b875f7af25.pt",
+        "checkpoint_sha256": "f21f820e0c4b41b953b503d3e9656095bf3bbbb4e43e9a48f18143b875f7af25",
+        "checkpoint_update": 46495,
+        "cohort_updates": {
+          "focus2": 868,
+          "history618": 3476,
+          "other10": 4347
+        },
+        "continuation": "new_stage_preserve_weights_optimizer_rng_sampling_cursor_episode_positions",
+        "first_cycle": [
+          "white_wine",
+          "airfoil_self_noise",
+          "qsar_fish_toxicity",
+          "red_wine",
+          "pumadyn32nh",
+          "kin8nm",
+          "space_ga",
+          "bodyfat",
+          "cars",
+          "energy_efficiency",
+          "cpu_activity",
+          "concrete_compressive_strength"
+        ],
+        "host": "gongqian-mini",
+        "identity": {
+          "code": {
+            "source/src/tabu_lab/models/restoration_v6/__init__.py": "e75a42c4c5a6ffc5334a59b2868968525cf41e496b2466d1cd2f4c8d1c56119a",
+            "source/src/tabu_lab/models/restoration_v6/model.py": "8c0d47aabcad1c7eb484197539dfe21ca5e23b2a25cb651af95f1c71effa8432",
+            "source/src/tabu_lab/models/restoration_v6/training.py": "923da21540c92cae19c2016c085dd1bedf4db96791073637ccccdd125ca64adb",
+            "train_jointall.py": "bb98be6e0c1d466e04c118ea6bf21069f0da376c57abc8beba6b693170a1e244",
+            "training_support.py": "6c0d77318134d63f60b3caeca283597aff503a0b9b7ff687665153f551c162bd"
+          },
+          "model_config": {
+            "backbone": {
+              "ff_width": 256,
+              "heads": 4,
+              "kind": "inducing",
+              "layers": 3,
+              "norm_eps": 1e-06,
+              "reference_mass": 1.0,
+              "slots": 256,
+              "tau_presence": 1.0,
+              "width": 128
+            },
+            "bandwidth": 1.0,
+            "center_chunk_size": 128,
+            "codec_version": "constant_weight_composition_v2",
+            "epsilon": 1e-06,
+            "numeric_scaling": "zscore",
+            "regression_width": null,
+            "ridge": 0.001,
+            "size": "small",
+            "slope_source": "shared_ll",
+            "subtokens": 1,
+            "unit_layers": 3
+          },
+          "parent_identity_sha256": "eb1a73516c3d5303a650feea4a14f1778638dca845048c32656d424ba57ba942",
+          "parent_manifest_sha256": "5fa1094d06e45c368c58980873f44094de16056f52c58ca42962b9288ddaf260",
+          "parent_sha256": "0e88f6d47aaf3cab0f1858e6f526534c402f4954f618894240b43e709beac662",
+          "runtime": {
+            "deterministic_algorithms": true,
+            "device": "mps",
+            "dtype": "float32",
+            "interop_threads": 10,
+            "mps_available": true,
+            "mps_cpu_fallback": false,
+            "platform": [
+              "Darwin",
+              "25.5.0",
+              "arm64"
+            ],
+            "python": "3.12.13",
+            "threads": 1,
+            "torch": "2.13.0",
+            "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+          },
+          "sampling": [
+            {
+              "cohort": "focus2",
+              "episodes": 2
+            },
+            {
+              "cohort": "other10",
+              "episodes": 10
+            },
+            {
+              "cohort": "history618",
+              "episodes": 8
+            }
+          ],
+          "schema": "tabu.v6.jointall-continuation.v1",
+          "sha256": "89460f066de8f9c8ffdb874ddf5feffb2180feba365ef7553dc43f7cdd9c8de8",
+          "supervision": "target_only"
+        },
+        "openml_table_updates": {
+          "airfoil_self_noise": 434,
+          "bodyfat": 435,
+          "cars": 435,
+          "concrete_compressive_strength": 435,
+          "cpu_activity": 435,
+          "energy_efficiency": 434,
+          "kin8nm": 434,
+          "pumadyn32nh": 434,
+          "qsar_fish_toxicity": 435,
+          "red_wine": 435,
+          "space_ga": 434,
+          "white_wine": 435
+        },
+        "optimizer_restored": true,
+        "outcome": "training_completed",
+        "parent": "/Users/gongqian/experiments/v6-replay40-5h-20260928/hour1/run/checkpoints/0e88f6d47aaf3cab0f1858e6f526534c402f4954f618894240b43e709beac662.pt",
+        "parent_sha256": "0e88f6d47aaf3cab0f1858e6f526534c402f4954f618894240b43e709beac662",
+        "parent_update": 37804,
+        "per_table_episode_positions_preserved": true,
+        "rng_restored": true,
+        "runtime": {
+          "deterministic_algorithms": true,
+          "device": "mps",
+          "dtype": "float32",
+          "interop_threads": 10,
+          "mps_available": true,
+          "mps_cpu_fallback": false,
+          "platform": [
+            "Darwin",
+            "25.5.0",
+            "arm64"
+          ],
+          "python": "3.12.13",
+          "threads": 1,
+          "torch": "2.13.0",
+          "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+        },
+        "sampling": "each OpenML table once plus 8 history618 per 20 updates",
+        "schedule_cursor_reset": false,
+        "successful_update_seconds": 3600.200757429935,
+        "successful_update_seconds_target": 3600.0,
+        "supervision": "target_only"
+      },
+      "eval": {
+        "bank_sha256": "2090f8d9074c3b80c40667aeb2995db80ef1799a801b8c5c6b8badffe6d413d4",
+        "checkpoint_sha256": "f21f820e0c4b41b953b503d3e9656095bf3bbbb4e43e9a48f18143b875f7af25",
+        "checkpoint_update": 46495,
+        "evaluation": "all train support + all test Query in one forward per table",
+        "identity": {
+          "code": {
+            "source/src/tabu_lab/models/restoration_v6/__init__.py": "e75a42c4c5a6ffc5334a59b2868968525cf41e496b2466d1cd2f4c8d1c56119a",
+            "source/src/tabu_lab/models/restoration_v6/model.py": "8c0d47aabcad1c7eb484197539dfe21ca5e23b2a25cb651af95f1c71effa8432",
+            "source/src/tabu_lab/models/restoration_v6/training.py": "923da21540c92cae19c2016c085dd1bedf4db96791073637ccccdd125ca64adb",
+            "train_jointall.py": "bb98be6e0c1d466e04c118ea6bf21069f0da376c57abc8beba6b693170a1e244",
+            "training_support.py": "6c0d77318134d63f60b3caeca283597aff503a0b9b7ff687665153f551c162bd"
+          },
+          "model_config": {
+            "backbone": {
+              "ff_width": 256,
+              "heads": 4,
+              "kind": "inducing",
+              "layers": 3,
+              "norm_eps": 1e-06,
+              "reference_mass": 1.0,
+              "slots": 256,
+              "tau_presence": 1.0,
+              "width": 128
+            },
+            "bandwidth": 1.0,
+            "center_chunk_size": 128,
+            "codec_version": "constant_weight_composition_v2",
+            "epsilon": 1e-06,
+            "numeric_scaling": "zscore",
+            "regression_width": null,
+            "ridge": 0.001,
+            "size": "small",
+            "slope_source": "shared_ll",
+            "subtokens": 1,
+            "unit_layers": 3
+          },
+          "parent_identity_sha256": "eb1a73516c3d5303a650feea4a14f1778638dca845048c32656d424ba57ba942",
+          "parent_manifest_sha256": "5fa1094d06e45c368c58980873f44094de16056f52c58ca42962b9288ddaf260",
+          "parent_sha256": "0e88f6d47aaf3cab0f1858e6f526534c402f4954f618894240b43e709beac662",
+          "runtime": {
+            "deterministic_algorithms": true,
+            "device": "mps",
+            "dtype": "float32",
+            "interop_threads": 10,
+            "mps_available": true,
+            "mps_cpu_fallback": false,
+            "platform": [
+              "Darwin",
+              "25.5.0",
+              "arm64"
+            ],
+            "python": "3.12.13",
+            "threads": 1,
+            "torch": "2.13.0",
+            "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+          },
+          "sampling": [
+            {
+              "cohort": "focus2",
+              "episodes": 2
+            },
+            {
+              "cohort": "other10",
+              "episodes": 10
+            },
+            {
+              "cohort": "history618",
+              "episodes": 8
+            }
+          ],
+          "schema": "tabu.v6.jointall-continuation.v1",
+          "sha256": "89460f066de8f9c8ffdb874ddf5feffb2180feba365ef7553dc43f7cdd9c8de8",
+          "supervision": "target_only"
+        },
+        "macro": {
+          "r2": 0.7381960192031652,
+          "slog": 0.6675147860400622
+        },
+        "model_state_sha256": "f2e253e6544adc38817833f346ac88ebc1af308872be89d1b34ee98580f6e108",
+        "optimizer_updates": 0,
+        "outcome": "completed",
+        "runtime": {
+          "deterministic_algorithms": true,
+          "device": "mps",
+          "dtype": "float32",
+          "interop_threads": 10,
+          "mps_available": true,
+          "mps_cpu_fallback": false,
+          "platform": [
+            "Darwin",
+            "25.5.0",
+            "arm64"
+          ],
+          "python": "3.12.13",
+          "threads": 1,
+          "torch": "2.13.0",
+          "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+        },
+        "schema": "tabu.v6.broadcast-explicit-supervision.full-context.v1",
+        "tables": {
+          "airfoil_self_noise": {
+            "forward_rows": 1503,
+            "mae": 1.1481915982775515,
+            "n": 301,
+            "query_rows": 301,
+            "r2": 0.9456803042623618,
+            "rmse": 1.5078542416113339,
+            "seconds": 0.7538757501170039,
+            "slog": 0.8977019818977514,
+            "support_rows": 1202
+          },
+          "bodyfat": {
+            "forward_rows": 252,
+            "mae": 0.394742228938084,
+            "n": 51,
+            "query_rows": 51,
+            "r2": 0.9931612451201361,
+            "rmse": 0.6748929779336137,
+            "seconds": 0.23411516658961773,
+            "slog": 0.9858226104931812,
+            "support_rows": 201
+          },
+          "cars": {
+            "forward_rows": 804,
+            "mae": 1629.9753166246119,
+            "n": 161,
+            "query_rows": 161,
+            "r2": 0.9537923018052514,
+            "rmse": 2380.319279826047,
+            "seconds": 0.48283287417143583,
+            "slog": 0.8498802844061101,
+            "support_rows": 643
+          },
+          "concrete_compressive_strength": {
+            "forward_rows": 1030,
+            "mae": 3.3089160580215298,
+            "n": 206,
+            "query_rows": 206,
+            "r2": 0.9052580462301307,
+            "rmse": 5.176553618632751,
+            "seconds": 0.4766187919303775,
+            "slog": 0.8428580371047474,
+            "support_rows": 824
+          },
+          "cpu_activity": {
+            "forward_rows": 8192,
+            "mae": 2.0042943646080107,
+            "n": 1639,
+            "query_rows": 1639,
+            "r2": 0.9764202326231947,
+            "rmse": 2.7393605920887523,
+            "seconds": 14.36590024922043,
+            "slog": 0.8258449588741453,
+            "support_rows": 6553
+          },
+          "energy_efficiency": {
+            "forward_rows": 768,
+            "mae": 0.4817674674987794,
+            "n": 154,
+            "query_rows": 154,
+            "r2": 0.9956450444328859,
+            "rmse": 0.6797294479909275,
+            "seconds": 0.35947070829570293,
+            "slog": 0.991033311478679,
+            "support_rows": 614
+          },
+          "kin8nm": {
+            "forward_rows": 8192,
+            "mae": 0.10354612807488914,
+            "n": 1639,
+            "query_rows": 1639,
+            "r2": 0.7437136893260439,
+            "rmse": 0.13289096733859115,
+            "seconds": 12.950403457507491,
+            "slog": 0.6129440071647663,
+            "support_rows": 6553
+          },
+          "pumadyn32nh": {
+            "forward_rows": 8192,
+            "mae": 0.01743931979379358,
+            "n": 1639,
+            "query_rows": 1639,
+            "r2": 0.630349825093421,
+            "rmse": 0.02196297866435625,
+            "seconds": 15.480130666866899,
+            "slog": 0.4441115333867658,
+            "support_rows": 6553
+          },
+          "qsar_fish_toxicity": {
+            "forward_rows": 908,
+            "mae": 0.7797017507972298,
+            "n": 182,
+            "query_rows": 182,
+            "r2": 0.46925894829577275,
+            "rmse": 1.0846270525413506,
+            "seconds": 0.38320204243063927,
+            "slog": 0.37347472749436383,
+            "support_rows": 726
+          },
+          "red_wine": {
+            "forward_rows": 1599,
+            "mae": 0.48615944385528564,
+            "n": 320,
+            "query_rows": 320,
+            "r2": 0.3400638455308549,
+            "rmse": 0.6498916362442687,
+            "seconds": 0.8820930412039161,
+            "slog": 0.42443569080440513,
+            "support_rows": 1279
+          },
+          "space_ga": {
+            "forward_rows": 3107,
+            "mae": 0.09708393942275066,
+            "n": 622,
+            "query_rows": 622,
+            "r2": 0.5079329688428686,
+            "rmse": 0.13521126382115461,
+            "seconds": 2.171646791510284,
+            "slog": 0.4252035522776181,
+            "support_rows": 2485
+          },
+          "white_wine": {
+            "forward_rows": 4898,
+            "mae": 0.5473924558989856,
+            "n": 980,
+            "query_rows": 980,
+            "r2": 0.39707577887506207,
+            "rmse": 0.7102989883697267,
+            "seconds": 5.252306583337486,
+            "slog": 0.3368667370982139,
+            "support_rows": 3918
+          }
+        },
+        "total_predictions": 7894
+      }
+    },
+    "hour3": {
+      "campaign": {
+        "balanced_manifest": "/Users/gongqian/experiments/v6-replay40-5h-20260928/balanced-manifest.json",
+        "checkpoint": "/Users/gongqian/experiments/v6-replay40-5h-20260928/hour3/run/checkpoints/d6db37c6b9b85314d8728175f08b5a1ceda4cb02aeff049827f844b4a85677bc.pt",
+        "checkpoint_sha256": "d6db37c6b9b85314d8728175f08b5a1ceda4cb02aeff049827f844b4a85677bc",
+        "checkpoint_update": 55248,
+        "cohort_updates": {
+          "focus2": 877,
+          "history618": 3500,
+          "other10": 4376
+        },
+        "continuation": "new_stage_preserve_weights_optimizer_rng_sampling_cursor_episode_positions",
+        "first_cycle": [
+          "white_wine",
+          "airfoil_self_noise",
+          "qsar_fish_toxicity",
+          "red_wine",
+          "pumadyn32nh",
+          "kin8nm",
+          "space_ga",
+          "bodyfat",
+          "cars",
+          "energy_efficiency",
+          "cpu_activity",
+          "concrete_compressive_strength"
+        ],
+        "host": "gongqian-mini",
+        "identity": {
+          "code": {
+            "source/src/tabu_lab/models/restoration_v6/__init__.py": "e75a42c4c5a6ffc5334a59b2868968525cf41e496b2466d1cd2f4c8d1c56119a",
+            "source/src/tabu_lab/models/restoration_v6/model.py": "8c0d47aabcad1c7eb484197539dfe21ca5e23b2a25cb651af95f1c71effa8432",
+            "source/src/tabu_lab/models/restoration_v6/training.py": "923da21540c92cae19c2016c085dd1bedf4db96791073637ccccdd125ca64adb",
+            "train_jointall.py": "bb98be6e0c1d466e04c118ea6bf21069f0da376c57abc8beba6b693170a1e244",
+            "training_support.py": "6c0d77318134d63f60b3caeca283597aff503a0b9b7ff687665153f551c162bd"
+          },
+          "model_config": {
+            "backbone": {
+              "ff_width": 256,
+              "heads": 4,
+              "kind": "inducing",
+              "layers": 3,
+              "norm_eps": 1e-06,
+              "reference_mass": 1.0,
+              "slots": 256,
+              "tau_presence": 1.0,
+              "width": 128
+            },
+            "bandwidth": 1.0,
+            "center_chunk_size": 128,
+            "codec_version": "constant_weight_composition_v2",
+            "epsilon": 1e-06,
+            "numeric_scaling": "zscore",
+            "regression_width": null,
+            "ridge": 0.001,
+            "size": "small",
+            "slope_source": "shared_ll",
+            "subtokens": 1,
+            "unit_layers": 3
+          },
+          "parent_identity_sha256": "89460f066de8f9c8ffdb874ddf5feffb2180feba365ef7553dc43f7cdd9c8de8",
+          "parent_manifest_sha256": "5fa1094d06e45c368c58980873f44094de16056f52c58ca42962b9288ddaf260",
+          "parent_sha256": "f21f820e0c4b41b953b503d3e9656095bf3bbbb4e43e9a48f18143b875f7af25",
+          "runtime": {
+            "deterministic_algorithms": true,
+            "device": "mps",
+            "dtype": "float32",
+            "interop_threads": 10,
+            "mps_available": true,
+            "mps_cpu_fallback": false,
+            "platform": [
+              "Darwin",
+              "25.5.0",
+              "arm64"
+            ],
+            "python": "3.12.13",
+            "threads": 1,
+            "torch": "2.13.0",
+            "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+          },
+          "sampling": [
+            {
+              "cohort": "focus2",
+              "episodes": 2
+            },
+            {
+              "cohort": "other10",
+              "episodes": 10
+            },
+            {
+              "cohort": "history618",
+              "episodes": 8
+            }
+          ],
+          "schema": "tabu.v6.jointall-continuation.v1",
+          "sha256": "20c648036e23fd79e8de02b5390bf561fa969ec37e436c0080831c32165bf182",
+          "supervision": "target_only"
+        },
+        "openml_table_updates": {
+          "airfoil_self_noise": 439,
+          "bodyfat": 438,
+          "cars": 437,
+          "concrete_compressive_strength": 437,
+          "cpu_activity": 438,
+          "energy_efficiency": 438,
+          "kin8nm": 438,
+          "pumadyn32nh": 439,
+          "qsar_fish_toxicity": 437,
+          "red_wine": 437,
+          "space_ga": 438,
+          "white_wine": 437
+        },
+        "optimizer_restored": true,
+        "outcome": "training_completed",
+        "parent": "/Users/gongqian/experiments/v6-replay40-5h-20260928/hour2/run/checkpoints/f21f820e0c4b41b953b503d3e9656095bf3bbbb4e43e9a48f18143b875f7af25.pt",
+        "parent_sha256": "f21f820e0c4b41b953b503d3e9656095bf3bbbb4e43e9a48f18143b875f7af25",
+        "parent_update": 46495,
+        "per_table_episode_positions_preserved": true,
+        "rng_restored": true,
+        "runtime": {
+          "deterministic_algorithms": true,
+          "device": "mps",
+          "dtype": "float32",
+          "interop_threads": 10,
+          "mps_available": true,
+          "mps_cpu_fallback": false,
+          "platform": [
+            "Darwin",
+            "25.5.0",
+            "arm64"
+          ],
+          "python": "3.12.13",
+          "threads": 1,
+          "torch": "2.13.0",
+          "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+        },
+        "sampling": "each OpenML table once plus 8 history618 per 20 updates",
+        "schedule_cursor_reset": false,
+        "successful_update_seconds": 3600.3910703528672,
+        "successful_update_seconds_target": 3600.0,
+        "supervision": "target_only"
+      },
+      "eval": {
+        "bank_sha256": "2090f8d9074c3b80c40667aeb2995db80ef1799a801b8c5c6b8badffe6d413d4",
+        "checkpoint_sha256": "d6db37c6b9b85314d8728175f08b5a1ceda4cb02aeff049827f844b4a85677bc",
+        "checkpoint_update": 55248,
+        "evaluation": "all train support + all test Query in one forward per table",
+        "identity": {
+          "code": {
+            "source/src/tabu_lab/models/restoration_v6/__init__.py": "e75a42c4c5a6ffc5334a59b2868968525cf41e496b2466d1cd2f4c8d1c56119a",
+            "source/src/tabu_lab/models/restoration_v6/model.py": "8c0d47aabcad1c7eb484197539dfe21ca5e23b2a25cb651af95f1c71effa8432",
+            "source/src/tabu_lab/models/restoration_v6/training.py": "923da21540c92cae19c2016c085dd1bedf4db96791073637ccccdd125ca64adb",
+            "train_jointall.py": "bb98be6e0c1d466e04c118ea6bf21069f0da376c57abc8beba6b693170a1e244",
+            "training_support.py": "6c0d77318134d63f60b3caeca283597aff503a0b9b7ff687665153f551c162bd"
+          },
+          "model_config": {
+            "backbone": {
+              "ff_width": 256,
+              "heads": 4,
+              "kind": "inducing",
+              "layers": 3,
+              "norm_eps": 1e-06,
+              "reference_mass": 1.0,
+              "slots": 256,
+              "tau_presence": 1.0,
+              "width": 128
+            },
+            "bandwidth": 1.0,
+            "center_chunk_size": 128,
+            "codec_version": "constant_weight_composition_v2",
+            "epsilon": 1e-06,
+            "numeric_scaling": "zscore",
+            "regression_width": null,
+            "ridge": 0.001,
+            "size": "small",
+            "slope_source": "shared_ll",
+            "subtokens": 1,
+            "unit_layers": 3
+          },
+          "parent_identity_sha256": "89460f066de8f9c8ffdb874ddf5feffb2180feba365ef7553dc43f7cdd9c8de8",
+          "parent_manifest_sha256": "5fa1094d06e45c368c58980873f44094de16056f52c58ca42962b9288ddaf260",
+          "parent_sha256": "f21f820e0c4b41b953b503d3e9656095bf3bbbb4e43e9a48f18143b875f7af25",
+          "runtime": {
+            "deterministic_algorithms": true,
+            "device": "mps",
+            "dtype": "float32",
+            "interop_threads": 10,
+            "mps_available": true,
+            "mps_cpu_fallback": false,
+            "platform": [
+              "Darwin",
+              "25.5.0",
+              "arm64"
+            ],
+            "python": "3.12.13",
+            "threads": 1,
+            "torch": "2.13.0",
+            "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+          },
+          "sampling": [
+            {
+              "cohort": "focus2",
+              "episodes": 2
+            },
+            {
+              "cohort": "other10",
+              "episodes": 10
+            },
+            {
+              "cohort": "history618",
+              "episodes": 8
+            }
+          ],
+          "schema": "tabu.v6.jointall-continuation.v1",
+          "sha256": "20c648036e23fd79e8de02b5390bf561fa969ec37e436c0080831c32165bf182",
+          "supervision": "target_only"
+        },
+        "macro": {
+          "r2": 0.7370612508536274,
+          "slog": 0.6593470149459432
+        },
+        "model_state_sha256": "38878819d56a7c170f7559a4586d6daf1623bd2d3a9a577243a7a97a77c3aa36",
+        "optimizer_updates": 0,
+        "outcome": "completed",
+        "runtime": {
+          "deterministic_algorithms": true,
+          "device": "mps",
+          "dtype": "float32",
+          "interop_threads": 10,
+          "mps_available": true,
+          "mps_cpu_fallback": false,
+          "platform": [
+            "Darwin",
+            "25.5.0",
+            "arm64"
+          ],
+          "python": "3.12.13",
+          "threads": 1,
+          "torch": "2.13.0",
+          "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+        },
+        "schema": "tabu.v6.broadcast-explicit-supervision.full-context.v1",
+        "tables": {
+          "airfoil_self_noise": {
+            "forward_rows": 1503,
+            "mae": 1.0389960724586667,
+            "n": 301,
+            "query_rows": 301,
+            "r2": 0.9538514794866523,
+            "rmse": 1.3898233021375794,
+            "seconds": 0.7645444581285119,
+            "slog": 0.9117381650316456,
+            "support_rows": 1202
+          },
+          "bodyfat": {
+            "forward_rows": 252,
+            "mae": 0.39926269381654034,
+            "n": 51,
+            "query_rows": 51,
+            "r2": 0.9942428633244205,
+            "rmse": 0.6192266806190796,
+            "seconds": 0.23459229059517384,
+            "slog": 0.9880326015464634,
+            "support_rows": 201
+          },
+          "cars": {
+            "forward_rows": 804,
+            "mae": 1567.89725470691,
+            "n": 161,
+            "query_rows": 161,
+            "r2": 0.9582050202050456,
+            "rmse": 2263.810691086017,
+            "seconds": 0.4813493750989437,
+            "slog": 0.8575856458892385,
+            "support_rows": 643
+          },
+          "concrete_compressive_strength": {
+            "forward_rows": 1030,
+            "mae": 3.299200261429241,
+            "n": 206,
+            "query_rows": 206,
+            "r2": 0.9047971371645813,
+            "rmse": 5.189130020237141,
+            "seconds": 0.4768657498061657,
+            "slog": 0.8437346220998792,
+            "support_rows": 824
+          },
+          "cpu_activity": {
+            "forward_rows": 8192,
+            "mae": 2.8046129539727147,
+            "n": 1639,
+            "query_rows": 1639,
+            "r2": 0.954488282616735,
+            "rmse": 3.8057570239778977,
+            "seconds": 14.406161249615252,
+            "slog": 0.7035426770164135,
+            "support_rows": 6553
+          },
+          "energy_efficiency": {
+            "forward_rows": 768,
+            "mae": 0.44053804853365014,
+            "n": 154,
+            "query_rows": 154,
+            "r2": 0.9964173244057954,
+            "rmse": 0.6165211272047405,
+            "seconds": 0.345636541955173,
+            "slog": 0.9926300723242066,
+            "support_rows": 614
+          },
+          "kin8nm": {
+            "forward_rows": 8192,
+            "mae": 0.1037116040221915,
+            "n": 1639,
+            "query_rows": 1639,
+            "r2": 0.7453413759278509,
+            "rmse": 0.13246829672847388,
+            "seconds": 12.95306458324194,
+            "slog": 0.6115598286218344,
+            "support_rows": 6553
+          },
+          "pumadyn32nh": {
+            "forward_rows": 8192,
+            "mae": 0.01829487252709586,
+            "n": 1639,
+            "query_rows": 1639,
+            "r2": 0.5878422225059898,
+            "rmse": 0.023191430162241674,
+            "seconds": 15.524402709677815,
+            "slog": 0.40646397689961355,
+            "support_rows": 6553
+          },
+          "qsar_fish_toxicity": {
+            "forward_rows": 908,
+            "mae": 0.7714497627111582,
+            "n": 182,
+            "query_rows": 182,
+            "r2": 0.47945843979658953,
+            "rmse": 1.0741546100541424,
+            "seconds": 0.3815773753449321,
+            "slog": 0.3822306656563491,
+            "support_rows": 726
+          },
+          "red_wine": {
+            "forward_rows": 1599,
+            "mae": 0.48788332641124726,
+            "n": 320,
+            "query_rows": 320,
+            "r2": 0.36518562910893415,
+            "rmse": 0.6374019119600145,
+            "seconds": 0.8841713750734925,
+            "slog": 0.430156296997659,
+            "support_rows": 1279
+          },
+          "space_ga": {
+            "forward_rows": 3107,
+            "mae": 0.09745736272847193,
+            "n": 622,
+            "query_rows": 622,
+            "r2": 0.48489487067698767,
+            "rmse": 0.13834028799256975,
+            "seconds": 2.179856000468135,
+            "slog": 0.4239513854712954,
+            "support_rows": 2485
+          },
+          "white_wine": {
+            "forward_rows": 4898,
+            "mae": 0.5347541140050304,
+            "n": 980,
+            "query_rows": 980,
+            "r2": 0.4200103650239464,
+            "rmse": 0.6966585103364328,
+            "seconds": 5.238917917013168,
+            "slog": 0.3605382417967191,
+            "support_rows": 3918
+          }
+        },
+        "total_predictions": 7894
+      }
+    },
+    "hour4": {
+      "campaign": {
+        "balanced_manifest": "/Users/gongqian/experiments/v6-replay40-5h-20260928/balanced-manifest.json",
+        "checkpoint": "/Users/gongqian/experiments/v6-replay40-5h-20260928/hour4/run/checkpoints/05b3cb9bb7be51784ef50cc6eba64bcc78367f2b735a15ed04e312d549d65f7f.pt",
+        "checkpoint_sha256": "05b3cb9bb7be51784ef50cc6eba64bcc78367f2b735a15ed04e312d549d65f7f",
+        "checkpoint_update": 63958,
+        "cohort_updates": {
+          "focus2": 871,
+          "history618": 3485,
+          "other10": 4354
+        },
+        "continuation": "new_stage_preserve_weights_optimizer_rng_sampling_cursor_episode_positions",
+        "first_cycle": [
+          "white_wine",
+          "airfoil_self_noise",
+          "qsar_fish_toxicity",
+          "red_wine",
+          "pumadyn32nh",
+          "kin8nm",
+          "space_ga",
+          "bodyfat",
+          "cars",
+          "energy_efficiency",
+          "cpu_activity",
+          "concrete_compressive_strength"
+        ],
+        "host": "gongqian-mini",
+        "identity": {
+          "code": {
+            "source/src/tabu_lab/models/restoration_v6/__init__.py": "e75a42c4c5a6ffc5334a59b2868968525cf41e496b2466d1cd2f4c8d1c56119a",
+            "source/src/tabu_lab/models/restoration_v6/model.py": "8c0d47aabcad1c7eb484197539dfe21ca5e23b2a25cb651af95f1c71effa8432",
+            "source/src/tabu_lab/models/restoration_v6/training.py": "923da21540c92cae19c2016c085dd1bedf4db96791073637ccccdd125ca64adb",
+            "train_jointall.py": "bb98be6e0c1d466e04c118ea6bf21069f0da376c57abc8beba6b693170a1e244",
+            "training_support.py": "6c0d77318134d63f60b3caeca283597aff503a0b9b7ff687665153f551c162bd"
+          },
+          "model_config": {
+            "backbone": {
+              "ff_width": 256,
+              "heads": 4,
+              "kind": "inducing",
+              "layers": 3,
+              "norm_eps": 1e-06,
+              "reference_mass": 1.0,
+              "slots": 256,
+              "tau_presence": 1.0,
+              "width": 128
+            },
+            "bandwidth": 1.0,
+            "center_chunk_size": 128,
+            "codec_version": "constant_weight_composition_v2",
+            "epsilon": 1e-06,
+            "numeric_scaling": "zscore",
+            "regression_width": null,
+            "ridge": 0.001,
+            "size": "small",
+            "slope_source": "shared_ll",
+            "subtokens": 1,
+            "unit_layers": 3
+          },
+          "parent_identity_sha256": "20c648036e23fd79e8de02b5390bf561fa969ec37e436c0080831c32165bf182",
+          "parent_manifest_sha256": "5fa1094d06e45c368c58980873f44094de16056f52c58ca42962b9288ddaf260",
+          "parent_sha256": "d6db37c6b9b85314d8728175f08b5a1ceda4cb02aeff049827f844b4a85677bc",
+          "runtime": {
+            "deterministic_algorithms": true,
+            "device": "mps",
+            "dtype": "float32",
+            "interop_threads": 10,
+            "mps_available": true,
+            "mps_cpu_fallback": false,
+            "platform": [
+              "Darwin",
+              "25.5.0",
+              "arm64"
+            ],
+            "python": "3.12.13",
+            "threads": 1,
+            "torch": "2.13.0",
+            "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+          },
+          "sampling": [
+            {
+              "cohort": "focus2",
+              "episodes": 2
+            },
+            {
+              "cohort": "other10",
+              "episodes": 10
+            },
+            {
+              "cohort": "history618",
+              "episodes": 8
+            }
+          ],
+          "schema": "tabu.v6.jointall-continuation.v1",
+          "sha256": "0af4567f62d8deac0fcdda288ed016d2551958bf38aeac576f58403ccd9bf95c",
+          "supervision": "target_only"
+        },
+        "openml_table_updates": {
+          "airfoil_self_noise": 434,
+          "bodyfat": 435,
+          "cars": 436,
+          "concrete_compressive_strength": 436,
+          "cpu_activity": 435,
+          "energy_efficiency": 435,
+          "kin8nm": 436,
+          "pumadyn32nh": 435,
+          "qsar_fish_toxicity": 436,
+          "red_wine": 436,
+          "space_ga": 435,
+          "white_wine": 436
+        },
+        "optimizer_restored": true,
+        "outcome": "training_completed",
+        "parent": "/Users/gongqian/experiments/v6-replay40-5h-20260928/hour3/run/checkpoints/d6db37c6b9b85314d8728175f08b5a1ceda4cb02aeff049827f844b4a85677bc.pt",
+        "parent_sha256": "d6db37c6b9b85314d8728175f08b5a1ceda4cb02aeff049827f844b4a85677bc",
+        "parent_update": 55248,
+        "per_table_episode_positions_preserved": true,
+        "rng_restored": true,
+        "runtime": {
+          "deterministic_algorithms": true,
+          "device": "mps",
+          "dtype": "float32",
+          "interop_threads": 10,
+          "mps_available": true,
+          "mps_cpu_fallback": false,
+          "platform": [
+            "Darwin",
+            "25.5.0",
+            "arm64"
+          ],
+          "python": "3.12.13",
+          "threads": 1,
+          "torch": "2.13.0",
+          "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+        },
+        "sampling": "each OpenML table once plus 8 history618 per 20 updates",
+        "schedule_cursor_reset": false,
+        "successful_update_seconds": 3600.187487201765,
+        "successful_update_seconds_target": 3600.0,
+        "supervision": "target_only"
+      },
+      "eval": {
+        "bank_sha256": "2090f8d9074c3b80c40667aeb2995db80ef1799a801b8c5c6b8badffe6d413d4",
+        "checkpoint_sha256": "05b3cb9bb7be51784ef50cc6eba64bcc78367f2b735a15ed04e312d549d65f7f",
+        "checkpoint_update": 63958,
+        "evaluation": "all train support + all test Query in one forward per table",
+        "identity": {
+          "code": {
+            "source/src/tabu_lab/models/restoration_v6/__init__.py": "e75a42c4c5a6ffc5334a59b2868968525cf41e496b2466d1cd2f4c8d1c56119a",
+            "source/src/tabu_lab/models/restoration_v6/model.py": "8c0d47aabcad1c7eb484197539dfe21ca5e23b2a25cb651af95f1c71effa8432",
+            "source/src/tabu_lab/models/restoration_v6/training.py": "923da21540c92cae19c2016c085dd1bedf4db96791073637ccccdd125ca64adb",
+            "train_jointall.py": "bb98be6e0c1d466e04c118ea6bf21069f0da376c57abc8beba6b693170a1e244",
+            "training_support.py": "6c0d77318134d63f60b3caeca283597aff503a0b9b7ff687665153f551c162bd"
+          },
+          "model_config": {
+            "backbone": {
+              "ff_width": 256,
+              "heads": 4,
+              "kind": "inducing",
+              "layers": 3,
+              "norm_eps": 1e-06,
+              "reference_mass": 1.0,
+              "slots": 256,
+              "tau_presence": 1.0,
+              "width": 128
+            },
+            "bandwidth": 1.0,
+            "center_chunk_size": 128,
+            "codec_version": "constant_weight_composition_v2",
+            "epsilon": 1e-06,
+            "numeric_scaling": "zscore",
+            "regression_width": null,
+            "ridge": 0.001,
+            "size": "small",
+            "slope_source": "shared_ll",
+            "subtokens": 1,
+            "unit_layers": 3
+          },
+          "parent_identity_sha256": "20c648036e23fd79e8de02b5390bf561fa969ec37e436c0080831c32165bf182",
+          "parent_manifest_sha256": "5fa1094d06e45c368c58980873f44094de16056f52c58ca42962b9288ddaf260",
+          "parent_sha256": "d6db37c6b9b85314d8728175f08b5a1ceda4cb02aeff049827f844b4a85677bc",
+          "runtime": {
+            "deterministic_algorithms": true,
+            "device": "mps",
+            "dtype": "float32",
+            "interop_threads": 10,
+            "mps_available": true,
+            "mps_cpu_fallback": false,
+            "platform": [
+              "Darwin",
+              "25.5.0",
+              "arm64"
+            ],
+            "python": "3.12.13",
+            "threads": 1,
+            "torch": "2.13.0",
+            "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+          },
+          "sampling": [
+            {
+              "cohort": "focus2",
+              "episodes": 2
+            },
+            {
+              "cohort": "other10",
+              "episodes": 10
+            },
+            {
+              "cohort": "history618",
+              "episodes": 8
+            }
+          ],
+          "schema": "tabu.v6.jointall-continuation.v1",
+          "sha256": "0af4567f62d8deac0fcdda288ed016d2551958bf38aeac576f58403ccd9bf95c",
+          "supervision": "target_only"
+        },
+        "macro": {
+          "r2": 0.7426313519493356,
+          "slog": 0.6673402245893696
+        },
+        "model_state_sha256": "ac9ea83ec66f6d20f148deb515aa97631935100b9c62f091ddf8e3b1227170f5",
+        "optimizer_updates": 0,
+        "outcome": "completed",
+        "runtime": {
+          "deterministic_algorithms": true,
+          "device": "mps",
+          "dtype": "float32",
+          "interop_threads": 10,
+          "mps_available": true,
+          "mps_cpu_fallback": false,
+          "platform": [
+            "Darwin",
+            "25.5.0",
+            "arm64"
+          ],
+          "python": "3.12.13",
+          "threads": 1,
+          "torch": "2.13.0",
+          "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+        },
+        "schema": "tabu.v6.broadcast-explicit-supervision.full-context.v1",
+        "tables": {
+          "airfoil_self_noise": {
+            "forward_rows": 1503,
+            "mae": 1.1828816025439293,
+            "n": 301,
+            "query_rows": 301,
+            "r2": 0.9389769626913531,
+            "rmse": 1.5981870515436187,
+            "seconds": 0.7608913751319051,
+            "slog": 0.8858177943447472,
+            "support_rows": 1202
+          },
+          "bodyfat": {
+            "forward_rows": 252,
+            "mae": 0.3862277311437271,
+            "n": 51,
+            "query_rows": 51,
+            "r2": 0.9955696370654533,
+            "rmse": 0.5432078571664593,
+            "seconds": 0.2332620406523347,
+            "slog": 0.9905251005722756,
+            "support_rows": 201
+          },
+          "cars": {
+            "forward_rows": 804,
+            "mae": 1521.0138667022518,
+            "n": 161,
+            "query_rows": 161,
+            "r2": 0.9580742914790442,
+            "rmse": 2267.348365128833,
+            "seconds": 0.4846002496778965,
+            "slog": 0.8629171637960075,
+            "support_rows": 643
+          },
+          "concrete_compressive_strength": {
+            "forward_rows": 1030,
+            "mae": 3.3138274059615576,
+            "n": 206,
+            "query_rows": 206,
+            "r2": 0.9054177219997629,
+            "rmse": 5.17218956071398,
+            "seconds": 0.477636999450624,
+            "slog": 0.8414639175877114,
+            "support_rows": 824
+          },
+          "cpu_activity": {
+            "forward_rows": 8192,
+            "mae": 2.49020503045874,
+            "n": 1639,
+            "query_rows": 1639,
+            "r2": 0.9646757988124308,
+            "rmse": 3.352861550045705,
+            "seconds": 14.324963834136724,
+            "slog": 0.7619442665706153,
+            "support_rows": 6553
+          },
+          "energy_efficiency": {
+            "forward_rows": 768,
+            "mae": 0.4659053516635647,
+            "n": 154,
+            "query_rows": 154,
+            "r2": 0.9958069926584765,
+            "rmse": 0.6669711250367075,
+            "seconds": 0.34637491777539253,
+            "slog": 0.9913628524836101,
+            "support_rows": 614
+          },
+          "kin8nm": {
+            "forward_rows": 8192,
+            "mae": 0.106353026232639,
+            "n": 1639,
+            "query_rows": 1639,
+            "r2": 0.7326831978676092,
+            "rmse": 0.1357206361590552,
+            "seconds": 12.946692165918648,
+            "slog": 0.5985577240055704,
+            "support_rows": 6553
+          },
+          "pumadyn32nh": {
+            "forward_rows": 8192,
+            "mae": 0.018151569681650503,
+            "n": 1639,
+            "query_rows": 1639,
+            "r2": 0.5993425562103034,
+            "rmse": 0.022865588824043877,
+            "seconds": 15.514404250308871,
+            "slog": 0.4138398879137857,
+            "support_rows": 6553
+          },
+          "qsar_fish_toxicity": {
+            "forward_rows": 908,
+            "mae": 0.7112675858277541,
+            "n": 182,
+            "query_rows": 182,
+            "r2": 0.5287016955704618,
+            "rmse": 1.0220850375381254,
+            "seconds": 0.38170245848596096,
+            "slog": 0.43718927794543394,
+            "support_rows": 726
+          },
+          "red_wine": {
+            "forward_rows": 1599,
+            "mae": 0.4584250241518021,
+            "n": 320,
+            "query_rows": 320,
+            "r2": 0.39317402583309535,
+            "rmse": 0.6231922845052071,
+            "seconds": 0.8878532079979777,
+            "slog": 0.46329665713706025,
+            "support_rows": 1279
+          },
+          "space_ga": {
+            "forward_rows": 3107,
+            "mae": 0.10132716040587338,
+            "n": 622,
+            "query_rows": 622,
+            "r2": 0.4697702793363,
+            "rmse": 0.1403565781964103,
+            "seconds": 2.1777796670794487,
+            "slog": 0.3918212907725436,
+            "support_rows": 2485
+          },
+          "white_wine": {
+            "forward_rows": 4898,
+            "mae": 0.5250896736067169,
+            "n": 980,
+            "query_rows": 980,
+            "r2": 0.42938306386773617,
+            "rmse": 0.6910065426143053,
+            "seconds": 5.244993791915476,
+            "slog": 0.3693467619430746,
+            "support_rows": 3918
+          }
+        },
+        "total_predictions": 7894
+      }
+    },
+    "hour5": {
+      "campaign": {
+        "balanced_manifest": "/Users/gongqian/experiments/v6-replay40-5h-20260928/balanced-manifest.json",
+        "checkpoint": "/Users/gongqian/experiments/v6-replay40-5h-20260928/hour5/run/checkpoints/ec1aa503ab3ec7eb5a2d7c7e9dca88e41377957a0f634a49166652d0a111545f.pt",
+        "checkpoint_sha256": "ec1aa503ab3ec7eb5a2d7c7e9dca88e41377957a0f634a49166652d0a111545f",
+        "checkpoint_update": 72715,
+        "cohort_updates": {
+          "focus2": 876,
+          "history618": 3502,
+          "other10": 4379
+        },
+        "continuation": "new_stage_preserve_weights_optimizer_rng_sampling_cursor_episode_positions",
+        "first_cycle": [
+          "white_wine",
+          "airfoil_self_noise",
+          "qsar_fish_toxicity",
+          "red_wine",
+          "pumadyn32nh",
+          "kin8nm",
+          "space_ga",
+          "bodyfat",
+          "cars",
+          "energy_efficiency",
+          "cpu_activity",
+          "concrete_compressive_strength"
+        ],
+        "host": "gongqian-mini",
+        "identity": {
+          "code": {
+            "source/src/tabu_lab/models/restoration_v6/__init__.py": "e75a42c4c5a6ffc5334a59b2868968525cf41e496b2466d1cd2f4c8d1c56119a",
+            "source/src/tabu_lab/models/restoration_v6/model.py": "8c0d47aabcad1c7eb484197539dfe21ca5e23b2a25cb651af95f1c71effa8432",
+            "source/src/tabu_lab/models/restoration_v6/training.py": "923da21540c92cae19c2016c085dd1bedf4db96791073637ccccdd125ca64adb",
+            "train_jointall.py": "bb98be6e0c1d466e04c118ea6bf21069f0da376c57abc8beba6b693170a1e244",
+            "training_support.py": "6c0d77318134d63f60b3caeca283597aff503a0b9b7ff687665153f551c162bd"
+          },
+          "model_config": {
+            "backbone": {
+              "ff_width": 256,
+              "heads": 4,
+              "kind": "inducing",
+              "layers": 3,
+              "norm_eps": 1e-06,
+              "reference_mass": 1.0,
+              "slots": 256,
+              "tau_presence": 1.0,
+              "width": 128
+            },
+            "bandwidth": 1.0,
+            "center_chunk_size": 128,
+            "codec_version": "constant_weight_composition_v2",
+            "epsilon": 1e-06,
+            "numeric_scaling": "zscore",
+            "regression_width": null,
+            "ridge": 0.001,
+            "size": "small",
+            "slope_source": "shared_ll",
+            "subtokens": 1,
+            "unit_layers": 3
+          },
+          "parent_identity_sha256": "0af4567f62d8deac0fcdda288ed016d2551958bf38aeac576f58403ccd9bf95c",
+          "parent_manifest_sha256": "5fa1094d06e45c368c58980873f44094de16056f52c58ca42962b9288ddaf260",
+          "parent_sha256": "05b3cb9bb7be51784ef50cc6eba64bcc78367f2b735a15ed04e312d549d65f7f",
+          "runtime": {
+            "deterministic_algorithms": true,
+            "device": "mps",
+            "dtype": "float32",
+            "interop_threads": 10,
+            "mps_available": true,
+            "mps_cpu_fallback": false,
+            "platform": [
+              "Darwin",
+              "25.5.0",
+              "arm64"
+            ],
+            "python": "3.12.13",
+            "threads": 1,
+            "torch": "2.13.0",
+            "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+          },
+          "sampling": [
+            {
+              "cohort": "focus2",
+              "episodes": 2
+            },
+            {
+              "cohort": "other10",
+              "episodes": 10
+            },
+            {
+              "cohort": "history618",
+              "episodes": 8
+            }
+          ],
+          "schema": "tabu.v6.jointall-continuation.v1",
+          "sha256": "8239b461cbd04173aa053e3725ff531bc4abe7ecd56737af34653c6dc60b1fef",
+          "supervision": "target_only"
+        },
+        "openml_table_updates": {
+          "airfoil_self_noise": 439,
+          "bodyfat": 437,
+          "cars": 438,
+          "concrete_compressive_strength": 437,
+          "cpu_activity": 438,
+          "energy_efficiency": 439,
+          "kin8nm": 438,
+          "pumadyn32nh": 438,
+          "qsar_fish_toxicity": 438,
+          "red_wine": 438,
+          "space_ga": 438,
+          "white_wine": 437
+        },
+        "optimizer_restored": true,
+        "outcome": "training_completed",
+        "parent": "/Users/gongqian/experiments/v6-replay40-5h-20260928/hour4/run/checkpoints/05b3cb9bb7be51784ef50cc6eba64bcc78367f2b735a15ed04e312d549d65f7f.pt",
+        "parent_sha256": "05b3cb9bb7be51784ef50cc6eba64bcc78367f2b735a15ed04e312d549d65f7f",
+        "parent_update": 63958,
+        "per_table_episode_positions_preserved": true,
+        "rng_restored": true,
+        "runtime": {
+          "deterministic_algorithms": true,
+          "device": "mps",
+          "dtype": "float32",
+          "interop_threads": 10,
+          "mps_available": true,
+          "mps_cpu_fallback": false,
+          "platform": [
+            "Darwin",
+            "25.5.0",
+            "arm64"
+          ],
+          "python": "3.12.13",
+          "threads": 1,
+          "torch": "2.13.0",
+          "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+        },
+        "sampling": "each OpenML table once plus 8 history618 per 20 updates",
+        "schedule_cursor_reset": false,
+        "successful_update_seconds": 3600.454050443135,
+        "successful_update_seconds_target": 3600.0,
+        "supervision": "target_only"
+      },
+      "eval": {
+        "bank_sha256": "2090f8d9074c3b80c40667aeb2995db80ef1799a801b8c5c6b8badffe6d413d4",
+        "checkpoint_sha256": "ec1aa503ab3ec7eb5a2d7c7e9dca88e41377957a0f634a49166652d0a111545f",
+        "checkpoint_update": 72715,
+        "evaluation": "all train support + all test Query in one forward per table",
+        "identity": {
+          "code": {
+            "source/src/tabu_lab/models/restoration_v6/__init__.py": "e75a42c4c5a6ffc5334a59b2868968525cf41e496b2466d1cd2f4c8d1c56119a",
+            "source/src/tabu_lab/models/restoration_v6/model.py": "8c0d47aabcad1c7eb484197539dfe21ca5e23b2a25cb651af95f1c71effa8432",
+            "source/src/tabu_lab/models/restoration_v6/training.py": "923da21540c92cae19c2016c085dd1bedf4db96791073637ccccdd125ca64adb",
+            "train_jointall.py": "bb98be6e0c1d466e04c118ea6bf21069f0da376c57abc8beba6b693170a1e244",
+            "training_support.py": "6c0d77318134d63f60b3caeca283597aff503a0b9b7ff687665153f551c162bd"
+          },
+          "model_config": {
+            "backbone": {
+              "ff_width": 256,
+              "heads": 4,
+              "kind": "inducing",
+              "layers": 3,
+              "norm_eps": 1e-06,
+              "reference_mass": 1.0,
+              "slots": 256,
+              "tau_presence": 1.0,
+              "width": 128
+            },
+            "bandwidth": 1.0,
+            "center_chunk_size": 128,
+            "codec_version": "constant_weight_composition_v2",
+            "epsilon": 1e-06,
+            "numeric_scaling": "zscore",
+            "regression_width": null,
+            "ridge": 0.001,
+            "size": "small",
+            "slope_source": "shared_ll",
+            "subtokens": 1,
+            "unit_layers": 3
+          },
+          "parent_identity_sha256": "0af4567f62d8deac0fcdda288ed016d2551958bf38aeac576f58403ccd9bf95c",
+          "parent_manifest_sha256": "5fa1094d06e45c368c58980873f44094de16056f52c58ca42962b9288ddaf260",
+          "parent_sha256": "05b3cb9bb7be51784ef50cc6eba64bcc78367f2b735a15ed04e312d549d65f7f",
+          "runtime": {
+            "deterministic_algorithms": true,
+            "device": "mps",
+            "dtype": "float32",
+            "interop_threads": 10,
+            "mps_available": true,
+            "mps_cpu_fallback": false,
+            "platform": [
+              "Darwin",
+              "25.5.0",
+              "arm64"
+            ],
+            "python": "3.12.13",
+            "threads": 1,
+            "torch": "2.13.0",
+            "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+          },
+          "sampling": [
+            {
+              "cohort": "focus2",
+              "episodes": 2
+            },
+            {
+              "cohort": "other10",
+              "episodes": 10
+            },
+            {
+              "cohort": "history618",
+              "episodes": 8
+            }
+          ],
+          "schema": "tabu.v6.jointall-continuation.v1",
+          "sha256": "8239b461cbd04173aa053e3725ff531bc4abe7ecd56737af34653c6dc60b1fef",
+          "supervision": "target_only"
+        },
+        "macro": {
+          "r2": 0.7539275680519015,
+          "slog": 0.6799737642167544
+        },
+        "model_state_sha256": "831b829e953efb5f94037488a802f89f37ee1984eaff528e21bdb42ebcad70f6",
+        "optimizer_updates": 0,
+        "outcome": "completed",
+        "runtime": {
+          "deterministic_algorithms": true,
+          "device": "mps",
+          "dtype": "float32",
+          "interop_threads": 10,
+          "mps_available": true,
+          "mps_cpu_fallback": false,
+          "platform": [
+            "Darwin",
+            "25.5.0",
+            "arm64"
+          ],
+          "python": "3.12.13",
+          "threads": 1,
+          "torch": "2.13.0",
+          "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+        },
+        "schema": "tabu.v6.broadcast-explicit-supervision.full-context.v1",
+        "tables": {
+          "airfoil_self_noise": {
+            "forward_rows": 1503,
+            "mae": 1.0345906826285427,
+            "n": 301,
+            "query_rows": 301,
+            "r2": 0.9533638689136511,
+            "rmse": 1.3971465248577515,
+            "seconds": 0.7605466246604919,
+            "slog": 0.9115595443082668,
+            "support_rows": 1202
+          },
+          "bodyfat": {
+            "forward_rows": 252,
+            "mae": 0.42403349782906347,
+            "n": 51,
+            "query_rows": 51,
+            "r2": 0.9951985997118024,
+            "rmse": 0.5654970552212527,
+            "seconds": 0.2346034161746502,
+            "slog": 0.9897267708557009,
+            "support_rows": 201
+          },
+          "cars": {
+            "forward_rows": 804,
+            "mae": 1527.2507116168479,
+            "n": 161,
+            "query_rows": 161,
+            "r2": 0.9578941423327245,
+            "rmse": 2272.214389479295,
+            "seconds": 0.4841040410101414,
+            "slog": 0.8609030315406851,
+            "support_rows": 643
+          },
+          "concrete_compressive_strength": {
+            "forward_rows": 1030,
+            "mae": 3.2775517237400575,
+            "n": 206,
+            "query_rows": 206,
+            "r2": 0.9124067318517641,
+            "rmse": 4.9774271653855156,
+            "seconds": 0.4764497084543109,
+            "slog": 0.8479223131228948,
+            "support_rows": 824
+          },
+          "cpu_activity": {
+            "forward_rows": 8192,
+            "mae": 2.052422482186225,
+            "n": 1639,
+            "query_rows": 1639,
+            "r2": 0.9729056792299223,
+            "rmse": 2.9364227471764996,
+            "seconds": 14.339287417009473,
+            "slog": 0.8134165597345102,
+            "support_rows": 6553
+          },
+          "energy_efficiency": {
+            "forward_rows": 768,
+            "mae": 0.46553846443473507,
+            "n": 154,
+            "query_rows": 154,
+            "r2": 0.996063113780248,
+            "rmse": 0.6462799055645728,
+            "seconds": 0.35020370967686176,
+            "slog": 0.9918787987979473,
+            "support_rows": 614
+          },
+          "kin8nm": {
+            "forward_rows": 8192,
+            "mae": 0.10618626078694497,
+            "n": 1639,
+            "query_rows": 1639,
+            "r2": 0.7404756728056292,
+            "rmse": 0.13372782927019383,
+            "seconds": 12.974033957347274,
+            "slog": 0.6014202378597311,
+            "support_rows": 6553
+          },
+          "pumadyn32nh": {
+            "forward_rows": 8192,
+            "mae": 0.017258219514888554,
+            "n": 1639,
+            "query_rows": 1639,
+            "r2": 0.6391235129185617,
+            "rmse": 0.021700766547262634,
+            "seconds": 15.48957624938339,
+            "slog": 0.4526863268037893,
+            "support_rows": 6553
+          },
+          "qsar_fish_toxicity": {
+            "forward_rows": 908,
+            "mae": 0.7310901413487865,
+            "n": 182,
+            "query_rows": 182,
+            "r2": 0.5087824307459092,
+            "rmse": 1.043460558261101,
+            "seconds": 0.3844576673582196,
+            "slog": 0.4199820847093002,
+            "support_rows": 726
+          },
+          "red_wine": {
+            "forward_rows": 1599,
+            "mae": 0.45824483409523964,
+            "n": 320,
+            "query_rows": 320,
+            "r2": 0.4111771564514999,
+            "rmse": 0.6138783428913583,
+            "seconds": 0.8830776242539287,
+            "slog": 0.4657438940266816,
+            "support_rows": 1279
+          },
+          "space_ga": {
+            "forward_rows": 3107,
+            "mae": 0.09514536862839322,
+            "n": 622,
+            "query_rows": 622,
+            "r2": 0.5294628754823938,
+            "rmse": 0.13222016209820073,
+            "seconds": 2.1869209576398134,
+            "slog": 0.4396937886760769,
+            "support_rows": 2485
+          },
+          "white_wine": {
+            "forward_rows": 4898,
+            "mae": 0.5283375345930761,
+            "n": 980,
+            "query_rows": 980,
+            "r2": 0.4302770323987125,
+            "rmse": 0.6904650407745059,
+            "seconds": 5.243114458397031,
+            "slog": 0.3647518201654687,
+            "support_rows": 3918
+          }
+        },
+        "total_predictions": 7894
+      }
+    }
+  }
+}

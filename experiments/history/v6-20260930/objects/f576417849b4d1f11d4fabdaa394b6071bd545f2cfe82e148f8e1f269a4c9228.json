@@ -1,0 +1,22 @@
+{
+  "completed_utc": "2026-09-29T16:40:13.063973+00:00",
+  "selected_trial": "lr1e-4",
+  "trials": {
+    "lr1e-4": {
+      "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/energy_efficiency/run/lr1e-4/checkpoints/7e1220abe438c38849d1f2219a552a22ca57b7468cd1ce862142411e2160cbba.pt",
+      "checkpoint_sha256": "7e1220abe438c38849d1f2219a552a22ca57b7468cd1ce862142411e2160cbba",
+      "metrics": {
+        "mae": 0.2951411534220246,
+        "mse": 0.18608883109837282,
+        "n": 123,
+        "prediction_std": 10.38199936046382,
+        "r2": 0.9982732447890422,
+        "rmse": 0.4313801468523706,
+        "slog": 0.9962456139556954,
+        "target_std": 10.381133267292117
+      },
+      "seconds": 900.2146850340941,
+      "updates": 2013
+    }
+  }
+}

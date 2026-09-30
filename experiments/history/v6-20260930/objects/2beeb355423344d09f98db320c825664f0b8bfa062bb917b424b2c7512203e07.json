@@ -1,0 +1,30 @@
+{
+  "outcome": "completed",
+  "host": "dgx2",
+  "started_utc": "2026-09-28T15:46:59.265462+00:00",
+  "completed_training_seconds": 1800.376445533031,
+  "additional_seconds_target": 1800,
+  "start_successful_seconds": 0,
+  "start_sha256": "39f28cb4e16b589f289435a529f04c19f2dbd3f0d96313945870caf19be0278d",
+  "objective": "broadcast_allcell_restoration",
+  "phase": "half2",
+  "phase_budget": 898.553129604974,
+  "checkpoint_sha256": "382b1be53784b5a7aabe15c697d80a6f1f4bde46d10ed4668a4675660a015540",
+  "evaluations": {
+    "half1": {
+      "macro": {
+        "r2": 0.7496081899365651,
+        "slog": 0.6776640623567752
+      },
+      "checkpoint_sha256": "ad1f381c894031bd5e3487553d741d6af49777284fec8249404f9196e8c5fc34"
+    },
+    "half2": {
+      "macro": {
+        "r2": 0.7431468124940448,
+        "slog": 0.673783593057714
+      },
+      "checkpoint_sha256": "382b1be53784b5a7aabe15c697d80a6f1f4bde46d10ed4668a4675660a015540"
+    }
+  },
+  "completed_utc": "2026-09-28T16:20:53.741710+00:00"
+}

@@ -1,0 +1,26 @@
+{
+  "outcome": "failed",
+  "started_utc": "2026-09-28T00:20:29.367381+00:00",
+  "start_update": 72715,
+  "start_successful_seconds": 0,
+  "additional_seconds_target": 1200,
+  "start_sha256": "ec1aa503ab3ec7eb5a2d7c7e9dca88e41377957a0f634a49166652d0a111545f",
+  "sampling": "OpenML12 equal; full train rows; no replay",
+  "supervision": "target_only",
+  "completed_training_seconds": 647.9853173326701,
+  "phase": "half2",
+  "additional_successful_seconds": 647.9853173326701,
+  "checkpoint_sha256": "64e0367c294675ccfae9009209243b1f85480238064ccf5ad5306fa816f9db87",
+  "checkpoint_update": 72720,
+  "evaluations": {
+    "half1": {
+      "macro": {
+        "r2": 0.7559432648006443,
+        "slog": 0.6829452286832504
+      },
+      "checkpoint_sha256": "64e0367c294675ccfae9009209243b1f85480238064ccf5ad5306fa816f9db87"
+    }
+  },
+  "error_type": "CalledProcessError",
+  "error": "Command '['/Users/gongqian/.local/bin/wehub-python', '--profile', 'train-20260920', '-u', '-c', \"import runpy; runpy.run_path('/Users/gongqian/experiments/v6-fulltrain-noreplay20m-20260928/train_jointall.py',run_name='__main__')\", '--host', 'gongqian-mini', '--device', 'mps', '--parent', '/Users/gongqian/experiments/v6-fulltrain-noreplay20m-20260928/half1/run/checkpoints/64e0367c294675ccfae9009209243b1f85480238064ccf5ad5306fa816f9db87.pt', '--parent-sha', '64e0367c294675ccfae9009209243b1f85480238064ccf5ad5306fa816f9db87', '--manifest', '/Users/gongqian/experiments/v6-fulltrain-noreplay20m-20260928/balanced-manifest.json', '--supervision', 'target_only', '--segment', 'half2', '--seconds', '600']' returned non-zero exit status 1."
+}

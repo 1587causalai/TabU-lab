@@ -1,0 +1,44 @@
+{
+  "schema": "openml12-joint30m-midpoint-v1",
+  "hosts": {
+    "dgx2": {
+      "checkpoint_sha256": "9690247e09dc81d45ec797316f8a8472253de40dd16a2388c30075e7d3f26d20",
+      "checkpoint_update": 21185,
+      "added_successful_seconds": 898.7423782115802,
+      "start_macro": {
+        "r2": 0.6326490058441948,
+        "slog": 0.566735057748008
+      },
+      "midpoint_macro": {
+        "r2": 0.6072942564149887,
+        "slog": 0.556389984536487
+      }
+    },
+    "dustinstudio": {
+      "checkpoint_sha256": "b303ef9dd20bc00f229c09cd0d55d54b1bcbd2d3f0097be65b3e35d6a8399f7c",
+      "checkpoint_update": 36069,
+      "added_successful_seconds": 899.7591190170497,
+      "start_macro": {
+        "r2": 0.6554071961006075,
+        "slog": 0.6106397073154802
+      },
+      "midpoint_macro": {
+        "r2": 0.6343930127455348,
+        "slog": 0.535774206025184
+      }
+    },
+    "gongqian-mini": {
+      "checkpoint_sha256": "50239086c6f748229d946c505f3b2e24b4b5fe3e6bda88cf81bd70b9f4a2b068",
+      "checkpoint_update": 18335,
+      "added_successful_seconds": 899.2757252948359,
+      "start_macro": {
+        "r2": 0.6903258933152738,
+        "slog": 0.6255250408725723
+      },
+      "midpoint_macro": {
+        "r2": 0.6963732840184886,
+        "slog": 0.631437383237323
+      }
+    }
+  }
+}

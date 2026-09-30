@@ -1,0 +1,40 @@
+{
+  "outcome": "failed",
+  "offsets": {
+    "airfoil_self_noise": 1056394,
+    "bodyfat": 78906,
+    "cars": 1160,
+    "concrete_compressive_strength": 0,
+    "cpu_activity": 0,
+    "energy_efficiency": 0,
+    "kin8nm": 0,
+    "pumadyn32nh": 0,
+    "qsar_fish_toxicity": 0,
+    "red_wine": 0,
+    "space_ga": 0,
+    "white_wine": 0
+  },
+  "nodes": [
+    "tables/airfoil_self_noise/run/lr1e-4/monitor/sec0000/terminal.json",
+    "tables/airfoil_self_noise/run/lr1e-4/monitor/sec0180/terminal.json",
+    "tables/airfoil_self_noise/run/lr1e-4/monitor/sec0360/terminal.json",
+    "tables/airfoil_self_noise/run/lr1e-4/monitor/sec0540/terminal.json",
+    "tables/airfoil_self_noise/run/lr1e-4/monitor/sec0720/terminal.json",
+    "tables/airfoil_self_noise/run/lr1e-4/monitor/sec0900/terminal.json",
+    "tables/airfoil_self_noise/run/lr1e-4/selected-eval/test/terminal.json",
+    "tables/airfoil_self_noise/run/lr1e-4/selected-eval/train/terminal.json",
+    "tables/bodyfat/run/lr1e-4/monitor/sec0000/terminal.json",
+    "tables/bodyfat/run/lr1e-4/monitor/sec0180/terminal.json",
+    "tables/bodyfat/run/lr1e-4/monitor/sec0360/terminal.json",
+    "tables/bodyfat/run/lr1e-4/monitor/sec0540/terminal.json",
+    "tables/bodyfat/run/lr1e-4/monitor/sec0720/terminal.json",
+    "tables/bodyfat/run/lr1e-4/monitor/sec0900/terminal.json",
+    "tables/bodyfat/run/lr1e-4/selected-eval/test/terminal.json",
+    "tables/bodyfat/run/lr1e-4/selected-eval/train/terminal.json",
+    "tables/cars/run/lr1e-4/monitor/sec0000/terminal.json"
+  ],
+  "logged_updates": 2837,
+  "wandb_url": "https://wandb.ai/zj3712/restoration-v6-target-broadcast/runs/openml12-single-earlystop-dustinstudio-20260929",
+  "controller_outcome": "failed",
+  "last_sync_utc": "2026-09-29T15:37:45.306200+00:00"
+}

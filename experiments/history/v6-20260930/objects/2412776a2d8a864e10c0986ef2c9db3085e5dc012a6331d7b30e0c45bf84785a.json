@@ -1,0 +1,97 @@
+{
+  "reported_evaluations": [
+    "dustinstudio/half1",
+    "gongqian-mini/half1",
+    "dustinstudio/half2",
+    "gongqian-mini/half2"
+  ],
+  "launch_reported": true,
+  "started": {
+    "dustinstudio": {
+      "successful_updates": 18,
+      "successful_seconds": 39.06693512364291,
+      "covered_tables": 11,
+      "parent_sha256": "4455b89b2196898fa896b5d8ba99f3ffb201c48f828130954777579d3779e8af",
+      "mode": "joint_all"
+    },
+    "gongqian-mini": {
+      "successful_updates": 34,
+      "successful_seconds": 37.507027870975435,
+      "covered_tables": 12,
+      "parent_sha256": "64e0367c294675ccfae9009209243b1f85480238064ccf5ad5306fa816f9db87",
+      "mode": "target_only"
+    }
+  },
+  "last_checked_utc": "2026-09-28T02:14:38.836024+00:00",
+  "latest_observation": {
+    "dustinstudio": {
+      "status.json": {
+        "outcome": "monitoring",
+        "last_update": 64494,
+        "evaluated": [
+          "half1"
+        ],
+        "additional_successful_seconds": 3091.3153840119485
+      },
+      "controller.json": {
+        "outcome": "training",
+        "phase": "half2",
+        "additional_successful_seconds": 1800.0404002577998
+      },
+      "half2-train.json": {
+        "cohort_updates": {
+          "focus2": 85,
+          "history618": 0,
+          "other10": 429
+        },
+        "outcome": "running",
+        "successful_update_seconds": 1201.6549917142838
+      }
+    },
+    "gongqian-mini": {
+      "status.json": {
+        "outcome": "monitoring",
+        "last_update": 75452,
+        "evaluated": [
+          "half1"
+        ],
+        "additional_successful_seconds": 3054.8235136996955
+      },
+      "controller.json": {
+        "outcome": "training",
+        "phase": "half2",
+        "additional_successful_seconds": 1800.1670830268413
+      },
+      "half2-train.json": {
+        "cohort_updates": {
+          "focus2": 180,
+          "history618": 0,
+          "other10": 894
+        },
+        "outcome": "running",
+        "successful_update_seconds": 1202.6834575906396
+      }
+    }
+  },
+  "terminal": {
+    "dustinstudio": {
+      "successful_updates": 1526,
+      "successful_seconds": 3601.4225964725483,
+      "checkpoint_sha256": "079e7b6b7bfdb9ecf3696a519370173dba0ecf9700139174add86d1324e3c564",
+      "macro": {
+        "r2": 0.7719109337266038,
+        "slog": 0.7003036524191616
+      }
+    },
+    "gongqian-mini": {
+      "successful_updates": 3220,
+      "successful_seconds": 3600.7934759901837,
+      "checkpoint_sha256": "074c492962467e13af3bba5ec436f8a8a7d5fd171905001016329f16000c0fc6",
+      "macro": {
+        "r2": 0.7531724396294268,
+        "slog": 0.690400163376911
+      }
+    }
+  },
+  "terminal_reported": true
+}

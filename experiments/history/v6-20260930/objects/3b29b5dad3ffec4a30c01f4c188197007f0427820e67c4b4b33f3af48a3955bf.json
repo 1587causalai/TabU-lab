@@ -1,0 +1,31 @@
+{
+  "actual_training_seconds_stop_target": 7196.0,
+  "command": [
+    "/Users/dustinstudio/.local/bin/wehub-python",
+    "--profile",
+    "train-20260920",
+    "-u",
+    "-m",
+    "tabu_lab.cli",
+    "curriculum-v55",
+    "run",
+    "--manifest",
+    "/Users/dustinstudio/experiments/joint618-60min-dustin-20260926/manifests/joint618-60min-v55.json",
+    "--output-root",
+    "/Users/dustinstudio/experiments/joint618-60min-dustin-20260926/runs/01-joint618",
+    "--device",
+    "mps",
+    "--initialize-from",
+    "/Users/dustinstudio/experiments/tabu-v55-three-stage-25replay-dustin-20260926-r2/runs/03-tanh100/checkpoint-progress.pt",
+    "--max-updates-this-invocation",
+    "24000"
+  ],
+  "hard_limit_seconds": 7200.0,
+  "identity_sha256": "2a7d192be89b8963a6eab90915df11a6f0727898daed4587df32a1d1d7aa8a2c",
+  "initialization": "weights_only_cross_identity",
+  "optimizer_rng_cursor": "fresh",
+  "parent_checkpoint": "/Users/dustinstudio/experiments/tabu-v55-three-stage-25replay-dustin-20260926-r2/runs/03-tanh100/checkpoint-progress.pt",
+  "parent_sha256": "be9fcd6406b6bd8a11ef059b9c7f93f086d11a7956548deb4001fb1e1419ac41",
+  "pid": 66316,
+  "utc": "2026-09-26T14:38:19.888018+00:00"
+}

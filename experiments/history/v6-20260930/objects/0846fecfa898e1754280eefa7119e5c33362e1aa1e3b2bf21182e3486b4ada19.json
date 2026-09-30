@@ -1,0 +1,227 @@
+{
+  "active_target_seconds": 900,
+  "active_trial": "lr1e-4",
+  "bank_sha256": "a4980c6db7b524d57d3724782525f368e5d1a48c1bde88bcca184f203351a994",
+  "branch": "v55",
+  "completed_utc": "2026-09-29T16:40:13.902107+00:00",
+  "first_episode_index": 3728,
+  "host": "dgx2",
+  "max_total_successful_seconds": 900,
+  "memory_fraction": 0.5,
+  "monitor_exposure": "parent previously trained these rows; no new updates on monitor rows",
+  "monitor_rows": 123,
+  "optimizer_restored": true,
+  "original_train_fit_scope": "only new-update rows, masked target query; no validation labels in support",
+  "original_train_rows": 614,
+  "outcome": "completed",
+  "parent_checkpoint": "/home/cms/experiments/v6-all730-hostloss-5h-20260929/hour5/run/checkpoints/f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08.pt",
+  "parent_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+  "per_trial_successful_seconds": 900,
+  "phase": "final_evaluations",
+  "runtime": {
+    "cublas_workspace_config": ":4096:8",
+    "cuda_capability": [
+      12,
+      1
+    ],
+    "cuda_device": "NVIDIA GB10",
+    "cuda_runtime": "13.0",
+    "cudnn": 92000,
+    "deterministic_algorithms": true,
+    "device": "cuda:0",
+    "dtype": "float64",
+    "interop_threads": 20,
+    "platform": [
+      "Linux",
+      "6.17.0-1014-nvidia",
+      "aarch64"
+    ],
+    "python": "3.12.3",
+    "threads": 1,
+    "torch": "2.12.0.dev20260322+cu130",
+    "torch_build_sha256": "b62d287846a05b05f6dfa176679c95c75d9a9911ca563e92882a1b5802ec92e4"
+  },
+  "selected_trial": "lr1e-4",
+  "selection": "minimum monitor MSE; earliest node on ties; all 15-minute curves retained",
+  "selection_completed_utc": "2026-09-29T16:40:13.063973+00:00",
+  "split_sha256": "81749782dbbdf5686cbb0f7205f31124d657925f3e096b5c355b26f7b565a00f",
+  "started_utc": "2026-09-29T16:24:39.156225+00:00",
+  "strict_resume": false,
+  "test_rows": 154,
+  "test_started": true,
+  "test_started_utc": "2026-09-29T16:40:13.074438+00:00",
+  "total_successful_seconds": 900.2146850340941,
+  "trials": {
+    "lr1e-4": {
+      "final_evaluations": {
+        "test": {
+          "bank_sha256": "a4980c6db7b524d57d3724782525f368e5d1a48c1bde88bcca184f203351a994",
+          "branch": "v55",
+          "checkpoint_sha256": "7e1220abe438c38849d1f2219a552a22ca57b7468cd1ce862142411e2160cbba",
+          "metrics": {
+            "mae": 0.25298616149507136,
+            "mse": 0.16882644167340569,
+            "n": 154,
+            "prediction_std": 10.318589920083314,
+            "r2": 0.9984087001394677,
+            "rmse": 0.41088494943646414,
+            "slog": 0.9967926871321483,
+            "target_std": 10.300165933397562
+          },
+          "model_state_unchanged": true,
+          "optimizer_updates": 0,
+          "outcome": "completed",
+          "predictions": 154,
+          "scope": "original_test",
+          "split_sha256": "81749782dbbdf5686cbb0f7205f31124d657925f3e096b5c355b26f7b565a00f"
+        },
+        "train": {
+          "bank_sha256": "a4980c6db7b524d57d3724782525f368e5d1a48c1bde88bcca184f203351a994",
+          "branch": "v55",
+          "checkpoint_sha256": "7e1220abe438c38849d1f2219a552a22ca57b7468cd1ce862142411e2160cbba",
+          "metrics": {
+            "mae": 0.032491683484121556,
+            "mse": 0.0018296394969657646,
+            "n": 491,
+            "prediction_std": 9.934183158374305,
+            "r2": 0.9999814288990639,
+            "rmse": 0.04277428546411693,
+            "slog": 0.9999606071474383,
+            "target_std": 9.925763846225
+          },
+          "model_state_unchanged": true,
+          "optimizer_updates": 0,
+          "outcome": "completed",
+          "predictions": 491,
+          "scope": "original_train",
+          "split_sha256": "81749782dbbdf5686cbb0f7205f31124d657925f3e096b5c355b26f7b565a00f"
+        }
+      },
+      "first_episode_index": 3728,
+      "initial_rng_restored": true,
+      "initial_state_hash": "4dad03a7392bbee1ebed59c8459e048ab82e6abe5669da315d25fb5700557b2e",
+      "learning_rate": 0.0001,
+      "nodes": {
+        "0": {
+          "checkpoint": "/home/cms/experiments/v6-all730-hostloss-5h-20260929/hour5/run/checkpoints/f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08.pt",
+          "checkpoint_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+          "metrics": {
+            "mae": 6.3507824198662775,
+            "mse": 56.563913477951296,
+            "n": 123,
+            "prediction_std": 3.3289010380107413,
+            "r2": 0.4751322162984494,
+            "rmse": 7.520898448852457,
+            "slog": 0.3751207025607619,
+            "target_std": 10.381133267292117
+          },
+          "seconds": 0.0,
+          "updates": 0
+        },
+        "180": {
+          "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/energy_efficiency/run/lr1e-4/checkpoints/7bf2f0d8898907aaab580ec19a389dcfcf3c5fbff1779e8c8c9379cbd75452c3.pt",
+          "checkpoint_sha256": "7bf2f0d8898907aaab580ec19a389dcfcf3c5fbff1779e8c8c9379cbd75452c3",
+          "metrics": {
+            "mae": 0.3391298662237038,
+            "mse": 0.24636298273399787,
+            "n": 123,
+            "prediction_std": 10.30380310137328,
+            "r2": 0.9977139489688227,
+            "rmse": 0.4963496577353488,
+            "slog": 0.9950390052732148,
+            "target_std": 10.381133267292117
+          },
+          "seconds": 180.42267882302986,
+          "updates": 403
+        },
+        "360": {
+          "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/energy_efficiency/run/lr1e-4/checkpoints/2f7556a2125770c065faaf864458873f106e09537981a436ebc015dc660c26c8.pt",
+          "checkpoint_sha256": "2f7556a2125770c065faaf864458873f106e09537981a436ebc015dc660c26c8",
+          "metrics": {
+            "mae": 0.31665470103428733,
+            "mse": 0.2075106647983308,
+            "n": 123,
+            "prediction_std": 10.317394567983724,
+            "r2": 0.9980744673409206,
+            "rmse": 0.45553338494377205,
+            "slog": 0.9958123481733089,
+            "target_std": 10.381133267292117
+          },
+          "seconds": 360.17260238411836,
+          "updates": 805
+        },
+        "540": {
+          "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/energy_efficiency/run/lr1e-4/checkpoints/eaa2ce447012cd6bd45bcf309400ab2ac292505c8d19d3aef651b403e4d460ac.pt",
+          "checkpoint_sha256": "eaa2ce447012cd6bd45bcf309400ab2ac292505c8d19d3aef651b403e4d460ac",
+          "metrics": {
+            "mae": 0.3006080029718344,
+            "mse": 0.18884077829561893,
+            "n": 123,
+            "prediction_std": 10.368539583112465,
+            "r2": 0.9982477089246109,
+            "rmse": 0.43455814144440896,
+            "slog": 0.9961861138135498,
+            "target_std": 10.381133267292117
+          },
+          "seconds": 540.0430511569721,
+          "updates": 1207
+        },
+        "720": {
+          "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/energy_efficiency/run/lr1e-4/checkpoints/5a67c0586d021fe864e70ecf77533cf8dc87e0f18b08c760fc9c08d2b293978f.pt",
+          "checkpoint_sha256": "5a67c0586d021fe864e70ecf77533cf8dc87e0f18b08c760fc9c08d2b293978f",
+          "metrics": {
+            "mae": 0.3029440041106026,
+            "mse": 0.18828204288608075,
+            "n": 123,
+            "prediction_std": 10.361861417205013,
+            "r2": 0.9982528935414107,
+            "rmse": 0.43391478758631946,
+            "slog": 0.9961981112345379,
+            "target_std": 10.381133267292117
+          },
+          "seconds": 720.3715515742078,
+          "updates": 1611
+        },
+        "900": {
+          "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/energy_efficiency/run/lr1e-4/checkpoints/7e1220abe438c38849d1f2219a552a22ca57b7468cd1ce862142411e2160cbba.pt",
+          "checkpoint_sha256": "7e1220abe438c38849d1f2219a552a22ca57b7468cd1ce862142411e2160cbba",
+          "metrics": {
+            "mae": 0.2951411534220246,
+            "mse": 0.18608883109837282,
+            "n": 123,
+            "prediction_std": 10.38199936046382,
+            "r2": 0.9982732447890422,
+            "rmse": 0.4313801468523706,
+            "slog": 0.9962456139556954,
+            "target_std": 10.381133267292117
+          },
+          "seconds": 900.2146850340941,
+          "updates": 2013
+        }
+      },
+      "outcome": "completed",
+      "parent_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+      "selected": {
+        "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/energy_efficiency/run/lr1e-4/checkpoints/7e1220abe438c38849d1f2219a552a22ca57b7468cd1ce862142411e2160cbba.pt",
+        "checkpoint_sha256": "7e1220abe438c38849d1f2219a552a22ca57b7468cd1ce862142411e2160cbba",
+        "metrics": {
+          "mae": 0.2951411534220246,
+          "mse": 0.18608883109837282,
+          "n": 123,
+          "prediction_std": 10.38199936046382,
+          "r2": 0.9982732447890422,
+          "rmse": 0.4313801468523706,
+          "slog": 0.9962456139556954,
+          "target_std": 10.381133267292117
+        },
+        "seconds": 900.2146850340941,
+        "updates": 2013
+      },
+      "selected_node": "900",
+      "successful_update_seconds": 900.2146850340941,
+      "updates": 2013
+    }
+  },
+  "update_rows": 491,
+  "window_rows": 491
+}

@@ -1,0 +1,23 @@
+{
+  "schema": "tabu.ordinal100.actual-evaluation-bank-authority.v1",
+  "outcome": "passed",
+  "identity_sha256": "6161840153c9b7a681aba90f5a0a6c72b8901d5be2a551ce82c2a223f4b50873",
+  "actual_query_bank_sha256": "baf6614adb3a55fada76a5577e6aeafeabb1446be181664947d17afa54632171",
+  "actual_query_bank_hash_scope": "ordered [table, probe, per-mask query_addresses] projection from exact evaluate_probe addressing",
+  "independent_full_receipt_tables_sha256": "e868915054bf331472c0f937d99d4f0dbd2dc39871e920c8a19038df4bb75600",
+  "primary_rebuild_full_tables_sha256": "24af9c124e166c83ea5ab44201f5b1986d8d30c1221abad43ce6166bc67782fb",
+  "full_hash_difference_explanation": "The two full receipts contain different audit-only metadata fields. Their 998 query-address masks, mask/code/window seeds, selected row ids, query rows and support rows match exactly.",
+  "legacy_export_bank_sha256": "32d723aaba9074f26ac8dc3348dd5f322fadd0c95cf7bce7db632d0f14e64819",
+  "legacy_export_matches_actual_query_bank": false,
+  "actual_mask_count": 998,
+  "legacy_vs_actual_query_address_mismatched_masks": 998,
+  "independent_vs_primary_common_field_mismatches": 0,
+  "runner_start_interim_final_share_actual_query_bank": true,
+  "external_baseline_alignment_established": false,
+  "model_or_training_execution": false,
+  "evidence": [
+    "actual-evaluation-bank-audit.json",
+    "actual-evaluation-bank-addresses.json",
+    "evaluation-bank-correction.json"
+  ]
+}

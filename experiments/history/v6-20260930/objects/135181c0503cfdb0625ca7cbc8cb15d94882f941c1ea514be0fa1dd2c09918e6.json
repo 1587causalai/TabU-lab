@@ -1,0 +1,44 @@
+{
+  "columns": [
+    9,
+    13,
+    17,
+    21
+  ],
+  "family": "ordinal8_tanh_latent_threshold_scm_v1",
+  "generator": "tfm_data.generators.mixed_scm.sample_world/sample_rows",
+  "inputs": "numeric sparse tanh additive-noise SCM; root sd1, nonroot sd0.1",
+  "latent_noise": "independent Gaussian(0,0.5) event noise",
+  "max_parents": 3,
+  "reserved_rows": 52,
+  "row_acceptance": "At least 4 occurrences of every ordered target level in the 204 train rows; reject independent world/event seeds otherwise. No model-performance filtering.",
+  "rows": 256,
+  "scope": "one fixed mechanism per table, 100 independent accepted worlds; true ordinal domain, not unordered labels or post-hoc binning",
+  "target": "8 ordered levels from one additive latent score and seven fixed increasing thresholds",
+  "target_order": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "target_parents": [
+    2,
+    3
+  ],
+  "thresholds": [
+    -0.9,
+    -0.6000000000000001,
+    -0.30000000000000004,
+    -1.1102230246251565e-16,
+    0.29999999999999993,
+    0.6,
+    0.9
+  ],
+  "train_rows": 204,
+  "world_conditioning": "Use existing ordinal sampler; accept n_classes==8 and 2 or 3 target parents. No model scores.",
+  "worlds": 100
+}

@@ -1,0 +1,28 @@
+{
+  "label": "zero",
+  "command": [
+    "/Users/gongqian/.local/bin/wehub-python",
+    "--profile",
+    "train-20260920",
+    "-u",
+    "-m",
+    "tabu_lab.cli",
+    "curriculum-v55",
+    "run",
+    "--manifest",
+    "/Users/gongqian/experiments/joint618-60min-20260926/manifests/candidate.json",
+    "--output-root",
+    "/Users/gongqian/experiments/joint618-60min-20260926/runs/attempt-000-zero",
+    "--device",
+    "mps",
+    "--initialize-from",
+    "/Users/gongqian/experiments/tabu-v55-triad90b-h4-mini-20260926/numeric/runs/attempt-002-main/checkpoint-progress.pt",
+    "--max-updates-this-invocation",
+    "0"
+  ],
+  "started_utc": "2026-09-26T14:43:03.395469+00:00",
+  "status": "completed",
+  "pid": 3820,
+  "returncode": 0,
+  "finished_utc": "2026-09-26T14:43:07.421745+00:00"
+}

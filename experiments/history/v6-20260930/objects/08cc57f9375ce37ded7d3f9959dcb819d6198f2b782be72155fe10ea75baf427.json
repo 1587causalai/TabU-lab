@@ -1,0 +1,323 @@
+{
+  "schema": "tabu.pretrain-handoff-intake.v1",
+  "verified_utc": "2026-09-27T00:21:25.822500+00:00",
+  "scope": "read-only intake; no training or evaluation launched",
+  "user_direction": "Select suitable synthetic data later; no new dataset or budget selected.",
+  "handoff_path": "/Users/cms/.openclaw/workspace/projects/causal-superintelligence/TabU/preparations/joint618-60min-20260926/HANDOFF-PRETRAIN.md",
+  "local_replay_tables_checked": 618,
+  "local_replay_errors": [],
+  "fixed_query_bank_sha_ok": true,
+  "hosts": [
+    {
+      "host": "dgx2",
+      "verified_utc": "2026-09-27T00:21:25.920040+00:00",
+      "root": "/home/cms/experiments/joint618-60min-20260926",
+      "checkpoint": "/home/cms/experiments/joint618-60min-20260926/runs/attempt-002-main/checkpoints/1366ac9d552864f80df2c52247476215b87b5d74915d0697676ba1a9d8eeb1a6.pt",
+      "checkpoint_sha256": "1366ac9d552864f80df2c52247476215b87b5d74915d0697676ba1a9d8eeb1a6",
+      "update": 26003,
+      "immutable_checkpoint_ok": true,
+      "mutable_alias_ok": true,
+      "manifest_ok": true,
+      "endpoint_file_unchanged": true,
+      "checkpoint_endpoint_aligned": true,
+      "endpoint_outcome": "completed",
+      "data_checked": 618,
+      "data_passed": 618,
+      "source_checked": 45,
+      "source_passed": 45,
+      "model_manifest": {
+        "center_chunk_size": 128,
+        "codec_version": "constant_weight_composition_v2",
+        "numeric_scaling": "zscore",
+        "size": "small",
+        "subtokens": 1,
+        "unit_layers": 3
+      },
+      "optimizer_manifest": {
+        "betas": [
+          0.9,
+          0.95
+        ],
+        "eps": 1e-08,
+        "grad_clip": 1.0,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.01
+      },
+      "recorded_training_runtime": {
+        "cublas_workspace_config": ":4096:8",
+        "cuda_capability": [
+          12,
+          1
+        ],
+        "cuda_device": "NVIDIA GB10",
+        "cuda_runtime": "13.0",
+        "cudnn": 92000,
+        "deterministic_algorithms": true,
+        "device": "cuda:0",
+        "dtype": "float64",
+        "interop_threads": 20,
+        "platform": [
+          "Linux",
+          "6.17.0-1014-nvidia",
+          "aarch64"
+        ],
+        "python": "3.12.3",
+        "threads": 1,
+        "torch": "2.12.0.dev20260322+cu130",
+        "torch_build_sha256": "b62d287846a05b05f6dfa176679c95c75d9a9911ca563e92882a1b5802ec92e4"
+      },
+      "runtime_info": {
+        "backend": "docker-gpu",
+        "config": "/home/cms/.wehub/runtime/profiles/train-20260920.env",
+        "errors": [],
+        "expected": {
+          "accelerator": "cuda",
+          "dtype": "float64",
+          "python_prefix": "3.12",
+          "torch_prefix": "2.12.0.dev20260322"
+        },
+        "ok": true,
+        "package_fingerprint_sha256": "74414ebf7ce09a1305c61452a3bc48f75fb180bf85647eaa3696b7940d2c868d",
+        "python": {
+          "executable": "/usr/bin/python3",
+          "version": "3.12.3"
+        },
+        "runtime_id": "wehub-train-dgx2-20260920",
+        "schema_version": "wehub.python-runtime.v1",
+        "torch": {
+          "cuda_available": true,
+          "mps_available": false,
+          "version": "2.12.0.dev20260322+cu130"
+        }
+      },
+      "related_experiment_processes": [],
+      "tabu_training_processes_snapshot": [],
+      "resources": {
+        "disk_free_gib": 1538.35,
+        "load_average": [
+          0.07666015625,
+          0.12158203125,
+          0.08935546875
+        ],
+        "mem_available": "34765212 kB",
+        "gpu": "NVIDIA GB10, 0 %, 49, [N/A], [N/A]",
+        "gpu_query_returncode": 0
+      },
+      "fullpool_snapshot": {
+        "exists": true,
+        "run_terminal_files": [],
+        "preflight_terminal_exists": false
+      },
+      "errors": []
+    },
+    {
+      "host": "dustinstudio",
+      "verified_utc": "2026-09-27T00:21:24.425482+00:00",
+      "root": "/Users/dustinstudio/experiments/joint618-60min-dustin-20260926",
+      "checkpoint": "/Users/dustinstudio/experiments/joint618-60min-dustin-20260926/runs/02-strict-resume/checkpoints/fdb28693e5894d93dd0ccbdb90cb34d18ab06acbbfb08022085a213afda316ab.pt",
+      "checkpoint_sha256": "fdb28693e5894d93dd0ccbdb90cb34d18ab06acbbfb08022085a213afda316ab",
+      "update": 30870,
+      "immutable_checkpoint_ok": true,
+      "mutable_alias_ok": true,
+      "manifest_ok": true,
+      "endpoint_file_unchanged": true,
+      "checkpoint_endpoint_aligned": true,
+      "endpoint_outcome": "completed",
+      "data_checked": 618,
+      "data_passed": 618,
+      "source_checked": 45,
+      "source_passed": 45,
+      "model_manifest": {
+        "center_chunk_size": 128,
+        "codec_version": "constant_weight_composition_v2",
+        "numeric_scaling": "zscore",
+        "size": "small",
+        "subtokens": 1,
+        "unit_layers": 3
+      },
+      "optimizer_manifest": {
+        "betas": [
+          0.9,
+          0.95
+        ],
+        "eps": 1e-08,
+        "grad_clip": 1.0,
+        "learning_rate": 0.0001,
+        "weight_decay": 0.01
+      },
+      "recorded_training_runtime": {
+        "deterministic_algorithms": true,
+        "device": "mps",
+        "dtype": "float32",
+        "interop_threads": 16,
+        "mps_available": true,
+        "mps_cpu_fallback": false,
+        "platform": [
+          "Darwin",
+          "25.6.0",
+          "arm64"
+        ],
+        "python": "3.12.13",
+        "threads": 1,
+        "torch": "2.13.0",
+        "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+      },
+      "runtime_info": {
+        "backend": "native",
+        "config": "/Users/dustinstudio/.wehub/runtime/profiles/train-20260920.env",
+        "errors": [],
+        "expected": {
+          "accelerator": "mps",
+          "dtype": "float32",
+          "python_prefix": "3.12",
+          "torch_prefix": "2.13.0"
+        },
+        "ok": true,
+        "package_fingerprint_sha256": "3dfd3210ef203298daa7c998f26413b0b451d8389479fce056c6fd08adf82a52",
+        "python": {
+          "executable": "/Users/dustinstudio/.wehub/envs/train-torch213-py312-mps-20260920/bin/python",
+          "version": "3.12.13"
+        },
+        "runtime_id": "wehub-train-dustinstudio-20260920",
+        "schema_version": "wehub.python-runtime.v1",
+        "torch": {
+          "cuda_available": false,
+          "mps_available": true,
+          "version": "2.13.0"
+        }
+      },
+      "related_experiment_processes": [],
+      "tabu_training_processes_snapshot": [],
+      "resources": {
+        "disk_free_gib": 30.88,
+        "load_average": [
+          3.23095703125,
+          3.779296875,
+          4.07421875
+        ],
+        "thermal": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\nNote: No CPU power status has been recorded",
+        "memory_pressure": "The system has 137438953472 (8388608 pages with a page size of 16384).\nSystem-wide memory free percentage: 45%"
+      },
+      "fullpool_snapshot": null,
+      "errors": []
+    },
+    {
+      "host": "gongqian-mini",
+      "verified_utc": "2026-09-27T00:21:24.136724+00:00",
+      "root": "/Users/gongqian/experiments/joint618-60min-20260926",
+      "checkpoint": "/Users/gongqian/experiments/joint618-60min-20260926/runs/attempt-002-main/checkpoints/c579d50ce4caf00d6a6c47408f20f259782c40def1eba9133092eeb81f12aa34.pt",
+      "checkpoint_sha256": "c579d50ce4caf00d6a6c47408f20f259782c40def1eba9133092eeb81f12aa34",
+      "update": 21133,
+      "immutable_checkpoint_ok": true,
+      "mutable_alias_ok": true,
+      "manifest_ok": true,
+      "endpoint_file_unchanged": true,
+      "checkpoint_endpoint_aligned": true,
+      "endpoint_outcome": "completed",
+      "data_checked": 618,
+      "data_passed": 618,
+      "source_checked": 45,
+      "source_passed": 45,
+      "model_manifest": {
+        "backbone": {
+          "ff_width": 256,
+          "heads": 4,
+          "kind": "inducing",
+          "layers": 3,
+          "norm_eps": 1e-06,
+          "reference_mass": 1.0,
+          "slots": 256,
+          "tau_presence": 1.0,
+          "width": 128
+        },
+        "bandwidth": 1.0,
+        "center_chunk_size": 128,
+        "codec_version": "constant_weight_composition_v2",
+        "epsilon": 1e-06,
+        "numeric_scaling": "zscore",
+        "regression_width": null,
+        "ridge": 0.001,
+        "size": "small",
+        "slope_source": "shared_ll",
+        "subtokens": 1,
+        "unit_layers": 3
+      },
+      "optimizer_manifest": {
+        "betas": [
+          0.9,
+          0.95
+        ],
+        "eps": 1e-08,
+        "grad_clip": 1.0,
+        "learning_rate": 0.0001,
+        "muon_adjust_lr_fn": "match_rms_adamw",
+        "muon_momentum": 0.95,
+        "muon_nesterov": true,
+        "muon_ns_steps": 5,
+        "weight_decay": 0.01
+      },
+      "recorded_training_runtime": {
+        "deterministic_algorithms": true,
+        "device": "mps",
+        "dtype": "float32",
+        "interop_threads": 10,
+        "mps_available": true,
+        "mps_cpu_fallback": false,
+        "platform": [
+          "Darwin",
+          "25.5.0",
+          "arm64"
+        ],
+        "python": "3.12.13",
+        "threads": 1,
+        "torch": "2.13.0",
+        "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+      },
+      "runtime_info": {
+        "backend": "native",
+        "config": "/Users/gongqian/.wehub/runtime/profiles/train-20260920.env",
+        "errors": [],
+        "expected": {
+          "accelerator": "mps",
+          "dtype": "float32",
+          "python_prefix": "3.12",
+          "torch_prefix": "2.13.0"
+        },
+        "ok": true,
+        "package_fingerprint_sha256": "3dfd3210ef203298daa7c998f26413b0b451d8389479fce056c6fd08adf82a52",
+        "python": {
+          "executable": "/Users/gongqian/.wehub/envs/train-torch213-py312-mps-20260920/bin/python",
+          "version": "3.12.13"
+        },
+        "runtime_id": "wehub-train-gongqian-mini-20260920",
+        "schema_version": "wehub.python-runtime.v1",
+        "torch": {
+          "cuda_available": false,
+          "mps_available": true,
+          "version": "2.13.0"
+        }
+      },
+      "related_experiment_processes": [],
+      "tabu_training_processes_snapshot": [],
+      "resources": {
+        "disk_free_gib": 325.97,
+        "load_average": [
+          1.30810546875,
+          1.23779296875,
+          1.21630859375
+        ],
+        "thermal": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\nNote: No CPU power status has been recorded",
+        "memory_pressure": "The system has 25769803776 (1572864 pages with a page size of 16384).\nSystem-wide memory free percentage: 84%"
+      },
+      "fullpool_snapshot": null,
+      "errors": []
+    }
+  ],
+  "pending": [
+    "new synthetic corpus and scale",
+    "successful-update time budget",
+    "new manifest and rehearsal recipe",
+    "retention threshold and trigger action",
+    "zero-update alignment and device admission after scope is fixed"
+  ]
+}

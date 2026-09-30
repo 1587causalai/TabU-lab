@@ -1,0 +1,185 @@
+{
+  "outcome": "completed_total60",
+  "reported_evaluations": [
+    "half1",
+    "half2"
+  ],
+  "budget_confirmed": true,
+  "hosts_launched": [
+    "dustinstudio",
+    "dgx2",
+    "gongqian-mini"
+  ],
+  "started_utc": "2026-09-29T03:22:20.681481+00:00",
+  "training_updates_confirmed": true,
+  "preflight": {
+    "dustinstudio": {
+      "outcome": "passed",
+      "disposable_updates": 5,
+      "disabled_matches_legacy_loss": 0.0,
+      "max_sample_reserved_bytes": 4557160448
+    },
+    "dgx2": {
+      "outcome": "passed",
+      "disposable_updates": 5,
+      "disabled_matches_legacy_loss": 0.0,
+      "max_sample_reserved_bytes": 6694109184
+    },
+    "gongqian-mini": {
+      "outcome": "passed",
+      "disposable_updates": 5,
+      "disabled_matches_legacy_loss": 0.0,
+      "max_sample_reserved_bytes": 4389404672
+    }
+  },
+  "automation_id": "tabu-30",
+  "latest_observed": {
+    "dustinstudio": {
+      "outcome": "completed",
+      "phase": "half2",
+      "successful_training_seconds": 3600.310311427107,
+      "complete_extension_evaluation_pairs": [
+        "45min",
+        "60min"
+      ]
+    },
+    "dgx2": {
+      "outcome": "completed",
+      "phase": "half2",
+      "successful_training_seconds": 3600.1876540416997,
+      "complete_extension_evaluation_pairs": [
+        "45min",
+        "60min"
+      ]
+    },
+    "gongqian-mini": {
+      "outcome": "completed",
+      "phase": "half2",
+      "successful_training_seconds": 3600.037779714912,
+      "complete_extension_evaluation_pairs": [
+        "45min",
+        "60min"
+      ]
+    }
+  },
+  "last_checked_utc": "2026-09-29T05:05:16.353916+00:00",
+  "first_training_audit_passed": true,
+  "reported_partial_evaluations": [
+    "half1-openml12-all3-user-request",
+    "half1-dgx2-fit718-user-request"
+  ],
+  "last_partial_report_utc": "2026-09-29T03:49:27.836106+00:00",
+  "extended_to_total_seconds": 3600,
+  "extension_directory": "v6-randommix2-all730-extend60m-20260929",
+  "extension_authorized": true,
+  "extension_queued": true,
+  "do_not_delete_automation_at_30m": true,
+  "last_extension_update_utc": "2026-09-29T03:58:04.848752+00:00",
+  "last_complete_report_utc": "2026-09-29T05:05:16.353916+00:00",
+  "last_complete_evaluation": "60min",
+  "full_half1_audit": {
+    "dustinstudio": {
+      "half1_successful_seconds": 900.2066544061527,
+      "half1_updates": 3086,
+      "half1_coverage": 730,
+      "half1_sha256": "ec3cf0da27142f3d6c195747d19f4a807c6a40ec0293968e912b17e2c8ddc46c",
+      "latest_observer_successful_seconds": 1457.4228120979387,
+      "parent_bank_loss_continuity_audit": "passed"
+    },
+    "dgx2": {
+      "half1_successful_seconds": 900.2321511351183,
+      "half1_updates": 2812,
+      "half1_coverage": 730,
+      "half1_sha256": "a00c9e3e6b71aac17b3020ea5b1888530e2cebe801c1829e8550d89a4aefae60",
+      "latest_observer_successful_seconds": 1606.8862974772346,
+      "parent_bank_loss_continuity_audit": "passed"
+    },
+    "gongqian-mini": {
+      "half1_successful_seconds": 900.2985966717824,
+      "half1_updates": 2308,
+      "half1_coverage": 730,
+      "half1_sha256": "34b718bd4d92581ac3c138ddc6c592ce7c9f7801114d1fb755e26c2688eb0f72",
+      "latest_observer_successful_seconds": 1516.2033604374155,
+      "parent_bank_loss_continuity_audit": "passed"
+    }
+  },
+  "complete30_and_continuation_audit": {
+    "dustinstudio": {
+      "completed30_seconds": 1800.1075952595565,
+      "completed30_updates": 5333,
+      "coverage": 730,
+      "parent_sha256": "689958a995a3b3f85642017abdf0456e8c756cb1109250f2faea6ff884abc753",
+      "extension_successful_updates": 102,
+      "extension_successful_seconds": 37.74223570455797,
+      "extension_outcome": "training",
+      "total_budget": 3600,
+      "extension_budget": 1799.8924047404435,
+      "checkpoint_bank_code_continuity": "passed",
+      "sampling_cursor_reset": false
+    },
+    "dgx2": {
+      "completed30_seconds": 1800.1872720942192,
+      "completed30_updates": 5631,
+      "coverage": 730,
+      "parent_sha256": "b186939c2ba3f275cb5a9d10e4e1d520ed9df151f2d57651e605aca51ac4d8db",
+      "extension_successful_updates": 879,
+      "extension_successful_seconds": 336.77177308287355,
+      "extension_outcome": "training",
+      "total_budget": 3600,
+      "extension_budget": 1799.8127279057808,
+      "checkpoint_bank_code_continuity": "passed",
+      "sampling_cursor_reset": false
+    },
+    "gongqian-mini": {
+      "completed30_seconds": 1800.5058395061642,
+      "completed30_updates": 4629,
+      "coverage": 730,
+      "parent_sha256": "4949d4d3aca1c364f3b206c91a5609e77df831b0020d412cf2f00e5c0f3d01bb",
+      "extension_successful_updates": 405,
+      "extension_successful_seconds": 157.28823696263134,
+      "extension_outcome": "training",
+      "total_budget": 3600,
+      "extension_budget": 1799.4941604938358,
+      "checkpoint_bank_code_continuity": "passed",
+      "sampling_cursor_reset": false
+    }
+  },
+  "final_report_utc": "2026-09-29T05:05:16.353916+00:00",
+  "total60_all_complete": true,
+  "default_checkpoints_unchanged": true,
+  "complete60_audit": {
+    "dustinstudio": {
+      "checkpoint_sha256": "a0ec9a4438e66a09675d0eb2e61a0844adddd352054be85df71dba6b3aa8f274",
+      "cumulative_successful_seconds": 3600.310311427107,
+      "cumulative_updates": 10652,
+      "table_coverage": 730,
+      "parent_cursor_optimizer_rng_episode_code_bank_audit": "passed",
+      "terminal_evaluations": "completed",
+      "post45_loss_and_gradient_finite": true,
+      "default_replaced": false
+    },
+    "dgx2": {
+      "checkpoint_sha256": "0731430eff67dff6e724c4bea1956087add3dccf51fa6cc430f33b23a0eb2544",
+      "cumulative_successful_seconds": 3600.1876540416997,
+      "cumulative_updates": 11082,
+      "table_coverage": 730,
+      "parent_cursor_optimizer_rng_episode_code_bank_audit": "passed",
+      "terminal_evaluations": "completed",
+      "post45_loss_and_gradient_finite": true,
+      "default_replaced": false
+    },
+    "gongqian-mini": {
+      "checkpoint_sha256": "fa2ddc869d0f143177c661effef395d07b4055f8415ab45e9b12ca5a700366bb",
+      "cumulative_successful_seconds": 3600.037779714912,
+      "cumulative_updates": 9251,
+      "table_coverage": 730,
+      "parent_cursor_optimizer_rng_episode_code_bank_audit": "passed",
+      "terminal_evaluations": "completed",
+      "post45_loss_and_gradient_finite": true,
+      "default_replaced": false
+    }
+  },
+  "automation_deletion_pending": false,
+  "automation_deleted": true,
+  "automation_deleted_utc": "2026-09-29T05:05:28.627649+00:00"
+}

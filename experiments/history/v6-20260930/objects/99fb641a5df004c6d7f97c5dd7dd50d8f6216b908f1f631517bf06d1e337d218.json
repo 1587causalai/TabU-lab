@@ -1,0 +1,24 @@
+{
+  "all_table_files_sha256_verified": true,
+  "budget_revision": "2026-09-26 owner changed one-stage joint618 budget from 3600 to 7200 before launch",
+  "initialization": "weights_only_cross_identity",
+  "manifest_file_sha256": "3bf1ecc3ec2dc0769e7e0a5fedd0da20f4e8e9650310064847a429c547ab2ebf",
+  "parent_checkpoint": "/Users/dustinstudio/experiments/tabu-v55-three-stage-25replay-dustin-20260926-r2/runs/03-tanh100/checkpoint-progress.pt",
+  "parent_sha256": "be9fcd6406b6bd8a11ef059b9c7f93f086d11a7956548deb4001fb1e1419ac41",
+  "probe_mask_count": 1238,
+  "sampling_per_618": {
+    "new120": 120,
+    "nominal100": 100,
+    "old120": 120,
+    "ordinal100": 100,
+    "real78": 78,
+    "tanh100": 100
+  },
+  "source_new120": "/Users/cms/.openclaw/workspace/projects/causal-superintelligence/TabU/tabu-lab/experiments/local/v55-new120-oldreplay-balanced-dustin-20260926/manifests/new120-oldreplay-balanced-v55.json",
+  "source_old498": "/Users/cms/.openclaw/workspace/projects/causal-superintelligence/TabU/tabu-lab/experiments/local/v55-three-stage-25replay-dustin-20260926-r2",
+  "status": "prepared_not_launched",
+  "table_count": 618,
+  "training_update_seconds_hard_limit": 7200.0,
+  "training_update_seconds_target": 7196.0,
+  "utc": "2026-09-26T14:34:05.698990+00:00"
+}

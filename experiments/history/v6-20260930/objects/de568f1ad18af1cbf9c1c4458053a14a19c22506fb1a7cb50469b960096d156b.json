@@ -1,0 +1,22 @@
+{
+  "completed_utc": "2026-09-29T15:49:48.279331+00:00",
+  "selected_trial": "lr1e-4",
+  "trials": {
+    "lr1e-4": {
+      "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/cars/run/lr1e-4/checkpoints/459143b354ba2acccf52fa78ffa52414a4bc1f6093a91c8e5f97eae36a6842ec.pt",
+      "checkpoint_sha256": "459143b354ba2acccf52fa78ffa52414a4bc1f6093a91c8e5f97eae36a6842ec",
+      "metrics": {
+        "mae": 1668.299259387679,
+        "mse": 5955977.40338488,
+        "n": 129,
+        "prediction_std": 9773.673721553381,
+        "r2": 0.9383685095046364,
+        "rmse": 2440.4871241997735,
+        "slog": 0.8127008432375501,
+        "target_std": 9830.490442224533
+      },
+      "seconds": 180.4420247847156,
+      "updates": 250
+    }
+  }
+}

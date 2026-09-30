@@ -1,0 +1,258 @@
+{
+  "reported_evaluations": [
+    "dustinstudio:half1",
+    "dgx2:half1",
+    "gongqian-mini:half1",
+    "dustinstudio:half2",
+    "dgx2:half2",
+    "gongqian-mini:half2"
+  ],
+  "terminal_reported": true,
+  "automation_id": "tabu-12-30",
+  "last_checked_utc": "2026-09-28T10:22:53.506848+00:00",
+  "hosts": {
+    "dustinstudio": {
+      "launch_confirmed": true,
+      "parent_sha256": "f4c8e43abbb026615b417304d58fef75dba03337b41eaa13cbcae4e5146d6e2f",
+      "supervision": "joint_all",
+      "successful_updates": 2044,
+      "successful_seconds": 1800.7400814862922,
+      "openml_coverage": 12,
+      "phase": "half2",
+      "controller_outcome": "completed",
+      "half1_train_outcome": "training_completed",
+      "last_checkpoint_cohort_updates": {
+        "focus2": 108,
+        "history618": 428,
+        "other10": 535
+      },
+      "replay718_active": {
+        "manifest_cohorts": {
+          "history718": 718,
+          "other10": 10,
+          "focus2": 2
+        },
+        "replay_counts": {
+          "old618": 331,
+          "sparse100": 56
+        },
+        "cohorts": {
+          "history718": 387,
+          "other10": 480,
+          "focus2": 96
+        },
+        "openml_coverage": 12,
+        "synthetic_coverage": 56,
+        "synthetic_windows": [
+          [
+            204,
+            68
+          ]
+        ],
+        "updates": 963,
+        "seconds": 890.2528182452079
+      },
+      "half2_train_outcome": "training_completed",
+      "final_checkpoint_sha256": "ced305ae38d9ac5e648f4ae0cd517253f88a2849bb2232139c2d33d47c2b6231",
+      "final_macro": {
+        "r2": 0.7384256458691835,
+        "slog": 0.6524793923164253
+      },
+      "replay718_final": {
+        "updates": 973,
+        "replay_counts": {
+          "old618": 333,
+          "sparse100": 57
+        },
+        "openml_coverage": 12,
+        "synthetic_coverage": 57,
+        "openml_windows": [
+          [
+            201,
+            67
+          ],
+          [
+            512,
+            171
+          ]
+        ],
+        "synthetic_windows": [
+          [
+            204,
+            68
+          ]
+        ]
+      }
+    },
+    "dgx2": {
+      "launch_confirmed": true,
+      "parent_sha256": "abd462dac215f6fd6245cc51144409a0293b4a0cff680426bdabeda8c9f32d6f",
+      "supervision": "target_only",
+      "successful_updates": 3913,
+      "successful_seconds": 1800.247570560834,
+      "openml_coverage": 12,
+      "phase": "half2",
+      "controller_outcome": "completed",
+      "half1_train_outcome": "training_completed",
+      "last_checkpoint_cohort_updates": {
+        "focus2": 132,
+        "history618": 530,
+        "other10": 661
+      },
+      "replay718_active": {
+        "manifest_cohorts": {
+          "history718": 718,
+          "other10": 10,
+          "focus2": 2
+        },
+        "replay_counts": {
+          "old618": 571,
+          "sparse100": 91
+        },
+        "cohorts": {
+          "history718": 662,
+          "other10": 827,
+          "focus2": 165
+        },
+        "openml_coverage": 12,
+        "synthetic_coverage": 91,
+        "synthetic_windows": [
+          [
+            204,
+            68
+          ]
+        ],
+        "updates": 1654,
+        "seconds": 771.2515465168144
+      },
+      "half2_train_outcome": "training_completed",
+      "final_checkpoint_sha256": "b210401a5a31e81386ad907f501dba54c5d58daf77693a980e8263420f2b38f7",
+      "final_macro": {
+        "r2": 0.751086527256443,
+        "slog": 0.6832573063693573
+      },
+      "replay718_final": {
+        "updates": 1928,
+        "replay_counts": {
+          "old618": 665,
+          "sparse100": 107
+        },
+        "openml_coverage": 12,
+        "synthetic_coverage": 100,
+        "openml_windows": [
+          [
+            201,
+            67
+          ],
+          [
+            512,
+            171
+          ]
+        ],
+        "synthetic_windows": [
+          [
+            204,
+            68
+          ]
+        ]
+      }
+    },
+    "gongqian-mini": {
+      "launch_confirmed": true,
+      "parent_sha256": "b0bec57b3ed33329b4c8340724a33ed930fb8cefb353e686ee904fb7f7deb0f2",
+      "supervision": "target_only",
+      "successful_updates": 3637,
+      "successful_seconds": 1800.1642663134262,
+      "openml_coverage": 12,
+      "phase": "half2",
+      "controller_outcome": "completed",
+      "half1_train_outcome": "training_completed",
+      "last_checkpoint_cohort_updates": {
+        "focus2": 184,
+        "history618": 742,
+        "other10": 927
+      },
+      "replay718_active": {
+        "manifest_cohorts": {
+          "history718": 718,
+          "other10": 10,
+          "focus2": 2
+        },
+        "replay_counts": {
+          "old618": 576,
+          "sparse100": 95
+        },
+        "cohorts": {
+          "history718": 671,
+          "other10": 834,
+          "focus2": 168
+        },
+        "openml_coverage": 12,
+        "synthetic_coverage": 95,
+        "synthetic_windows": [
+          [
+            204,
+            68
+          ]
+        ],
+        "updates": 1673,
+        "seconds": 844.5315936887637
+      },
+      "half2_train_outcome": "training_completed",
+      "final_checkpoint_sha256": "e249ad031408d2171c803697baca35583664d1aaddfe6e59af10fd186cb85514",
+      "final_macro": {
+        "r2": 0.7671259616781274,
+        "slog": 0.6997661554224109
+      },
+      "replay718_final": {
+        "updates": 1784,
+        "replay_counts": {
+          "old618": 614,
+          "sparse100": 100
+        },
+        "openml_coverage": 12,
+        "synthetic_coverage": 100,
+        "openml_windows": [
+          [
+            201,
+            67
+          ],
+          [
+            512,
+            171
+          ]
+        ],
+        "synthetic_windows": [
+          [
+            204,
+            68
+          ]
+        ]
+      }
+    }
+  },
+  "pending_replay718_switch": {
+    "effective_segment": "half2",
+    "deployed_hosts": [
+      "dustinstudio",
+      "dgx2",
+      "gongqian-mini"
+    ],
+    "validated_without_updates": true,
+    "replay_tables": 718,
+    "replay_fraction": 0.4,
+    "synthetic_window": 204,
+    "total_successful_seconds_target": 1800,
+    "configured_utc": "2026-09-28T09:40:32.865478+00:00",
+    "active_confirmed_hosts": [
+      "dustinstudio",
+      "dgx2",
+      "gongqian-mini"
+    ],
+    "completed_hosts": [
+      "dustinstudio",
+      "dgx2",
+      "gongqian-mini"
+    ]
+  }
+}

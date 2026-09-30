@@ -1,0 +1,30 @@
+{
+  "outcome": "completed",
+  "host": "dustinstudio",
+  "started_utc": "2026-09-28T15:46:58.548036+00:00",
+  "completed_training_seconds": 1801.0967379612848,
+  "additional_seconds_target": 1800,
+  "start_successful_seconds": 0,
+  "start_sha256": "ced305ae38d9ac5e648f4ae0cd517253f88a2849bb2232139c2d33d47c2b6231",
+  "objective": "broadcast_allcell_restoration",
+  "phase": "half2",
+  "phase_budget": 899.704125320306,
+  "checkpoint_sha256": "c13bf590ff1ca746516d3a6f070600ebb89bc79abd4684bf631a6d9948cb333c",
+  "evaluations": {
+    "half1": {
+      "macro": {
+        "r2": 0.7592332936604228,
+        "slog": 0.6712291287279978
+      },
+      "checkpoint_sha256": "18ca39c10298d4ec01c110347796faae52c03980b844ab55b8a4594e22f5d0b8"
+    },
+    "half2": {
+      "macro": {
+        "r2": 0.7491586360353639,
+        "slog": 0.668793957717342
+      },
+      "checkpoint_sha256": "c13bf590ff1ca746516d3a6f070600ebb89bc79abd4684bf631a6d9948cb333c"
+    }
+  },
+  "completed_utc": "2026-09-28T16:20:38.093965+00:00"
+}

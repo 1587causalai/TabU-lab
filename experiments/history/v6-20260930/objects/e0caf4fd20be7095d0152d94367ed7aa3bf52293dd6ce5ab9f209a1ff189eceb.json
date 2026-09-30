@@ -1,0 +1,43 @@
+{
+  "outcome": "running",
+  "phase": "training",
+  "parent": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+  "run_sha": "0bd7ef342c1c12b0047d43619f7d29d7d6b678c312d30d7d43231a29670f27ca",
+  "updates_logged": 37,
+  "first": {
+    "branch": "v55",
+    "episode_index": 5605,
+    "forward_passes": 1,
+    "gradient_norm": 5.554248890165009,
+    "learning_rate": 0.0001,
+    "loss": 3.4576271883356338,
+    "optimizer_steps": 1,
+    "query_rows": 171,
+    "scored_cells": 171,
+    "seconds": 1.3099341319903033,
+    "successful_update_seconds": 1.3099341319903033,
+    "support_rows": 341,
+    "table": "pumadyn32nh",
+    "train_rows": 512,
+    "trial": "lr1e-4",
+    "update": 140514
+  },
+  "last": {
+    "branch": "v55",
+    "episode_index": 5641,
+    "forward_passes": 1,
+    "gradient_norm": 3.992678057381324,
+    "learning_rate": 0.0001,
+    "loss": 4.10173061027225,
+    "optimizer_steps": 1,
+    "query_rows": 171,
+    "scored_cells": 171,
+    "seconds": 1.190296880013193,
+    "successful_update_seconds": 43.98671640898101,
+    "support_rows": 341,
+    "table": "pumadyn32nh",
+    "train_rows": 512,
+    "trial": "lr1e-4",
+    "update": 140550
+  }
+}

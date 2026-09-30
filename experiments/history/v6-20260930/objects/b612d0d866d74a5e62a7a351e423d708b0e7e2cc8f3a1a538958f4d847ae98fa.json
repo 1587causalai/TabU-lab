@@ -1,0 +1,239 @@
+{
+  "all_complete": true,
+  "hosts": {
+    "dustinstudio": {
+      "controller": {
+        "outcome": "completed",
+        "host": "dustinstudio",
+        "started_utc": "2026-09-28T15:46:58.548036+00:00",
+        "completed_training_seconds": 1801.0967379612848,
+        "additional_seconds_target": 1800,
+        "start_successful_seconds": 0,
+        "start_sha256": "ced305ae38d9ac5e648f4ae0cd517253f88a2849bb2232139c2d33d47c2b6231",
+        "objective": "broadcast_allcell_restoration",
+        "phase": "half2",
+        "phase_budget": 899.704125320306,
+        "checkpoint_sha256": "c13bf590ff1ca746516d3a6f070600ebb89bc79abd4684bf631a6d9948cb333c",
+        "evaluations": {
+          "half1": {
+            "macro": {
+              "r2": 0.7592332936604228,
+              "slog": 0.6712291287279978
+            },
+            "checkpoint_sha256": "18ca39c10298d4ec01c110347796faae52c03980b844ab55b8a4594e22f5d0b8"
+          },
+          "half2": {
+            "macro": {
+              "r2": 0.7491586360353639,
+              "slog": 0.668793957717342
+            },
+            "checkpoint_sha256": "c13bf590ff1ca746516d3a6f070600ebb89bc79abd4684bf631a6d9948cb333c"
+          }
+        },
+        "completed_utc": "2026-09-28T16:20:38.093965+00:00"
+      },
+      "evaluations": {
+        "half1": {
+          "macro": {
+            "r2": 0.7592332936604228,
+            "slog": 0.6712291287279978
+          },
+          "delta": {
+            "r2": 0.020807647791239336,
+            "slog": 0.018749736411572515
+          },
+          "counts": {
+            "r2": {
+              "improved": 10,
+              "declined": 2
+            },
+            "slog": {
+              "improved": 9,
+              "declined": 3
+            }
+          },
+          "successful_seconds": 900.295874679694,
+          "updates": 480
+        },
+        "half2": {
+          "macro": {
+            "r2": 0.7491586360353639,
+            "slog": 0.668793957717342
+          },
+          "delta": {
+            "r2": 0.010732990166180456,
+            "slog": 0.016314565400916692
+          },
+          "counts": {
+            "r2": {
+              "improved": 7,
+              "declined": 5
+            },
+            "slog": {
+              "improved": 9,
+              "declined": 3
+            }
+          },
+          "successful_seconds": 900.8008632815909,
+          "updates": 433
+        }
+      }
+    },
+    "dgx2": {
+      "controller": {
+        "outcome": "completed",
+        "host": "dgx2",
+        "started_utc": "2026-09-28T15:46:59.265462+00:00",
+        "completed_training_seconds": 1800.376445533031,
+        "additional_seconds_target": 1800,
+        "start_successful_seconds": 0,
+        "start_sha256": "39f28cb4e16b589f289435a529f04c19f2dbd3f0d96313945870caf19be0278d",
+        "objective": "broadcast_allcell_restoration",
+        "phase": "half2",
+        "phase_budget": 898.553129604974,
+        "checkpoint_sha256": "382b1be53784b5a7aabe15c697d80a6f1f4bde46d10ed4668a4675660a015540",
+        "evaluations": {
+          "half1": {
+            "macro": {
+              "r2": 0.7496081899365651,
+              "slog": 0.6776640623567752
+            },
+            "checkpoint_sha256": "ad1f381c894031bd5e3487553d741d6af49777284fec8249404f9196e8c5fc34"
+          },
+          "half2": {
+            "macro": {
+              "r2": 0.7431468124940448,
+              "slog": 0.673783593057714
+            },
+            "checkpoint_sha256": "382b1be53784b5a7aabe15c697d80a6f1f4bde46d10ed4668a4675660a015540"
+          }
+        },
+        "completed_utc": "2026-09-28T16:20:53.741710+00:00"
+      },
+      "evaluations": {
+        "half1": {
+          "macro": {
+            "r2": 0.7496081899365651,
+            "slog": 0.6776640623567752
+          },
+          "delta": {
+            "r2": -0.005440360834660929,
+            "slog": -0.006552268189505828
+          },
+          "counts": {
+            "r2": {
+              "improved": 6,
+              "declined": 6
+            },
+            "slog": {
+              "improved": 5,
+              "declined": 7
+            }
+          },
+          "successful_seconds": 901.446870395026,
+          "updates": 370
+        },
+        "half2": {
+          "macro": {
+            "r2": 0.7431468124940448,
+            "slog": 0.673783593057714
+          },
+          "delta": {
+            "r2": -0.011901738277181217,
+            "slog": -0.010432737488567101
+          },
+          "counts": {
+            "r2": {
+              "improved": 8,
+              "declined": 4
+            },
+            "slog": {
+              "improved": 8,
+              "declined": 4
+            }
+          },
+          "successful_seconds": 898.929575138005,
+          "updates": 360
+        }
+      }
+    },
+    "gongqian-mini": {
+      "controller": {
+        "outcome": "completed",
+        "host": "gongqian-mini",
+        "started_utc": "2026-09-28T15:46:59.724237+00:00",
+        "completed_training_seconds": 1804.2930924668908,
+        "additional_seconds_target": 1800,
+        "start_successful_seconds": 0,
+        "start_sha256": "cf3731e8941261c73dd02725402a7e04545d2e71c941500fed39f7153716f818",
+        "objective": "broadcast_allcell_restoration",
+        "phase": "half2",
+        "phase_budget": 899.2021645624191,
+        "checkpoint_sha256": "119435398a2b3957dae7d3ba8a61b530fa709379d6c81e3da16cc3cb3772616a",
+        "evaluations": {
+          "half1": {
+            "macro": {
+              "r2": 0.7617296402512856,
+              "slog": 0.6941406692044653
+            },
+            "checkpoint_sha256": "556413ae41aabd0e57d98fed164d7962d50780c0943963b8c7de9267dc2ccc41"
+          },
+          "half2": {
+            "macro": {
+              "r2": 0.7636189447734586,
+              "slog": 0.6948070987508147
+            },
+            "checkpoint_sha256": "119435398a2b3957dae7d3ba8a61b530fa709379d6c81e3da16cc3cb3772616a"
+          }
+        },
+        "completed_utc": "2026-09-28T16:19:52.704717+00:00"
+      },
+      "evaluations": {
+        "half1": {
+          "macro": {
+            "r2": 0.7617296402512856,
+            "slog": 0.6941406692044653
+          },
+          "delta": {
+            "r2": -0.00828827057745618,
+            "slog": -0.007937446046877517
+          },
+          "counts": {
+            "r2": {
+              "improved": 3,
+              "declined": 9
+            },
+            "slog": {
+              "improved": 3,
+              "declined": 9
+            }
+          },
+          "successful_seconds": 900.7978354375809,
+          "updates": 293
+        },
+        "half2": {
+          "macro": {
+            "r2": 0.7636189447734586,
+            "slog": 0.6948070987508147
+          },
+          "delta": {
+            "r2": -0.006398966055283228,
+            "slog": -0.0072710165005280825
+          },
+          "counts": {
+            "r2": {
+              "improved": 5,
+              "declined": 7
+            },
+            "slog": {
+              "improved": 6,
+              "declined": 6
+            }
+          },
+          "successful_seconds": 903.4952570293099,
+          "updates": 291
+        }
+      }
+    }
+  }
+}

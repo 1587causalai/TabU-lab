@@ -1,0 +1,114 @@
+{
+  "outcome": "completed",
+  "reported_evaluations": [
+    "hour1",
+    "hour2",
+    "hour3",
+    "hour4",
+    "hour5"
+  ],
+  "automation_id": "tabu-730",
+  "launch_verified_utc": "2026-09-28T17:22:25.662349+00:00",
+  "hosts_launched": [
+    "dustinstudio",
+    "dgx2",
+    "gongqian-mini"
+  ],
+  "training_updates_confirmed": true,
+  "initial_failure": "DGX2/Mini before-fit manifest used absolute paths; corrected to relative, archived zero-update attempt",
+  "before_metrics_reported": true,
+  "last_training_audit": {
+    "dustinstudio": {
+      "phase_completed": "hour5",
+      "successful_seconds": 18000.005344845355,
+      "updates": 21306,
+      "coverage": 730,
+      "min_per_table": 29,
+      "max_per_table": 30,
+      "supervision": "joint_all",
+      "all_parent_links_match": true,
+      "cursor_continued": true
+    },
+    "dgx2": {
+      "phase_completed": "hour5",
+      "successful_seconds": 18000.24608983566,
+      "updates": 56237,
+      "coverage": 730,
+      "min_per_table": 77,
+      "max_per_table": 78,
+      "supervision": "target_only",
+      "all_parent_links_match": true,
+      "cursor_continued": true
+    },
+    "gongqian-mini": {
+      "phase_completed": "hour5",
+      "successful_seconds": 18000.40883662179,
+      "updates": 46705,
+      "coverage": 730,
+      "min_per_table": 63,
+      "max_per_table": 64,
+      "supervision": "target_only",
+      "all_parent_links_match": true,
+      "cursor_continued": true
+    }
+  },
+  "last_checked_utc": "2026-09-28T23:24:27.529928+00:00",
+  "last_reported_utc": "2026-09-28T23:24:27.529928+00:00",
+  "latest_observed": {
+    "dustinstudio": {
+      "phase": "hour5",
+      "outcome": "completed",
+      "successful_seconds": 18000.005344845355
+    },
+    "dgx2": {
+      "phase": "hour5",
+      "outcome": "completed",
+      "successful_seconds": 18000.24608983566
+    },
+    "gongqian-mini": {
+      "phase": "hour5",
+      "outcome": "completed",
+      "successful_seconds": 18000.40883662179
+    }
+  },
+  "reported_anomalies": [
+    "dgx2/hour4/openml12/cpu_activity:r2=-13.201873343888328; remote receipt confirmed; hour4 loss and gradient_norm finite"
+  ],
+  "final_checkpoints": {
+    "dustinstudio": {
+      "checkpoint": "/Users/dustinstudio/experiments/v6-all730-hostloss-5h-20260929/hour5/run/checkpoints/158b3ecde247de71149948b2c20c9b8da79ca8778609cfa1a0f845661bc71554.pt",
+      "sha256": "158b3ecde247de71149948b2c20c9b8da79ca8778609cfa1a0f845661bc71554",
+      "adopted_as_default": false
+    },
+    "dgx2": {
+      "checkpoint": "/home/cms/experiments/v6-all730-hostloss-5h-20260929/hour5/run/checkpoints/f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08.pt",
+      "sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+      "adopted_as_default": false
+    },
+    "gongqian-mini": {
+      "checkpoint": "/Users/gongqian/experiments/v6-all730-hostloss-5h-20260929/hour5/run/checkpoints/fe454498403ce421dc3350b3b319ccf31a94168c6c1a534ad66b6b632cb45798.pt",
+      "sha256": "fe454498403ce421dc3350b3b319ccf31a94168c6c1a534ad66b6b632cb45798",
+      "adopted_as_default": false
+    }
+  },
+  "automation_deleted": true,
+  "accepted_next_checkpoints": {
+    "dustinstudio": {
+      "stage": "all730_hour3",
+      "checkpoint": "/Users/dustinstudio/experiments/v6-all730-hostloss-5h-20260929/hour3/run/checkpoints/3085f15478bb0347bc279e231f1311c939649ec2cef5b8657b33027c35748b94.pt",
+      "checkpoint_sha256": "3085f15478bb0347bc279e231f1311c939649ec2cef5b8657b33027c35748b94",
+      "supervision": "joint_all",
+      "user_selected": true
+    }
+  },
+  "selected_default_checkpoints": {
+    "dgx2": {
+      "checkpoint": "/home/cms/experiments/v6-all730-hostloss-5h-20260929/hour5/run/checkpoints/f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08.pt",
+      "sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+      "phase": "hour5",
+      "selected_at_utc": "2026-09-29T03:01:00.447808+00:00",
+      "authority": "User delegated default exploration checkpoint selection",
+      "decision_document": "/Users/cms/.openclaw/workspace/projects/causal-superintelligence/TabU/preparations/v6-v55-dual718-continue60m-20260928/CHECKPOINT_DECISION.md"
+    }
+  }
+}

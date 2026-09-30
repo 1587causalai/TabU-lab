@@ -1,0 +1,78 @@
+{
+  "variant": "all-column-loss-only",
+  "outcome": "completed",
+  "checkpoint": {
+    "path": "/home/cms/experiments/v6-sparse-relevance-deeper-20260927/ablation-h8-u600/all-column-loss-only/checkpoint-u0600.pt",
+    "sha256": "fec1ef73148dab7ac3e26af6bd6c51846b8baba260de5580e9b4488330613843",
+    "update": 600
+  },
+  "state": {
+    "update": 600,
+    "cursor": 600,
+    "parameter_update_seconds": 748.9476710136514,
+    "episode_build_seconds": 5.703323466936126
+  },
+  "initial_metrics": {
+    "train_query": {
+      "n": 544,
+      "r2": -0.019967619110892176,
+      "slog": -0.009200315006456128,
+      "prediction_sd": 0.007372922972364628,
+      "target_sd": 0.03571200586961525,
+      "prediction_sd_ratio": 0.2064550224169209,
+      "correlation": 0.055171517722124315,
+      "prediction_mean": 0.0009970751495517213,
+      "target_mean": 0.0013960546368293081
+    },
+    "test_query": {
+      "n": 544,
+      "r2": -0.062158068909711206,
+      "slog": -0.029073673238648068,
+      "prediction_sd": 0.007516081204269806,
+      "target_sd": 0.03482558125018005,
+      "prediction_sd_ratio": 0.21582069658150924,
+      "correlation": -0.03344570323330623,
+      "prediction_mean": 0.0010747487797419686,
+      "target_mean": 0.002252114021211234
+    }
+  },
+  "metrics": {
+    "train_query": {
+      "n": 544,
+      "r2": 0.06433965942227937,
+      "slog": 0.030701628388528746,
+      "prediction_sd": 0.0061228914930299,
+      "target_sd": 0.03571200586961525,
+      "prediction_sd_ratio": 0.17145190654886802,
+      "correlation": 0.29646340246437614,
+      "prediction_mean": -0.0017827182215618474,
+      "target_mean": 0.0013960546368293081
+    },
+    "test_query": {
+      "n": 544,
+      "r2": 0.06896912563801971,
+      "slog": 0.03736559680341833,
+      "prediction_sd": 0.006001523172856101,
+      "target_sd": 0.03482558125018005,
+      "prediction_sd_ratio": 0.1723308831442712,
+      "correlation": 0.31963131419129187,
+      "prediction_mean": -0.001482129368400439,
+      "target_mean": 0.002252114021211234
+    }
+  },
+  "delta": {
+    "train_query": {
+      "r2": 0.08430727853317155,
+      "slog": 0.03990194339498487,
+      "prediction_sd": -0.0012500314793347277
+    },
+    "test_query": {
+      "r2": 0.13112719454773092,
+      "slog": 0.0664392700420664,
+      "prediction_sd": -0.001514558031413705
+    }
+  },
+  "initial_evaluation_seconds": 3.068762192968279,
+  "final_evaluation_seconds": 3.0628344130236655,
+  "peak_allocated_bytes": 7900840448
+}

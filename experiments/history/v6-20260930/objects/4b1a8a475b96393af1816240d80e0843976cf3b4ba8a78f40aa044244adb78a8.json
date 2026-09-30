@@ -1,0 +1,54 @@
+{
+  "completed_utc": "2026-09-29T14:48:56.181364+00:00",
+  "selected_trial": "lr1e-4",
+  "trials": {
+    "lr1e-4": {
+      "checkpoint": "/Users/dustinstudio/experiments/v6-puma-lrval-grid-20260929/run/lr1e-4/checkpoints/0ac497fa189633817270020daaaeffc1f685ebd2a1e60e99cce92da502fe75dd.pt",
+      "checkpoint_sha256": "0ac497fa189633817270020daaaeffc1f685ebd2a1e60e99cce92da502fe75dd",
+      "metrics": {
+        "mae": 0.01678574379547759,
+        "mse": 0.0004473021776846163,
+        "n": 1311,
+        "prediction_std": 0.027950652516952203,
+        "r2": 0.6557714876403257,
+        "rmse": 0.021149519561555443,
+        "slog": 0.476825026965504,
+        "target_std": 0.03604766067433209
+      },
+      "seconds": 360.2316655043978,
+      "updates": 661
+    },
+    "lr1e-5": {
+      "checkpoint": "/Users/dustinstudio/experiments/v6-puma-lrval-grid-20260929/run/lr1e-5/checkpoints/5c91b2c8761c9c694a07aa0ab5bc488dbf33ed3cef9f918ba3c52b1b0a91af21.pt",
+      "checkpoint_sha256": "5c91b2c8761c9c694a07aa0ab5bc488dbf33ed3cef9f918ba3c52b1b0a91af21",
+      "metrics": {
+        "mae": 0.016927822763982185,
+        "mse": 0.0004587231649206033,
+        "n": 1311,
+        "prediction_std": 0.025429756039825162,
+        "r2": 0.6469822850787084,
+        "rmse": 0.021417823533697426,
+        "slog": 0.4701080738130923,
+        "target_std": 0.03604766067433209
+      },
+      "seconds": 720.5270894705318,
+      "updates": 912
+    },
+    "lr3e-5": {
+      "checkpoint": "/Users/dustinstudio/experiments/v6-puma-lrval-grid-20260929/run/lr3e-5/checkpoints/7e4fc4b52f1de07480e79c892a8f1c9c2e223581ecdf7dc1c1a301a6dfc503e5.pt",
+      "checkpoint_sha256": "7e4fc4b52f1de07480e79c892a8f1c9c2e223581ecdf7dc1c1a301a6dfc503e5",
+      "metrics": {
+        "mae": 0.016825666902994148,
+        "mse": 0.00045349348721529937,
+        "n": 1311,
+        "prediction_std": 0.026907466046007005,
+        "r2": 0.6510068668188103,
+        "rmse": 0.021295386524205175,
+        "slog": 0.47501137419238626,
+        "target_std": 0.03604766067433209
+      },
+      "seconds": 360.77851700712927,
+      "updates": 516
+    }
+  }
+}

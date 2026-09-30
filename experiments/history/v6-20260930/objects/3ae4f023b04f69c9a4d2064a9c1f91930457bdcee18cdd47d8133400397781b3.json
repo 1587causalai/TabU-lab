@@ -1,0 +1,11 @@
+{
+  "outcome": "failed",
+  "host": "gongqian-mini",
+  "supervision": "target_only",
+  "start_sha256": "cf3731e8941261c73dd02725402a7e04545d2e71c941500fed39f7153716f818",
+  "completed_training_seconds": 0,
+  "additional_seconds_target": 18000,
+  "started_utc": "2026-09-28T17:19:10.985825+00:00",
+  "error_type": "CalledProcessError",
+  "error": "Command '['/Users/gongqian/.local/bin/wehub-python', '--profile', 'train-20260920', '-u', '-c', \"import runpy;runpy.run_path('/Users/gongqian/experiments/v6-all730-hostloss-5h-20260929/eval_fit.py',run_name='__main__')\", '--host', 'gongqian-mini', '--device', 'mps', '--checkpoint', '/Users/gongqian/experiments/v6-dual718-openml12-adapt60m-20260928/half2/run/checkpoints/cf3731e8941261c73dd02725402a7e04545d2e71c941500fed39f7153716f818.pt', '--expected-sha', 'cf3731e8941261c73dd02725402a7e04545d2e71c941500fed39f7153716f818', '--output', '/Users/gongqian/experiments/v6-all730-hostloss-5h-20260929/evaluations/before/fit718']' returned non-zero exit status 1."
+}

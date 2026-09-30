@@ -1,0 +1,592 @@
+{
+  "status": "local_unissued",
+  "outcome": "completed",
+  "checkpoint": "/home/cms/tar-openml12-kinpuma3x-fit-20260909/attempt-02/main/checkpoint-019200",
+  "checkpoint_updates": 19200,
+  "global_step": 261760,
+  "protocol_sha256": "dc1d454b05aa148060750be6a378dfb277bbba445264a9e77329fce096b01b23",
+  "evaluator_sha256": "438b66f2b20c1fdf353d66b4370dd628bc06a88e71776fd4dc2990c313a72284",
+  "model_state_unchanged": true,
+  "wall_seconds": 120.25939930700406,
+  "datasets": {
+    "airfoil_self_noise": {
+      "data_sha256": "ec522f702d8884432a41525b010be9edbbfeb68347f68607e3167fd634e85019",
+      "train_rows": 1202,
+      "test_rows": 301,
+      "predictors": 5,
+      "tar_context_rows": 801,
+      "tar_query_chunk_max": 401,
+      "tar_episodes": 1,
+      "tar": {
+        "n": 301,
+        "mae": 1.1745700511404797,
+        "mse": 2.8037716690885466,
+        "rmse": 1.6744466754986695,
+        "r2": 0.9330144314740084,
+        "nmse_train_variance": 0.05725026075375991,
+        "accuracy": null
+      },
+      "mlp": {
+        "n": 301,
+        "mae": 1.0866342244687694,
+        "mse": 2.3868290070162694,
+        "rmse": 1.5449365705478881,
+        "r2": 0.942975706698225,
+        "nmse_train_variance": 0.04873670154129937,
+        "accuracy": null
+      },
+      "xgboost": {
+        "n": 301,
+        "mae": 1.0401948110384003,
+        "mse": 2.1407056823771295,
+        "rmse": 1.463115061222845,
+        "r2": 0.9488558969470334,
+        "nmse_train_variance": 0.04371110524595138,
+        "accuracy": null
+      },
+      "seconds": {
+        "tar": 2.658830437998404,
+        "mlp": 1.91146854001272,
+        "xgboost": 0.13719858700642362
+      },
+      "selection": {
+        "xgboost_trees": 599,
+        "mlp_epochs": 290
+      },
+      "mlp_warnings": [
+        "Stochastic Optimizer: Maximum iterations (300) reached and the optimization hasn't converged yet.",
+        "Stochastic Optimizer: Maximum iterations (290) reached and the optimization hasn't converged yet."
+      ]
+    },
+    "concrete_compressive_strength": {
+      "data_sha256": "8c7f1276c126ede73f3d02692696467e238df902e729378df77271a21ea1fbc2",
+      "train_rows": 824,
+      "test_rows": 206,
+      "predictors": 8,
+      "tar_context_rows": 549,
+      "tar_query_chunk_max": 275,
+      "tar_episodes": 1,
+      "tar": {
+        "n": 206,
+        "mae": 3.4404705898793875,
+        "mse": 28.01373744398585,
+        "rmse": 5.292800529397065,
+        "r2": 0.9009551367064799,
+        "nmse_train_variance": 0.10084786396957514,
+        "accuracy": null
+      },
+      "mlp": {
+        "n": 206,
+        "mae": 3.556116556879215,
+        "mse": 28.074635984774705,
+        "rmse": 5.298550366352546,
+        "r2": 0.900739824927419,
+        "nmse_train_variance": 0.10106709525814205,
+        "accuracy": null
+      },
+      "xgboost": {
+        "n": 206,
+        "mae": 2.832001101072829,
+        "mse": 19.85464466518511,
+        "rmse": 4.455855099213293,
+        "r2": 0.9298022775241346,
+        "nmse_train_variance": 0.07147559329998303,
+        "accuracy": null
+      },
+      "seconds": {
+        "tar": 1.9075980299967341,
+        "mlp": 0.9814679369883379,
+        "xgboost": 0.31382949800172355
+      },
+      "selection": {
+        "xgboost_trees": 520,
+        "mlp_epochs": 200
+      },
+      "mlp_warnings": [
+        "Stochastic Optimizer: Maximum iterations (200) reached and the optimization hasn't converged yet."
+      ]
+    },
+    "qsar_fish_toxicity": {
+      "data_sha256": "c7c22a6bd8634247678fd9f9c4231204ef4ae56ed81b8d7bbcbc5ff504002949",
+      "train_rows": 726,
+      "test_rows": 182,
+      "predictors": 6,
+      "tar_context_rows": 484,
+      "tar_query_chunk_max": 242,
+      "tar_episodes": 1,
+      "tar": {
+        "n": 182,
+        "mae": 0.714048377972351,
+        "mse": 1.1360119570093676,
+        "rmse": 1.065838616775245,
+        "r2": 0.4874871973666949,
+        "nmse_train_variance": 0.5433166758200997,
+        "accuracy": null
+      },
+      "mlp": {
+        "n": 182,
+        "mae": 0.6567660448015732,
+        "mse": 0.989168462478439,
+        "rmse": 0.9945694859980568,
+        "r2": 0.5537357702502408,
+        "nmse_train_variance": 0.47308632408649265,
+        "accuracy": null
+      },
+      "xgboost": {
+        "n": 182,
+        "mae": 0.7054963224851167,
+        "mse": 1.0605289381906358,
+        "rmse": 1.029819857154947,
+        "r2": 0.5215414282991355,
+        "nmse_train_variance": 0.5072156624351487,
+        "accuracy": null
+      },
+      "seconds": {
+        "tar": 1.52494865799963,
+        "mlp": 0.16282835700258147,
+        "xgboost": 0.04389893799088895
+      },
+      "selection": {
+        "xgboost_trees": 71,
+        "mlp_epochs": 29
+      },
+      "mlp_warnings": [
+        "Stochastic Optimizer: Maximum iterations (29) reached and the optimization hasn't converged yet."
+      ]
+    },
+    "bodyfat": {
+      "data_sha256": "3c22b81b697581c55657034afd3b885f23ea35f3fec9df1cd6e9be903c2171b9",
+      "train_rows": 201,
+      "test_rows": 51,
+      "predictors": 14,
+      "tar_context_rows": 134,
+      "tar_query_chunk_max": 67,
+      "tar_episodes": 1,
+      "tar": {
+        "n": 51,
+        "mae": 1.0623574023355202,
+        "mse": 2.3708509662693906,
+        "rmse": 1.5397567880251057,
+        "r2": 0.9644031577908108,
+        "nmse_train_variance": 0.03361153348587316,
+        "accuracy": null
+      },
+      "mlp": {
+        "n": 51,
+        "mae": 1.2175878733141687,
+        "mse": 2.423759395539594,
+        "rmse": 1.556842765194865,
+        "r2": 0.963608770866005,
+        "nmse_train_variance": 0.03436161582651841,
+        "accuracy": null
+      },
+      "xgboost": {
+        "n": 51,
+        "mae": 0.3046600659688314,
+        "mse": 0.29636835906622927,
+        "rmse": 0.5443972438084429,
+        "r2": 0.995550214727298,
+        "nmse_train_variance": 0.004201611643511451,
+        "accuracy": null
+      },
+      "seconds": {
+        "tar": 0.6338806480052881,
+        "mlp": 0.08685606300423387,
+        "xgboost": 0.08006915499572642
+      },
+      "selection": {
+        "xgboost_trees": 180,
+        "mlp_epochs": 57
+      },
+      "mlp_warnings": [
+        "Got `batch_size` less than 1 or larger than sample size. It is going to be clipped",
+        "Stochastic Optimizer: Maximum iterations (57) reached and the optimization hasn't converged yet."
+      ]
+    },
+    "energy_efficiency": {
+      "data_sha256": "80d4fda975a2deb0ab01592d644a224c0b715bca099596af6d1ac4aba583aeea",
+      "train_rows": 614,
+      "test_rows": 154,
+      "predictors": 8,
+      "tar_context_rows": 136,
+      "tar_query_chunk_max": 68,
+      "tar_episodes": 3,
+      "tar": {
+        "n": 154,
+        "mae": 0.6882478261960471,
+        "mse": 0.9412234157345186,
+        "rmse": 0.9701666948182248,
+        "r2": 0.9911283524349493,
+        "nmse_train_variance": 0.009377219859761442,
+        "accuracy": null
+      },
+      "mlp": {
+        "n": 154,
+        "mae": 0.35866897758006433,
+        "mse": 0.29177001799591284,
+        "rmse": 0.5401574011303676,
+        "r2": 0.9972498763562015,
+        "nmse_train_variance": 0.002906846091476692,
+        "accuracy": null
+      },
+      "xgboost": {
+        "n": 154,
+        "mae": 0.20475025744252395,
+        "mse": 0.1204131965567755,
+        "rmse": 0.34700604685909364,
+        "r2": 0.9988650267044205,
+        "nmse_train_variance": 0.0011996524940344649,
+        "accuracy": null
+      },
+      "seconds": {
+        "tar": 1.7769136179995257,
+        "mlp": 1.009617128991522,
+        "xgboost": 0.0907294969947543
+      },
+      "selection": {
+        "xgboost_trees": 453,
+        "mlp_epochs": 291
+      },
+      "mlp_warnings": [
+        "Stochastic Optimizer: Maximum iterations (291) reached and the optimization hasn't converged yet."
+      ]
+    },
+    "cars": {
+      "data_sha256": "c239fe676e37528fda3eff165bc43d57f52adba81f6bb4912a69d7c74608c714",
+      "train_rows": 643,
+      "test_rows": 161,
+      "predictors": 17,
+      "tar_context_rows": 136,
+      "tar_query_chunk_max": 68,
+      "tar_episodes": 3,
+      "tar": {
+        "n": 161,
+        "mae": 1738.0303878204727,
+        "mse": 5828770.716054864,
+        "rmse": 2414.2847214143703,
+        "r2": 0.9524641922075204,
+        "nmse_train_variance": 0.06428219303977324,
+        "accuracy": null
+      },
+      "mlp": {
+        "n": 161,
+        "mae": 1405.9130892412288,
+        "mse": 4218577.181776553,
+        "rmse": 2053.917520684936,
+        "r2": 0.9655959234220146,
+        "nmse_train_variance": 0.046524285473299176,
+        "accuracy": null
+      },
+      "xgboost": {
+        "n": 161,
+        "mae": 1610.365272224379,
+        "mse": 5251146.285583819,
+        "rmse": 2291.5379738472193,
+        "r2": 0.9571749357314476,
+        "nmse_train_variance": 0.057911902123756485,
+        "accuracy": null
+      },
+      "seconds": {
+        "tar": 2.2839401949895546,
+        "mlp": 0.25426371600769926,
+        "xgboost": 0.038254503000644036
+      },
+      "selection": {
+        "xgboost_trees": 122,
+        "mlp_epochs": 56
+      },
+      "mlp_warnings": [
+        "Stochastic Optimizer: Maximum iterations (56) reached and the optimization hasn't converged yet."
+      ]
+    },
+    "red_wine": {
+      "data_sha256": "a19ce80995bb56e10aa9f755427773454c0460b9ee9c3a3da9884580f8fa87b8",
+      "train_rows": 1279,
+      "test_rows": 320,
+      "predictors": 11,
+      "tar_context_rows": 136,
+      "tar_query_chunk_max": 68,
+      "tar_episodes": 5,
+      "tar": {
+        "n": 320,
+        "mae": 0.4166224340019923,
+        "mse": 0.3444063136685856,
+        "rmse": 0.5868614092514395,
+        "r2": 0.4618651348928351,
+        "nmse_train_variance": 0.5260988229949594,
+        "accuracy": null
+      },
+      "mlp": {
+        "n": 320,
+        "mae": 0.487874850203209,
+        "mse": 0.39154109955066924,
+        "rmse": 0.6257324504536018,
+        "r2": 0.38821703195207935,
+        "nmse_train_variance": 0.5980996963545162,
+        "accuracy": null
+      },
+      "xgboost": {
+        "n": 320,
+        "mae": 0.41550725847482683,
+        "mse": 0.33684000065368097,
+        "rmse": 0.5803791869577001,
+        "r2": 0.4736874989786235,
+        "nmse_train_variance": 0.5145408804905045,
+        "accuracy": null
+      },
+      "seconds": {
+        "tar": 3.47386898600962,
+        "mlp": 0.28097924700705335,
+        "xgboost": 0.15381795501161832
+      },
+      "selection": {
+        "xgboost_trees": 218,
+        "mlp_epochs": 28
+      },
+      "mlp_warnings": [
+        "Stochastic Optimizer: Maximum iterations (28) reached and the optimization hasn't converged yet."
+      ]
+    },
+    "white_wine": {
+      "data_sha256": "85ac54c02770cd04647cba09f15dd1630bc4fa3333697c99632b30cead437664",
+      "train_rows": 3918,
+      "test_rows": 980,
+      "predictors": 11,
+      "tar_context_rows": 136,
+      "tar_query_chunk_max": 68,
+      "tar_episodes": 15,
+      "tar": {
+        "n": 980,
+        "mae": 0.5242533322430315,
+        "mse": 0.5153544863450097,
+        "rmse": 0.7178819445737646,
+        "r2": 0.3841337573700446,
+        "nmse_train_variance": 0.6683904326433576,
+        "accuracy": null
+      },
+      "mlp": {
+        "n": 980,
+        "mae": 0.510793148854451,
+        "mse": 0.45727120190445864,
+        "rmse": 0.6762183093531694,
+        "r2": 0.4535452694376072,
+        "nmse_train_variance": 0.5930591555414502,
+        "accuracy": null
+      },
+      "xgboost": {
+        "n": 980,
+        "mae": 0.439334545816694,
+        "mse": 0.3900573126334543,
+        "rmse": 0.6245456849850571,
+        "r2": 0.5338681666562939,
+        "nmse_train_variance": 0.5058859151412226,
+        "accuracy": null
+      },
+      "seconds": {
+        "tar": 10.52881993498886,
+        "mlp": 1.357069772988325,
+        "xgboost": 0.5119711229926907
+      },
+      "selection": {
+        "xgboost_trees": 586,
+        "mlp_epochs": 50
+      },
+      "mlp_warnings": [
+        "Stochastic Optimizer: Maximum iterations (50) reached and the optimization hasn't converged yet."
+      ]
+    },
+    "space_ga": {
+      "data_sha256": "327c897b299f64b4dba21174c7898fa9d78eb86812a3ad3f0c815b319416c756",
+      "train_rows": 2485,
+      "test_rows": 622,
+      "predictors": 6,
+      "tar_context_rows": 136,
+      "tar_query_chunk_max": 68,
+      "tar_episodes": 10,
+      "tar": {
+        "n": 622,
+        "mae": 0.08535610809527777,
+        "mse": 0.013863386491712789,
+        "rmse": 0.11774288297690348,
+        "r2": 0.6268633960334136,
+        "nmse_train_variance": 0.34898535343235343,
+        "accuracy": null
+      },
+      "mlp": {
+        "n": 622,
+        "mae": 0.07159757457861719,
+        "mse": 0.009159580825621697,
+        "rmse": 0.09570569902373471,
+        "r2": 0.753467532260389,
+        "nmse_train_variance": 0.23057566444047597,
+        "accuracy": null
+      },
+      "xgboost": {
+        "n": 622,
+        "mae": 0.07714653393125319,
+        "mse": 0.01172467966537369,
+        "rmse": 0.10828055996056582,
+        "r2": 0.6844272389326482,
+        "nmse_train_variance": 0.29514732777215097,
+        "accuracy": null
+      },
+      "seconds": {
+        "tar": 5.88379668800917,
+        "mlp": 1.8880657839908963,
+        "xgboost": 0.20367703899682965
+      },
+      "selection": {
+        "xgboost_trees": 265,
+        "mlp_epochs": 134
+      },
+      "mlp_warnings": [
+        "Stochastic Optimizer: Maximum iterations (134) reached and the optimization hasn't converged yet."
+      ]
+    },
+    "cpu_activity": {
+      "data_sha256": "a4920adefb565787dc23586e23e2191487321db6c03799c96457dc9b2d8e050b",
+      "train_rows": 6553,
+      "test_rows": 1639,
+      "predictors": 21,
+      "tar_context_rows": 136,
+      "tar_query_chunk_max": 68,
+      "tar_episodes": 25,
+      "tar": {
+        "n": 1639,
+        "mae": 1.8335771392889262,
+        "mse": 6.27353508155481,
+        "rmse": 2.504702593433961,
+        "r2": 0.9802869674223718,
+        "nmse_train_variance": 0.018259356030025813,
+        "accuracy": null
+      },
+      "mlp": {
+        "n": 1639,
+        "mae": 1.8624530119367175,
+        "mse": 6.923607669363361,
+        "rmse": 2.6312749133002735,
+        "r2": 0.9782442750751222,
+        "nmse_train_variance": 0.020151416355161468,
+        "accuracy": null
+      },
+      "xgboost": {
+        "n": 1639,
+        "mae": 1.506744760469334,
+        "mse": 4.520050390679423,
+        "rmse": 2.126041013404827,
+        "r2": 0.9857968594348082,
+        "nmse_train_variance": 0.013155773943104838,
+        "accuracy": null
+      },
+      "seconds": {
+        "tar": 22.483709321008064,
+        "mlp": 1.7487164929916617,
+        "xgboost": 1.3660452280018944
+      },
+      "selection": {
+        "xgboost_trees": 553,
+        "mlp_epochs": 36
+      },
+      "mlp_warnings": [
+        "Stochastic Optimizer: Maximum iterations (36) reached and the optimization hasn't converged yet."
+      ]
+    },
+    "kin8nm": {
+      "data_sha256": "6eedd40306c5b3fefd63497a3a1b6eabd300ab7e7382acc0cf723af9bc5002c2",
+      "train_rows": 6553,
+      "test_rows": 1639,
+      "predictors": 8,
+      "tar_context_rows": 136,
+      "tar_query_chunk_max": 68,
+      "tar_episodes": 25,
+      "tar": {
+        "n": 1639,
+        "mae": 0.07977302474525864,
+        "mse": 0.010262953512049592,
+        "rmse": 0.10130623629396954,
+        "r2": 0.8510615446228796,
+        "nmse_train_variance": 0.1474278998274544,
+        "accuracy": null
+      },
+      "mlp": {
+        "n": 1639,
+        "mae": 0.05722782275279477,
+        "mse": 0.005390104511573148,
+        "rmse": 0.07341733113899707,
+        "r2": 0.9217775039775438,
+        "nmse_train_variance": 0.07742915205245025,
+        "accuracy": null
+      },
+      "xgboost": {
+        "n": 1639,
+        "mae": 0.08990788399762055,
+        "mse": 0.013399835793147784,
+        "rmse": 0.1157576597601549,
+        "r2": 0.8055383527758069,
+        "nmse_train_variance": 0.19248938881941843,
+        "accuracy": null
+      },
+      "seconds": {
+        "tar": 16.27985888600233,
+        "mlp": 3.487145484003122,
+        "xgboost": 0.8958932490058942
+      },
+      "selection": {
+        "xgboost_trees": 599,
+        "mlp_epochs": 84
+      },
+      "mlp_warnings": [
+        "Stochastic Optimizer: Maximum iterations (84) reached and the optimization hasn't converged yet."
+      ]
+    },
+    "pumadyn32nh": {
+      "data_sha256": "2f11bcd411e69c4bfffd93b534eb37eeb10dc33c0b616ecc15b2769319c22bd1",
+      "train_rows": 6553,
+      "test_rows": 1639,
+      "predictors": 32,
+      "tar_context_rows": 136,
+      "tar_query_chunk_max": 68,
+      "tar_episodes": 25,
+      "tar": {
+        "n": 1639,
+        "mae": 0.01832201119496397,
+        "mse": 0.0005389071271691962,
+        "rmse": 0.02321437328831421,
+        "r2": 0.587026329285417,
+        "nmse_train_variance": 0.41791971642487397,
+        "accuracy": null
+      },
+      "mlp": {
+        "n": 1639,
+        "mae": 0.020195394776377405,
+        "mse": 0.0006400913890074224,
+        "rmse": 0.02530002745072468,
+        "r2": 0.5094871134851433,
+        "nmse_train_variance": 0.49638759313717284,
+        "accuracy": null
+      },
+      "xgboost": {
+        "n": 1639,
+        "mae": 0.017148542162282492,
+        "mse": 0.00046478054806190476,
+        "rmse": 0.021558769632377094,
+        "r2": 0.6438307839458244,
+        "nmse_train_variance": 0.36043493406025134,
+        "accuracy": null
+      },
+      "seconds": {
+        "tar": 27.559172998997383,
+        "mlp": 1.5412489430018468,
+        "xgboost": 0.6379552489961497
+      },
+      "selection": {
+        "xgboost_trees": 76,
+        "mlp_epochs": 28
+      },
+      "mlp_warnings": [
+        "Stochastic Optimizer: Maximum iterations (28) reached and the optimization hasn't converged yet."
+      ]
+    }
+  },
+  "scope": "Untouched row holdout within the 12 previously trained tables; one prediction per test row; no test-based tuning or checkpoint selection. ACC not applicable to these regression targets."
+}

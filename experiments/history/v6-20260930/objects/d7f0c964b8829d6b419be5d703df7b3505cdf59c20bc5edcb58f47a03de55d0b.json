@@ -1,0 +1,13 @@
+{
+  "host": "dustinstudio",
+  "device": "mps",
+  "supervision": "joint_all",
+  "parent": {
+    "stage": "broadcast_allcell_15min",
+    "checkpoint": "/Users/dustinstudio/experiments/v6-broadcast-restoration-allcell-openml12-30m-20260928/half1/run/checkpoints/18ca39c10298d4ec01c110347796faae52c03980b844ab55b8a4594e22f5d0b8.pt",
+    "checkpoint_sha256": "18ca39c10298d4ec01c110347796faae52c03980b844ab55b8a4594e22f5d0b8",
+    "manifest": "/Users/dustinstudio/experiments/v6-broadcast-restoration-allcell-openml12-30m-20260928/balanced-replay718-manifest.json",
+    "supervision": "target_only",
+    "training_objective": "broadcast_allcell_restoration"
+  }
+}

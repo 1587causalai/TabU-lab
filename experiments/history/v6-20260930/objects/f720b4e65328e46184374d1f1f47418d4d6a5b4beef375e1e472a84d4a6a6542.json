@@ -1,0 +1,20 @@
+{
+  "schema": "tabu.ordinal100.cuda-smoke-row-semantics.v1",
+  "smoke_receipt": "ordinal-cuda-smoke.json",
+  "field_interpretation": {
+    "rows": "total selected episode rows presented to train_step",
+    "query": "masked target Query cells"
+  },
+  "episode_contract": {
+    "total_rows": 204,
+    "visible_target_support_rows": 153,
+    "masked_target_query_cells": 51
+  },
+  "correction": "The smoke receipt legacy field support_rows_expected=204 names total episode rows. It does not mean 204 visible target support rows.",
+  "evidence": [
+    "evidence/validation/candidate-episode-validation.json",
+    "evidence/validation/fixed-bank-addresses.json",
+    "evidence/validation/independent-data-audit.json"
+  ],
+  "model_execution_repeated": false
+}

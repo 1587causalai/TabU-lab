@@ -1,0 +1,116 @@
+{
+  "schema": "tfm-data.provenance.1",
+  "extracted_on": "2026-09-08",
+  "sources": [
+    {
+      "path": "tabuf-episode-api/generator.py",
+      "sha256": "f207f60bd5cbbeb284b32c97b4445e02f34e506cd34a1df8f47fb1bde41d5d53",
+      "license": "MIT"
+    },
+    {
+      "path": "tabuf-episode-api/scm_v1.py",
+      "sha256": "c3f119d08c634b1102c0ac73a629a69551b2300f6534949305280eef255524f4",
+      "license": "MIT"
+    },
+    {
+      "path": "tabuf-episode-api/sources.py",
+      "sha256": "682cdadace4dc91ae133630c0a14857af41b5bd067526146ca1713f816fb6dfb",
+      "license": "MIT"
+    },
+    {
+      "path": "tabuf-episode-api/docs/data-generation.tex",
+      "sha256": "a9648d860942f7e3037ae94aa0fa07ba3fc3d274cd3aab552b8910f57b67efe6",
+      "license": "MIT"
+    },
+    {
+      "path": "tabuf-episode-api/LICENSE",
+      "sha256": "940a710b27d6a831bff89a26dfa1d65b173527f9b5329ea20a355b46c46d60b9",
+      "license": "MIT"
+    },
+    {
+      "path": "TabU/tabu-lab/src/tabu_lab/tar_diverse_corpus.py",
+      "sha256": "c024e7b944ea99083e9f760eaf73c5dfb3a77f4b57da818b9098bf0b2b290667",
+      "license": "Apache-2.0"
+    },
+    {
+      "path": "TabU/tabu-lab/src/tabu_lab/tar_data.py",
+      "sha256": "1397d8cc54398a42ae56dfe0287fc799d09f8c154d346ba9c130232532b3ff50",
+      "license": "Apache-2.0"
+    },
+    {
+      "path": "TabU/tabu-lab/src/tabu_lab/models/tar/types.py",
+      "sha256": "5850afb454c6ded5ba2b273993bed1a2a9b6c037dde228a6920ff41c2f4b3623",
+      "license": "Apache-2.0"
+    },
+    {
+      "path": "TabU/tabu-lab/LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "license": "Apache-2.0"
+    }
+  ],
+  "changes": [
+    "Split synthetic algorithms into package modules; remove service, real-data and model dependencies.",
+    "Preserve generation laws, RNG ordering, recipe and typed serialization.",
+    "Replace TARFeature validation with a pure data Feature; new public validation rejects invalid requests before sampling.",
+    "New corpus source identity, CLI, manifests, portable checker and documentation."
+  ],
+  "transition": "API source remains in place with existing behavior; future API integration is separate.",
+  "derivatives": [
+    {
+      "source": "tabuf-episode-api/generator.py",
+      "destinations": [
+        "src/tfm_data/generators/discoscm.py",
+        "src/tfm_data/api.py"
+      ],
+      "modifications": "Separate public dispatch and stricter request validation; retain sampling helpers and RNG ordering; formatting."
+    },
+    {
+      "source": "tabuf-episode-api/scm_v1.py",
+      "destinations": [
+        "src/tfm_data/generators/mixed_scm.py"
+      ],
+      "modifications": "Relative import of grid packer; formatting; generation law unchanged."
+    },
+    {
+      "source": "tabuf-episode-api/sources.py",
+      "destinations": [
+        "src/tfm_data/generators/grid.py",
+        "src/tfm_data/generators/numeric_scm.py",
+        "src/tfm_data/generators/sklearn_synthetic.py"
+      ],
+      "modifications": "Extract synthetic and grid functions; exclude real-data/network/service functions; relative imports and formatting."
+    },
+    {
+      "source": "TabU/tabu-lab/src/tabu_lab/tar_diverse_corpus.py",
+      "destinations": [
+        "src/tfm_data/recipes/anchor120.py",
+        "src/tfm_data/corpus/adapt.py",
+        "src/tfm_data/corpus/freeze.py",
+        "src/tfm_data/io/json.py"
+      ],
+      "modifications": "Split recipe/adaptation/serialization; replace dynamic sibling imports and old manifest with package source snapshot; retain selection/retry/split/RNG rules."
+    },
+    {
+      "source": "TabU/tabu-lab/src/tabu_lab/tar_data.py",
+      "destinations": [
+        "src/tfm_data/core/typed.py"
+      ],
+      "modifications": "Replace model feature construction with pure-data Feature; unchanged full split algorithm and coverage checks."
+    },
+    {
+      "source": "TabU/tabu-lab/src/tabu_lab/models/tar/types.py",
+      "destinations": [
+        "src/tfm_data/core/types.py"
+      ],
+      "modifications": "Extract only feature fields and validation; omit tensor and model episode objects."
+    },
+    {
+      "source": "tabuf-episode-api/docs/data-generation.tex",
+      "destinations": [
+        "docs/math/handbook.tex",
+        "docs/generators/"
+      ],
+      "modifications": "Historical mathematical source; rewrite around current implementation, add mixed mechanisms, conditional distributions, recipe, source mappings and replay limits."
+    }
+  ]
+}

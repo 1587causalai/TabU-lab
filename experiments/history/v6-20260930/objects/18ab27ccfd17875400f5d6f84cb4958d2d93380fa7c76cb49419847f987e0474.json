@@ -1,0 +1,140 @@
+{
+  "balanced_manifest": "/Users/dustinstudio/experiments/v6-balanced-loss-continue60m-20260928/balanced-manifest.json",
+  "checkpoint": "/Users/dustinstudio/experiments/v6-balanced-loss-continue60m-20260928/half2/run/checkpoints/cb8d17030f2c7003b4124a127870adb68cad29363b6ed20d41dcc64bbd6e510f.pt",
+  "checkpoint_sha256": "cb8d17030f2c7003b4124a127870adb68cad29363b6ed20d41dcc64bbd6e510f",
+  "checkpoint_update": 30492,
+  "cohort_updates": {
+    "focus2": 376,
+    "history618": 564,
+    "other10": 1876
+  },
+  "continuation": "new_stage_preserve_weights_optimizer_rng_sampling_cursor_episode_positions",
+  "first_cycle": [
+    "kin8nm",
+    "airfoil_self_noise",
+    "qsar_fish_toxicity",
+    "pumadyn32nh",
+    "bodyfat",
+    "cpu_activity",
+    "concrete_compressive_strength",
+    "cars",
+    "red_wine",
+    "white_wine",
+    "space_ga",
+    "energy_efficiency"
+  ],
+  "host": "dustinstudio",
+  "identity": {
+    "code": {
+      "source/src/tabu_lab/models/restoration_v6/__init__.py": "e75a42c4c5a6ffc5334a59b2868968525cf41e496b2466d1cd2f4c8d1c56119a",
+      "source/src/tabu_lab/models/restoration_v6/model.py": "8c0d47aabcad1c7eb484197539dfe21ca5e23b2a25cb651af95f1c71effa8432",
+      "source/src/tabu_lab/models/restoration_v6/training.py": "923da21540c92cae19c2016c085dd1bedf4db96791073637ccccdd125ca64adb",
+      "train_jointall.py": "c996bc56f818fd79f0855203f6cdfa8cd001d678adb3c88038bd7702f020581f",
+      "training_support.py": "6c0d77318134d63f60b3caeca283597aff503a0b9b7ff687665153f551c162bd"
+    },
+    "model_config": {
+      "backbone": {
+        "ff_width": 256,
+        "heads": 8,
+        "kind": "inducing",
+        "layers": 3,
+        "norm_eps": 1e-06,
+        "reference_mass": 1.0,
+        "slots": 256,
+        "tau_presence": 1.0,
+        "width": 128
+      },
+      "bandwidth": 1.0,
+      "center_chunk_size": 128,
+      "codec_version": "constant_weight_composition_v2",
+      "epsilon": 1e-06,
+      "numeric_scaling": "zscore",
+      "regression_width": null,
+      "ridge": 0.001,
+      "size": "small",
+      "slope_source": "shared_ll",
+      "subtokens": 1,
+      "unit_layers": 3
+    },
+    "parent_identity_sha256": "c55a27faa8c4225818475df0cbc0f8c1bfaa769585a60a175db77bd387e25ba7",
+    "parent_manifest_sha256": "d2cb871ecc889bbd7bf43640e4fed122dac708d8450a7a9f2db46430f4179617",
+    "parent_sha256": "67644cea74275c05f2a25943fbae917320ce3e26b7d25bea1937d6adb6640df6",
+    "runtime": {
+      "deterministic_algorithms": true,
+      "device": "mps",
+      "dtype": "float32",
+      "interop_threads": 16,
+      "mps_available": true,
+      "mps_cpu_fallback": false,
+      "platform": [
+        "Darwin",
+        "25.6.0",
+        "arm64"
+      ],
+      "python": "3.12.13",
+      "threads": 1,
+      "torch": "2.13.0",
+      "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+    },
+    "sampling": [
+      {
+        "cohort": "focus2",
+        "episodes": 2
+      },
+      {
+        "cohort": "other10",
+        "episodes": 10
+      },
+      {
+        "cohort": "history618",
+        "episodes": 3
+      }
+    ],
+    "schema": "tabu.v6.jointall-continuation.v1",
+    "sha256": "45cc831ed661111fd9d8c5ddbc039ea85e80cb5d7ae58f0732bf789e99ac1369",
+    "supervision": "joint_all"
+  },
+  "openml_table_updates": {
+    "airfoil_self_noise": 187,
+    "bodyfat": 188,
+    "cars": 187,
+    "concrete_compressive_strength": 188,
+    "cpu_activity": 188,
+    "energy_efficiency": 188,
+    "kin8nm": 188,
+    "pumadyn32nh": 188,
+    "qsar_fish_toxicity": 187,
+    "red_wine": 187,
+    "space_ga": 188,
+    "white_wine": 188
+  },
+  "optimizer_restored": true,
+  "outcome": "training_completed",
+  "parent": "/Users/dustinstudio/experiments/v6-balanced-loss-continue60m-20260928/half1/run/checkpoints/67644cea74275c05f2a25943fbae917320ce3e26b7d25bea1937d6adb6640df6.pt",
+  "parent_sha256": "67644cea74275c05f2a25943fbae917320ce3e26b7d25bea1937d6adb6640df6",
+  "parent_update": 27676,
+  "per_table_episode_positions_preserved": true,
+  "rng_restored": true,
+  "runtime": {
+    "deterministic_algorithms": true,
+    "device": "mps",
+    "dtype": "float32",
+    "interop_threads": 16,
+    "mps_available": true,
+    "mps_cpu_fallback": false,
+    "platform": [
+      "Darwin",
+      "25.6.0",
+      "arm64"
+    ],
+    "python": "3.12.13",
+    "threads": 1,
+    "torch": "2.13.0",
+    "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+  },
+  "sampling": "each OpenML table once plus 3 history618 per 15 updates",
+  "schedule_cursor_reset": false,
+  "successful_update_seconds": 1800.0106237893924,
+  "successful_update_seconds_target": 1800,
+  "supervision": "joint_all"
+}

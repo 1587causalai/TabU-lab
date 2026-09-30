@@ -1,0 +1,34 @@
+{
+  "equal_cycle_tables": 730,
+  "optimizer_updates": 0,
+  "outcome": "passed",
+  "parent_sha256": "18ca39c10298d4ec01c110347796faae52c03980b844ab55b8a4594e22f5d0b8",
+  "supervision": "joint_all",
+  "tests": [
+    {
+      "kind": "numeric",
+      "loss": 1.331467628479004,
+      "query_rows": 171,
+      "rows": 512,
+      "scored_cells": 5643,
+      "table": "pumadyn32nh"
+    },
+    {
+      "kind": "nominal",
+      "loss": 0.02501489222049713,
+      "query_rows": 68,
+      "rows": 204,
+      "scored_cells": 612,
+      "table": "nominal_gumbel_train_000"
+    },
+    {
+      "kind": "ordinal",
+      "loss": 0.023709973320364952,
+      "query_rows": 68,
+      "rows": 204,
+      "scored_cells": 612,
+      "table": "ordinal_latent_train_000"
+    }
+  ]
+}
+

@@ -1,0 +1,39 @@
+{
+  "bank": "/home/cms/experiments/openml12-joint30m-squared-20260927/fixed-query-bank.json",
+  "bank_sha256": "e791488f67179a67ae2057440100144b34edbccb9c900f9633e2004d26284f41",
+  "checkpoint": "/home/cms/experiments/openml12-joint2h-squared-20260927/runs/main/checkpoints/33de3db7038700280a3bba0b91d4b4c9eff53164b726a12f34b7918b3840dbce.pt",
+  "checkpoint_sha256": "33de3db7038700280a3bba0b91d4b4c9eff53164b726a12f34b7918b3840dbce",
+  "checkpoint_update": 18831,
+  "error": "Inference tensors do not track version counter.",
+  "error_type": "RuntimeError",
+  "expected_checkpoint_sha256": "33de3db7038700280a3bba0b91d4b4c9eff53164b726a12f34b7918b3840dbce",
+  "host": "dgx2",
+  "label": "pre",
+  "outcome": "failed",
+  "probes": {},
+  "runtime": {
+    "cublas_workspace_config": ":4096:8",
+    "cuda_capability": [
+      12,
+      1
+    ],
+    "cuda_device": "NVIDIA GB10",
+    "cuda_runtime": "13.0",
+    "cudnn": 92000,
+    "deterministic_algorithms": true,
+    "device": "cuda:0",
+    "dtype": "float64",
+    "interop_threads": 20,
+    "platform": [
+      "Linux",
+      "6.17.0-1014-nvidia",
+      "aarch64"
+    ],
+    "python": "3.12.3",
+    "threads": 1,
+    "torch": "2.12.0.dev20260322+cu130",
+    "torch_build_sha256": "b62d287846a05b05f6dfa176679c95c75d9a9911ca563e92882a1b5802ec92e4"
+  },
+  "schema": "tabu.openml12.old618-retention.v1",
+  "source_script_sha256": "fbf5ee599f14f64608a84df66753278cbda59568e03c26df6cd3b91a2ae41315"
+}

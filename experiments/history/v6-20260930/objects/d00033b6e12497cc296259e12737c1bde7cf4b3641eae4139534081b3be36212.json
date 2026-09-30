@@ -1,0 +1,12 @@
+{
+  "outcome": "failed",
+  "phase": "main",
+  "started_utc": "2026-09-27T14:51:06.519715+00:00",
+  "start_update": 18761,
+  "start_successful_seconds": 0,
+  "additional_seconds_target": 1800,
+  "start_sha256": "f360f00fd778535d691f3f9a901e1277a23dc0f0829b8283503f11f85df2d049",
+  "sampling": "OpenML12 equal:12 + history618:3 per 15 updates",
+  "error_type": "CalledProcessError",
+  "error": "Command '['/home/cms/.local/bin/wehub-python', '--profile', 'train-20260920', '-u', '-c', \"import runpy; runpy.run_path('/home/cms/experiments/v6-broadcast-balanced30m-20260927/train_balanced.py',run_name='__main__')\", '--host', 'dgx2', '--device', 'cuda:0', '--parent', '/home/cms/experiments/v6-broadcast-oldloss-openml12-round2-20260927/half2/run/checkpoints/f360f00fd778535d691f3f9a901e1277a23dc0f0829b8283503f11f85df2d049.pt', '--parent-sha', 'f360f00fd778535d691f3f9a901e1277a23dc0f0829b8283503f11f85df2d049', '--manifest', '/home/cms/experiments/openml12-joint2h-squared-20260927/manifests/joint-openml12-squared.json']' returned non-zero exit status 1."
+}

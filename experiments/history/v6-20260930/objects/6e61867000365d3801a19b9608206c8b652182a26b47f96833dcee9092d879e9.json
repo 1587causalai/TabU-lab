@@ -1,0 +1,33 @@
+{
+  "bank_sha256": "2364ad568abe0541dc2e35c31a858d82db50c30fcdb35efa9486673932a135f9",
+  "branch": "v55",
+  "checkpoint_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+  "metrics": {
+    "test": {
+      "mae": 0.028974115225680996,
+      "mse": 0.0013482954943465188,
+      "n": 1639,
+      "prediction_std": 0.0015440418421343214,
+      "r2": -0.033221702657864505,
+      "rmse": 0.03671914343154697,
+      "slog": -0.02489638425496432,
+      "target_std": 0.03612399568005235
+    },
+    "train": {
+      "mae": 0.029060672589823144,
+      "mse": 0.001324802979453137,
+      "n": 6553,
+      "prediction_std": 0.0016076756294149648,
+      "r2": -0.027377924707639556,
+      "rmse": 0.036397843060449846,
+      "slog": -0.02111444249447625,
+      "target_std": 0.03590959716165739
+    }
+  },
+  "model_state_unchanged": true,
+  "optimizer_updates": 0,
+  "outcome": "completed",
+  "test_scope": "original heldout test rows; all original train support",
+  "total_predictions": 8192,
+  "train_fit_scope": "all training rows; target hidden in each query; previously seen in parameter training"
+}

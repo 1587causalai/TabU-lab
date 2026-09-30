@@ -1,0 +1,28 @@
+{
+  "host": "dustinstudio",
+  "pid": 83937,
+  "command": [
+    "/Users/dustinstudio/.local/bin/wehub-python",
+    "--profile",
+    "train-20260920",
+    "-u",
+    "-c",
+    "import runpy; runpy.run_path('/Users/dustinstudio/experiments/openml12-finetune-20260927/run_additional.py',run_name='__main__')",
+    "--root",
+    "/Users/dustinstudio/experiments/openml12-joint2h-20260927",
+    "--manifest",
+    "/Users/dustinstudio/experiments/openml12-joint-fit-20260927/manifests/joint-openml12.json",
+    "--parent",
+    "/Users/dustinstudio/experiments/openml12-joint-fit-20260927/runs/main/checkpoints/70f76ae65c24f4481c46279390678bc57866fbdd6f5efd46c51662035082887b.pt",
+    "--parent-sha",
+    "70f76ae65c24f4481c46279390678bc57866fbdd6f5efd46c51662035082887b",
+    "--host",
+    "dustinstudio",
+    "--device",
+    "mps",
+    "--seconds",
+    "7190"
+  ],
+  "source_root": "/Users/dustinstudio/experiments/joint618-60min-dustin-20260926/source/src",
+  "launched_utc": "2026-09-27T02:37:47.813354+00:00"
+}

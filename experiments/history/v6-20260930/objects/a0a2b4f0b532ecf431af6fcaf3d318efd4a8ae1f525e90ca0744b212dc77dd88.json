@@ -1,0 +1,170 @@
+{
+  "all_complete": true,
+  "hosts": {
+    "dustinstudio": {
+      "controller": {
+        "outcome": "completed",
+        "host": "dustinstudio",
+        "supervision": "target_only",
+        "start_sha256": "3085f15478bb0347bc279e231f1311c939649ec2cef5b8657b33027c35748b94",
+        "completed_training_seconds": 3600.0594686537515,
+        "additional_seconds_target": 3600,
+        "started_utc": "2026-09-28T23:55:01.412354+00:00",
+        "phase": "half2",
+        "phase_budget": 1799.9076499757357,
+        "checkpoint_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+        "evaluations": {
+          "half1": {
+            "openml12": {
+              "r2": 0.6225281804707076,
+              "slog": 0.5617711314595372
+            },
+            "fit718": {
+              "old618": {
+                "nominal_tables": 186,
+                "numeric_tables": 292,
+                "ordinal_tables": 140,
+                "tables": 618,
+                "v6/accuracy": 0.5467924799359559,
+                "v6/loss": 0.7718448698788346,
+                "v6/nominal_accuracy": 0.5573635461593633,
+                "v6/ordinal_accuracy": 0.5327480633820003,
+                "v6/r2": 0.6538309953690871,
+                "v6/rank_mae": 0.1547774793928481,
+                "v6/slog": 0.5359379912957516
+              },
+              "sparse100": {
+                "nominal_tables": 0,
+                "numeric_tables": 100,
+                "ordinal_tables": 0,
+                "tables": 100,
+                "v6/accuracy": null,
+                "v6/loss": 2.978785148859024,
+                "v6/nominal_accuracy": null,
+                "v6/ordinal_accuracy": null,
+                "v6/r2": 0.26618653756706395,
+                "v6/rank_mae": null,
+                "v6/slog": 0.16121966629119594
+              }
+            },
+            "checkpoint_sha256": "9b748c4a6c3b4f65f67459526fa6ec6072fc04bfe4d906b04c63a71c60957ca7"
+          },
+          "half2": {
+            "openml12": {
+              "r2": 0.6791636537723201,
+              "slog": 0.6041107212869868
+            },
+            "fit718": {
+              "old618": {
+                "nominal_tables": 186,
+                "numeric_tables": 292,
+                "ordinal_tables": 140,
+                "tables": 618,
+                "v6/accuracy": 0.557858030048017,
+                "v6/loss": 0.7095167165625536,
+                "v6/nominal_accuracy": 0.5720558364287536,
+                "v6/ordinal_accuracy": 0.5389952301421815,
+                "v6/r2": 0.683724648176905,
+                "v6/rank_mae": 0.1437519632337249,
+                "v6/slog": 0.5609505328216448
+              },
+              "sparse100": {
+                "nominal_tables": 0,
+                "numeric_tables": 100,
+                "ordinal_tables": 0,
+                "tables": 100,
+                "v6/accuracy": null,
+                "v6/loss": 3.079450864195824,
+                "v6/nominal_accuracy": null,
+                "v6/ordinal_accuracy": null,
+                "v6/r2": 0.24131029608278964,
+                "v6/rank_mae": null,
+                "v6/slog": 0.14768586842275822
+              }
+            },
+            "checkpoint_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114"
+          }
+        },
+        "completed_utc": "2026-09-29T01:04:15.042003+00:00"
+      },
+      "phases": {
+        "half1": {
+          "openml12": {
+            "r2": 0.6225281804707076,
+            "slog": 0.5617711314595372
+          },
+          "fit718": {
+            "old618": {
+              "nominal_tables": 186,
+              "numeric_tables": 292,
+              "ordinal_tables": 140,
+              "tables": 618,
+              "v6/accuracy": 0.5467924799359559,
+              "v6/loss": 0.7718448698788346,
+              "v6/nominal_accuracy": 0.5573635461593633,
+              "v6/ordinal_accuracy": 0.5327480633820003,
+              "v6/r2": 0.6538309953690871,
+              "v6/rank_mae": 0.1547774793928481,
+              "v6/slog": 0.5359379912957516
+            },
+            "sparse100": {
+              "nominal_tables": 0,
+              "numeric_tables": 100,
+              "ordinal_tables": 0,
+              "tables": 100,
+              "v6/accuracy": null,
+              "v6/loss": 2.978785148859024,
+              "v6/nominal_accuracy": null,
+              "v6/ordinal_accuracy": null,
+              "v6/r2": 0.26618653756706395,
+              "v6/rank_mae": null,
+              "v6/slog": 0.16121966629119594
+            }
+          },
+          "successful_seconds": 1800.0923500242643,
+          "updates": 8088,
+          "coverage": 730,
+          "checkpoint_sha256": "9b748c4a6c3b4f65f67459526fa6ec6072fc04bfe4d906b04c63a71c60957ca7"
+        },
+        "half2": {
+          "openml12": {
+            "r2": 0.6791636537723201,
+            "slog": 0.6041107212869868
+          },
+          "fit718": {
+            "old618": {
+              "nominal_tables": 186,
+              "numeric_tables": 292,
+              "ordinal_tables": 140,
+              "tables": 618,
+              "v6/accuracy": 0.557858030048017,
+              "v6/loss": 0.7095167165625536,
+              "v6/nominal_accuracy": 0.5720558364287536,
+              "v6/ordinal_accuracy": 0.5389952301421815,
+              "v6/r2": 0.683724648176905,
+              "v6/rank_mae": 0.1437519632337249,
+              "v6/slog": 0.5609505328216448
+            },
+            "sparse100": {
+              "nominal_tables": 0,
+              "numeric_tables": 100,
+              "ordinal_tables": 0,
+              "tables": 100,
+              "v6/accuracy": null,
+              "v6/loss": 3.079450864195824,
+              "v6/nominal_accuracy": null,
+              "v6/ordinal_accuracy": null,
+              "v6/r2": 0.24131029608278964,
+              "v6/rank_mae": null,
+              "v6/slog": 0.14768586842275822
+            }
+          },
+          "successful_seconds": 1799.9671186294872,
+          "updates": 8068,
+          "coverage": 730,
+          "checkpoint_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114"
+        }
+      }
+    }
+  }
+}

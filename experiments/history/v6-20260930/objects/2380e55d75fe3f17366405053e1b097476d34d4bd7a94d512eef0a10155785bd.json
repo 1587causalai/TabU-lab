@@ -1,0 +1,20 @@
+{
+  "tables": 730,
+  "sampling": "equal_table",
+  "successful_seconds": "3600 minus completed parent seconds",
+  "every_seconds": 900,
+  "supervision": "target_only",
+  "mixing": "mix_model.MIX_CONFIG",
+  "openml_window": 512,
+  "history_window": 204,
+  "optimizer_rng_cursor": "preserved",
+  "strict_resume": false,
+  "total_successful_seconds": 3600,
+  "continuation_of": "v6-randommix2-all730-30m-20260929",
+  "checkpoints_total_minutes": [
+    15,
+    30,
+    45,
+    60
+  ]
+}

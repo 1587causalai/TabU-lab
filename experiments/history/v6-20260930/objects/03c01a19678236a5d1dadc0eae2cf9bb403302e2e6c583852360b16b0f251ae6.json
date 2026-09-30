@@ -1,0 +1,35 @@
+{
+  "outcome": "passed",
+  "host": "gongqian-mini",
+  "checked_utc": "2026-09-29T12:11:59.102342+00:00",
+  "checkpoint_sha256": "a3d1497b5cb234a5617608b487e54167cb6280c233f3605dc6c4b55af9c8f92d",
+  "successful_seconds": 1799.9754693508148,
+  "updates": 4262,
+  "coverage": 730,
+  "branch_counts": {
+    "v55": 2144,
+    "v6": 2118
+  },
+  "cohort_counts": {
+    "focus2": 10,
+    "history718": 2921,
+    "other10": 47,
+    "sparse100": 1284
+  },
+  "complete_weighted_cycles_verified": 3,
+  "all_step_contracts_verified": true,
+  "exact_schedule_and_episode_sequence_verified": true,
+  "branch_rng_sequence_verified": true,
+  "no_duplicate_episodes_across_continuation": true,
+  "checkpoint_hash_verified": true,
+  "complete_evaluations": [
+    "openml12-v6",
+    "openml12-v55",
+    "fit718"
+  ],
+  "pending_evaluations": [],
+  "audit_note": "Sparse episodes are shuffled within the weighted schedule; continuity checked against schedule_entry and duplicate-free pairs, not monotonically increasing episode numbers.",
+  "all_terminal_evaluations_verified_utc": "2026-09-29T12:24:59.259239+00:00",
+  "total_successful_training_seconds": 3600.172314907424,
+  "controller_outcome": "completed"
+}

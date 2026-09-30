@@ -1,0 +1,35 @@
+{
+  "additional_seconds_per_arm": 600,
+  "arm": "residual_gelu",
+  "checkpoint_sha256": "fcbc62aec91a8a47f0a8d03f9deb82992204376190690a6be1a3e69354a8b37b",
+  "completed_arm_seconds": 300.8807612899691,
+  "defaults_unchanged": true,
+  "node": 600,
+  "outcome": "completed",
+  "results": {
+    "linear": {
+      "arm": "linear",
+      "checkpoint": "/Users/gongqian/experiments/v6-nonlinear-encoder-single-table-mini-extend10m-20260929/linear/checkpoints/ed14478a1609092f7f703d3cebfd53669e01cc4f11a075613e1bf50b39fe9534.pt",
+      "checkpoint_sha256": "ed14478a1609092f7f703d3cebfd53669e01cc4f11a075613e1bf50b39fe9534",
+      "initial_cursor": 837,
+      "outcome": "training_node_completed",
+      "parent_sha256": "aafa224c791caac30c466b1c197858ab2143449debc043a407d34dfaf34f37fb",
+      "seconds": 601.0312457755208,
+      "total_arm_updates": 1396,
+      "updates": 559
+    },
+    "residual_gelu": {
+      "arm": "residual_gelu",
+      "checkpoint": "/Users/gongqian/experiments/v6-nonlinear-encoder-single-table-mini-extend10m-20260929/residual_gelu/checkpoints/fcbc62aec91a8a47f0a8d03f9deb82992204376190690a6be1a3e69354a8b37b.pt",
+      "checkpoint_sha256": "fcbc62aec91a8a47f0a8d03f9deb82992204376190690a6be1a3e69354a8b37b",
+      "initial_cursor": 828,
+      "outcome": "training_node_completed",
+      "parent_sha256": "477bc08409910d96e3b5578f98a6adf8f2f3f3d9f17d375cb530911941d3944b",
+      "seconds": 600.0884806998074,
+      "total_arm_updates": 1380,
+      "updates": 552
+    }
+  },
+  "target_seconds": 600,
+  "updated_utc": "2026-09-29T15:19:56.655566+00:00"
+}

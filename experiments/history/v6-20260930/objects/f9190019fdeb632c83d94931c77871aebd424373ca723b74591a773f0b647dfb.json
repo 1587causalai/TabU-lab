@@ -1,0 +1,23 @@
+{
+  "dustinstudio": {
+    "stage": "original_parent",
+    "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-recover30m-20260928/half2/run/checkpoints/ced305ae38d9ac5e648f4ae0cd517253f88a2849bb2232139c2d33d47c2b6231.pt",
+    "checkpoint_sha256": "ced305ae38d9ac5e648f4ae0cd517253f88a2849bb2232139c2d33d47c2b6231",
+    "manifest": "/Users/dustinstudio/experiments/v6-openml12-recover30m-20260928/balanced-replay718-manifest.json",
+    "supervision": "joint_all"
+  },
+  "dgx2": {
+    "stage": "adapt30",
+    "checkpoint": "/home/cms/experiments/v6-dual718-openml12-adapt60m-20260928/half1/run/checkpoints/39f28cb4e16b589f289435a529f04c19f2dbd3f0d96313945870caf19be0278d.pt",
+    "checkpoint_sha256": "39f28cb4e16b589f289435a529f04c19f2dbd3f0d96313945870caf19be0278d",
+    "manifest": "/home/cms/experiments/v6-dual718-openml12-adapt60m-20260928/balanced-replay718-manifest.json",
+    "supervision": "target_only"
+  },
+  "gongqian-mini": {
+    "stage": "adapt60",
+    "checkpoint": "/Users/gongqian/experiments/v6-dual718-openml12-adapt60m-20260928/half2/run/checkpoints/cf3731e8941261c73dd02725402a7e04545d2e71c941500fed39f7153716f818.pt",
+    "checkpoint_sha256": "cf3731e8941261c73dd02725402a7e04545d2e71c941500fed39f7153716f818",
+    "manifest": "/Users/gongqian/experiments/v6-dual718-openml12-adapt60m-20260928/balanced-replay718-manifest.json",
+    "supervision": "target_only"
+  }
+}

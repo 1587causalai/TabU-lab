@@ -1,0 +1,1129 @@
+{
+  "hosts": {
+    "dustinstudio": {
+      "active_target_seconds": 900,
+      "active_trial": "lr1e-5",
+      "bank_sha256": "2364ad568abe0541dc2e35c31a858d82db50c30fcdb35efa9486673932a135f9",
+      "branch": "v6",
+      "completed_utc": "2026-09-29T14:51:46.081586+00:00",
+      "first_episode_index": 5400,
+      "host": "dustinstudio",
+      "max_total_successful_seconds": 2700,
+      "memory_fraction": 0.5,
+      "monitor_exposure": "parent previously trained these rows; no new updates on monitor rows",
+      "monitor_rows": 1311,
+      "optimizer_restored": true,
+      "original_train_fit_scope": "6553 original train rows: 5242 new-update rows plus 1311 monitor rows",
+      "original_train_rows": 6553,
+      "outcome": "completed",
+      "parent_checkpoint": "/Users/dustinstudio/experiments/v6-all730-dustin-targetonly60m-20260929/half2/run/checkpoints/94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114.pt",
+      "parent_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+      "per_trial_successful_seconds": 900,
+      "phase": "final_evaluations",
+      "runtime": {
+        "deterministic_algorithms": true,
+        "device": "mps",
+        "dtype": "float32",
+        "interop_threads": 16,
+        "mps_available": true,
+        "mps_cpu_fallback": false,
+        "platform": [
+          "Darwin",
+          "25.6.0",
+          "arm64"
+        ],
+        "python": "3.12.13",
+        "threads": 1,
+        "torch": "2.13.0",
+        "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+      },
+      "selected_trial": "lr1e-4",
+      "selection": "minimum monitor MSE; earliest node on ties; all 15-minute curves retained",
+      "selection_completed_utc": "2026-09-29T14:48:56.181364+00:00",
+      "split_sha256": "64b23a2bbd53590278bb622d25b857583ba6f8ffca6f1fd19ab1d2be0358658d",
+      "started_utc": "2026-09-29T13:59:45.258919+00:00",
+      "strict_resume": false,
+      "test_rows": 1639,
+      "test_started": true,
+      "test_started_utc": "2026-09-29T14:48:56.185736+00:00",
+      "total_successful_seconds": 2701.6054727695882,
+      "trials": {
+        "lr1e-4": {
+          "final_evaluations": {
+            "test": {
+              "bank_sha256": "2364ad568abe0541dc2e35c31a858d82db50c30fcdb35efa9486673932a135f9",
+              "branch": "v6",
+              "checkpoint_sha256": "0ac497fa189633817270020daaaeffc1f685ebd2a1e60e99cce92da502fe75dd",
+              "metrics": {
+                "mae": 0.016935313803648936,
+                "mse": 0.00045532227221410654,
+                "n": 1639,
+                "prediction_std": 0.02821152533099787,
+                "r2": 0.6510788211280643,
+                "rmse": 0.021338281847752095,
+                "slog": 0.4648986616911125,
+                "target_std": 0.03612399568005235
+              },
+              "model_state_unchanged": true,
+              "optimizer_updates": 0,
+              "outcome": "completed",
+              "predictions": 1639,
+              "scope": "original_test",
+              "split_sha256": "64b23a2bbd53590278bb622d25b857583ba6f8ffca6f1fd19ab1d2be0358658d"
+            },
+            "train": {
+              "bank_sha256": "2364ad568abe0541dc2e35c31a858d82db50c30fcdb35efa9486673932a135f9",
+              "branch": "v6",
+              "checkpoint_sha256": "0ac497fa189633817270020daaaeffc1f685ebd2a1e60e99cce92da502fe75dd",
+              "metrics": {
+                "mae": 0.01663319819128851,
+                "mse": 0.00043689084866435423,
+                "n": 6553,
+                "prediction_std": 0.030535029308408637,
+                "r2": 0.6611933846874164,
+                "rmse": 0.020901934089082624,
+                "slog": 0.48342798610583027,
+                "target_std": 0.03590959716165739
+              },
+              "model_state_unchanged": true,
+              "optimizer_updates": 0,
+              "outcome": "completed",
+              "predictions": 6553,
+              "scope": "original_train",
+              "split_sha256": "64b23a2bbd53590278bb622d25b857583ba6f8ffca6f1fd19ab1d2be0358658d"
+            }
+          },
+          "first_episode_index": 5400,
+          "initial_rng_restored": true,
+          "initial_state_hash": "1b2c9224d30ba44feedfbc6efa8fb484cced9183da406cacf073aef118a83d16",
+          "learning_rate": 0.0001,
+          "nodes": {
+            "0": {
+              "checkpoint": "/Users/dustinstudio/experiments/v6-all730-dustin-targetonly60m-20260929/half2/run/checkpoints/94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114.pt",
+              "checkpoint_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+              "metrics": {
+                "mae": 0.025904928847252175,
+                "mse": 0.0010761148144385522,
+                "n": 1311,
+                "prediction_std": 0.01577354429137581,
+                "r2": 0.17185871166589328,
+                "rmse": 0.032804188976997314,
+                "slog": 0.10349274195865399,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 0.0,
+              "updates": 0
+            },
+            "180": {
+              "checkpoint": "/Users/dustinstudio/experiments/v6-puma-lrval-grid-20260929/run/lr1e-4/checkpoints/1e095207bbffaca7f162b5d1f97e1993249b710e1de5ddb3f0904bb3a8fc6f9a.pt",
+              "checkpoint_sha256": "1e095207bbffaca7f162b5d1f97e1993249b710e1de5ddb3f0904bb3a8fc6f9a",
+              "metrics": {
+                "mae": 0.016798119693502995,
+                "mse": 0.00045249830610813815,
+                "n": 1311,
+                "prediction_std": 0.027075299492978714,
+                "r2": 0.6517727242841591,
+                "rmse": 0.021272007571175273,
+                "slog": 0.4749927262415854,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 180.50529962172732,
+              "updates": 332
+            },
+            "360": {
+              "checkpoint": "/Users/dustinstudio/experiments/v6-puma-lrval-grid-20260929/run/lr1e-4/checkpoints/0ac497fa189633817270020daaaeffc1f685ebd2a1e60e99cce92da502fe75dd.pt",
+              "checkpoint_sha256": "0ac497fa189633817270020daaaeffc1f685ebd2a1e60e99cce92da502fe75dd",
+              "metrics": {
+                "mae": 0.01678574379547759,
+                "mse": 0.0004473021776846163,
+                "n": 1311,
+                "prediction_std": 0.027950652516952203,
+                "r2": 0.6557714876403257,
+                "rmse": 0.021149519561555443,
+                "slog": 0.476825026965504,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 360.2316655043978,
+              "updates": 661
+            },
+            "540": {
+              "checkpoint": "/Users/dustinstudio/experiments/v6-puma-lrval-grid-20260929/run/lr1e-4/checkpoints/97ba1cbc754d1c2bd349d0ac2cf1e93e5dc09dc85ea764a6b7cc2700c3e9f111.pt",
+              "checkpoint_sha256": "97ba1cbc754d1c2bd349d0ac2cf1e93e5dc09dc85ea764a6b7cc2700c3e9f111",
+              "metrics": {
+                "mae": 0.0171456263086355,
+                "mse": 0.00047278531184103,
+                "n": 1311,
+                "prediction_std": 0.02567373562662655,
+                "r2": 0.6361605360318825,
+                "rmse": 0.021743626924711296,
+                "slog": 0.4615098822882031,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 540.5508416655939,
+              "updates": 982
+            },
+            "720": {
+              "checkpoint": "/Users/dustinstudio/experiments/v6-puma-lrval-grid-20260929/run/lr1e-4/checkpoints/ca6dde206881e7a169c6b394583bf8569669323af7b1a8365b77993f441a9232.pt",
+              "checkpoint_sha256": "ca6dde206881e7a169c6b394583bf8569669323af7b1a8365b77993f441a9232",
+              "metrics": {
+                "mae": 0.016982577918536933,
+                "mse": 0.00046421974401926073,
+                "n": 1311,
+                "prediction_std": 0.027605502611016478,
+                "r2": 0.6427523051219997,
+                "rmse": 0.021545759304774124,
+                "slog": 0.46692146816118807,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 720.2213803043123,
+              "updates": 1314
+            },
+            "900": {
+              "checkpoint": "/Users/dustinstudio/experiments/v6-puma-lrval-grid-20260929/run/lr1e-4/checkpoints/9eb553b3f8ebf404e7496d63f6fc03f78e6b67a4a02f0708b271dff4d4747320.pt",
+              "checkpoint_sha256": "9eb553b3f8ebf404e7496d63f6fc03f78e6b67a4a02f0708b271dff4d4747320",
+              "metrics": {
+                "mae": 0.017149898846579345,
+                "mse": 0.0004731698782779156,
+                "n": 1311,
+                "prediction_std": 0.025689957969941328,
+                "r2": 0.6358645868076739,
+                "rmse": 0.021752468326098433,
+                "slog": 0.4606052116615439,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 900.5072836750187,
+              "updates": 1648
+            }
+          },
+          "outcome": "completed",
+          "parent_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+          "selected": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-puma-lrval-grid-20260929/run/lr1e-4/checkpoints/0ac497fa189633817270020daaaeffc1f685ebd2a1e60e99cce92da502fe75dd.pt",
+            "checkpoint_sha256": "0ac497fa189633817270020daaaeffc1f685ebd2a1e60e99cce92da502fe75dd",
+            "metrics": {
+              "mae": 0.01678574379547759,
+              "mse": 0.0004473021776846163,
+              "n": 1311,
+              "prediction_std": 0.027950652516952203,
+              "r2": 0.6557714876403257,
+              "rmse": 0.021149519561555443,
+              "slog": 0.476825026965504,
+              "target_std": 0.03604766067433209
+            },
+            "seconds": 360.2316655043978,
+            "updates": 661
+          },
+          "selected_node": "360",
+          "successful_update_seconds": 900.5072836750187,
+          "updates": 1648
+        },
+        "lr1e-5": {
+          "final_evaluations": {
+            "test": {
+              "bank_sha256": "2364ad568abe0541dc2e35c31a858d82db50c30fcdb35efa9486673932a135f9",
+              "branch": "v6",
+              "checkpoint_sha256": "5c91b2c8761c9c694a07aa0ab5bc488dbf33ed3cef9f918ba3c52b1b0a91af21",
+              "metrics": {
+                "mae": 0.017110252585670296,
+                "mse": 0.00046578901389579715,
+                "n": 1639,
+                "prediction_std": 0.02545966041813539,
+                "r2": 0.6430579794750422,
+                "rmse": 0.021582145720381862,
+                "slog": 0.4571334559716943,
+                "target_std": 0.03612399568005235
+              },
+              "model_state_unchanged": true,
+              "optimizer_updates": 0,
+              "outcome": "completed",
+              "predictions": 1639,
+              "scope": "original_test",
+              "split_sha256": "64b23a2bbd53590278bb622d25b857583ba6f8ffca6f1fd19ab1d2be0358658d"
+            },
+            "train": {
+              "bank_sha256": "2364ad568abe0541dc2e35c31a858d82db50c30fcdb35efa9486673932a135f9",
+              "branch": "v6",
+              "checkpoint_sha256": "5c91b2c8761c9c694a07aa0ab5bc488dbf33ed3cef9f918ba3c52b1b0a91af21",
+              "metrics": {
+                "mae": 0.016579533751984322,
+                "mse": 0.00043497449566842116,
+                "n": 6553,
+                "prediction_std": 0.02928903112557309,
+                "r2": 0.6626795066198881,
+                "rmse": 0.020856042186100918,
+                "slog": 0.4849126908945238,
+                "target_std": 0.03590959716165739
+              },
+              "model_state_unchanged": true,
+              "optimizer_updates": 0,
+              "outcome": "completed",
+              "predictions": 6553,
+              "scope": "original_train",
+              "split_sha256": "64b23a2bbd53590278bb622d25b857583ba6f8ffca6f1fd19ab1d2be0358658d"
+            }
+          },
+          "first_episode_index": 5400,
+          "initial_rng_restored": true,
+          "initial_state_hash": "1b2c9224d30ba44feedfbc6efa8fb484cced9183da406cacf073aef118a83d16",
+          "learning_rate": 1e-05,
+          "nodes": {
+            "0": {
+              "checkpoint": "/Users/dustinstudio/experiments/v6-all730-dustin-targetonly60m-20260929/half2/run/checkpoints/94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114.pt",
+              "checkpoint_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+              "metrics": {
+                "mae": 0.025904928847252175,
+                "mse": 0.0010761148144385522,
+                "n": 1311,
+                "prediction_std": 0.01577354429137581,
+                "r2": 0.17185871166589328,
+                "rmse": 0.032804188976997314,
+                "slog": 0.10349274195865399,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 0.0,
+              "updates": 0
+            },
+            "180": {
+              "checkpoint": "/Users/dustinstudio/experiments/v6-puma-lrval-grid-20260929/run/lr1e-5/checkpoints/8391ad67fa19d4b983d2203d6156a7811dda8c37360e9c093a8ca801f5a97d3c.pt",
+              "checkpoint_sha256": "8391ad67fa19d4b983d2203d6156a7811dda8c37360e9c093a8ca801f5a97d3c",
+              "metrics": {
+                "mae": 0.017687036555167977,
+                "mse": 0.0005037481735862906,
+                "n": 1311,
+                "prediction_std": 0.02251236628206958,
+                "r2": 0.6123325728143989,
+                "rmse": 0.022444334999867796,
+                "slog": 0.4369775273385541,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 180.79822119348682,
+              "updates": 213
+            },
+            "360": {
+              "checkpoint": "/Users/dustinstudio/experiments/v6-puma-lrval-grid-20260929/run/lr1e-5/checkpoints/985fc46a394adf45408810b3f19ae8f5f42e17db8f17f3eb080384bba5947504.pt",
+              "checkpoint_sha256": "985fc46a394adf45408810b3f19ae8f5f42e17db8f17f3eb080384bba5947504",
+              "metrics": {
+                "mae": 0.01698749547111857,
+                "mse": 0.00046549105161915996,
+                "n": 1311,
+                "prediction_std": 0.025116145237033097,
+                "r2": 0.6417739501179391,
+                "rmse": 0.021575241635243856,
+                "slog": 0.46649622521034717,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 360.4614536254667,
+              "updates": 445
+            },
+            "540": {
+              "checkpoint": "/Users/dustinstudio/experiments/v6-puma-lrval-grid-20260929/run/lr1e-5/checkpoints/f9667c671ad3b88a4b113dd32485fe55529eceb257875def78c8dbee1c3a1d52.pt",
+              "checkpoint_sha256": "f9667c671ad3b88a4b113dd32485fe55529eceb257875def78c8dbee1c3a1d52",
+              "metrics": {
+                "mae": 0.016966053375796573,
+                "mse": 0.0004607729901866478,
+                "n": 1311,
+                "prediction_std": 0.025476326529151008,
+                "r2": 0.6454048094098435,
+                "rmse": 0.02146562345208375,
+                "slog": 0.4682540056297546,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 540.7318519619294,
+              "updates": 681
+            },
+            "720": {
+              "checkpoint": "/Users/dustinstudio/experiments/v6-puma-lrval-grid-20260929/run/lr1e-5/checkpoints/5c91b2c8761c9c694a07aa0ab5bc488dbf33ed3cef9f918ba3c52b1b0a91af21.pt",
+              "checkpoint_sha256": "5c91b2c8761c9c694a07aa0ab5bc488dbf33ed3cef9f918ba3c52b1b0a91af21",
+              "metrics": {
+                "mae": 0.016927822763982185,
+                "mse": 0.0004587231649206033,
+                "n": 1311,
+                "prediction_std": 0.025429756039825162,
+                "r2": 0.6469822850787084,
+                "rmse": 0.021417823533697426,
+                "slog": 0.4701080738130923,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 720.5270894705318,
+              "updates": 912
+            },
+            "900": {
+              "checkpoint": "/Users/dustinstudio/experiments/v6-puma-lrval-grid-20260929/run/lr1e-5/checkpoints/8c6a9955adc3d1858fede4238f6e9368a50c74bb793077322c91b71ef30f1aff.pt",
+              "checkpoint_sha256": "8c6a9955adc3d1858fede4238f6e9368a50c74bb793077322c91b71ef30f1aff",
+              "metrics": {
+                "mae": 0.016975014722353157,
+                "mse": 0.0004591243571980238,
+                "n": 1311,
+                "prediction_std": 0.02592165413799574,
+                "r2": 0.6466735411742153,
+                "rmse": 0.02142718733753975,
+                "slog": 0.46866288823766555,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 900.3491379609331,
+              "updates": 1105
+            }
+          },
+          "outcome": "completed",
+          "parent_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+          "selected": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-puma-lrval-grid-20260929/run/lr1e-5/checkpoints/5c91b2c8761c9c694a07aa0ab5bc488dbf33ed3cef9f918ba3c52b1b0a91af21.pt",
+            "checkpoint_sha256": "5c91b2c8761c9c694a07aa0ab5bc488dbf33ed3cef9f918ba3c52b1b0a91af21",
+            "metrics": {
+              "mae": 0.016927822763982185,
+              "mse": 0.0004587231649206033,
+              "n": 1311,
+              "prediction_std": 0.025429756039825162,
+              "r2": 0.6469822850787084,
+              "rmse": 0.021417823533697426,
+              "slog": 0.4701080738130923,
+              "target_std": 0.03604766067433209
+            },
+            "seconds": 720.5270894705318,
+            "updates": 912
+          },
+          "selected_node": "720",
+          "successful_update_seconds": 900.3491379609331,
+          "updates": 1105
+        },
+        "lr3e-5": {
+          "final_evaluations": {
+            "test": {
+              "bank_sha256": "2364ad568abe0541dc2e35c31a858d82db50c30fcdb35efa9486673932a135f9",
+              "branch": "v6",
+              "checkpoint_sha256": "7e4fc4b52f1de07480e79c892a8f1c9c2e223581ecdf7dc1c1a301a6dfc503e5",
+              "metrics": {
+                "mae": 0.01694832727484584,
+                "mse": 0.00045668268986919034,
+                "n": 1639,
+                "prediction_std": 0.02708151212053935,
+                "r2": 0.6500363100080571,
+                "rmse": 0.021370135466795486,
+                "slog": 0.46430963066801834,
+                "target_std": 0.03612399568005235
+              },
+              "model_state_unchanged": true,
+              "optimizer_updates": 0,
+              "outcome": "completed",
+              "predictions": 1639,
+              "scope": "original_test",
+              "split_sha256": "64b23a2bbd53590278bb622d25b857583ba6f8ffca6f1fd19ab1d2be0358658d"
+            },
+            "train": {
+              "bank_sha256": "2364ad568abe0541dc2e35c31a858d82db50c30fcdb35efa9486673932a135f9",
+              "branch": "v6",
+              "checkpoint_sha256": "7e4fc4b52f1de07480e79c892a8f1c9c2e223581ecdf7dc1c1a301a6dfc503e5",
+              "metrics": {
+                "mae": 0.016588713735287353,
+                "mse": 0.00043568234261345655,
+                "n": 6553,
+                "prediction_std": 0.029750405021609673,
+                "r2": 0.6621305749397213,
+                "rmse": 0.0208730051169796,
+                "slog": 0.48508592899307,
+                "target_std": 0.03590959716165739
+              },
+              "model_state_unchanged": true,
+              "optimizer_updates": 0,
+              "outcome": "completed",
+              "predictions": 6553,
+              "scope": "original_train",
+              "split_sha256": "64b23a2bbd53590278bb622d25b857583ba6f8ffca6f1fd19ab1d2be0358658d"
+            }
+          },
+          "first_episode_index": 5400,
+          "initial_rng_restored": true,
+          "initial_state_hash": "1b2c9224d30ba44feedfbc6efa8fb484cced9183da406cacf073aef118a83d16",
+          "learning_rate": 3e-05,
+          "nodes": {
+            "0": {
+              "checkpoint": "/Users/dustinstudio/experiments/v6-all730-dustin-targetonly60m-20260929/half2/run/checkpoints/94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114.pt",
+              "checkpoint_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+              "metrics": {
+                "mae": 0.025904928847252175,
+                "mse": 0.0010761148144385522,
+                "n": 1311,
+                "prediction_std": 0.01577354429137581,
+                "r2": 0.17185871166589328,
+                "rmse": 0.032804188976997314,
+                "slog": 0.10349274195865399,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 0.0,
+              "updates": 0
+            },
+            "180": {
+              "checkpoint": "/Users/dustinstudio/experiments/v6-puma-lrval-grid-20260929/run/lr3e-5/checkpoints/880cbc5f980393e1e1dad5d8f9e6116b1d22edc17f12a0969ffacc1d0652bb5e.pt",
+              "checkpoint_sha256": "880cbc5f980393e1e1dad5d8f9e6116b1d22edc17f12a0969ffacc1d0652bb5e",
+              "metrics": {
+                "mae": 0.016887492735693753,
+                "mse": 0.00045811251243742463,
+                "n": 1311,
+                "prediction_std": 0.025945201164872873,
+                "r2": 0.6474522224193702,
+                "rmse": 0.021403563078081757,
+                "slog": 0.47161220653365643,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 180.39874284388497,
+              "updates": 301
+            },
+            "360": {
+              "checkpoint": "/Users/dustinstudio/experiments/v6-puma-lrval-grid-20260929/run/lr3e-5/checkpoints/7e4fc4b52f1de07480e79c892a8f1c9c2e223581ecdf7dc1c1a301a6dfc503e5.pt",
+              "checkpoint_sha256": "7e4fc4b52f1de07480e79c892a8f1c9c2e223581ecdf7dc1c1a301a6dfc503e5",
+              "metrics": {
+                "mae": 0.016825666902994148,
+                "mse": 0.00045349348721529937,
+                "n": 1311,
+                "prediction_std": 0.026907466046007005,
+                "r2": 0.6510068668188103,
+                "rmse": 0.021295386524205175,
+                "slog": 0.47501137419238626,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 360.77851700712927,
+              "updates": 516
+            },
+            "540": {
+              "checkpoint": "/Users/dustinstudio/experiments/v6-puma-lrval-grid-20260929/run/lr3e-5/checkpoints/11e353d966071e3ed2508c062125fe2427707b48214cdff08eebdc81f7668733.pt",
+              "checkpoint_sha256": "11e353d966071e3ed2508c062125fe2427707b48214cdff08eebdc81f7668733",
+              "metrics": {
+                "mae": 0.016903859137733887,
+                "mse": 0.00045836354709704485,
+                "n": 1311,
+                "prediction_std": 0.02609763916535069,
+                "r2": 0.6472590347003229,
+                "rmse": 0.021409426594307585,
+                "slog": 0.4713561859630562,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 540.1321944273077,
+              "updates": 741
+            },
+            "720": {
+              "checkpoint": "/Users/dustinstudio/experiments/v6-puma-lrval-grid-20260929/run/lr3e-5/checkpoints/b3bd01b3b847f915bf38646897600a59d5044db60a867f385a10b2d7756fc38c.pt",
+              "checkpoint_sha256": "b3bd01b3b847f915bf38646897600a59d5044db60a867f385a10b2d7756fc38c",
+              "metrics": {
+                "mae": 0.016897161646107443,
+                "mse": 0.0004550110789822884,
+                "n": 1311,
+                "prediction_std": 0.02718269383666611,
+                "r2": 0.6498389799128623,
+                "rmse": 0.021330988701471116,
+                "slog": 0.4720908581547383,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 720.0685636710841,
+              "updates": 969
+            },
+            "900": {
+              "checkpoint": "/Users/dustinstudio/experiments/v6-puma-lrval-grid-20260929/run/lr3e-5/checkpoints/0739dd6aa0e415d4a1c8e91a840599b02540e25a59c3fdda49253a407b932984.pt",
+              "checkpoint_sha256": "0739dd6aa0e415d4a1c8e91a840599b02540e25a59c3fdda49253a407b932984",
+              "metrics": {
+                "mae": 0.016957340965551803,
+                "mse": 0.0004598299110926914,
+                "n": 1311,
+                "prediction_std": 0.026051166701592618,
+                "r2": 0.6461305709414116,
+                "rmse": 0.021443645004818827,
+                "slog": 0.469881781151946,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 900.7490511336364,
+              "updates": 1208
+            }
+          },
+          "outcome": "completed",
+          "parent_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+          "selected": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-puma-lrval-grid-20260929/run/lr3e-5/checkpoints/7e4fc4b52f1de07480e79c892a8f1c9c2e223581ecdf7dc1c1a301a6dfc503e5.pt",
+            "checkpoint_sha256": "7e4fc4b52f1de07480e79c892a8f1c9c2e223581ecdf7dc1c1a301a6dfc503e5",
+            "metrics": {
+              "mae": 0.016825666902994148,
+              "mse": 0.00045349348721529937,
+              "n": 1311,
+              "prediction_std": 0.026907466046007005,
+              "r2": 0.6510068668188103,
+              "rmse": 0.021295386524205175,
+              "slog": 0.47501137419238626,
+              "target_std": 0.03604766067433209
+            },
+            "seconds": 360.77851700712927,
+            "updates": 516
+          },
+          "selected_node": "360",
+          "successful_update_seconds": 900.7490511336364,
+          "updates": 1208
+        }
+      },
+      "update_rows": 5242,
+      "window_rows": 512
+    },
+    "dgx2": {
+      "active_target_seconds": 900,
+      "active_trial": "lr1e-5",
+      "bank_sha256": "2364ad568abe0541dc2e35c31a858d82db50c30fcdb35efa9486673932a135f9",
+      "branch": "v55",
+      "completed_utc": "2026-09-29T14:52:52.793895+00:00",
+      "first_episode_index": 5605,
+      "host": "dgx2",
+      "max_total_successful_seconds": 2700,
+      "memory_fraction": 0.5,
+      "monitor_exposure": "parent previously trained these rows; no new updates on monitor rows",
+      "monitor_rows": 1311,
+      "optimizer_restored": true,
+      "original_train_fit_scope": "6553 original train rows: 5242 new-update rows plus 1311 monitor rows",
+      "original_train_rows": 6553,
+      "outcome": "completed",
+      "parent_checkpoint": "/home/cms/experiments/v6-all730-hostloss-5h-20260929/hour5/run/checkpoints/f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08.pt",
+      "parent_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+      "per_trial_successful_seconds": 900,
+      "phase": "final_evaluations",
+      "runtime": {
+        "cublas_workspace_config": ":4096:8",
+        "cuda_capability": [
+          12,
+          1
+        ],
+        "cuda_device": "NVIDIA GB10",
+        "cuda_runtime": "13.0",
+        "cudnn": 92000,
+        "deterministic_algorithms": true,
+        "device": "cuda:0",
+        "dtype": "float64",
+        "interop_threads": 20,
+        "platform": [
+          "Linux",
+          "6.17.0-1014-nvidia",
+          "aarch64"
+        ],
+        "python": "3.12.3",
+        "threads": 1,
+        "torch": "2.12.0.dev20260322+cu130",
+        "torch_build_sha256": "b62d287846a05b05f6dfa176679c95c75d9a9911ca563e92882a1b5802ec92e4"
+      },
+      "selected_trial": "lr1e-4",
+      "selection": "minimum monitor MSE; earliest node on ties; all 15-minute curves retained",
+      "selection_completed_utc": "2026-09-29T14:49:53.250411+00:00",
+      "split_sha256": "64b23a2bbd53590278bb622d25b857583ba6f8ffca6f1fd19ab1d2be0358658d",
+      "started_utc": "2026-09-29T13:59:55.618096+00:00",
+      "strict_resume": false,
+      "test_rows": 1639,
+      "test_started": true,
+      "test_started_utc": "2026-09-29T14:49:53.263431+00:00",
+      "total_successful_seconds": 2702.090142959889,
+      "trials": {
+        "lr1e-4": {
+          "final_evaluations": {
+            "test": {
+              "bank_sha256": "2364ad568abe0541dc2e35c31a858d82db50c30fcdb35efa9486673932a135f9",
+              "branch": "v55",
+              "checkpoint_sha256": "1d38415918a8165c25a32803de4f9141f3744e99e59e3bd0e98bec78e86f26ab",
+              "metrics": {
+                "mae": 0.017563451903662992,
+                "mse": 0.0004934266857308029,
+                "n": 1639,
+                "prediction_std": 0.0339239398318776,
+                "r2": 0.6218787628488647,
+                "rmse": 0.02221320971248421,
+                "slog": 0.4362965723234776,
+                "target_std": 0.03612399568005235
+              },
+              "model_state_unchanged": true,
+              "optimizer_updates": 0,
+              "outcome": "completed",
+              "predictions": 1639,
+              "scope": "original_test",
+              "split_sha256": "64b23a2bbd53590278bb622d25b857583ba6f8ffca6f1fd19ab1d2be0358658d"
+            },
+            "train": {
+              "bank_sha256": "2364ad568abe0541dc2e35c31a858d82db50c30fcdb35efa9486673932a135f9",
+              "branch": "v55",
+              "checkpoint_sha256": "1d38415918a8165c25a32803de4f9141f3744e99e59e3bd0e98bec78e86f26ab",
+              "metrics": {
+                "mae": 0.017397488307915113,
+                "mse": 0.0004769121361395737,
+                "n": 6553,
+                "prediction_std": 0.033602631182833756,
+                "r2": 0.6301570812459859,
+                "rmse": 0.02183831807029959,
+                "slog": 0.45174020490651223,
+                "target_std": 0.03590959716165739
+              },
+              "model_state_unchanged": true,
+              "optimizer_updates": 0,
+              "outcome": "completed",
+              "predictions": 6553,
+              "scope": "original_train",
+              "split_sha256": "64b23a2bbd53590278bb622d25b857583ba6f8ffca6f1fd19ab1d2be0358658d"
+            }
+          },
+          "first_episode_index": 5605,
+          "initial_rng_restored": true,
+          "initial_state_hash": "4dad03a7392bbee1ebed59c8459e048ab82e6abe5669da315d25fb5700557b2e",
+          "learning_rate": 0.0001,
+          "nodes": {
+            "0": {
+              "checkpoint": "/home/cms/experiments/v6-all730-hostloss-5h-20260929/hour5/run/checkpoints/f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08.pt",
+              "checkpoint_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+              "metrics": {
+                "mae": 0.029061050426409444,
+                "mse": 0.0013311707113951845,
+                "n": 1311,
+                "prediction_std": 0.0014920138012248087,
+                "r2": -0.02442361459599285,
+                "rmse": 0.03648521222900018,
+                "slog": -0.021639131577418924,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 0.0,
+              "updates": 0
+            },
+            "180": {
+              "checkpoint": "/home/cms/experiments/v6-puma-lrval-grid-20260929/run/lr1e-4/checkpoints/62a86fcb4324512ba464dfb5764f2b65b78b1676d024614341984b795b91450c.pt",
+              "checkpoint_sha256": "62a86fcb4324512ba464dfb5764f2b65b78b1676d024614341984b795b91450c",
+              "metrics": {
+                "mae": 0.026081947814547816,
+                "mse": 0.0010690931360039487,
+                "n": 1311,
+                "prediction_std": 0.01138968459948855,
+                "r2": 0.17726235609776952,
+                "rmse": 0.03269698970859471,
+                "slog": 0.09193235067048855,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 180.8108612600481,
+              "updates": 152
+            },
+            "360": {
+              "checkpoint": "/home/cms/experiments/v6-puma-lrval-grid-20260929/run/lr1e-4/checkpoints/45c2ae5f18e2b6eab287922f790441bf55eed516d32491a5ac9b14658fe2b87b.pt",
+              "checkpoint_sha256": "45c2ae5f18e2b6eab287922f790441bf55eed516d32491a5ac9b14658fe2b87b",
+              "metrics": {
+                "mae": 0.025804290604337907,
+                "mse": 0.0010537812464729917,
+                "n": 1311,
+                "prediction_std": 0.015365088456874882,
+                "r2": 0.18904586446774918,
+                "rmse": 0.0324619969575655,
+                "slog": 0.10535539802425797,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 360.27878531703027,
+              "updates": 303
+            },
+            "540": {
+              "checkpoint": "/home/cms/experiments/v6-puma-lrval-grid-20260929/run/lr1e-4/checkpoints/caf858e9be85dcd4452f909522341bd7e2be823c1d01d599774cfef78062fdbd.pt",
+              "checkpoint_sha256": "caf858e9be85dcd4452f909522341bd7e2be823c1d01d599774cfef78062fdbd",
+              "metrics": {
+                "mae": 0.02349942515989739,
+                "mse": 0.0008758553775767638,
+                "n": 1311,
+                "prediction_std": 0.015068647736136684,
+                "r2": 0.32597154964434827,
+                "rmse": 0.029594853903622566,
+                "slog": 0.19667220547043673,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 540.1728792419744,
+              "updates": 454
+            },
+            "720": {
+              "checkpoint": "/home/cms/experiments/v6-puma-lrval-grid-20260929/run/lr1e-4/checkpoints/a433de1497d6bd71ae224a933834a9d36989408e1e6770e8d26e550b4804c3eb.pt",
+              "checkpoint_sha256": "a433de1497d6bd71ae224a933834a9d36989408e1e6770e8d26e550b4804c3eb",
+              "metrics": {
+                "mae": 0.01841819003479659,
+                "mse": 0.0005523096698506144,
+                "n": 1311,
+                "prediction_std": 0.02440593490353816,
+                "r2": 0.574961300213946,
+                "rmse": 0.023501269536997663,
+                "slog": 0.40593280805471754,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 720.7353386239993,
+              "updates": 605
+            },
+            "900": {
+              "checkpoint": "/home/cms/experiments/v6-puma-lrval-grid-20260929/run/lr1e-4/checkpoints/1d38415918a8165c25a32803de4f9141f3744e99e59e3bd0e98bec78e86f26ab.pt",
+              "checkpoint_sha256": "1d38415918a8165c25a32803de4f9141f3744e99e59e3bd0e98bec78e86f26ab",
+              "metrics": {
+                "mae": 0.0176292171601948,
+                "mse": 0.0004985590960060722,
+                "n": 1311,
+                "prediction_std": 0.034062065427643104,
+                "r2": 0.6163259100818446,
+                "rmse": 0.022328436936025597,
+                "slog": 0.44074463184917256,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 900.3122250119341,
+              "updates": 755
+            }
+          },
+          "outcome": "completed",
+          "parent_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+          "selected": {
+            "checkpoint": "/home/cms/experiments/v6-puma-lrval-grid-20260929/run/lr1e-4/checkpoints/1d38415918a8165c25a32803de4f9141f3744e99e59e3bd0e98bec78e86f26ab.pt",
+            "checkpoint_sha256": "1d38415918a8165c25a32803de4f9141f3744e99e59e3bd0e98bec78e86f26ab",
+            "metrics": {
+              "mae": 0.0176292171601948,
+              "mse": 0.0004985590960060722,
+              "n": 1311,
+              "prediction_std": 0.034062065427643104,
+              "r2": 0.6163259100818446,
+              "rmse": 0.022328436936025597,
+              "slog": 0.44074463184917256,
+              "target_std": 0.03604766067433209
+            },
+            "seconds": 900.3122250119341,
+            "updates": 755
+          },
+          "selected_node": "900",
+          "successful_update_seconds": 900.3122250119341,
+          "updates": 755
+        },
+        "lr1e-5": {
+          "final_evaluations": {
+            "test": {
+              "bank_sha256": "2364ad568abe0541dc2e35c31a858d82db50c30fcdb35efa9486673932a135f9",
+              "branch": "v55",
+              "checkpoint_sha256": "db51597937b47a0eeeeea1231e1d7d1f8a6db2d26b6999b24921634087b0f2b6",
+              "metrics": {
+                "mae": 0.0263170939364691,
+                "mse": 0.001114243405520511,
+                "n": 1639,
+                "prediction_std": 0.013887500372909097,
+                "r2": 0.14613638222889413,
+                "rmse": 0.03338028468303575,
+                "slog": 0.07555610986995687,
+                "target_std": 0.03612399568005235
+              },
+              "model_state_unchanged": true,
+              "optimizer_updates": 0,
+              "outcome": "completed",
+              "predictions": 1639,
+              "scope": "original_test",
+              "split_sha256": "64b23a2bbd53590278bb622d25b857583ba6f8ffca6f1fd19ab1d2be0358658d"
+            },
+            "train": {
+              "bank_sha256": "2364ad568abe0541dc2e35c31a858d82db50c30fcdb35efa9486673932a135f9",
+              "branch": "v55",
+              "checkpoint_sha256": "db51597937b47a0eeeeea1231e1d7d1f8a6db2d26b6999b24921634087b0f2b6",
+              "metrics": {
+                "mae": 0.026068816884745896,
+                "mse": 0.0010648781525968239,
+                "n": 6553,
+                "prediction_std": 0.01362506974560902,
+                "r2": 0.17419244714181326,
+                "rmse": 0.032632470831930944,
+                "slog": 0.09352604794708375,
+                "target_std": 0.03590959716165739
+              },
+              "model_state_unchanged": true,
+              "optimizer_updates": 0,
+              "outcome": "completed",
+              "predictions": 6553,
+              "scope": "original_train",
+              "split_sha256": "64b23a2bbd53590278bb622d25b857583ba6f8ffca6f1fd19ab1d2be0358658d"
+            }
+          },
+          "first_episode_index": 5605,
+          "initial_rng_restored": true,
+          "initial_state_hash": "4dad03a7392bbee1ebed59c8459e048ab82e6abe5669da315d25fb5700557b2e",
+          "learning_rate": 1e-05,
+          "nodes": {
+            "0": {
+              "checkpoint": "/home/cms/experiments/v6-all730-hostloss-5h-20260929/hour5/run/checkpoints/f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08.pt",
+              "checkpoint_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+              "metrics": {
+                "mae": 0.029061050426409444,
+                "mse": 0.0013311707113951845,
+                "n": 1311,
+                "prediction_std": 0.0014920138012248087,
+                "r2": -0.02442361459599285,
+                "rmse": 0.03648521222900018,
+                "slog": -0.021639131577418924,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 0.0,
+              "updates": 0
+            },
+            "180": {
+              "checkpoint": "/home/cms/experiments/v6-puma-lrval-grid-20260929/run/lr1e-5/checkpoints/dc9cdc5f08fc6fe73e1b7df6403a9c853ed8c8904c7d952932dd7c7ddf2a92a5.pt",
+              "checkpoint_sha256": "dc9cdc5f08fc6fe73e1b7df6403a9c853ed8c8904c7d952932dd7c7ddf2a92a5",
+              "metrics": {
+                "mae": 0.028327021929951807,
+                "mse": 0.0012688960846679617,
+                "n": 1311,
+                "prediction_std": 0.003685560834820876,
+                "r2": 0.023500815879685666,
+                "rmse": 0.035621567689645015,
+                "slog": 0.004197090365521405,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 181.01226499197946,
+              "updates": 151
+            },
+            "360": {
+              "checkpoint": "/home/cms/experiments/v6-puma-lrval-grid-20260929/run/lr1e-5/checkpoints/4f97d5925e651ce061a0305c7346ffd2ad9779db451176317fcff2f445a05cb6.pt",
+              "checkpoint_sha256": "4f97d5925e651ce061a0305c7346ffd2ad9779db451176317fcff2f445a05cb6",
+              "metrics": {
+                "mae": 0.02742864106028776,
+                "mse": 0.001183626010857503,
+                "n": 1311,
+                "prediction_std": 0.00587883507706332,
+                "r2": 0.0891217587700408,
+                "rmse": 0.0344038662196199,
+                "slog": 0.03846030835001546,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 360.72144837606174,
+              "updates": 301
+            },
+            "540": {
+              "checkpoint": "/home/cms/experiments/v6-puma-lrval-grid-20260929/run/lr1e-5/checkpoints/627c6b3709958e633316ce868bc7b0ba8a6a04bae38590c0534dd90604ddd5b7.pt",
+              "checkpoint_sha256": "627c6b3709958e633316ce868bc7b0ba8a6a04bae38590c0534dd90604ddd5b7",
+              "metrics": {
+                "mae": 0.02631320902491058,
+                "mse": 0.001083808370128464,
+                "n": 1311,
+                "prediction_std": 0.011772860914968592,
+                "r2": 0.16593801339519965,
+                "rmse": 0.032921244966259464,
+                "slog": 0.08283657724245064,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 540.414057065107,
+              "updates": 451
+            },
+            "720": {
+              "checkpoint": "/home/cms/experiments/v6-puma-lrval-grid-20260929/run/lr1e-5/checkpoints/6ef5bb6c7feacc9e526b1361795f54c4868ed564798b0c639bd3c90c161ea6eb.pt",
+              "checkpoint_sha256": "6ef5bb6c7feacc9e526b1361795f54c4868ed564798b0c639bd3c90c161ea6eb",
+              "metrics": {
+                "mae": 0.026055212785762276,
+                "mse": 0.001065851273679101,
+                "n": 1311,
+                "prediction_std": 0.012922041242991704,
+                "r2": 0.17975718286372377,
+                "rmse": 0.03264737774583283,
+                "slog": 0.09382041155966458,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 720.0121944540588,
+              "updates": 601
+            },
+            "900": {
+              "checkpoint": "/home/cms/experiments/v6-puma-lrval-grid-20260929/run/lr1e-5/checkpoints/db51597937b47a0eeeeea1231e1d7d1f8a6db2d26b6999b24921634087b0f2b6.pt",
+              "checkpoint_sha256": "db51597937b47a0eeeeea1231e1d7d1f8a6db2d26b6999b24921634087b0f2b6",
+              "metrics": {
+                "mae": 0.025938517017191985,
+                "mse": 0.001057353457362302,
+                "n": 1311,
+                "prediction_std": 0.013447743406783322,
+                "r2": 0.18629681270451537,
+                "rmse": 0.03251697183567839,
+                "slog": 0.09903414633566443,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 900.782741925912,
+              "updates": 752
+            }
+          },
+          "outcome": "completed",
+          "parent_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+          "selected": {
+            "checkpoint": "/home/cms/experiments/v6-puma-lrval-grid-20260929/run/lr1e-5/checkpoints/db51597937b47a0eeeeea1231e1d7d1f8a6db2d26b6999b24921634087b0f2b6.pt",
+            "checkpoint_sha256": "db51597937b47a0eeeeea1231e1d7d1f8a6db2d26b6999b24921634087b0f2b6",
+            "metrics": {
+              "mae": 0.025938517017191985,
+              "mse": 0.001057353457362302,
+              "n": 1311,
+              "prediction_std": 0.013447743406783322,
+              "r2": 0.18629681270451537,
+              "rmse": 0.03251697183567839,
+              "slog": 0.09903414633566443,
+              "target_std": 0.03604766067433209
+            },
+            "seconds": 900.782741925912,
+            "updates": 752
+          },
+          "selected_node": "900",
+          "successful_update_seconds": 900.782741925912,
+          "updates": 752
+        },
+        "lr3e-5": {
+          "final_evaluations": {
+            "test": {
+              "bank_sha256": "2364ad568abe0541dc2e35c31a858d82db50c30fcdb35efa9486673932a135f9",
+              "branch": "v55",
+              "checkpoint_sha256": "2e824c3a5893c92fc92d48b5c25cb5077cb2273a340c51e99a01fedaab2d8e42",
+              "metrics": {
+                "mae": 0.02621462680473631,
+                "mse": 0.0011069287638686039,
+                "n": 1639,
+                "prediction_std": 0.014038247214960262,
+                "r2": 0.15174171617357135,
+                "rmse": 0.03327053897772929,
+                "slog": 0.07923316909256861,
+                "target_std": 0.03612399568005235
+              },
+              "model_state_unchanged": true,
+              "optimizer_updates": 0,
+              "outcome": "completed",
+              "predictions": 1639,
+              "scope": "original_test",
+              "split_sha256": "64b23a2bbd53590278bb622d25b857583ba6f8ffca6f1fd19ab1d2be0358658d"
+            },
+            "train": {
+              "bank_sha256": "2364ad568abe0541dc2e35c31a858d82db50c30fcdb35efa9486673932a135f9",
+              "branch": "v55",
+              "checkpoint_sha256": "2e824c3a5893c92fc92d48b5c25cb5077cb2273a340c51e99a01fedaab2d8e42",
+              "metrics": {
+                "mae": 0.025933769833044042,
+                "mse": 0.0010562408772152793,
+                "n": 6553,
+                "prediction_std": 0.013922176874523478,
+                "r2": 0.18089060995865913,
+                "rmse": 0.032499859649162785,
+                "slog": 0.09920228837172063,
+                "target_std": 0.03590959716165739
+              },
+              "model_state_unchanged": true,
+              "optimizer_updates": 0,
+              "outcome": "completed",
+              "predictions": 6553,
+              "scope": "original_train",
+              "split_sha256": "64b23a2bbd53590278bb622d25b857583ba6f8ffca6f1fd19ab1d2be0358658d"
+            }
+          },
+          "first_episode_index": 5605,
+          "initial_rng_restored": true,
+          "initial_state_hash": "4dad03a7392bbee1ebed59c8459e048ab82e6abe5669da315d25fb5700557b2e",
+          "learning_rate": 3e-05,
+          "nodes": {
+            "0": {
+              "checkpoint": "/home/cms/experiments/v6-all730-hostloss-5h-20260929/hour5/run/checkpoints/f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08.pt",
+              "checkpoint_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+              "metrics": {
+                "mae": 0.029061050426409444,
+                "mse": 0.0013311707113951845,
+                "n": 1311,
+                "prediction_std": 0.0014920138012248087,
+                "r2": -0.02442361459599285,
+                "rmse": 0.03648521222900018,
+                "slog": -0.021639131577418924,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 0.0,
+              "updates": 0
+            },
+            "180": {
+              "checkpoint": "/home/cms/experiments/v6-puma-lrval-grid-20260929/run/lr3e-5/checkpoints/8b9b363e96c159b4e616f79c3ed9583a70d2314b7c1707a93b470de771151f0c.pt",
+              "checkpoint_sha256": "8b9b363e96c159b4e616f79c3ed9583a70d2314b7c1707a93b470de771151f0c",
+              "metrics": {
+                "mae": 0.026832188124789342,
+                "mse": 0.001123127235483026,
+                "n": 1311,
+                "prediction_std": 0.008895564851805272,
+                "r2": 0.13567955456378689,
+                "rmse": 0.033513090509277504,
+                "slog": 0.062404553351751324,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 180.82676048498251,
+              "updates": 151
+            },
+            "360": {
+              "checkpoint": "/home/cms/experiments/v6-puma-lrval-grid-20260929/run/lr3e-5/checkpoints/93ad7968fe191cc549b224e2144111fad945faf3fc8abca4c1fa03b30a47fb74.pt",
+              "checkpoint_sha256": "93ad7968fe191cc549b224e2144111fad945faf3fc8abca4c1fa03b30a47fb74",
+              "metrics": {
+                "mae": 0.025857519018951072,
+                "mse": 0.0010550100065980228,
+                "n": 1311,
+                "prediction_std": 0.01397180437609676,
+                "r2": 0.18810025255037455,
+                "rmse": 0.03248091757629428,
+                "slog": 0.10222098836174487,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 360.4473991319246,
+              "updates": 301
+            },
+            "540": {
+              "checkpoint": "/home/cms/experiments/v6-puma-lrval-grid-20260929/run/lr3e-5/checkpoints/43cd16ad5d1416b960673f8f634c1fa10f7c396af316c6d749ec0ccb51afce4e.pt",
+              "checkpoint_sha256": "43cd16ad5d1416b960673f8f634c1fa10f7c396af316c6d749ec0ccb51afce4e",
+              "metrics": {
+                "mae": 0.025930800655399554,
+                "mse": 0.0010616772672863684,
+                "n": 1311,
+                "prediction_std": 0.011919361962644827,
+                "r2": 0.18296935593783525,
+                "rmse": 0.03258338943827619,
+                "slog": 0.09795696699389023,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 540.2340827940207,
+              "updates": 451
+            },
+            "720": {
+              "checkpoint": "/home/cms/experiments/v6-puma-lrval-grid-20260929/run/lr3e-5/checkpoints/1fb0c452c74b9c8263cdca2578f348e49926d81ef8bd00c021b5c2b1c9ae7206.pt",
+              "checkpoint_sha256": "1fb0c452c74b9c8263cdca2578f348e49926d81ef8bd00c021b5c2b1c9ae7206",
+              "metrics": {
+                "mae": 0.025931835105692323,
+                "mse": 0.001060717891819854,
+                "n": 1311,
+                "prediction_std": 0.012595980248062076,
+                "r2": 0.18370765860236093,
+                "rmse": 0.03256866426213783,
+                "slog": 0.09822057612281898,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 720.0062659870746,
+              "updates": 601
+            },
+            "900": {
+              "checkpoint": "/home/cms/experiments/v6-puma-lrval-grid-20260929/run/lr3e-5/checkpoints/2e824c3a5893c92fc92d48b5c25cb5077cb2273a340c51e99a01fedaab2d8e42.pt",
+              "checkpoint_sha256": "2e824c3a5893c92fc92d48b5c25cb5077cb2273a340c51e99a01fedaab2d8e42",
+              "metrics": {
+                "mae": 0.025743059294504298,
+                "mse": 0.0010457172126238168,
+                "n": 1311,
+                "prediction_std": 0.013968064677134294,
+                "r2": 0.19525167010430644,
+                "rmse": 0.0323375511228636,
+                "slog": 0.10685272457332706,
+                "target_std": 0.03604766067433209
+              },
+              "seconds": 900.9951760220429,
+              "updates": 752
+            }
+          },
+          "outcome": "completed",
+          "parent_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+          "selected": {
+            "checkpoint": "/home/cms/experiments/v6-puma-lrval-grid-20260929/run/lr3e-5/checkpoints/2e824c3a5893c92fc92d48b5c25cb5077cb2273a340c51e99a01fedaab2d8e42.pt",
+            "checkpoint_sha256": "2e824c3a5893c92fc92d48b5c25cb5077cb2273a340c51e99a01fedaab2d8e42",
+            "metrics": {
+              "mae": 0.025743059294504298,
+              "mse": 0.0010457172126238168,
+              "n": 1311,
+              "prediction_std": 0.013968064677134294,
+              "r2": 0.19525167010430644,
+              "rmse": 0.0323375511228636,
+              "slog": 0.10685272457332706,
+              "target_std": 0.03604766067433209
+            },
+            "seconds": 900.9951760220429,
+            "updates": 752
+          },
+          "selected_node": "900",
+          "successful_update_seconds": 900.9951760220429,
+          "updates": 752
+        }
+      },
+      "update_rows": 5242,
+      "window_rows": 512
+    }
+  },
+  "all_complete": true
+}

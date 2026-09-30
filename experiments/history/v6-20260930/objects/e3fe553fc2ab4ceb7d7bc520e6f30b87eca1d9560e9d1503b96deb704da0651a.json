@@ -1,0 +1,33 @@
+{
+  "bank": "/Users/dustinstudio/experiments/openml12-joint30m-squared-20260927/fixed-query-bank.json",
+  "bank_sha256": "e791488f67179a67ae2057440100144b34edbccb9c900f9633e2004d26284f41",
+  "checkpoint": "/Users/dustinstudio/experiments/openml12-joint2h-squared-20260927/runs/main/checkpoints/f0d2a0eacdc7c1b3a403cf942cb32f1065c595dd17e680de07d9d23be76aa97e.pt",
+  "checkpoint_sha256": "f0d2a0eacdc7c1b3a403cf942cb32f1065c595dd17e680de07d9d23be76aa97e",
+  "checkpoint_update": 32388,
+  "error": "Inference tensors do not track version counter.",
+  "error_type": "RuntimeError",
+  "expected_checkpoint_sha256": "f0d2a0eacdc7c1b3a403cf942cb32f1065c595dd17e680de07d9d23be76aa97e",
+  "host": "dustinstudio",
+  "label": "pre",
+  "outcome": "failed",
+  "probes": {},
+  "runtime": {
+    "deterministic_algorithms": true,
+    "device": "mps",
+    "dtype": "float32",
+    "interop_threads": 16,
+    "mps_available": true,
+    "mps_cpu_fallback": false,
+    "platform": [
+      "Darwin",
+      "25.6.0",
+      "arm64"
+    ],
+    "python": "3.12.13",
+    "threads": 1,
+    "torch": "2.13.0",
+    "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+  },
+  "schema": "tabu.openml12.old618-retention.v1",
+  "source_script_sha256": "fbf5ee599f14f64608a84df66753278cbda59568e03c26df6cd3b91a2ae41315"
+}

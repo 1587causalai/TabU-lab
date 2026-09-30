@@ -1,0 +1,174 @@
+{
+  "status": {
+    "outcome": "training",
+    "started_utc": "2026-09-28T13:58:51.463797+00:00",
+    "completed_training_seconds": 0,
+    "additional_seconds_target": 3600,
+    "host": "gongqian-mini",
+    "supervision": "target_only",
+    "start_sha256": "2fd259588903115aa032c79881f0e13db115939046097be85250b39e0511ffba",
+    "start_update": 108554,
+    "start_successful_seconds": 0,
+    "sampling": "12 OpenML per20 plus8 equal-table history718 replay; window512",
+    "phase": "half1",
+    "phase_budget": 1800
+  },
+  "identity": {
+    "code": {
+      "source/src/tabu_lab/models/restoration_v53/readout.py": "fe7965e58e06701f1f1595eed92c2f936e22c41439fbf80631d031eb9ce9306a",
+      "source/src/tabu_lab/models/restoration_v6/__init__.py": "e75a42c4c5a6ffc5334a59b2868968525cf41e496b2466d1cd2f4c8d1c56119a",
+      "source/src/tabu_lab/models/restoration_v6/model.py": "8c0d47aabcad1c7eb484197539dfe21ca5e23b2a25cb651af95f1c71effa8432",
+      "source/src/tabu_lab/models/restoration_v6/training.py": "923da21540c92cae19c2016c085dd1bedf4db96791073637ccccdd125ca64adb",
+      "train.py": "966540aa82c0568c7dd013197c49a1b4996ba78e21ba0da868b0a46d9de80c13",
+      "training_support.py": "2ee5c702d7ee1f9818ac143aa8c97e8acf2b82e60cdad87b87559b1603b82a1a"
+    },
+    "forward_passes_per_update": 1,
+    "model_config": {
+      "backbone": {
+        "ff_width": 256,
+        "heads": 4,
+        "kind": "inducing",
+        "layers": 3,
+        "norm_eps": 1e-06,
+        "reference_mass": 1.0,
+        "slots": 256,
+        "tau_presence": 1.0,
+        "width": 128
+      },
+      "bandwidth": 1.0,
+      "center_chunk_size": 128,
+      "codec_version": "constant_weight_composition_v2",
+      "epsilon": 1e-06,
+      "numeric_scaling": "zscore",
+      "regression_width": null,
+      "ridge": 0.001,
+      "size": "small",
+      "slope_source": "shared_ll",
+      "subtokens": 1,
+      "unit_layers": 3
+    },
+    "objective": "v6_single_branch_openml12_adaptation",
+    "openml_template": {
+      "checkpoint_sha256": "e249ad031408d2171c803697baca35583664d1aaddfe6e59af10fd186cb85514",
+      "manifest_sha256": "27bd8d790f879ad10824567ee1866ce9ccc257c41ee84ed1a5284d0de482781b",
+      "source": "pre_dual_OpenML12_episode_positions_and_host_objective"
+    },
+    "optimizer_steps_per_update": 1,
+    "parent_identity_sha256": "089da5636fee89d6c03a273bec2f99bf4383e59aabdea0452647094b5ec96407",
+    "parent_manifest_sha256": "5650ab3bb2779e242b971d927d9618cdb73ec32fb80227a366cb984c07b59dab",
+    "parent_sha256": "2fd259588903115aa032c79881f0e13db115939046097be85250b39e0511ffba",
+    "runtime": {
+      "deterministic_algorithms": true,
+      "device": "mps",
+      "dtype": "float32",
+      "interop_threads": 10,
+      "mps_available": true,
+      "mps_cpu_fallback": false,
+      "platform": [
+        "Darwin",
+        "25.5.0",
+        "arm64"
+      ],
+      "python": "3.12.13",
+      "threads": 1,
+      "torch": "2.13.0",
+      "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+    },
+    "sampling": [
+      {
+        "cohort": "focus2",
+        "episodes": 2
+      },
+      {
+        "cohort": "other10",
+        "episodes": 10
+      },
+      {
+        "cohort": "history718",
+        "episodes": 8
+      }
+    ],
+    "schema": "tabu.v6.dual718-openml12-adaptation.v1",
+    "sha256": "9ad42b2633b21ea25eb4612a20e26a5399520adf35b1b1281bab2b8039fe2331",
+    "strict_resume": false,
+    "supervision": "target_only"
+  },
+  "updates": 105,
+  "successful_seconds": 54.5057103773579,
+  "cohorts": {
+    "history718": 40,
+    "other10": 54,
+    "focus2": 11
+  },
+  "windows": [
+    [
+      "focus2",
+      512,
+      171
+    ],
+    [
+      "history718",
+      204,
+      68
+    ],
+    [
+      "other10",
+      201,
+      67
+    ],
+    [
+      "other10",
+      512,
+      171
+    ]
+  ],
+  "passes": [
+    [
+      1,
+      1,
+      "target_only"
+    ]
+  ],
+  "first": {
+    "accelerator_allocated_bytes": 91374848,
+    "accelerator_reserved_bytes": 1253916672,
+    "cohort": "history718",
+    "episode_index": 64,
+    "forward_passes": 1,
+    "gradient_norm": 0.5119572281837463,
+    "loss": 0.010042349807918072,
+    "optimizer_steps": 1,
+    "query_rows": 68,
+    "replay_family": "old618",
+    "scored_cells": 68,
+    "seconds": 0.6798768751323223,
+    "successful_update_seconds": 0.6798768751323223,
+    "supervision": "target_only",
+    "support_rows": 136,
+    "table": "scm_mixed_v1_016",
+    "total_train_rows": 204,
+    "train_rows": 204,
+    "update": 108555
+  },
+  "last": {
+    "accelerator_allocated_bytes": 171542016,
+    "accelerator_reserved_bytes": 5957435392,
+    "cohort": "other10",
+    "episode_index": 5181,
+    "forward_passes": 1,
+    "gradient_norm": 6.98636531829834,
+    "loss": 0.4843139946460724,
+    "optimizer_steps": 1,
+    "query_rows": 171,
+    "replay_family": null,
+    "scored_cells": 171,
+    "seconds": 0.44957216642796993,
+    "successful_update_seconds": 54.5057103773579,
+    "supervision": "target_only",
+    "support_rows": 341,
+    "table": "qsar_fish_toxicity",
+    "total_train_rows": 726,
+    "train_rows": 512,
+    "update": 108659
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "tables": 730,
+  "families": {
+    "old618": 618,
+    "sparse100": 100,
+    "openml12": 12
+  },
+  "sampling": "equal_table",
+  "successful_seconds": 18000,
+  "every_seconds": 3600,
+  "openml_window": 512,
+  "history_window": 204,
+  "supervision": {
+    "dgx2": "target_only",
+    "gongqian-mini": "target_only",
+    "dustinstudio": "joint_all"
+  },
+  "dustin_loss_contract": "Query rows only, every observed column; own cell encoding plus target encoding, support rows excluded"
+}

@@ -1,0 +1,112 @@
+"""Forward three hosts' local update journals to isolated W&B queue files."""
+from __future__ import annotations
+
+import json
+import os
+import shlex
+import subprocess
+import time
+from pathlib import Path
+
+
+HERE = Path(__file__).parent
+STATE = HERE / "collector-30m-state.json"
+MONITOR = "/Users/dustinstudio/experiments/openml12-joint30m-squared-monitor-20260927"
+HOSTS = ("dgx2", "dustinstudio", "gongqian-mini")
+BASE = json.loads((HERE / "result-squared.json").read_text())
+PARENT_UPDATES = {host: BASE["hosts"][host]["checkpoint_update"] for host in HOSTS}
+ROOT_NAME = "openml12-joint30m-squared-20260927"
+
+
+def atomic(path, value):
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n")
+    os.replace(tmp, path)
+
+
+def fetch(host, half, offset):
+    code = '''import json,os
+root=os.path.expanduser("~/experiments/openml12-joint30m-squared-20260927/half%d")
+journal=root+"/run/updates.jsonl"
+campaign=root+"/campaign.json"
+result={"offset":%d,"seconds_delta":0.0,"cohorts":{},"last":None,"campaign":None}
+if os.path.isfile(campaign):
+ result["campaign"]=json.load(open(campaign))["outcome"]
+if os.path.isfile(journal):
+ with open(journal,"rb") as f:
+  f.seek(%d)
+  while True:
+   line=f.readline()
+   if not line or not line.endswith(bytes([10])): break
+   row=json.loads(line)
+   result["offset"]=f.tell()
+   result["seconds_delta"]+=row["seconds"]
+   key=row["cohort"]
+   result["cohorts"][key]=result["cohorts"].get(key,0)+1
+   result["last"]={k:row[k] for k in ("update","loss","objective_loss","gradient_norm")}
+print(json.dumps(result))
+''' % (half, offset, offset)
+    done = subprocess.run(["ssh", "-o", "BatchMode=yes", host, "python3", "-"],
+                          input=code, text=True, capture_output=True, timeout=30, check=True)
+    return json.loads(done.stdout)
+
+
+def push(host, event):
+    path = f"{MONITOR}/queue-{host}.jsonl"
+    command = f"cat >> {shlex.quote(path)}"
+    done = subprocess.run(["ssh", "-o", "BatchMode=yes", "dustinstudio", command],
+                          input=json.dumps(event, allow_nan=False) + "\n",
+                          text=True, capture_output=True, timeout=30, check=True)
+    if done.stdout.strip() or done.stderr.strip():
+        raise RuntimeError("W&B queue append produced unexpected output")
+
+
+def main():
+    if STATE.exists():
+        state = json.loads(STATE.read_text())
+    else:
+        state = {}
+        for host in HOSTS:
+            state[host] = dict(half=1, offset=0, additional_successful_seconds=0.0,
+                               cohort_updates={"focus2": 0, "other10": 0, "history618": 0},
+                               last_update=PARENT_UPDATES[host], campaign="pending")
+        atomic(STATE, state)
+    while True:
+        for host in HOSTS:
+            previous = state[host]
+            try:
+                result = fetch(host, previous["half"], previous["offset"])
+                previous["campaign"] = result["campaign"] or previous["campaign"]
+                if result["last"] is not None:
+                    assert result["offset"] > previous["offset"]
+                    assert result["last"]["update"] > previous["last_update"]
+                    seconds = previous["additional_successful_seconds"] + result["seconds_delta"]
+                    cohorts = dict(previous["cohort_updates"])
+                    for name, count in result["cohorts"].items():
+                        cohorts[name] += count
+                    event = dict(kind="train", host=host,
+                                 additional_successful_seconds=seconds,
+                                 cohort_updates=cohorts, **result["last"])
+                    push(host, event)
+                    previous.update(offset=result["offset"], last_update=event["update"],
+                                    additional_successful_seconds=seconds,
+                                    cohort_updates=cohorts)
+                    atomic(STATE, state)
+                    print(json.dumps(dict(host=host, half=previous["half"],
+                                          update=event["update"], seconds=round(seconds, 2))), flush=True)
+                if previous["half"] == 1 and previous["campaign"] == "training_completed":
+                    previous.update(half=2, offset=0, campaign="pending")
+                    atomic(STATE, state)
+            except Exception as error:
+                print(json.dumps(dict(host=host, error_type=type(error).__name__)), flush=True)
+        atomic(STATE, state)
+        if all(state[h]["half"] == 2 and state[h]["campaign"] in
+               ("training_completed", "budget_limited", "failed")
+               for h in HOSTS):
+            print("collector_terminal", flush=True)
+            return
+        time.sleep(45)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,32 @@
+{
+  "outcome": "completed",
+  "started_utc": "2026-09-28T02:33:29.192666+00:00",
+  "start_update": 64704,
+  "start_successful_seconds": 0,
+  "additional_seconds_target": 3600,
+  "start_sha256": "079e7b6b7bfdb9ecf3696a519370173dba0ecf9700139174add86d1324e3c564",
+  "sampling": "OpenML12 equal; at most 1024 training rows; no replay",
+  "supervision": "joint_all",
+  "completed_training_seconds": 3602.3449666660745,
+  "phase": "half2",
+  "additional_successful_seconds": 3602.3449666660745,
+  "checkpoint_sha256": "77a0526f1cdfa81beadadcbe6e42b38b1d2a7c92d94763836809291650d75b6c",
+  "checkpoint_update": 66164,
+  "evaluations": {
+    "half1": {
+      "macro": {
+        "r2": 0.7772067835315388,
+        "slog": 0.7053341147626733
+      },
+      "checkpoint_sha256": "6143e1476175a41a5d54d6422819b02fc9a262c57f558ea9d0976275adffbe42"
+    },
+    "half2": {
+      "macro": {
+        "r2": 0.7733904261100109,
+        "slog": 0.7008512559795838
+      },
+      "checkpoint_sha256": "77a0526f1cdfa81beadadcbe6e42b38b1d2a7c92d94763836809291650d75b6c"
+    }
+  },
+  "completed_utc": "2026-09-28T03:34:35.319770+00:00"
+}

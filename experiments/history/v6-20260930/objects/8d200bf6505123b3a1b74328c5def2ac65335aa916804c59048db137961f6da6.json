@@ -1,0 +1,30 @@
+{
+  "pid": 3730024,
+  "host": "dgx2",
+  "command": [
+    "/home/cms/.local/bin/wehub-python",
+    "--profile",
+    "train-20260920",
+    "-u",
+    "-c",
+    "import runpy; runpy.run_path('/home/cms/experiments/openml12-finetune-20260927/run_campaign.py', run_name='__main__')",
+    "--root",
+    "/home/cms/experiments/openml12-finetune-20260927",
+    "--bank-root",
+    "/home/cms/experiments/openml12-frozen-icl-20260927",
+    "--parent-manifest",
+    "/home/cms/experiments/joint618-60min-20260926/manifests/joint618.json",
+    "--parent",
+    "/home/cms/experiments/joint618-60min-20260926/runs/attempt-002-main/checkpoints/1366ac9d552864f80df2c52247476215b87b5d74915d0697676ba1a9d8eeb1a6.pt",
+    "--parent-sha",
+    "1366ac9d552864f80df2c52247476215b87b5d74915d0697676ba1a9d8eeb1a6",
+    "--device",
+    "cuda:0",
+    "--host",
+    "dgx2",
+    "--seconds",
+    "120"
+  ],
+  "source_root": "/home/cms/experiments/joint618-60min-20260926/source/src",
+  "launched_utc": "2026-09-27T00:38:23.463965+00:00"
+}

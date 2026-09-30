@@ -1,0 +1,32 @@
+{
+  "host": "gongqian-mini",
+  "outcome": "passed",
+  "checked_utc": "2026-09-29T10:34:14.806928+00:00",
+  "controller": "completed",
+  "successful_seconds": 3600.152755415067,
+  "updates": 8544,
+  "full_weighted_cycles": 9,
+  "branch_counts": {
+    "v6": 4220,
+    "v55": 4324
+  },
+  "cohort_counts": {
+    "history718": 5866,
+    "sparse100": 2561,
+    "other10": 98,
+    "focus2": 19
+  },
+  "coverage": 730,
+  "checkpoint_sha256": "11d74eda701a8bfcf8d7ab44e7bd1548e2757a6145d61d8df81084300aabb116",
+  "actual_checkpoint_hash_verified": true,
+  "episode_and_cursor_continuation_verified": true,
+  "all_step_contracts_verified": true,
+  "complete_evaluations": [
+    "openml12-v6",
+    "openml12-v55",
+    "fit718"
+  ],
+  "pending": {},
+  "final_evaluation_verified_utc": "2026-09-29T10:38:06.451708+00:00",
+  "final_evaluation_counts_bank_and_checkpoint_verified": true
+}

@@ -1,0 +1,204 @@
+{
+  "additional_seconds_target": 900,
+  "branch": "v6",
+  "checkpoint": "/Users/dustinstudio/experiments/v6-puma-single-hostloss-15m-20260929/run/checkpoints/62d7badc873aa9f3ae25fe0fb653c9b53dc8fcfb77e70761a74036e72d941f8d.pt",
+  "checkpoint_sha256": "62d7badc873aa9f3ae25fe0fb653c9b53dc8fcfb77e70761a74036e72d941f8d",
+  "completed_utc": "2026-09-29T13:26:37.957786+00:00",
+  "evaluations": {
+    "before": {
+      "bank_sha256": "2364ad568abe0541dc2e35c31a858d82db50c30fcdb35efa9486673932a135f9",
+      "checkpoint": "/Users/dustinstudio/experiments/v6-all730-dustin-targetonly60m-20260929/half2/run/checkpoints/94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114.pt",
+      "checkpoint_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+      "metrics": {
+        "test": {
+          "mae": 0.026488160306676806,
+          "mse": 0.0011428052142692133,
+          "n": 1639,
+          "prediction_std": 0.016120362013046695,
+          "r2": 0.12424898381358962,
+          "rmse": 0.03380540214624304,
+          "slog": 0.07227135981577482,
+          "target_std": 0.03612399568005235
+        },
+        "train": {
+          "mae": 0.026738612096453142,
+          "mse": 0.0011441759876235783,
+          "n": 6553,
+          "prediction_std": 0.017396559619366106,
+          "r2": 0.1126973822550893,
+          "rmse": 0.03382567054211311,
+          "slog": 0.0710063248966234,
+          "target_std": 0.03590959716165739
+        }
+      },
+      "new_updates": 0,
+      "successful_update_seconds": 0.0
+    },
+    "minute05": {
+      "bank_sha256": "2364ad568abe0541dc2e35c31a858d82db50c30fcdb35efa9486673932a135f9",
+      "checkpoint": "/Users/dustinstudio/experiments/v6-puma-single-hostloss-15m-20260929/run/checkpoints/c890d9e69086c6918fb6c0bec6fa569e8d86e127b34c01e0df1e9d0ac42b7620.pt",
+      "checkpoint_sha256": "c890d9e69086c6918fb6c0bec6fa569e8d86e127b34c01e0df1e9d0ac42b7620",
+      "metrics": {
+        "test": {
+          "mae": 0.017023099359905394,
+          "mse": 0.00045994619732035323,
+          "n": 1639,
+          "prediction_std": 0.027453129979670133,
+          "r2": 0.6475354289033841,
+          "rmse": 0.021446356271412476,
+          "slog": 0.460568714917332,
+          "target_std": 0.03612399568005235
+        },
+        "train": {
+          "mae": 0.016710740500637797,
+          "mse": 0.00044116491423758605,
+          "n": 6553,
+          "prediction_std": 0.03175546000790094,
+          "r2": 0.6578788687278405,
+          "rmse": 0.02100392616244844,
+          "slog": 0.4804784608477649,
+          "target_std": 0.03590959716165739
+        }
+      },
+      "new_updates": 544,
+      "successful_update_seconds": 300.333283507498
+    },
+    "minute10": {
+      "bank_sha256": "2364ad568abe0541dc2e35c31a858d82db50c30fcdb35efa9486673932a135f9",
+      "checkpoint": "/Users/dustinstudio/experiments/v6-puma-single-hostloss-15m-20260929/run/checkpoints/8ae427cc6a0dc60cc276e345985cc811c5987ec321eeeddf11885b7fa81bde24.pt",
+      "checkpoint_sha256": "8ae427cc6a0dc60cc276e345985cc811c5987ec321eeeddf11885b7fa81bde24",
+      "metrics": {
+        "test": {
+          "mae": 0.017054439090908865,
+          "mse": 0.0004605558747005889,
+          "n": 1639,
+          "prediction_std": 0.027821272015559353,
+          "r2": 0.647068222787573,
+          "rmse": 0.021460565572710075,
+          "slog": 0.4598610114705719,
+          "target_std": 0.03612399568005235
+        },
+        "train": {
+          "mae": 0.016517495303134372,
+          "mse": 0.0004310116541389109,
+          "n": 6553,
+          "prediction_std": 0.029685825479325835,
+          "r2": 0.6657526699276985,
+          "rmse": 0.020760820170188626,
+          "slog": 0.4877703326494125,
+          "target_std": 0.03590959716165739
+        }
+      },
+      "new_updates": 940,
+      "successful_update_seconds": 600.1612154622562
+    },
+    "minute15": {
+      "bank_sha256": "2364ad568abe0541dc2e35c31a858d82db50c30fcdb35efa9486673932a135f9",
+      "checkpoint": "/Users/dustinstudio/experiments/v6-puma-single-hostloss-15m-20260929/run/checkpoints/62d7badc873aa9f3ae25fe0fb653c9b53dc8fcfb77e70761a74036e72d941f8d.pt",
+      "checkpoint_sha256": "62d7badc873aa9f3ae25fe0fb653c9b53dc8fcfb77e70761a74036e72d941f8d",
+      "metrics": {
+        "test": {
+          "mae": 0.017422925212704835,
+          "mse": 0.00048329850355876305,
+          "n": 1639,
+          "prediction_std": 0.025056546053869106,
+          "r2": 0.6296401606081118,
+          "rmse": 0.021984051117998317,
+          "slog": 0.44366468484215804,
+          "target_std": 0.03612399568005235
+        },
+        "train": {
+          "mae": 0.01656523863702177,
+          "mse": 0.00043415019299427254,
+          "n": 6553,
+          "prediction_std": 0.02831843745611286,
+          "r2": 0.6633187491214767,
+          "rmse": 0.02083627109139907,
+          "slog": 0.4858401919820712,
+          "target_std": 0.03590959716165739
+        }
+      },
+      "new_updates": 1309,
+      "successful_update_seconds": 900.511388127692
+    }
+  },
+  "first_episode_index": 5400,
+  "host": "dustinstudio",
+  "identity": {
+    "code": {
+      "baselines.py": "88d7a11698c77498a95ed1820d9a2cba9e9c911a95fff4f98d3f604400aeba7d",
+      "common.py": "4f2fbc0423a832abe41d0ff2a998e9c6a03adf8474f41d1136ba986842f0ba3c",
+      "dual.py": "2e82302f7ae600fd06165bb025174f5ba48b556a5ab622cd604c415e1d02c0e9",
+      "evaluate.py": "ee2ce7614ab3100df9afe7dfb81b9c470eb8c87de57b47ac384d7eacd0a8c862",
+      "frozen_evaluate.py": "726b6495ef02aa1865026f9fa19a46ebd6302b610ec9478686da9272446cd4f3",
+      "report.py": "290e0ba076c4c0cacba70c544fe4194b11d275e3c6685e1528ef7d8b907434bb",
+      "run.py": "acaace6bc20b72ca6a23b5bc3833bd3c047b9ee0414c726e2a261afd2f1c4af8",
+      "setup_host.py": "4a5100aff2cee644f9434703791132e63025495f0932e142d89e8acf9e2fd89f",
+      "training_support.py": "2ee5c702d7ee1f9818ac143aa8c97e8acf2b82e60cdad87b87559b1603b82a1a"
+    },
+    "inference_branch": "v6",
+    "initialization": "model optimizer RNG retained; single-table schedule reset and Puma episode offset settled",
+    "model_config": {
+      "backbone": {
+        "ff_width": 256,
+        "heads": 8,
+        "kind": "inducing",
+        "layers": 3,
+        "norm_eps": 1e-06,
+        "reference_mass": 1.0,
+        "slots": 256,
+        "tau_presence": 1.0,
+        "width": 128
+      },
+      "bandwidth": 1.0,
+      "center_chunk_size": 128,
+      "codec_version": "constant_weight_composition_v2",
+      "epsilon": 1e-06,
+      "numeric_scaling": "zscore",
+      "regression_width": null,
+      "ridge": 0.001,
+      "size": "small",
+      "slope_source": "shared_ll",
+      "subtokens": 1,
+      "unit_layers": 3
+    },
+    "objective": "puma_single_v6",
+    "parent_manifest_sha256": "2414cf78f2e567e27c928c6714f77ea2ec5f5967022b03ea92afae67d9ff0f18",
+    "parent_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+    "runtime": {
+      "deterministic_algorithms": true,
+      "device": "mps",
+      "dtype": "float32",
+      "interop_threads": 16,
+      "mps_available": true,
+      "mps_cpu_fallback": false,
+      "platform": [
+        "Darwin",
+        "25.6.0",
+        "arm64"
+      ],
+      "python": "3.12.13",
+      "threads": 1,
+      "torch": "2.13.0",
+      "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+    },
+    "schema": "tabu.puma.single.v1",
+    "sha256": "45475230969cc2008d0c9919d4f4480a7554624add92d21fc0ceba63ccb62d24",
+    "strict_resume": false,
+    "supervision": "target_only"
+  },
+  "loss_scope": "Query target column only; own-cell encoding squared error",
+  "memory_fraction": 0.5,
+  "new_updates": 1309,
+  "optimizer_restored": true,
+  "outcome": "completed",
+  "parameter_count": 2082688,
+  "parent_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+  "phase": "minute15",
+  "rng_restored": true,
+  "schedule_cursor_reset": true,
+  "started_utc": "2026-09-29T13:09:27.906942+00:00",
+  "successful_update_seconds": 900.511388127692,
+  "target_seconds": 900,
+  "window_rows": 512
+}

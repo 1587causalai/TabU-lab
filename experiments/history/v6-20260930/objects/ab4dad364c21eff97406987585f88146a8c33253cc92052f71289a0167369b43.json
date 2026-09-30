@@ -1,0 +1,22 @@
+{
+  "completed_utc": "2026-09-29T15:35:13.224103+00:00",
+  "selected_trial": "lr1e-4",
+  "trials": {
+    "lr1e-4": {
+      "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/bodyfat/run/lr1e-4/checkpoints/65c01d13e481016ce69b9c798c6bd60b1cfe7a7f4958c701ebaa836ef6499fd9.pt",
+      "checkpoint_sha256": "65c01d13e481016ce69b9c798c6bd60b1cfe7a7f4958c701ebaa836ef6499fd9",
+      "metrics": {
+        "mae": 0.43079640388488755,
+        "mse": 0.5947630980637347,
+        "n": 40,
+        "prediction_std": 6.912435078554132,
+        "r2": 0.9879662962944448,
+        "rmse": 0.7712088550216049,
+        "slog": 0.9789447717967854,
+        "target_std": 7.030275599149723
+      },
+      "seconds": 723.9257632906083,
+      "updates": 165
+    }
+  }
+}

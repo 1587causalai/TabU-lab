@@ -1,0 +1,31 @@
+{
+  "command": [
+    "/Users/dustinstudio/.local/bin/wehub-python",
+    "--profile",
+    "train-20260920",
+    "-u",
+    "-m",
+    "tabu_lab.cli",
+    "curriculum-v55",
+    "run",
+    "--manifest",
+    "/Users/dustinstudio/experiments/joint618-60min-dustin-20260926/manifests/joint618-60min-v55.json",
+    "--output-root",
+    "/Users/dustinstudio/experiments/joint618-60min-dustin-20260926/runs/02-strict-resume",
+    "--device",
+    "mps",
+    "--resume-checkpoint",
+    "/Users/dustinstudio/experiments/joint618-60min-dustin-20260926/runs/01-joint618/checkpoint-progress.pt",
+    "--max-updates-this-invocation",
+    "100000"
+  ],
+  "cumulative_training_seconds_before_resume": 5668.09362277016,
+  "hard_limit_seconds": 7200.0,
+  "identity_sha256": "2a7d192be89b8963a6eab90915df11a6f0727898daed4587df32a1d1d7aa8a2c",
+  "pid": 91096,
+  "resume_checkpoint_sha256": "b0d05b7c31ffac0b01f81577ee773bc6d5ee81b4afed4cf29e6022d1314a2a46",
+  "resume_checkpoint_update": 24000,
+  "resume_mode": "strict_model_optimizer_rng_cursor_exposure",
+  "target_seconds": 7196.0,
+  "utc": "2026-09-26T16:23:49.082040+00:00"
+}

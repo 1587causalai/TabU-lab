@@ -1,0 +1,35 @@
+{
+  "outcome": "completed",
+  "started_utc": "2026-09-28T05:20:12.606560+00:00",
+  "start_update": 85056,
+  "start_successful_seconds": 0,
+  "additional_seconds_target": 1799.506162806414,
+  "prior_training_seconds": 1800.493837193586,
+  "total_successful_seconds_target": 3600,
+  "start_sha256": "ed9c173772d18458ef6cf5b460f83b76d1a688805faab6c54d65d650a7e52a44",
+  "sampling": "OpenML12 once plus 8 old618 per20; OpenML window512",
+  "supervision": "target_only",
+  "completed_training_seconds": 1800.0081220977008,
+  "phase": "half2",
+  "phase_budget": 899.3305490585044,
+  "additional_successful_seconds": 1800.0081220977008,
+  "checkpoint_sha256": "38c843d9a85f8abe3dfb3c43ce03ae479694a4f51125ab245d7588a89d507ea2",
+  "checkpoint_update": 88722,
+  "evaluations": {
+    "half1": {
+      "macro": {
+        "r2": 0.759394520242846,
+        "slog": 0.6944816868470046
+      },
+      "checkpoint_sha256": "8cac98823861addcb810f94b3800c1ddb1df5ec90d831d4226cfe4f87c337df5"
+    },
+    "half2": {
+      "macro": {
+        "r2": 0.7602648358169843,
+        "slog": 0.6970395559495226
+      },
+      "checkpoint_sha256": "38c843d9a85f8abe3dfb3c43ce03ae479694a4f51125ab245d7588a89d507ea2"
+    }
+  },
+  "completed_utc": "2026-09-28T05:52:18.507724+00:00"
+}

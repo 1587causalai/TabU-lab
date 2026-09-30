@@ -1,0 +1,39 @@
+{
+  "added_successful_seconds": 899.3593937056139,
+  "added_updates": 2049,
+  "checkpoint": "/Users/gongqian/experiments/openml12-joint30m-squared-20260927/half2/run/checkpoint-progress.pt",
+  "checkpoint_sha256": "b4581d2f0310f18da749cdd4499089c4da3711b8ea6320064d1cd2107c3d7a6d",
+  "checkpoint_update": 20384,
+  "continuation": "strict_resume_same_identity_optimizer_rng_cursor_exposure",
+  "final_stage_seconds": 9027.005663374439,
+  "half": 2,
+  "host": "gongqian-mini",
+  "identity_sha256": "d6f33c33a2a4bc6731a69c7fe580855d8cece3ce31774f1202c5e58b7a4bfb8e",
+  "manifest": "/Users/gongqian/experiments/openml12-joint2h-squared-20260927/manifests/joint-openml12-squared.json",
+  "old618_tables_with_gradient": 410,
+  "outcome": "training_completed",
+  "parent": "/Users/gongqian/experiments/openml12-joint30m-squared-20260927/half1/run/checkpoints/50239086c6f748229d946c505f3b2e24b4b5fe3e6bda88cf81bd70b9f4a2b068.pt",
+  "parent_sha256": "50239086c6f748229d946c505f3b2e24b4b5fe3e6bda88cf81bd70b9f4a2b068",
+  "parent_stage_seconds": 8122.727880332619,
+  "parent_update": 18335,
+  "runtime": {
+    "deterministic_algorithms": true,
+    "device": "mps",
+    "dtype": "float32",
+    "interop_threads": 10,
+    "mps_available": true,
+    "mps_cpu_fallback": false,
+    "platform": [
+      "Darwin",
+      "25.5.0",
+      "arm64"
+    ],
+    "python": "3.12.13",
+    "threads": 1,
+    "torch": "2.13.0",
+    "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+  },
+  "schema": "tabu.openml12.strict30.half.v1",
+  "source_script_sha256": "c63e5ee83b3e7b87c9ff865e66dbbd5257f7f718ea3cb866e51df25d90a5024d",
+  "target_successful_update_seconds": 900.0
+}

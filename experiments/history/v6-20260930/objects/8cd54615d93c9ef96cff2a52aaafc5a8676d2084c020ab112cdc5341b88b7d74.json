@@ -1,0 +1,11 @@
+{
+  "outcome": "failed",
+  "host": "dgx2",
+  "supervision": "target_only",
+  "start_sha256": "39f28cb4e16b589f289435a529f04c19f2dbd3f0d96313945870caf19be0278d",
+  "completed_training_seconds": 0,
+  "additional_seconds_target": 18000,
+  "started_utc": "2026-09-28T17:19:10.708243+00:00",
+  "error_type": "CalledProcessError",
+  "error": "Command '['/home/cms/.local/bin/wehub-python', '--profile', 'train-20260920', '-u', '-c', \"import runpy;runpy.run_path('/home/cms/experiments/v6-all730-hostloss-5h-20260929/eval_fit.py',run_name='__main__')\", '--host', 'dgx2', '--device', 'cuda:0', '--checkpoint', '/home/cms/experiments/v6-dual718-openml12-adapt60m-20260928/half1/run/checkpoints/39f28cb4e16b589f289435a529f04c19f2dbd3f0d96313945870caf19be0278d.pt', '--expected-sha', '39f28cb4e16b589f289435a529f04c19f2dbd3f0d96313945870caf19be0278d', '--output', '/home/cms/experiments/v6-all730-hostloss-5h-20260929/evaluations/before/fit718']' returned non-zero exit status 1."
+}

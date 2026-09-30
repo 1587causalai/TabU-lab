@@ -1,0 +1,23 @@
+{
+  "name": "v6-puma-single-hostloss-15m-20260929",
+  "table": "pumadyn32nh",
+  "host_branches": {
+    "dustinstudio": "v6",
+    "dgx2": "v55"
+  },
+  "successful_train_seconds": 900,
+  "evaluation_seconds": [
+    0,
+    300,
+    600,
+    900
+  ],
+  "window_rows": 512,
+  "query_fraction": 0.3333333333333333,
+  "sampling": "Puma only; no replay",
+  "initialization": "default model weights; preserved AdamW, LR and RNG; settled Puma episode offset then new single-table cursor, not strict resume",
+  "fit": "all 6553 training rows as masked Query in three fixed disjoint partitions; remaining training rows as support",
+  "test": "all 6553 train support plus 1639 heldout test Query",
+  "baseline": "MLP and XGBoost predefined candidates fit same full training split; no test-based tuning; CPU budget up to 900 seconds",
+  "default_replacement": false
+}

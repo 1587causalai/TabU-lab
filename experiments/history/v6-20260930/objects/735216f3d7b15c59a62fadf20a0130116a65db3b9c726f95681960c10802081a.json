@@ -1,0 +1,219 @@
+{
+  "recorded_utc": "2026-09-29T05:57:01.247507+00:00",
+  "automation_id": "tabu",
+  "phase": "formal_training_running",
+  "formal_training_updates_confirmed": true,
+  "preflight_attempt1": "Count attribute error; zero formal updates; archived remotely in preflight-attempt1. Fixed by counting prepared Query targets.",
+  "hosts": {
+    "dustinstudio": {
+      "launch": {
+        "pid": 70224,
+        "root": "/Users/dustinstudio/experiments/v6-branchsample50-all730-2h-20260929",
+        "launched_once": true,
+        "status": {
+          "outcome": "evaluating_before",
+          "host": "dustinstudio",
+          "objective": "v6_v55_bernoulli50_all730",
+          "start_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+          "completed_training_seconds": 0,
+          "additional_seconds_target": 7200,
+          "started_utc": "2026-09-29T05:53:52.749955+00:00"
+        }
+      },
+      "observer": {
+        "pid": 30898,
+        "host": "dustinstudio",
+        "root": "/Users/dustinstudio/experiments/v6-branchsample50-all730-2h-20260929"
+      },
+      "preflight": {
+        "outcome": "passed",
+        "runtime": {
+          "torch": "2.13.0",
+          "device": "mps",
+          "dtype": "float32",
+          "deterministic_algorithms": true,
+          "threads": 1,
+          "interop_threads": 16,
+          "platform": [
+            "Darwin",
+            "25.6.0",
+            "arm64"
+          ],
+          "python": "3.12.13",
+          "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1",
+          "mps_available": true,
+          "mps_cpu_fallback": false
+        },
+        "disposable_updates": 10,
+        "parity": {
+          "v6": {
+            "loss_diff": 0.0,
+            "max_gradient_diff": 0.0
+          },
+          "v55": {
+            "loss_diff": 0.0,
+            "max_gradient_diff": 0.0
+          }
+        },
+        "sampler_resume_identical": true,
+        "parent_unchanged": true
+      },
+      "formal_updates_confirmed": {
+        "updates": 1244,
+        "branch_counts": {
+          "v6": 633,
+          "v55": 611
+        },
+        "successful_seconds": 304.7729150475934,
+        "parent_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114"
+      }
+    },
+    "dgx2": {
+      "launch": {
+        "pid": 1503658,
+        "root": "/home/cms/experiments/v6-branchsample50-all730-2h-20260929",
+        "launched_once": true,
+        "status": {
+          "outcome": "evaluating_before",
+          "host": "dgx2",
+          "objective": "v6_v55_bernoulli50_all730",
+          "start_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+          "completed_training_seconds": 0,
+          "additional_seconds_target": 7200,
+          "started_utc": "2026-09-29T05:55:33.243788+00:00"
+        }
+      },
+      "observer": {
+        "pid": 32543,
+        "host": "dgx2",
+        "root": "/home/cms/experiments/v6-branchsample50-all730-2h-20260929"
+      },
+      "preflight": {
+        "outcome": "passed",
+        "runtime": {
+          "torch": "2.12.0.dev20260322+cu130",
+          "device": "cuda:0",
+          "dtype": "float64",
+          "deterministic_algorithms": true,
+          "threads": 1,
+          "interop_threads": 20,
+          "platform": [
+            "Linux",
+            "6.17.0-1014-nvidia",
+            "aarch64"
+          ],
+          "python": "3.12.3",
+          "torch_build_sha256": "b62d287846a05b05f6dfa176679c95c75d9a9911ca563e92882a1b5802ec92e4",
+          "cuda_device": "NVIDIA GB10",
+          "cuda_capability": [
+            12,
+            1
+          ],
+          "cuda_runtime": "13.0",
+          "cudnn": 92000,
+          "cublas_workspace_config": ":4096:8"
+        },
+        "disposable_updates": 10,
+        "parity": {
+          "v6": {
+            "loss_diff": 0.0,
+            "max_gradient_diff": 0.0
+          },
+          "v55": {
+            "loss_diff": 0.0,
+            "max_gradient_diff": 0.0
+          }
+        },
+        "sampler_resume_identical": true,
+        "parent_unchanged": true
+      },
+      "formal_updates_confirmed": {
+        "updates": 21,
+        "branch_counts": {
+          "v6": 11,
+          "v55": 10
+        },
+        "successful_seconds": 23.447211590013467,
+        "parent_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08"
+      }
+    },
+    "gongqian-mini": {
+      "launch": {
+        "pid": 12192,
+        "root": "/Users/gongqian/experiments/v6-branchsample50-all730-2h-20260929",
+        "launched_once": true,
+        "status": {
+          "outcome": "evaluating_before",
+          "host": "gongqian-mini",
+          "objective": "v6_v55_bernoulli50_all730",
+          "start_sha256": "184e4de7fce2dcd72a7bb1501570f75e86a2cf4db7acc3e9624e5739626110e3",
+          "completed_training_seconds": 0,
+          "additional_seconds_target": 7200,
+          "started_utc": "2026-09-29T05:53:52.776851+00:00"
+        }
+      },
+      "observer": {
+        "pid": 30901,
+        "host": "gongqian-mini",
+        "root": "/Users/gongqian/experiments/v6-branchsample50-all730-2h-20260929"
+      },
+      "preflight": {
+        "outcome": "passed",
+        "runtime": {
+          "torch": "2.13.0",
+          "device": "mps",
+          "dtype": "float32",
+          "deterministic_algorithms": true,
+          "threads": 1,
+          "interop_threads": 10,
+          "platform": [
+            "Darwin",
+            "25.5.0",
+            "arm64"
+          ],
+          "python": "3.12.13",
+          "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1",
+          "mps_available": true,
+          "mps_cpu_fallback": false
+        },
+        "disposable_updates": 10,
+        "parity": {
+          "v6": {
+            "loss_diff": 0.0,
+            "max_gradient_diff": 0.0
+          },
+          "v55": {
+            "loss_diff": 0.0,
+            "max_gradient_diff": 0.0
+          }
+        },
+        "sampler_resume_identical": true,
+        "parent_unchanged": true
+      },
+      "formal_updates_confirmed": {
+        "updates": 338,
+        "branch_counts": {
+          "v6": 182,
+          "v55": 156
+        },
+        "successful_seconds": 126.78148405533284,
+        "parent_sha256": "184e4de7fce2dcd72a7bb1501570f75e86a2cf4db7acc3e9624e5739626110e3"
+      }
+    }
+  },
+  "local_code_sha256": {
+    "eval_fit.py": "e8a0763a3fde138ffc4064416ed6e8e75d67195ea0eb7e82e0b5e34da97cd607",
+    "controller.py": "c5c5397b7c702947d6a1bf37d27b0abf23239a859efaad589b750844ae509b82",
+    "branch_sampling.py": "f59d69c61770f4df45a8aaa96af061969504f3e96632feddb699e05727ffdc09",
+    "dual.py": "2e82302f7ae600fd06165bb025174f5ba48b556a5ab622cd604c415e1d02c0e9",
+    "training_support.py": "2ee5c702d7ee1f9818ac143aa8c97e8acf2b82e60cdad87b87559b1603b82a1a",
+    "frozen_evaluate.py": "726b6495ef02aa1865026f9fa19a46ebd6302b610ec9478686da9272446cd4f3",
+    "observe.py": "2c0a15bbd97070191be8026ea2f8889f87f9d9abf1034bb1dc924a581b939c47",
+    "train.py": "8965a110543933a2e42a384935d82b781c7ff6d2b4bd28a3bf6fa571cdcd4338",
+    "evaluate.py": "ee2ce7614ab3100df9afe7dfb81b9c470eb8c87de57b47ac384d7eacd0a8c862",
+    "report.py": "1da34e509f3489d299c37f4ec4a0330754227cb322d66f05703cf93bd3d30e0f",
+    "evaluation_support.py": "d6e0bfd4f3af425ae72380aa6c1bb0e282eae60bec3192862a8b6f08d17da3c3",
+    "preflight.py": "af18c2d638fc02183f37de45b15502ca3a21b93c3140b09bfd402f7aeca70036"
+  },
+  "last_verified_utc": "2026-09-29T06:06:27.934581+00:00"
+}

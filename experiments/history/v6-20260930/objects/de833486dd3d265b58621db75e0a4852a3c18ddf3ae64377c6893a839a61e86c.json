@@ -1,0 +1,231 @@
+{
+  "bank_sha256": "2090f8d9074c3b80c40667aeb2995db80ef1799a801b8c5c6b8badffe6d413d4",
+  "checkpoint_sha256": "04a2e1af576f9ac49cf921e4f59bb2e61eb692e6f682f8d6f589a92001d914ee",
+  "checkpoint_update": 22146,
+  "evaluation": "all train support + all test Query in one forward per table",
+  "identity": {
+    "code": {
+      "source/src/tabu_lab/models/restoration_v6/__init__.py": "e75a42c4c5a6ffc5334a59b2868968525cf41e496b2466d1cd2f4c8d1c56119a",
+      "source/src/tabu_lab/models/restoration_v6/model.py": "8c0d47aabcad1c7eb484197539dfe21ca5e23b2a25cb651af95f1c71effa8432",
+      "source/src/tabu_lab/models/restoration_v6/training.py": "923da21540c92cae19c2016c085dd1bedf4db96791073637ccccdd125ca64adb",
+      "train_jointall.py": "f77d61997a3c3e064de43e77b35874b9d3a93af8d4e13fd099a821abf88a0c9b",
+      "training_support.py": "6c0d77318134d63f60b3caeca283597aff503a0b9b7ff687665153f551c162bd"
+    },
+    "model_config": {
+      "backbone": {
+        "ff_width": 256,
+        "heads": 8,
+        "kind": "inducing",
+        "layers": 3,
+        "norm_eps": 1e-06,
+        "reference_mass": 1.0,
+        "slots": 256,
+        "tau_presence": 1.0,
+        "width": 128
+      },
+      "bandwidth": 1.0,
+      "center_chunk_size": 128,
+      "codec_version": "constant_weight_composition_v2",
+      "epsilon": 1e-06,
+      "numeric_scaling": "zscore",
+      "regression_width": null,
+      "ridge": 0.001,
+      "size": "small",
+      "slope_source": "shared_ll",
+      "subtokens": 1,
+      "unit_layers": 3
+    },
+    "parent_identity_sha256": "73951efeda3bc8bf32b6f2ee532c9bb8300d6210aae59026a0bbdb6308540e59",
+    "parent_manifest_sha256": "d4bc7a7ef8c5c771616b07e2013cb0c9b5d9980b950d4b6e76958fa17e05990f",
+    "parent_sha256": "d5b40d64dd81d963d4b61fa84283b3a55eabce7cf8fb3335ed6cc6ec8e553723",
+    "runtime": {
+      "deterministic_algorithms": true,
+      "device": "mps",
+      "dtype": "float32",
+      "interop_threads": 16,
+      "mps_available": true,
+      "mps_cpu_fallback": false,
+      "platform": [
+        "Darwin",
+        "25.6.0",
+        "arm64"
+      ],
+      "python": "3.12.13",
+      "threads": 1,
+      "torch": "2.13.0",
+      "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+    },
+    "sampling": [
+      {
+        "cohort": "focus2",
+        "episodes": 2
+      },
+      {
+        "cohort": "other10",
+        "episodes": 10
+      },
+      {
+        "cohort": "history618",
+        "episodes": 3
+      }
+    ],
+    "schema": "tabu.v6.jointall-continuation.v1",
+    "sha256": "849ce7cf204f1e957f11fdf10774c8c6443e5ea5e774c304bc97b74f2127c570",
+    "supervision": "joint_all"
+  },
+  "model_state_sha256": "6302ad5738d9856ed567040c6fc3f84bcceec13f41e8e472ac2e97a49d6b4db4",
+  "optimizer_updates": 0,
+  "outcome": "running",
+  "runtime": {
+    "deterministic_algorithms": true,
+    "device": "mps",
+    "dtype": "float32",
+    "interop_threads": 16,
+    "mps_available": true,
+    "mps_cpu_fallback": false,
+    "platform": [
+      "Darwin",
+      "25.6.0",
+      "arm64"
+    ],
+    "python": "3.12.13",
+    "threads": 1,
+    "torch": "2.13.0",
+    "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+  },
+  "schema": "tabu.v6.broadcast-explicit-supervision.full-context.v1",
+  "tables": {
+    "airfoil_self_noise": {
+      "forward_rows": 1503,
+      "mae": 1.76683625626168,
+      "n": 301,
+      "query_rows": 301,
+      "r2": 0.8818830177105738,
+      "rmse": 2.2234986449447236,
+      "seconds": 0.5080232918262482,
+      "slog": 0.7891141831738944,
+      "support_rows": 1202
+    },
+    "bodyfat": {
+      "forward_rows": 252,
+      "mae": 1.015116381177715,
+      "n": 51,
+      "query_rows": 51,
+      "r2": 0.9685094913285406,
+      "rmse": 1.4482256281025294,
+      "seconds": 0.2712114171590656,
+      "slog": 0.9398910422262988,
+      "support_rows": 201
+    },
+    "cars": {
+      "forward_rows": 804,
+      "mae": 1574.6797403920807,
+      "n": 161,
+      "query_rows": 161,
+      "r2": 0.959252781096146,
+      "rmse": 2235.254783754138,
+      "seconds": 0.35239749983884394,
+      "slog": 0.8564361189590145,
+      "support_rows": 643
+    },
+    "concrete_compressive_strength": {
+      "forward_rows": 1030,
+      "mae": 3.968943775993,
+      "n": 206,
+      "query_rows": 206,
+      "r2": 0.8813983987704673,
+      "rmse": 5.791816912528792,
+      "seconds": 0.355036832857877,
+      "slog": 0.8005629881796097,
+      "support_rows": 824
+    },
+    "cpu_activity": {
+      "forward_rows": 8192,
+      "mae": 2.378495042392435,
+      "n": 1639,
+      "query_rows": 1639,
+      "r2": 0.9717962966076683,
+      "rmse": 2.995935885427584,
+      "seconds": 5.676298207836226,
+      "slog": 0.7884340922079014,
+      "support_rows": 6553
+    },
+    "energy_efficiency": {
+      "forward_rows": 768,
+      "mae": 0.9547396260050984,
+      "n": 154,
+      "query_rows": 154,
+      "r2": 0.9854069151463963,
+      "rmse": 1.2442790101145815,
+      "seconds": 0.29242420801892877,
+      "slog": 0.9705241723222737,
+      "support_rows": 614
+    },
+    "kin8nm": {
+      "forward_rows": 8192,
+      "mae": 0.13073920006372736,
+      "n": 1639,
+      "query_rows": 1639,
+      "r2": 0.6170417098844003,
+      "rmse": 0.16244580319437657,
+      "seconds": 4.837551458040252,
+      "slog": 0.4642708333138814,
+      "support_rows": 6553
+    },
+    "pumadyn32nh": {
+      "forward_rows": 8192,
+      "mae": 0.01902012939489073,
+      "n": 1639,
+      "query_rows": 1639,
+      "r2": 0.5603694182347769,
+      "rmse": 0.023951886738825538,
+      "seconds": 6.126392957987264,
+      "slog": 0.37642460633431474,
+      "support_rows": 6553
+    },
+    "qsar_fish_toxicity": {
+      "forward_rows": 908,
+      "mae": 0.7352232290519463,
+      "n": 182,
+      "query_rows": 182,
+      "r2": 0.49740529414019785,
+      "rmse": 1.0554752325961922,
+      "seconds": 0.3170292500872165,
+      "slog": 0.4204912714707363,
+      "support_rows": 726
+    },
+    "red_wine": {
+      "forward_rows": 1599,
+      "mae": 0.4902166187763214,
+      "n": 320,
+      "query_rows": 320,
+      "r2": 0.4075858511393329,
+      "rmse": 0.6157475580713471,
+      "seconds": 0.5265617079567164,
+      "slog": 0.4398382538937512,
+      "support_rows": 1279
+    },
+    "space_ga": {
+      "forward_rows": 3107,
+      "mae": 0.14087734512649014,
+      "n": 622,
+      "query_rows": 622,
+      "r2": 0.10479535593604217,
+      "rmse": 0.18237357077707514,
+      "seconds": 0.9883874158840626,
+      "slog": 0.0815284484313713,
+      "support_rows": 2485
+    },
+    "white_wine": {
+      "forward_rows": 4898,
+      "mae": 0.5782045734171964,
+      "n": 980,
+      "query_rows": 980,
+      "r2": 0.3138220687741192,
+      "rmse": 0.757753940945056,
+      "seconds": 2.1618512920103967,
+      "slog": 0.27098050537194507,
+      "support_rows": 3918
+    }
+  }
+}

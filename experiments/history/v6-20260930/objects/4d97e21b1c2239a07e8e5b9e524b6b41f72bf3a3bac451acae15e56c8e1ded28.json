@@ -1,0 +1,29 @@
+{
+  "pid": 17192,
+  "command": [
+    "/Users/gongqian/.local/bin/wehub-python",
+    "--profile",
+    "train-20260920",
+    "-u",
+    "-c",
+    "import runpy; runpy.run_path('/Users/gongqian/experiments/openml12-finetune-20260927/run_squared.py',run_name='__main__')",
+    "--root",
+    "/Users/gongqian/experiments/openml12-joint2h-squared-20260927",
+    "--parent-manifest",
+    "/Users/gongqian/experiments/openml12-joint-fit-20260927/manifests/joint-openml12.json",
+    "--parent",
+    "/Users/gongqian/experiments/openml12-joint-fit-20260927/runs/main/checkpoints/e3da2393c28f6f05cab7e9d143710e69db9618015205b47f1fd3e9a041543863.pt",
+    "--parent-sha",
+    "e3da2393c28f6f05cab7e9d143710e69db9618015205b47f1fd3e9a041543863",
+    "--host",
+    "gongqian-mini",
+    "--device",
+    "mps",
+    "--seconds",
+    "7190"
+  ],
+  "cwd": "/Users/gongqian/experiments/joint618-60min-20260926/source/src",
+  "log": "/Users/gongqian/experiments/openml12-finetune-20260927/joint2h-squared-launch.log",
+  "host": "gongqian-mini",
+  "launched_utc": "2026-09-27T02:41:48.924525+00:00"
+}

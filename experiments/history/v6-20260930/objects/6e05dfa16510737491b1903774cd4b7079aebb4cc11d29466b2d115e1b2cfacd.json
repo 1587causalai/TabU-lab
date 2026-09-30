@@ -1,0 +1,60 @@
+{
+  "bank": "/home/cms/experiments/openml12-joint30m-squared-20260927/fixed-query-bank.json",
+  "bank_sha256": "e791488f67179a67ae2057440100144b34edbccb9c900f9633e2004d26284f41",
+  "checkpoint": "/home/cms/experiments/v6-target-broadcast-dgx2-20260927/stage15m-v6/checkpoints/d27940148168ccca51ab1f1a5881a122eed0125ed14e78e6a49a60eb7d67755a.pt",
+  "checkpoint_sha256": "d27940148168ccca51ab1f1a5881a122eed0125ed14e78e6a49a60eb7d67755a",
+  "checkpoint_update": 827,
+  "evaluator_sha256": "15c1a8e16ec2e9fafbc9a1fd412633ac9ea79a85568ccae52addd1439ce4c954",
+  "expected_checkpoint_sha256": "d27940148168ccca51ab1f1a5881a122eed0125ed14e78e6a49a60eb7d67755a",
+  "host": "dgx2",
+  "label": "end-smoke",
+  "model_state_sha256": "75967fd02fb0395dabdbbd7490f63a97608c02a7dc570f07ea45e3c58de7dc66",
+  "optimizer_updates": 0,
+  "outcome": "running",
+  "probes": {
+    "ordinal100_fit": {
+      "by_table": [
+        {
+          "cohort": "ordinal100",
+          "masks": 4,
+          "metrics": {
+            "accuracy": 0.1111111111111111,
+            "query_exposures": 204,
+            "rank_mae": 0.5101317122593718,
+            "unique_query_rows": 141
+          },
+          "probe": "ordinal100_fit",
+          "seconds": 0.7742505399510264,
+          "table": "ordinal_latent_train_000",
+          "target_column": 8,
+          "target_kind": "ordinal"
+        }
+      ]
+    }
+  },
+  "runtime": {
+    "cublas_workspace_config": ":4096:8",
+    "cuda_capability": [
+      12,
+      1
+    ],
+    "cuda_device": "NVIDIA GB10",
+    "cuda_runtime": "13.0",
+    "cudnn": 92000,
+    "deterministic_algorithms": true,
+    "device": "cuda:0",
+    "dtype": "float64",
+    "interop_threads": 20,
+    "platform": [
+      "Linux",
+      "6.17.0-1014-nvidia",
+      "aarch64"
+    ],
+    "python": "3.12.3",
+    "threads": 1,
+    "torch": "2.12.0.dev20260322+cu130",
+    "torch_build_sha256": "b62d287846a05b05f6dfa176679c95c75d9a9911ca563e92882a1b5802ec92e4"
+  },
+  "schema": "tabu.v6.old618-fixed-query-retention.v1",
+  "v6_identity_sha256": "b1aa43c1e4ccc156d1b1fd5f3a5309fa52d45f42744465eb2757c6473136f1de"
+}

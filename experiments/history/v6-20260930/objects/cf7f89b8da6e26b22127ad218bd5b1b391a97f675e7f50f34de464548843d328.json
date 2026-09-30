@@ -1,0 +1,41 @@
+{
+  "notified_nodes": {
+    "dustinstudio": "all_three_selected_tests_complete",
+    "dgx2": "all_three_selected_tests_complete"
+  },
+  "final_notified": true,
+  "automation_deleted": true,
+  "automation_id": "puma",
+  "launch_verified": true,
+  "launch_notified": true,
+  "verified_utc": "2026-09-29T14:01:27.080760+00:00",
+  "last_checked_utc": "2026-09-29T14:58:30.753682+00:00",
+  "last_checked_status": {
+    "dustinstudio": {
+      "outcome": "running",
+      "phase": "training",
+      "active_trial": "lr1e-5",
+      "audit_passed": true,
+      "test_started": false,
+      "seconds": {
+        "lr1e-4": 900.5072836750187,
+        "lr1e-5": 849.6475978423841,
+        "lr3e-5": 900.7490511336364
+      }
+    },
+    "dgx2": {
+      "outcome": "running",
+      "phase": "training",
+      "active_trial": "lr1e-5",
+      "audit_passed": true,
+      "test_started": false,
+      "seconds": {
+        "lr1e-4": 900.3122250119341,
+        "lr1e-5": 778.6778369570093,
+        "lr3e-5": 900.9951760220429
+      }
+    }
+  },
+  "final_notified_utc": "2026-09-29T14:58:30.753682+00:00",
+  "final_audit_passed": true
+}

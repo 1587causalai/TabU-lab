@@ -1,0 +1,11 @@
+{
+  "host": "dgx2",
+  "device": "cuda:0",
+  "parent": {
+    "stage": "adapt30",
+    "checkpoint": "/home/cms/experiments/v6-dual718-openml12-adapt60m-20260928/half1/run/checkpoints/39f28cb4e16b589f289435a529f04c19f2dbd3f0d96313945870caf19be0278d.pt",
+    "checkpoint_sha256": "39f28cb4e16b589f289435a529f04c19f2dbd3f0d96313945870caf19be0278d",
+    "manifest": "/home/cms/experiments/v6-dual718-openml12-adapt60m-20260928/balanced-replay718-manifest.json",
+    "supervision": "target_only"
+  }
+}

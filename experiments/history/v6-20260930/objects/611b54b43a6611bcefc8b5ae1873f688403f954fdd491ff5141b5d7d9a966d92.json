@@ -1,0 +1,157 @@
+{
+  "allocator_fraction_cap": 0.5,
+  "balanced_manifest": "/home/cms/experiments/v6-openml12-recover30m-20260928/balanced-manifest.json",
+  "checkpoint": "/home/cms/experiments/v6-openml12-recover30m-20260928/half1/run/checkpoints/f4712a28e9623d365452d00c5632b63d9b0e3ed26418346b3fc0241556f59847.pt",
+  "checkpoint_sha256": "f4712a28e9623d365452d00c5632b63d9b0e3ed26418346b3fc0241556f59847",
+  "checkpoint_update": 69602,
+  "cohort_updates": {
+    "focus2": 199,
+    "history618": 792,
+    "other10": 994
+  },
+  "continuation": "new_stage_preserve_weights_optimizer_rng_sampling_cursor_episode_positions",
+  "first_cycle": [
+    "white_wine",
+    "airfoil_self_noise",
+    "qsar_fish_toxicity",
+    "red_wine",
+    "pumadyn32nh",
+    "kin8nm",
+    "space_ga",
+    "bodyfat",
+    "cars",
+    "energy_efficiency",
+    "cpu_activity",
+    "concrete_compressive_strength"
+  ],
+  "host": "dgx2",
+  "identity": {
+    "code": {
+      "source/src/tabu_lab/models/restoration_v53/readout.py": "fe7965e58e06701f1f1595eed92c2f936e22c41439fbf80631d031eb9ce9306a",
+      "source/src/tabu_lab/models/restoration_v6/.___init__.py": "b78edc8369f701d784ca6b425eb235ba9760392125b2ca90c6a7d8f12179b3b5",
+      "source/src/tabu_lab/models/restoration_v6/._model.py": "b78edc8369f701d784ca6b425eb235ba9760392125b2ca90c6a7d8f12179b3b5",
+      "source/src/tabu_lab/models/restoration_v6/._training.py": "b78edc8369f701d784ca6b425eb235ba9760392125b2ca90c6a7d8f12179b3b5",
+      "source/src/tabu_lab/models/restoration_v6/__init__.py": "e75a42c4c5a6ffc5334a59b2868968525cf41e496b2466d1cd2f4c8d1c56119a",
+      "source/src/tabu_lab/models/restoration_v6/model.py": "8c0d47aabcad1c7eb484197539dfe21ca5e23b2a25cb651af95f1c71effa8432",
+      "source/src/tabu_lab/models/restoration_v6/training.py": "923da21540c92cae19c2016c085dd1bedf4db96791073637ccccdd125ca64adb",
+      "train_jointall.py": "de5dc78d752ac8207325568c6444e7b9e64e11e0a0a6f183b6d934feb5973397",
+      "training_support.py": "6c0d77318134d63f60b3caeca283597aff503a0b9b7ff687665153f551c162bd"
+    },
+    "model_config": {
+      "backbone": {
+        "ff_width": 256,
+        "heads": 8,
+        "kind": "inducing",
+        "layers": 3,
+        "norm_eps": 1e-06,
+        "reference_mass": 1.0,
+        "slots": 256,
+        "tau_presence": 1.0,
+        "width": 128
+      },
+      "bandwidth": 1.0,
+      "center_chunk_size": 128,
+      "codec_version": "constant_weight_composition_v2",
+      "epsilon": 1e-06,
+      "numeric_scaling": "zscore",
+      "regression_width": null,
+      "ridge": 0.001,
+      "size": "small",
+      "slope_source": "shared_ll",
+      "subtokens": 1,
+      "unit_layers": 3
+    },
+    "parent_identity_sha256": "4975ee492cd49b9ab1299d5902e510d19af14321d31fcad8e4123030146ddfa7",
+    "parent_manifest_sha256": "ef87f5f97c701bee970b4a96f03a39dea68edd480027e70c30732aae776d5f13",
+    "parent_sha256": "abd462dac215f6fd6245cc51144409a0293b4a0cff680426bdabeda8c9f32d6f",
+    "runtime": {
+      "cublas_workspace_config": ":4096:8",
+      "cuda_capability": [
+        12,
+        1
+      ],
+      "cuda_device": "NVIDIA GB10",
+      "cuda_runtime": "13.0",
+      "cudnn": 92000,
+      "deterministic_algorithms": true,
+      "device": "cuda:0",
+      "dtype": "float64",
+      "interop_threads": 20,
+      "platform": [
+        "Linux",
+        "6.17.0-1014-nvidia",
+        "aarch64"
+      ],
+      "python": "3.12.3",
+      "threads": 1,
+      "torch": "2.12.0.dev20260322+cu130",
+      "torch_build_sha256": "b62d287846a05b05f6dfa176679c95c75d9a9911ca563e92882a1b5802ec92e4"
+    },
+    "sampling": [
+      {
+        "cohort": "focus2",
+        "episodes": 2
+      },
+      {
+        "cohort": "other10",
+        "episodes": 10
+      },
+      {
+        "cohort": "history618",
+        "episodes": 8
+      }
+    ],
+    "schema": "tabu.v6.jointall-continuation.v1",
+    "sha256": "fb7929b3184384115ae873dfdaa8492cdadd7c96731da1fd3affcf4e28e40bfc",
+    "supervision": "target_only"
+  },
+  "openml_table_updates": {
+    "airfoil_self_noise": 100,
+    "bodyfat": 100,
+    "cars": 99,
+    "concrete_compressive_strength": 99,
+    "cpu_activity": 100,
+    "energy_efficiency": 99,
+    "kin8nm": 99,
+    "pumadyn32nh": 100,
+    "qsar_fish_toxicity": 100,
+    "red_wine": 99,
+    "space_ga": 99,
+    "white_wine": 99
+  },
+  "optimizer_restored": true,
+  "outcome": "training_completed",
+  "parent": "/home/cms/experiments/v6-sparse-relevance100-20260928/half2/run/checkpoints/abd462dac215f6fd6245cc51144409a0293b4a0cff680426bdabeda8c9f32d6f.pt",
+  "parent_sha256": "abd462dac215f6fd6245cc51144409a0293b4a0cff680426bdabeda8c9f32d6f",
+  "parent_update": 67617,
+  "per_table_episode_positions_preserved": true,
+  "rng_restored": true,
+  "runtime": {
+    "cublas_workspace_config": ":4096:8",
+    "cuda_capability": [
+      12,
+      1
+    ],
+    "cuda_device": "NVIDIA GB10",
+    "cuda_runtime": "13.0",
+    "cudnn": 92000,
+    "deterministic_algorithms": true,
+    "device": "cuda:0",
+    "dtype": "float64",
+    "interop_threads": 20,
+    "platform": [
+      "Linux",
+      "6.17.0-1014-nvidia",
+      "aarch64"
+    ],
+    "python": "3.12.3",
+    "threads": 1,
+    "torch": "2.12.0.dev20260322+cu130",
+    "torch_build_sha256": "b62d287846a05b05f6dfa176679c95c75d9a9911ca563e92882a1b5802ec92e4"
+  },
+  "sampling": "each OpenML table once plus 8 old618 per 20 updates; OpenML window512",
+  "schedule_cursor_reset": true,
+  "successful_update_seconds": 900.3147975630563,
+  "successful_update_seconds_target": 900.0,
+  "supervision": "target_only"
+}

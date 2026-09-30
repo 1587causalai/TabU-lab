@@ -1,0 +1,359 @@
+{
+  "dustinstudio": {
+    "seconds": 1800.3219773985911,
+    "updates": 4610,
+    "coverage": 718,
+    "phase": "half2",
+    "controller_outcome": "training",
+    "counts": {
+      "old618/v6/loss": {
+        "improved": 424,
+        "declined": 194,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v6/r2": {
+        "improved": 197,
+        "declined": 95,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v6/slog": {
+        "improved": 187,
+        "declined": 99,
+        "tied": 0,
+        "undefined": 6
+      },
+      "old618/v6/accuracy": {
+        "improved": 176,
+        "declined": 124,
+        "tied": 26,
+        "undefined": 0
+      },
+      "old618/v6/rank_mae": {
+        "improved": 78,
+        "declined": 56,
+        "tied": 6,
+        "undefined": 0
+      },
+      "old618/v55/loss": {
+        "improved": 489,
+        "declined": 129,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v55/r2": {
+        "improved": 219,
+        "declined": 73,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v55/slog": {
+        "improved": 213,
+        "declined": 73,
+        "tied": 0,
+        "undefined": 6
+      },
+      "old618/v55/accuracy": {
+        "improved": 194,
+        "declined": 102,
+        "tied": 30,
+        "undefined": 0
+      },
+      "old618/v55/rank_mae": {
+        "improved": 75,
+        "declined": 56,
+        "tied": 9,
+        "undefined": 0
+      },
+      "sparse100/v6/loss": {
+        "improved": 58,
+        "declined": 42,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v6/r2": {
+        "improved": 55,
+        "declined": 45,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v6/slog": {
+        "improved": 55,
+        "declined": 45,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v55/loss": {
+        "improved": 59,
+        "declined": 41,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v55/r2": {
+        "improved": 60,
+        "declined": 40,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v55/slog": {
+        "improved": 63,
+        "declined": 37,
+        "tied": 0,
+        "undefined": 0
+      }
+    },
+    "sparse_thresholds": {
+      "0": [
+        4,
+        15,
+        26,
+        35
+      ],
+      "0.1": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "dgx2": {
+    "seconds": 1800.4226505960978,
+    "updates": 3036,
+    "coverage": 718,
+    "phase": "half2",
+    "controller_outcome": "training",
+    "counts": {
+      "old618/v6/loss": {
+        "improved": 359,
+        "declined": 259,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v6/r2": {
+        "improved": 166,
+        "declined": 126,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v6/slog": {
+        "improved": 163,
+        "declined": 123,
+        "tied": 0,
+        "undefined": 6
+      },
+      "old618/v6/accuracy": {
+        "improved": 158,
+        "declined": 142,
+        "tied": 26,
+        "undefined": 0
+      },
+      "old618/v6/rank_mae": {
+        "improved": 86,
+        "declined": 46,
+        "tied": 8,
+        "undefined": 0
+      },
+      "old618/v55/loss": {
+        "improved": 480,
+        "declined": 138,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v55/r2": {
+        "improved": 223,
+        "declined": 69,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v55/slog": {
+        "improved": 217,
+        "declined": 69,
+        "tied": 0,
+        "undefined": 6
+      },
+      "old618/v55/accuracy": {
+        "improved": 199,
+        "declined": 92,
+        "tied": 35,
+        "undefined": 0
+      },
+      "old618/v55/rank_mae": {
+        "improved": 79,
+        "declined": 55,
+        "tied": 6,
+        "undefined": 0
+      },
+      "sparse100/v6/loss": {
+        "improved": 48,
+        "declined": 52,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v6/r2": {
+        "improved": 47,
+        "declined": 53,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v6/slog": {
+        "improved": 48,
+        "declined": 52,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v55/loss": {
+        "improved": 60,
+        "declined": 40,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v55/r2": {
+        "improved": 62,
+        "declined": 38,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v55/slog": {
+        "improved": 61,
+        "declined": 39,
+        "tied": 0,
+        "undefined": 0
+      }
+    },
+    "sparse_thresholds": {
+      "0": [
+        19,
+        16,
+        20,
+        32
+      ],
+      "0.1": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "gongqian-mini": {
+    "seconds": 1800.0416704881936,
+    "updates": 2971,
+    "coverage": 718,
+    "phase": "half2",
+    "controller_outcome": "training",
+    "counts": {
+      "old618/v6/loss": {
+        "improved": 332,
+        "declined": 286,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v6/r2": {
+        "improved": 162,
+        "declined": 130,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v6/slog": {
+        "improved": 149,
+        "declined": 137,
+        "tied": 0,
+        "undefined": 6
+      },
+      "old618/v6/accuracy": {
+        "improved": 163,
+        "declined": 144,
+        "tied": 19,
+        "undefined": 0
+      },
+      "old618/v6/rank_mae": {
+        "improved": 66,
+        "declined": 70,
+        "tied": 4,
+        "undefined": 0
+      },
+      "old618/v55/loss": {
+        "improved": 410,
+        "declined": 208,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v55/r2": {
+        "improved": 226,
+        "declined": 66,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v55/slog": {
+        "improved": 220,
+        "declined": 66,
+        "tied": 0,
+        "undefined": 6
+      },
+      "old618/v55/accuracy": {
+        "improved": 172,
+        "declined": 127,
+        "tied": 27,
+        "undefined": 0
+      },
+      "old618/v55/rank_mae": {
+        "improved": 70,
+        "declined": 66,
+        "tied": 4,
+        "undefined": 0
+      },
+      "sparse100/v6/loss": {
+        "improved": 80,
+        "declined": 20,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v6/r2": {
+        "improved": 81,
+        "declined": 19,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v6/slog": {
+        "improved": 78,
+        "declined": 22,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v55/loss": {
+        "improved": 41,
+        "declined": 59,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v55/r2": {
+        "improved": 41,
+        "declined": 59,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v55/slog": {
+        "improved": 50,
+        "declined": 50,
+        "tied": 0,
+        "undefined": 0
+      }
+    },
+    "sparse_thresholds": {
+      "0": [
+        10,
+        25,
+        32,
+        30
+      ],
+      "0.1": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  }
+}

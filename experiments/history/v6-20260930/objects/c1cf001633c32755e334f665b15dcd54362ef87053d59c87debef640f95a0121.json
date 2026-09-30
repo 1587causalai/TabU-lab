@@ -1,0 +1,89 @@
+{
+  "outcome": "completed",
+  "phase": "completed",
+  "host": "dustinstudio",
+  "branch": "v6",
+  "parent_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+  "pid": 6289,
+  "started_utc": "2026-09-29T14:35:35.592309+00:00",
+  "tables": {
+    "airfoil_self_noise": {
+      "preflight": "passed",
+      "outcome": "completed",
+      "successful_seconds": 903.2187417838722
+    },
+    "bodyfat": {
+      "preflight": "passed",
+      "outcome": "completed",
+      "successful_seconds": 901.9478713739663
+    },
+    "cars": {
+      "preflight": "passed",
+      "outcome": "completed",
+      "successful_seconds": 906.5666235433891,
+      "prior_attempt_successful_seconds": 40.17525950097479
+    },
+    "concrete_compressive_strength": {
+      "preflight": "passed",
+      "outcome": "completed",
+      "successful_seconds": 905.0866890025791,
+      "prior_attempt_successful_seconds": 0.0
+    },
+    "cpu_activity": {
+      "preflight": "passed",
+      "outcome": "completed",
+      "successful_seconds": 912.2526626656763,
+      "prior_attempt_successful_seconds": 0.0
+    },
+    "energy_efficiency": {
+      "preflight": "passed",
+      "outcome": "completed",
+      "successful_seconds": 907.9812111672945,
+      "prior_attempt_successful_seconds": 0.0
+    },
+    "kin8nm": {
+      "preflight": "passed",
+      "outcome": "completed",
+      "successful_seconds": 900.4663234599866,
+      "prior_attempt_successful_seconds": 0.0
+    },
+    "pumadyn32nh": {
+      "preflight": "passed",
+      "outcome": "completed",
+      "successful_seconds": 901.0741366664879,
+      "prior_attempt_successful_seconds": 0.0
+    },
+    "qsar_fish_toxicity": {
+      "preflight": "passed",
+      "outcome": "completed",
+      "successful_seconds": 904.0799384508282,
+      "prior_attempt_successful_seconds": 0.0
+    },
+    "red_wine": {
+      "preflight": "passed",
+      "outcome": "completed",
+      "successful_seconds": 900.1472227845807,
+      "prior_attempt_successful_seconds": 0.0
+    },
+    "space_ga": {
+      "preflight": "passed",
+      "outcome": "completed",
+      "successful_seconds": 900.4699572888203,
+      "prior_attempt_successful_seconds": 0.0
+    },
+    "white_wine": {
+      "preflight": "passed",
+      "outcome": "completed",
+      "successful_seconds": 900.2147144989576,
+      "prior_attempt_successful_seconds": 0.0
+    }
+  },
+  "baselines": {},
+  "successful_seconds_budget": 10800,
+  "prior_completed_utc": "2026-09-29T14:51:46.081586+00:00",
+  "active_table": "white_wine",
+  "recovery_started_utc": "2026-09-29T16:12:25.798656+00:00",
+  "recovery": "bounded-identical-backward-replay-v1",
+  "completed_utc": "2026-09-29T19:28:00.321812+00:00",
+  "total_successful_seconds": 10843.506092686439
+}

@@ -1,0 +1,30 @@
+{
+  "host": "gongqian-mini",
+  "device": "mps",
+  "dtype": "float32",
+  "runtime": "train-20260920",
+  "memory_fraction": 0.75,
+  "arms": [
+    "linear",
+    "residual_gelu"
+  ],
+  "successful_train_seconds_per_arm": 900,
+  "evaluation_seconds": [
+    0,
+    300,
+    600,
+    900
+  ],
+  "selection": "lowest median R2 over 8 frozen train-row Query windows across OpenML12, no test-based selection",
+  "train_window": 512,
+  "fit_windows": 8,
+  "fit_seed": 2026092913,
+  "module_seed": 2026092914,
+  "objective": "v6_target_only",
+  "broadcast": "encode visible cells, then broadcast original target carrier; Query seeds unchanged",
+  "residual": "h=W e; f=h+U GELU(V h), bias-free, U=0, V initialized by fixed seed",
+  "defaults_unchanged": true,
+  "optimizer": "inherit AdamW moments for existing parameters; new parameters fresh with identical hyperparameters",
+  "comparison": "equal successful training time, same per-update episode prefix; update counts may differ",
+  "scope": "single-table empirical fitting exploration; no theoretical upper-bound or unseen-table claim"
+}

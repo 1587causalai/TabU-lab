@@ -1,0 +1,76 @@
+{
+  "allocator_fraction_cap": 0.75,
+  "error": "MPS backend out of memory (MPS allocated: 13.29 GiB, other allocations: 65.30 MiB, max allowed: 13.32 GiB). Tried to allocate 1024.00 KiB on shared pool. Use PYTORCH_MPS_HIGH_WATERMARK_RATIO=0.0 to disable upper limit for memory allocations (may cause system failure).",
+  "error_type": "RuntimeError",
+  "outcome": "failed",
+  "parent_sha256": "4ae9ba2de41188f6b3712569534057df5bf0463f776a94236995533eac7561dd",
+  "purpose": "capacity_probe_not_production_continuation",
+  "recommended_max_memory": 19069665280,
+  "runtime": {
+    "deterministic_algorithms": true,
+    "device": "mps",
+    "dtype": "float32",
+    "interop_threads": 10,
+    "mps_available": true,
+    "mps_cpu_fallback": false,
+    "platform": [
+      "Darwin",
+      "25.5.0",
+      "arm64"
+    ],
+    "python": "3.12.13",
+    "threads": 1,
+    "torch": "2.13.0",
+    "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+  },
+  "supervision": "target_only",
+  "updates": [
+    {
+      "allocated": 59807488,
+      "driver": 2419900416,
+      "gradient_norm": 1.3615882396697998,
+      "loss": 0.07012487202882767,
+      "query_rows": 242,
+      "rss_peak": 702840832,
+      "sampled_peak_allocated": 1256920832,
+      "sampled_peak_driver": 2419916800,
+      "seconds": 0.8771824156865478,
+      "step": 1,
+      "table": "qsar_fish_toxicity",
+      "total_train_rows": 726,
+      "train_rows": 726
+    },
+    {
+      "allocated": 115146752,
+      "driver": 8957247488,
+      "gradient_norm": 0.6156495213508606,
+      "loss": 0.066840261220932,
+      "query_rows": 683,
+      "rss_peak": 789069824,
+      "sampled_peak_allocated": 5914960384,
+      "sampled_peak_driver": 8957263872,
+      "seconds": 4.666038916446269,
+      "step": 2,
+      "table": "cpu_activity",
+      "total_train_rows": 6553,
+      "train_rows": 2048
+    },
+    {
+      "allocated": 78514944,
+      "driver": 8953282560,
+      "gradient_norm": 1.7275127172470093,
+      "loss": 0.04157125949859619,
+      "query_rows": 401,
+      "rss_peak": 866828288,
+      "sampled_peak_allocated": 3668664064,
+      "sampled_peak_driver": 8957362176,
+      "seconds": 1.4194770837202668,
+      "step": 3,
+      "table": "airfoil_self_noise",
+      "total_train_rows": 1202,
+      "train_rows": 1202
+    }
+  ],
+  "updates_target": 24,
+  "window": 2048
+}

@@ -1,0 +1,225 @@
+{
+  "active_target_seconds": 900,
+  "active_trial": "lr1e-4",
+  "bank_sha256": "70ffabcb2c6167d3cd73f9688cc287546ed3941e20cb776807da20474fe2ae06",
+  "branch": "v6",
+  "completed_utc": "2026-09-29T19:27:59.726883+00:00",
+  "first_episode_index": 4087,
+  "host": "dustinstudio",
+  "max_total_successful_seconds": 900,
+  "memory_fraction": 0.5,
+  "monitor_exposure": "parent previously trained these rows; no new updates on monitor rows",
+  "monitor_rows": 784,
+  "optimizer_restored": true,
+  "original_train_fit_scope": "only new-update rows, masked target query; no validation labels in support",
+  "original_train_rows": 3918,
+  "outcome": "completed",
+  "parent_checkpoint": "/Users/dustinstudio/experiments/v6-all730-dustin-targetonly60m-20260929/half2/run/checkpoints/94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114.pt",
+  "parent_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+  "per_trial_successful_seconds": 900,
+  "phase": "final_evaluations",
+  "prior_attempt_successful_seconds": 0.0,
+  "repair": "bounded-identical-backward-replay-v1",
+  "runtime": {
+    "deterministic_algorithms": true,
+    "device": "mps",
+    "dtype": "float32",
+    "interop_threads": 16,
+    "mps_available": true,
+    "mps_cpu_fallback": false,
+    "platform": [
+      "Darwin",
+      "25.6.0",
+      "arm64"
+    ],
+    "python": "3.12.13",
+    "threads": 1,
+    "torch": "2.13.0",
+    "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+  },
+  "selected_trial": "lr1e-4",
+  "selection": "minimum monitor MSE; earliest node on ties; all 15-minute curves retained",
+  "selection_completed_utc": "2026-09-29T19:27:52.885484+00:00",
+  "split_sha256": "21036b67d4c6f7059b41a07e5d7d79cca82304c6df1cca1b112794bd7f5f61a4",
+  "started_utc": "2026-09-29T19:12:34.591030+00:00",
+  "strict_resume": false,
+  "test_rows": 980,
+  "test_started": true,
+  "test_started_utc": "2026-09-29T19:27:52.886769+00:00",
+  "total_successful_seconds": 900.2147144989576,
+  "trials": {
+    "lr1e-4": {
+      "final_evaluations": {
+        "test": {
+          "bank_sha256": "70ffabcb2c6167d3cd73f9688cc287546ed3941e20cb776807da20474fe2ae06",
+          "branch": "v6",
+          "checkpoint_sha256": "c583fa465313ec9728a384d74858c54e954938ec132a137639b8e4644ff1f428",
+          "metrics": {
+            "mae": 0.532369454539552,
+            "mse": 0.5230869028533767,
+            "n": 980,
+            "prediction_std": 0.6815200105338697,
+            "r2": 0.37489325509901206,
+            "rmse": 0.7232474699944527,
+            "slog": 0.34053164594507135,
+            "target_std": 0.9147656129380451
+          },
+          "model_state_unchanged": true,
+          "optimizer_updates": 0,
+          "outcome": "completed",
+          "predictions": 980,
+          "scope": "original_test",
+          "split_sha256": "21036b67d4c6f7059b41a07e5d7d79cca82304c6df1cca1b112794bd7f5f61a4"
+        },
+        "train": {
+          "bank_sha256": "70ffabcb2c6167d3cd73f9688cc287546ed3941e20cb776807da20474fe2ae06",
+          "branch": "v6",
+          "checkpoint_sha256": "c583fa465313ec9728a384d74858c54e954938ec132a137639b8e4644ff1f428",
+          "metrics": {
+            "mae": 0.34214667552736205,
+            "mse": 0.2031245717490842,
+            "n": 3134,
+            "prediction_std": 0.7303914887602236,
+            "r2": 0.7363696935658242,
+            "rmse": 0.45069343433101416,
+            "slog": 0.6509599696893347,
+            "target_std": 0.8777757207862334
+          },
+          "model_state_unchanged": true,
+          "optimizer_updates": 0,
+          "outcome": "completed",
+          "predictions": 3134,
+          "scope": "original_train",
+          "split_sha256": "21036b67d4c6f7059b41a07e5d7d79cca82304c6df1cca1b112794bd7f5f61a4"
+        }
+      },
+      "first_episode_index": 4087,
+      "initial_rng_restored": true,
+      "initial_state_hash": "1b2c9224d30ba44feedfbc6efa8fb484cced9183da406cacf073aef118a83d16",
+      "learning_rate": 0.0001,
+      "nodes": {
+        "0": {
+          "checkpoint": "/Users/dustinstudio/experiments/v6-all730-dustin-targetonly60m-20260929/half2/run/checkpoints/94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114.pt",
+          "checkpoint_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+          "metrics": {
+            "mae": 0.5223081282206944,
+            "mse": 0.45524659646715276,
+            "n": 784,
+            "prediction_std": 0.46459817877140985,
+            "r2": 0.4111530892295576,
+            "rmse": 0.6747196428644662,
+            "slog": 0.3361934109835023,
+            "target_std": 0.8792697928374557
+          },
+          "seconds": 0.0,
+          "updates": 0
+        },
+        "180": {
+          "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/white_wine/run/lr1e-4/checkpoints/c583fa465313ec9728a384d74858c54e954938ec132a137639b8e4644ff1f428.pt",
+          "checkpoint_sha256": "c583fa465313ec9728a384d74858c54e954938ec132a137639b8e4644ff1f428",
+          "metrics": {
+            "mae": 0.44846734891132434,
+            "mse": 0.36046228765478994,
+            "n": 784,
+            "prediction_std": 0.6822480486808331,
+            "r2": 0.5337535608570232,
+            "rmse": 0.600385116116972,
+            "slog": 0.4571634684704231,
+            "target_std": 0.8792697928374557
+          },
+          "seconds": 180.07874358003028,
+          "updates": 283
+        },
+        "360": {
+          "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/white_wine/run/lr1e-4/checkpoints/d6e9d22b73acfe585b5f948ca5d76b788c7c6e12a1597e8ea017d0656dc7de2c.pt",
+          "checkpoint_sha256": "d6e9d22b73acfe585b5f948ca5d76b788c7c6e12a1597e8ea017d0656dc7de2c",
+          "metrics": {
+            "mae": 0.4472422386918749,
+            "mse": 0.365710754528016,
+            "n": 784,
+            "prediction_std": 0.6894947600127797,
+            "r2": 0.526964836836759,
+            "rmse": 0.6047402372324964,
+            "slog": 0.45558454531615444,
+            "target_std": 0.8792697928374557
+          },
+          "seconds": 360.26902099722065,
+          "updates": 555
+        },
+        "540": {
+          "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/white_wine/run/lr1e-4/checkpoints/6e6c3bc2f9eda8a675e4f63b4860183ea927e668a5af8ee2c2c731554439a5cd.pt",
+          "checkpoint_sha256": "6e6c3bc2f9eda8a675e4f63b4860183ea927e668a5af8ee2c2c731554439a5cd",
+          "metrics": {
+            "mae": 0.4536328741482326,
+            "mse": 0.3836477999417818,
+            "n": 784,
+            "prediction_std": 0.738769657362842,
+            "r2": 0.5037638423379297,
+            "rmse": 0.6193930900016417,
+            "slog": 0.43537472385289255,
+            "target_std": 0.8792697928374557
+          },
+          "seconds": 540.6677809585817,
+          "updates": 832
+        },
+        "720": {
+          "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/white_wine/run/lr1e-4/checkpoints/acd906c11dc1b7e675587c9bd632feae417f684df13b05fe9cc16e6ee8bbdb41.pt",
+          "checkpoint_sha256": "acd906c11dc1b7e675587c9bd632feae417f684df13b05fe9cc16e6ee8bbdb41",
+          "metrics": {
+            "mae": 0.4628322443791798,
+            "mse": 0.408548503381375,
+            "n": 784,
+            "prediction_std": 0.7169028096593715,
+            "r2": 0.4715555789259629,
+            "rmse": 0.6391779903762136,
+            "slog": 0.41246887905577456,
+            "target_std": 0.8792697928374557
+          },
+          "seconds": 720.1257668798789,
+          "updates": 1111
+        },
+        "900": {
+          "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/white_wine/run/lr1e-4/checkpoints/a4c60746f081d64a9f9e4258d1cce0c738e7b67ee57db71d877d22e5fd8a43fb.pt",
+          "checkpoint_sha256": "a4c60746f081d64a9f9e4258d1cce0c738e7b67ee57db71d877d22e5fd8a43fb",
+          "metrics": {
+            "mae": 0.46210008221013205,
+            "mse": 0.40854982847693266,
+            "n": 784,
+            "prediction_std": 0.6998542640863026,
+            "r2": 0.4715538649572443,
+            "rmse": 0.6391790269376277,
+            "slog": 0.41732607460625737,
+            "target_std": 0.8792697928374557
+          },
+          "seconds": 900.2147144989576,
+          "updates": 1415
+        }
+      },
+      "outcome": "completed",
+      "parent_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+      "prior_attempt_successful_seconds": 0.0,
+      "retained_update_seconds": 900.2147144989576,
+      "selected": {
+        "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/white_wine/run/lr1e-4/checkpoints/c583fa465313ec9728a384d74858c54e954938ec132a137639b8e4644ff1f428.pt",
+        "checkpoint_sha256": "c583fa465313ec9728a384d74858c54e954938ec132a137639b8e4644ff1f428",
+        "metrics": {
+          "mae": 0.44846734891132434,
+          "mse": 0.36046228765478994,
+          "n": 784,
+          "prediction_std": 0.6822480486808331,
+          "r2": 0.5337535608570232,
+          "rmse": 0.600385116116972,
+          "slog": 0.4571634684704231,
+          "target_std": 0.8792697928374557
+        },
+        "seconds": 180.07874358003028,
+        "updates": 283
+      },
+      "selected_node": "180",
+      "successful_update_seconds": 900.2147144989576,
+      "updates": 1415
+    }
+  },
+  "update_rows": 3134,
+  "window_rows": 512
+}

@@ -1,0 +1,50 @@
+{
+  "dustinstudio": {
+    "outcome": "launched",
+    "host": "dustinstudio",
+    "pid": 45804,
+    "root": "/Users/dustinstudio/experiments/v6-branchsample50-sparse30-60m-20260929",
+    "started_utc": "2026-09-29T09:15:33.920335+00:00",
+    "preflight": "passed",
+    "parent": {
+      "checkpoint": "/Users/dustinstudio/experiments/v6-branchsample50-all730-2h-20260929/stage4/run/checkpoints/1a395299bdffe673bcc29a73a6dbae94c67137cf88716cffb663f311feb340c8.pt",
+      "checkpoint_sha256": "1a395299bdffe673bcc29a73a6dbae94c67137cf88716cffb663f311feb340c8",
+      "manifest": "/Users/dustinstudio/experiments/v6-branchsample50-all730-2h-20260929/all730-manifest.json",
+      "source_run": "v6-branchsample50-all730-2h-20260929",
+      "source_phase": "stage4",
+      "supervision": "target_only"
+    }
+  },
+  "dgx2": {
+    "outcome": "launched",
+    "host": "dgx2",
+    "pid": 1685557,
+    "root": "/home/cms/experiments/v6-branchsample50-sparse30-60m-20260929",
+    "started_utc": "2026-09-29T09:15:35.304893+00:00",
+    "preflight": "passed",
+    "parent": {
+      "checkpoint": "/home/cms/experiments/v6-branchsample50-all730-2h-20260929/stage4/run/checkpoints/03851a62a7403625f424bbfc95a33003676048888b7aaca89ee029e39ec7d0aa.pt",
+      "checkpoint_sha256": "03851a62a7403625f424bbfc95a33003676048888b7aaca89ee029e39ec7d0aa",
+      "manifest": "/home/cms/experiments/v6-branchsample50-all730-2h-20260929/all730-manifest.json",
+      "source_run": "v6-branchsample50-all730-2h-20260929",
+      "source_phase": "stage4",
+      "supervision": "target_only"
+    }
+  },
+  "gongqian-mini": {
+    "outcome": "launched",
+    "host": "gongqian-mini",
+    "pid": 17873,
+    "root": "/Users/gongqian/experiments/v6-branchsample50-sparse30-60m-20260929",
+    "started_utc": "2026-09-29T09:15:36.318303+00:00",
+    "preflight": "passed",
+    "parent": {
+      "checkpoint": "/Users/gongqian/experiments/v6-branchsample50-all730-2h-20260929/stage4/run/checkpoints/2a1f980ce99e83bb175f64e03e7a9002b74ffe2ff8b818a2234869afe7cdb036.pt",
+      "checkpoint_sha256": "2a1f980ce99e83bb175f64e03e7a9002b74ffe2ff8b818a2234869afe7cdb036",
+      "manifest": "/Users/gongqian/experiments/v6-branchsample50-all730-2h-20260929/all730-manifest.json",
+      "source_run": "v6-branchsample50-all730-2h-20260929",
+      "source_phase": "stage4",
+      "supervision": "target_only"
+    }
+  }
+}
