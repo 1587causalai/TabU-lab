@@ -1,0 +1,105 @@
+{
+  "bank_sha256": "2090f8d9074c3b80c40667aeb2995db80ef1799a801b8c5c6b8badffe6d413d4",
+  "checkpoint_sha256": "4f1ded54395282bc82e93bef24ed21aaf0010dbd29e2e60f33aa50a866b0370d",
+  "checkpoint_update": 80510,
+  "evaluation": "all train support + all test Query in one forward per table",
+  "evaluation_supervision": "target_only",
+  "identity": {
+    "code": {
+      "dual.py": "2e82302f7ae600fd06165bb025174f5ba48b556a5ab622cd604c415e1d02c0e9",
+      "train.py": "3d05420d3d45a8a8b4d19d2a526476fe421f1b876fa57615eb07fd44de5aad50",
+      "training_support.py": "6c0d77318134d63f60b3caeca283597aff503a0b9b7ff687665153f551c162bd"
+    },
+    "model_config": {
+      "backbone": {
+        "ff_width": 256,
+        "heads": 8,
+        "kind": "inducing",
+        "layers": 3,
+        "norm_eps": 1e-06,
+        "reference_mass": 1.0,
+        "slots": 256,
+        "tau_presence": 1.0,
+        "width": 128
+      },
+      "bandwidth": 1.0,
+      "center_chunk_size": 128,
+      "codec_version": "constant_weight_composition_v2",
+      "epsilon": 1e-06,
+      "numeric_scaling": "zscore",
+      "regression_width": null,
+      "ridge": 0.001,
+      "size": "small",
+      "slope_source": "shared_ll",
+      "subtokens": 1,
+      "unit_layers": 3
+    },
+    "objective": "0.5*v6_target_only+0.5*v55_query_squared",
+    "parent_identity_sha256": "443f1e5f2c367ba02b5ce37fb4e690ccd17c4a37a120f7bbe350d85e1b9a9aeb",
+    "parent_manifest_sha256": "90ae21ae0602338e980b2dddd8d32889984d3a550e2b6acd7822ef500ee9e715",
+    "parent_sha256": "bc97965231d03b5366d934aa88f262fe3f513c234656e0627bdef62d3575dcdc",
+    "runtime": {
+      "cublas_workspace_config": ":4096:8",
+      "cuda_capability": [
+        12,
+        1
+      ],
+      "cuda_device": "NVIDIA GB10",
+      "cuda_runtime": "13.0",
+      "cudnn": 92000,
+      "deterministic_algorithms": true,
+      "device": "cuda:0",
+      "dtype": "float64",
+      "interop_threads": 20,
+      "platform": [
+        "Linux",
+        "6.17.0-1014-nvidia",
+        "aarch64"
+      ],
+      "python": "3.12.3",
+      "threads": 1,
+      "torch": "2.12.0.dev20260322+cu130",
+      "torch_build_sha256": "b62d287846a05b05f6dfa176679c95c75d9a9911ca563e92882a1b5802ec92e4"
+    },
+    "sampling": [
+      {
+        "cohort": "history718",
+        "episodes": 718
+      }
+    ],
+    "schema": "tabu.dual718.v1",
+    "sha256": "19408ecf6a9cf7b293572c937fc6b5a6599082c1bd08e9b32c891c1cab7a2efc",
+    "supervision": "target_only",
+    "weights": [
+      0.5,
+      0.5
+    ]
+  },
+  "model_state_sha256": "0b959b1a8226f3cc91e6d82e13b92651b2e23bea6a1565340dc71a00d8db5359",
+  "optimizer_updates": 0,
+  "outcome": "running",
+  "runtime": {
+    "cublas_workspace_config": ":4096:8",
+    "cuda_capability": [
+      12,
+      1
+    ],
+    "cuda_device": "NVIDIA GB10",
+    "cuda_runtime": "13.0",
+    "cudnn": 92000,
+    "deterministic_algorithms": true,
+    "device": "cuda:0",
+    "dtype": "float64",
+    "interop_threads": 20,
+    "platform": [
+      "Linux",
+      "6.17.0-1014-nvidia",
+      "aarch64"
+    ],
+    "python": "3.12.3",
+    "threads": 1,
+    "torch": "2.12.0.dev20260322+cu130",
+    "torch_build_sha256": "b62d287846a05b05f6dfa176679c95c75d9a9911ca563e92882a1b5802ec92e4"
+  },
+  "schema": "tabu.v6.broadcast-explicit-supervision.full-context.v1"
+}

@@ -1,0 +1,543 @@
+{
+  "attempt": 2,
+  "event_seed": 10525628662894536535,
+  "split_seed": 3027770556183982630,
+  "upstream_world_hash": "4759b81dc27a3786a5f4b06b2bcc5cd8c2095270dffe04fd51f4703ad1431a9e",
+  "world": {
+    "contract_version": "scm.mixed_observational.v1",
+    "n_features": 17,
+    "node_to_output": [
+      7,
+      2,
+      5,
+      16,
+      0,
+      15,
+      10,
+      3,
+      14,
+      9,
+      6,
+      12,
+      11,
+      1,
+      13,
+      8,
+      4
+    ],
+    "nodes": [
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [],
+          "family": "additive_score",
+          "intercept": 0.1519377653158699,
+          "noise_family": "gaussian",
+          "noise_scale": 1.0
+        },
+        "n_classes": null,
+        "node": 0,
+        "parents": [],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [
+            {
+              "parent": 6,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": 1.75
+            }
+          ],
+          "family": "additive_score",
+          "intercept": -0.03055368794727903,
+          "noise_family": "gaussian",
+          "noise_scale": 0.1
+        },
+        "n_classes": null,
+        "node": 1,
+        "parents": [
+          6
+        ],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [
+            {
+              "parent": 0,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": -1.0087399685099068
+            },
+            {
+              "parent": 4,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": -0.49976351459172447
+            },
+            {
+              "parent": 6,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": 1.3398433137548436
+            }
+          ],
+          "family": "additive_score",
+          "intercept": 0.023856414048808696,
+          "noise_family": "gaussian",
+          "noise_scale": 0.1
+        },
+        "n_classes": null,
+        "node": 2,
+        "parents": [
+          0,
+          4,
+          6
+        ],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [
+            {
+              "parent": 7,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": -0.6706473914216274
+            },
+            {
+              "parent": 4,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": 1.2950685823769355
+            },
+            {
+              "parent": 15,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": -0.9672277101694103
+            }
+          ],
+          "family": "additive_score",
+          "intercept": -0.04054901396316667,
+          "noise_family": "gaussian",
+          "noise_scale": 0.5,
+          "thresholds": [
+            -0.9,
+            -0.6000000000000001,
+            -0.30000000000000004,
+            -1.1102230246251565e-16,
+            0.29999999999999993,
+            0.6,
+            0.9
+          ]
+        },
+        "n_classes": 8,
+        "node": 3,
+        "parents": [
+          7,
+          4,
+          15
+        ],
+        "type": "ordinal"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [
+            {
+              "parent": 5,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": -0.9760434433287289
+            },
+            {
+              "parent": 9,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": -0.6894827278967877
+            },
+            {
+              "parent": 0,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": 1.2784571813975634
+            }
+          ],
+          "family": "additive_score",
+          "intercept": -0.01043496145413705,
+          "noise_family": "gaussian",
+          "noise_scale": 0.1
+        },
+        "n_classes": null,
+        "node": 4,
+        "parents": [
+          5,
+          9,
+          0
+        ],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [],
+          "family": "additive_score",
+          "intercept": 0.021026493393923477,
+          "noise_family": "gaussian",
+          "noise_scale": 1.0
+        },
+        "n_classes": null,
+        "node": 5,
+        "parents": [],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [],
+          "family": "additive_score",
+          "intercept": 0.23954159265104696,
+          "noise_family": "gaussian",
+          "noise_scale": 1.0
+        },
+        "n_classes": null,
+        "node": 6,
+        "parents": [],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [
+            {
+              "parent": 16,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": 0.5345786318491182
+            },
+            {
+              "parent": 1,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": -1.443644509821048
+            },
+            {
+              "parent": 0,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": -0.8322356731322387
+            }
+          ],
+          "family": "additive_score",
+          "intercept": 0.10236791329183481,
+          "noise_family": "gaussian",
+          "noise_scale": 0.1
+        },
+        "n_classes": null,
+        "node": 7,
+        "parents": [
+          16,
+          1,
+          0
+        ],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [
+            {
+              "parent": 9,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": 1.75
+            }
+          ],
+          "family": "additive_score",
+          "intercept": -0.07393708906447585,
+          "noise_family": "gaussian",
+          "noise_scale": 0.1
+        },
+        "n_classes": null,
+        "node": 8,
+        "parents": [
+          9
+        ],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [],
+          "family": "additive_score",
+          "intercept": 0.09885577395956058,
+          "noise_family": "gaussian",
+          "noise_scale": 1.0
+        },
+        "n_classes": null,
+        "node": 9,
+        "parents": [],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [],
+          "family": "additive_score",
+          "intercept": -0.027920568560348854,
+          "noise_family": "gaussian",
+          "noise_scale": 1.0
+        },
+        "n_classes": null,
+        "node": 10,
+        "parents": [],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [
+            {
+              "parent": 10,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": -1.7499999999999998
+            }
+          ],
+          "family": "additive_score",
+          "intercept": 0.16456560374279328,
+          "noise_family": "gaussian",
+          "noise_scale": 0.1
+        },
+        "n_classes": null,
+        "node": 11,
+        "parents": [
+          10
+        ],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [
+            {
+              "parent": 0,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": 1.75
+            }
+          ],
+          "family": "additive_score",
+          "intercept": -0.2324607493423629,
+          "noise_family": "gaussian",
+          "noise_scale": 0.1
+        },
+        "n_classes": null,
+        "node": 12,
+        "parents": [
+          0
+        ],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [],
+          "family": "additive_score",
+          "intercept": -0.08719780316665413,
+          "noise_family": "gaussian",
+          "noise_scale": 1.0
+        },
+        "n_classes": null,
+        "node": 13,
+        "parents": [],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [
+            {
+              "parent": 15,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": -1.6063693185575645
+            },
+            {
+              "parent": 4,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": 0.6943180916531747
+            }
+          ],
+          "family": "additive_score",
+          "intercept": 0.04108369529092536,
+          "noise_family": "gaussian",
+          "noise_scale": 0.1
+        },
+        "n_classes": null,
+        "node": 14,
+        "parents": [
+          15,
+          4
+        ],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [
+            {
+              "parent": 5,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": 1.209833262808161
+            },
+            {
+              "parent": 8,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": -0.8091838643210849
+            },
+            {
+              "parent": 4,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": -0.9716094636865965
+            }
+          ],
+          "family": "additive_score",
+          "intercept": 0.07236127624003096,
+          "noise_family": "gaussian",
+          "noise_scale": 0.1
+        },
+        "n_classes": null,
+        "node": 15,
+        "parents": [
+          5,
+          8,
+          4
+        ],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [],
+          "family": "additive_score",
+          "intercept": -0.008335358002575772,
+          "noise_family": "gaussian",
+          "noise_scale": 1.0
+        },
+        "n_classes": null,
+        "node": 16,
+        "parents": [],
+        "type": "numeric"
+      }
+    ],
+    "output_to_node": [
+      4,
+      13,
+      1,
+      7,
+      16,
+      2,
+      10,
+      0,
+      15,
+      9,
+      6,
+      12,
+      11,
+      14,
+      8,
+      5,
+      3
+    ],
+    "parents": [
+      [],
+      [
+        6
+      ],
+      [
+        0,
+        4,
+        6
+      ],
+      [
+        7,
+        4,
+        15
+      ],
+      [
+        5,
+        9,
+        0
+      ],
+      [],
+      [],
+      [
+        16,
+        1,
+        0
+      ],
+      [
+        9
+      ],
+      [],
+      [],
+      [
+        10
+      ],
+      [
+        0
+      ],
+      [],
+      [
+        15,
+        4
+      ],
+      [
+        5,
+        8,
+        4
+      ],
+      []
+    ],
+    "target_node": 3,
+    "target_output_column": 16,
+    "topological_order": [
+      0,
+      5,
+      9,
+      4,
+      6,
+      8,
+      12,
+      16,
+      10,
+      15,
+      1,
+      2,
+      14,
+      7,
+      11,
+      13,
+      3
+    ],
+    "type_weights": {
+      "binary": 0.0,
+      "categorical": 0.0,
+      "high_cardinality": 0.0,
+      "numeric": 1.0,
+      "ordinal": 0.0
+    }
+  },
+  "world_seed": 12289927376893029773
+}

@@ -1,0 +1,28 @@
+{
+  "checkpoint_sha256": "ced305ae38d9ac5e648f4ae0cd517253f88a2849bb2232139c2d33d47c2b6231",
+  "checkpoint_update": 76817,
+  "error": "Inference tensors do not track version counter.",
+  "error_type": "RuntimeError",
+  "evaluation": "718 known tables; 2 fixed training-row Query masks per table; same inputs for V6 and V55; new bank, not comparable to historical old618 bank",
+  "optimizer_updates": 0,
+  "outcome": "failed",
+  "parent_supervision": "joint_all",
+  "runtime": {
+    "deterministic_algorithms": true,
+    "device": "mps",
+    "dtype": "float32",
+    "interop_threads": 16,
+    "mps_available": true,
+    "mps_cpu_fallback": false,
+    "platform": [
+      "Darwin",
+      "25.6.0",
+      "arm64"
+    ],
+    "python": "3.12.13",
+    "threads": 1,
+    "torch": "2.13.0",
+    "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+  },
+  "tables": {}
+}

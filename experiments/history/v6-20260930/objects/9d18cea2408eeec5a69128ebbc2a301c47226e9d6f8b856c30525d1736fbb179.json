@@ -1,0 +1,32 @@
+{
+  "host": "dgx2",
+  "outcome": "passed",
+  "checked_utc": "2026-09-29T10:34:15.192968+00:00",
+  "controller": "completed",
+  "successful_seconds": 3600.238269369409,
+  "updates": 9910,
+  "full_weighted_cycles": 11,
+  "branch_counts": {
+    "v55": 4984,
+    "v6": 4926
+  },
+  "cohort_counts": {
+    "history718": 6804,
+    "sparse100": 2974,
+    "other10": 110,
+    "focus2": 22
+  },
+  "coverage": 730,
+  "checkpoint_sha256": "d9e4fdbf91f7f976db3c82489ed003e924d10b8e4db5d19fe5bd6e8f0f9bd47e",
+  "actual_checkpoint_hash_verified": true,
+  "episode_and_cursor_continuation_verified": true,
+  "all_step_contracts_verified": true,
+  "complete_evaluations": [
+    "openml12-v6",
+    "openml12-v55",
+    "fit718"
+  ],
+  "pending": {},
+  "final_evaluation_verified_utc": "2026-09-29T10:38:06.445992+00:00",
+  "final_evaluation_counts_bank_and_checkpoint_verified": true
+}

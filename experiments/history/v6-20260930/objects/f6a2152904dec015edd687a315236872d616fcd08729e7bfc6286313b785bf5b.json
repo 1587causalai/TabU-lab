@@ -1,0 +1,28 @@
+{
+  "host": "gongqian-mini",
+  "pid": 17100,
+  "command": [
+    "/Users/gongqian/.local/bin/wehub-python",
+    "--profile",
+    "train-20260920",
+    "-u",
+    "-c",
+    "import runpy; runpy.run_path('/Users/gongqian/experiments/openml12-finetune-20260927/run_additional.py',run_name='__main__')",
+    "--root",
+    "/Users/gongqian/experiments/openml12-joint2h-20260927",
+    "--manifest",
+    "/Users/gongqian/experiments/openml12-joint-fit-20260927/manifests/joint-openml12.json",
+    "--parent",
+    "/Users/gongqian/experiments/openml12-joint-fit-20260927/runs/main/checkpoints/e3da2393c28f6f05cab7e9d143710e69db9618015205b47f1fd3e9a041543863.pt",
+    "--parent-sha",
+    "e3da2393c28f6f05cab7e9d143710e69db9618015205b47f1fd3e9a041543863",
+    "--host",
+    "gongqian-mini",
+    "--device",
+    "mps",
+    "--seconds",
+    "7190"
+  ],
+  "source_root": "/Users/gongqian/experiments/joint618-60min-20260926/source/src",
+  "launched_utc": "2026-09-27T02:37:47.934697+00:00"
+}

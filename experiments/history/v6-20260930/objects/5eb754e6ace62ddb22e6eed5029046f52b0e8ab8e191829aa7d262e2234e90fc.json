@@ -1,0 +1,139 @@
+{
+  "bank_sha256": "2090f8d9074c3b80c40667aeb2995db80ef1799a801b8c5c6b8badffe6d413d4",
+  "checkpoint_sha256": "8a48ea48f9774518be1c71ec0d5b2b700a53373d2f093de2b8d48ea3f15d33f0",
+  "checkpoint_update": 0,
+  "evaluation": "all train support + all test Query in one forward per table",
+  "identity": {
+    "code": {
+      "run_v6.py": "53b493468d87728fd30f785f4baf1a9e4be705834ce2e3564adb90f7053ea07b",
+      "source/src/tabu_lab/models/restoration_v6/__init__.py": "e75a42c4c5a6ffc5334a59b2868968525cf41e496b2466d1cd2f4c8d1c56119a",
+      "source/src/tabu_lab/models/restoration_v6/model.py": "be4297e4a159681adc67d36832331de53737189cfb256f13de7d05e4148c3965",
+      "source/src/tabu_lab/models/restoration_v6/training.py": "ce82a1a7bf1b7459cca38a167a7d7b9a87736be79357f738ec2a22a2433f91f3"
+    },
+    "device": "cuda:0",
+    "model_config": {
+      "backbone": {
+        "ff_width": 256,
+        "heads": 8,
+        "kind": "inducing",
+        "layers": 3,
+        "norm_eps": 1e-06,
+        "reference_mass": 1.0,
+        "slots": 256,
+        "tau_presence": 1.0,
+        "width": 128
+      },
+      "bandwidth": 1.0,
+      "center_chunk_size": 128,
+      "codec_version": "constant_weight_composition_v2",
+      "epsilon": 1e-06,
+      "numeric_scaling": "zscore",
+      "regression_width": null,
+      "ridge": 0.001,
+      "size": "small",
+      "slope_source": "shared_ll",
+      "subtokens": 1,
+      "unit_layers": 3
+    },
+    "objective": "all Query-row observed columns: chi_target/128 * squared joint code",
+    "parent_identity_sha256": "d1db41341ad1d933a9105b312b878f1320d711021a916bedf264c41641fcae8a",
+    "parent_manifest_sha256": "184067d4ad5eb3906a2046aea04a343ea2e4c93a626965a20dfa89b951fdc61d",
+    "parent_sha256": "86f380c39c4da737eb92de301e1c69ac11c47304aa23b86ee034a40bfb3ad952",
+    "recipe": {
+      "real": {
+        "fraction": 0.3333333333333333,
+        "kind": "supervised_row",
+        "numeric_query_guard": {
+          "kind": "none"
+        }
+      },
+      "synthetic": {
+        "fraction": 0.25,
+        "kind": "supervised_row",
+        "numeric_query_guard": {
+          "kind": "none"
+        }
+      }
+    },
+    "runtime": {
+      "cublas_workspace_config": ":4096:8",
+      "cuda_capability": [
+        12,
+        1
+      ],
+      "cuda_device": "NVIDIA GB10",
+      "cuda_runtime": "13.0",
+      "cudnn": 92000,
+      "deterministic_algorithms": true,
+      "device": "cuda:0",
+      "dtype": "float64",
+      "interop_threads": 20,
+      "platform": [
+        "Linux",
+        "6.17.0-1014-nvidia",
+        "aarch64"
+      ],
+      "python": "3.12.3",
+      "threads": 1,
+      "torch": "2.12.0.dev20260322+cu130",
+      "torch_build_sha256": "b62d287846a05b05f6dfa176679c95c75d9a9911ca563e92882a1b5802ec92e4"
+    },
+    "sampling": [
+      {
+        "cohort": "focus2",
+        "episodes": 6
+      },
+      {
+        "cohort": "other10",
+        "episodes": 10
+      },
+      {
+        "cohort": "history618",
+        "episodes": 4
+      }
+    ],
+    "schema": "tabu.v6.target-broadcast.joint-query.v1",
+    "sha256": "b1aa43c1e4ccc156d1b1fd5f3a5309fa52d45f42744465eb2757c6473136f1de"
+  },
+  "model_state_sha256": "a8a017cdc3462e94df275c3c06d47f92d89e33c071cf8262ae07b97cebdc71c2",
+  "optimizer_updates": 0,
+  "outcome": "completed",
+  "runtime": {
+    "cublas_workspace_config": ":4096:8",
+    "cuda_capability": [
+      12,
+      1
+    ],
+    "cuda_device": "NVIDIA GB10",
+    "cuda_runtime": "13.0",
+    "cudnn": 92000,
+    "deterministic_algorithms": true,
+    "device": "cuda:0",
+    "dtype": "float64",
+    "interop_threads": 20,
+    "platform": [
+      "Linux",
+      "6.17.0-1014-nvidia",
+      "aarch64"
+    ],
+    "python": "3.12.3",
+    "threads": 1,
+    "torch": "2.12.0.dev20260322+cu130",
+    "torch_build_sha256": "b62d287846a05b05f6dfa176679c95c75d9a9911ca563e92882a1b5802ec92e4"
+  },
+  "schema": "tabu.v6.openml12.full-context.v1",
+  "tables": {
+    "pumadyn32nh": {
+      "forward_rows": 8192,
+      "mae": 0.033711856276238274,
+      "n": 1639,
+      "query_rows": 1639,
+      "r2": -0.3630778538104249,
+      "rmse": 0.04217509918038497,
+      "seconds": 21.317775196861476,
+      "slog": -0.2065077425167754,
+      "support_rows": 6553
+    }
+  },
+  "total_predictions": 1639
+}

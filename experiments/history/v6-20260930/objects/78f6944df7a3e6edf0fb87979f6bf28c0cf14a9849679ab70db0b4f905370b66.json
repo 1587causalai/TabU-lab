@@ -1,0 +1,8 @@
+{
+  "error": "{'label': 'attempt-001-main', 'command': ['/home/cms/.local/bin/wehub-python', '--profile', 'train-20260920', '-u', '-m', 'tabu_lab.cli', 'curriculum-v55', 'run', '--manifest', '/home/cms/experiments/tabu-v55-ordinal100-continuous-dgx2-20260926/manifests/candidate.json', '--output-root', '/home/cms/experiments/tabu-v55-ordinal100-continuous-dgx2-20260926/runs/attempt-001-main', '--device', 'cuda:0', '--initialize-from', '/home/cms/experiments/tabu-v55-nominal100-retention-dgx2-20260926/runs/attempt-003-second30min/checkpoint-progress.pt', '--max-updates-this-invocation', '20000'], 'pid': 114, 'started_utc': '2026-09-26T05:30:31.853461+00:00', 'returncode': 127, 'wall_seconds': 0.007500255946069956}",
+  "error_type": "AssertionError",
+  "identity_sha256": "6161840153c9b7a681aba90f5a0a6c72b8901d5be2a551ce82c2a223f4b50873",
+  "schema": "tabu.ordinal100.current.v1",
+  "status": "failed",
+  "updated_utc": "2026-09-26T05:30:31.871684+00:00"
+}

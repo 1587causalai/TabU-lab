@@ -1,0 +1,11 @@
+{
+  "outcome": "failed",
+  "phase": "before",
+  "completed_training_seconds": 0.0,
+  "additional_seconds_target": 1800,
+  "started_utc": "2026-09-28T11:03:24.165103+00:00",
+  "start_sha256": "ced305ae38d9ac5e648f4ae0cd517253f88a2849bb2232139c2d33d47c2b6231",
+  "checkpoint_sha256": "ced305ae38d9ac5e648f4ae0cd517253f88a2849bb2232139c2d33d47c2b6231",
+  "error": "Command '['/Users/dustinstudio/.local/bin/wehub-python', '--profile', 'train-20260920', '-u', '-c', \"import runpy;runpy.run_path('/Users/dustinstudio/experiments/v6-v55-dual718-30m-20260928/evaluate.py',run_name='__main__')\", '--host', 'dustinstudio', '--device', 'mps', '--checkpoint', '/Users/dustinstudio/experiments/v6-openml12-recover30m-20260928/half2/run/checkpoints/ced305ae38d9ac5e648f4ae0cd517253f88a2849bb2232139c2d33d47c2b6231.pt', '--expected-sha', 'ced305ae38d9ac5e648f4ae0cd517253f88a2849bb2232139c2d33d47c2b6231', '--output', '/Users/dustinstudio/experiments/v6-v55-dual718-30m-20260928/evaluations/before']' returned non-zero exit status 1.",
+  "error_type": "CalledProcessError"
+}

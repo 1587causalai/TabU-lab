@@ -1,0 +1,109 @@
+{
+  "bank_sha256": "2090f8d9074c3b80c40667aeb2995db80ef1799a801b8c5c6b8badffe6d413d4",
+  "checkpoint_sha256": "4d5e0e5b27ab401586917a2128bdbfb86e889c4d02a4e7602782332bd4c9660c",
+  "checkpoint_update": 44961,
+  "evaluation": "all train support + all test Query in one forward per table",
+  "identity": {
+    "code": {
+      "source/src/tabu_lab/models/restoration_v6/__init__.py": "e75a42c4c5a6ffc5334a59b2868968525cf41e496b2466d1cd2f4c8d1c56119a",
+      "source/src/tabu_lab/models/restoration_v6/model.py": "8c0d47aabcad1c7eb484197539dfe21ca5e23b2a25cb651af95f1c71effa8432",
+      "source/src/tabu_lab/models/restoration_v6/training.py": "923da21540c92cae19c2016c085dd1bedf4db96791073637ccccdd125ca64adb",
+      "train_jointall.py": "bb98be6e0c1d466e04c118ea6bf21069f0da376c57abc8beba6b693170a1e244",
+      "training_support.py": "6c0d77318134d63f60b3caeca283597aff503a0b9b7ff687665153f551c162bd"
+    },
+    "model_config": {
+      "backbone": {
+        "ff_width": 256,
+        "heads": 8,
+        "kind": "inducing",
+        "layers": 3,
+        "norm_eps": 1e-06,
+        "reference_mass": 1.0,
+        "slots": 256,
+        "tau_presence": 1.0,
+        "width": 128
+      },
+      "bandwidth": 1.0,
+      "center_chunk_size": 128,
+      "codec_version": "constant_weight_composition_v2",
+      "epsilon": 1e-06,
+      "numeric_scaling": "zscore",
+      "regression_width": null,
+      "ridge": 0.001,
+      "size": "small",
+      "slope_source": "shared_ll",
+      "subtokens": 1,
+      "unit_layers": 3
+    },
+    "parent_identity_sha256": "911974b92b1abbe831cfbfc87457540ee101ab4d1e1eb4129f9ad81f225b5fdd",
+    "parent_manifest_sha256": "0f97cfe58aefdb1f90b597d24fc4f251c1b3e27ed4ee383933a387031476d479",
+    "parent_sha256": "52de69361e12fce6c9354daaa2c4d23537a38384074375609e5d52c5ba1eb5a1",
+    "runtime": {
+      "cublas_workspace_config": ":4096:8",
+      "cuda_capability": [
+        12,
+        1
+      ],
+      "cuda_device": "NVIDIA GB10",
+      "cuda_runtime": "13.0",
+      "cudnn": 92000,
+      "deterministic_algorithms": true,
+      "device": "cuda:0",
+      "dtype": "float64",
+      "interop_threads": 20,
+      "platform": [
+        "Linux",
+        "6.17.0-1014-nvidia",
+        "aarch64"
+      ],
+      "python": "3.12.3",
+      "threads": 1,
+      "torch": "2.12.0.dev20260322+cu130",
+      "torch_build_sha256": "b62d287846a05b05f6dfa176679c95c75d9a9911ca563e92882a1b5802ec92e4"
+    },
+    "sampling": [
+      {
+        "cohort": "focus2",
+        "episodes": 2
+      },
+      {
+        "cohort": "other10",
+        "episodes": 10
+      },
+      {
+        "cohort": "history618",
+        "episodes": 8
+      }
+    ],
+    "schema": "tabu.v6.jointall-continuation.v1",
+    "sha256": "410879d1c90789f682d9cfe4c3c951ab9d82faa6559bd500445187d4850d00ba",
+    "supervision": "target_only"
+  },
+  "model_state_sha256": "478c9e22ba86dc76089b04d90d457a1b92e594b2a61e3cf1b0c1037211cd51b0",
+  "optimizer_updates": 0,
+  "outcome": "running",
+  "runtime": {
+    "cublas_workspace_config": ":4096:8",
+    "cuda_capability": [
+      12,
+      1
+    ],
+    "cuda_device": "NVIDIA GB10",
+    "cuda_runtime": "13.0",
+    "cudnn": 92000,
+    "deterministic_algorithms": true,
+    "device": "cuda:0",
+    "dtype": "float64",
+    "interop_threads": 20,
+    "platform": [
+      "Linux",
+      "6.17.0-1014-nvidia",
+      "aarch64"
+    ],
+    "python": "3.12.3",
+    "threads": 1,
+    "torch": "2.12.0.dev20260322+cu130",
+    "torch_build_sha256": "b62d287846a05b05f6dfa176679c95c75d9a9911ca563e92882a1b5802ec92e4"
+  },
+  "schema": "tabu.v6.broadcast-explicit-supervision.full-context.v1"
+}

@@ -1,0 +1,525 @@
+{
+  "actual_evaluation_bank_sha256": "24af9c124e166c83ea5ab44201f5b1986d8d30c1221abad43ce6166bc67782fb",
+  "cause": "legacy validator called build_episode without evaluation=True and without the SHA256 probe-name-derived evaluation seed used by evaluate_probe",
+  "claim_boundary": "Runner-produced step0/interim/final evaluations remain internally paired because all use the same frozen evaluate_probe path. The legacy exported bank SHA must not establish alignment with an external baseline.",
+  "examples": [
+    {
+      "actual_mask_seed": 13984258611385252728,
+      "actual_query_addresses_head": [
+        [
+          2,
+          8
+        ],
+        [
+          5,
+          8
+        ],
+        [
+          7,
+          8
+        ],
+        [
+          9,
+          8
+        ],
+        [
+          10,
+          8
+        ]
+      ],
+      "legacy_mask_seed": 18104387134543724301,
+      "legacy_query_addresses_head": [
+        [
+          6,
+          8
+        ],
+        [
+          18,
+          8
+        ],
+        [
+          23,
+          8
+        ],
+        [
+          26,
+          8
+        ],
+        [
+          46,
+          8
+        ]
+      ],
+      "mask": 0,
+      "probe": "ordinal100_fit",
+      "table": "ordinal_latent_train_000"
+    },
+    {
+      "actual_mask_seed": 6589056130873175808,
+      "actual_query_addresses_head": [
+        [
+          3,
+          8
+        ],
+        [
+          6,
+          8
+        ],
+        [
+          8,
+          8
+        ],
+        [
+          18,
+          8
+        ],
+        [
+          19,
+          8
+        ]
+      ],
+      "legacy_mask_seed": 4074826085647628015,
+      "legacy_query_addresses_head": [
+        [
+          3,
+          8
+        ],
+        [
+          8,
+          8
+        ],
+        [
+          9,
+          8
+        ],
+        [
+          19,
+          8
+        ],
+        [
+          20,
+          8
+        ]
+      ],
+      "mask": 1,
+      "probe": "ordinal100_fit",
+      "table": "ordinal_latent_train_000"
+    },
+    {
+      "actual_mask_seed": 9932157885302955919,
+      "actual_query_addresses_head": [
+        [
+          0,
+          8
+        ],
+        [
+          2,
+          8
+        ],
+        [
+          7,
+          8
+        ],
+        [
+          17,
+          8
+        ],
+        [
+          19,
+          8
+        ]
+      ],
+      "legacy_mask_seed": 3326418228861154601,
+      "legacy_query_addresses_head": [
+        [
+          8,
+          8
+        ],
+        [
+          13,
+          8
+        ],
+        [
+          15,
+          8
+        ],
+        [
+          24,
+          8
+        ],
+        [
+          25,
+          8
+        ]
+      ],
+      "mask": 2,
+      "probe": "ordinal100_fit",
+      "table": "ordinal_latent_train_000"
+    },
+    {
+      "actual_mask_seed": 1332514856297237393,
+      "actual_query_addresses_head": [
+        [
+          3,
+          8
+        ],
+        [
+          5,
+          8
+        ],
+        [
+          6,
+          8
+        ],
+        [
+          12,
+          8
+        ],
+        [
+          13,
+          8
+        ]
+      ],
+      "legacy_mask_seed": 14544562363515097664,
+      "legacy_query_addresses_head": [
+        [
+          3,
+          8
+        ],
+        [
+          6,
+          8
+        ],
+        [
+          10,
+          8
+        ],
+        [
+          11,
+          8
+        ],
+        [
+          12,
+          8
+        ]
+      ],
+      "mask": 3,
+      "probe": "ordinal100_fit",
+      "table": "ordinal_latent_train_000"
+    },
+    {
+      "actual_mask_seed": 7861279754365087274,
+      "actual_query_addresses_head": [
+        [
+          5,
+          12
+        ],
+        [
+          6,
+          12
+        ],
+        [
+          10,
+          12
+        ],
+        [
+          12,
+          12
+        ],
+        [
+          20,
+          12
+        ]
+      ],
+      "legacy_mask_seed": 16420947745255766891,
+      "legacy_query_addresses_head": [
+        [
+          1,
+          12
+        ],
+        [
+          6,
+          12
+        ],
+        [
+          9,
+          12
+        ],
+        [
+          11,
+          12
+        ],
+        [
+          23,
+          12
+        ]
+      ],
+      "mask": 0,
+      "probe": "ordinal100_fit",
+      "table": "ordinal_latent_train_001"
+    },
+    {
+      "actual_mask_seed": 13071703953192742368,
+      "actual_query_addresses_head": [
+        [
+          16,
+          12
+        ],
+        [
+          20,
+          12
+        ],
+        [
+          24,
+          12
+        ],
+        [
+          32,
+          12
+        ],
+        [
+          34,
+          12
+        ]
+      ],
+      "legacy_mask_seed": 2073370219579637973,
+      "legacy_query_addresses_head": [
+        [
+          4,
+          12
+        ],
+        [
+          21,
+          12
+        ],
+        [
+          28,
+          12
+        ],
+        [
+          31,
+          12
+        ],
+        [
+          41,
+          12
+        ]
+      ],
+      "mask": 1,
+      "probe": "ordinal100_fit",
+      "table": "ordinal_latent_train_001"
+    },
+    {
+      "actual_mask_seed": 4600270503052146691,
+      "actual_query_addresses_head": [
+        [
+          5,
+          12
+        ],
+        [
+          7,
+          12
+        ],
+        [
+          10,
+          12
+        ],
+        [
+          11,
+          12
+        ],
+        [
+          19,
+          12
+        ]
+      ],
+      "legacy_mask_seed": 6579161673050586844,
+      "legacy_query_addresses_head": [
+        [
+          2,
+          12
+        ],
+        [
+          4,
+          12
+        ],
+        [
+          18,
+          12
+        ],
+        [
+          21,
+          12
+        ],
+        [
+          31,
+          12
+        ]
+      ],
+      "mask": 2,
+      "probe": "ordinal100_fit",
+      "table": "ordinal_latent_train_001"
+    },
+    {
+      "actual_mask_seed": 10101989347300970043,
+      "actual_query_addresses_head": [
+        [
+          2,
+          12
+        ],
+        [
+          5,
+          12
+        ],
+        [
+          6,
+          12
+        ],
+        [
+          10,
+          12
+        ],
+        [
+          17,
+          12
+        ]
+      ],
+      "legacy_mask_seed": 1607790476701576304,
+      "legacy_query_addresses_head": [
+        [
+          2,
+          12
+        ],
+        [
+          6,
+          12
+        ],
+        [
+          9,
+          12
+        ],
+        [
+          16,
+          12
+        ],
+        [
+          17,
+          12
+        ]
+      ],
+      "mask": 3,
+      "probe": "ordinal100_fit",
+      "table": "ordinal_latent_train_001"
+    },
+    {
+      "actual_mask_seed": 14281085630074233743,
+      "actual_query_addresses_head": [
+        [
+          6,
+          16
+        ],
+        [
+          9,
+          16
+        ],
+        [
+          14,
+          16
+        ],
+        [
+          17,
+          16
+        ],
+        [
+          21,
+          16
+        ]
+      ],
+      "legacy_mask_seed": 10838133106833783210,
+      "legacy_query_addresses_head": [
+        [
+          5,
+          16
+        ],
+        [
+          8,
+          16
+        ],
+        [
+          23,
+          16
+        ],
+        [
+          26,
+          16
+        ],
+        [
+          41,
+          16
+        ]
+      ],
+      "mask": 0,
+      "probe": "ordinal100_fit",
+      "table": "ordinal_latent_train_002"
+    },
+    {
+      "actual_mask_seed": 14691191951111244578,
+      "actual_query_addresses_head": [
+        [
+          8,
+          16
+        ],
+        [
+          19,
+          16
+        ],
+        [
+          26,
+          16
+        ],
+        [
+          30,
+          16
+        ],
+        [
+          36,
+          16
+        ]
+      ],
+      "legacy_mask_seed": 12128917768942718123,
+      "legacy_query_addresses_head": [
+        [
+          4,
+          16
+        ],
+        [
+          5,
+          16
+        ],
+        [
+          8,
+          16
+        ],
+        [
+          15,
+          16
+        ],
+        [
+          22,
+          16
+        ]
+      ],
+      "mask": 1,
+      "probe": "ordinal100_fit",
+      "table": "ordinal_latent_train_002"
+    }
+  ],
+  "identity_sha256": "6161840153c9b7a681aba90f5a0a6c72b8901d5be2a551ce82c2a223f4b50873",
+  "legacy_export_bank_sha256": "32d723aaba9074f26ac8dc3348dd5f322fadd0c95cf7bce7db632d0f14e64819",
+  "masks": 998,
+  "outcome": "legacy_export_does_not_match_actual_evaluator",
+  "query_address_mismatched_masks": 998,
+  "schema": "tabu.ordinal100.evaluation-bank-correction.v1",
+  "tables": 498,
+  "training_or_model_execution": false
+}

@@ -1,0 +1,53 @@
+{
+  "notified": {
+    "gongqian-mini/stage1": {
+      "notified_utc": "2026-09-29T11:42:35.734564+00:00",
+      "checkpoint_sha256": "f83f9add64e28bb1354b085119e3840bfeaafccf31990623893e09a2a264e08f",
+      "report": "STAGE1.md"
+    },
+    "gongqian-mini/stage2": {
+      "notified_utc": "2026-09-29T12:26:21.076020+00:00",
+      "checkpoint_sha256": "a3d1497b5cb234a5617608b487e54167cb6280c233f3605dc6c4b55af9c8f92d",
+      "report": "STAGE2.md"
+    }
+  },
+  "phase_notifications": {
+    "gongqian-mini/stage1": {
+      "notified_utc": "2026-09-29T11:42:35.734564+00:00",
+      "checkpoint_sha256": "f83f9add64e28bb1354b085119e3840bfeaafccf31990623893e09a2a264e08f",
+      "report": "STAGE1.md"
+    },
+    "gongqian-mini/stage2": {
+      "notified_utc": "2026-09-29T12:26:21.076020+00:00",
+      "checkpoint_sha256": "a3d1497b5cb234a5617608b487e54167cb6280c233f3605dc6c4b55af9c8f92d",
+      "report": "STAGE2.md"
+    }
+  },
+  "final_notified": true,
+  "automation_deleted": true,
+  "launch_notified": true,
+  "created_utc": "2026-09-29T10:50:51.284982+00:00",
+  "automation_id": "mini-30",
+  "launch_verified_utc": "2026-09-29T10:58:15.168222+00:00",
+  "parent_sha256": "11d74eda701a8bfcf8d7ab44e7bd1548e2757a6145d61d8df81084300aabb116",
+  "last_checked_utc": "2026-09-29T12:26:21.076020+00:00",
+  "last_check": {
+    "host": "gongqian-mini",
+    "phase": "stage2",
+    "outcome": "completed",
+    "new_complete_nodes": [
+      "gongqian-mini/stage2"
+    ],
+    "training_or_evaluation_failures": [],
+    "performance_regressions": [
+      "v55 sparse100 final-half-hour reversal",
+      "v6 cpu_activity test R2=-0.4624113",
+      "v6 new120__discoscm_090 fit R2=-9.29670"
+    ],
+    "successful_training_seconds": 3600.172314907424,
+    "all_final_evaluations_verified": true,
+    "default_changed": false,
+    "recommendation": "Do not extend unchanged recipe; retain stage1 as research candidate and keep existing default."
+  },
+  "automation_deleted_utc": "2026-09-29T12:26:29.770719+00:00"
+}

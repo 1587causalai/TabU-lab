@@ -1,0 +1,49 @@
+{
+  "name": "v6-branchsample50-sparse30-mini-continue60m-20260929",
+  "tables": 730,
+  "broadcast_loss": "V6 target_only original own target encoding squared",
+  "unbroadcast_loss": "V55 original Query squared",
+  "branch_probability": [
+    0.5,
+    0.5
+  ],
+  "selected_loss_weight": 1,
+  "forwards_per_update": 1,
+  "optimizer_steps_per_update": 1,
+  "randommix2": false,
+  "training_seconds_per_host": 3600,
+  "evaluation_cumulative_seconds": [
+    1800,
+    3600
+  ],
+  "window_rows": {
+    "openml12": 512,
+    "history718": 204
+  },
+  "preserve": [
+    "model",
+    "optimizer",
+    "learning_rate",
+    "RNG",
+    "episode_offsets",
+    "branch_rng_state",
+    "mixture_cursor"
+  ],
+  "branch_sampler": "independent dedicated Python RNG saved per successful update",
+  "seed": 2026092901,
+  "sparse_sampling_probability": 0.3,
+  "sparse_per_table_weight_relative_to_others": 2.7,
+  "sampling_cycle": {
+    "sparse100": 270,
+    "old618": 618,
+    "openml12": 12
+  },
+  "sampling_transition": "unchanged weighted sampling; preserve cursor and all per-table offsets in both stages",
+  "baseline": "prior sparse30 stage2 exact checkpoint and fixed banks reused",
+  "hosts": [
+    "gongqian-mini"
+  ],
+  "parent_update": 199161,
+  "previous_phase": "sparse30 60 minutes",
+  "default_checkpoint_changed": false
+}

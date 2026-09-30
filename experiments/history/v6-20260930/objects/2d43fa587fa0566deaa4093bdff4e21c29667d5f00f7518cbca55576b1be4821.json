@@ -1,0 +1,42 @@
+{
+  "checkpoint_roundtrip": true,
+  "discarded_updates": 2,
+  "formal_updates": 0,
+  "memory_cap": 0.75,
+  "original_parent_unchanged": true,
+  "outcome": "passed",
+  "output_max_abs_error": 0.0,
+  "residual_gradient_norms": [
+    {
+      "loss": 3.186898946762085,
+      "u": 0.7431716918945312,
+      "v": 0.0
+    },
+    {
+      "loss": 3.0797581672668457,
+      "u": 0.6929440498352051,
+      "v": 0.00974374357610941
+    }
+  ],
+  "runtime": {
+    "deterministic_algorithms": true,
+    "device": "mps",
+    "dtype": "float32",
+    "interop_threads": 10,
+    "mps_available": true,
+    "mps_cpu_fallback": false,
+    "platform": [
+      "Darwin",
+      "25.5.0",
+      "arm64"
+    ],
+    "python": "3.12.13",
+    "threads": 1,
+    "torch": "2.13.0",
+    "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+  },
+  "seeds_and_null_preserved": true,
+  "selected_table": "pumadyn32nh",
+  "source_snapshot_sha256": "27a4af37e29798757c577cf6755401056b51275b244bdcf9b7a0636335b93631",
+  "zero_init_exact_carriers": true
+}

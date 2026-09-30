@@ -1,0 +1,41 @@
+{
+  "checked_utc": "2026-09-29T04:44:14.415521+00:00",
+  "hosts": {
+    "dustinstudio": {
+      "checkpoint_sha256": "2cae5ac1b8f712eaf14c5fbc83991ddde2fb520991ca8078b43150720702af6c",
+      "parent_sha256": "689958a995a3b3f85642017abdf0456e8c756cb1109250f2faea6ff884abc753",
+      "cumulative_successful_seconds": 2700.027665412752,
+      "cumulative_updates": 8065,
+      "table_coverage": 730,
+      "schedule_cursor_reset": false,
+      "optimizer_rng_episode_preserved": true,
+      "bank_sha_match": "passed",
+      "forward_passes_per_update": 1,
+      "optimizer_steps_per_update": 1
+    },
+    "dgx2": {
+      "checkpoint_sha256": "35a5ed76b1ac3397de4f79bc6759ae9c4d4a681c4946c1ee6804834a7befd872",
+      "parent_sha256": "b186939c2ba3f275cb5a9d10e4e1d520ed9df151f2d57651e605aca51ac4d8db",
+      "cumulative_successful_seconds": 2700.2445233120525,
+      "cumulative_updates": 8278,
+      "table_coverage": 730,
+      "schedule_cursor_reset": false,
+      "optimizer_rng_episode_preserved": true,
+      "bank_sha_match": "passed",
+      "forward_passes_per_update": 1,
+      "optimizer_steps_per_update": 1
+    },
+    "gongqian-mini": {
+      "checkpoint_sha256": "c9a1266fe40fa0ecc50be449f5a9252686e0ad81551fc05521314872197a7d6d",
+      "parent_sha256": "4949d4d3aca1c364f3b206c91a5609e77df831b0020d412cf2f00e5c0f3d01bb",
+      "cumulative_successful_seconds": 2700.0758049162105,
+      "cumulative_updates": 6952,
+      "table_coverage": 730,
+      "schedule_cursor_reset": false,
+      "optimizer_rng_episode_preserved": true,
+      "bank_sha_match": "passed",
+      "forward_passes_per_update": 1,
+      "optimizer_steps_per_update": 1
+    }
+  }
+}

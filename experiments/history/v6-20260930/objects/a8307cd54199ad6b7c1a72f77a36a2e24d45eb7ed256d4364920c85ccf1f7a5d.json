@@ -1,0 +1,640 @@
+{
+  "attempt": 11,
+  "event_seed": 7234437607952556692,
+  "split_seed": 14866631491587964201,
+  "upstream_world_hash": "8f07445b20661dec821b985d80f4be2ae962548e0c9b89c9cf8f92ad273c83d3",
+  "world": {
+    "contract_version": "scm.mixed_observational.v1",
+    "n_features": 21,
+    "node_to_output": [
+      11,
+      3,
+      10,
+      2,
+      9,
+      6,
+      17,
+      19,
+      8,
+      0,
+      14,
+      12,
+      15,
+      4,
+      1,
+      13,
+      7,
+      5,
+      20,
+      16,
+      18
+    ],
+    "nodes": [
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [
+            {
+              "parent": 12,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": 1.75
+            }
+          ],
+          "family": "additive_score",
+          "intercept": -0.19660881218797355,
+          "noise_family": "gaussian",
+          "noise_scale": 0.1
+        },
+        "n_classes": null,
+        "node": 0,
+        "parents": [
+          12
+        ],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [
+            {
+              "parent": 9,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": 0.5463743803610889
+            },
+            {
+              "parent": 12,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": 1.1539878949436229
+            },
+            {
+              "parent": 6,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": -1.196781924499456
+            }
+          ],
+          "family": "additive_score",
+          "intercept": 0.0464100967450689,
+          "noise_family": "gaussian",
+          "noise_scale": 0.1
+        },
+        "n_classes": null,
+        "node": 1,
+        "parents": [
+          9,
+          12,
+          6
+        ],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [
+            {
+              "parent": 5,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": 1.3863084535867451
+            },
+            {
+              "parent": 0,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": 1.0680116439037208
+            }
+          ],
+          "family": "additive_score",
+          "intercept": -0.026867489838681088,
+          "noise_family": "gaussian",
+          "noise_scale": 0.1
+        },
+        "n_classes": null,
+        "node": 2,
+        "parents": [
+          5,
+          0
+        ],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [
+            {
+              "parent": 7,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": 1.75
+            }
+          ],
+          "family": "additive_score",
+          "intercept": 0.13331846610326845,
+          "noise_family": "gaussian",
+          "noise_scale": 0.1
+        },
+        "n_classes": null,
+        "node": 3,
+        "parents": [
+          7
+        ],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [],
+          "family": "additive_score",
+          "intercept": -0.16487688743227438,
+          "noise_family": "gaussian",
+          "noise_scale": 1.0
+        },
+        "n_classes": null,
+        "node": 4,
+        "parents": [],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [
+            {
+              "parent": 14,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": 1.7500000000000002
+            }
+          ],
+          "family": "additive_score",
+          "intercept": 0.09891405621861334,
+          "noise_family": "gaussian",
+          "noise_scale": 0.1
+        },
+        "n_classes": null,
+        "node": 5,
+        "parents": [
+          14
+        ],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [
+            {
+              "parent": 12,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": 1.75
+            }
+          ],
+          "family": "additive_score",
+          "intercept": -0.013116064471991784,
+          "noise_family": "gaussian",
+          "noise_scale": 0.1
+        },
+        "n_classes": null,
+        "node": 6,
+        "parents": [
+          12
+        ],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [],
+          "family": "additive_score",
+          "intercept": 0.03205552594184013,
+          "noise_family": "gaussian",
+          "noise_scale": 1.0
+        },
+        "n_classes": null,
+        "node": 7,
+        "parents": [],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [
+            {
+              "parent": 9,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": 0.8249228982403345
+            },
+            {
+              "parent": 20,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": 0.5854684033743155
+            },
+            {
+              "parent": 7,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": -1.4280157424234146
+            }
+          ],
+          "family": "additive_score",
+          "intercept": -0.07562045452237579,
+          "noise_family": "gaussian",
+          "noise_scale": 0.1
+        },
+        "n_classes": null,
+        "node": 8,
+        "parents": [
+          9,
+          20,
+          7
+        ],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [
+            {
+              "parent": 10,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": 0.7147678726123288
+            },
+            {
+              "parent": 5,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": -1.5973749992663733
+            }
+          ],
+          "family": "additive_score",
+          "intercept": 0.009995238797704954,
+          "noise_family": "gaussian",
+          "noise_scale": 0.1
+        },
+        "n_classes": null,
+        "node": 9,
+        "parents": [
+          10,
+          5
+        ],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [
+            {
+              "parent": 14,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": 1.75
+            }
+          ],
+          "family": "additive_score",
+          "intercept": 0.22760675455544513,
+          "noise_family": "gaussian",
+          "noise_scale": 0.1
+        },
+        "n_classes": null,
+        "node": 10,
+        "parents": [
+          14
+        ],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [],
+          "family": "additive_score",
+          "intercept": -0.038683959766537546,
+          "noise_family": "gaussian",
+          "noise_scale": 1.0
+        },
+        "n_classes": null,
+        "node": 11,
+        "parents": [],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [
+            {
+              "parent": 10,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": 1.75
+            }
+          ],
+          "family": "additive_score",
+          "intercept": -0.10245667882489531,
+          "noise_family": "gaussian",
+          "noise_scale": 0.1
+        },
+        "n_classes": null,
+        "node": 12,
+        "parents": [
+          10
+        ],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [
+            {
+              "parent": 20,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": -1.7500000000000002
+            }
+          ],
+          "family": "additive_score",
+          "intercept": -0.07716523183245319,
+          "noise_family": "gaussian",
+          "noise_scale": 0.1
+        },
+        "n_classes": null,
+        "node": 13,
+        "parents": [
+          20
+        ],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [],
+          "family": "additive_score",
+          "intercept": -0.01312581517272313,
+          "noise_family": "gaussian",
+          "noise_scale": 1.0
+        },
+        "n_classes": null,
+        "node": 14,
+        "parents": [],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [],
+          "family": "additive_score",
+          "intercept": 0.033034381142656936,
+          "noise_family": "gaussian",
+          "noise_scale": 1.0
+        },
+        "n_classes": null,
+        "node": 15,
+        "parents": [],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [],
+          "family": "additive_score",
+          "intercept": 0.08251110467565767,
+          "noise_family": "gaussian",
+          "noise_scale": 1.0
+        },
+        "n_classes": null,
+        "node": 16,
+        "parents": [],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [],
+          "family": "additive_score",
+          "intercept": -0.043774224335796,
+          "noise_family": "gaussian",
+          "noise_scale": 1.0
+        },
+        "n_classes": null,
+        "node": 17,
+        "parents": [],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [
+            {
+              "parent": 2,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": -0.6055429042942069
+            },
+            {
+              "parent": 14,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": 0.8054351458955175
+            },
+            {
+              "parent": 7,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": 1.430766234160984
+            }
+          ],
+          "family": "additive_score",
+          "intercept": -0.0665396721296307,
+          "noise_family": "gaussian",
+          "noise_scale": 0.5,
+          "thresholds": [
+            -0.9,
+            -0.6000000000000001,
+            -0.30000000000000004,
+            -1.1102230246251565e-16,
+            0.29999999999999993,
+            0.6,
+            0.9
+          ]
+        },
+        "n_classes": 8,
+        "node": 18,
+        "parents": [
+          2,
+          14,
+          7
+        ],
+        "type": "ordinal"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [
+            {
+              "parent": 0,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": -0.9194616237380394
+            },
+            {
+              "parent": 11,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": -1.1701335409659668
+            },
+            {
+              "parent": 20,
+              "parent_type": "numeric",
+              "transform": "tanh",
+              "weight": 0.9208028121044461
+            }
+          ],
+          "family": "additive_score",
+          "intercept": -0.09946413605572947,
+          "noise_family": "gaussian",
+          "noise_scale": 0.1
+        },
+        "n_classes": null,
+        "node": 19,
+        "parents": [
+          0,
+          11,
+          20
+        ],
+        "type": "numeric"
+      },
+      {
+        "category_embedding": null,
+        "mechanism": {
+          "edges": [],
+          "family": "additive_score",
+          "intercept": 0.011924472504969901,
+          "noise_family": "gaussian",
+          "noise_scale": 1.0
+        },
+        "n_classes": null,
+        "node": 20,
+        "parents": [],
+        "type": "numeric"
+      }
+    ],
+    "output_to_node": [
+      9,
+      14,
+      3,
+      1,
+      13,
+      17,
+      5,
+      16,
+      8,
+      4,
+      2,
+      0,
+      11,
+      15,
+      10,
+      12,
+      19,
+      6,
+      20,
+      7,
+      18
+    ],
+    "parents": [
+      [
+        12
+      ],
+      [
+        9,
+        12,
+        6
+      ],
+      [
+        5,
+        0
+      ],
+      [
+        7
+      ],
+      [],
+      [
+        14
+      ],
+      [
+        12
+      ],
+      [],
+      [
+        9,
+        20,
+        7
+      ],
+      [
+        10,
+        5
+      ],
+      [
+        14
+      ],
+      [],
+      [
+        10
+      ],
+      [
+        20
+      ],
+      [],
+      [],
+      [],
+      [],
+      [
+        2,
+        14,
+        7
+      ],
+      [
+        0,
+        11,
+        20
+      ],
+      []
+    ],
+    "target_node": 18,
+    "target_output_column": 20,
+    "topological_order": [
+      20,
+      14,
+      5,
+      7,
+      10,
+      12,
+      9,
+      8,
+      0,
+      6,
+      16,
+      2,
+      1,
+      11,
+      17,
+      13,
+      19,
+      4,
+      15,
+      3,
+      18
+    ],
+    "type_weights": {
+      "binary": 0.0,
+      "categorical": 0.0,
+      "high_cardinality": 0.0,
+      "numeric": 1.0,
+      "ordinal": 0.0
+    }
+  },
+  "world_seed": 11207368089182729577
+}

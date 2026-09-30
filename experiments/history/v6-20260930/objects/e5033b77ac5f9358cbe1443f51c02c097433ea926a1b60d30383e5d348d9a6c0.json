@@ -1,0 +1,15 @@
+{
+  "objective": "broadcast_allcell_restoration",
+  "readout": "original_cell_encoding",
+  "state_weights": null,
+  "discrete_weight": 1.0,
+  "scope": "all_original_observed_cells_all_rows_all_columns",
+  "successful_seconds": 1800,
+  "half1_seconds": 900,
+  "openml_window": 512,
+  "replay_window": 204,
+  "replay_fraction": 0.4,
+  "replay_pool": "history718",
+  "broadcast": true,
+  "forward_passes_per_update": 1
+}

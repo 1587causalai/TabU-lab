@@ -1,0 +1,115 @@
+{
+  "aggregation": "per-address mean over repeated masks; equal addresses per table; equal tables per type",
+  "bank": "/home/cms/experiments/openml12-joint30m-squared-20260927/fixed-query-bank.json",
+  "bank_checked_masks": 4,
+  "bank_checked_query_addresses": 204,
+  "bank_sha256": "e791488f67179a67ae2057440100144b34edbccb9c900f9633e2004d26284f41",
+  "by_cohort": {
+    "ordinal100": {
+      "nominal": {
+        "accuracy": null,
+        "tables": 0
+      },
+      "numeric": {
+        "r2": null,
+        "tables": 0
+      },
+      "ordinal": {
+        "accuracy": 0.6312056737588653,
+        "rank_mae": 0.1220871327254306,
+        "tables": 1
+      }
+    }
+  },
+  "checkpoint": "/home/cms/experiments/v6-replay40-5h-20260928/hour5/run/checkpoints/34b9ab75ed580a0cd3fccfa23137913594aa985b31da9fd72236adbfc0f2f2b0.pt",
+  "checkpoint_sha256": "34b9ab75ed580a0cd3fccfa23137913594aa985b31da9fd72236adbfc0f2f2b0",
+  "checkpoint_update": 50202,
+  "claim_boundary": "one-table evaluator smoke only",
+  "evaluator_sha256": "ad2655c158e580068a00196bd9c6df9ae5ba8f3128bbc4c5dba01cc5559db2c9",
+  "expected_checkpoint_sha256": "34b9ab75ed580a0cd3fccfa23137913594aa985b31da9fd72236adbfc0f2f2b0",
+  "host": "dgx2",
+  "label": "hour5-smoke",
+  "macro": {
+    "nominal": {
+      "accuracy": null,
+      "tables": 0
+    },
+    "numeric": {
+      "r2": null,
+      "tables": 0
+    },
+    "ordinal": {
+      "accuracy": 0.6312056737588653,
+      "rank_mae": 0.1220871327254306,
+      "tables": 1
+    }
+  },
+  "model_state_sha256": "e29e4fa52ec3e05a35d7d31b23d8890bca3d466a817461c8ae8353f0227393af",
+  "optimizer_updates": 0,
+  "ordinal_rank_metric": "absolute difference of decoded declared rank divided by domain_size-1",
+  "outcome": "completed",
+  "probes": {
+    "ordinal100_fit": {
+      "by_table": [
+        {
+          "cohort": "ordinal100",
+          "masks": 4,
+          "metrics": {
+            "accuracy": 0.6312056737588653,
+            "query_exposures": 204,
+            "rank_mae": 0.1220871327254306,
+            "unique_query_rows": 141
+          },
+          "probe": "ordinal100_fit",
+          "seconds": 0.8931368910707533,
+          "table": "ordinal_latent_train_000",
+          "target_column": 8,
+          "target_kind": "ordinal"
+        }
+      ],
+      "macro": {
+        "nominal": {
+          "accuracy": null,
+          "tables": 0
+        },
+        "numeric": {
+          "r2": null,
+          "tables": 0
+        },
+        "ordinal": {
+          "accuracy": 0.6312056737588653,
+          "rank_mae": 0.1220871327254306,
+          "tables": 1
+        }
+      },
+      "tables": 1
+    }
+  },
+  "runtime": {
+    "cublas_workspace_config": ":4096:8",
+    "cuda_capability": [
+      12,
+      1
+    ],
+    "cuda_device": "NVIDIA GB10",
+    "cuda_runtime": "13.0",
+    "cudnn": 92000,
+    "deterministic_algorithms": true,
+    "device": "cuda:0",
+    "dtype": "float64",
+    "interop_threads": 20,
+    "platform": [
+      "Linux",
+      "6.17.0-1014-nvidia",
+      "aarch64"
+    ],
+    "python": "3.12.3",
+    "threads": 1,
+    "torch": "2.12.0.dev20260322+cu130",
+    "torch_build_sha256": "b62d287846a05b05f6dfa176679c95c75d9a9911ca563e92882a1b5802ec92e4"
+  },
+  "schema": "tabu.v6.old618-fixed-query-retention.v1",
+  "seconds": 3.853687849128619,
+  "tables": 1,
+  "v6_identity_sha256": "8e19720c0fa7759788fc6b766b01a5d6bcaaa4f795d37172863ed4b32b077278"
+}

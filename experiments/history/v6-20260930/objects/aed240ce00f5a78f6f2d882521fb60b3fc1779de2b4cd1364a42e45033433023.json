@@ -1,0 +1,22 @@
+{
+  "completed_utc": "2026-09-29T18:37:33.485740+00:00",
+  "selected_trial": "lr1e-4",
+  "trials": {
+    "lr1e-4": {
+      "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/qsar_fish_toxicity/run/lr1e-4/checkpoints/355924edcdeb1bfb7df857de709f7d4324d110ad4f6ef552df3323bcf07d0dd2.pt",
+      "checkpoint_sha256": "355924edcdeb1bfb7df857de709f7d4324d110ad4f6ef552df3323bcf07d0dd2",
+      "metrics": {
+        "mae": 0.3227678505996178,
+        "mse": 0.17830308528274902,
+        "n": 145,
+        "prediction_std": 1.3451731756466012,
+        "r2": 0.9146331368327314,
+        "rmse": 0.42225949993191275,
+        "slog": 0.799345159492133,
+        "target_std": 1.4452226765545806
+      },
+      "seconds": 180.25478963018395,
+      "updates": 286
+    }
+  }
+}

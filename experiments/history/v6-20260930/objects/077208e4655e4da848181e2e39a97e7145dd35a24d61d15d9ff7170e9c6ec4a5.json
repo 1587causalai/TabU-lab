@@ -1,0 +1,32 @@
+{
+  "name": "v6-puma-lrval-grid-20260929",
+  "hosts": {
+    "dustinstudio": "v6",
+    "dgx2": "v55"
+  },
+  "learning_rates": [
+    0.0001,
+    3e-05,
+    1e-05
+  ],
+  "successful_seconds_per_trial": 900,
+  "successful_seconds_per_host": 2700,
+  "monitor_seconds": [
+    0,
+    180,
+    360,
+    540,
+    720,
+    900
+  ],
+  "update_rows": 5242,
+  "monitor_rows": 1311,
+  "test_rows": 1639,
+  "selection": "lowest monitor MSE, earliest tie; all trajectories retained; no test use",
+  "full_train_refit": false,
+  "parent_exposed_to_monitor": true,
+  "window": 512,
+  "query": 171,
+  "memory_fraction": 0.5,
+  "default_replacement": false
+}

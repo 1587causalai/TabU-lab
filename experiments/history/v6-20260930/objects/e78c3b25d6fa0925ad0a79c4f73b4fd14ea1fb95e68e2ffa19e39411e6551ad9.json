@@ -1,0 +1,23 @@
+{
+  "pid": 63768,
+  "command": [
+    "/Users/dustinstudio/.local/bin/wehub-python",
+    "--profile",
+    "train-20260920",
+    "-u",
+    "-c",
+    "import runpy; runpy.run_path('/Users/dustinstudio/experiments/openml12-frozen-icl-20260927/evaluate.py', run_name='__main__')",
+    "--root",
+    "/Users/dustinstudio/experiments/openml12-frozen-icl-20260927",
+    "--manifest",
+    "/Users/dustinstudio/experiments/joint618-60min-dustin-20260926/manifests/01-joint618.json",
+    "--checkpoint",
+    "/Users/dustinstudio/experiments/joint618-60min-dustin-20260926/runs/02-strict-resume/checkpoints/fdb28693e5894d93dd0ccbdb90cb34d18ab06acbbfb08022085a213afda316ab.pt",
+    "--expected-sha",
+    "fdb28693e5894d93dd0ccbdb90cb34d18ab06acbbfb08022085a213afda316ab",
+    "--device",
+    "mps"
+  ],
+  "parent_sha256": "fdb28693e5894d93dd0ccbdb90cb34d18ab06acbbfb08022085a213afda316ab",
+  "output": "/Users/dustinstudio/experiments/openml12-frozen-icl-20260927/evaluation-01"
+}

@@ -1,0 +1,398 @@
+{
+  "dustinstudio": {
+    "half1": {
+      "path": "/Users/dustinstudio/experiments/v6-dual718-openml12-adapt60m-20260928/half1/run/checkpoints/13d2db3d2585b5a2b0fb8ab66476e0285cd1077b938941c3db697bb24b5a8b64.pt",
+      "sha256": "13d2db3d2585b5a2b0fb8ab66476e0285cd1077b938941c3db697bb24b5a8b64",
+      "bytes": 25182838,
+      "successful_seconds": 1800.954169357894,
+      "updates": 1845,
+      "table_coverage": 730,
+      "parent_sha256": "d454eb19e3d37a1b4bf166efad3b4d14d78b3ff913772c16f14c965833aaf320",
+      "memory_cap": 0.5,
+      "supervision": "joint_all",
+      "optimizer_restored": true,
+      "rng_restored": true,
+      "schedule_cursor_reset": true,
+      "windows": [
+        [
+          "focus2",
+          512,
+          171
+        ],
+        [
+          "history718",
+          204,
+          68
+        ],
+        [
+          "other10",
+          201,
+          67
+        ],
+        [
+          "other10",
+          512,
+          171
+        ]
+      ],
+      "cohorts": {
+        "history718": 738,
+        "other10": 923,
+        "focus2": 184
+      },
+      "replay_family_updates": {
+        "old618": 634,
+        "sparse100": 104
+      }
+    },
+    "half2": {
+      "path": "/Users/dustinstudio/experiments/v6-dual718-openml12-adapt60m-20260928/half2/run/checkpoints/b106ad75eeb7031c86619dcaf9b664816053286285950ec29acc408c92133dcc.pt",
+      "sha256": "b106ad75eeb7031c86619dcaf9b664816053286285950ec29acc408c92133dcc",
+      "bytes": 25182838,
+      "successful_seconds": 1800.220272352919,
+      "updates": 1718,
+      "table_coverage": 699,
+      "parent_sha256": "13d2db3d2585b5a2b0fb8ab66476e0285cd1077b938941c3db697bb24b5a8b64",
+      "memory_cap": 0.5,
+      "supervision": "joint_all",
+      "optimizer_restored": true,
+      "rng_restored": true,
+      "schedule_cursor_reset": false,
+      "windows": [
+        [
+          "focus2",
+          512,
+          171
+        ],
+        [
+          "history718",
+          204,
+          68
+        ],
+        [
+          "other10",
+          201,
+          67
+        ],
+        [
+          "other10",
+          512,
+          171
+        ]
+      ],
+      "cohorts": {
+        "history718": 687,
+        "other10": 858,
+        "focus2": 173
+      },
+      "replay_family_updates": {
+        "old618": 591,
+        "sparse100": 96
+      }
+    },
+    "controller": {
+      "outcome": "completed",
+      "started_utc": "2026-09-28T13:58:48.882343+00:00",
+      "completed_training_seconds": 3601.174441710813,
+      "additional_seconds_target": 3600,
+      "host": "dustinstudio",
+      "supervision": "joint_all",
+      "start_sha256": "d454eb19e3d37a1b4bf166efad3b4d14d78b3ff913772c16f14c965833aaf320",
+      "start_update": 91138,
+      "start_successful_seconds": 0,
+      "sampling": "12 OpenML per20 plus8 equal-table history718 replay; window512",
+      "phase": "terminal",
+      "phase_budget": 1799.045830642106,
+      "checkpoint_sha256": "b106ad75eeb7031c86619dcaf9b664816053286285950ec29acc408c92133dcc",
+      "checkpoint_update": 94701,
+      "evaluations": {
+        "half1": {
+          "macro": {
+            "r2": 0.7291824032619797,
+            "slog": 0.6449831354322467
+          },
+          "checkpoint_sha256": "13d2db3d2585b5a2b0fb8ab66476e0285cd1077b938941c3db697bb24b5a8b64"
+        },
+        "half2": {
+          "macro": {
+            "r2": 0.7123065937198269,
+            "slog": 0.6198057158947557
+          },
+          "checkpoint_sha256": "b106ad75eeb7031c86619dcaf9b664816053286285950ec29acc408c92133dcc"
+        },
+        "sparse-final": {
+          "macro": {
+            "r2": 0.23629895653400224,
+            "slog": 0.14340997968360175
+          },
+          "checkpoint_sha256": "b106ad75eeb7031c86619dcaf9b664816053286285950ec29acc408c92133dcc"
+        }
+      },
+      "completed_utc": "2026-09-28T15:04:05.851332+00:00"
+    }
+  },
+  "dgx2": {
+    "half1": {
+      "path": "/home/cms/experiments/v6-dual718-openml12-adapt60m-20260928/half1/run/checkpoints/39f28cb4e16b589f289435a529f04c19f2dbd3f0d96313945870caf19be0278d.pt",
+      "sha256": "39f28cb4e16b589f289435a529f04c19f2dbd3f0d96313945870caf19be0278d",
+      "bytes": 50178550,
+      "successful_seconds": 1800.2323345049663,
+      "updates": 3766,
+      "table_coverage": 730,
+      "parent_sha256": "4f1ded54395282bc82e93bef24ed21aaf0010dbd29e2e60f33aa50a866b0370d",
+      "memory_cap": 0.5,
+      "supervision": "target_only",
+      "optimizer_restored": true,
+      "rng_restored": true,
+      "schedule_cursor_reset": true,
+      "windows": [
+        [
+          "focus2",
+          512,
+          171
+        ],
+        [
+          "history718",
+          204,
+          68
+        ],
+        [
+          "other10",
+          201,
+          67
+        ],
+        [
+          "other10",
+          512,
+          171
+        ]
+      ],
+      "cohorts": {
+        "history718": 1506,
+        "other10": 1883,
+        "focus2": 377
+      },
+      "replay_family_updates": {
+        "old618": 1299,
+        "sparse100": 207
+      }
+    },
+    "half2": {
+      "path": "/home/cms/experiments/v6-dual718-openml12-adapt60m-20260928/half2/run/checkpoints/a5d11bfb1f9503365c44a5f8da62af37e017779915ed786066e038b991ff2a2f.pt",
+      "sha256": "a5d11bfb1f9503365c44a5f8da62af37e017779915ed786066e038b991ff2a2f",
+      "bytes": 50178550,
+      "successful_seconds": 1800.3635460890218,
+      "updates": 3855,
+      "table_coverage": 730,
+      "parent_sha256": "39f28cb4e16b589f289435a529f04c19f2dbd3f0d96313945870caf19be0278d",
+      "memory_cap": 0.5,
+      "supervision": "target_only",
+      "optimizer_restored": true,
+      "rng_restored": true,
+      "schedule_cursor_reset": false,
+      "windows": [
+        [
+          "focus2",
+          512,
+          171
+        ],
+        [
+          "history718",
+          204,
+          68
+        ],
+        [
+          "other10",
+          201,
+          67
+        ],
+        [
+          "other10",
+          512,
+          171
+        ]
+      ],
+      "cohorts": {
+        "history718": 1542,
+        "other10": 1928,
+        "focus2": 385
+      },
+      "replay_family_updates": {
+        "old618": 1324,
+        "sparse100": 218
+      }
+    },
+    "controller": {
+      "outcome": "completed",
+      "started_utc": "2026-09-28T13:58:51.770816+00:00",
+      "completed_training_seconds": 3600.595880593988,
+      "additional_seconds_target": 3600,
+      "host": "dgx2",
+      "supervision": "target_only",
+      "start_sha256": "4f1ded54395282bc82e93bef24ed21aaf0010dbd29e2e60f33aa50a866b0370d",
+      "start_update": 80510,
+      "start_successful_seconds": 0,
+      "sampling": "12 OpenML per20 plus8 equal-table history718 replay; window512",
+      "phase": "terminal",
+      "phase_budget": 1799.7676654950337,
+      "checkpoint_sha256": "a5d11bfb1f9503365c44a5f8da62af37e017779915ed786066e038b991ff2a2f",
+      "checkpoint_update": 88131,
+      "evaluations": {
+        "half1": {
+          "macro": {
+            "r2": 0.755048550771226,
+            "slog": 0.6842163305462811
+          },
+          "checkpoint_sha256": "39f28cb4e16b589f289435a529f04c19f2dbd3f0d96313945870caf19be0278d"
+        },
+        "half2": {
+          "macro": {
+            "r2": 0.7283051235625528,
+            "slog": 0.6626928037202998
+          },
+          "checkpoint_sha256": "a5d11bfb1f9503365c44a5f8da62af37e017779915ed786066e038b991ff2a2f"
+        },
+        "sparse-final": {
+          "macro": {
+            "r2": 0.24951841802357283,
+            "slog": 0.15149730097533307
+          },
+          "checkpoint_sha256": "a5d11bfb1f9503365c44a5f8da62af37e017779915ed786066e038b991ff2a2f"
+        }
+      },
+      "completed_utc": "2026-09-28T15:08:31.558897+00:00"
+    }
+  },
+  "gongqian-mini": {
+    "half1": {
+      "path": "/Users/gongqian/experiments/v6-dual718-openml12-adapt60m-20260928/half1/run/checkpoints/5984a9edf02e557d7ab45799d5d3caaa84c29db0b881b11912183c7465273f9f.pt",
+      "sha256": "5984a9edf02e557d7ab45799d5d3caaa84c29db0b881b11912183c7465273f9f",
+      "bytes": 25182838,
+      "successful_seconds": 1800.2063789432868,
+      "updates": 3582,
+      "table_coverage": 730,
+      "parent_sha256": "2fd259588903115aa032c79881f0e13db115939046097be85250b39e0511ffba",
+      "memory_cap": 0.75,
+      "supervision": "target_only",
+      "optimizer_restored": true,
+      "rng_restored": true,
+      "schedule_cursor_reset": true,
+      "windows": [
+        [
+          "focus2",
+          512,
+          171
+        ],
+        [
+          "history718",
+          204,
+          68
+        ],
+        [
+          "other10",
+          201,
+          67
+        ],
+        [
+          "other10",
+          512,
+          171
+        ]
+      ],
+      "cohorts": {
+        "history718": 1432,
+        "other10": 1791,
+        "focus2": 359
+      },
+      "replay_family_updates": {
+        "old618": 1232,
+        "sparse100": 200
+      }
+    },
+    "half2": {
+      "path": "/Users/gongqian/experiments/v6-dual718-openml12-adapt60m-20260928/half2/run/checkpoints/cf3731e8941261c73dd02725402a7e04545d2e71c941500fed39f7153716f818.pt",
+      "sha256": "cf3731e8941261c73dd02725402a7e04545d2e71c941500fed39f7153716f818",
+      "bytes": 25182838,
+      "successful_seconds": 1800.1732870507985,
+      "updates": 3566,
+      "table_coverage": 730,
+      "parent_sha256": "5984a9edf02e557d7ab45799d5d3caaa84c29db0b881b11912183c7465273f9f",
+      "memory_cap": 0.75,
+      "supervision": "target_only",
+      "optimizer_restored": true,
+      "rng_restored": true,
+      "schedule_cursor_reset": false,
+      "windows": [
+        [
+          "focus2",
+          512,
+          171
+        ],
+        [
+          "history718",
+          204,
+          68
+        ],
+        [
+          "other10",
+          201,
+          67
+        ],
+        [
+          "other10",
+          512,
+          171
+        ]
+      ],
+      "cohorts": {
+        "history718": 1427,
+        "other10": 1783,
+        "focus2": 356
+      },
+      "replay_family_updates": {
+        "old618": 1228,
+        "sparse100": 199
+      }
+    },
+    "controller": {
+      "outcome": "completed",
+      "started_utc": "2026-09-28T13:58:51.463797+00:00",
+      "completed_training_seconds": 3600.3796659940854,
+      "additional_seconds_target": 3600,
+      "host": "gongqian-mini",
+      "supervision": "target_only",
+      "start_sha256": "2fd259588903115aa032c79881f0e13db115939046097be85250b39e0511ffba",
+      "start_update": 108554,
+      "start_successful_seconds": 0,
+      "sampling": "12 OpenML per20 plus8 equal-table history718 replay; window512",
+      "phase": "terminal",
+      "phase_budget": 1799.7936210567132,
+      "checkpoint_sha256": "cf3731e8941261c73dd02725402a7e04545d2e71c941500fed39f7153716f818",
+      "checkpoint_update": 115702,
+      "evaluations": {
+        "half1": {
+          "macro": {
+            "r2": 0.7665832484878944,
+            "slog": 0.7010903350983861
+          },
+          "checkpoint_sha256": "5984a9edf02e557d7ab45799d5d3caaa84c29db0b881b11912183c7465273f9f"
+        },
+        "half2": {
+          "macro": {
+            "r2": 0.7700179108287418,
+            "slog": 0.7020781152513428
+          },
+          "checkpoint_sha256": "cf3731e8941261c73dd02725402a7e04545d2e71c941500fed39f7153716f818"
+        },
+        "sparse-final": {
+          "macro": {
+            "r2": 0.2242342419567438,
+            "slog": 0.1337347764245503
+          },
+          "checkpoint_sha256": "cf3731e8941261c73dd02725402a7e04545d2e71c941500fed39f7153716f818"
+        }
+      },
+      "completed_utc": "2026-09-28T15:05:35.417011+00:00"
+    }
+  }
+}

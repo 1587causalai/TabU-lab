@@ -1,0 +1,101 @@
+{
+  "added_successful_seconds": 899.7591190170497,
+  "checkpoint_sha256": "b303ef9dd20bc00f229c09cd0d55d54b1bcbd2d3f0097be65b3e35d6a8399f7c",
+  "checkpoint_update": 36069,
+  "host": "dustinstudio",
+  "label": "half1",
+  "macro": {
+    "r2": 0.6343930127455348,
+    "slog": 0.535774206025184
+  },
+  "outcome": "completed",
+  "scale": "s=max(raw_train_MAD, 1e-12) in original target units",
+  "schema": "openml12-joint30m-squared-r2-slog-v1",
+  "slog_formula": "1 - mean(log1p(((y-pred)/s)^2)) / mean(log1p(((y-median_train)/s)^2))",
+  "tables": {
+    "airfoil_self_noise": {
+      "query_rows": 301,
+      "r2": 0.9700162309768499,
+      "slog": 0.9441181944983255,
+      "support_rows": 1202,
+      "train_mad": 4.914500000000004
+    },
+    "bodyfat": {
+      "query_rows": 51,
+      "r2": 0.9880735324055981,
+      "slog": 0.9761043728618877,
+      "support_rows": 201,
+      "train_mad": 6.300000000000001
+    },
+    "cars": {
+      "query_rows": 161,
+      "r2": 0.9622690544348396,
+      "slog": 0.8712795582714883,
+      "support_rows": 643,
+      "train_mad": 4667.080000000002
+    },
+    "concrete_compressive_strength": {
+      "query_rows": 206,
+      "r2": 0.9386705829356402,
+      "slog": 0.8880219577755298,
+      "support_rows": 824,
+      "train_mad": 11.150304367094002
+    },
+    "cpu_activity": {
+      "query_rows": 1639,
+      "r2": 0.11876981707000667,
+      "slog": -0.5362142779343224,
+      "support_rows": 6553,
+      "train_mad": 6.0
+    },
+    "energy_efficiency": {
+      "query_rows": 154,
+      "r2": 0.997429748523127,
+      "slog": 0.9946824838230426,
+      "support_rows": 614,
+      "train_mad": 7.1899999999999995
+    },
+    "kin8nm": {
+      "query_rows": 1639,
+      "r2": 0.6824833322870716,
+      "slog": 0.5404393946844319,
+      "support_rows": 6553,
+      "train_mad": 0.19050435
+    },
+    "pumadyn32nh": {
+      "query_rows": 1639,
+      "r2": 0.1117346695587127,
+      "slog": 0.05507379275596358,
+      "support_rows": 6553,
+      "train_mad": 0.02379755231
+    },
+    "qsar_fish_toxicity": {
+      "query_rows": 182,
+      "r2": 0.528048308319198,
+      "slog": 0.45266683238927696,
+      "support_rows": 726,
+      "train_mad": 0.8470000000000004
+    },
+    "red_wine": {
+      "query_rows": 320,
+      "r2": 0.38264427475201335,
+      "slog": 0.4539202692606661,
+      "support_rows": 1279,
+      "train_mad": 1.0
+    },
+    "space_ga": {
+      "query_rows": 622,
+      "r2": 0.5926156179805574,
+      "slog": 0.5019407002168973,
+      "support_rows": 2485,
+      "train_mad": 0.13098773539007602
+    },
+    "white_wine": {
+      "query_rows": 980,
+      "r2": 0.3399609837028037,
+      "slog": 0.28725719369902025,
+      "support_rows": 3918,
+      "train_mad": 1.0
+    }
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "additional_seconds_target": 900,
+  "branch": "v6",
+  "error": "",
+  "error_type": "AssertionError",
+  "evaluations": {},
+  "first_episode_index": 5400,
+  "host": "dustinstudio",
+  "identity": {
+    "code": {
+      "baselines.py": "88d7a11698c77498a95ed1820d9a2cba9e9c911a95fff4f98d3f604400aeba7d",
+      "common.py": "4f2fbc0423a832abe41d0ff2a998e9c6a03adf8474f41d1136ba986842f0ba3c",
+      "dual.py": "2e82302f7ae600fd06165bb025174f5ba48b556a5ab622cd604c415e1d02c0e9",
+      "evaluate.py": "ee2ce7614ab3100df9afe7dfb81b9c470eb8c87de57b47ac384d7eacd0a8c862",
+      "frozen_evaluate.py": "726b6495ef02aa1865026f9fa19a46ebd6302b610ec9478686da9272446cd4f3",
+      "report.py": "290e0ba076c4c0cacba70c544fe4194b11d275e3c6685e1528ef7d8b907434bb",
+      "run.py": "292f870bd2b9876f45172e2ac3debf4a9e88360612e836608d194c52799bd5f6",
+      "setup_host.py": "4a5100aff2cee644f9434703791132e63025495f0932e142d89e8acf9e2fd89f",
+      "training_support.py": "2ee5c702d7ee1f9818ac143aa8c97e8acf2b82e60cdad87b87559b1603b82a1a"
+    },
+    "inference_branch": "v6",
+    "initialization": "model optimizer RNG retained; single-table schedule reset and Puma episode offset settled",
+    "model_config": {
+      "backbone": {
+        "ff_width": 256,
+        "heads": 8,
+        "kind": "inducing",
+        "layers": 3,
+        "norm_eps": 1e-06,
+        "reference_mass": 1.0,
+        "slots": 256,
+        "tau_presence": 1.0,
+        "width": 128
+      },
+      "bandwidth": 1.0,
+      "center_chunk_size": 128,
+      "codec_version": "constant_weight_composition_v2",
+      "epsilon": 1e-06,
+      "numeric_scaling": "zscore",
+      "regression_width": null,
+      "ridge": 0.001,
+      "size": "small",
+      "slope_source": "shared_ll",
+      "subtokens": 1,
+      "unit_layers": 3
+    },
+    "objective": "puma_single_v6",
+    "parent_manifest_sha256": "2414cf78f2e567e27c928c6714f77ea2ec5f5967022b03ea92afae67d9ff0f18",
+    "parent_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+    "runtime": {
+      "deterministic_algorithms": true,
+      "device": "mps",
+      "dtype": "float32",
+      "interop_threads": 16,
+      "mps_available": true,
+      "mps_cpu_fallback": false,
+      "platform": [
+        "Darwin",
+        "25.6.0",
+        "arm64"
+      ],
+      "python": "3.12.13",
+      "threads": 1,
+      "torch": "2.13.0",
+      "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+    },
+    "schema": "tabu.puma.single.v1",
+    "sha256": "69081620d97f57674dcbd0a986c86036faa5aa4367e14428dded49369091a412",
+    "strict_resume": false,
+    "supervision": "target_only"
+  },
+  "loss_scope": "Query target column only; own-cell encoding squared error",
+  "memory_fraction": 0.5,
+  "optimizer_restored": true,
+  "outcome": "failed",
+  "parameter_count": 2082688,
+  "parent_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+  "rng_restored": true,
+  "schedule_cursor_reset": true,
+  "started_utc": "2026-09-29T13:05:33.439962+00:00",
+  "successful_update_seconds": 0,
+  "window_rows": 512
+}

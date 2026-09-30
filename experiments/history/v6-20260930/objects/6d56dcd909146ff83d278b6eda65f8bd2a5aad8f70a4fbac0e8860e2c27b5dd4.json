@@ -1,0 +1,45 @@
+{
+  "added_successful_seconds": 898.7423782115802,
+  "added_updates": 2354,
+  "checkpoint": "/home/cms/experiments/openml12-joint30m-squared-20260927/half1/run/checkpoint-progress.pt",
+  "checkpoint_sha256": "9690247e09dc81d45ec797316f8a8472253de40dd16a2388c30075e7d3f26d20",
+  "checkpoint_update": 21185,
+  "continuation": "strict_resume_same_identity_optimizer_rng_cursor_exposure",
+  "final_stage_seconds": 8439.334331044927,
+  "half": 1,
+  "host": "dgx2",
+  "identity_sha256": "d1db41341ad1d933a9105b312b878f1320d711021a916bedf264c41641fcae8a",
+  "manifest": "/home/cms/experiments/openml12-joint2h-squared-20260927/manifests/joint-openml12-squared.json",
+  "old618_tables_with_gradient": 471,
+  "outcome": "training_completed",
+  "parent": "/home/cms/experiments/openml12-joint2h-squared-20260927/runs/main/checkpoints/33de3db7038700280a3bba0b91d4b4c9eff53164b726a12f34b7918b3840dbce.pt",
+  "parent_sha256": "33de3db7038700280a3bba0b91d4b4c9eff53164b726a12f34b7918b3840dbce",
+  "parent_stage_seconds": 7500.086489557987,
+  "parent_update": 18831,
+  "runtime": {
+    "cublas_workspace_config": ":4096:8",
+    "cuda_capability": [
+      12,
+      1
+    ],
+    "cuda_device": "NVIDIA GB10",
+    "cuda_runtime": "13.0",
+    "cudnn": 92000,
+    "deterministic_algorithms": true,
+    "device": "cuda:0",
+    "dtype": "float64",
+    "interop_threads": 20,
+    "platform": [
+      "Linux",
+      "6.17.0-1014-nvidia",
+      "aarch64"
+    ],
+    "python": "3.12.3",
+    "threads": 1,
+    "torch": "2.12.0.dev20260322+cu130",
+    "torch_build_sha256": "b62d287846a05b05f6dfa176679c95c75d9a9911ca563e92882a1b5802ec92e4"
+  },
+  "schema": "tabu.openml12.strict30.half.v1",
+  "source_script_sha256": "c63e5ee83b3e7b87c9ff865e66dbbd5257f7f718ea3cb866e51df25d90a5024d",
+  "target_successful_update_seconds": 900.0
+}

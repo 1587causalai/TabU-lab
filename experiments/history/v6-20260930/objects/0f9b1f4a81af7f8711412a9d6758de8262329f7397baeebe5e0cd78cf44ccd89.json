@@ -1,0 +1,225 @@
+{
+  "reported_evaluations": [
+    "dustinstudio:half1",
+    "dustinstudio:half2",
+    "dustinstudio:sparse-final",
+    "dgx2:half1",
+    "dgx2:half2",
+    "dgx2:sparse-final",
+    "gongqian-mini:half1",
+    "gongqian-mini:half2",
+    "gongqian-mini:sparse-final"
+  ],
+  "terminal_reported": true,
+  "phase": "completed",
+  "additional_seconds": 3600,
+  "scope": "only_dual_final_adapt; original_parent_not_trained",
+  "status": "completed",
+  "launched_hosts": [
+    "dustinstudio",
+    "dgx2",
+    "gongqian-mini"
+  ],
+  "launch_verified_utc": "2026-09-28T14:00:38.757541+00:00",
+  "automation_id": "tabu",
+  "terminal_notified": true,
+  "launch_verification": {
+    "dustinstudio": {
+      "updates": 47,
+      "successful_seconds": 47.393372705671936,
+      "cohorts": {
+        "history718": 19,
+        "other10": 24,
+        "focus2": 4
+      },
+      "windows": [
+        [
+          "focus2",
+          512,
+          171
+        ],
+        [
+          "history718",
+          204,
+          68
+        ],
+        [
+          "other10",
+          201,
+          67
+        ],
+        [
+          "other10",
+          512,
+          171
+        ]
+      ],
+      "passes": [
+        [
+          1,
+          1,
+          "joint_all"
+        ]
+      ]
+    },
+    "dgx2": {
+      "updates": 30,
+      "successful_seconds": 43.679040591021476,
+      "cohorts": {
+        "history718": 11,
+        "other10": 16,
+        "focus2": 3
+      },
+      "windows": [
+        [
+          "focus2",
+          512,
+          171
+        ],
+        [
+          "history718",
+          204,
+          68
+        ],
+        [
+          "other10",
+          201,
+          67
+        ],
+        [
+          "other10",
+          512,
+          171
+        ]
+      ],
+      "passes": [
+        [
+          1,
+          1,
+          "target_only"
+        ]
+      ]
+    },
+    "gongqian-mini": {
+      "updates": 105,
+      "successful_seconds": 54.5057103773579,
+      "cohorts": {
+        "history718": 40,
+        "other10": 54,
+        "focus2": 11
+      },
+      "windows": [
+        [
+          "focus2",
+          512,
+          171
+        ],
+        [
+          "history718",
+          204,
+          68
+        ],
+        [
+          "other10",
+          201,
+          67
+        ],
+        [
+          "other10",
+          512,
+          171
+        ]
+      ],
+      "passes": [
+        [
+          1,
+          1,
+          "target_only"
+        ]
+      ]
+    }
+  },
+  "half1_reported_utc": "2026-09-28T14:34:13.707220+00:00",
+  "results_verified_utc": "2026-09-28T15:19:55.602723+00:00",
+  "verified_checkpoints": 6,
+  "completed_hosts": {
+    "dustinstudio": {
+      "successful_seconds": 3601.174441710813,
+      "updates": 3563,
+      "final_checkpoint_sha256": "b106ad75eeb7031c86619dcaf9b664816053286285950ec29acc408c92133dcc",
+      "openml_predictions": 7894,
+      "sparse_predictions": 54400
+    },
+    "dgx2": {
+      "successful_seconds": 3600.595880593988,
+      "updates": 7621,
+      "final_checkpoint_sha256": "a5d11bfb1f9503365c44a5f8da62af37e017779915ed786066e038b991ff2a2f",
+      "openml_predictions": 7894,
+      "sparse_predictions": 54400
+    },
+    "gongqian-mini": {
+      "successful_seconds": 3600.3796659940854,
+      "updates": 7148,
+      "final_checkpoint_sha256": "cf3731e8941261c73dd02725402a7e04545d2e71c941500fed39f7153716f818",
+      "openml_predictions": 7894,
+      "sparse_predictions": 54400
+    }
+  },
+  "terminal_reported_utc": "2026-09-28T15:21:23.493245+00:00",
+  "automation_deleted": true,
+  "recommendations": {
+    "gongqian-mini": "adapt60_half2_for_combined_next_exploration",
+    "dustinstudio": "original_parent_for_OpenML12; preserve_adapt60_half2_sparse_candidate",
+    "dgx2": "adapt60_half1_for_OpenML12; sparse100_at_half1_unmeasured"
+  },
+  "accepted_next_checkpoints": {
+    "dustinstudio": {
+      "stage": "broadcast_allcell_15min",
+      "checkpoint": "/Users/dustinstudio/experiments/v6-broadcast-restoration-allcell-openml12-30m-20260928/half1/run/checkpoints/18ca39c10298d4ec01c110347796faae52c03980b844ab55b8a4594e22f5d0b8.pt",
+      "checkpoint_sha256": "18ca39c10298d4ec01c110347796faae52c03980b844ab55b8a4594e22f5d0b8",
+      "manifest": "/Users/dustinstudio/experiments/v6-broadcast-restoration-allcell-openml12-30m-20260928/balanced-replay718-manifest.json",
+      "supervision": "target_only",
+      "training_objective": "broadcast_allcell_restoration"
+    },
+    "dgx2": {
+      "stage": "adapt30",
+      "checkpoint": "/home/cms/experiments/v6-dual718-openml12-adapt60m-20260928/half1/run/checkpoints/39f28cb4e16b589f289435a529f04c19f2dbd3f0d96313945870caf19be0278d.pt",
+      "checkpoint_sha256": "39f28cb4e16b589f289435a529f04c19f2dbd3f0d96313945870caf19be0278d",
+      "manifest": "/home/cms/experiments/v6-dual718-openml12-adapt60m-20260928/balanced-replay718-manifest.json",
+      "supervision": "target_only"
+    },
+    "gongqian-mini": {
+      "stage": "adapt60",
+      "checkpoint": "/Users/gongqian/experiments/v6-dual718-openml12-adapt60m-20260928/half2/run/checkpoints/cf3731e8941261c73dd02725402a7e04545d2e71c941500fed39f7153716f818.pt",
+      "checkpoint_sha256": "cf3731e8941261c73dd02725402a7e04545d2e71c941500fed39f7153716f818",
+      "manifest": "/Users/gongqian/experiments/v6-dual718-openml12-adapt60m-20260928/balanced-replay718-manifest.json",
+      "supervision": "target_only"
+    }
+  },
+  "selection_status": "user_accepted",
+  "selection_accepted_utc": "2026-09-28T16:36:53.851348+00:00",
+  "previous_accepted_next_checkpoints": {
+    "dustinstudio": {
+      "stage": "original_parent",
+      "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-recover30m-20260928/half2/run/checkpoints/ced305ae38d9ac5e648f4ae0cd517253f88a2849bb2232139c2d33d47c2b6231.pt",
+      "checkpoint_sha256": "ced305ae38d9ac5e648f4ae0cd517253f88a2849bb2232139c2d33d47c2b6231",
+      "manifest": "/Users/dustinstudio/experiments/v6-openml12-recover30m-20260928/balanced-replay718-manifest.json",
+      "supervision": "joint_all"
+    },
+    "dgx2": {
+      "stage": "adapt30",
+      "checkpoint": "/home/cms/experiments/v6-dual718-openml12-adapt60m-20260928/half1/run/checkpoints/39f28cb4e16b589f289435a529f04c19f2dbd3f0d96313945870caf19be0278d.pt",
+      "checkpoint_sha256": "39f28cb4e16b589f289435a529f04c19f2dbd3f0d96313945870caf19be0278d",
+      "manifest": "/home/cms/experiments/v6-dual718-openml12-adapt60m-20260928/balanced-replay718-manifest.json",
+      "supervision": "target_only"
+    },
+    "gongqian-mini": {
+      "stage": "adapt60",
+      "checkpoint": "/Users/gongqian/experiments/v6-dual718-openml12-adapt60m-20260928/half2/run/checkpoints/cf3731e8941261c73dd02725402a7e04545d2e71c941500fed39f7153716f818.pt",
+      "checkpoint_sha256": "cf3731e8941261c73dd02725402a7e04545d2e71c941500fed39f7153716f818",
+      "manifest": "/Users/gongqian/experiments/v6-dual718-openml12-adapt60m-20260928/balanced-replay718-manifest.json",
+      "supervision": "target_only"
+    }
+  },
+  "selection_source": "v6-broadcast-restoration-allcell-openml12-30m-20260928/README.md"
+}

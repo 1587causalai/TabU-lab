@@ -1,0 +1,14 @@
+{
+  "outcome": "failed",
+  "started_utc": "2026-09-28T00:14:10.163475+00:00",
+  "start_update": 63149,
+  "start_successful_seconds": 0,
+  "additional_seconds_target": 1200,
+  "start_sha256": "8df55cd41141669280f2cacf6c64242b2f4df0a9451b39ce6cb5db9b90662638",
+  "sampling": "OpenML12 equal; full train rows; no replay",
+  "supervision": "joint_all",
+  "completed_training_seconds": 0,
+  "phase": "half1",
+  "error_type": "CalledProcessError",
+  "error": "Command '['/Users/dustinstudio/.local/bin/wehub-python', '--profile', 'train-20260920', '-u', '-c', \"import runpy; runpy.run_path('/Users/dustinstudio/experiments/v6-fulltrain-noreplay20m-20260928/train_jointall.py',run_name='__main__')\", '--host', 'dustinstudio', '--device', 'mps', '--parent', '/Users/dustinstudio/experiments/v6-replay40-5h-20260928/hour5/run/checkpoints/8df55cd41141669280f2cacf6c64242b2f4df0a9451b39ce6cb5db9b90662638.pt', '--parent-sha', '8df55cd41141669280f2cacf6c64242b2f4df0a9451b39ce6cb5db9b90662638', '--manifest', '/Users/dustinstudio/experiments/v6-replay40-5h-20260928/balanced-manifest.json', '--supervision', 'joint_all', '--segment', 'half1', '--seconds', '600', '--reset-sampling-cursor']' returned non-zero exit status 1."
+}

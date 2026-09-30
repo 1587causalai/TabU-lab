@@ -1,0 +1,152 @@
+{
+  "active_model": "mlp-256x3",
+  "bank_sha256": "b276dce823697630b9a6da99b62b37823c47508cb0353c6d8ddc8598fb3fa0f9",
+  "completed_utc": "2026-09-29T17:48:42.747252+00:00",
+  "device": "cpu",
+  "dtype": "float32",
+  "fit_n": 1988,
+  "models": {
+    "mlp-256x3": {
+      "metrics": {
+        "test": {
+          "mae": 0.0682265950580894,
+          "mse": 0.00845888788294081,
+          "n": 622,
+          "prediction_std": 0.1702142435386772,
+          "r2": 0.7723268625698765,
+          "rmse": 0.09197221255868976,
+          "slog": 0.6330044581587897,
+          "target_std": 0.19275281894544072
+        },
+        "train": {
+          "mae": 0.06064228066363935,
+          "mse": 0.0063105302492474005,
+          "n": 1988,
+          "prediction_std": 0.17827887009512913,
+          "r2": 0.8440793448404839,
+          "rmse": 0.07943884597127152,
+          "slog": 0.7029009486474784,
+          "target_std": 0.20117828471141344
+        }
+      },
+      "refit": false,
+      "selected_rounds": 68
+    },
+    "xgboost-depth6": {
+      "metrics": {
+        "test": {
+          "mae": 0.07919950661198533,
+          "mse": 0.01296280187924187,
+          "n": 622,
+          "prediction_std": 0.16712116598713272,
+          "r2": 0.6511028619159265,
+          "rmse": 0.1138543011011963,
+          "slog": 0.557863787007753,
+          "target_std": 0.19275281894544072
+        },
+        "train": {
+          "mae": 0.042717791154494617,
+          "mse": 0.003090834697852349,
+          "n": 1988,
+          "prediction_std": 0.1795869647712795,
+          "r2": 0.9236316201580084,
+          "rmse": 0.05559527585912628,
+          "slog": 0.82955717531304,
+          "target_std": 0.20117828471141344
+        }
+      },
+      "refit": false,
+      "selected_rounds": 215
+    }
+  },
+  "normalization_fit_only": {
+    "xm": [
+      9.761923016395068,
+      9.023759379798369,
+      8.743694520698028,
+      11.8886065270902,
+      -91551471.52716298,
+      38278644.505533196
+    ],
+    "xs": [
+      1.2965015785162046,
+      1.350773482976854,
+      1.2441566454645303,
+      1.3824593261491793,
+      11340001.108288568,
+      4812562.373868506
+    ],
+    "ym": -0.5790751156818931,
+    "ys": 0.2011782847114134
+  },
+  "old_baseline_script_sha256": "88d7a11698c77498a95ed1820d9a2cba9e9c911a95fff4f98d3f604400aeba7d",
+  "outcome": "completed",
+  "script_sha256": "53d86a61f54d68c0af7de6186fb639ad3f8978dc43f1d852a7dd01f818fc0a61",
+  "seed": 20260929,
+  "selected": {
+    "mlp-256x3": {
+      "best_rounds": 68,
+      "patience": 50,
+      "searched_rounds": 118,
+      "selection_seconds": 3.77016923300107,
+      "stopped_by_patience": true,
+      "validation_metrics": {
+        "mae": 0.0696533284334201,
+        "mse": 0.008639496080101502,
+        "n": 497,
+        "prediction_std": 0.17117027060268775,
+        "r2": 0.7643335894578949,
+        "rmse": 0.09294888961198784,
+        "slog": 0.6354510005902219,
+        "target_std": 0.1914676303654293
+      },
+      "width": 256
+    },
+    "xgboost-depth6": {
+      "best_rounds": 215,
+      "params": {
+        "colsample_bytree": 1.0,
+        "device": "cpu",
+        "eta": 0.05,
+        "eval_metric": "rmse",
+        "max_depth": 6,
+        "nthread": 2,
+        "objective": "reg:squarederror",
+        "reg_lambda": 1.0,
+        "seed": 20260929,
+        "subsample": 1.0,
+        "tree_method": "hist"
+      },
+      "patience": 100,
+      "searched_rounds": 315,
+      "selection_seconds": 0.285445386020001,
+      "stopped_by_patience": true,
+      "validation_metrics": {
+        "mae": 0.07867288786072539,
+        "mse": 0.010946927126114362,
+        "n": 497,
+        "prediction_std": 0.16568844331225188,
+        "r2": 0.7013919563874533,
+        "rmse": 0.10462756389266818,
+        "slog": 0.5643889774312707,
+        "target_std": 0.1914676303654293
+      }
+    }
+  },
+  "selection_completed_utc": "2026-09-29T17:48:42.714768+00:00",
+  "source_common_sha256": "4f2fbc0423a832abe41d0ff2a998e9c6a03adf8474f41d1136ba986842f0ba3c",
+  "split_sha256": "d99d7d8be87479f4755e41292d16277e3956adde0fe7e39ff0858e99f4a2e11e",
+  "started_utc": "2026-09-29T17:48:38.608414+00:00",
+  "test_n": 622,
+  "test_predictions_computed": true,
+  "test_started_utc": "2026-09-29T17:48:42.718012+00:00",
+  "threads": 2,
+  "train_n": 1988,
+  "validation_n": 497,
+  "versions": {
+    "numpy": "2.2.6",
+    "python": "3.12.3",
+    "torch": "2.12.0.dev20260322+cu130",
+    "xgboost": "3.3.0"
+  }
+}

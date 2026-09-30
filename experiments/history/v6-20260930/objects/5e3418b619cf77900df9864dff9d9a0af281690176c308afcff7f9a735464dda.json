@@ -1,0 +1,63 @@
+{
+  "status": {
+    "outcome": "failed",
+    "phase": "before",
+    "completed_training_seconds": 0.0,
+    "additional_seconds_target": 1800,
+    "started_utc": "2026-09-28T11:03:26.945386+00:00",
+    "start_sha256": "b210401a5a31e81386ad907f501dba54c5d58daf77693a980e8263420f2b38f7",
+    "checkpoint_sha256": "b210401a5a31e81386ad907f501dba54c5d58daf77693a980e8263420f2b38f7",
+    "error": "Command '['/home/cms/.local/bin/wehub-python', '--profile', 'train-20260920', '-u', '-c', \"import runpy;runpy.run_path('/home/cms/experiments/v6-v55-dual718-30m-20260928/evaluate.py',run_name='__main__')\", '--host', 'dgx2', '--device', 'cuda:0', '--checkpoint', '/home/cms/experiments/v6-openml12-recover30m-20260928/half2/run/checkpoints/b210401a5a31e81386ad907f501dba54c5d58daf77693a980e8263420f2b38f7.pt', '--expected-sha', 'b210401a5a31e81386ad907f501dba54c5d58daf77693a980e8263420f2b38f7', '--output', '/home/cms/experiments/v6-v55-dual718-30m-20260928/evaluations/before']' returned non-zero exit status 1.",
+    "error_type": "CalledProcessError"
+  },
+  "evaluations/before/terminal.json": {
+    "checkpoint_sha256": "b210401a5a31e81386ad907f501dba54c5d58daf77693a980e8263420f2b38f7",
+    "checkpoint_update": 71530,
+    "error": "Inference tensors do not track version counter.",
+    "error_type": "RuntimeError",
+    "evaluation": "718 known tables; 2 fixed training-row Query masks per table; same inputs for V6 and V55; new bank, not comparable to historical old618 bank",
+    "optimizer_updates": 0,
+    "outcome": "failed",
+    "parent_supervision": "target_only",
+    "runtime": {
+      "cublas_workspace_config": ":4096:8",
+      "cuda_capability": [
+        12,
+        1
+      ],
+      "cuda_device": "NVIDIA GB10",
+      "cuda_runtime": "13.0",
+      "cudnn": 92000,
+      "deterministic_algorithms": true,
+      "device": "cuda:0",
+      "dtype": "float64",
+      "interop_threads": 20,
+      "platform": [
+        "Linux",
+        "6.17.0-1014-nvidia",
+        "aarch64"
+      ],
+      "python": "3.12.3",
+      "threads": 1,
+      "torch": "2.12.0.dev20260322+cu130",
+      "torch_build_sha256": "b62d287846a05b05f6dfa176679c95c75d9a9911ca563e92882a1b5802ec92e4"
+    }
+  },
+  "initial.json": {
+    "optimizer_preserved": true,
+    "parent": "/home/cms/experiments/v6-openml12-recover30m-20260928/half2/run/checkpoints/b210401a5a31e81386ad907f501dba54c5d58daf77693a980e8263420f2b38f7.pt",
+    "parent_sha256": "b210401a5a31e81386ad907f501dba54c5d58daf77693a980e8263420f2b38f7",
+    "parent_supervision": "target_only",
+    "rng_preserved": true,
+    "sampling_cursor_reset": true,
+    "table_count": 718,
+    "target_kinds": {
+      "nominal": 186,
+      "numeric": 392,
+      "ordinal": 140
+    },
+    "windows": [
+      204
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "outcome": "failed",
+  "started_utc": "2026-09-28T00:18:06.620707+00:00",
+  "start_update": 72715,
+  "start_successful_seconds": 0,
+  "additional_seconds_target": 1200,
+  "start_sha256": "ec1aa503ab3ec7eb5a2d7c7e9dca88e41377957a0f634a49166652d0a111545f",
+  "sampling": "OpenML12 equal; full train rows; no replay",
+  "supervision": "target_only",
+  "completed_training_seconds": 0,
+  "phase": "half1",
+  "error_type": "CalledProcessError",
+  "error": "Command '['/Users/gongqian/.local/bin/wehub-python', '--profile', 'train-20260920', '-u', '-c', \"import runpy; runpy.run_path('/Users/gongqian/experiments/v6-fulltrain-noreplay20m-20260928/train_jointall.py',run_name='__main__')\", '--host', 'gongqian-mini', '--device', 'mps', '--parent', '/Users/gongqian/experiments/v6-replay40-5h-20260928/hour5/run/checkpoints/ec1aa503ab3ec7eb5a2d7c7e9dca88e41377957a0f634a49166652d0a111545f.pt', '--parent-sha', 'ec1aa503ab3ec7eb5a2d7c7e9dca88e41377957a0f634a49166652d0a111545f', '--manifest', '/Users/gongqian/experiments/v6-replay40-5h-20260928/balanced-manifest.json', '--supervision', 'target_only', '--segment', 'half1', '--seconds', '600', '--reset-sampling-cursor']' returned non-zero exit status 1."
+}

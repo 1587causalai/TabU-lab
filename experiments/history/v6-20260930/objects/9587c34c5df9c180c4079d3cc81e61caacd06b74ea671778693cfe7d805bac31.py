@@ -1,0 +1,122 @@
+"""Local online W&B monitoring and receipt collection for both training halves."""
+import argparse
+import json
+import os
+import subprocess
+import time
+from pathlib import Path
+import wandb
+
+
+def atomic(path, value):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp = path.with_suffix('.tmp')
+    temp.write_text(json.dumps(value, indent=2)+'\n')
+    os.replace(temp, path)
+
+
+def fetch(host, root, offsets):
+    script = f'''import pathlib,json
+root=pathlib.Path({root!r})
+offsets={offsets!r}
+out={{'rows':[],'offsets':offsets,'campaigns':{{}},'evals':{{}}}}
+for half in ('half1','half2'):
+ p=root/half/'run'
+ if (p/'updates.jsonl').exists():
+  with (p/'updates.jsonl').open('rb') as f:
+   f.seek(offsets.get(half,0))
+   while True:
+    line=f.readline()
+    if not line or not line.endswith(b'\\n'):break
+    row=json.loads(line)
+    for prior in range(1,int(half[-1])):
+     first=json.loads((root/('half'+str(prior))/'run/campaign.json').read_text())
+     row['successful_update_seconds']+=first['successful_update_seconds']
+    out['rows'].append(row)
+    offsets[half]=f.tell()
+ if (p/'campaign.json').exists():out['campaigns'][half]=json.loads((p/'campaign.json').read_text())
+ e=root/'evaluations'/half/'terminal.json'
+ if e.exists():out['evals'][half]=json.loads(e.read_text())
+if (root/'before-eval.json').exists():out['before_eval']=json.loads((root/'before-eval.json').read_text())
+out['controller']=json.loads((root/'status.json').read_text()) if (root/'status.json').exists() else {{}}
+print(json.dumps(out))
+'''
+    result = subprocess.run(['ssh','-o','BatchMode=yes','-o','ConnectTimeout=8',host,'python3','-'],
+                            input=script,text=True,capture_output=True,check=True,timeout=30)
+    return json.loads(result.stdout)
+
+
+def main(args):
+    local = Path(__file__).resolve().parent/'monitor'/args.host
+    local.mkdir(parents=True, exist_ok=True)
+    settings=wandb.Settings(disable_git=True,disable_code=True,console='off',silent=True,
+                            x_disable_stats=True,x_disable_meta=True,init_timeout=45)
+    run=wandb.init(entity='zj3712',project='restoration-v6-target-broadcast',
+                   id=f'dual718-v6-v55-continue60m-{args.host}-20260928',resume='allow',
+                   name=f'{args.host}-dual718-equal-loss-continue60m',mode='online',settings=settings,
+                   config=dict(host=args.host,additional_train_seconds=3600,window_rows='inherited_per_table',
+                               supervision='target_only',loss_weights=[0.5,0.5],sampling='718_equal_table',
+                               continuation='same_dual_objective_preserve_optimizer_rng_offsets_and_cursor'))
+    state=dict(outcome='monitoring',url=run.url,last_update=0,offsets={},evaluated=[])
+    atomic(local/'status.json',state)
+    try:
+        while True:
+            try:
+                response=fetch(args.host,args.remote_root,state['offsets'])
+            except (subprocess.SubprocessError,ValueError) as error:
+                state['last_fetch_error']=str(error)
+                atomic(local/'status.json',state)
+                time.sleep(15)
+                continue
+            controller=response['controller']
+            if 'before_eval' in response:
+                atomic(local/'before-eval.json',response['before_eval'])
+                if not state.get('before_logged'):
+                    for metric,value in response['before_eval']['macro'].items():
+                        if value is not None:run.summary[f'before/macro/{metric}']=value
+                    state['before_logged']=True
+            start=controller.get('start_successful_seconds',0)
+            for row in response['rows']:
+                if row['update']<=state['last_update']:
+                    raise ValueError('update journal regressed')
+                run.log({'train/loss':row['loss'],'train/loss_v6':row['loss_v6'],'train/loss_v55':row['loss_v55'],'train/gradient_norm':row['gradient_norm'],
+                         'train/successful_seconds':row['successful_update_seconds'],
+                         'train/additional_seconds':row['successful_update_seconds']-start,
+                         'train/query_rows':row['query_rows'],'train/scored_cells':row['scored_cells'],
+                         f'loss/{row["table"]}':row['loss']},step=row['update'])
+                state['last_update']=row['update']
+                state['additional_successful_seconds']=row['successful_update_seconds']-start
+            state['offsets']=response['offsets']
+            atomic(local/'controller.json',controller)
+            for half,campaign in response['campaigns'].items():
+                atomic(local/f'{half}-train.json',campaign)
+            for half,evaluation in response['evals'].items():
+                atomic(local/f'{half}-eval.json',evaluation)
+                if half not in state['evaluated'] and evaluation.get('outcome')=='completed':
+                    for metric,value in evaluation['macro'].items():
+                        if value is not None:run.summary[f'{half}/macro/{metric}']=value
+                    for table,metrics in evaluation['tables'].items():
+                        for branch in ('v6','v55'):
+                            for metric,value in metrics[branch].items():
+                                if isinstance(value,(int,float)):run.summary[f'{half}/{table}/{branch}/{metric}']=value
+                    state['evaluated'].append(half)
+            state['controller_outcome']=controller.get('outcome')
+            atomic(local/'status.json',state)
+            if controller.get('outcome') in ('completed','failed'):
+                state['outcome']=controller['outcome']
+                atomic(local/'status.json',state)
+                run.finish(exit_code=0 if state['outcome']=='completed' else 1)
+                return
+            time.sleep(10)
+    except Exception as error:
+        state.update(outcome='observer_failed',error=str(error))
+        atomic(local/'status.json',state)
+        run.finish(exit_code=1)
+        raise
+
+
+if __name__=='__main__':
+    parser=argparse.ArgumentParser()
+    parser.add_argument('--host',required=True)
+    parser.add_argument('--remote-root',required=True)
+    main(parser.parse_args())

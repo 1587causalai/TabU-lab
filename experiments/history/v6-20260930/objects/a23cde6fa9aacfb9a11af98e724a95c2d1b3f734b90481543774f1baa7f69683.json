@@ -1,0 +1,100 @@
+{
+  "description": "Independent table adaptation from joint618; fixed final endpoint; no test-driven selection",
+  "experiment_id": "openml12-independent-gongqian-mini-cars-20260927",
+  "model": {
+    "backbone": {
+      "ff_width": 256,
+      "heads": 4,
+      "kind": "inducing",
+      "layers": 3,
+      "norm_eps": 1e-06,
+      "reference_mass": 1.0,
+      "slots": 256,
+      "tau_presence": 1.0,
+      "width": 128
+    },
+    "bandwidth": 1.0,
+    "center_chunk_size": 128,
+    "codec_version": "constant_weight_composition_v2",
+    "epsilon": 1e-06,
+    "numeric_scaling": "zscore",
+    "regression_width": null,
+    "ridge": 0.001,
+    "size": "small",
+    "slope_source": "shared_ll",
+    "subtokens": 1,
+    "unit_layers": 3
+  },
+  "optimizer": {
+    "betas": [
+      0.9,
+      0.95
+    ],
+    "eps": 1e-08,
+    "grad_clip": 1.0,
+    "learning_rate": 0.0001,
+    "muon_adjust_lr_fn": "match_rms_adamw",
+    "muon_momentum": 0.95,
+    "muon_nesterov": true,
+    "muon_ns_steps": 5,
+    "weight_decay": 0.01
+  },
+  "probes": [],
+  "schema": "tabu.curriculum.v55.v1",
+  "seeds": {
+    "codes": 20260911,
+    "evaluation": 20260913,
+    "masks": 20260910,
+    "model": 20260908,
+    "order": 20260909,
+    "windows": 20260912
+  },
+  "stages": [
+    {
+      "checkpoint_every": 250,
+      "evaluate_every": 100000,
+      "loss": {
+        "discrete_weight": 1.0,
+        "state_weights": [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ]
+      },
+      "max_seconds": 1800.0,
+      "max_updates": 100000,
+      "name": "target_finetune",
+      "objective": {
+        "kind": "squared"
+      },
+      "optimizer": "adamw",
+      "probes": [],
+      "question": "Adapt to target train split",
+      "recipe": {
+        "real": {
+          "fraction": 0.3333333333333333,
+          "kind": "supervised_row"
+        }
+      },
+      "sampling": [
+        {
+          "cohort": "target",
+          "episodes": 1
+        }
+      ]
+    }
+  ],
+  "tables": [
+    {
+      "cohort": "target",
+      "id": "cars",
+      "kind": "real",
+      "path": "../data/cars.json",
+      "role": "train",
+      "sha256": "41085fbff460790e34633f9833205012299dd61e7d63a0b17dffe7b770da7968",
+      "target_column": 17,
+      "window_rows": 204
+    }
+  ]
+}

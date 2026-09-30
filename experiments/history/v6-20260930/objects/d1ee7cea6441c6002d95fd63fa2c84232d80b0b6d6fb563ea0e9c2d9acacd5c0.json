@@ -1,0 +1,181 @@
+{
+  "reported_evaluations": [
+    "dustinstudio:half1",
+    "dgx2:half1",
+    "gongqian-mini:half1",
+    "dustinstudio:half2",
+    "dgx2:half2",
+    "gongqian-mini:half2"
+  ],
+  "terminal_reported": true,
+  "hosts": {
+    "dustinstudio": {
+      "launch_confirmed": true,
+      "successful_updates": 4057,
+      "successful_seconds": 3600.9076009246055,
+      "synthetic_coverage": 100,
+      "phase": "completed",
+      "last_checkpoint_cohort_updates": {
+        "history618": 554,
+        "sparse100": 831
+      },
+      "half1_successful_seconds": 1801.0188768994994,
+      "half1_successful_updates": 2010,
+      "half1_cohort_updates": {
+        "history618": 804,
+        "sparse100": 1206
+      },
+      "half1_counts": {
+        "r2": {
+          "improved": 100,
+          "declined": 0
+        },
+        "slog": {
+          "improved": 100,
+          "declined": 0
+        }
+      },
+      "half1_checkpoint_sha256": "402e2bd3a076161bd817c1bebfaa421cf3cdcebdd2f8af4d046762424d0f1f6d",
+      "total_cohort_updates": {
+        "history618": 1622,
+        "sparse100": 2435
+      },
+      "final_checkpoint_sha256": "f4c8e43abbb026615b417304d58fef75dba03337b41eaa13cbcae4e5146d6e2f",
+      "final_counts": {
+        "baseline": {
+          "r2": {
+            "improved": 100,
+            "declined": 0
+          },
+          "slog": {
+            "improved": 100,
+            "declined": 0
+          }
+        },
+        "half1": {
+          "r2": {
+            "improved": 84,
+            "declined": 16
+          },
+          "slog": {
+            "improved": 83,
+            "declined": 17
+          }
+        }
+      }
+    },
+    "dgx2": {
+      "launch_confirmed": true,
+      "successful_updates": 8383,
+      "successful_seconds": 3600.072874426045,
+      "synthetic_coverage": 100,
+      "phase": "completed",
+      "last_checkpoint_cohort_updates": {
+        "history618": 839,
+        "sparse100": 1255
+      },
+      "half1_successful_seconds": 1800.0015914731375,
+      "half1_successful_updates": 4192,
+      "half1_cohort_updates": {
+        "history618": 1676,
+        "sparse100": 2516
+      },
+      "half1_counts": {
+        "r2": {
+          "improved": 100,
+          "declined": 0
+        },
+        "slog": {
+          "improved": 100,
+          "declined": 0
+        }
+      },
+      "half1_checkpoint_sha256": "b94406154210fd464bac206a388b17404a07c916768b340a8774a5afd2172b3d",
+      "total_cohort_updates": {
+        "history618": 3354,
+        "sparse100": 5029
+      },
+      "final_checkpoint_sha256": "abd462dac215f6fd6245cc51144409a0293b4a0cff680426bdabeda8c9f32d6f",
+      "final_counts": {
+        "baseline": {
+          "r2": {
+            "improved": 100,
+            "declined": 0
+          },
+          "slog": {
+            "improved": 100,
+            "declined": 0
+          }
+        },
+        "half1": {
+          "r2": {
+            "improved": 75,
+            "declined": 25
+          },
+          "slog": {
+            "improved": 71,
+            "declined": 29
+          }
+        }
+      }
+    },
+    "gongqian-mini": {
+      "launch_confirmed": true,
+      "successful_updates": 7296,
+      "successful_seconds": 3600.409052843228,
+      "synthetic_coverage": 100,
+      "phase": "evaluating",
+      "last_checkpoint_cohort_updates": {
+        "history618": 729,
+        "sparse100": 1092
+      },
+      "half1_successful_seconds": 1800.1013982454315,
+      "half1_successful_updates": 3654,
+      "half1_cohort_updates": {
+        "history618": 1461,
+        "sparse100": 2193
+      },
+      "half1_counts": {
+        "r2": {
+          "improved": 100,
+          "declined": 0
+        },
+        "slog": {
+          "improved": 100,
+          "declined": 0
+        }
+      },
+      "half1_checkpoint_sha256": "f129cb9c98230b42466439f69be1a0999ecf8f2341834e4e851e8bbd0cb246e2",
+      "total_cohort_updates": {
+        "history618": 2918,
+        "sparse100": 4378
+      },
+      "final_checkpoint_sha256": "b0bec57b3ed33329b4c8340724a33ed930fb8cefb353e686ee904fb7f7deb0f2",
+      "final_counts": {
+        "baseline": {
+          "r2": {
+            "improved": 100,
+            "declined": 0
+          },
+          "slog": {
+            "improved": 100,
+            "declined": 0
+          }
+        },
+        "half1": {
+          "r2": {
+            "improved": 63,
+            "declined": 37
+          },
+          "slog": {
+            "improved": 56,
+            "declined": 44
+          }
+        }
+      }
+    }
+  },
+  "last_checked_utc": "2026-09-28T09:22:17.328132+00:00",
+  "half1_reported_utc": "2026-09-28T08:54:32.571376+00:00",
+  "terminal_reported_utc": "2026-09-28T09:27:37.373333+00:00"
+}

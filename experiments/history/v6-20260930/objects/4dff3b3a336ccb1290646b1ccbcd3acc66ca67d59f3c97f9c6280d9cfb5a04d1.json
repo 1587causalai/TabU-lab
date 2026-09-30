@@ -1,0 +1,74 @@
+{
+  "branch_rng_restored": true,
+  "branch_rng_roundtrip": true,
+  "disposable_updates": 4,
+  "next_2700_schedule_and_episodes_equal": true,
+  "outcome": "passed",
+  "parent_cursor": 8544,
+  "parent_sha256": "11d74eda701a8bfcf8d7ab44e7bd1548e2757a6145d61d8df81084300aabb116",
+  "parent_unchanged": true,
+  "runtime": {
+    "deterministic_algorithms": true,
+    "device": "mps",
+    "dtype": "float32",
+    "interop_threads": 10,
+    "mps_available": true,
+    "mps_cpu_fallback": false,
+    "platform": [
+      "Darwin",
+      "25.5.0",
+      "arm64"
+    ],
+    "python": "3.12.13",
+    "threads": 1,
+    "torch": "2.13.0",
+    "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+  },
+  "schedule_cursor_reset": false,
+  "table_offsets_preserved": true,
+  "tests": [
+    {
+      "branch": "v6",
+      "forward_passes": 1,
+      "loss": 3.0883915424346924,
+      "optimizer_steps": 1,
+      "query_cells": 68,
+      "rows": 204,
+      "table": "sparse_000"
+    },
+    {
+      "branch": "v55",
+      "forward_passes": 1,
+      "loss": 4.432123184204102,
+      "optimizer_steps": 1,
+      "query_cells": 68,
+      "rows": 204,
+      "table": "sparse_000"
+    },
+    {
+      "branch": "v6",
+      "forward_passes": 1,
+      "loss": 3.2910361289978027,
+      "optimizer_steps": 1,
+      "query_cells": 171,
+      "rows": 512,
+      "table": "pumadyn32nh"
+    },
+    {
+      "branch": "v55",
+      "forward_passes": 1,
+      "loss": 3.529083490371704,
+      "optimizer_steps": 1,
+      "query_cells": 171,
+      "rows": 512,
+      "table": "pumadyn32nh"
+    }
+  ],
+  "unchanged_code_hashes": {
+    "branch_sampling.py": "f59d69c61770f4df45a8aaa96af061969504f3e96632feddb699e05727ffdc09",
+    "dual.py": "2e82302f7ae600fd06165bb025174f5ba48b556a5ab622cd604c415e1d02c0e9",
+    "eval_fit.py": "e8a0763a3fde138ffc4064416ed6e8e75d67195ea0eb7e82e0b5e34da97cd607",
+    "evaluate.py": "ee2ce7614ab3100df9afe7dfb81b9c470eb8c87de57b47ac384d7eacd0a8c862",
+    "training_support.py": "2ee5c702d7ee1f9818ac143aa8c97e8acf2b82e60cdad87b87559b1603b82a1a"
+  }
+}

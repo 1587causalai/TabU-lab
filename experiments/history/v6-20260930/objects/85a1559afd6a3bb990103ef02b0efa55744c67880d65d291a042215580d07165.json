@@ -1,0 +1,39 @@
+{
+  "added_successful_seconds": 899.7591190170497,
+  "added_updates": 3681,
+  "checkpoint": "/Users/dustinstudio/experiments/openml12-joint30m-squared-20260927/half1/run/checkpoint-progress.pt",
+  "checkpoint_sha256": "b303ef9dd20bc00f229c09cd0d55d54b1bcbd2d3f0097be65b3e35d6a8399f7c",
+  "checkpoint_update": 36069,
+  "continuation": "strict_resume_same_identity_optimizer_rng_cursor_exposure",
+  "final_stage_seconds": 8165.200266041793,
+  "half": 1,
+  "host": "dustinstudio",
+  "identity_sha256": "37c739f8a25a1b47952a1600f01fdd3b09ca7743a4259449495a6861d3be1905",
+  "manifest": "/Users/dustinstudio/experiments/openml12-joint2h-squared-20260927/manifests/joint-openml12-squared.json",
+  "old618_tables_with_gradient": 618,
+  "outcome": "training_completed",
+  "parent": "/Users/dustinstudio/experiments/openml12-joint2h-squared-20260927/runs/main/checkpoints/f0d2a0eacdc7c1b3a403cf942cb32f1065c595dd17e680de07d9d23be76aa97e.pt",
+  "parent_sha256": "f0d2a0eacdc7c1b3a403cf942cb32f1065c595dd17e680de07d9d23be76aa97e",
+  "parent_stage_seconds": 7256.359930875711,
+  "parent_update": 32388,
+  "runtime": {
+    "deterministic_algorithms": true,
+    "device": "mps",
+    "dtype": "float32",
+    "interop_threads": 16,
+    "mps_available": true,
+    "mps_cpu_fallback": false,
+    "platform": [
+      "Darwin",
+      "25.6.0",
+      "arm64"
+    ],
+    "python": "3.12.13",
+    "threads": 1,
+    "torch": "2.13.0",
+    "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+  },
+  "schema": "tabu.openml12.strict30.half.v1",
+  "source_script_sha256": "c63e5ee83b3e7b87c9ff865e66dbbd5257f7f718ea3cb866e51df25d90a5024d",
+  "target_successful_update_seconds": 900.0
+}

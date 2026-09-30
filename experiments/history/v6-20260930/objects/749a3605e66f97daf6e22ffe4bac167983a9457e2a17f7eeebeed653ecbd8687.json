@@ -1,0 +1,55 @@
+{
+  "bank_masks": 1238,
+  "bank_sha256": "e6392af138cf47061ada80a4b53faa05fd7bdb680b64b22ee3f6d6aa032ac928",
+  "cohorts": {
+    "new120": 120,
+    "nominal100": 100,
+    "old120": 120,
+    "ordinal100": 100,
+    "real78": 78,
+    "tanh100": 100
+  },
+  "controller_sha256": "bcaae16aaf98c4e601016b1d652591aa11b0dfbf70962dec2abf5151422505ae",
+  "data_sha256": "e85929328a3b396e2e3322a10b957768a7343583f7be019a46be366c97839838",
+  "device": "mps",
+  "distinct_table_file_sha256": 618,
+  "dtype": "float32",
+  "identity_sha256": "b90c8fd183f95d499b2f19ff8d25d57773d3c790ddfe7d263cdd60e856fb701e",
+  "kinds": {
+    "new120": {
+      "nominal": 43,
+      "numeric": 57,
+      "ordinal": 20
+    },
+    "nominal100": {
+      "nominal": 100
+    },
+    "old120": {
+      "nominal": 43,
+      "numeric": 57,
+      "ordinal": 20
+    },
+    "ordinal100": {
+      "ordinal": 100
+    },
+    "real78": {
+      "numeric": 78
+    },
+    "tanh100": {
+      "numeric": 100
+    }
+  },
+  "manifest_max_updates": 50000,
+  "manifest_max_wall_seconds": 20000.0,
+  "manifest_sha256": "28e3ebfdc9be0eae9a19bd707c1bba3442663b3918f0c648c7682381a0fbd480",
+  "objective_kind": "squared",
+  "one_update_each_per_618_step_cycle": true,
+  "raw_rows": 164136,
+  "raw_train_rows": 126072,
+  "schema": "tabu.mini.joint618.frozen-setup.v1",
+  "source_sha256": "9998c71b1d6c377ef3b8d7a2207284d1cea42a7edaea6efaefa91b1992ca751e",
+  "stop_target_seconds": 7196.0,
+  "successful_update_budget_seconds": 7200.0,
+  "table_count": 618,
+  "train_rows": 126072
+}

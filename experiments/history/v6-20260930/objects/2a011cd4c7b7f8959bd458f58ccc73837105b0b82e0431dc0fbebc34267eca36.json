@@ -1,0 +1,73 @@
+{
+  "outcome": "completed",
+  "host": "dustinstudio",
+  "optimizer_updates": 0,
+  "started_utc": "2026-09-28T13:41:33.735279+00:00",
+  "completed": {
+    "parent/openml12": {
+      "macro": {
+        "r2": 0.7384256458691835,
+        "slog": 0.6524793923164253
+      },
+      "checkpoint_sha256": "ced305ae38d9ac5e648f4ae0cd517253f88a2849bb2232139c2d33d47c2b6231",
+      "seconds": 55.51339374994859,
+      "bank_sha256": "2090f8d9074c3b80c40667aeb2995db80ef1799a801b8c5c6b8badffe6d413d4"
+    },
+    "final/openml12": {
+      "macro": {
+        "r2": 0.5790990545399558,
+        "slog": 0.49797831258004943
+      },
+      "checkpoint_sha256": "d454eb19e3d37a1b4bf166efad3b4d14d78b3ff913772c16f14c965833aaf320",
+      "seconds": 43.300897541921586,
+      "bank_sha256": "2090f8d9074c3b80c40667aeb2995db80ef1799a801b8c5c6b8badffe6d413d4"
+    },
+    "middle/openml12": {
+      "macro": {
+        "r2": 0.5726744470145403,
+        "slog": 0.5035672892916794
+      },
+      "checkpoint_sha256": "d71063cba2c8e25a0575202d0f7bc2520e26037df97017764a695f00f217520d",
+      "seconds": 41.47783787501976,
+      "bank_sha256": "2090f8d9074c3b80c40667aeb2995db80ef1799a801b8c5c6b8badffe6d413d4"
+    },
+    "parent/sparse100": {
+      "macro": {
+        "r2": 0.1905590697784526,
+        "slog": 0.11444141188835438
+      },
+      "checkpoint_sha256": "ced305ae38d9ac5e648f4ae0cd517253f88a2849bb2232139c2d33d47c2b6231",
+      "seconds": 147.90547024994157,
+      "bank_sha256": "27c35a98529a10cb47a489738e1731d98df458c5332e8ea9aa28e011515875bd"
+    },
+    "middle/sparse100": {
+      "macro": {
+        "r2": 0.26209278128612273,
+        "slog": 0.16035039161938872
+      },
+      "checkpoint_sha256": "d71063cba2c8e25a0575202d0f7bc2520e26037df97017764a695f00f217520d",
+      "seconds": 146.551054000156,
+      "bank_sha256": "27c35a98529a10cb47a489738e1731d98df458c5332e8ea9aa28e011515875bd"
+    },
+    "final/sparse100": {
+      "macro": {
+        "r2": 0.2594237503987113,
+        "slog": 0.1581513193972636
+      },
+      "checkpoint_sha256": "d454eb19e3d37a1b4bf166efad3b4d14d78b3ff913772c16f14c965833aaf320",
+      "seconds": 146.59841699991375,
+      "bank_sha256": "27c35a98529a10cb47a489738e1731d98df458c5332e8ea9aa28e011515875bd"
+    }
+  },
+  "historical_parent_openml12": {
+    "macro": {
+      "r2": 0.7384256458691835,
+      "slog": 0.6524793923164253
+    },
+    "checkpoint_sha256": "ced305ae38d9ac5e648f4ae0cd517253f88a2849bb2232139c2d33d47c2b6231",
+    "source": "/Users/dustinstudio/experiments/v6-openml12-recover30m-20260928/evaluations/half2/terminal.json"
+  },
+  "node": "final",
+  "dataset": "sparse100",
+  "completed_utc": "2026-09-28T13:51:15.136478+00:00"
+}

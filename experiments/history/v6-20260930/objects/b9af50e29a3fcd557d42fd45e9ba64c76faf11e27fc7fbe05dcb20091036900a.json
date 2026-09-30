@@ -1,0 +1,53 @@
+{
+  "outcome": "completed",
+  "started_utc": "2026-09-27T18:22:01.573939+00:00",
+  "start_update": 29082,
+  "start_successful_seconds": 0,
+  "additional_seconds_target": 18000,
+  "start_sha256": "19c210152e1c9a481dd0fbab529fdd7547ab8fdefcb8bfee2ff23096672356cc",
+  "sampling": "OpenML12 equal:12 + history618:8 per 20 updates",
+  "supervision": "target_only",
+  "completed_training_seconds": 18001.36556225829,
+  "phase": "hour5",
+  "additional_successful_seconds": 18001.36556225829,
+  "checkpoint_sha256": "ec1aa503ab3ec7eb5a2d7c7e9dca88e41377957a0f634a49166652d0a111545f",
+  "checkpoint_update": 72715,
+  "evaluations": {
+    "hour1": {
+      "macro": {
+        "r2": 0.7289109528920261,
+        "slog": 0.6590505263506424
+      },
+      "checkpoint_sha256": "0e88f6d47aaf3cab0f1858e6f526534c402f4954f618894240b43e709beac662"
+    },
+    "hour2": {
+      "macro": {
+        "r2": 0.7381960192031652,
+        "slog": 0.6675147860400622
+      },
+      "checkpoint_sha256": "f21f820e0c4b41b953b503d3e9656095bf3bbbb4e43e9a48f18143b875f7af25"
+    },
+    "hour3": {
+      "macro": {
+        "r2": 0.7370612508536274,
+        "slog": 0.6593470149459432
+      },
+      "checkpoint_sha256": "d6db37c6b9b85314d8728175f08b5a1ceda4cb02aeff049827f844b4a85677bc"
+    },
+    "hour4": {
+      "macro": {
+        "r2": 0.7426313519493356,
+        "slog": 0.6673402245893696
+      },
+      "checkpoint_sha256": "05b3cb9bb7be51784ef50cc6eba64bcc78367f2b735a15ed04e312d549d65f7f"
+    },
+    "hour5": {
+      "macro": {
+        "r2": 0.7539275680519015,
+        "slog": 0.6799737642167544
+      },
+      "checkpoint_sha256": "ec1aa503ab3ec7eb5a2d7c7e9dca88e41377957a0f634a49166652d0a111545f"
+    }
+  },
+  "completed_utc": "2026-09-27T23:28:10.749956+00:00"
+}

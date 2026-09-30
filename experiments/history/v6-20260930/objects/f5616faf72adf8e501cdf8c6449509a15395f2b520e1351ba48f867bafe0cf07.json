@@ -1,0 +1,57 @@
+{
+  "status": {
+    "outcome": "failed",
+    "phase": "before",
+    "completed_training_seconds": 0.0,
+    "additional_seconds_target": 1800,
+    "started_utc": "2026-09-28T11:03:28.236590+00:00",
+    "start_sha256": "e249ad031408d2171c803697baca35583664d1aaddfe6e59af10fd186cb85514",
+    "checkpoint_sha256": "e249ad031408d2171c803697baca35583664d1aaddfe6e59af10fd186cb85514",
+    "error": "Command '['/Users/gongqian/.local/bin/wehub-python', '--profile', 'train-20260920', '-u', '-c', \"import runpy;runpy.run_path('/Users/gongqian/experiments/v6-v55-dual718-30m-20260928/evaluate.py',run_name='__main__')\", '--host', 'gongqian-mini', '--device', 'mps', '--checkpoint', '/Users/gongqian/experiments/v6-openml12-recover30m-20260928/half2/run/checkpoints/e249ad031408d2171c803697baca35583664d1aaddfe6e59af10fd186cb85514.pt', '--expected-sha', 'e249ad031408d2171c803697baca35583664d1aaddfe6e59af10fd186cb85514', '--output', '/Users/gongqian/experiments/v6-v55-dual718-30m-20260928/evaluations/before']' returned non-zero exit status 1.",
+    "error_type": "CalledProcessError"
+  },
+  "evaluations/before/terminal.json": {
+    "checkpoint_sha256": "e249ad031408d2171c803697baca35583664d1aaddfe6e59af10fd186cb85514",
+    "checkpoint_update": 99655,
+    "error": "Inference tensors do not track version counter.",
+    "error_type": "RuntimeError",
+    "evaluation": "718 known tables; 2 fixed training-row Query masks per table; same inputs for V6 and V55; new bank, not comparable to historical old618 bank",
+    "optimizer_updates": 0,
+    "outcome": "failed",
+    "parent_supervision": "target_only",
+    "runtime": {
+      "deterministic_algorithms": true,
+      "device": "mps",
+      "dtype": "float32",
+      "interop_threads": 10,
+      "mps_available": true,
+      "mps_cpu_fallback": false,
+      "platform": [
+        "Darwin",
+        "25.5.0",
+        "arm64"
+      ],
+      "python": "3.12.13",
+      "threads": 1,
+      "torch": "2.13.0",
+      "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+    }
+  },
+  "initial.json": {
+    "optimizer_preserved": true,
+    "parent": "/Users/gongqian/experiments/v6-openml12-recover30m-20260928/half2/run/checkpoints/e249ad031408d2171c803697baca35583664d1aaddfe6e59af10fd186cb85514.pt",
+    "parent_sha256": "e249ad031408d2171c803697baca35583664d1aaddfe6e59af10fd186cb85514",
+    "parent_supervision": "target_only",
+    "rng_preserved": true,
+    "sampling_cursor_reset": true,
+    "table_count": 718,
+    "target_kinds": {
+      "nominal": 186,
+      "numeric": 392,
+      "ordinal": 140
+    },
+    "windows": [
+      204
+    ]
+  }
+}

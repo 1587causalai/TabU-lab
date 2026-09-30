@@ -1,0 +1,34 @@
+{
+  "reported_evaluations": [
+    "dustinstudio/half1",
+    "dustinstudio/half2",
+    "dgx2/half1",
+    "dgx2/half2",
+    "gongqian-mini/half1",
+    "gongqian-mini/half2"
+  ],
+  "terminal_reported": true,
+  "last_checked_utc": "2026-09-28T06:08:46.978789+00:00",
+  "transition_verified": {
+    "dustinstudio": {
+      "parent_sha256": "b2efac691db081ef5948abfdeec8c372893ba9d5a2a4e3cb74c7665eefb3d5a7",
+      "prior_seconds": 1800.9456891163718,
+      "remaining_budget": 1799.0543108836282
+    },
+    "dgx2": {
+      "parent_sha256": "10e75ff0b4d6355ffa5347a723a46fcfb3172b2a859367b334e5e2de7f4fc395",
+      "prior_seconds": 1800.028830185086,
+      "remaining_budget": 1799.971169814914
+    },
+    "gongqian-mini": {
+      "parent_sha256": "ed9c173772d18458ef6cf5b460f83b76d1a688805faab6c54d65d650a7e52a44",
+      "prior_seconds": 1800.493837193586,
+      "remaining_budget": 1799.506162806414
+    }
+  },
+  "completed_hosts": [
+    "dustinstudio",
+    "dgx2",
+    "gongqian-mini"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "reported_evaluations": [
+    "dustinstudio/half1",
+    "gongqian-mini/half1",
+    "dustinstudio/half2"
+  ],
+  "last_checked_utc": "2026-09-28T01:09:45.811185+00:00",
+  "latest_observation": {
+    "gongqian-mini": {
+      "outcome": "failed",
+      "successful_updates": 16,
+      "successful_seconds": 686.0382332913578,
+      "tables_covered": 12,
+      "history618_updates": 0
+    },
+    "dustinstudio": {
+      "outcome": "completed",
+      "successful_updates": 29,
+      "successful_seconds": 1422.9925225432962,
+      "tables_covered": 12,
+      "history618_updates": 0,
+      "terminal_evaluation_complete": true
+    },
+    "dgx2": {
+      "outcome": "ssh_timeout",
+      "live_training_status": "unknown"
+    }
+  },
+  "previously_reported_issues": [
+    "Mac first-step OOM and recomputation repair",
+    "DGX2 SSH timeout"
+  ],
+  "reported_failures": [
+    "gongqian-mini/half2/backbone_softmax_oom"
+  ]
+}

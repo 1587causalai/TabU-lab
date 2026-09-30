@@ -1,0 +1,29 @@
+{
+  "pid": 3810497,
+  "command": [
+    "/home/cms/.local/bin/wehub-python",
+    "--profile",
+    "train-20260920",
+    "-u",
+    "-c",
+    "import runpy; runpy.run_path('/home/cms/experiments/openml12-finetune-20260927/run_squared.py',run_name='__main__')",
+    "--root",
+    "/home/cms/experiments/openml12-joint2h-squared-20260927",
+    "--parent-manifest",
+    "/home/cms/experiments/openml12-joint-fit-20260927/manifests/joint-openml12.json",
+    "--parent",
+    "/home/cms/experiments/openml12-joint-fit-20260927/runs/main/checkpoints/c7a6030f3833e10ba73602536788da29e074f5ef30b308f939a23f873c8723f8.pt",
+    "--parent-sha",
+    "c7a6030f3833e10ba73602536788da29e074f5ef30b308f939a23f873c8723f8",
+    "--host",
+    "dgx2",
+    "--device",
+    "cuda:0",
+    "--seconds",
+    "7190"
+  ],
+  "cwd": "/home/cms/experiments/joint618-60min-20260926/source/src",
+  "log": "/home/cms/experiments/openml12-finetune-20260927/joint2h-squared-launch.log",
+  "host": "dgx2",
+  "launched_utc": "2026-09-27T02:41:49.265477+00:00"
+}

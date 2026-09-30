@@ -1,0 +1,12 @@
+{
+  "host": "gongqian-mini",
+  "device": "mps",
+  "supervision": "target_only",
+  "parent": {
+    "stage": "adapt60",
+    "checkpoint": "/Users/gongqian/experiments/v6-dual718-openml12-adapt60m-20260928/half2/run/checkpoints/cf3731e8941261c73dd02725402a7e04545d2e71c941500fed39f7153716f818.pt",
+    "checkpoint_sha256": "cf3731e8941261c73dd02725402a7e04545d2e71c941500fed39f7153716f818",
+    "manifest": "/Users/gongqian/experiments/v6-dual718-openml12-adapt60m-20260928/balanced-replay718-manifest.json",
+    "supervision": "target_only"
+  }
+}

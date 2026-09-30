@@ -1,0 +1,130 @@
+{
+  "additional_seconds_target": 900,
+  "branch": "v55",
+  "discarded_updates": 1,
+  "evaluations": {},
+  "first_episode_index": 5605,
+  "formal_updates": 0,
+  "host": "dgx2",
+  "identity": {
+    "code": {
+      "baselines.py": "88d7a11698c77498a95ed1820d9a2cba9e9c911a95fff4f98d3f604400aeba7d",
+      "common.py": "4f2fbc0423a832abe41d0ff2a998e9c6a03adf8474f41d1136ba986842f0ba3c",
+      "dual.py": "2e82302f7ae600fd06165bb025174f5ba48b556a5ab622cd604c415e1d02c0e9",
+      "evaluate.py": "ee2ce7614ab3100df9afe7dfb81b9c470eb8c87de57b47ac384d7eacd0a8c862",
+      "frozen_evaluate.py": "726b6495ef02aa1865026f9fa19a46ebd6302b610ec9478686da9272446cd4f3",
+      "report.py": "290e0ba076c4c0cacba70c544fe4194b11d275e3c6685e1528ef7d8b907434bb",
+      "run.py": "acaace6bc20b72ca6a23b5bc3833bd3c047b9ee0414c726e2a261afd2f1c4af8",
+      "setup_host.py": "4a5100aff2cee644f9434703791132e63025495f0932e142d89e8acf9e2fd89f",
+      "training_support.py": "2ee5c702d7ee1f9818ac143aa8c97e8acf2b82e60cdad87b87559b1603b82a1a"
+    },
+    "inference_branch": "v55",
+    "initialization": "model optimizer RNG retained; single-table schedule reset and Puma episode offset settled",
+    "model_config": {
+      "backbone": {
+        "ff_width": 256,
+        "heads": 8,
+        "kind": "inducing",
+        "layers": 3,
+        "norm_eps": 1e-06,
+        "reference_mass": 1.0,
+        "slots": 256,
+        "tau_presence": 1.0,
+        "width": 128
+      },
+      "bandwidth": 1.0,
+      "center_chunk_size": 128,
+      "codec_version": "constant_weight_composition_v2",
+      "epsilon": 1e-06,
+      "numeric_scaling": "zscore",
+      "regression_width": null,
+      "ridge": 0.001,
+      "size": "small",
+      "slope_source": "shared_ll",
+      "subtokens": 1,
+      "unit_layers": 3
+    },
+    "objective": "puma_single_v55",
+    "parent_manifest_sha256": "bac2a451714ecd542d4389747d6b07e3a9e0caad27983ecfedd017580eb56e55",
+    "parent_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+    "runtime": {
+      "cublas_workspace_config": ":4096:8",
+      "cuda_capability": [
+        12,
+        1
+      ],
+      "cuda_device": "NVIDIA GB10",
+      "cuda_runtime": "13.0",
+      "cudnn": 92000,
+      "deterministic_algorithms": true,
+      "device": "cuda:0",
+      "dtype": "float64",
+      "interop_threads": 20,
+      "platform": [
+        "Linux",
+        "6.17.0-1014-nvidia",
+        "aarch64"
+      ],
+      "python": "3.12.3",
+      "threads": 1,
+      "torch": "2.12.0.dev20260322+cu130",
+      "torch_build_sha256": "b62d287846a05b05f6dfa176679c95c75d9a9911ca563e92882a1b5802ec92e4"
+    },
+    "schema": "tabu.puma.single.v1",
+    "sha256": "928a0b1ca5571650c53793ab28c6f683c766554bd7d08bf4c4a8cd380edfca9e",
+    "strict_resume": false,
+    "supervision": "target_only"
+  },
+  "loss_scope": "Query target column only; own-cell encoding squared error",
+  "memory_fraction": 0.5,
+  "optimizer_restored": true,
+  "outcome": "passed",
+  "parameter_count": 2082688,
+  "parent_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+  "parent_unchanged": true,
+  "rng_restored": true,
+  "runtime": {
+    "cublas_workspace_config": ":4096:8",
+    "cuda_capability": [
+      12,
+      1
+    ],
+    "cuda_device": "NVIDIA GB10",
+    "cuda_runtime": "13.0",
+    "cudnn": 92000,
+    "deterministic_algorithms": true,
+    "device": "cuda:0",
+    "dtype": "float64",
+    "interop_threads": 20,
+    "platform": [
+      "Linux",
+      "6.17.0-1014-nvidia",
+      "aarch64"
+    ],
+    "python": "3.12.3",
+    "threads": 1,
+    "torch": "2.12.0.dev20260322+cu130",
+    "torch_build_sha256": "b62d287846a05b05f6dfa176679c95c75d9a9911ca563e92882a1b5802ec92e4"
+  },
+  "schedule_cursor_reset": true,
+  "started_utc": "2026-09-29T13:07:09.757109+00:00",
+  "step": {
+    "branch": "v55",
+    "episode_index": 5605,
+    "forward_passes": 1,
+    "gradient_norm": 5.418861882176846,
+    "loss": 4.103225848160578,
+    "optimizer_steps": 1,
+    "query_rows": 171,
+    "scored_cells": 171,
+    "seconds": 1.7027184160106117,
+    "selected_loss_weight": 1.0,
+    "successful_update_seconds": 1.7027184160106117,
+    "support_rows": 341,
+    "table": "pumadyn32nh",
+    "train_rows": 512,
+    "update": 140514
+  },
+  "successful_update_seconds": 0,
+  "window_rows": 512
+}

@@ -1,0 +1,66 @@
+{
+  "model": "v55",
+  "arm": "full32",
+  "checkpoint": {
+    "path": "/home/cms/experiments/v6-sparse-relevance-probe-20260927/run-h8-150/v55-full32/checkpoint-u0150.pt",
+    "sha256": "151e866d4ae3d8ff2f34049c99f1cfc68a40126325ba5bbb37b639079a114be6",
+    "update": 150
+  },
+  "state": {
+    "update": 150,
+    "cursor": 150,
+    "train_step_seconds": 77.78411606769077
+  },
+  "initial_metrics": {
+    "train_query": {
+      "n": 544,
+      "r2": -0.019967619110892176,
+      "slog": -0.009200315006456128,
+      "prediction_sd": 0.007372922972364628,
+      "target_sd": 0.03571200586961525,
+      "prediction_sd_ratio": 0.2064550224169209,
+      "correlation": 0.055171517722124315,
+      "prediction_mean": 0.0009970751495517213,
+      "target_mean": 0.0013960546368293081
+    },
+    "test_query": {
+      "n": 544,
+      "r2": -0.062158068909711206,
+      "slog": -0.029073673238648068,
+      "prediction_sd": 0.007516081204269806,
+      "target_sd": 0.03482558125018005,
+      "prediction_sd_ratio": 0.21582069658150924,
+      "correlation": -0.03344570323330623,
+      "prediction_mean": 0.0010747487797419686,
+      "target_mean": 0.002252114021211234
+    }
+  },
+  "metrics": {
+    "train_query": {
+      "n": 544,
+      "r2": 0.003571103631515471,
+      "slog": -0.002271803125555749,
+      "prediction_sd": 0.00436557265257492,
+      "target_sd": 0.03571200586961525,
+      "prediction_sd_ratio": 0.12224383778703587,
+      "correlation": 0.07764802340722327,
+      "prediction_mean": 0.0021697165246627567,
+      "target_mean": 0.0013960546368293081
+    },
+    "test_query": {
+      "n": 544,
+      "r2": -0.0029789795388319718,
+      "slog": 0.007813916601010162,
+      "prediction_sd": 0.0040762636302121395,
+      "target_sd": 0.03482558125018005,
+      "prediction_sd_ratio": 0.11704797117179674,
+      "correlation": 0.04597410486523744,
+      "prediction_mean": 0.00202884052687231,
+      "target_mean": 0.002252114021211234
+    }
+  },
+  "context_rows": 136,
+  "query_rows": 68,
+  "peak_allocated_bytes": 2928953344,
+  "outcome": "completed"
+}

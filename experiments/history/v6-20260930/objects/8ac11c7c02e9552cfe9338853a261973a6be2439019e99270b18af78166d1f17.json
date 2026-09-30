@@ -1,0 +1,64 @@
+{
+  "outcome": "completed",
+  "reported_evaluations": [
+    "half1",
+    "half2"
+  ],
+  "automation_id": "dustin-target-only",
+  "training_updates_confirmed": true,
+  "last_checked_utc": "2026-09-29T01:13:05.636489+00:00",
+  "launch_evidence": {
+    "successful_updates_verified": 76,
+    "successful_seconds_verified": 19.519741707248613,
+    "supervision": "target_only",
+    "sample_query_rows": 68,
+    "sample_scored_cells": 68,
+    "sample_scored_visible_cells": 0,
+    "optimizer_rng_restored": true,
+    "sampling_cursor_reset": false,
+    "wandb_url": "https://wandb.ai/zj3712/restoration-v6-target-broadcast/runs/all730-targetonly-60m-dustinstudio-20260929"
+  },
+  "latest_observed": {
+    "phase": "half2",
+    "outcome": "completed",
+    "successful_seconds": 3600.0594686537515
+  },
+  "last_reported_utc": "2026-09-29T01:13:05.636595+00:00",
+  "half1_audit": {
+    "successful_seconds": 1800.0923500242643,
+    "updates": 8088,
+    "coverage": 730,
+    "supervision": "target_only",
+    "forward_passes_per_update": 1,
+    "optimizer_steps_per_update": 1,
+    "parent_and_half2_link_match": true,
+    "cursor_preserved": true
+  },
+  "final_audit": {
+    "updates": 16156,
+    "coverage": 730,
+    "min_table_updates": 22,
+    "max_table_updates": 23,
+    "supervision": "target_only",
+    "forward_passes_per_update": 1,
+    "optimizer_steps_per_update": 1,
+    "parent_links_match": true,
+    "cursor_preserved": true
+  },
+  "final_checkpoint": {
+    "path": "/Users/dustinstudio/experiments/v6-all730-dustin-targetonly60m-20260929/half2/run/checkpoints/94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114.pt",
+    "sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+    "adopted_as_default": true
+  },
+  "automation_deleted": true,
+  "selected_default_checkpoints": {
+    "dustinstudio": {
+      "checkpoint": "/Users/dustinstudio/experiments/v6-all730-dustin-targetonly60m-20260929/half2/run/checkpoints/94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114.pt",
+      "sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+      "phase": "half2",
+      "selected_at_utc": "2026-09-29T03:01:00.447808+00:00",
+      "authority": "User delegated default exploration checkpoint selection",
+      "decision_document": "/Users/cms/.openclaw/workspace/projects/causal-superintelligence/TabU/preparations/v6-v55-dual718-continue60m-20260928/CHECKPOINT_DECISION.md"
+    }
+  }
+}

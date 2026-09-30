@@ -1,0 +1,51 @@
+{
+  "status.json": {
+    "outcome": "training",
+    "phase": "half1"
+  },
+  "half1/run/campaign.json": {
+    "outcome": "admitted",
+    "parent_sha256": "11af62f749ab02df11e8e0a12679b68736687c01e95638f8512c9c0c908ae48e",
+    "parent_update": 74565,
+    "sampling_cursor_reset": false,
+    "optimizer_restored": true,
+    "rng_restored": true
+  },
+  "updates": 40,
+  "first": {
+    "accelerator_allocated_bytes": 141341184,
+    "episode_index": 40,
+    "family": "old618",
+    "forward_passes": 2,
+    "gradient_norm": 0.06773017447978158,
+    "loss": 0.016833319645445623,
+    "loss_v55": 0.016980802464656275,
+    "loss_v6": 0.016685836826234972,
+    "optimizer_steps": 1,
+    "query_rows": 68,
+    "scored_cells": 68,
+    "seconds": 1.1374245870028972,
+    "successful_update_seconds": 1.1374245870028972,
+    "table": "nominal_gumbel_train_054",
+    "train_rows": 204,
+    "update": 74566
+  },
+  "last": {
+    "accelerator_allocated_bytes": 137714176,
+    "episode_index": 37,
+    "family": "old618",
+    "forward_passes": 2,
+    "gradient_norm": 0.192647572740578,
+    "loss": 0.01899228197156526,
+    "loss_v55": 0.016587896430271955,
+    "loss_v6": 0.021396667512858566,
+    "optimizer_steps": 1,
+    "query_rows": 68,
+    "scored_cells": 68,
+    "seconds": 0.3545936660011648,
+    "successful_update_seconds": 21.968515627027955,
+    "table": "nominal_gumbel_train_088",
+    "train_rows": 204,
+    "update": 74605
+  }
+}

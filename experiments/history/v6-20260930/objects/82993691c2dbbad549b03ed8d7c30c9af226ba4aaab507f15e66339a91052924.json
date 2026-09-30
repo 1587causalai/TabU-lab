@@ -1,0 +1,12 @@
+{
+  "outcome": "failed",
+  "phase": "main",
+  "started_utc": "2026-09-27T14:51:36.623831+00:00",
+  "start_update": 13086,
+  "start_successful_seconds": 0,
+  "additional_seconds_target": 1800,
+  "start_sha256": "894fb79e63b6610a1c10a142aa8a3a8eeec3c19f4676d5b529f8e1867e713371",
+  "sampling": "OpenML12 equal:12 + history618:3 per 15 updates",
+  "error_type": "CalledProcessError",
+  "error": "Command '['/Users/dustinstudio/.local/bin/wehub-python', '--profile', 'train-20260920', '-u', '-c', \"import runpy; runpy.run_path('/Users/dustinstudio/experiments/v6-broadcast-balanced30m-20260927/train_balanced.py',run_name='__main__')\", '--host', 'dustinstudio', '--device', 'mps', '--parent', '/Users/dustinstudio/experiments/v6-broadcast-oldloss-openml12-round2-20260927/half2/run/checkpoints/894fb79e63b6610a1c10a142aa8a3a8eeec3c19f4676d5b529f8e1867e713371.pt', '--parent-sha', '894fb79e63b6610a1c10a142aa8a3a8eeec3c19f4676d5b529f8e1867e713371', '--manifest', '/Users/dustinstudio/experiments/openml12-joint2h-squared-20260927/manifests/joint-openml12-squared.json']' returned non-zero exit status 1."
+}

@@ -1,0 +1,238 @@
+{
+  "outcome": "completed",
+  "reported_evaluations": [
+    "dustinstudio/half1",
+    "dustinstudio/half2",
+    "dgx2/half1",
+    "dgx2/half2",
+    "gongqian-mini/half1",
+    "gongqian-mini/half2"
+  ],
+  "config": {
+    "objective": "broadcast_allcell_restoration",
+    "readout": "original_cell_encoding",
+    "state_weights": null,
+    "discrete_weight": 1.0,
+    "scope": "all_original_observed_cells_all_rows_all_columns",
+    "successful_seconds": 1800,
+    "half1_seconds": 900,
+    "openml_window": 512,
+    "replay_window": 204,
+    "replay_fraction": 0.4,
+    "replay_pool": "history718",
+    "broadcast": true,
+    "forward_passes_per_update": 1
+  },
+  "automation_id": "tabu-cell-30",
+  "startup_verification": {
+    "dustinstudio": {
+      "outcome": "training",
+      "parent_sha": "ced305ae38d9ac5e648f4ae0cd517253f88a2849bb2232139c2d33d47c2b6231",
+      "successful_updates": 32,
+      "successful_seconds": 68.10224708612077,
+      "openml_coverage": 12,
+      "replay_updates": 12,
+      "all_cells_verified": true,
+      "one_forward_one_update": true
+    },
+    "dgx2": {
+      "outcome": "training",
+      "parent_sha": "39f28cb4e16b589f289435a529f04c19f2dbd3f0d96313945870caf19be0278d",
+      "successful_updates": 29,
+      "successful_seconds": 70.63787022398901,
+      "openml_coverage": 12,
+      "replay_updates": 10,
+      "all_cells_verified": true,
+      "one_forward_one_update": true
+    },
+    "gongqian-mini": {
+      "outcome": "training",
+      "parent_sha": "cf3731e8941261c73dd02725402a7e04545d2e71c941500fed39f7153716f818",
+      "successful_updates": 25,
+      "successful_seconds": 77.07913900259882,
+      "openml_coverage": 12,
+      "replay_updates": 8,
+      "all_cells_verified": true,
+      "one_forward_one_update": true
+    }
+  },
+  "half1_reported": true,
+  "terminal_reported": true,
+  "half1_reported_utc": "2026-09-28T16:04:38.603286+00:00",
+  "phase": "completed",
+  "half1_results": {
+    "dustinstudio": {
+      "controller": {
+        "outcome": "training",
+        "host": "dustinstudio",
+        "started_utc": "2026-09-28T15:46:58.548036+00:00",
+        "completed_training_seconds": 900.295874679694,
+        "additional_seconds_target": 1800,
+        "start_successful_seconds": 0,
+        "start_sha256": "ced305ae38d9ac5e648f4ae0cd517253f88a2849bb2232139c2d33d47c2b6231",
+        "objective": "broadcast_allcell_restoration",
+        "phase": "half2",
+        "phase_budget": 899.704125320306,
+        "checkpoint_sha256": "18ca39c10298d4ec01c110347796faae52c03980b844ab55b8a4594e22f5d0b8",
+        "evaluations": {
+          "half1": {
+            "macro": {
+              "r2": 0.7592332936604228,
+              "slog": 0.6712291287279978
+            },
+            "checkpoint_sha256": "18ca39c10298d4ec01c110347796faae52c03980b844ab55b8a4594e22f5d0b8"
+          }
+        }
+      },
+      "evaluations": {
+        "half1": {
+          "macro": {
+            "r2": 0.7592332936604228,
+            "slog": 0.6712291287279978
+          },
+          "delta": {
+            "r2": 0.020807647791239336,
+            "slog": 0.018749736411572515
+          },
+          "counts": {
+            "r2": {
+              "improved": 10,
+              "declined": 2
+            },
+            "slog": {
+              "improved": 9,
+              "declined": 3
+            }
+          },
+          "successful_seconds": 900.295874679694,
+          "updates": 480
+        }
+      }
+    },
+    "dgx2": {
+      "controller": {
+        "outcome": "training",
+        "host": "dgx2",
+        "started_utc": "2026-09-28T15:46:59.265462+00:00",
+        "completed_training_seconds": 901.446870395026,
+        "additional_seconds_target": 1800,
+        "start_successful_seconds": 0,
+        "start_sha256": "39f28cb4e16b589f289435a529f04c19f2dbd3f0d96313945870caf19be0278d",
+        "objective": "broadcast_allcell_restoration",
+        "phase": "half2",
+        "phase_budget": 898.553129604974,
+        "checkpoint_sha256": "ad1f381c894031bd5e3487553d741d6af49777284fec8249404f9196e8c5fc34",
+        "evaluations": {
+          "half1": {
+            "macro": {
+              "r2": 0.7496081899365651,
+              "slog": 0.6776640623567752
+            },
+            "checkpoint_sha256": "ad1f381c894031bd5e3487553d741d6af49777284fec8249404f9196e8c5fc34"
+          }
+        }
+      },
+      "evaluations": {
+        "half1": {
+          "macro": {
+            "r2": 0.7496081899365651,
+            "slog": 0.6776640623567752
+          },
+          "delta": {
+            "r2": -0.005440360834660929,
+            "slog": -0.006552268189505828
+          },
+          "counts": {
+            "r2": {
+              "improved": 6,
+              "declined": 6
+            },
+            "slog": {
+              "improved": 5,
+              "declined": 7
+            }
+          },
+          "successful_seconds": 901.446870395026,
+          "updates": 370
+        }
+      }
+    },
+    "gongqian-mini": {
+      "controller": {
+        "outcome": "training",
+        "host": "gongqian-mini",
+        "started_utc": "2026-09-28T15:46:59.724237+00:00",
+        "completed_training_seconds": 900.7978354375809,
+        "additional_seconds_target": 1800,
+        "start_successful_seconds": 0,
+        "start_sha256": "cf3731e8941261c73dd02725402a7e04545d2e71c941500fed39f7153716f818",
+        "objective": "broadcast_allcell_restoration",
+        "phase": "half2",
+        "phase_budget": 899.2021645624191,
+        "checkpoint_sha256": "556413ae41aabd0e57d98fed164d7962d50780c0943963b8c7de9267dc2ccc41",
+        "evaluations": {
+          "half1": {
+            "macro": {
+              "r2": 0.7617296402512856,
+              "slog": 0.6941406692044653
+            },
+            "checkpoint_sha256": "556413ae41aabd0e57d98fed164d7962d50780c0943963b8c7de9267dc2ccc41"
+          }
+        }
+      },
+      "evaluations": {
+        "half1": {
+          "macro": {
+            "r2": 0.7617296402512856,
+            "slog": 0.6941406692044653
+          },
+          "delta": {
+            "r2": -0.00828827057745618,
+            "slog": -0.007937446046877517
+          },
+          "counts": {
+            "r2": {
+              "improved": 3,
+              "declined": 9
+            },
+            "slog": {
+              "improved": 3,
+              "declined": 9
+            }
+          },
+          "successful_seconds": 900.7978354375809,
+          "updates": 293
+        }
+      }
+    }
+  },
+  "terminal_reported_utc": "2026-09-28T16:33:45.293588+00:00",
+  "automation_deleted": true,
+  "accepted_next_checkpoints": {
+    "dustinstudio": {
+      "stage": "broadcast_allcell_15min",
+      "checkpoint": "/Users/dustinstudio/experiments/v6-broadcast-restoration-allcell-openml12-30m-20260928/half1/run/checkpoints/18ca39c10298d4ec01c110347796faae52c03980b844ab55b8a4594e22f5d0b8.pt",
+      "checkpoint_sha256": "18ca39c10298d4ec01c110347796faae52c03980b844ab55b8a4594e22f5d0b8",
+      "manifest": "/Users/dustinstudio/experiments/v6-broadcast-restoration-allcell-openml12-30m-20260928/balanced-replay718-manifest.json",
+      "supervision": "target_only",
+      "training_objective": "broadcast_allcell_restoration"
+    },
+    "dgx2": {
+      "stage": "adapt30",
+      "checkpoint": "/home/cms/experiments/v6-dual718-openml12-adapt60m-20260928/half1/run/checkpoints/39f28cb4e16b589f289435a529f04c19f2dbd3f0d96313945870caf19be0278d.pt",
+      "checkpoint_sha256": "39f28cb4e16b589f289435a529f04c19f2dbd3f0d96313945870caf19be0278d",
+      "manifest": "/home/cms/experiments/v6-dual718-openml12-adapt60m-20260928/balanced-replay718-manifest.json",
+      "supervision": "target_only"
+    },
+    "gongqian-mini": {
+      "stage": "adapt60",
+      "checkpoint": "/Users/gongqian/experiments/v6-dual718-openml12-adapt60m-20260928/half2/run/checkpoints/cf3731e8941261c73dd02725402a7e04545d2e71c941500fed39f7153716f818.pt",
+      "checkpoint_sha256": "cf3731e8941261c73dd02725402a7e04545d2e71c941500fed39f7153716f818",
+      "manifest": "/Users/gongqian/experiments/v6-dual718-openml12-adapt60m-20260928/balanced-replay718-manifest.json",
+      "supervision": "target_only"
+    }
+  },
+  "selection_status": "user_accepted",
+  "selection_accepted_utc": "2026-09-28T16:36:53.851348+00:00",
+  "selection_source": "v6-broadcast-restoration-allcell-openml12-30m-20260928/README.md"
+}

@@ -1,0 +1,247 @@
+{
+  "active_table": null,
+  "bank_sha256": "2090f8d9074c3b80c40667aeb2995db80ef1799a801b8c5c6b8badffe6d413d4",
+  "continuation": "weights-only per table; strict resume after one-update admission",
+  "datasets": {
+    "airfoil_self_noise": {
+      "checkpoint": "/home/cms/experiments/openml12-finetune-20260927/runs/airfoil_self_noise/main/checkpoints/fd0c8751801696a8b66df9e8d0ebe8e1d1e4133f21cf9ef9b1342e7f62baf490.pt",
+      "checkpoint_sha256": "fd0c8751801696a8b66df9e8d0ebe8e1d1e4133f21cf9ef9b1342e7f62baf490",
+      "checkpoint_update": 96,
+      "historical_trace_sha256": "b3a7f6301e41ee87306bd52b32977f3007d3afedeb74fb7fc79874abb85e3685",
+      "metrics": {
+        "mae": 1.136426870016957,
+        "n": 301,
+        "r2": 0.9350737377196474,
+        "rmse": 1.6485073909077523
+      },
+      "model_state_unchanged": true,
+      "optimizer_updates_during_evaluation": 0,
+      "outcome": "completed",
+      "parent_checkpoint_sha256": "1366ac9d552864f80df2c52247476215b87b5d74915d0697676ba1a9d8eeb1a6",
+      "successful_update_seconds": 119.45052922912873
+    },
+    "bodyfat": {
+      "checkpoint": "/home/cms/experiments/openml12-finetune-20260927/runs/bodyfat/main/checkpoints/ca13c053e1e84cbea628da97683c91b124ba0231cb1296f1f7321e655afe2a78.pt",
+      "checkpoint_sha256": "ca13c053e1e84cbea628da97683c91b124ba0231cb1296f1f7321e655afe2a78",
+      "checkpoint_update": 452,
+      "historical_trace_sha256": "1ceb13e2f67b06536674034ffee5219382b0f7e82437338e62c900911f106314",
+      "metrics": {
+        "mae": 0.31154712624945713,
+        "n": 51,
+        "r2": 0.994856120178568,
+        "rmse": 0.585317888631472
+      },
+      "model_state_unchanged": true,
+      "optimizer_updates_during_evaluation": 0,
+      "outcome": "completed",
+      "parent_checkpoint_sha256": "1366ac9d552864f80df2c52247476215b87b5d74915d0697676ba1a9d8eeb1a6",
+      "successful_update_seconds": 119.9347661563661
+    },
+    "cars": {
+      "checkpoint": "/home/cms/experiments/openml12-finetune-20260927/runs/cars/main/checkpoints/b21a1623e8eb6c9668a0291981221a810766132ba3c8b94ca0ede55e7a0958a3.pt",
+      "checkpoint_sha256": "b21a1623e8eb6c9668a0291981221a810766132ba3c8b94ca0ede55e7a0958a3",
+      "checkpoint_update": 385,
+      "historical_trace_sha256": "b1c9ead9b7e0bb26f111142fd46bdd82242734614d29929f04339cb01de27d60",
+      "metrics": {
+        "mae": 1668.5890105079063,
+        "n": 161,
+        "r2": 0.948921485879207,
+        "rmse": 2502.633042715687
+      },
+      "model_state_unchanged": true,
+      "optimizer_updates_during_evaluation": 0,
+      "outcome": "completed",
+      "parent_checkpoint_sha256": "1366ac9d552864f80df2c52247476215b87b5d74915d0697676ba1a9d8eeb1a6",
+      "successful_update_seconds": 119.73132634395733
+    },
+    "concrete_compressive_strength": {
+      "checkpoint": "/home/cms/experiments/openml12-finetune-20260927/runs/concrete_compressive_strength/main/checkpoints/1d4b83a7196516638a23e5f41720facff54a17c59ad2a486c3db485c854cadb3.pt",
+      "checkpoint_sha256": "1d4b83a7196516638a23e5f41720facff54a17c59ad2a486c3db485c854cadb3",
+      "checkpoint_update": 146,
+      "historical_trace_sha256": "0fdb1bf7fbfcd7448f749aeedb79a61a5fb0bd8ff75b27daa15cc081653eb999",
+      "metrics": {
+        "mae": 2.720664753719682,
+        "n": 206,
+        "r2": 0.9324951708208749,
+        "rmse": 4.369552581424206
+      },
+      "model_state_unchanged": true,
+      "optimizer_updates_during_evaluation": 0,
+      "outcome": "completed",
+      "parent_checkpoint_sha256": "1366ac9d552864f80df2c52247476215b87b5d74915d0697676ba1a9d8eeb1a6",
+      "successful_update_seconds": 119.36120145884342
+    },
+    "cpu_activity": {
+      "checkpoint": "/home/cms/experiments/openml12-finetune-20260927/runs/cpu_activity/main/checkpoints/d3ab8a9b571809e8357fb3e956c170b22b8b8e7d420479f5d3ff11edec3c4a31.pt",
+      "checkpoint_sha256": "d3ab8a9b571809e8357fb3e956c170b22b8b8e7d420479f5d3ff11edec3c4a31",
+      "checkpoint_update": 329,
+      "historical_trace_sha256": "e9d1563ba3d2523e52f802b4b0ce9e3501dab3150af8b8924416a70fb931536e",
+      "metrics": {
+        "mae": 2.1589175799082696,
+        "n": 1639,
+        "r2": 0.9709276169193828,
+        "rmse": 3.0417237020610344
+      },
+      "model_state_unchanged": true,
+      "optimizer_updates_during_evaluation": 0,
+      "outcome": "completed",
+      "parent_checkpoint_sha256": "1366ac9d552864f80df2c52247476215b87b5d74915d0697676ba1a9d8eeb1a6",
+      "successful_update_seconds": 119.75625337450765
+    },
+    "energy_efficiency": {
+      "checkpoint": "/home/cms/experiments/openml12-finetune-20260927/runs/energy_efficiency/main/checkpoints/8a5fe0f9e64181e84b8c3a8057860e9330489a91a5de2cbe99083eda87483af9.pt",
+      "checkpoint_sha256": "8a5fe0f9e64181e84b8c3a8057860e9330489a91a5de2cbe99083eda87483af9",
+      "checkpoint_update": 643,
+      "historical_trace_sha256": "863310516fa140d62858f0a1ce29db1c93e6dce3aefc714059fc29dd3e1596f4",
+      "metrics": {
+        "mae": 0.30675987560723533,
+        "n": 154,
+        "r2": 0.9980007159588118,
+        "rmse": 0.4605549673962611
+      },
+      "model_state_unchanged": true,
+      "optimizer_updates_during_evaluation": 0,
+      "outcome": "completed",
+      "parent_checkpoint_sha256": "1366ac9d552864f80df2c52247476215b87b5d74915d0697676ba1a9d8eeb1a6",
+      "successful_update_seconds": 119.72521726926789
+    },
+    "kin8nm": {
+      "checkpoint": "/home/cms/experiments/openml12-finetune-20260927/runs/kin8nm/main/checkpoints/4be4db40b2f56d87cb1c8ba1416a07498baffaf511a7804a7bcedbb9b58d29d1.pt",
+      "checkpoint_sha256": "4be4db40b2f56d87cb1c8ba1416a07498baffaf511a7804a7bcedbb9b58d29d1",
+      "checkpoint_update": 646,
+      "historical_trace_sha256": "81893837ebffcda4498cde97cabf306ac3f2e15376f7ab99985a5200dbe11673",
+      "metrics": {
+        "mae": 0.1690480192118892,
+        "n": 1639,
+        "r2": 0.3561554986478448,
+        "rmse": 0.21063146752130651
+      },
+      "model_state_unchanged": true,
+      "optimizer_updates_during_evaluation": 0,
+      "outcome": "completed",
+      "parent_checkpoint_sha256": "1366ac9d552864f80df2c52247476215b87b5d74915d0697676ba1a9d8eeb1a6",
+      "successful_update_seconds": 119.88148174900562
+    },
+    "pumadyn32nh": {
+      "checkpoint": "/home/cms/experiments/openml12-finetune-20260927/runs/pumadyn32nh/main/checkpoints/e25de389069fbe7b01b37e3d46bc900bc0553073c07e6accdd0818650a719468.pt",
+      "checkpoint_sha256": "e25de389069fbe7b01b37e3d46bc900bc0553073c07e6accdd0818650a719468",
+      "checkpoint_update": 229,
+      "historical_trace_sha256": "d9a11234226985b0801b53662b9e8b8580a1394579559fd09029d9e3d9cc9620",
+      "metrics": {
+        "mae": 0.02849122411773557,
+        "n": 1639,
+        "r2": -0.007241517535529374,
+        "rmse": 0.03625455601676134
+      },
+      "model_state_unchanged": true,
+      "optimizer_updates_during_evaluation": 0,
+      "outcome": "completed",
+      "parent_checkpoint_sha256": "1366ac9d552864f80df2c52247476215b87b5d74915d0697676ba1a9d8eeb1a6",
+      "successful_update_seconds": 119.82530392077751
+    },
+    "qsar_fish_toxicity": {
+      "checkpoint": "/home/cms/experiments/openml12-finetune-20260927/runs/qsar_fish_toxicity/main/checkpoints/09f7ba881263200b0ef6d5528ee12e90a2e164e1fe13f29cf82d0ce9d2784bf1.pt",
+      "checkpoint_sha256": "09f7ba881263200b0ef6d5528ee12e90a2e164e1fe13f29cf82d0ce9d2784bf1",
+      "checkpoint_update": 197,
+      "historical_trace_sha256": "49a0a5710694d8adda706f94e0f2f4178e3f461e9fa0a166e029e773ccbbf6c8",
+      "metrics": {
+        "mae": 0.7110101810180903,
+        "n": 182,
+        "r2": 0.5019237494840838,
+        "rmse": 1.05072002427175
+      },
+      "model_state_unchanged": true,
+      "optimizer_updates_during_evaluation": 0,
+      "outcome": "completed",
+      "parent_checkpoint_sha256": "1366ac9d552864f80df2c52247476215b87b5d74915d0697676ba1a9d8eeb1a6",
+      "successful_update_seconds": 119.81594830565155
+    },
+    "red_wine": {
+      "checkpoint": "/home/cms/experiments/openml12-finetune-20260927/runs/red_wine/main/checkpoints/f631b59ec9f7c38c81383225c58eb112c99ae32c0884a48c511a3d7420231fbc.pt",
+      "checkpoint_sha256": "f631b59ec9f7c38c81383225c58eb112c99ae32c0884a48c511a3d7420231fbc",
+      "checkpoint_update": 529,
+      "historical_trace_sha256": "6ba8edc982d9ca7b24901256f5189cd4e3993450f2cfae19538eeb4d37b1d123",
+      "metrics": {
+        "mae": 0.5284637336321494,
+        "n": 320,
+        "r2": 0.2570081585119285,
+        "rmse": 0.6895757960894261
+      },
+      "model_state_unchanged": true,
+      "optimizer_updates_during_evaluation": 0,
+      "outcome": "completed",
+      "parent_checkpoint_sha256": "1366ac9d552864f80df2c52247476215b87b5d74915d0697676ba1a9d8eeb1a6",
+      "successful_update_seconds": 119.87090624612756
+    },
+    "space_ga": {
+      "checkpoint": "/home/cms/experiments/openml12-finetune-20260927/runs/space_ga/main/checkpoints/259e7c9289d114ea4a6b399da6a90129e86bef344dab6c8eae13dc2803ada09e.pt",
+      "checkpoint_sha256": "259e7c9289d114ea4a6b399da6a90129e86bef344dab6c8eae13dc2803ada09e",
+      "checkpoint_update": 736,
+      "historical_trace_sha256": "00de469830cfd5ea4ebd231d3c1443b815d8e600a2d542d566e460a82f814b7f",
+      "metrics": {
+        "mae": 0.09250383597039279,
+        "n": 622,
+        "r2": 0.5451773856660324,
+        "rmse": 0.1299935377870084
+      },
+      "model_state_unchanged": true,
+      "optimizer_updates_during_evaluation": 0,
+      "outcome": "completed",
+      "parent_checkpoint_sha256": "1366ac9d552864f80df2c52247476215b87b5d74915d0697676ba1a9d8eeb1a6",
+      "successful_update_seconds": 119.97663747682236
+    },
+    "white_wine": {
+      "checkpoint": "/home/cms/experiments/openml12-finetune-20260927/runs/white_wine/main/checkpoints/b06c995c478164d18d8edee0d6b7dfe2a1170fcc91d0b18b4e4e463befd5f8df.pt",
+      "checkpoint_sha256": "b06c995c478164d18d8edee0d6b7dfe2a1170fcc91d0b18b4e4e463befd5f8df",
+      "checkpoint_update": 526,
+      "historical_trace_sha256": "03db72df9b9d3ae47d0d426c7b7e3a6146aec0b46e8fa4f9af089cba1ecee3db",
+      "metrics": {
+        "mae": 0.6556735737016839,
+        "n": 980,
+        "r2": -0.012034589086744152,
+        "rmse": 0.9202535651368531
+      },
+      "model_state_unchanged": true,
+      "optimizer_updates_during_evaluation": 0,
+      "outcome": "completed",
+      "parent_checkpoint_sha256": "1366ac9d552864f80df2c52247476215b87b5d74915d0697676ba1a9d8eeb1a6",
+      "successful_update_seconds": 119.95954759395681
+    }
+  },
+  "exposure_audit": "Not performed, per owner request",
+  "host": "dgx2",
+  "macro_r2": 0.6184386277636756,
+  "median_r2": 0.7388362782434537,
+  "mode": "independent_per_table",
+  "outcome": "completed",
+  "parent_checkpoint": "/home/cms/experiments/joint618-60min-20260926/runs/attempt-002-main/checkpoints/1366ac9d552864f80df2c52247476215b87b5d74915d0697676ba1a9d8eeb1a6.pt",
+  "parent_sha256": "1366ac9d552864f80df2c52247476215b87b5d74915d0697676ba1a9d8eeb1a6",
+  "parent_update": 26003,
+  "runtime": {
+    "cublas_workspace_config": ":4096:8",
+    "cuda_capability": [
+      12,
+      1
+    ],
+    "cuda_device": "NVIDIA GB10",
+    "cuda_runtime": "13.0",
+    "cudnn": 92000,
+    "deterministic_algorithms": true,
+    "device": "cuda:0",
+    "dtype": "float64",
+    "interop_threads": 20,
+    "platform": [
+      "Linux",
+      "6.17.0-1014-nvidia",
+      "aarch64"
+    ],
+    "python": "3.12.3",
+    "threads": 1,
+    "torch": "2.12.0.dev20260322+cu130",
+    "torch_build_sha256": "b62d287846a05b05f6dfa176679c95c75d9a9911ca563e92882a1b5802ec92e4"
+  },
+  "schema": "tabu.openml12.independent-finetune.v1",
+  "script_sha256": "63edb4f2ddb44daaa4f3052e8cdee1aac412c468010aa9df957aca646ec2cc6a",
+  "selection": "Fixed budget final checkpoint; no test-based tuning or selection",
+  "successful_update_seconds_per_table": 120.0
+}

@@ -1,0 +1,26 @@
+{
+  "dustinstudio": {
+    "checkpoint": "/Users/dustinstudio/experiments/v6-all730-dustin-targetonly60m-20260929/half2/run/checkpoints/94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114.pt",
+    "checkpoint_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+    "manifest": "/Users/dustinstudio/experiments/v6-all730-dustin-targetonly60m-20260929/all730-manifest.json",
+    "source_run": "v6-all730-dustin-targetonly60m-20260929",
+    "source_phase": "half2",
+    "supervision": "target_only"
+  },
+  "dgx2": {
+    "checkpoint": "/home/cms/experiments/v6-all730-hostloss-5h-20260929/hour5/run/checkpoints/f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08.pt",
+    "checkpoint_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+    "manifest": "/home/cms/experiments/v6-all730-hostloss-5h-20260929/all730-manifest.json",
+    "source_run": "v6-all730-hostloss-5h-20260929",
+    "source_phase": "hour5",
+    "supervision": "target_only"
+  },
+  "gongqian-mini": {
+    "checkpoint": "/Users/gongqian/experiments/v6-all730-continue-20260929/hour1/run/checkpoints/184e4de7fce2dcd72a7bb1501570f75e86a2cf4db7acc3e9624e5739626110e3.pt",
+    "checkpoint_sha256": "184e4de7fce2dcd72a7bb1501570f75e86a2cf4db7acc3e9624e5739626110e3",
+    "manifest": "/Users/gongqian/experiments/v6-all730-continue-20260929/all730-manifest.json",
+    "source_run": "v6-all730-continue-20260929",
+    "source_phase": "hour1",
+    "supervision": "target_only"
+  }
+}

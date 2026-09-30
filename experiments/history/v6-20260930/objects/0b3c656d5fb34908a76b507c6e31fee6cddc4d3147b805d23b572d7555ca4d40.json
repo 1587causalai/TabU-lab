@@ -1,0 +1,33 @@
+{
+  "outcome": "completed",
+  "started_utc": "2026-09-28T04:47:55.553335+00:00",
+  "start_update": 51328,
+  "start_successful_seconds": 0,
+  "additional_seconds_target": 1800,
+  "start_sha256": "01a29f496fcdfb266d71b830e878902eb4c20f48d9a4890a9007fabc16eaf3ff",
+  "sampling": "OpenML12 once plus 8 old618 per20; OpenML window512",
+  "supervision": "target_only",
+  "completed_training_seconds": 1800.028830185086,
+  "phase": "half2",
+  "phase_budget": 899.7086633429635,
+  "additional_successful_seconds": 1800.028830185086,
+  "checkpoint_sha256": "10e75ff0b4d6355ffa5347a723a46fcfb3172b2a859367b334e5e2de7f4fc395",
+  "checkpoint_update": 55279,
+  "evaluations": {
+    "half1": {
+      "macro": {
+        "r2": 0.745763628163961,
+        "slog": 0.673139647210402
+      },
+      "checkpoint_sha256": "ca356663381523c1c01cd98a15ccbf88e154617d28be623ec0d49355e79ed04c"
+    },
+    "half2": {
+      "macro": {
+        "r2": 0.7543018014543562,
+        "slog": 0.6844438220396795
+      },
+      "checkpoint_sha256": "10e75ff0b4d6355ffa5347a723a46fcfb3172b2a859367b334e5e2de7f4fc395"
+    }
+  },
+  "completed_utc": "2026-09-28T05:21:35.524989+00:00"
+}

@@ -1,0 +1,110 @@
+{
+  "description": "Single-table exploratory adaptation; fit-only update and support; validation-selected checkpoint, no full-train refit.",
+  "experiment_id": "openml12-single-dgx2-red_wine-20260929",
+  "model": {
+    "backbone": {
+      "ff_width": 256,
+      "heads": 8,
+      "kind": "inducing",
+      "layers": 3,
+      "norm_eps": 1e-06,
+      "reference_mass": 1.0,
+      "slots": 256,
+      "tau_presence": 1.0,
+      "width": 128
+    },
+    "bandwidth": 1.0,
+    "center_chunk_size": 128,
+    "codec_version": "constant_weight_composition_v2",
+    "epsilon": 1e-06,
+    "numeric_scaling": "zscore",
+    "regression_width": null,
+    "ridge": 0.001,
+    "size": "small",
+    "slope_source": "shared_ll",
+    "subtokens": 1,
+    "unit_layers": 3
+  },
+  "optimizer": {
+    "betas": [
+      0.9,
+      0.95
+    ],
+    "eps": 1e-08,
+    "grad_clip": 1.0,
+    "learning_rate": 0.0001,
+    "muon_adjust_lr_fn": "match_rms_adamw",
+    "muon_momentum": 0.95,
+    "muon_nesterov": true,
+    "muon_ns_steps": 5,
+    "weight_decay": 0.01
+  },
+  "probes": [],
+  "schema": "tabu.curriculum.v55.v1",
+  "seeds": {
+    "codes": 20260911,
+    "evaluation": 20260913,
+    "masks": 20260910,
+    "model": 20260908,
+    "order": 20260909,
+    "windows": 20260912
+  },
+  "stages": [
+    {
+      "checkpoint_every": 250,
+      "evaluate_every": 100000,
+      "loss": {
+        "discrete_weight": 1.0,
+        "state_weights": [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ]
+      },
+      "max_seconds": 900,
+      "max_updates": 1000000,
+      "name": "puma_single",
+      "objective": {
+        "kind": "squared"
+      },
+      "optimizer": "adamw",
+      "probes": [],
+      "question": "Fit Puma without inter-table interference",
+      "recipe": {
+        "real": {
+          "fraction": 0.3333333333333333,
+          "kind": "supervised_row",
+          "numeric_query_guard": {
+            "kind": "none"
+          }
+        },
+        "synthetic": {
+          "fraction": 0.3333333333333333,
+          "kind": "supervised_row",
+          "numeric_query_guard": {
+            "kind": "none"
+          }
+        }
+      },
+      "sampling": [
+        {
+          "cohort": "puma",
+          "episodes": 1
+        }
+      ]
+    }
+  ],
+  "tables": [
+    {
+      "cohort": "puma",
+      "id": "red_wine",
+      "kind": "real",
+      "path": "fit-data.json",
+      "role": "train",
+      "sha256": "f22f3e43e5f60666d4f52cd09fdd4a442cddf6770e6fc3b7d300e62deef8a62a",
+      "target_column": 11,
+      "window_rows": 512
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "outcome": "successful_updates_verified",
+  "checked_utc": "2026-09-29T10:55:27.222489+00:00",
+  "host": "gongqian-mini",
+  "parent_sha256": "11d74eda701a8bfcf8d7ab44e7bd1548e2757a6145d61d8df81084300aabb116",
+  "initial_cursor": 8544,
+  "schedule_cursor_reset": false,
+  "optimizer_restored": true,
+  "rng_restored": true,
+  "branch_selector_restored": true,
+  "episode_offsets_preserved": true,
+  "updates": 191,
+  "successful_seconds": 80.08012703154236,
+  "branch_counts": {
+    "v6": 98,
+    "v55": 93
+  },
+  "cohort_counts": {
+    "history718": 138,
+    "sparse100": 52,
+    "other10": 1
+  },
+  "first_update": {
+    "accelerator_allocated_bytes": 81106432,
+    "accelerator_reserved_bytes": 1205633024,
+    "branch": "v6",
+    "branch_counts": {
+      "v55": 0,
+      "v6": 1
+    },
+    "cohort": "history718",
+    "columns": 13,
+    "episode_index": 179,
+    "forward_passes": 1,
+    "gradient_norm": 0.09662982076406479,
+    "loss": 0.01987215131521225,
+    "objective": "v6_v55_bernoulli50_sparse30",
+    "optimizer_steps": 1,
+    "query_rows": 68,
+    "replay_family": "old618",
+    "scored_cells": 68,
+    "scored_query_cells": 68,
+    "scored_visible_cells": 0,
+    "seconds": 0.5600648745894432,
+    "selected_loss_weight": 1.0,
+    "successful_update_seconds": 0.5600648745894432,
+    "supervision": "target_only",
+    "support_rows": 136,
+    "table": "ordinal_latent_train_013",
+    "total_train_rows": 204,
+    "train_rows": 204,
+    "update": 199162
+  },
+  "last_update": {
+    "accelerator_allocated_bytes": 248579328,
+    "accelerator_reserved_bytes": 2678931456,
+    "branch": "v55",
+    "branch_counts": {
+      "v55": 93,
+      "v6": 98
+    },
+    "cohort": "sparse100",
+    "columns": 33,
+    "episode_index": 187,
+    "forward_passes": 1,
+    "gradient_norm": 25.464767456054688,
+    "loss": 6.123930931091309,
+    "objective": "v6_v55_bernoulli50_sparse30",
+    "optimizer_steps": 1,
+    "query_rows": 68,
+    "replay_family": "sparse100",
+    "scored_cells": 68,
+    "scored_query_cells": 68,
+    "scored_visible_cells": 0,
+    "seconds": 0.5877430001273751,
+    "selected_loss_weight": 1.0,
+    "successful_update_seconds": 80.08012703154236,
+    "supervision": "target_only",
+    "support_rows": 136,
+    "table": "sparse_053",
+    "total_train_rows": 6553,
+    "train_rows": 204,
+    "update": 199352
+  },
+  "runtime": {
+    "deterministic_algorithms": true,
+    "device": "mps",
+    "dtype": "float32",
+    "interop_threads": 10,
+    "mps_available": true,
+    "mps_cpu_fallback": false,
+    "platform": [
+      "Darwin",
+      "25.5.0",
+      "arm64"
+    ],
+    "python": "3.12.13",
+    "threads": 1,
+    "torch": "2.13.0",
+    "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+  },
+  "memory_cap": 0.75
+}

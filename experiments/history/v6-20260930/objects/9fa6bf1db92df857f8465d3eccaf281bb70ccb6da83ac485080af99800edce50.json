@@ -1,0 +1,49 @@
+{
+  "dustinstudio": {
+    "status": {
+      "outcome": "evaluating_before",
+      "host": "dustinstudio",
+      "supervision": "joint_all",
+      "start_sha256": "18ca39c10298d4ec01c110347796faae52c03980b844ab55b8a4594e22f5d0b8",
+      "completed_training_seconds": 0,
+      "additional_seconds_target": 18000,
+      "started_utc": "2026-09-28T17:21:07.698414+00:00"
+    },
+    "progress": null,
+    "log_tail": ""
+  },
+  "dgx2": {
+    "status": {
+      "outcome": "evaluating_before",
+      "host": "dgx2",
+      "supervision": "target_only",
+      "start_sha256": "39f28cb4e16b589f289435a529f04c19f2dbd3f0d96313945870caf19be0278d",
+      "completed_training_seconds": 0,
+      "additional_seconds_target": 18000,
+      "started_utc": "2026-09-28T17:21:07.036037+00:00"
+    },
+    "progress": {
+      "completed_tables": 11,
+      "outcome": "running",
+      "total_tables": 718
+    },
+    "log_tail": ""
+  },
+  "gongqian-mini": {
+    "status": {
+      "outcome": "evaluating_before",
+      "host": "gongqian-mini",
+      "supervision": "target_only",
+      "start_sha256": "cf3731e8941261c73dd02725402a7e04545d2e71c941500fed39f7153716f818",
+      "completed_training_seconds": 0,
+      "additional_seconds_target": 18000,
+      "started_utc": "2026-09-28T17:21:07.279828+00:00"
+    },
+    "progress": {
+      "completed_tables": 57,
+      "outcome": "running",
+      "total_tables": 718
+    },
+    "log_tail": ""
+  }
+}

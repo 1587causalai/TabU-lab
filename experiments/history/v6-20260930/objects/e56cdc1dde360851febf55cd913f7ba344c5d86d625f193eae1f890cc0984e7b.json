@@ -1,0 +1,49 @@
+{
+  "memory_fraction": 0.5,
+  "optimizer_steps": 0,
+  "outcome": "passed",
+  "parameter_set": "single",
+  "tests": [
+    {
+      "averaged_gradient_max_difference": 5.551115123125783e-17,
+      "losses": {
+        "v55": 1.8483090840720886,
+        "v6": 0.07817147576309766
+      },
+      "query": 68,
+      "rows": 204,
+      "table": "tanh_anm_train_000"
+    },
+    {
+      "averaged_gradient_max_difference": null,
+      "losses": {
+        "v55": 0.02784267883283649,
+        "v6": 0.02485578579620214
+      },
+      "query": 68,
+      "rows": 204,
+      "table": "nominal_gumbel_train_000"
+    },
+    {
+      "averaged_gradient_max_difference": null,
+      "losses": {
+        "v55": 0.033236800548384744,
+        "v6": 0.017070351244136323
+      },
+      "query": 68,
+      "rows": 204,
+      "table": "ordinal_latent_train_000"
+    },
+    {
+      "averaged_gradient_max_difference": null,
+      "losses": {
+        "v55": 4.482617095020505,
+        "v6": 2.198229776258606
+      },
+      "query": 68,
+      "rows": 204,
+      "table": "sparse_000"
+    }
+  ]
+}
+

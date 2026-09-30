@@ -1,0 +1,225 @@
+{
+  "active_target_seconds": 900,
+  "active_trial": "lr1e-4",
+  "bank_sha256": "a4980c6db7b524d57d3724782525f368e5d1a48c1bde88bcca184f203351a994",
+  "branch": "v6",
+  "completed_utc": "2026-09-29T17:37:25.132264+00:00",
+  "first_episode_index": 4089,
+  "host": "dustinstudio",
+  "max_total_successful_seconds": 900,
+  "memory_fraction": 0.5,
+  "monitor_exposure": "parent previously trained these rows; no new updates on monitor rows",
+  "monitor_rows": 123,
+  "optimizer_restored": true,
+  "original_train_fit_scope": "only new-update rows, masked target query; no validation labels in support",
+  "original_train_rows": 614,
+  "outcome": "completed",
+  "parent_checkpoint": "/Users/dustinstudio/experiments/v6-all730-dustin-targetonly60m-20260929/half2/run/checkpoints/94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114.pt",
+  "parent_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+  "per_trial_successful_seconds": 900,
+  "phase": "final_evaluations",
+  "prior_attempt_successful_seconds": 0.0,
+  "repair": "bounded-identical-backward-replay-v1",
+  "runtime": {
+    "deterministic_algorithms": true,
+    "device": "mps",
+    "dtype": "float32",
+    "interop_threads": 16,
+    "mps_available": true,
+    "mps_cpu_fallback": false,
+    "platform": [
+      "Darwin",
+      "25.6.0",
+      "arm64"
+    ],
+    "python": "3.12.13",
+    "threads": 1,
+    "torch": "2.13.0",
+    "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+  },
+  "selected_trial": "lr1e-4",
+  "selection": "minimum monitor MSE; earliest node on ties; all 15-minute curves retained",
+  "selection_completed_utc": "2026-09-29T17:37:04.705368+00:00",
+  "split_sha256": "81749782dbbdf5686cbb0f7205f31124d657925f3e096b5c355b26f7b565a00f",
+  "started_utc": "2026-09-29T17:21:07.748685+00:00",
+  "strict_resume": false,
+  "test_rows": 154,
+  "test_started": true,
+  "test_started_utc": "2026-09-29T17:37:04.706217+00:00",
+  "total_successful_seconds": 907.9812111672945,
+  "trials": {
+    "lr1e-4": {
+      "final_evaluations": {
+        "test": {
+          "bank_sha256": "a4980c6db7b524d57d3724782525f368e5d1a48c1bde88bcca184f203351a994",
+          "branch": "v6",
+          "checkpoint_sha256": "d9738fa37caa2c97e6eaa2c6d6c42e7a1cb7b166eec8cece0480fda4101d2e66",
+          "metrics": {
+            "mae": 0.33277620602892577,
+            "mse": 0.2430393492069091,
+            "n": 154,
+            "prediction_std": 10.313032928746312,
+            "r2": 0.9977091948473038,
+            "rmse": 0.4929902120802289,
+            "slog": 0.9953168245627388,
+            "target_std": 10.300165933397562
+          },
+          "model_state_unchanged": true,
+          "optimizer_updates": 0,
+          "outcome": "completed",
+          "predictions": 154,
+          "scope": "original_test",
+          "split_sha256": "81749782dbbdf5686cbb0f7205f31124d657925f3e096b5c355b26f7b565a00f"
+        },
+        "train": {
+          "bank_sha256": "a4980c6db7b524d57d3724782525f368e5d1a48c1bde88bcca184f203351a994",
+          "branch": "v6",
+          "checkpoint_sha256": "d9738fa37caa2c97e6eaa2c6d6c42e7a1cb7b166eec8cece0480fda4101d2e66",
+          "metrics": {
+            "mae": 0.3244568846910404,
+            "mse": 0.1835683314338081,
+            "n": 491,
+            "prediction_std": 9.865746489541435,
+            "r2": 0.9981367553458634,
+            "rmse": 0.42844875006680566,
+            "slog": 0.9960767143338242,
+            "target_std": 9.925763846225
+          },
+          "model_state_unchanged": true,
+          "optimizer_updates": 0,
+          "outcome": "completed",
+          "predictions": 491,
+          "scope": "original_train",
+          "split_sha256": "81749782dbbdf5686cbb0f7205f31124d657925f3e096b5c355b26f7b565a00f"
+        }
+      },
+      "first_episode_index": 4089,
+      "initial_rng_restored": true,
+      "initial_state_hash": "1b2c9224d30ba44feedfbc6efa8fb484cced9183da406cacf073aef118a83d16",
+      "learning_rate": 0.0001,
+      "nodes": {
+        "0": {
+          "checkpoint": "/Users/dustinstudio/experiments/v6-all730-dustin-targetonly60m-20260929/half2/run/checkpoints/94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114.pt",
+          "checkpoint_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+          "metrics": {
+            "mae": 0.5973017182388926,
+            "mse": 0.5582435090497683,
+            "n": 123,
+            "prediction_std": 10.628824619171771,
+            "r2": 0.9948199476425028,
+            "rmse": 0.7471569507471427,
+            "slog": 0.9887948338634993,
+            "target_std": 10.381133267292117
+          },
+          "seconds": 0.0,
+          "updates": 0
+        },
+        "180": {
+          "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/energy_efficiency/run/lr1e-4/checkpoints/a8211f8acc9955f3af97fb7b3b39026ed4c37ecf42f08b781ffec5df6324a78a.pt",
+          "checkpoint_sha256": "a8211f8acc9955f3af97fb7b3b39026ed4c37ecf42f08b781ffec5df6324a78a",
+          "metrics": {
+            "mae": 0.43643665344734506,
+            "mse": 0.2891010818587215,
+            "n": 123,
+            "prediction_std": 10.57230597178852,
+            "r2": 0.997317373661565,
+            "rmse": 0.5376812083927813,
+            "slog": 0.994157458059344,
+            "target_std": 10.381133267292117
+          },
+          "seconds": 188.19350337679498,
+          "updates": 15
+        },
+        "360": {
+          "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/energy_efficiency/run/lr1e-4/checkpoints/0b255d3c2eddeb80fe8383ae61cfa31bec948465848422890d29484373cc1a67.pt",
+          "checkpoint_sha256": "0b255d3c2eddeb80fe8383ae61cfa31bec948465848422890d29484373cc1a67",
+          "metrics": {
+            "mae": 0.392659712690648,
+            "mse": 0.23200779529609472,
+            "n": 123,
+            "prediction_std": 10.624590077794938,
+            "r2": 0.9978471536032242,
+            "rmse": 0.48167187513502874,
+            "slog": 0.9953080809540485,
+            "target_std": 10.381133267292117
+          },
+          "seconds": 367.3687582940329,
+          "updates": 32
+        },
+        "540": {
+          "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/energy_efficiency/run/lr1e-4/checkpoints/d9738fa37caa2c97e6eaa2c6d6c42e7a1cb7b166eec8cece0480fda4101d2e66.pt",
+          "checkpoint_sha256": "d9738fa37caa2c97e6eaa2c6d6c42e7a1cb7b166eec8cece0480fda4101d2e66",
+          "metrics": {
+            "mae": 0.347618861935003,
+            "mse": 0.18537513577559087,
+            "n": 123,
+            "prediction_std": 10.554698041477096,
+            "r2": 0.9982798673096437,
+            "rmse": 0.43055212898740947,
+            "slog": 0.9962481422252705,
+            "target_std": 10.381133267292117
+          },
+          "seconds": 550.9401640861761,
+          "updates": 46
+        },
+        "720": {
+          "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/energy_efficiency/run/lr1e-4/checkpoints/c85eb0282e18430f3230e3be84aa3bbcbc492ccadde2d7963dd8f92ee0ec5aab.pt",
+          "checkpoint_sha256": "c85eb0282e18430f3230e3be84aa3bbcbc492ccadde2d7963dd8f92ee0ec5aab",
+          "metrics": {
+            "mae": 0.3668526148602246,
+            "mse": 0.2058372959152362,
+            "n": 123,
+            "prediction_std": 10.582778704997969,
+            "r2": 0.9980899948630276,
+            "rmse": 0.4536929533453613,
+            "slog": 0.9958333158513876,
+            "target_std": 10.381133267292117
+          },
+          "seconds": 721.2564232938457,
+          "updates": 61
+        },
+        "900": {
+          "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/energy_efficiency/run/lr1e-4/checkpoints/b2f23f14d164fbd471fe65dc1be5c211a6ebf365f963656f13409c7256835424.pt",
+          "checkpoint_sha256": "b2f23f14d164fbd471fe65dc1be5c211a6ebf365f963656f13409c7256835424",
+          "metrics": {
+            "mae": 0.3502172891880439,
+            "mse": 0.18814672087250314,
+            "n": 123,
+            "prediction_std": 10.618937284105876,
+            "r2": 0.9982541492212423,
+            "rmse": 0.4337588280052674,
+            "slog": 0.9961911853965093,
+            "target_std": 10.381133267292117
+          },
+          "seconds": 907.9812111672945,
+          "updates": 77
+        }
+      },
+      "outcome": "completed",
+      "parent_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+      "prior_attempt_successful_seconds": 0.0,
+      "retained_update_seconds": 907.9812111672945,
+      "selected": {
+        "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/energy_efficiency/run/lr1e-4/checkpoints/d9738fa37caa2c97e6eaa2c6d6c42e7a1cb7b166eec8cece0480fda4101d2e66.pt",
+        "checkpoint_sha256": "d9738fa37caa2c97e6eaa2c6d6c42e7a1cb7b166eec8cece0480fda4101d2e66",
+        "metrics": {
+          "mae": 0.347618861935003,
+          "mse": 0.18537513577559087,
+          "n": 123,
+          "prediction_std": 10.554698041477096,
+          "r2": 0.9982798673096437,
+          "rmse": 0.43055212898740947,
+          "slog": 0.9962481422252705,
+          "target_std": 10.381133267292117
+        },
+        "seconds": 550.9401640861761,
+        "updates": 46
+      },
+      "selected_node": "540",
+      "successful_update_seconds": 907.9812111672945,
+      "updates": 77
+    }
+  },
+  "update_rows": 491,
+  "window_rows": 491
+}

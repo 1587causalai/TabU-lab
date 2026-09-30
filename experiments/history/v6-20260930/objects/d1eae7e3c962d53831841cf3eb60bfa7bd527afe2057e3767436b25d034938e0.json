@@ -1,0 +1,227 @@
+{
+  "active_target_seconds": 900,
+  "active_trial": "lr1e-4",
+  "bank_sha256": "954e50c0977dae92071d57153464b5aa886e93b1c4eb6149f7acf2e32c551df9",
+  "branch": "v55",
+  "completed_utc": "2026-09-29T17:32:25.136275+00:00",
+  "first_episode_index": 3730,
+  "host": "dgx2",
+  "max_total_successful_seconds": 900,
+  "memory_fraction": 0.5,
+  "monitor_exposure": "parent previously trained these rows; no new updates on monitor rows",
+  "monitor_rows": 145,
+  "optimizer_restored": true,
+  "original_train_fit_scope": "only new-update rows, masked target query; no validation labels in support",
+  "original_train_rows": 726,
+  "outcome": "completed",
+  "parent_checkpoint": "/home/cms/experiments/v6-all730-hostloss-5h-20260929/hour5/run/checkpoints/f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08.pt",
+  "parent_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+  "per_trial_successful_seconds": 900,
+  "phase": "final_evaluations",
+  "runtime": {
+    "cublas_workspace_config": ":4096:8",
+    "cuda_capability": [
+      12,
+      1
+    ],
+    "cuda_device": "NVIDIA GB10",
+    "cuda_runtime": "13.0",
+    "cudnn": 92000,
+    "deterministic_algorithms": true,
+    "device": "cuda:0",
+    "dtype": "float64",
+    "interop_threads": 20,
+    "platform": [
+      "Linux",
+      "6.17.0-1014-nvidia",
+      "aarch64"
+    ],
+    "python": "3.12.3",
+    "threads": 1,
+    "torch": "2.12.0.dev20260322+cu130",
+    "torch_build_sha256": "b62d287846a05b05f6dfa176679c95c75d9a9911ca563e92882a1b5802ec92e4"
+  },
+  "selected_trial": "lr1e-4",
+  "selection": "minimum monitor MSE; earliest node on ties; all 15-minute curves retained",
+  "selection_completed_utc": "2026-09-29T17:32:24.245543+00:00",
+  "split_sha256": "2d6ed783f7590063d32c1fca060067f44156df2be53c1411701a74455809dc5c",
+  "started_utc": "2026-09-29T17:16:48.477662+00:00",
+  "strict_resume": false,
+  "test_rows": 182,
+  "test_started": true,
+  "test_started_utc": "2026-09-29T17:32:24.256899+00:00",
+  "total_successful_seconds": 900.2778627938824,
+  "trials": {
+    "lr1e-4": {
+      "final_evaluations": {
+        "test": {
+          "bank_sha256": "954e50c0977dae92071d57153464b5aa886e93b1c4eb6149f7acf2e32c551df9",
+          "branch": "v55",
+          "checkpoint_sha256": "bf4ee0699fbdf42fd7d9482f10a29c26f7fe879a8bffb326d68c92632ed273ac",
+          "metrics": {
+            "mae": 0.7293619817192537,
+            "mse": 1.0542188102084165,
+            "n": 182,
+            "prediction_std": 1.3432233733547134,
+            "r2": 0.5243882481386519,
+            "rmse": 1.0267515815465864,
+            "slog": 0.42076091800065163,
+            "target_std": 1.488809365044359
+          },
+          "model_state_unchanged": true,
+          "optimizer_updates": 0,
+          "outcome": "completed",
+          "predictions": 182,
+          "scope": "original_test",
+          "split_sha256": "2d6ed783f7590063d32c1fca060067f44156df2be53c1411701a74455809dc5c"
+        },
+        "train": {
+          "bank_sha256": "954e50c0977dae92071d57153464b5aa886e93b1c4eb6149f7acf2e32c551df9",
+          "branch": "v55",
+          "checkpoint_sha256": "bf4ee0699fbdf42fd7d9482f10a29c26f7fe879a8bffb326d68c92632ed273ac",
+          "metrics": {
+            "mae": 0.1254811914606633,
+            "mse": 0.03408226881989336,
+            "n": 581,
+            "prediction_std": 1.4349906775352275,
+            "r2": 0.9837009838921227,
+            "rmse": 0.18461383702175024,
+            "slog": 0.956350276134108,
+            "target_std": 1.4460508141387924
+          },
+          "model_state_unchanged": true,
+          "optimizer_updates": 0,
+          "outcome": "completed",
+          "predictions": 581,
+          "scope": "original_train",
+          "split_sha256": "2d6ed783f7590063d32c1fca060067f44156df2be53c1411701a74455809dc5c"
+        }
+      },
+      "first_episode_index": 3730,
+      "initial_rng_restored": true,
+      "initial_state_hash": "4dad03a7392bbee1ebed59c8459e048ab82e6abe5669da315d25fb5700557b2e",
+      "learning_rate": 0.0001,
+      "nodes": {
+        "0": {
+          "checkpoint": "/home/cms/experiments/v6-all730-hostloss-5h-20260929/hour5/run/checkpoints/f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08.pt",
+          "checkpoint_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+          "metrics": {
+            "mae": 0.9438595225896432,
+            "mse": 1.7201718549304288,
+            "n": 145,
+            "prediction_std": 0.516837349800872,
+            "r2": 0.176426615775224,
+            "rmse": 1.311553222301874,
+            "slog": 0.1632897067302318,
+            "target_std": 1.4452226765545806
+          },
+          "seconds": 0.0,
+          "updates": 0
+        },
+        "180": {
+          "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/qsar_fish_toxicity/run/lr1e-4/checkpoints/bf4ee0699fbdf42fd7d9482f10a29c26f7fe879a8bffb326d68c92632ed273ac.pt",
+          "checkpoint_sha256": "bf4ee0699fbdf42fd7d9482f10a29c26f7fe879a8bffb326d68c92632ed273ac",
+          "metrics": {
+            "mae": 0.4879694742032496,
+            "mse": 0.4262282274405806,
+            "n": 145,
+            "prediction_std": 1.3439937609482693,
+            "r2": 0.7959330501082035,
+            "rmse": 0.652861568359312,
+            "slog": 0.6247124547813825,
+            "target_std": 1.4452226765545806
+          },
+          "seconds": 180.14817996084457,
+          "updates": 431
+        },
+        "360": {
+          "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/qsar_fish_toxicity/run/lr1e-4/checkpoints/b8fe90fc8d454ef1d5769b7d285fe810984acb03eeed9d8dce2f5c2f75d45119.pt",
+          "checkpoint_sha256": "b8fe90fc8d454ef1d5769b7d285fe810984acb03eeed9d8dce2f5c2f75d45119",
+          "metrics": {
+            "mae": 0.5143694732316465,
+            "mse": 0.4956658582598508,
+            "n": 145,
+            "prediction_std": 1.3365804273784645,
+            "r2": 0.7626881249325792,
+            "rmse": 0.7040354098053953,
+            "slog": 0.5959915799367559,
+            "target_std": 1.4452226765545806
+          },
+          "seconds": 360.0912314745947,
+          "updates": 861
+        },
+        "540": {
+          "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/qsar_fish_toxicity/run/lr1e-4/checkpoints/2f24c3ebdd88eb1b1c0702e90f1b8c20fae384a702ccc259a9ca97cd181b260e.pt",
+          "checkpoint_sha256": "2f24c3ebdd88eb1b1c0702e90f1b8c20fae384a702ccc259a9ca97cd181b260e",
+          "metrics": {
+            "mae": 0.5237834699284735,
+            "mse": 0.5072831314167766,
+            "n": 145,
+            "prediction_std": 1.3042253641404282,
+            "r2": 0.7571260777790405,
+            "rmse": 0.7122381142685195,
+            "slog": 0.5852601084795883,
+            "target_std": 1.4452226765545806
+          },
+          "seconds": 540.0956706647121,
+          "updates": 1291
+        },
+        "720": {
+          "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/qsar_fish_toxicity/run/lr1e-4/checkpoints/61db671728badda045343bd48308e40191c5f89d36cfdf89c981f68686636cc4.pt",
+          "checkpoint_sha256": "61db671728badda045343bd48308e40191c5f89d36cfdf89c981f68686636cc4",
+          "metrics": {
+            "mae": 0.5446657829043123,
+            "mse": 0.5326443889016316,
+            "n": 145,
+            "prediction_std": 1.2908808619000938,
+            "r2": 0.7449837696746897,
+            "rmse": 0.7298249029059173,
+            "slog": 0.5648884797502238,
+            "target_std": 1.4452226765545806
+          },
+          "seconds": 720.3368312356179,
+          "updates": 1722
+        },
+        "900": {
+          "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/qsar_fish_toxicity/run/lr1e-4/checkpoints/338162d2ee53016548ed7bcd9eb19a2455941be5f4967786a2d338b5e0480399.pt",
+          "checkpoint_sha256": "338162d2ee53016548ed7bcd9eb19a2455941be5f4967786a2d338b5e0480399",
+          "metrics": {
+            "mae": 0.5532855270352823,
+            "mse": 0.5623321785269816,
+            "n": 145,
+            "prediction_std": 1.2979258312126467,
+            "r2": 0.7307700309125871,
+            "rmse": 0.7498881106718399,
+            "slog": 0.551757786596109,
+            "target_std": 1.4452226765545806
+          },
+          "seconds": 900.2778627938824,
+          "updates": 2153
+        }
+      },
+      "outcome": "completed",
+      "parent_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+      "selected": {
+        "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/qsar_fish_toxicity/run/lr1e-4/checkpoints/bf4ee0699fbdf42fd7d9482f10a29c26f7fe879a8bffb326d68c92632ed273ac.pt",
+        "checkpoint_sha256": "bf4ee0699fbdf42fd7d9482f10a29c26f7fe879a8bffb326d68c92632ed273ac",
+        "metrics": {
+          "mae": 0.4879694742032496,
+          "mse": 0.4262282274405806,
+          "n": 145,
+          "prediction_std": 1.3439937609482693,
+          "r2": 0.7959330501082035,
+          "rmse": 0.652861568359312,
+          "slog": 0.6247124547813825,
+          "target_std": 1.4452226765545806
+        },
+        "seconds": 180.14817996084457,
+        "updates": 431
+      },
+      "selected_node": "180",
+      "successful_update_seconds": 900.2778627938824,
+      "updates": 2153
+    }
+  },
+  "update_rows": 581,
+  "window_rows": 512
+}

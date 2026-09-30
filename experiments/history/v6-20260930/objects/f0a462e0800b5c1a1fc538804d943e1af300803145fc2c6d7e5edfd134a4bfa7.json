@@ -1,0 +1,132 @@
+{
+  "checkpoint": "/Users/dustinstudio/experiments/v6-broadcast-oldloss-openml12-round2-20260927/half1/run/checkpoints/254d56ee4a3849eddb47b9932ea2541df3278c7dfc123a8326c84de15e1a0dac.pt",
+  "checkpoint_sha256": "254d56ee4a3849eddb47b9932ea2541df3278c7dfc123a8326c84de15e1a0dac",
+  "checkpoint_update": 6751,
+  "cohort_updates": {
+    "focus2": 2024,
+    "history618": 1350,
+    "other10": 3377
+  },
+  "continuation": "weights_only_broadcast_old_loss_new_optimizer_rng_cursor_exposure",
+  "focus_tables": [
+    "pumadyn32nh",
+    "kin8nm"
+  ],
+  "host": "dustinstudio",
+  "identity": {
+    "code": {
+      "run_broadcast_oldloss.py": "6c0d77318134d63f60b3caeca283597aff503a0b9b7ff687665153f551c162bd",
+      "source/src/tabu_lab/models/restoration_v6/__init__.py": "e75a42c4c5a6ffc5334a59b2868968525cf41e496b2466d1cd2f4c8d1c56119a",
+      "source/src/tabu_lab/models/restoration_v6/model.py": "8c0d47aabcad1c7eb484197539dfe21ca5e23b2a25cb651af95f1c71effa8432",
+      "source/src/tabu_lab/models/restoration_v6/training.py": "923da21540c92cae19c2016c085dd1bedf4db96791073637ccccdd125ca64adb"
+    },
+    "device": "mps",
+    "model_config": {
+      "backbone": {
+        "ff_width": 256,
+        "heads": 8,
+        "kind": "inducing",
+        "layers": 3,
+        "norm_eps": 1e-06,
+        "reference_mass": 1.0,
+        "slots": 256,
+        "tau_presence": 1.0,
+        "width": 128
+      },
+      "bandwidth": 1.0,
+      "center_chunk_size": 128,
+      "codec_version": "constant_weight_composition_v2",
+      "epsilon": 1e-06,
+      "numeric_scaling": "zscore",
+      "regression_width": null,
+      "ridge": 0.001,
+      "size": "small",
+      "slope_source": "shared_ll",
+      "subtokens": 1,
+      "unit_layers": 3
+    },
+    "objective": "V5.5 Query target-column squared loss with target broadcasting",
+    "parent_identity_sha256": "37c739f8a25a1b47952a1600f01fdd3b09ca7743a4259449495a6861d3be1905",
+    "parent_manifest_sha256": "f3344f5e0fe21700f0e305b5187b6ef7c9c06b6ed456f1a04bff25ffae6e0257",
+    "parent_sha256": "eebc6cf2883307e4bdd4b96be521e68dd777d57b8b55d409e6801b7981d1d633",
+    "recipe": {
+      "real": {
+        "fraction": 0.3333333333333333,
+        "kind": "supervised_row",
+        "numeric_query_guard": {
+          "kind": "none"
+        }
+      },
+      "synthetic": {
+        "fraction": 0.25,
+        "kind": "supervised_row",
+        "numeric_query_guard": {
+          "kind": "none"
+        }
+      }
+    },
+    "runtime": {
+      "deterministic_algorithms": true,
+      "device": "mps",
+      "dtype": "float32",
+      "interop_threads": 16,
+      "mps_available": true,
+      "mps_cpu_fallback": false,
+      "platform": [
+        "Darwin",
+        "25.6.0",
+        "arm64"
+      ],
+      "python": "3.12.13",
+      "threads": 1,
+      "torch": "2.13.0",
+      "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+    },
+    "sampling": [
+      {
+        "cohort": "focus2",
+        "episodes": 6
+      },
+      {
+        "cohort": "other10",
+        "episodes": 10
+      },
+      {
+        "cohort": "history618",
+        "episodes": 4
+      }
+    ],
+    "schema": "tabu.v6.target-broadcast.target-only.v1",
+    "sha256": "2dd11f1c686dadb61326b3674b097e37d4bee4404f14d79d478e9671797a6dbf",
+    "supervision": "target_only"
+  },
+  "initial_checkpoint": "/Users/dustinstudio/experiments/v6-broadcast-oldloss-openml12-round2-20260927/half1/run/checkpoints/90146bc1e7246608911c3dc55c6655b578e392724f05fa1109d8b50d67c2eb07.pt",
+  "initial_checkpoint_sha256": "90146bc1e7246608911c3dc55c6655b578e392724f05fa1109d8b50d67c2eb07",
+  "manifest": "/Users/dustinstudio/experiments/openml12-joint2h-squared-20260927/manifests/joint-openml12-squared.json",
+  "outcome": "training_completed",
+  "parent": "/Users/dustinstudio/experiments/openml12-joint30m-squared-20260927/half2/run/checkpoints/eebc6cf2883307e4bdd4b96be521e68dd777d57b8b55d409e6801b7981d1d633.pt",
+  "parent_sha256": "eebc6cf2883307e4bdd4b96be521e68dd777d57b8b55d409e6801b7981d1d633",
+  "parent_update": 39432,
+  "runtime": {
+    "deterministic_algorithms": true,
+    "device": "mps",
+    "dtype": "float32",
+    "interop_threads": 16,
+    "mps_available": true,
+    "mps_cpu_fallback": false,
+    "platform": [
+      "Darwin",
+      "25.6.0",
+      "arm64"
+    ],
+    "python": "3.12.13",
+    "threads": 1,
+    "torch": "2.13.0",
+    "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+  },
+  "schema": "tabu.v6.broadcast-target-only-campaign.v1",
+  "successful_update_seconds": 1800.2346249679103,
+  "successful_update_seconds_target": 1800.0,
+  "wandb_error_type": "ModuleNotFoundError",
+  "wandb_status": "unavailable"
+}

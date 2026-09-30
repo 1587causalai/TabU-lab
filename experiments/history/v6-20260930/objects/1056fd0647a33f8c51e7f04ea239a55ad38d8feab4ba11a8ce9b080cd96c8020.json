@@ -1,0 +1,99 @@
+{
+  "outcome": "completed",
+  "reported_evaluations": [
+    "hour1",
+    "hour2"
+  ],
+  "duration_pending_reply": false,
+  "duration_assumption": "2 hours within user stated 1–2 hour range",
+  "hosts_launched": [
+    "dgx2",
+    "gongqian-mini"
+  ],
+  "automation_id": "tabu730-2",
+  "launch_evidence": {
+    "dgx2": {
+      "successful_seconds": 58.34480006393278,
+      "updates": 79,
+      "parent_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+      "optimizer_rng_restored": true,
+      "cursor_reset": false,
+      "wandb": "https://wandb.ai/zj3712/restoration-v6-target-broadcast/runs/all730-continue-2h-dgx2-20260929"
+    },
+    "gongqian-mini": {
+      "successful_seconds": 46.71376983355731,
+      "updates": 125,
+      "parent_sha256": "fe454498403ce421dc3350b3b319ccf31a94168c6c1a534ad66b6b632cb45798",
+      "optimizer_rng_restored": true,
+      "cursor_reset": false,
+      "wandb": "https://wandb.ai/zj3712/restoration-v6-target-broadcast/runs/all730-continue-2h-gongqian-mini-20260929"
+    }
+  },
+  "last_checked_utc": "2026-09-29T02:16:21.384504+00:00",
+  "training_updates_confirmed": true,
+  "latest_observed": {
+    "dgx2": {
+      "phase": "hour2",
+      "outcome": "completed",
+      "successful_seconds": 7200.420865645952
+    },
+    "gongqian-mini": {
+      "phase": "hour2",
+      "outcome": "completed",
+      "successful_seconds": 7200.053164602257
+    }
+  },
+  "last_reported_utc": "2026-09-29T02:16:21.384504+00:00",
+  "hour1_audit": {
+    "dgx2": {
+      "successful_seconds": 3600.2954974926397,
+      "updates": 11213,
+      "coverage": 730,
+      "parent_links_match": true,
+      "cursor_preserved": true,
+      "supervision": "target_only"
+    },
+    "gongqian-mini": {
+      "successful_seconds": 3600.1457482567057,
+      "updates": 9358,
+      "coverage": 730,
+      "parent_links_match": true,
+      "cursor_preserved": true,
+      "supervision": "target_only"
+    }
+  },
+  "completion_audit": {
+    "dgx2": {
+      "successful_seconds": 7200.420865645952,
+      "updates": 22522,
+      "coverage": 730,
+      "checkpoint": "/home/cms/experiments/v6-all730-continue-20260929/hour2/run/checkpoints/b589e547a6350e34a67aef21430d739ca4778b14e28f2a7f40d8ed6518e2136f.pt",
+      "checkpoint_sha256": "b589e547a6350e34a67aef21430d739ca4778b14e28f2a7f40d8ed6518e2136f",
+      "parent_links_match": true,
+      "cursor_preserved": true,
+      "supervision": "target_only"
+    },
+    "gongqian-mini": {
+      "successful_seconds": 7200.053164602257,
+      "updates": 18712,
+      "coverage": 730,
+      "checkpoint": "/Users/gongqian/experiments/v6-all730-continue-20260929/hour2/run/checkpoints/b28d8b3071e2b9a571baa8cfe86a2512bb7f88f9363ddfcad991708b513c2fc3.pt",
+      "checkpoint_sha256": "b28d8b3071e2b9a571baa8cfe86a2512bb7f88f9363ddfcad991708b513c2fc3",
+      "parent_links_match": true,
+      "cursor_preserved": true,
+      "supervision": "target_only"
+    }
+  },
+  "final_synced": true,
+  "automation_deleted": true,
+  "selected_default_checkpoints": {
+    "gongqian-mini": {
+      "checkpoint": "/Users/gongqian/experiments/v6-all730-continue-20260929/hour1/run/checkpoints/184e4de7fce2dcd72a7bb1501570f75e86a2cf4db7acc3e9624e5739626110e3.pt",
+      "sha256": "184e4de7fce2dcd72a7bb1501570f75e86a2cf4db7acc3e9624e5739626110e3",
+      "phase": "hour1",
+      "selected_at_utc": "2026-09-29T03:01:00.447808+00:00",
+      "authority": "User delegated default exploration checkpoint selection",
+      "decision_document": "/Users/cms/.openclaw/workspace/projects/causal-superintelligence/TabU/preparations/v6-v55-dual718-continue60m-20260928/CHECKPOINT_DECISION.md"
+    }
+  }
+}

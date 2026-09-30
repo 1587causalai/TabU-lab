@@ -1,0 +1,698 @@
+{
+  "dgx2": {
+    "half1": {
+      "campaign": {
+        "outcome": "training_completed",
+        "parent_sha256": "33de3db7038700280a3bba0b91d4b4c9eff53164b726a12f34b7918b3840dbce",
+        "parent_update": 18831,
+        "checkpoint_sha256": "9690247e09dc81d45ec797316f8a8472253de40dd16a2388c30075e7d3f26d20",
+        "checkpoint_update": 21185,
+        "added_updates": 2354,
+        "added_successful_seconds": 898.7423782115802,
+        "old618_tables_with_gradient": 471,
+        "error_type": null,
+        "error": null
+      },
+      "metrics": {
+        "added_successful_seconds": 898.7423782115802,
+        "checkpoint_sha256": "9690247e09dc81d45ec797316f8a8472253de40dd16a2388c30075e7d3f26d20",
+        "checkpoint_update": 21185,
+        "host": "dgx2",
+        "label": "half1",
+        "macro": {
+          "r2": 0.6072942564149887,
+          "slog": 0.556389984536487
+        },
+        "outcome": "completed",
+        "scale": "s=max(raw_train_MAD, 1e-12) in original target units",
+        "schema": "openml12-joint30m-squared-r2-slog-v1",
+        "slog_formula": "1 - mean(log1p(((y-pred)/s)^2)) / mean(log1p(((y-median_train)/s)^2))",
+        "tables": {
+          "airfoil_self_noise": {
+            "query_rows": 301,
+            "r2": 0.9715896396864957,
+            "slog": 0.9452098485465861,
+            "support_rows": 1202,
+            "train_mad": 4.914500000000004
+          },
+          "bodyfat": {
+            "query_rows": 51,
+            "r2": 0.9913929559011428,
+            "slog": 0.9822900373704395,
+            "support_rows": 201,
+            "train_mad": 6.300000000000001
+          },
+          "cars": {
+            "query_rows": 161,
+            "r2": 0.9625283069483075,
+            "slog": 0.8720610702630884,
+            "support_rows": 643,
+            "train_mad": 4667.080000000002
+          },
+          "concrete_compressive_strength": {
+            "query_rows": 206,
+            "r2": 0.9279440826050686,
+            "slog": 0.8800485703051906,
+            "support_rows": 824,
+            "train_mad": 11.150304367094002
+          },
+          "cpu_activity": {
+            "query_rows": 1639,
+            "r2": 0.46813618935616996,
+            "slog": 0.22398989834513705,
+            "support_rows": 6553,
+            "train_mad": 6.0
+          },
+          "energy_efficiency": {
+            "query_rows": 154,
+            "r2": 0.9974845034232253,
+            "slog": 0.9948035972572864,
+            "support_rows": 614,
+            "train_mad": 7.1899999999999995
+          },
+          "kin8nm": {
+            "query_rows": 1639,
+            "r2": 0.6630770888559966,
+            "slog": 0.5226684752928488,
+            "support_rows": 6553,
+            "train_mad": 0.19050435
+          },
+          "pumadyn32nh": {
+            "query_rows": 1639,
+            "r2": 0.1273430469254555,
+            "slog": 0.06292499083445491,
+            "support_rows": 6553,
+            "train_mad": 0.02379755231
+          },
+          "qsar_fish_toxicity": {
+            "query_rows": 182,
+            "r2": 0.5060093750664674,
+            "slog": 0.45410434674207567,
+            "support_rows": 726,
+            "train_mad": 0.8470000000000004
+          },
+          "red_wine": {
+            "query_rows": 320,
+            "r2": 0.37074559004965113,
+            "slog": 0.4281164234868159,
+            "support_rows": 1279,
+            "train_mad": 1.0
+          },
+          "space_ga": {
+            "query_rows": 622,
+            "r2": -0.02573485218019278,
+            "slog": 0.03164908812172007,
+            "support_rows": 2485,
+            "train_mad": 0.13098773539007602
+          },
+          "white_wine": {
+            "query_rows": 980,
+            "r2": 0.3270151503420774,
+            "slog": 0.27881346787220074,
+            "support_rows": 3918,
+            "train_mad": 1.0
+          }
+        }
+      }
+    },
+    "half2": {
+      "campaign": {
+        "outcome": "training_completed",
+        "parent_sha256": "9690247e09dc81d45ec797316f8a8472253de40dd16a2388c30075e7d3f26d20",
+        "parent_update": 21185,
+        "checkpoint_sha256": "86f380c39c4da737eb92de301e1c69ac11c47304aa23b86ee034a40bfb3ad952",
+        "checkpoint_update": 23543,
+        "added_updates": 2358,
+        "added_successful_seconds": 898.9818415604532,
+        "old618_tables_with_gradient": 471,
+        "error_type": null,
+        "error": null
+      },
+      "metrics": {
+        "added_successful_seconds": 898.9818415604532,
+        "checkpoint_sha256": "86f380c39c4da737eb92de301e1c69ac11c47304aa23b86ee034a40bfb3ad952",
+        "checkpoint_update": 23543,
+        "host": "dgx2",
+        "label": "half2",
+        "macro": {
+          "r2": 0.64639886040954,
+          "slog": 0.6092871040438667
+        },
+        "outcome": "completed",
+        "scale": "s=max(raw_train_MAD, 1e-12) in original target units",
+        "schema": "openml12-joint30m-squared-r2-slog-v1",
+        "slog_formula": "1 - mean(log1p(((y-pred)/s)^2)) / mean(log1p(((y-median_train)/s)^2))",
+        "tables": {
+          "airfoil_self_noise": {
+            "query_rows": 301,
+            "r2": 0.9751236499472447,
+            "slog": 0.950592733773157,
+            "support_rows": 1202,
+            "train_mad": 4.914500000000004
+          },
+          "bodyfat": {
+            "query_rows": 51,
+            "r2": 0.9899153536045628,
+            "slog": 0.97979581563565,
+            "support_rows": 201,
+            "train_mad": 6.300000000000001
+          },
+          "cars": {
+            "query_rows": 161,
+            "r2": 0.9545975332758451,
+            "slog": 0.8523354961689027,
+            "support_rows": 643,
+            "train_mad": 4667.080000000002
+          },
+          "concrete_compressive_strength": {
+            "query_rows": 206,
+            "r2": 0.929596356114635,
+            "slog": 0.8791538318882569,
+            "support_rows": 824,
+            "train_mad": 11.150304367094002
+          },
+          "cpu_activity": {
+            "query_rows": 1639,
+            "r2": 0.36442780616842985,
+            "slog": 0.476155844715595,
+            "support_rows": 6553,
+            "train_mad": 6.0
+          },
+          "energy_efficiency": {
+            "query_rows": 154,
+            "r2": 0.9977117808968459,
+            "slog": 0.9952774473685533,
+            "support_rows": 614,
+            "train_mad": 7.1899999999999995
+          },
+          "kin8nm": {
+            "query_rows": 1639,
+            "r2": 0.6525855280887238,
+            "slog": 0.5023673675256343,
+            "support_rows": 6553,
+            "train_mad": 0.19050435
+          },
+          "pumadyn32nh": {
+            "query_rows": 1639,
+            "r2": 0.14167666664647272,
+            "slog": 0.06925716708520868,
+            "support_rows": 6553,
+            "train_mad": 0.02379755231
+          },
+          "qsar_fish_toxicity": {
+            "query_rows": 182,
+            "r2": 0.4660967721151218,
+            "slog": 0.41689747592610893,
+            "support_rows": 726,
+            "train_mad": 0.8470000000000004
+          },
+          "red_wine": {
+            "query_rows": 320,
+            "r2": 0.4216513292456241,
+            "slog": 0.4723257800172641,
+            "support_rows": 1279,
+            "train_mad": 1.0
+          },
+          "space_ga": {
+            "query_rows": 622,
+            "r2": 0.4958135992633208,
+            "slog": 0.4075182820576232,
+            "support_rows": 2485,
+            "train_mad": 0.13098773539007602
+          },
+          "white_wine": {
+            "query_rows": 980,
+            "r2": 0.36758994954765256,
+            "slog": 0.3097680063644458,
+            "support_rows": 3918,
+            "train_mad": 1.0
+          }
+        }
+      }
+    }
+  },
+  "dustinstudio": {
+    "half1": {
+      "campaign": {
+        "outcome": "training_completed",
+        "parent_sha256": "f0d2a0eacdc7c1b3a403cf942cb32f1065c595dd17e680de07d9d23be76aa97e",
+        "parent_update": 32388,
+        "checkpoint_sha256": "b303ef9dd20bc00f229c09cd0d55d54b1bcbd2d3f0097be65b3e35d6a8399f7c",
+        "checkpoint_update": 36069,
+        "added_updates": 3681,
+        "added_successful_seconds": 899.7591190170497,
+        "old618_tables_with_gradient": 618,
+        "error_type": null,
+        "error": null
+      },
+      "metrics": {
+        "added_successful_seconds": 899.7591190170497,
+        "checkpoint_sha256": "b303ef9dd20bc00f229c09cd0d55d54b1bcbd2d3f0097be65b3e35d6a8399f7c",
+        "checkpoint_update": 36069,
+        "host": "dustinstudio",
+        "label": "half1",
+        "macro": {
+          "r2": 0.6343930127455348,
+          "slog": 0.535774206025184
+        },
+        "outcome": "completed",
+        "scale": "s=max(raw_train_MAD, 1e-12) in original target units",
+        "schema": "openml12-joint30m-squared-r2-slog-v1",
+        "slog_formula": "1 - mean(log1p(((y-pred)/s)^2)) / mean(log1p(((y-median_train)/s)^2))",
+        "tables": {
+          "airfoil_self_noise": {
+            "query_rows": 301,
+            "r2": 0.9700162309768499,
+            "slog": 0.9441181944983255,
+            "support_rows": 1202,
+            "train_mad": 4.914500000000004
+          },
+          "bodyfat": {
+            "query_rows": 51,
+            "r2": 0.9880735324055981,
+            "slog": 0.9761043728618877,
+            "support_rows": 201,
+            "train_mad": 6.300000000000001
+          },
+          "cars": {
+            "query_rows": 161,
+            "r2": 0.9622690544348396,
+            "slog": 0.8712795582714883,
+            "support_rows": 643,
+            "train_mad": 4667.080000000002
+          },
+          "concrete_compressive_strength": {
+            "query_rows": 206,
+            "r2": 0.9386705829356402,
+            "slog": 0.8880219577755298,
+            "support_rows": 824,
+            "train_mad": 11.150304367094002
+          },
+          "cpu_activity": {
+            "query_rows": 1639,
+            "r2": 0.11876981707000667,
+            "slog": -0.5362142779343224,
+            "support_rows": 6553,
+            "train_mad": 6.0
+          },
+          "energy_efficiency": {
+            "query_rows": 154,
+            "r2": 0.997429748523127,
+            "slog": 0.9946824838230426,
+            "support_rows": 614,
+            "train_mad": 7.1899999999999995
+          },
+          "kin8nm": {
+            "query_rows": 1639,
+            "r2": 0.6824833322870716,
+            "slog": 0.5404393946844319,
+            "support_rows": 6553,
+            "train_mad": 0.19050435
+          },
+          "pumadyn32nh": {
+            "query_rows": 1639,
+            "r2": 0.1117346695587127,
+            "slog": 0.05507379275596358,
+            "support_rows": 6553,
+            "train_mad": 0.02379755231
+          },
+          "qsar_fish_toxicity": {
+            "query_rows": 182,
+            "r2": 0.528048308319198,
+            "slog": 0.45266683238927696,
+            "support_rows": 726,
+            "train_mad": 0.8470000000000004
+          },
+          "red_wine": {
+            "query_rows": 320,
+            "r2": 0.38264427475201335,
+            "slog": 0.4539202692606661,
+            "support_rows": 1279,
+            "train_mad": 1.0
+          },
+          "space_ga": {
+            "query_rows": 622,
+            "r2": 0.5926156179805574,
+            "slog": 0.5019407002168973,
+            "support_rows": 2485,
+            "train_mad": 0.13098773539007602
+          },
+          "white_wine": {
+            "query_rows": 980,
+            "r2": 0.3399609837028037,
+            "slog": 0.28725719369902025,
+            "support_rows": 3918,
+            "train_mad": 1.0
+          }
+        }
+      }
+    },
+    "half2": {
+      "campaign": {
+        "outcome": "training_completed",
+        "parent_sha256": "b303ef9dd20bc00f229c09cd0d55d54b1bcbd2d3f0097be65b3e35d6a8399f7c",
+        "parent_update": 36069,
+        "checkpoint_sha256": "eebc6cf2883307e4bdd4b96be521e68dd777d57b8b55d409e6801b7981d1d633",
+        "checkpoint_update": 39432,
+        "added_updates": 3363,
+        "added_successful_seconds": 899.937791868113,
+        "old618_tables_with_gradient": 618,
+        "error_type": null,
+        "error": null
+      },
+      "metrics": {
+        "added_successful_seconds": 899.937791868113,
+        "checkpoint_sha256": "eebc6cf2883307e4bdd4b96be521e68dd777d57b8b55d409e6801b7981d1d633",
+        "checkpoint_update": 39432,
+        "host": "dustinstudio",
+        "label": "half2",
+        "macro": {
+          "r2": 0.6295222624205891,
+          "slog": 0.5937390404443237
+        },
+        "outcome": "completed",
+        "scale": "s=max(raw_train_MAD, 1e-12) in original target units",
+        "schema": "openml12-joint30m-squared-r2-slog-v1",
+        "slog_formula": "1 - mean(log1p(((y-pred)/s)^2)) / mean(log1p(((y-median_train)/s)^2))",
+        "tables": {
+          "airfoil_self_noise": {
+            "query_rows": 301,
+            "r2": 0.9721061953335022,
+            "slog": 0.9471512568155916,
+            "support_rows": 1202,
+            "train_mad": 4.914500000000004
+          },
+          "bodyfat": {
+            "query_rows": 51,
+            "r2": 0.9888873867197603,
+            "slog": 0.9786625011043579,
+            "support_rows": 201,
+            "train_mad": 6.300000000000001
+          },
+          "cars": {
+            "query_rows": 161,
+            "r2": 0.9651403125352328,
+            "slog": 0.8777730619653359,
+            "support_rows": 643,
+            "train_mad": 4667.080000000002
+          },
+          "concrete_compressive_strength": {
+            "query_rows": 206,
+            "r2": 0.9374156787944862,
+            "slog": 0.8891530385641752,
+            "support_rows": 824,
+            "train_mad": 11.150304367094002
+          },
+          "cpu_activity": {
+            "query_rows": 1639,
+            "r2": 0.10534290390390966,
+            "slog": 0.1844786591730967,
+            "support_rows": 6553,
+            "train_mad": 6.0
+          },
+          "energy_efficiency": {
+            "query_rows": 154,
+            "r2": 0.9976019183030196,
+            "slog": 0.9950244666226722,
+            "support_rows": 614,
+            "train_mad": 7.1899999999999995
+          },
+          "kin8nm": {
+            "query_rows": 1639,
+            "r2": 0.684599583020623,
+            "slog": 0.544869223157427,
+            "support_rows": 6553,
+            "train_mad": 0.19050435
+          },
+          "pumadyn32nh": {
+            "query_rows": 1639,
+            "r2": 0.12010909754459043,
+            "slog": 0.055364391446779515,
+            "support_rows": 6553,
+            "train_mad": 0.02379755231
+          },
+          "qsar_fish_toxicity": {
+            "query_rows": 182,
+            "r2": 0.5168278950533294,
+            "slog": 0.4436511691267576,
+            "support_rows": 726,
+            "train_mad": 0.8470000000000004
+          },
+          "red_wine": {
+            "query_rows": 320,
+            "r2": 0.38217331119017617,
+            "slog": 0.4493558666068148,
+            "support_rows": 1279,
+            "train_mad": 1.0
+          },
+          "space_ga": {
+            "query_rows": 622,
+            "r2": 0.5635088342415577,
+            "slog": 0.4753523984845497,
+            "support_rows": 2485,
+            "train_mad": 0.13098773539007602
+          },
+          "white_wine": {
+            "query_rows": 980,
+            "r2": 0.32055403240688096,
+            "slog": 0.28403245226432605,
+            "support_rows": 3918,
+            "train_mad": 1.0
+          }
+        }
+      }
+    }
+  },
+  "gongqian-mini": {
+    "half1": {
+      "campaign": {
+        "outcome": "training_completed",
+        "parent_sha256": "ad8020148b9e250fb32f6b2d5acabc99a34edee52bc0aac8d466c49cadc00c88",
+        "parent_update": 16283,
+        "checkpoint_sha256": "50239086c6f748229d946c505f3b2e24b4b5fe3e6bda88cf81bd70b9f4a2b068",
+        "checkpoint_update": 18335,
+        "added_updates": 2052,
+        "added_successful_seconds": 899.2757252948359,
+        "old618_tables_with_gradient": 409,
+        "error_type": null,
+        "error": null
+      },
+      "metrics": {
+        "added_successful_seconds": 899.2757252948359,
+        "checkpoint_sha256": "50239086c6f748229d946c505f3b2e24b4b5fe3e6bda88cf81bd70b9f4a2b068",
+        "checkpoint_update": 18335,
+        "host": "gongqian-mini",
+        "label": "half1",
+        "macro": {
+          "r2": 0.6963732840184886,
+          "slog": 0.631437383237323
+        },
+        "outcome": "completed",
+        "scale": "s=max(raw_train_MAD, 1e-12) in original target units",
+        "schema": "openml12-joint30m-squared-r2-slog-v1",
+        "slog_formula": "1 - mean(log1p(((y-pred)/s)^2)) / mean(log1p(((y-median_train)/s)^2))",
+        "tables": {
+          "airfoil_self_noise": {
+            "query_rows": 301,
+            "r2": 0.968285749238389,
+            "slog": 0.9361181699671263,
+            "support_rows": 1202,
+            "train_mad": 4.914500000000004
+          },
+          "bodyfat": {
+            "query_rows": 51,
+            "r2": 0.9928012555686756,
+            "slog": 0.9848778856576916,
+            "support_rows": 201,
+            "train_mad": 6.300000000000001
+          },
+          "cars": {
+            "query_rows": 161,
+            "r2": 0.9663218743904665,
+            "slog": 0.8780922667082949,
+            "support_rows": 643,
+            "train_mad": 4667.080000000002
+          },
+          "concrete_compressive_strength": {
+            "query_rows": 206,
+            "r2": 0.9240172132328748,
+            "slog": 0.8697192498645759,
+            "support_rows": 824,
+            "train_mad": 11.150304367094002
+          },
+          "cpu_activity": {
+            "query_rows": 1639,
+            "r2": 0.9761527294503165,
+            "slog": 0.8159214285296326,
+            "support_rows": 6553,
+            "train_mad": 6.0
+          },
+          "energy_efficiency": {
+            "query_rows": 154,
+            "r2": 0.9972879531119595,
+            "slog": 0.9943551776909255,
+            "support_rows": 614,
+            "train_mad": 7.1899999999999995
+          },
+          "kin8nm": {
+            "query_rows": 1639,
+            "r2": 0.59612588925402,
+            "slog": 0.4458968418501398,
+            "support_rows": 6553,
+            "train_mad": 0.19050435
+          },
+          "pumadyn32nh": {
+            "query_rows": 1639,
+            "r2": 0.14036367641783776,
+            "slog": 0.07016852929762263,
+            "support_rows": 6553,
+            "train_mad": 0.02379755231
+          },
+          "qsar_fish_toxicity": {
+            "query_rows": 182,
+            "r2": 0.518363148830626,
+            "slog": 0.4142849754100105,
+            "support_rows": 726,
+            "train_mad": 0.8470000000000004
+          },
+          "red_wine": {
+            "query_rows": 320,
+            "r2": 0.38266829510813083,
+            "slog": 0.435353176995419,
+            "support_rows": 1279,
+            "train_mad": 1.0
+          },
+          "space_ga": {
+            "query_rows": 622,
+            "r2": 0.5678688061434407,
+            "slog": 0.451564979321581,
+            "support_rows": 2485,
+            "train_mad": 0.13098773539007602
+          },
+          "white_wine": {
+            "query_rows": 980,
+            "r2": 0.3262228174751268,
+            "slog": 0.28089591755485677,
+            "support_rows": 3918,
+            "train_mad": 1.0
+          }
+        }
+      }
+    },
+    "half2": {
+      "campaign": {
+        "outcome": "training_completed",
+        "parent_sha256": "50239086c6f748229d946c505f3b2e24b4b5fe3e6bda88cf81bd70b9f4a2b068",
+        "parent_update": 18335,
+        "checkpoint_sha256": "b4581d2f0310f18da749cdd4499089c4da3711b8ea6320064d1cd2107c3d7a6d",
+        "checkpoint_update": 20384,
+        "added_updates": 2049,
+        "added_successful_seconds": 899.3593937056139,
+        "old618_tables_with_gradient": 410,
+        "error_type": null,
+        "error": null
+      },
+      "metrics": {
+        "added_successful_seconds": 899.3593937056139,
+        "checkpoint_sha256": "b4581d2f0310f18da749cdd4499089c4da3711b8ea6320064d1cd2107c3d7a6d",
+        "checkpoint_update": 20384,
+        "host": "gongqian-mini",
+        "label": "half2",
+        "macro": {
+          "r2": 0.6942556384727524,
+          "slog": 0.6315634204472385
+        },
+        "outcome": "completed",
+        "scale": "s=max(raw_train_MAD, 1e-12) in original target units",
+        "schema": "openml12-joint30m-squared-r2-slog-v1",
+        "slog_formula": "1 - mean(log1p(((y-pred)/s)^2)) / mean(log1p(((y-median_train)/s)^2))",
+        "tables": {
+          "airfoil_self_noise": {
+            "query_rows": 301,
+            "r2": 0.9693255348278204,
+            "slog": 0.9396700596860057,
+            "support_rows": 1202,
+            "train_mad": 4.914500000000004
+          },
+          "bodyfat": {
+            "query_rows": 51,
+            "r2": 0.9922172457284661,
+            "slog": 0.9838453514586122,
+            "support_rows": 201,
+            "train_mad": 6.300000000000001
+          },
+          "cars": {
+            "query_rows": 161,
+            "r2": 0.9602982217180704,
+            "slog": 0.8669984795522183,
+            "support_rows": 643,
+            "train_mad": 4667.080000000002
+          },
+          "concrete_compressive_strength": {
+            "query_rows": 206,
+            "r2": 0.9249730428959927,
+            "slog": 0.8769764236470714,
+            "support_rows": 824,
+            "train_mad": 11.150304367094002
+          },
+          "cpu_activity": {
+            "query_rows": 1639,
+            "r2": 0.9736083746234446,
+            "slog": 0.8116879560019082,
+            "support_rows": 6553,
+            "train_mad": 6.0
+          },
+          "energy_efficiency": {
+            "query_rows": 154,
+            "r2": 0.9973145194609924,
+            "slog": 0.9944165557835307,
+            "support_rows": 614,
+            "train_mad": 7.1899999999999995
+          },
+          "kin8nm": {
+            "query_rows": 1639,
+            "r2": 0.5822595719025103,
+            "slog": 0.438962284439778,
+            "support_rows": 6553,
+            "train_mad": 0.19050435
+          },
+          "pumadyn32nh": {
+            "query_rows": 1639,
+            "r2": 0.1613510695859547,
+            "slog": 0.09099161275237955,
+            "support_rows": 6553,
+            "train_mad": 0.02379755231
+          },
+          "qsar_fish_toxicity": {
+            "query_rows": 182,
+            "r2": 0.5242781182233613,
+            "slog": 0.42363294234583004,
+            "support_rows": 726,
+            "train_mad": 0.8470000000000004
+          },
+          "red_wine": {
+            "query_rows": 320,
+            "r2": 0.35071828949058603,
+            "slog": 0.4126543131731426,
+            "support_rows": 1279,
+            "train_mad": 1.0
+          },
+          "space_ga": {
+            "query_rows": 622,
+            "r2": 0.5237756004734417,
+            "slog": 0.43074020500368926,
+            "support_rows": 2485,
+            "train_mad": 0.13098773539007602
+          },
+          "white_wine": {
+            "query_rows": 980,
+            "r2": 0.37094807274238817,
+            "slog": 0.3081848615226953,
+            "support_rows": 3918,
+            "train_mad": 1.0
+          }
+        }
+      }
+    }
+  }
+}

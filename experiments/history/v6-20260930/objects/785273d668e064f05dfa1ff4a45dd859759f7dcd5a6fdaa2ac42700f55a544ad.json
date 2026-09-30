@@ -1,0 +1,89 @@
+{
+  "outcome": "completed",
+  "host": "gongqian-mini",
+  "supervision": "target_only",
+  "parent_root": "/Users/gongqian/experiments/v6-randommix2-all730-30m-20260929",
+  "total_successful_seconds_target": 3600,
+  "completed_training_seconds": 1799.531940208748,
+  "started_utc": "2026-09-29T03:57:18.616769+00:00",
+  "start_sha256": "4949d4d3aca1c364f3b206c91a5609e77df831b0020d412cf2f00e5c0f3d01bb",
+  "prior_training_seconds": 1800.5058395061642,
+  "additional_seconds_target": 1799.4941604938358,
+  "phase": "half2",
+  "phase_budget": 899.9241950837895,
+  "total_completed_training_seconds": 3600.037779714912,
+  "checkpoint_sha256": "fa2ddc869d0f143177c661effef395d07b4055f8415ab45e9b12ca5a700366bb",
+  "evaluations": {
+    "half1": {
+      "openml12": {
+        "r2": 0.30817965868446207,
+        "slog": 0.25939875539138535
+      },
+      "fit718": {
+        "old618": {
+          "nominal_tables": 186,
+          "numeric_tables": 292,
+          "ordinal_tables": 140,
+          "tables": 618,
+          "v6/accuracy": 0.49666450022005976,
+          "v6/loss": 1.0614783454248526,
+          "v6/nominal_accuracy": 0.5246692130981971,
+          "v6/ordinal_accuracy": 0.45945823882482006,
+          "v6/r2": 0.5001832038412386,
+          "v6/rank_mae": 0.1905872552605313,
+          "v6/slog": 0.3744746422570027
+        },
+        "sparse100": {
+          "nominal_tables": 0,
+          "numeric_tables": 100,
+          "ordinal_tables": 0,
+          "tables": 100,
+          "v6/accuracy": null,
+          "v6/loss": 4.172010757923126,
+          "v6/nominal_accuracy": null,
+          "v6/ordinal_accuracy": null,
+          "v6/r2": -0.026101907461914434,
+          "v6/rank_mae": null,
+          "v6/slog": -0.012226146479695279
+        }
+      },
+      "checkpoint_sha256": "c9a1266fe40fa0ecc50be449f5a9252686e0ad81551fc05521314872197a7d6d"
+    },
+    "half2": {
+      "openml12": {
+        "r2": 0.2973299716880566,
+        "slog": 0.2734715378319197
+      },
+      "fit718": {
+        "old618": {
+          "nominal_tables": 186,
+          "numeric_tables": 292,
+          "ordinal_tables": 140,
+          "tables": 618,
+          "v6/accuracy": 0.505671735024562,
+          "v6/loss": 1.083112371271522,
+          "v6/nominal_accuracy": 0.5345699689452675,
+          "v6/ordinal_accuracy": 0.46727836710133885,
+          "v6/r2": 0.49796405897119694,
+          "v6/rank_mae": 0.19180682588148246,
+          "v6/slog": 0.3855795366648059
+        },
+        "sparse100": {
+          "nominal_tables": 0,
+          "numeric_tables": 100,
+          "ordinal_tables": 0,
+          "tables": 100,
+          "v6/accuracy": null,
+          "v6/loss": 4.144811384677887,
+          "v6/nominal_accuracy": null,
+          "v6/ordinal_accuracy": null,
+          "v6/r2": -0.01900088097468325,
+          "v6/rank_mae": null,
+          "v6/slog": -0.011435251684528032
+        }
+      },
+      "checkpoint_sha256": "fa2ddc869d0f143177c661effef395d07b4055f8415ab45e9b12ca5a700366bb"
+    }
+  },
+  "completed_utc": "2026-09-29T04:55:56.746204+00:00"
+}

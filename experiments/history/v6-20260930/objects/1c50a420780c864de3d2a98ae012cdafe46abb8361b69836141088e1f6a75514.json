@@ -1,0 +1,3927 @@
+{
+  "hosts": {
+    "dustinstudio": {
+      "outcome": "completed",
+      "phase": "completed",
+      "host": "dustinstudio",
+      "branch": "v6",
+      "parent_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+      "pid": 6289,
+      "started_utc": "2026-09-29T14:35:35.592309+00:00",
+      "tables": {
+        "airfoil_self_noise": {
+          "preflight": "passed",
+          "outcome": "completed",
+          "successful_seconds": 903.2187417838722
+        },
+        "bodyfat": {
+          "preflight": "passed",
+          "outcome": "completed",
+          "successful_seconds": 901.9478713739663
+        },
+        "cars": {
+          "preflight": "passed",
+          "outcome": "completed",
+          "successful_seconds": 906.5666235433891,
+          "prior_attempt_successful_seconds": 40.17525950097479
+        },
+        "concrete_compressive_strength": {
+          "preflight": "passed",
+          "outcome": "completed",
+          "successful_seconds": 905.0866890025791,
+          "prior_attempt_successful_seconds": 0.0
+        },
+        "cpu_activity": {
+          "preflight": "passed",
+          "outcome": "completed",
+          "successful_seconds": 912.2526626656763,
+          "prior_attempt_successful_seconds": 0.0
+        },
+        "energy_efficiency": {
+          "preflight": "passed",
+          "outcome": "completed",
+          "successful_seconds": 907.9812111672945,
+          "prior_attempt_successful_seconds": 0.0
+        },
+        "kin8nm": {
+          "preflight": "passed",
+          "outcome": "completed",
+          "successful_seconds": 900.4663234599866,
+          "prior_attempt_successful_seconds": 0.0
+        },
+        "pumadyn32nh": {
+          "preflight": "passed",
+          "outcome": "completed",
+          "successful_seconds": 901.0741366664879,
+          "prior_attempt_successful_seconds": 0.0
+        },
+        "qsar_fish_toxicity": {
+          "preflight": "passed",
+          "outcome": "completed",
+          "successful_seconds": 904.0799384508282,
+          "prior_attempt_successful_seconds": 0.0
+        },
+        "red_wine": {
+          "preflight": "passed",
+          "outcome": "completed",
+          "successful_seconds": 900.1472227845807,
+          "prior_attempt_successful_seconds": 0.0
+        },
+        "space_ga": {
+          "preflight": "passed",
+          "outcome": "completed",
+          "successful_seconds": 900.4699572888203,
+          "prior_attempt_successful_seconds": 0.0
+        },
+        "white_wine": {
+          "preflight": "passed",
+          "outcome": "completed",
+          "successful_seconds": 900.2147144989576,
+          "prior_attempt_successful_seconds": 0.0
+        }
+      },
+      "baselines": {},
+      "successful_seconds_budget": 10800,
+      "prior_completed_utc": "2026-09-29T14:51:46.081586+00:00",
+      "active_table": "white_wine",
+      "recovery_started_utc": "2026-09-29T16:12:25.798656+00:00",
+      "recovery": "bounded-identical-backward-replay-v1",
+      "completed_utc": "2026-09-29T19:28:00.321812+00:00",
+      "total_successful_seconds": 10843.506092686439
+    },
+    "dgx2": {
+      "outcome": "completed",
+      "phase": "completed",
+      "host": "dgx2",
+      "branch": "v55",
+      "parent_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+      "pid": 1491917,
+      "started_utc": "2026-09-29T14:35:35.664622+00:00",
+      "tables": {
+        "airfoil_self_noise": {
+          "preflight": "passed",
+          "outcome": "completed",
+          "successful_seconds": 900.1815789786633
+        },
+        "bodyfat": {
+          "preflight": "passed",
+          "outcome": "completed",
+          "successful_seconds": 900.1921569409315
+        },
+        "cars": {
+          "preflight": "passed",
+          "outcome": "completed",
+          "successful_seconds": 900.1853098981373
+        },
+        "concrete_compressive_strength": {
+          "preflight": "passed",
+          "outcome": "completed",
+          "successful_seconds": 900.4191536333528
+        },
+        "cpu_activity": {
+          "preflight": "passed",
+          "outcome": "completed",
+          "successful_seconds": 900.2013509877434
+        },
+        "energy_efficiency": {
+          "preflight": "passed",
+          "outcome": "completed",
+          "successful_seconds": 900.2146850340941
+        },
+        "kin8nm": {
+          "preflight": "passed",
+          "outcome": "completed",
+          "successful_seconds": 900.3147098841728
+        },
+        "pumadyn32nh": {
+          "preflight": "passed",
+          "outcome": "completed",
+          "successful_seconds": 900.5961934610968
+        },
+        "qsar_fish_toxicity": {
+          "preflight": "passed",
+          "outcome": "completed",
+          "successful_seconds": 900.2778627938824
+        },
+        "red_wine": {
+          "preflight": "passed",
+          "outcome": "completed",
+          "successful_seconds": 900.1535894797707
+        },
+        "space_ga": {
+          "preflight": "passed",
+          "outcome": "completed",
+          "successful_seconds": 900.104754733009
+        },
+        "white_wine": {
+          "preflight": "passed",
+          "outcome": "completed",
+          "successful_seconds": 900.5384072115994
+        }
+      },
+      "baselines": {
+        "airfoil_self_noise": {
+          "outcome": "completed"
+        },
+        "bodyfat": {
+          "outcome": "completed"
+        },
+        "cars": {
+          "outcome": "completed"
+        },
+        "concrete_compressive_strength": {
+          "outcome": "completed"
+        },
+        "cpu_activity": {
+          "outcome": "completed"
+        },
+        "energy_efficiency": {
+          "outcome": "completed"
+        },
+        "kin8nm": {
+          "outcome": "completed"
+        },
+        "pumadyn32nh": {
+          "outcome": "completed"
+        },
+        "qsar_fish_toxicity": {
+          "outcome": "completed"
+        },
+        "red_wine": {
+          "outcome": "completed"
+        },
+        "space_ga": {
+          "outcome": "completed"
+        },
+        "white_wine": {
+          "outcome": "completed"
+        }
+      },
+      "successful_seconds_budget": 10800,
+      "prior_completed_utc": "2026-09-29T14:52:52.793895+00:00",
+      "active_table": "white_wine",
+      "completed_utc": "2026-09-29T18:21:54.385608+00:00",
+      "total_successful_seconds": 10803.379753036454
+    }
+  },
+  "tables": {
+    "airfoil_self_noise": {
+      "mlp-256x3": {
+        "metrics": {
+          "test": {
+            "mae": 1.0362045842369347,
+            "mse": 2.1583995183170086,
+            "n": 301,
+            "prediction_std": 6.273320704281764,
+            "r2": 0.9484331693501661,
+            "rmse": 1.469149249843939,
+            "slog": 0.9033830470713617,
+            "target_std": 6.469648676675006
+          },
+          "train": {
+            "mae": 0.4141999043035246,
+            "mse": 0.38590061624455857,
+            "n": 962,
+            "prediction_std": 7.027939844846825,
+            "r2": 0.9921754563352101,
+            "rmse": 0.6212089956243056,
+            "slog": 0.9820348446697904,
+            "target_std": 7.022766467936692
+          }
+        },
+        "refit": false,
+        "selected_rounds": 396
+      },
+      "xgboost-depth6": {
+        "metrics": {
+          "test": {
+            "mae": 1.1493558272172226,
+            "mse": 2.9965204496033513,
+            "n": 301,
+            "prediction_std": 6.060480573613687,
+            "r2": 0.9284094250150934,
+            "rmse": 1.7310460564650934,
+            "slog": 0.882036857613767,
+            "target_std": 6.469648676675006
+          },
+          "train": {
+            "mae": 0.06632252357973104,
+            "mse": 0.008887692646757085,
+            "n": 962,
+            "prediction_std": 7.015647432712907,
+            "r2": 0.9998197926194818,
+            "rmse": 0.09427455991282635,
+            "slog": 0.9995589366582486,
+            "target_std": 7.022766467936692
+          }
+        },
+        "refit": false,
+        "selected_rounds": 1349
+      },
+      "dustinstudio": {
+        "outcome": "completed",
+        "metrics": {
+          "test": {
+            "mae": 0.8776374300833162,
+            "mse": 1.704871421010906,
+            "n": 301,
+            "prediction_std": 6.193750019406947,
+            "r2": 0.9592685158141798,
+            "rmse": 1.3057072493522068,
+            "slog": 0.9239614881695887,
+            "target_std": 6.469648676675006
+          },
+          "train": {
+            "mae": 0.3219795604555124,
+            "mse": 0.19026296084730182,
+            "n": 962,
+            "prediction_std": 7.00029086106986,
+            "r2": 0.9961422169795177,
+            "rmse": 0.43619142683838,
+            "slog": 0.9907494487898303,
+            "target_std": 7.022766467936688
+          }
+        },
+        "nodes": {
+          "0": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-all730-dustin-targetonly60m-20260929/half2/run/checkpoints/94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114.pt",
+            "checkpoint_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+            "metrics": {
+              "mae": 1.6937149881998697,
+              "mse": 5.503025534731659,
+              "n": 240,
+              "prediction_std": 6.263523385101969,
+              "r2": 0.884362194610249,
+              "rmse": 2.345852837398727,
+              "slog": 0.7987415512469046,
+              "target_std": 6.898439241202752
+            },
+            "seconds": 0.0,
+            "updates": 0
+          },
+          "180": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/airfoil_self_noise/run/lr1e-4/checkpoints/14d302de889044c86bbddedf5acdf977cb91f0399635353fbb8f2903b125d8ec.pt",
+            "checkpoint_sha256": "14d302de889044c86bbddedf5acdf977cb91f0399635353fbb8f2903b125d8ec",
+            "metrics": {
+              "mae": 1.184161625417074,
+              "mse": 3.0534897791867093,
+              "n": 240,
+              "prediction_std": 6.651083680341282,
+              "r2": 0.9358355045571483,
+              "rmse": 1.7474237548993974,
+              "slog": 0.8833752601802226,
+              "target_std": 6.898439241202752
+            },
+            "seconds": 180.2227751412429,
+            "updates": 602
+          },
+          "360": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/airfoil_self_noise/run/lr1e-4/checkpoints/44ed7cda08650ccfec91a044d646e3b8d8dda06b674bf224e7a6a3a0cbdea0d9.pt",
+            "checkpoint_sha256": "44ed7cda08650ccfec91a044d646e3b8d8dda06b674bf224e7a6a3a0cbdea0d9",
+            "metrics": {
+              "mae": 1.106963814290365,
+              "mse": 2.5488640989498976,
+              "n": 240,
+              "prediction_std": 6.542208341572793,
+              "r2": 0.9464394543003581,
+              "rmse": 1.5965162382355833,
+              "slog": 0.8954538527697099,
+              "target_std": 6.898439241202752
+            },
+            "seconds": 360.258524390636,
+            "updates": 1226
+          },
+          "540": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/airfoil_self_noise/run/lr1e-4/checkpoints/f6610c4fd064377f79c158d3acbc7982c0e541b92f8cb10f0da84e3671952462.pt",
+            "checkpoint_sha256": "f6610c4fd064377f79c158d3acbc7982c0e541b92f8cb10f0da84e3671952462",
+            "metrics": {
+              "mae": 1.180369814554851,
+              "mse": 3.059106448001498,
+              "n": 240,
+              "prediction_std": 6.722780699275032,
+              "r2": 0.9357174787091408,
+              "rmse": 1.7490301449664891,
+              "slog": 0.8805529038276578,
+              "target_std": 6.898439241202752
+            },
+            "seconds": 540.2099013093393,
+            "updates": 1834
+          },
+          "720": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/airfoil_self_noise/run/lr1e-4/checkpoints/567888c8f51fd9873b85e2c9953089abd3b92a5880ba8e0b3e48e1105b8e4c20.pt",
+            "checkpoint_sha256": "567888c8f51fd9873b85e2c9953089abd3b92a5880ba8e0b3e48e1105b8e4c20",
+            "metrics": {
+              "mae": 0.9505369885762539,
+              "mse": 1.8535626344669363,
+              "n": 240,
+              "prediction_std": 6.568296901251076,
+              "r2": 0.9610501688844783,
+              "rmse": 1.3614560714422395,
+              "slog": 0.9198959339572507,
+              "target_std": 6.898439241202752
+            },
+            "seconds": 720.0667477874085,
+            "updates": 2476
+          },
+          "900": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/airfoil_self_noise/run/lr1e-4/checkpoints/4f37127bca4d7f9ad66265be7a1e6bef7236bd8e444e74c72e27bbddcc6c04f7.pt",
+            "checkpoint_sha256": "4f37127bca4d7f9ad66265be7a1e6bef7236bd8e444e74c72e27bbddcc6c04f7",
+            "metrics": {
+              "mae": 0.8442415570576991,
+              "mse": 1.3980341779610042,
+              "n": 240,
+              "prediction_std": 6.5413097277739265,
+              "r2": 0.9706224143102838,
+              "rmse": 1.1823849533722104,
+              "slog": 0.9372903529907035,
+              "target_std": 6.898439241202752
+            },
+            "seconds": 903.2187417838722,
+            "updates": 2631
+          }
+        },
+        "selected_node": "900",
+        "seconds": 903.2187417838722,
+        "updates": 2631
+      },
+      "dgx2": {
+        "outcome": "completed",
+        "metrics": {
+          "test": {
+            "mae": 0.8172369526312548,
+            "mse": 1.5308550932306852,
+            "n": 301,
+            "prediction_std": 6.375645994897562,
+            "r2": 0.9634259808380534,
+            "rmse": 1.2372772903559999,
+            "slog": 0.9324080686083372,
+            "target_std": 6.469648676675006
+          },
+          "train": {
+            "mae": 0.24692802508665918,
+            "mse": 0.11055269277339103,
+            "n": 962,
+            "prediction_std": 7.061053960687721,
+            "r2": 0.9977584270782369,
+            "rmse": 0.3324946507440248,
+            "slog": 0.9945799253558235,
+            "target_std": 7.022766467936688
+          }
+        },
+        "nodes": {
+          "0": {
+            "checkpoint": "/home/cms/experiments/v6-all730-hostloss-5h-20260929/hour5/run/checkpoints/f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08.pt",
+            "checkpoint_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+            "metrics": {
+              "mae": 4.354403601775411,
+              "mse": 29.17713107378976,
+              "n": 240,
+              "prediction_std": 2.597145360490681,
+              "r2": 0.38688647115160446,
+              "rmse": 5.40158597763562,
+              "slog": 0.2458707799777432,
+              "target_std": 6.898439241202752
+            },
+            "seconds": 0.0,
+            "updates": 0
+          },
+          "180": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/airfoil_self_noise/run/lr1e-4/checkpoints/b8f139396ceae7bd10a568d30f3b3e20422179970cca19a5b3b482b4064197e0.pt",
+            "checkpoint_sha256": "b8f139396ceae7bd10a568d30f3b3e20422179970cca19a5b3b482b4064197e0",
+            "metrics": {
+              "mae": 1.059338602468667,
+              "mse": 2.4028655992292,
+              "n": 240,
+              "prediction_std": 6.494190323701271,
+              "r2": 0.949507393198941,
+              "rmse": 1.5501179307488833,
+              "slog": 0.9029475477458468,
+              "target_std": 6.898439241202752
+            },
+            "seconds": 180.28549411901622,
+            "updates": 466
+          },
+          "360": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/airfoil_self_noise/run/lr1e-4/checkpoints/bb9474b494e03af782736d25d42b37ed79c5f99de1bed064b06fdccc7c687e55.pt",
+            "checkpoint_sha256": "bb9474b494e03af782736d25d42b37ed79c5f99de1bed064b06fdccc7c687e55",
+            "metrics": {
+              "mae": 0.9489575810344918,
+              "mse": 2.094192557625514,
+              "n": 240,
+              "prediction_std": 6.7388337565555245,
+              "r2": 0.9559936929423729,
+              "rmse": 1.4471325293923545,
+              "slog": 0.9141115125895154,
+              "target_std": 6.898439241202752
+            },
+            "seconds": 360.23522883391706,
+            "updates": 929
+          },
+          "540": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/airfoil_self_noise/run/lr1e-4/checkpoints/759b1c3efb97933c7fb6238aaf3ee2c3a6530eda3500a78e36c4dc4a95f79fff.pt",
+            "checkpoint_sha256": "759b1c3efb97933c7fb6238aaf3ee2c3a6530eda3500a78e36c4dc4a95f79fff",
+            "metrics": {
+              "mae": 0.8716419331101972,
+              "mse": 1.684710035133626,
+              "n": 240,
+              "prediction_std": 6.654630719913271,
+              "r2": 0.9645983523152155,
+              "rmse": 1.2979638034759005,
+              "slog": 0.931428235812809,
+              "target_std": 6.898439241202752
+            },
+            "seconds": 540.0735926968046,
+            "updates": 1392
+          },
+          "720": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/airfoil_self_noise/run/lr1e-4/checkpoints/0b6b753f4036eaf091a4faa4e7a339ba8549a6ba6c089af949afe27a9c8c369d.pt",
+            "checkpoint_sha256": "0b6b753f4036eaf091a4faa4e7a339ba8549a6ba6c089af949afe27a9c8c369d",
+            "metrics": {
+              "mae": 0.7963310092621446,
+              "mse": 1.277592726255968,
+              "n": 240,
+              "prediction_std": 6.754526470586522,
+              "r2": 0.9731533102810955,
+              "rmse": 1.1303064744820177,
+              "slog": 0.9428412390903279,
+              "target_std": 6.898439241202752
+            },
+            "seconds": 720.335658652737,
+            "updates": 1857
+          },
+          "900": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/airfoil_self_noise/run/lr1e-4/checkpoints/1c16437f9f41042d345f338ac4def12cbb579debc69337010cbe5426d80c24cf.pt",
+            "checkpoint_sha256": "1c16437f9f41042d345f338ac4def12cbb579debc69337010cbe5426d80c24cf",
+            "metrics": {
+              "mae": 0.8518201817113692,
+              "mse": 1.5074198169142996,
+              "n": 240,
+              "prediction_std": 6.730034210780007,
+              "r2": 0.9683238396171662,
+              "rmse": 1.2277702622699003,
+              "slog": 0.9349567420580944,
+              "target_std": 6.898439241202752
+            },
+            "seconds": 900.1815789786633,
+            "updates": 2321
+          }
+        },
+        "selected_node": "720",
+        "seconds": 900.1815789786633,
+        "updates": 2321
+      }
+    },
+    "bodyfat": {
+      "mlp-256x3": {
+        "metrics": {
+          "test": {
+            "mae": 0.7413740769411538,
+            "mse": 0.948904597425499,
+            "n": 51,
+            "prediction_std": 7.857142596587145,
+            "r2": 0.9857527918428038,
+            "rmse": 0.9741173427393124,
+            "slog": 0.9717758742240354,
+            "target_std": 8.161056614164153
+          },
+          "train": {
+            "mae": 0.3908099641371525,
+            "mse": 0.41484533455470146,
+            "n": 161,
+            "prediction_std": 8.576628073902643,
+            "r2": 0.9945208971635185,
+            "rmse": 0.6440848814827914,
+            "slog": 0.9895469651610346,
+            "target_std": 8.701384889377922
+          }
+        },
+        "refit": false,
+        "selected_rounds": 62
+      },
+      "xgboost-depth6": {
+        "metrics": {
+          "test": {
+            "mae": 0.3624175285479005,
+            "mse": 0.2401824044926506,
+            "n": 51,
+            "prediction_std": 7.926169723474925,
+            "r2": 0.9963938116415635,
+            "rmse": 0.4900840790034406,
+            "slog": 0.9927051114037129,
+            "target_std": 8.161056614164153
+          },
+          "train": {
+            "mae": 0.2801027759426991,
+            "mse": 0.2942620177738578,
+            "n": 161,
+            "prediction_std": 8.292403428491646,
+            "r2": 0.9961135109353848,
+            "rmse": 0.5424592314394306,
+            "slog": 0.9923862519960055,
+            "target_std": 8.701384889377922
+          }
+        },
+        "refit": false,
+        "selected_rounds": 72
+      },
+      "dustinstudio": {
+        "outcome": "completed",
+        "metrics": {
+          "test": {
+            "mae": 0.3783695520139206,
+            "mse": 0.3623973153967923,
+            "n": 51,
+            "prediction_std": 7.960639987252155,
+            "r2": 0.994558831307093,
+            "rmse": 0.6019944479783782,
+            "slog": 0.9893226091534111,
+            "target_std": 8.161056614164153
+          },
+          "train": {
+            "mae": 0.18882334691397157,
+            "mse": 0.07698833283460808,
+            "n": 161,
+            "prediction_std": 8.739776305073153,
+            "r2": 0.998983170454929,
+            "rmse": 0.27746771494105055,
+            "slog": 0.997801987336159,
+            "target_std": 8.701384889377914
+          }
+        },
+        "nodes": {
+          "0": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-all730-dustin-targetonly60m-20260929/half2/run/checkpoints/94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114.pt",
+            "checkpoint_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+            "metrics": {
+              "mae": 0.6548341751098632,
+              "mse": 0.895771135014878,
+              "n": 40,
+              "prediction_std": 6.916779333293513,
+              "r2": 0.9818760705533839,
+              "rmse": 0.946451866190182,
+              "slog": 0.9669192821613185,
+              "target_std": 7.030275599149723
+            },
+            "seconds": 0.0,
+            "updates": 0
+          },
+          "180": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/bodyfat/run/lr1e-4/checkpoints/44a8ca2a947ca02412980d768b19d2ab23292046388f4fe1a7a94d2cbc6c04bb.pt",
+            "checkpoint_sha256": "44a8ca2a947ca02412980d768b19d2ab23292046388f4fe1a7a94d2cbc6c04bb",
+            "metrics": {
+              "mae": 0.5859014844894409,
+              "mse": 0.8456407975907484,
+              "n": 40,
+              "prediction_std": 6.7514889373377125,
+              "r2": 0.9828903460341347,
+              "rmse": 0.9195872974278997,
+              "slog": 0.969479843192094,
+              "target_std": 7.030275599149723
+            },
+            "seconds": 183.71781170926988,
+            "updates": 40
+          },
+          "360": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/bodyfat/run/lr1e-4/checkpoints/175dc2dc1d73608d33951e37eb23fe4e67c9219b200095fb68ed2045d5ed3035.pt",
+            "checkpoint_sha256": "175dc2dc1d73608d33951e37eb23fe4e67c9219b200095fb68ed2045d5ed3035",
+            "metrics": {
+              "mae": 0.528600525856018,
+              "mse": 0.7158151930774408,
+              "n": 40,
+              "prediction_std": 6.791364467390249,
+              "r2": 0.9855170773548804,
+              "rmse": 0.8460586227191593,
+              "slog": 0.9741842996472123,
+              "target_std": 7.030275599149723
+            },
+            "seconds": 361.2049491230864,
+            "updates": 83
+          },
+          "540": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/bodyfat/run/lr1e-4/checkpoints/6dcfd6b13f658ce34fc734482da4b7d4ae5c797f52fe7c2a4f865d2e877cbaf6.pt",
+            "checkpoint_sha256": "6dcfd6b13f658ce34fc734482da4b7d4ae5c797f52fe7c2a4f865d2e877cbaf6",
+            "metrics": {
+              "mae": 0.48857572078704836,
+              "mse": 0.6436349400525602,
+              "n": 40,
+              "prediction_std": 6.89084978656752,
+              "r2": 0.9869774836597119,
+              "rmse": 0.8022686208824076,
+              "slog": 0.9768652316559064,
+              "target_std": 7.030275599149723
+            },
+            "seconds": 541.0787176252343,
+            "updates": 124
+          },
+          "720": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/bodyfat/run/lr1e-4/checkpoints/65c01d13e481016ce69b9c798c6bd60b1cfe7a7f4958c701ebaa836ef6499fd9.pt",
+            "checkpoint_sha256": "65c01d13e481016ce69b9c798c6bd60b1cfe7a7f4958c701ebaa836ef6499fd9",
+            "metrics": {
+              "mae": 0.43079640388488755,
+              "mse": 0.5947630980637347,
+              "n": 40,
+              "prediction_std": 6.912435078554132,
+              "r2": 0.9879662962944448,
+              "rmse": 0.7712088550216049,
+              "slog": 0.9789447717967854,
+              "target_std": 7.030275599149723
+            },
+            "seconds": 723.9257632906083,
+            "updates": 165
+          },
+          "900": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/bodyfat/run/lr1e-4/checkpoints/c18407a3b3fd1e06b97cc5332df113b32dab51b660f589ecd539d1385e7ced1f.pt",
+            "checkpoint_sha256": "c18407a3b3fd1e06b97cc5332df113b32dab51b660f589ecd539d1385e7ced1f",
+            "metrics": {
+              "mae": 0.4941491746902463,
+              "mse": 0.6160780219493415,
+              "n": 40,
+              "prediction_std": 6.713170777497261,
+              "r2": 0.9875350363871289,
+              "rmse": 0.7849063778243501,
+              "slog": 0.9777634546484233,
+              "target_std": 7.030275599149723
+            },
+            "seconds": 901.9478713739663,
+            "updates": 203
+          }
+        },
+        "selected_node": "720",
+        "seconds": 901.9478713739663,
+        "updates": 203
+      },
+      "dgx2": {
+        "outcome": "completed",
+        "metrics": {
+          "test": {
+            "mae": 0.29660602124530183,
+            "mse": 0.8268349942954271,
+            "n": 51,
+            "prediction_std": 8.114223544308821,
+            "r2": 0.9875855904720643,
+            "rmse": 0.9093046762749145,
+            "slog": 0.9806267986193862,
+            "target_std": 8.161056614164153
+          },
+          "train": {
+            "mae": 0.032878696094404684,
+            "mse": 0.0024539615808715897,
+            "n": 161,
+            "prediction_std": 8.703341927981713,
+            "r2": 0.9999675891067383,
+            "rmse": 0.049537476529104604,
+            "slog": 0.9999294690624189,
+            "target_std": 8.701384889377914
+          }
+        },
+        "nodes": {
+          "0": {
+            "checkpoint": "/home/cms/experiments/v6-all730-hostloss-5h-20260929/hour5/run/checkpoints/f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08.pt",
+            "checkpoint_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+            "metrics": {
+              "mae": 3.544930761980742,
+              "mse": 19.322364789638787,
+              "n": 40,
+              "prediction_std": 3.9672937663865637,
+              "r2": 0.6090550783561728,
+              "rmse": 4.395721191071925,
+              "slog": 0.47806815164299654,
+              "target_std": 7.030275599149723
+            },
+            "seconds": 0.0,
+            "updates": 0
+          },
+          "180": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/bodyfat/run/lr1e-4/checkpoints/59b974101fce14af66f01f041a0287bf643e92ddb4b14224447eda63cb4b0410.pt",
+            "checkpoint_sha256": "59b974101fce14af66f01f041a0287bf643e92ddb4b14224447eda63cb4b0410",
+            "metrics": {
+              "mae": 0.4027653366476741,
+              "mse": 0.6739581045005417,
+              "n": 40,
+              "prediction_std": 7.0753815887546825,
+              "r2": 0.9863639621121079,
+              "rmse": 0.8209495139778948,
+              "slog": 0.9768551573718103,
+              "target_std": 7.030275599149723
+            },
+            "seconds": 180.086920939415,
+            "updates": 788
+          },
+          "360": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/bodyfat/run/lr1e-4/checkpoints/8fdab580fd7a32b2895147aaa1467a810d81b0f81f1d5e44f90b47902231d898.pt",
+            "checkpoint_sha256": "8fdab580fd7a32b2895147aaa1467a810d81b0f81f1d5e44f90b47902231d898",
+            "metrics": {
+              "mae": 0.31457499871000605,
+              "mse": 0.5913337976946565,
+              "n": 40,
+              "prediction_std": 7.033001522108053,
+              "r2": 0.9880356805327964,
+              "rmse": 0.7689823129920847,
+              "slog": 0.9802543319214707,
+              "target_std": 7.030275599149723
+            },
+            "seconds": 360.2098260243365,
+            "updates": 1578
+          },
+          "540": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/bodyfat/run/lr1e-4/checkpoints/3b2d25d0f74ddfabe2c201112a8657098261fcadede60f415add983c8e073771.pt",
+            "checkpoint_sha256": "3b2d25d0f74ddfabe2c201112a8657098261fcadede60f415add983c8e073771",
+            "metrics": {
+              "mae": 0.2594879764374836,
+              "mse": 0.5344699665928401,
+              "n": 40,
+              "prediction_std": 7.081968467092303,
+              "r2": 0.9891861932281363,
+              "rmse": 0.7310745287539705,
+              "slog": 0.9823921761883575,
+              "target_std": 7.030275599149723
+            },
+            "seconds": 540.107200529892,
+            "updates": 2361
+          },
+          "720": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/bodyfat/run/lr1e-4/checkpoints/0590f2fa59309e9c6d4f5cffd062c62bd35a67512cda02b80b15d8452d66303f.pt",
+            "checkpoint_sha256": "0590f2fa59309e9c6d4f5cffd062c62bd35a67512cda02b80b15d8452d66303f",
+            "metrics": {
+              "mae": 0.2711059012279522,
+              "mse": 0.5459046837598873,
+              "n": 40,
+              "prediction_std": 7.117092785580918,
+              "r2": 0.9889548372499443,
+              "rmse": 0.7388536281022698,
+              "slog": 0.9821005361819013,
+              "target_std": 7.030275599149723
+            },
+            "seconds": 720.210930980742,
+            "updates": 3149
+          },
+          "900": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/bodyfat/run/lr1e-4/checkpoints/ba61e8ef251c6bdb6d2688b769ab520304de67e9cd30bfcb3a648b7125b2493c.pt",
+            "checkpoint_sha256": "ba61e8ef251c6bdb6d2688b769ab520304de67e9cd30bfcb3a648b7125b2493c",
+            "metrics": {
+              "mae": 0.243150003523587,
+              "mse": 0.530660929152834,
+              "n": 40,
+              "prediction_std": 7.063563150515693,
+              "r2": 0.9892632605984988,
+              "rmse": 0.7284647755058813,
+              "slog": 0.9826341499147437,
+              "target_std": 7.030275599149723
+            },
+            "seconds": 900.1921569409315,
+            "updates": 3937
+          }
+        },
+        "selected_node": "900",
+        "seconds": 900.1921569409315,
+        "updates": 3937
+      }
+    },
+    "cars": {
+      "mlp-256x3": {
+        "metrics": {
+          "test": {
+            "mae": 1383.6018081188724,
+            "mse": 3999131.8112629163,
+            "n": 161,
+            "prediction_std": 10522.461177872216,
+            "r2": 0.9673855825906199,
+            "rmse": 1999.7829410370807,
+            "slog": 0.8886683626055364,
+            "target_std": 11073.325005613462
+          },
+          "train": {
+            "mae": 1237.4846103894104,
+            "mse": 3469324.2316470784,
+            "n": 514,
+            "prediction_std": 9293.919868417377,
+            "r2": 0.9609399842572897,
+            "rmse": 1862.6122064581984,
+            "slog": 0.8927146515114328,
+            "target_std": 9424.45484029257
+          }
+        },
+        "refit": false,
+        "selected_rounds": 202
+      },
+      "xgboost-depth6": {
+        "metrics": {
+          "test": {
+            "mae": 1755.5070503242296,
+            "mse": 6347332.434775326,
+            "n": 161,
+            "prediction_std": 9983.785172145821,
+            "r2": 0.9482351272141528,
+            "rmse": 2519.3912825869916,
+            "slog": 0.8406258138535372,
+            "target_std": 11073.325005613462
+          },
+          "train": {
+            "mae": 918.559711793851,
+            "mse": 1639900.8751309656,
+            "n": 514,
+            "prediction_std": 9100.567807042838,
+            "r2": 0.9815368787342514,
+            "rmse": 1280.5861451425146,
+            "slog": 0.9414022731590723,
+            "target_std": 9424.45484029257
+          }
+        },
+        "refit": false,
+        "selected_rounds": 100
+      },
+      "dustinstudio": {
+        "outcome": "completed",
+        "metrics": {
+          "test": {
+            "mae": 1430.1490574048914,
+            "mse": 4290219.224109813,
+            "n": 161,
+            "prediction_std": 10874.81562650326,
+            "r2": 0.96501165574018,
+            "rmse": 2071.284438243529,
+            "slog": 0.8835970346857974,
+            "target_std": 11073.325005613462
+          },
+          "train": {
+            "mae": 1282.617994665005,
+            "mse": 3191052.066013555,
+            "n": 514,
+            "prediction_std": 9350.467353692047,
+            "r2": 0.964072961876174,
+            "rmse": 1786.3516076107624,
+            "slog": 0.8953615020216275,
+            "target_std": 9424.45484029257
+          }
+        },
+        "nodes": {
+          "0": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-all730-dustin-targetonly60m-20260929/half2/run/checkpoints/94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114.pt",
+            "checkpoint_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+            "metrics": {
+              "mae": 1573.6977701065891,
+              "mse": 4576056.8051068755,
+              "n": 129,
+              "prediction_std": 9484.347895808576,
+              "r2": 0.9526477045849928,
+              "rmse": 2139.1719905390673,
+              "slog": 0.8380902872673044,
+              "target_std": 9830.490442224533
+            },
+            "seconds": 40.17525950097479,
+            "updates": 0
+          },
+          "180": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/cars/run/lr1e-4/checkpoints/40077991918fb14f21374b5293e127dc200fae1be3a4cba39418f14407212af4.pt",
+            "checkpoint_sha256": "40077991918fb14f21374b5293e127dc200fae1be3a4cba39418f14407212af4",
+            "metrics": {
+              "mae": 1384.6897338299418,
+              "mse": 3986574.5012669135,
+              "n": 129,
+              "prediction_std": 9736.962767705363,
+              "r2": 0.9587475720871177,
+              "rmse": 1996.6408042677365,
+              "slog": 0.8656761904136803,
+              "target_std": 9830.490442224533
+            },
+            "seconds": 187.24070112407207,
+            "updates": 11
+          },
+          "360": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/cars/run/lr1e-4/checkpoints/c59029d504c49fd5333b67b81fcae471e08596e362825f769ffc1a92c3b14064.pt",
+            "checkpoint_sha256": "c59029d504c49fd5333b67b81fcae471e08596e362825f769ffc1a92c3b14064",
+            "metrics": {
+              "mae": 1406.4246632751938,
+              "mse": 4364267.264134263,
+              "n": 129,
+              "prediction_std": 9457.872784697742,
+              "r2": 0.9548392684875108,
+              "rmse": 2089.0828763201957,
+              "slog": 0.8571155885630494,
+              "target_std": 9830.490442224533
+            },
+            "seconds": 362.2414237514604,
+            "updates": 24
+          },
+          "540": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/cars/run/lr1e-4/checkpoints/d3224233e9a35bfbfda09072af01c7af25a5aa00e5a9ce70e816ffd3c4fc7ad5.pt",
+            "checkpoint_sha256": "d3224233e9a35bfbfda09072af01c7af25a5aa00e5a9ce70e816ffd3c4fc7ad5",
+            "metrics": {
+              "mae": 1492.9871396560077,
+              "mse": 4706100.235715648,
+              "n": 129,
+              "prediction_std": 9520.567264573281,
+              "r2": 0.9513020362060305,
+              "rmse": 2169.3547971034263,
+              "slog": 0.844920903397837,
+              "target_std": 9830.490442224533
+            },
+            "seconds": 540.9518681692425,
+            "updates": 39
+          },
+          "720": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/cars/run/lr1e-4/checkpoints/733c607f864030a5d433b53d707a92fc792e6c357fc7c493bccbe9101e28cfc0.pt",
+            "checkpoint_sha256": "733c607f864030a5d433b53d707a92fc792e6c357fc7c493bccbe9101e28cfc0",
+            "metrics": {
+              "mae": 1430.7989871002906,
+              "mse": 4499181.470529018,
+              "n": 129,
+              "prediction_std": 9716.178131430002,
+              "r2": 0.9534431981088047,
+              "rmse": 2121.1274055390963,
+              "slog": 0.8569876836483117,
+              "target_std": 9830.490442224533
+            },
+            "seconds": 723.7496940859128,
+            "updates": 55
+          },
+          "900": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/cars/run/lr1e-4/checkpoints/50b78712d97b83ce78240b64635e5f90deef6e80d3be8f8bb7d66f4fe765818b.pt",
+            "checkpoint_sha256": "50b78712d97b83ce78240b64635e5f90deef6e80d3be8f8bb7d66f4fe765818b",
+            "metrics": {
+              "mae": 1523.3949470082364,
+              "mse": 4938637.639983701,
+              "n": 129,
+              "prediction_std": 9046.566961283048,
+              "r2": 0.9488957767711276,
+              "rmse": 2222.3045785813656,
+              "slog": 0.8384763683738693,
+              "target_std": 9830.490442224533
+            },
+            "seconds": 906.5666235433891,
+            "updates": 71
+          }
+        },
+        "selected_node": "180",
+        "seconds": 906.5666235433891,
+        "updates": 71
+      },
+      "dgx2": {
+        "outcome": "completed",
+        "metrics": {
+          "test": {
+            "mae": 1577.089071633508,
+            "mse": 5426921.824627684,
+            "n": 161,
+            "prediction_std": 10488.820462233727,
+            "r2": 0.9557414203907955,
+            "rmse": 2329.5754601703043,
+            "slog": 0.8612659451279457,
+            "target_std": 11073.325005613462
+          },
+          "train": {
+            "mae": 1126.638081989904,
+            "mse": 2687937.329688556,
+            "n": 514,
+            "prediction_std": 9217.679620292949,
+            "r2": 0.969737370334162,
+            "rmse": 1639.4930099541614,
+            "slog": 0.9117350393898258,
+            "target_std": 9424.45484029257
+          }
+        },
+        "nodes": {
+          "0": {
+            "checkpoint": "/home/cms/experiments/v6-all730-hostloss-5h-20260929/hour5/run/checkpoints/f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08.pt",
+            "checkpoint_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+            "metrics": {
+              "mae": 5581.6380884072705,
+              "mse": 61523159.623075955,
+              "n": 129,
+              "prediction_std": 2559.673779352488,
+              "r2": 0.3633682986440775,
+              "rmse": 7843.670035326318,
+              "slog": 0.10530903184998142,
+              "target_std": 9830.490442224533
+            },
+            "seconds": 0.0,
+            "updates": 0
+          },
+          "180": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/cars/run/lr1e-4/checkpoints/459143b354ba2acccf52fa78ffa52414a4bc1f6093a91c8e5f97eae36a6842ec.pt",
+            "checkpoint_sha256": "459143b354ba2acccf52fa78ffa52414a4bc1f6093a91c8e5f97eae36a6842ec",
+            "metrics": {
+              "mae": 1668.299259387679,
+              "mse": 5955977.40338488,
+              "n": 129,
+              "prediction_std": 9773.673721553381,
+              "r2": 0.9383685095046364,
+              "rmse": 2440.4871241997735,
+              "slog": 0.8127008432375501,
+              "target_std": 9830.490442224533
+            },
+            "seconds": 180.4420247847156,
+            "updates": 250
+          },
+          "360": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/cars/run/lr1e-4/checkpoints/9626a6473091c67bd012fd3f39c351db07784b492c50008235fa216e46fab24a.pt",
+            "checkpoint_sha256": "9626a6473091c67bd012fd3f39c351db07784b492c50008235fa216e46fab24a",
+            "metrics": {
+              "mae": 1737.4328651864485,
+              "mse": 6543144.121880634,
+              "n": 129,
+              "prediction_std": 9534.319850536687,
+              "r2": 0.9322926033049925,
+              "rmse": 2557.9570211167807,
+              "slog": 0.8062184636469385,
+              "target_std": 9830.490442224533
+            },
+            "seconds": 360.0583106475824,
+            "updates": 499
+          },
+          "540": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/cars/run/lr1e-4/checkpoints/4b625253c126b863b4b4da5c6ea2fa3e5e692f82f5eafb57d6ea82e8d2cba7b5.pt",
+            "checkpoint_sha256": "4b625253c126b863b4b4da5c6ea2fa3e5e692f82f5eafb57d6ea82e8d2cba7b5",
+            "metrics": {
+              "mae": 1777.1945620635715,
+              "mse": 7160340.020292873,
+              "n": 129,
+              "prediction_std": 9863.038349901772,
+              "r2": 0.9259059600102827,
+              "rmse": 2675.881167072423,
+              "slog": 0.796931226169762,
+              "target_std": 9830.490442224533
+            },
+            "seconds": 540.5791924823134,
+            "updates": 749
+          },
+          "720": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/cars/run/lr1e-4/checkpoints/655ffaa1b0af9d8df9f5546d8646f020ac34e96db027d3280af7e2580085e233.pt",
+            "checkpoint_sha256": "655ffaa1b0af9d8df9f5546d8646f020ac34e96db027d3280af7e2580085e233",
+            "metrics": {
+              "mae": 1845.1623904055743,
+              "mse": 7340970.672914723,
+              "n": 129,
+              "prediction_std": 9857.059357834834,
+              "r2": 0.9240368232429221,
+              "rmse": 2709.4225718618945,
+              "slog": 0.7850781222446807,
+              "target_std": 9830.490442224533
+            },
+            "seconds": 720.1828842030955,
+            "updates": 997
+          },
+          "900": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/cars/run/lr1e-4/checkpoints/e5935d229da333a027d65502b4cb42c3d5db3439d58f7497068535cd7add70ec.pt",
+            "checkpoint_sha256": "e5935d229da333a027d65502b4cb42c3d5db3439d58f7497068535cd7add70ec",
+            "metrics": {
+              "mae": 1814.4168444514412,
+              "mse": 6690299.62158928,
+              "n": 129,
+              "prediction_std": 9614.486080955508,
+              "r2": 0.9307698620037109,
+              "rmse": 2586.561350826475,
+              "slog": 0.792068166629289,
+              "target_std": 9830.490442224533
+            },
+            "seconds": 900.1853098981373,
+            "updates": 1245
+          }
+        },
+        "selected_node": "180",
+        "seconds": 900.1853098981373,
+        "updates": 1245
+      }
+    },
+    "concrete_compressive_strength": {
+      "mlp-256x3": {
+        "metrics": {
+          "test": {
+            "mae": 3.4077790614232986,
+            "mse": 28.421662790517676,
+            "n": 206,
+            "prediction_std": 16.179257079973016,
+            "r2": 0.8995128832313056,
+            "rmse": 5.3311971254604416,
+            "slog": 0.8341425648777386,
+            "target_std": 16.817814136494455
+          },
+          "train": {
+            "mae": 1.3035595925809258,
+            "mse": 3.916477970614258,
+            "n": 659,
+            "prediction_std": 16.343526856546347,
+            "r2": 0.9859431452847952,
+            "rmse": 1.9790093407091989,
+            "slog": 0.9684690271378086,
+            "target_std": 16.69182281267952
+          }
+        },
+        "refit": false,
+        "selected_rounds": 139
+      },
+      "xgboost-depth6": {
+        "metrics": {
+          "test": {
+            "mae": 2.923639801011794,
+            "mse": 20.690323443283223,
+            "n": 206,
+            "prediction_std": 16.274917012664808,
+            "r2": 0.9268476667550601,
+            "rmse": 4.548661720031863,
+            "slog": 0.8699187021844068,
+            "target_std": 16.817814136494455
+          },
+          "train": {
+            "mae": 0.07843985953665848,
+            "mse": 0.057368874709976994,
+            "n": 659,
+            "prediction_std": 16.685105422142367,
+            "r2": 0.9997940940960159,
+            "rmse": 0.23951800498078843,
+            "slog": 0.9995055977006568,
+            "target_std": 16.69182281267952
+          }
+        },
+        "refit": false,
+        "selected_rounds": 1127
+      },
+      "dustinstudio": {
+        "outcome": "completed",
+        "metrics": {
+          "test": {
+            "mae": 3.1882409196017982,
+            "mse": 21.090465743907387,
+            "n": 206,
+            "prediction_std": 15.774731683445058,
+            "r2": 0.9254329308761893,
+            "rmse": 4.59243570928406,
+            "slog": 0.863295465802819,
+            "target_std": 16.817814136494455
+          },
+          "train": {
+            "mae": 1.709104716172257,
+            "mse": 5.217792389554451,
+            "n": 659,
+            "prediction_std": 16.416527536234263,
+            "r2": 0.98127252339873,
+            "rmse": 2.284248758247326,
+            "slog": 0.9574696940351375,
+            "target_std": 16.691822812679522
+          }
+        },
+        "nodes": {
+          "0": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-all730-dustin-targetonly60m-20260929/half2/run/checkpoints/94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114.pt",
+            "checkpoint_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+            "metrics": {
+              "mae": 3.511141369376885,
+              "mse": 22.14849384720541,
+              "n": 165,
+              "prediction_std": 14.51057863730169,
+              "r2": 0.91852721392841,
+              "rmse": 4.706218635720764,
+              "slog": 0.8417156340672485,
+              "target_std": 16.48791786410166
+            },
+            "seconds": 0.0,
+            "updates": 0
+          },
+          "180": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/concrete_compressive_strength/run/lr1e-4/checkpoints/a172300fba5f542bfd59d711cfc5043829d505230c2dbaddb7c2d18f2e544c94.pt",
+            "checkpoint_sha256": "a172300fba5f542bfd59d711cfc5043829d505230c2dbaddb7c2d18f2e544c94",
+            "metrics": {
+              "mae": 2.673689953369361,
+              "mse": 14.725675927757583,
+              "n": 165,
+              "prediction_std": 15.458454605847079,
+              "r2": 0.9458318993201817,
+              "rmse": 3.8374048428277128,
+              "slog": 0.8970518805533656,
+              "target_std": 16.48791786410166
+            },
+            "seconds": 180.70842720707878,
+            "updates": 17
+          },
+          "360": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/concrete_compressive_strength/run/lr1e-4/checkpoints/fa62365e12115f99210867580fb18a756b9cfabcd9a364fa591c3cbd9e751996.pt",
+            "checkpoint_sha256": "fa62365e12115f99210867580fb18a756b9cfabcd9a364fa591c3cbd9e751996",
+            "metrics": {
+              "mae": 2.5152688682734685,
+              "mse": 12.642859665149809,
+              "n": 165,
+              "prediction_std": 16.086890295973472,
+              "r2": 0.9534934967615484,
+              "rmse": 3.5556799160146304,
+              "slog": 0.9089484841671095,
+              "target_std": 16.48791786410166
+            },
+            "seconds": 362.22787991631776,
+            "updates": 33
+          },
+          "540": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/concrete_compressive_strength/run/lr1e-4/checkpoints/2434f378e0748ce145b2855831590c32cffe2d70f20584c2c82f805bed3a7448.pt",
+            "checkpoint_sha256": "2434f378e0748ce145b2855831590c32cffe2d70f20584c2c82f805bed3a7448",
+            "metrics": {
+              "mae": 2.5937166601694703,
+              "mse": 13.741075292929482,
+              "n": 165,
+              "prediction_std": 16.297405075526235,
+              "r2": 0.949453732815529,
+              "rmse": 3.706895640954771,
+              "slog": 0.9050860416449411,
+              "target_std": 16.48791786410166
+            },
+            "seconds": 547.9520815007854,
+            "updates": 50
+          },
+          "720": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/concrete_compressive_strength/run/lr1e-4/checkpoints/7d0a4d2400bcea82bfb22d49022f0320c1983eb6c98e21bdfdc534eae188224d.pt",
+            "checkpoint_sha256": "7d0a4d2400bcea82bfb22d49022f0320c1983eb6c98e21bdfdc534eae188224d",
+            "metrics": {
+              "mae": 2.457624203867053,
+              "mse": 13.38308200390951,
+              "n": 165,
+              "prediction_std": 16.61515176509374,
+              "r2": 0.950770603879205,
+              "rmse": 3.658289491539661,
+              "slog": 0.9079805357484697,
+              "target_std": 16.48791786410166
+            },
+            "seconds": 726.9718635440804,
+            "updates": 65
+          },
+          "900": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/concrete_compressive_strength/run/lr1e-4/checkpoints/d0d43396b947fd503573493bf986dc076ba9ad32757607bb9a938028e73afded.pt",
+            "checkpoint_sha256": "d0d43396b947fd503573493bf986dc076ba9ad32757607bb9a938028e73afded",
+            "metrics": {
+              "mae": 2.4425715161914283,
+              "mse": 13.782984966911892,
+              "n": 165,
+              "prediction_std": 16.646778734229105,
+              "r2": 0.9492995689285282,
+              "rmse": 3.7125442713739982,
+              "slog": 0.9074588761604575,
+              "target_std": 16.48791786410166
+            },
+            "seconds": 905.0866890025791,
+            "updates": 80
+          }
+        },
+        "selected_node": "360",
+        "seconds": 905.0866890025791,
+        "updates": 80
+      },
+      "dgx2": {
+        "outcome": "completed",
+        "metrics": {
+          "test": {
+            "mae": 2.8947299517219247,
+            "mse": 21.104357524379,
+            "n": 206,
+            "prediction_std": 16.00695335221219,
+            "r2": 0.9253838153484785,
+            "rmse": 4.593947923559757,
+            "slog": 0.8705668781278617,
+            "target_std": 16.817814136494455
+          },
+          "train": {
+            "mae": 0.5179161180072547,
+            "mse": 0.6728117927034765,
+            "n": 659,
+            "prediction_std": 16.59373074042126,
+            "r2": 0.9975851727772579,
+            "rmse": 0.8202510546798928,
+            "slog": 0.9943712003976588,
+            "target_std": 16.691822812679522
+          }
+        },
+        "nodes": {
+          "0": {
+            "checkpoint": "/home/cms/experiments/v6-all730-hostloss-5h-20260929/hour5/run/checkpoints/f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08.pt",
+            "checkpoint_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+            "metrics": {
+              "mae": 12.101462014519178,
+              "mse": 236.91027307784861,
+              "n": 165,
+              "prediction_std": 3.533086563788328,
+              "r2": 0.1285303583264218,
+              "rmse": 15.391889847508935,
+              "slog": 0.08577663163188953,
+              "target_std": 16.48791786410166
+            },
+            "seconds": 0.0,
+            "updates": 0
+          },
+          "180": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/concrete_compressive_strength/run/lr1e-4/checkpoints/ed506b44b8b73510067ad4675cdf5a7bb820b1f5db302bd826a3822d29f8c890.pt",
+            "checkpoint_sha256": "ed506b44b8b73510067ad4675cdf5a7bb820b1f5db302bd826a3822d29f8c890",
+            "metrics": {
+              "mae": 3.0274915817951764,
+              "mse": 22.81275956043429,
+              "n": 165,
+              "prediction_std": 16.02013526164187,
+              "r2": 0.9160837259548285,
+              "rmse": 4.776270465586543,
+              "slog": 0.8635808307803472,
+              "target_std": 16.48791786410166
+            },
+            "seconds": 180.42334001226118,
+            "updates": 381
+          },
+          "360": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/concrete_compressive_strength/run/lr1e-4/checkpoints/fb7fdd26c4b1e013457fcf61914d16fe828f371228f32ebf5a368c451f935314.pt",
+            "checkpoint_sha256": "fb7fdd26c4b1e013457fcf61914d16fe828f371228f32ebf5a368c451f935314",
+            "metrics": {
+              "mae": 2.8946941488475453,
+              "mse": 20.98581211719064,
+              "n": 165,
+              "prediction_std": 15.839205184961063,
+              "r2": 0.9228041151259508,
+              "rmse": 4.5810274084740685,
+              "slog": 0.8759469438879991,
+              "target_std": 16.48791786410166
+            },
+            "seconds": 360.44238066047546,
+            "updates": 761
+          },
+          "540": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/concrete_compressive_strength/run/lr1e-4/checkpoints/11b2fd2c1ce8728260641252a0d69d5c7e3a8121e74a4aea9748c3531feaf2bb.pt",
+            "checkpoint_sha256": "11b2fd2c1ce8728260641252a0d69d5c7e3a8121e74a4aea9748c3531feaf2bb",
+            "metrics": {
+              "mae": 2.7531728130588142,
+              "mse": 20.783331414673146,
+              "n": 165,
+              "prediction_std": 16.133076421172298,
+              "r2": 0.9235489362895766,
+              "rmse": 4.558873919585093,
+              "slog": 0.8813885239090261,
+              "target_std": 16.48791786410166
+            },
+            "seconds": 540.3747370253259,
+            "updates": 1141
+          },
+          "720": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/concrete_compressive_strength/run/lr1e-4/checkpoints/2fd9b45a11043a3d30767e22f879fc51638c983807b6c666e732e1fc4050ed24.pt",
+            "checkpoint_sha256": "2fd9b45a11043a3d30767e22f879fc51638c983807b6c666e732e1fc4050ed24",
+            "metrics": {
+              "mae": 2.697649035906272,
+              "mse": 20.655636223759927,
+              "n": 165,
+              "prediction_std": 15.763074411195243,
+              "r2": 0.924018660463302,
+              "rmse": 4.54484721676757,
+              "slog": 0.8819708331489918,
+              "target_std": 16.48791786410166
+            },
+            "seconds": 720.1030627024011,
+            "updates": 1520
+          },
+          "900": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/concrete_compressive_strength/run/lr1e-4/checkpoints/4300adad8d29d612f8eadca4f46387f86a9283899884ddebfcf7fd70f082f476.pt",
+            "checkpoint_sha256": "4300adad8d29d612f8eadca4f46387f86a9283899884ddebfcf7fd70f082f476",
+            "metrics": {
+              "mae": 2.7335744386703835,
+              "mse": 20.580301712935192,
+              "n": 165,
+              "prediction_std": 15.850627533310407,
+              "r2": 0.9242957769357165,
+              "rmse": 4.5365517425612145,
+              "slog": 0.8815168662624051,
+              "target_std": 16.48791786410166
+            },
+            "seconds": 900.4191536333528,
+            "updates": 1900
+          }
+        },
+        "selected_node": "900",
+        "seconds": 900.4191536333528,
+        "updates": 1900
+      }
+    },
+    "cpu_activity": {
+      "mlp-256x3": {
+        "metrics": {
+          "test": {
+            "mae": 1.7763521232094979,
+            "mse": 6.140826380921999,
+            "n": 1639,
+            "prediction_std": 17.61590230448809,
+            "r2": 0.9807039716958635,
+            "rmse": 2.4780690831617265,
+            "slog": 0.8562515417102762,
+            "target_std": 17.839367227532907
+          },
+          "train": {
+            "mae": 1.4282728618308222,
+            "mse": 3.77960426036165,
+            "n": 5242,
+            "prediction_std": 18.698730617806934,
+            "r2": 0.9893202206625412,
+            "rmse": 1.9441204336052975,
+            "slog": 0.9101877682833839,
+            "target_std": 18.812305602569467
+          }
+        },
+        "refit": false,
+        "selected_rounds": 25
+      },
+      "xgboost-depth6": {
+        "metrics": {
+          "test": {
+            "mae": 1.5520629585468877,
+            "mse": 4.759708626864672,
+            "n": 1639,
+            "prediction_std": 17.748941479455663,
+            "r2": 0.9850437926939675,
+            "rmse": 2.1816756465764273,
+            "slog": 0.8834976801844757,
+            "target_std": 17.839367227532907
+          },
+          "train": {
+            "mae": 0.4871162731695659,
+            "mse": 0.4720078727593975,
+            "n": 5242,
+            "prediction_std": 18.763622308725633,
+            "r2": 0.9986662783774798,
+            "rmse": 0.6870282910909837,
+            "slog": 0.9868946034530542,
+            "target_std": 18.812305602569467
+          }
+        },
+        "refit": false,
+        "selected_rounds": 705
+      },
+      "dustinstudio": {
+        "outcome": "completed",
+        "metrics": {
+          "test": {
+            "mae": 2.4339503694991644,
+            "mse": 20.226308699674984,
+            "n": 1639,
+            "prediction_std": 17.055922531585626,
+            "r2": 0.9364438267836958,
+            "rmse": 4.497366862918232,
+            "slog": 0.785199654093867,
+            "target_std": 17.839367227532907
+          },
+          "train": {
+            "mae": 2.2501943596261733,
+            "mse": 13.552971066549375,
+            "n": 5242,
+            "prediction_std": 17.461323187840378,
+            "r2": 0.9617042604497803,
+            "rmse": 3.681436006037505,
+            "slog": 0.8127021401855803,
+            "target_std": 18.812305602569495
+          }
+        },
+        "nodes": {
+          "0": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-all730-dustin-targetonly60m-20260929/half2/run/checkpoints/94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114.pt",
+            "checkpoint_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+            "metrics": {
+              "mae": 2.8011635024523933,
+              "mse": 23.405237091381412,
+              "n": 1311,
+              "prediction_std": 16.000698719453474,
+              "r2": 0.9225581344779005,
+              "rmse": 4.837895936394396,
+              "slog": 0.7625427459413061,
+              "target_std": 17.384756786661363
+            },
+            "seconds": 0.0,
+            "updates": 0
+          },
+          "180": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/cpu_activity/run/lr1e-4/checkpoints/170ee62440435e0a40d7d423551338f9302f2d6317b157a9a2ef21aad3cd85e4.pt",
+            "checkpoint_sha256": "170ee62440435e0a40d7d423551338f9302f2d6317b157a9a2ef21aad3cd85e4",
+            "metrics": {
+              "mae": 3.597561834060355,
+              "mse": 35.740983395301946,
+              "n": 1311,
+              "prediction_std": 13.570652374034793,
+              "r2": 0.8817423460005974,
+              "rmse": 5.97837631763859,
+              "slog": 0.643108706390265,
+              "target_std": 17.384756786661363
+            },
+            "seconds": 193.9402335009072,
+            "updates": 11
+          },
+          "360": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/cpu_activity/run/lr1e-4/checkpoints/23e22c92464cc9d8ac923cc978678a8b252c47a1227ee51209798935dc777d95.pt",
+            "checkpoint_sha256": "23e22c92464cc9d8ac923cc978678a8b252c47a1227ee51209798935dc777d95",
+            "metrics": {
+              "mae": 3.229250947907169,
+              "mse": 34.62652433226939,
+              "n": 1311,
+              "prediction_std": 13.811006299784069,
+              "r2": 0.8854298022973351,
+              "rmse": 5.884430671889116,
+              "slog": 0.6996894369809087,
+              "target_std": 17.384756786661363
+            },
+            "seconds": 363.451525791781,
+            "updates": 20
+          },
+          "540": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/cpu_activity/run/lr1e-4/checkpoints/8bfba6cab70cd8e73d1bbb7b0987334ba5f9a676c44c7daeb61a372aea9b92ce.pt",
+            "checkpoint_sha256": "8bfba6cab70cd8e73d1bbb7b0987334ba5f9a676c44c7daeb61a372aea9b92ce",
+            "metrics": {
+              "mae": 3.0323914208546747,
+              "mse": 24.22331074883235,
+              "n": 1311,
+              "prediction_std": 14.635392619602094,
+              "r2": 0.9198513406983657,
+              "rmse": 4.921718271989199,
+              "slog": 0.7202511986682156,
+              "target_std": 17.384756786661363
+            },
+            "seconds": 540.9819950421806,
+            "updates": 30
+          },
+          "720": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/cpu_activity/run/lr1e-4/checkpoints/c1ae41be7dd83e3346bfc330b544d03b6625c8ea8ea649f4b52ff62259f1a098.pt",
+            "checkpoint_sha256": "c1ae41be7dd83e3346bfc330b544d03b6625c8ea8ea649f4b52ff62259f1a098",
+            "metrics": {
+              "mae": 2.9968848617635184,
+              "mse": 22.87671640713282,
+              "n": 1311,
+              "prediction_std": 14.401354963224628,
+              "r2": 0.9243068724887749,
+              "rmse": 4.782961050137542,
+              "slog": 0.72084169394967,
+              "target_std": 17.384756786661363
+            },
+            "seconds": 724.7009832910262,
+            "updates": 41
+          },
+          "900": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/cpu_activity/run/lr1e-4/checkpoints/b46e50a479e54a486411acd09ca98756df138356c8430436219567bddc70a15a.pt",
+            "checkpoint_sha256": "b46e50a479e54a486411acd09ca98756df138356c8430436219567bddc70a15a",
+            "metrics": {
+              "mae": 2.5694288985589187,
+              "mse": 15.626670871282066,
+              "n": 1311,
+              "prediction_std": 15.322067762511779,
+              "r2": 0.9482953947679703,
+              "rmse": 3.95305841991768,
+              "slog": 0.7783411330155828,
+              "target_std": 17.384756786661363
+            },
+            "seconds": 912.2526626656763,
+            "updates": 50
+          }
+        },
+        "selected_node": "900",
+        "seconds": 912.2526626656763,
+        "updates": 50
+      },
+      "dgx2": {
+        "outcome": "completed",
+        "metrics": {
+          "test": {
+            "mae": 1.7445268611449523,
+            "mse": 8.554838097177011,
+            "n": 1639,
+            "prediction_std": 17.65775398234797,
+            "r2": 0.9731185368514444,
+            "rmse": 2.9248654836038206,
+            "slog": 0.8629981552052622,
+            "target_std": 17.839367227532907
+          },
+          "train": {
+            "mae": 1.5158201326150882,
+            "mse": 4.447823668001982,
+            "n": 5242,
+            "prediction_std": 18.579074950605424,
+            "r2": 0.9874320770022514,
+            "rmse": 2.108986407732867,
+            "slog": 0.8984281676879362,
+            "target_std": 18.812305602569495
+          }
+        },
+        "nodes": {
+          "0": {
+            "checkpoint": "/home/cms/experiments/v6-all730-hostloss-5h-20260929/hour5/run/checkpoints/f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08.pt",
+            "checkpoint_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+            "metrics": {
+              "mae": 7.339383878427864,
+              "mse": 139.80083875191065,
+              "n": 1311,
+              "prediction_std": 7.406426708700487,
+              "r2": 0.5374352452729976,
+              "rmse": 11.82374047211417,
+              "slog": 0.15950817965733388,
+              "target_std": 17.384756786661363
+            },
+            "seconds": 0.0,
+            "updates": 0
+          },
+          "180": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/cpu_activity/run/lr1e-4/checkpoints/59aae460306c44fc0a401997c2e890aacc536f5ce27efcb6a43eabbb0f61768a.pt",
+            "checkpoint_sha256": "59aae460306c44fc0a401997c2e890aacc536f5ce27efcb6a43eabbb0f61768a",
+            "metrics": {
+              "mae": 2.0445151727961512,
+              "mse": 7.472938132778199,
+              "n": 1311,
+              "prediction_std": 16.55429528179252,
+              "r2": 0.9752739838663423,
+              "rmse": 2.733667524183985,
+              "slog": 0.8399349291697706,
+              "target_std": 17.384756786661363
+            },
+            "seconds": 180.33222091657808,
+            "updates": 214
+          },
+          "360": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/cpu_activity/run/lr1e-4/checkpoints/b168e9643ce1d30662d54d2bbec4c024a5a4c9b0930a3b8efc028017cd19d740.pt",
+            "checkpoint_sha256": "b168e9643ce1d30662d54d2bbec4c024a5a4c9b0930a3b8efc028017cd19d740",
+            "metrics": {
+              "mae": 1.8029501475798269,
+              "mse": 6.425935846630888,
+              "n": 1311,
+              "prediction_std": 17.29792393303772,
+              "r2": 0.9787382431656001,
+              "rmse": 2.534942967135728,
+              "slog": 0.86454600925323,
+              "target_std": 17.384756786661363
+            },
+            "seconds": 360.6985787905578,
+            "updates": 428
+          },
+          "540": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/cpu_activity/run/lr1e-4/checkpoints/34033eefb6786640141b38b82d3b53fe94644ceec9f0f7020742ce08b6d20970.pt",
+            "checkpoint_sha256": "34033eefb6786640141b38b82d3b53fe94644ceec9f0f7020742ce08b6d20970",
+            "metrics": {
+              "mae": 1.8225849032146586,
+              "mse": 6.401543466599651,
+              "n": 1311,
+              "prediction_std": 17.021652291725996,
+              "r2": 0.9788189512313534,
+              "rmse": 2.530127164116391,
+              "slog": 0.8638718409734318,
+              "target_std": 17.384756786661363
+            },
+            "seconds": 540.4538938126352,
+            "updates": 641
+          },
+          "720": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/cpu_activity/run/lr1e-4/checkpoints/8fd82948f2cc875ec60c7e39ac24bb74f9ba549aed486fc8d8fc50efa5f75d57.pt",
+            "checkpoint_sha256": "8fd82948f2cc875ec60c7e39ac24bb74f9ba549aed486fc8d8fc50efa5f75d57",
+            "metrics": {
+              "mae": 1.7256232645692813,
+              "mse": 6.059586470594709,
+              "n": 1311,
+              "prediction_std": 17.312843844970406,
+              "r2": 0.9799503983342203,
+              "rmse": 2.4616227311663152,
+              "slog": 0.8722921898391254,
+              "target_std": 17.384756786661363
+            },
+            "seconds": 720.3353487685381,
+            "updates": 854
+          },
+          "900": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/cpu_activity/run/lr1e-4/checkpoints/9ffbfc6eacecedc0ebbf120e54a8d8e300d20094e0847dc3773a47434bb12bfb.pt",
+            "checkpoint_sha256": "9ffbfc6eacecedc0ebbf120e54a8d8e300d20094e0847dc3773a47434bb12bfb",
+            "metrics": {
+              "mae": 1.7181425424062193,
+              "mse": 6.003742804368823,
+              "n": 1311,
+              "prediction_std": 17.09958314302952,
+              "r2": 0.9801351705573447,
+              "rmse": 2.4502536204174503,
+              "slog": 0.8720127222823373,
+              "target_std": 17.384756786661363
+            },
+            "seconds": 900.2013509877434,
+            "updates": 1067
+          }
+        },
+        "selected_node": "900",
+        "seconds": 900.2013509877434,
+        "updates": 1067
+      }
+    },
+    "energy_efficiency": {
+      "mlp-256x3": {
+        "metrics": {
+          "test": {
+            "mae": 0.37678413195139093,
+            "mse": 0.31757724409397775,
+            "n": 154,
+            "prediction_std": 10.198348201419929,
+            "r2": 0.9970066263363379,
+            "rmse": 0.5635399223604107,
+            "slog": 0.9938908505293331,
+            "target_std": 10.300165933397562
+          },
+          "train": {
+            "mae": 0.10992366928090024,
+            "mse": 0.025728641062059965,
+            "n": 491,
+            "prediction_std": 9.898442826922432,
+            "r2": 0.9997388506364762,
+            "rmse": 0.16040149956300273,
+            "slog": 0.9994470636847587,
+            "target_std": 9.925763846225001
+          }
+        },
+        "refit": false,
+        "selected_rounds": 271
+      },
+      "xgboost-depth6": {
+        "metrics": {
+          "test": {
+            "mae": 0.246011259351077,
+            "mse": 0.15318030719230016,
+            "n": 154,
+            "prediction_std": 10.291286764911753,
+            "r2": 0.9985561752113278,
+            "rmse": 0.391382558620463,
+            "slog": 0.9970749552157788,
+            "target_std": 10.300165933397562
+          },
+          "train": {
+            "mae": 0.08965598398099335,
+            "mse": 0.01630421713790773,
+            "n": 491,
+            "prediction_std": 9.922183241172437,
+            "r2": 0.9998345098787748,
+            "rmse": 0.12768796786662293,
+            "slog": 0.9996492217616589,
+            "target_std": 9.925763846225001
+          }
+        },
+        "refit": false,
+        "selected_rounds": 235
+      },
+      "dustinstudio": {
+        "outcome": "completed",
+        "metrics": {
+          "test": {
+            "mae": 0.33277620602892577,
+            "mse": 0.2430393492069091,
+            "n": 154,
+            "prediction_std": 10.313032928746312,
+            "r2": 0.9977091948473038,
+            "rmse": 0.4929902120802289,
+            "slog": 0.9953168245627388,
+            "target_std": 10.300165933397562
+          },
+          "train": {
+            "mae": 0.3244568846910404,
+            "mse": 0.1835683314338081,
+            "n": 491,
+            "prediction_std": 9.865746489541435,
+            "r2": 0.9981367553458634,
+            "rmse": 0.42844875006680566,
+            "slog": 0.9960767143338242,
+            "target_std": 9.925763846225
+          }
+        },
+        "nodes": {
+          "0": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-all730-dustin-targetonly60m-20260929/half2/run/checkpoints/94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114.pt",
+            "checkpoint_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+            "metrics": {
+              "mae": 0.5973017182388926,
+              "mse": 0.5582435090497683,
+              "n": 123,
+              "prediction_std": 10.628824619171771,
+              "r2": 0.9948199476425028,
+              "rmse": 0.7471569507471427,
+              "slog": 0.9887948338634993,
+              "target_std": 10.381133267292117
+            },
+            "seconds": 0.0,
+            "updates": 0
+          },
+          "180": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/energy_efficiency/run/lr1e-4/checkpoints/a8211f8acc9955f3af97fb7b3b39026ed4c37ecf42f08b781ffec5df6324a78a.pt",
+            "checkpoint_sha256": "a8211f8acc9955f3af97fb7b3b39026ed4c37ecf42f08b781ffec5df6324a78a",
+            "metrics": {
+              "mae": 0.43643665344734506,
+              "mse": 0.2891010818587215,
+              "n": 123,
+              "prediction_std": 10.57230597178852,
+              "r2": 0.997317373661565,
+              "rmse": 0.5376812083927813,
+              "slog": 0.994157458059344,
+              "target_std": 10.381133267292117
+            },
+            "seconds": 188.19350337679498,
+            "updates": 15
+          },
+          "360": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/energy_efficiency/run/lr1e-4/checkpoints/0b255d3c2eddeb80fe8383ae61cfa31bec948465848422890d29484373cc1a67.pt",
+            "checkpoint_sha256": "0b255d3c2eddeb80fe8383ae61cfa31bec948465848422890d29484373cc1a67",
+            "metrics": {
+              "mae": 0.392659712690648,
+              "mse": 0.23200779529609472,
+              "n": 123,
+              "prediction_std": 10.624590077794938,
+              "r2": 0.9978471536032242,
+              "rmse": 0.48167187513502874,
+              "slog": 0.9953080809540485,
+              "target_std": 10.381133267292117
+            },
+            "seconds": 367.3687582940329,
+            "updates": 32
+          },
+          "540": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/energy_efficiency/run/lr1e-4/checkpoints/d9738fa37caa2c97e6eaa2c6d6c42e7a1cb7b166eec8cece0480fda4101d2e66.pt",
+            "checkpoint_sha256": "d9738fa37caa2c97e6eaa2c6d6c42e7a1cb7b166eec8cece0480fda4101d2e66",
+            "metrics": {
+              "mae": 0.347618861935003,
+              "mse": 0.18537513577559087,
+              "n": 123,
+              "prediction_std": 10.554698041477096,
+              "r2": 0.9982798673096437,
+              "rmse": 0.43055212898740947,
+              "slog": 0.9962481422252705,
+              "target_std": 10.381133267292117
+            },
+            "seconds": 550.9401640861761,
+            "updates": 46
+          },
+          "720": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/energy_efficiency/run/lr1e-4/checkpoints/c85eb0282e18430f3230e3be84aa3bbcbc492ccadde2d7963dd8f92ee0ec5aab.pt",
+            "checkpoint_sha256": "c85eb0282e18430f3230e3be84aa3bbcbc492ccadde2d7963dd8f92ee0ec5aab",
+            "metrics": {
+              "mae": 0.3668526148602246,
+              "mse": 0.2058372959152362,
+              "n": 123,
+              "prediction_std": 10.582778704997969,
+              "r2": 0.9980899948630276,
+              "rmse": 0.4536929533453613,
+              "slog": 0.9958333158513876,
+              "target_std": 10.381133267292117
+            },
+            "seconds": 721.2564232938457,
+            "updates": 61
+          },
+          "900": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/energy_efficiency/run/lr1e-4/checkpoints/b2f23f14d164fbd471fe65dc1be5c211a6ebf365f963656f13409c7256835424.pt",
+            "checkpoint_sha256": "b2f23f14d164fbd471fe65dc1be5c211a6ebf365f963656f13409c7256835424",
+            "metrics": {
+              "mae": 0.3502172891880439,
+              "mse": 0.18814672087250314,
+              "n": 123,
+              "prediction_std": 10.618937284105876,
+              "r2": 0.9982541492212423,
+              "rmse": 0.4337588280052674,
+              "slog": 0.9961911853965093,
+              "target_std": 10.381133267292117
+            },
+            "seconds": 907.9812111672945,
+            "updates": 77
+          }
+        },
+        "selected_node": "540",
+        "seconds": 907.9812111672945,
+        "updates": 77
+      },
+      "dgx2": {
+        "outcome": "completed",
+        "metrics": {
+          "test": {
+            "mae": 0.25298616149507136,
+            "mse": 0.16882644167340569,
+            "n": 154,
+            "prediction_std": 10.318589920083314,
+            "r2": 0.9984087001394677,
+            "rmse": 0.41088494943646414,
+            "slog": 0.9967926871321483,
+            "target_std": 10.300165933397562
+          },
+          "train": {
+            "mae": 0.032491683484121556,
+            "mse": 0.0018296394969657646,
+            "n": 491,
+            "prediction_std": 9.934183158374305,
+            "r2": 0.9999814288990639,
+            "rmse": 0.04277428546411693,
+            "slog": 0.9999606071474383,
+            "target_std": 9.925763846225
+          }
+        },
+        "nodes": {
+          "0": {
+            "checkpoint": "/home/cms/experiments/v6-all730-hostloss-5h-20260929/hour5/run/checkpoints/f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08.pt",
+            "checkpoint_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+            "metrics": {
+              "mae": 6.3507824198662775,
+              "mse": 56.563913477951296,
+              "n": 123,
+              "prediction_std": 3.3289010380107413,
+              "r2": 0.4751322162984494,
+              "rmse": 7.520898448852457,
+              "slog": 0.3751207025607619,
+              "target_std": 10.381133267292117
+            },
+            "seconds": 0.0,
+            "updates": 0
+          },
+          "180": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/energy_efficiency/run/lr1e-4/checkpoints/7bf2f0d8898907aaab580ec19a389dcfcf3c5fbff1779e8c8c9379cbd75452c3.pt",
+            "checkpoint_sha256": "7bf2f0d8898907aaab580ec19a389dcfcf3c5fbff1779e8c8c9379cbd75452c3",
+            "metrics": {
+              "mae": 0.3391298662237038,
+              "mse": 0.24636298273399787,
+              "n": 123,
+              "prediction_std": 10.30380310137328,
+              "r2": 0.9977139489688227,
+              "rmse": 0.4963496577353488,
+              "slog": 0.9950390052732148,
+              "target_std": 10.381133267292117
+            },
+            "seconds": 180.42267882302986,
+            "updates": 403
+          },
+          "360": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/energy_efficiency/run/lr1e-4/checkpoints/2f7556a2125770c065faaf864458873f106e09537981a436ebc015dc660c26c8.pt",
+            "checkpoint_sha256": "2f7556a2125770c065faaf864458873f106e09537981a436ebc015dc660c26c8",
+            "metrics": {
+              "mae": 0.31665470103428733,
+              "mse": 0.2075106647983308,
+              "n": 123,
+              "prediction_std": 10.317394567983724,
+              "r2": 0.9980744673409206,
+              "rmse": 0.45553338494377205,
+              "slog": 0.9958123481733089,
+              "target_std": 10.381133267292117
+            },
+            "seconds": 360.17260238411836,
+            "updates": 805
+          },
+          "540": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/energy_efficiency/run/lr1e-4/checkpoints/eaa2ce447012cd6bd45bcf309400ab2ac292505c8d19d3aef651b403e4d460ac.pt",
+            "checkpoint_sha256": "eaa2ce447012cd6bd45bcf309400ab2ac292505c8d19d3aef651b403e4d460ac",
+            "metrics": {
+              "mae": 0.3006080029718344,
+              "mse": 0.18884077829561893,
+              "n": 123,
+              "prediction_std": 10.368539583112465,
+              "r2": 0.9982477089246109,
+              "rmse": 0.43455814144440896,
+              "slog": 0.9961861138135498,
+              "target_std": 10.381133267292117
+            },
+            "seconds": 540.0430511569721,
+            "updates": 1207
+          },
+          "720": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/energy_efficiency/run/lr1e-4/checkpoints/5a67c0586d021fe864e70ecf77533cf8dc87e0f18b08c760fc9c08d2b293978f.pt",
+            "checkpoint_sha256": "5a67c0586d021fe864e70ecf77533cf8dc87e0f18b08c760fc9c08d2b293978f",
+            "metrics": {
+              "mae": 0.3029440041106026,
+              "mse": 0.18828204288608075,
+              "n": 123,
+              "prediction_std": 10.361861417205013,
+              "r2": 0.9982528935414107,
+              "rmse": 0.43391478758631946,
+              "slog": 0.9961981112345379,
+              "target_std": 10.381133267292117
+            },
+            "seconds": 720.3715515742078,
+            "updates": 1611
+          },
+          "900": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/energy_efficiency/run/lr1e-4/checkpoints/7e1220abe438c38849d1f2219a552a22ca57b7468cd1ce862142411e2160cbba.pt",
+            "checkpoint_sha256": "7e1220abe438c38849d1f2219a552a22ca57b7468cd1ce862142411e2160cbba",
+            "metrics": {
+              "mae": 0.2951411534220246,
+              "mse": 0.18608883109837282,
+              "n": 123,
+              "prediction_std": 10.38199936046382,
+              "r2": 0.9982732447890422,
+              "rmse": 0.4313801468523706,
+              "slog": 0.9962456139556954,
+              "target_std": 10.381133267292117
+            },
+            "seconds": 900.2146850340941,
+            "updates": 2013
+          }
+        },
+        "selected_node": "900",
+        "seconds": 900.2146850340941,
+        "updates": 2013
+      }
+    },
+    "kin8nm": {
+      "mlp-256x3": {
+        "metrics": {
+          "test": {
+            "mae": 0.056260423978734715,
+            "mse": 0.005292955740758021,
+            "n": 1639,
+            "prediction_std": 0.25851300784557757,
+            "r2": 0.9231873503585103,
+            "rmse": 0.07275270263542119,
+            "slog": 0.8524828403257202,
+            "target_std": 0.2625020854964069
+          },
+          "train": {
+            "mae": 0.04022671946778017,
+            "mse": 0.0026896911097672553,
+            "n": 5242,
+            "prediction_std": 0.26237423254159337,
+            "r2": 0.9619459259854678,
+            "rmse": 0.051862232016827575,
+            "slog": 0.9201952680558003,
+            "target_std": 0.2658585455397111
+          }
+        },
+        "refit": false,
+        "selected_rounds": 23
+      },
+      "xgboost-depth6": {
+        "metrics": {
+          "test": {
+            "mae": 0.09100189395816004,
+            "mse": 0.01364727625660293,
+            "n": 1639,
+            "prediction_std": 0.22505132008574416,
+            "r2": 0.8019474371216009,
+            "rmse": 0.1168215573282728,
+            "slog": 0.6806888259596521,
+            "target_std": 0.2625020854964069
+          },
+          "train": {
+            "mae": 0.01640134261437376,
+            "mse": 0.0005045446907070639,
+            "n": 5242,
+            "prediction_std": 0.25957216359972046,
+            "r2": 0.9928616409021528,
+            "rmse": 0.022462072270987465,
+            "slog": 0.9837865835637505,
+            "target_std": 0.2658585455397111
+          }
+        },
+        "refit": false,
+        "selected_rounds": 1025
+      },
+      "dustinstudio": {
+        "outcome": "completed",
+        "metrics": {
+          "test": {
+            "mae": 0.05702955983908324,
+            "mse": 0.005509295262039001,
+            "n": 1639,
+            "prediction_std": 0.2523192800068646,
+            "r2": 0.9200477790743976,
+            "rmse": 0.07422462705894184,
+            "slog": 0.8476908997577419,
+            "target_std": 0.2625020854964069
+          },
+          "train": {
+            "mae": 0.050420523186746564,
+            "mse": 0.004180022682136245,
+            "n": 5242,
+            "prediction_std": 0.257933489621677,
+            "r2": 0.9408605352671146,
+            "rmse": 0.06465309491537312,
+            "slog": 0.881154605718272,
+            "target_std": 0.2658585455397107
+          }
+        },
+        "nodes": {
+          "0": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-all730-dustin-targetonly60m-20260929/half2/run/checkpoints/94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114.pt",
+            "checkpoint_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+            "metrics": {
+              "mae": 0.13379641965184844,
+              "mse": 0.02905925614521476,
+              "n": 1311,
+              "prediction_std": 0.15448325818306086,
+              "r2": 0.5552961428033202,
+              "rmse": 0.17046775690791136,
+              "slog": 0.4361362039100518,
+              "target_std": 0.25562704421512367
+            },
+            "seconds": 0.0,
+            "updates": 0
+          },
+          "180": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/kin8nm/run/lr1e-4/checkpoints/aa378a3f5ce3b78ce276a24d4b38614b7ea8a1c631fd1037fe7edcf63cad5f7a.pt",
+            "checkpoint_sha256": "aa378a3f5ce3b78ce276a24d4b38614b7ea8a1c631fd1037fe7edcf63cad5f7a",
+            "metrics": {
+              "mae": 0.07312757307822866,
+              "mse": 0.00845277427497983,
+              "n": 1311,
+              "prediction_std": 0.2159589993832686,
+              "r2": 0.8706442688927742,
+              "rmse": 0.09193897038242178,
+              "slog": 0.7742543069879391,
+              "target_std": 0.25562704421512367
+            },
+            "seconds": 180.2261463617906,
+            "updates": 428
+          },
+          "360": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/kin8nm/run/lr1e-4/checkpoints/a5c7ae79242bacf409a3d42c266d930f2aa416ffd76e0a4cfcfc07d6c73d1da4.pt",
+            "checkpoint_sha256": "a5c7ae79242bacf409a3d42c266d930f2aa416ffd76e0a4cfcfc07d6c73d1da4",
+            "metrics": {
+              "mae": 0.0655582683677746,
+              "mse": 0.007085738257288023,
+              "n": 1311,
+              "prediction_std": 0.23100377672091316,
+              "r2": 0.8915644943437083,
+              "rmse": 0.08417682731778398,
+              "slog": 0.8071877211053018,
+              "target_std": 0.25562704421512367
+            },
+            "seconds": 360.3429649032187,
+            "updates": 847
+          },
+          "540": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/kin8nm/run/lr1e-4/checkpoints/14a503cb2b18be80cc56f0522f97846cbe9e1e86ed3682d62e7bad9440803c73.pt",
+            "checkpoint_sha256": "14a503cb2b18be80cc56f0522f97846cbe9e1e86ed3682d62e7bad9440803c73",
+            "metrics": {
+              "mae": 0.0597300124161636,
+              "mse": 0.005636976568859329,
+              "n": 1311,
+              "prediction_std": 0.23117464101800891,
+              "r2": 0.9137353960276149,
+              "rmse": 0.07507980133737255,
+              "slog": 0.839305596281145,
+              "target_std": 0.25562704421512367
+            },
+            "seconds": 540.2201628705952,
+            "updates": 1281
+          },
+          "720": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/kin8nm/run/lr1e-4/checkpoints/e6450144b5b02ad75d8d6c4c4db015f54ac616db1cb4b34e147156c25e4814f0.pt",
+            "checkpoint_sha256": "e6450144b5b02ad75d8d6c4c4db015f54ac616db1cb4b34e147156c25e4814f0",
+            "metrics": {
+              "mae": 0.058473868955276107,
+              "mse": 0.005559275024297737,
+              "n": 1311,
+              "prediction_std": 0.23882172783654937,
+              "r2": 0.9149244896645616,
+              "rmse": 0.07456054603004016,
+              "slog": 0.8418679129707246,
+              "target_std": 0.25562704421512367
+            },
+            "seconds": 720.5705597049091,
+            "updates": 1312
+          },
+          "900": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/kin8nm/run/lr1e-4/checkpoints/98ee9e189b17ad5ea0e32db8a3f08ac55b8568671e8d5aff68f6f83105cbb4a1.pt",
+            "checkpoint_sha256": "98ee9e189b17ad5ea0e32db8a3f08ac55b8568671e8d5aff68f6f83105cbb4a1",
+            "metrics": {
+              "mae": 0.060222989313541,
+              "mse": 0.005740963413157382,
+              "n": 1311,
+              "prediction_std": 0.23293677613244587,
+              "r2": 0.9121440493487472,
+              "rmse": 0.07576914552215422,
+              "slog": 0.8370503791794688,
+              "target_std": 0.25562704421512367
+            },
+            "seconds": 900.4663234599866,
+            "updates": 1457
+          }
+        },
+        "selected_node": "720",
+        "seconds": 900.4663234599866,
+        "updates": 1457
+      },
+      "dgx2": {
+        "outcome": "completed",
+        "metrics": {
+          "test": {
+            "mae": 0.07024636476823667,
+            "mse": 0.008147100389000317,
+            "n": 1639,
+            "prediction_std": 0.23848550086812728,
+            "r2": 0.8817673151968011,
+            "rmse": 0.09026128953765461,
+            "slog": 0.7873524307869392,
+            "target_std": 0.2625020854964069
+          },
+          "train": {
+            "mae": 0.0693003720174438,
+            "mse": 0.007753099169954465,
+            "n": 5242,
+            "prediction_std": 0.24094767374287754,
+            "r2": 0.8903082184478107,
+            "rmse": 0.08805168465142768,
+            "slog": 0.7975739717058367,
+            "target_std": 0.2658585455397107
+          }
+        },
+        "nodes": {
+          "0": {
+            "checkpoint": "/home/cms/experiments/v6-all730-hostloss-5h-20260929/hour5/run/checkpoints/f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08.pt",
+            "checkpoint_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+            "metrics": {
+              "mae": 0.211098513621872,
+              "mse": 0.0663167148611389,
+              "n": 1311,
+              "prediction_std": 0.03700095139111641,
+              "r2": -0.014867646576605109,
+              "rmse": 0.25752031931701796,
+              "slog": 0.0007562090153835355,
+              "target_std": 0.25562704421512367
+            },
+            "seconds": 0.0,
+            "updates": 0
+          },
+          "180": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/kin8nm/run/lr1e-4/checkpoints/925df3a03a3b73505a0e752a93cff6ec98999c34009b9c16531d7cd1aec2fbe5.pt",
+            "checkpoint_sha256": "925df3a03a3b73505a0e752a93cff6ec98999c34009b9c16531d7cd1aec2fbe5",
+            "metrics": {
+              "mae": 0.10717314351317232,
+              "mse": 0.01886316367253291,
+              "n": 1311,
+              "prediction_std": 0.17595065600015827,
+              "r2": 0.7113304758322581,
+              "rmse": 0.137343233078783,
+              "slog": 0.5861492782696475,
+              "target_std": 0.25562704421512367
+            },
+            "seconds": 180.1714003656234,
+            "updates": 380
+          },
+          "360": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/kin8nm/run/lr1e-4/checkpoints/b991b55137f0ba9113a2cf27eb83a63c6594aadde905aa21e4f07acb91447882.pt",
+            "checkpoint_sha256": "b991b55137f0ba9113a2cf27eb83a63c6594aadde905aa21e4f07acb91447882",
+            "metrics": {
+              "mae": 0.08515432554885706,
+              "mse": 0.012288341743434229,
+              "n": 1311,
+              "prediction_std": 0.20380076332708608,
+              "r2": 0.8119472520374182,
+              "rmse": 0.11085279312418893,
+              "slog": 0.7055063231757555,
+              "target_std": 0.25562704421512367
+            },
+            "seconds": 360.2541599968681,
+            "updates": 760
+          },
+          "540": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/kin8nm/run/lr1e-4/checkpoints/07e32c0c7d18d8013ae7184ae73e5d42b5caa2f2d85db378c06f5a7be45a47a3.pt",
+            "checkpoint_sha256": "07e32c0c7d18d8013ae7184ae73e5d42b5caa2f2d85db378c06f5a7be45a47a3",
+            "metrics": {
+              "mae": 0.07783856568270325,
+              "mse": 0.01014769095411553,
+              "n": 1311,
+              "prediction_std": 0.22197835644929637,
+              "r2": 0.8447063721664414,
+              "rmse": 0.10073574814392124,
+              "slog": 0.7440165812850688,
+              "target_std": 0.25562704421512367
+            },
+            "seconds": 540.4250521540525,
+            "updates": 1141
+          },
+          "720": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/kin8nm/run/lr1e-4/checkpoints/8c5fbd90b569fcc5588c7abaa4f29f08c832c155d1c9d4d0444b4584a1b506b0.pt",
+            "checkpoint_sha256": "8c5fbd90b569fcc5588c7abaa4f29f08c832c155d1c9d4d0444b4584a1b506b0",
+            "metrics": {
+              "mae": 0.08427522408430849,
+              "mse": 0.011987257783460721,
+              "n": 1311,
+              "prediction_std": 0.21903528543714643,
+              "r2": 0.8165548441131127,
+              "rmse": 0.10948633605825304,
+              "slog": 0.7127176117206009,
+              "target_std": 0.25562704421512367
+            },
+            "seconds": 720.377827580116,
+            "updates": 1521
+          },
+          "900": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/kin8nm/run/lr1e-4/checkpoints/5d191b46bc6b42c4514cd93be70fbdfdbf7e6feaf6230b8f2b56d662d1ac5d29.pt",
+            "checkpoint_sha256": "5d191b46bc6b42c4514cd93be70fbdfdbf7e6feaf6230b8f2b56d662d1ac5d29",
+            "metrics": {
+              "mae": 0.0695553937881169,
+              "mse": 0.007914300801148542,
+              "n": 1311,
+              "prediction_std": 0.22728800074321232,
+              "r2": 0.8788847148840354,
+              "rmse": 0.08896235609036297,
+              "slog": 0.7884919582725408,
+              "target_std": 0.25562704421512367
+            },
+            "seconds": 900.3147098841728,
+            "updates": 1901
+          }
+        },
+        "selected_node": "900",
+        "seconds": 900.3147098841728,
+        "updates": 1901
+      }
+    },
+    "pumadyn32nh": {
+      "mlp-256x3": {
+        "metrics": {
+          "test": {
+            "mae": 0.020146476931961362,
+            "mse": 0.0006464592498086405,
+            "n": 1639,
+            "prediction_std": 0.027619097044074784,
+            "r2": 0.5046073137625228,
+            "rmse": 0.025425562920191963,
+            "slog": 0.32788956973162986,
+            "target_std": 0.03612399568005235
+          },
+          "train": {
+            "mae": 0.011789350926984403,
+            "mse": 0.00021936639170633696,
+            "n": 5242,
+            "prediction_std": 0.03197697292435154,
+            "r2": 0.829553939197757,
+            "rmse": 0.014811022642151924,
+            "slog": 0.685395431617098,
+            "target_std": 0.03587497123628512
+          }
+        },
+        "refit": false,
+        "selected_rounds": 9
+      },
+      "xgboost-depth6": {
+        "metrics": {
+          "test": {
+            "mae": 0.017302146808032215,
+            "mse": 0.000473835684051964,
+            "n": 1639,
+            "prediction_std": 0.027074082956329855,
+            "r2": 0.6368916796732984,
+            "rmse": 0.021767767089252953,
+            "slog": 0.4495398159064977,
+            "target_std": 0.03612399568005235
+          },
+          "train": {
+            "mae": 0.01350959711154583,
+            "mse": 0.00029087477988308833,
+            "n": 5242,
+            "prediction_std": 0.02786864499189819,
+            "r2": 0.773992451477426,
+            "rmse": 0.017055051447682247,
+            "slog": 0.613880782603671,
+            "target_std": 0.03587497123628512
+          }
+        },
+        "refit": false,
+        "selected_rounds": 71
+      },
+      "dustinstudio": {
+        "outcome": "completed",
+        "metrics": {
+          "test": {
+            "mae": 0.01698872672613906,
+            "mse": 0.00045945038494795386,
+            "n": 1639,
+            "prediction_std": 0.029757469519835034,
+            "r2": 0.6479153783326874,
+            "rmse": 0.021434793792988863,
+            "slog": 0.46387923472217707,
+            "target_std": 0.03612399568005235
+          },
+          "train": {
+            "mae": 0.016596662721761316,
+            "mse": 0.00043384798935175586,
+            "n": 5242,
+            "prediction_std": 0.03070209270161602,
+            "r2": 0.6629033271834406,
+            "rmse": 0.020829017964170943,
+            "slog": 0.4850868877801445,
+            "target_std": 0.0358749712362851
+          }
+        },
+        "nodes": {
+          "0": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-all730-dustin-targetonly60m-20260929/half2/run/checkpoints/94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114.pt",
+            "checkpoint_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+            "metrics": {
+              "mae": 0.025904928847252175,
+              "mse": 0.0010761148144385522,
+              "n": 1311,
+              "prediction_std": 0.01577354429137581,
+              "r2": 0.17185871166589328,
+              "rmse": 0.032804188976997314,
+              "slog": 0.1036337671140537,
+              "target_std": 0.03604766067433209
+            },
+            "seconds": 0.0,
+            "updates": 0
+          },
+          "180": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/pumadyn32nh/run/lr1e-4/checkpoints/a58696dfa7467eba777f8c7d585bb181fb1c88a2336cb074f691645b6c062294.pt",
+            "checkpoint_sha256": "a58696dfa7467eba777f8c7d585bb181fb1c88a2336cb074f691645b6c062294",
+            "metrics": {
+              "mae": 0.017199063993223046,
+              "mse": 0.0004749721082796151,
+              "n": 1311,
+              "prediction_std": 0.025835675156903777,
+              "r2": 0.6344776520164634,
+              "rmse": 0.021793854828359646,
+              "slog": 0.4575067156373702,
+              "target_std": 0.03604766067433209
+            },
+            "seconds": 180.82120157941245,
+            "updates": 202
+          },
+          "360": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/pumadyn32nh/run/lr1e-4/checkpoints/c4693e6cf3ea6c78a372e75e89765bda2abf1398e963372c0f9765b71146baba.pt",
+            "checkpoint_sha256": "c4693e6cf3ea6c78a372e75e89765bda2abf1398e963372c0f9765b71146baba",
+            "metrics": {
+              "mae": 0.017132950639726544,
+              "mse": 0.00046752735238115705,
+              "n": 1311,
+              "prediction_std": 0.026723159857615652,
+              "r2": 0.6402068824464884,
+              "rmse": 0.021622380821296184,
+              "slog": 0.4630869313065441,
+              "target_std": 0.03604766067433209
+            },
+            "seconds": 360.1273082396947,
+            "updates": 396
+          },
+          "540": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/pumadyn32nh/run/lr1e-4/checkpoints/7322de974d327e830d8116c2f7bb5799d3a8e1be12f4a981a85f0bcff417370b.pt",
+            "checkpoint_sha256": "7322de974d327e830d8116c2f7bb5799d3a8e1be12f4a981a85f0bcff417370b",
+            "metrics": {
+              "mae": 0.016709689205826536,
+              "mse": 0.00044839986586137244,
+              "n": 1311,
+              "prediction_std": 0.02834170684807352,
+              "r2": 0.6549267442275495,
+              "rmse": 0.021175454324792477,
+              "slog": 0.4800176605456573,
+              "target_std": 0.03604766067433209
+            },
+            "seconds": 541.2206919491291,
+            "updates": 559
+          },
+          "720": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/pumadyn32nh/run/lr1e-4/checkpoints/ca5b57b82dc344a9a24cd4282048011876698f2ab41a2fe0d0fc79dc51cca2fb.pt",
+            "checkpoint_sha256": "ca5b57b82dc344a9a24cd4282048011876698f2ab41a2fe0d0fc79dc51cca2fb",
+            "metrics": {
+              "mae": 0.017147541594722378,
+              "mse": 0.00047120878224929873,
+              "n": 1311,
+              "prediction_std": 0.024798829456287252,
+              "r2": 0.6373737794792133,
+              "rmse": 0.021707343970400864,
+              "slog": 0.4606073713023361,
+              "target_std": 0.03604766067433209
+            },
+            "seconds": 721.1057037503924,
+            "updates": 709
+          },
+          "900": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/pumadyn32nh/run/lr1e-4/checkpoints/955cff2f8838c9fc429ebd8ef31a368b356f4ff7707f63efc579977b848ce08c.pt",
+            "checkpoint_sha256": "955cff2f8838c9fc429ebd8ef31a368b356f4ff7707f63efc579977b848ce08c",
+            "metrics": {
+              "mae": 0.016761515671406015,
+              "mse": 0.00045304997287070464,
+              "n": 1311,
+              "prediction_std": 0.026926908442020465,
+              "r2": 0.6513481803439094,
+              "rmse": 0.021284970586559537,
+              "slog": 0.47707011389663423,
+              "target_std": 0.03604766067433209
+            },
+            "seconds": 901.0741366664879,
+            "updates": 856
+          }
+        },
+        "selected_node": "540",
+        "seconds": 901.0741366664879,
+        "updates": 856
+      },
+      "dgx2": {
+        "outcome": "completed",
+        "metrics": {
+          "test": {
+            "mae": 0.017604596625070374,
+            "mse": 0.0004936182818896541,
+            "n": 1639,
+            "prediction_std": 0.03403747921486042,
+            "r2": 0.621731939463115,
+            "rmse": 0.022217521956547137,
+            "slog": 0.4354311386049885,
+            "target_std": 0.03612399568005235
+          },
+          "train": {
+            "mae": 0.01749185659963868,
+            "mse": 0.0004808522419994353,
+            "n": 5242,
+            "prediction_std": 0.03382532138527204,
+            "r2": 0.6263813711881235,
+            "rmse": 0.021928343348265853,
+            "slog": 0.44855982130838756,
+            "target_std": 0.0358749712362851
+          }
+        },
+        "nodes": {
+          "0": {
+            "checkpoint": "/home/cms/experiments/v6-all730-hostloss-5h-20260929/hour5/run/checkpoints/f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08.pt",
+            "checkpoint_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+            "metrics": {
+              "mae": 0.029061050426409444,
+              "mse": 0.0013311707113951845,
+              "n": 1311,
+              "prediction_std": 0.0014920138012248087,
+              "r2": -0.02442361459599285,
+              "rmse": 0.03648521222900018,
+              "slog": -0.02161075905300125,
+              "target_std": 0.03604766067433209
+            },
+            "seconds": 0.0,
+            "updates": 0
+          },
+          "180": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/pumadyn32nh/run/lr1e-4/checkpoints/235c570e69540f1233e67ac359cb5495b0f5d37ccd612e09d2a8d4b788b7a7bd.pt",
+            "checkpoint_sha256": "235c570e69540f1233e67ac359cb5495b0f5d37ccd612e09d2a8d4b788b7a7bd",
+            "metrics": {
+              "mae": 0.026081947814547816,
+              "mse": 0.0010690931360039487,
+              "n": 1311,
+              "prediction_std": 0.01138968459948855,
+              "r2": 0.17726235609776952,
+              "rmse": 0.03269698970859471,
+              "slog": 0.09207972911187123,
+              "target_std": 0.03604766067433209
+            },
+            "seconds": 181.11959774699062,
+            "updates": 152
+          },
+          "360": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/pumadyn32nh/run/lr1e-4/checkpoints/6a0f8b61c3d976faa26372836b6fbc6374df205cc08dc31dc0df22e9840dcf01.pt",
+            "checkpoint_sha256": "6a0f8b61c3d976faa26372836b6fbc6374df205cc08dc31dc0df22e9840dcf01",
+            "metrics": {
+              "mae": 0.025804290604337907,
+              "mse": 0.0010537812464729917,
+              "n": 1311,
+              "prediction_std": 0.015365088456874882,
+              "r2": 0.18904586446774918,
+              "rmse": 0.0324619969575655,
+              "slog": 0.10551644015430284,
+              "target_std": 0.03604766067433209
+            },
+            "seconds": 361.0304862500343,
+            "updates": 303
+          },
+          "540": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/pumadyn32nh/run/lr1e-4/checkpoints/68de33dff16904480086d1d352b014dc1a65ca087147038d02638af020cdb302.pt",
+            "checkpoint_sha256": "68de33dff16904480086d1d352b014dc1a65ca087147038d02638af020cdb302",
+            "metrics": {
+              "mae": 0.023467852903728437,
+              "mse": 0.0008734946266240362,
+              "n": 1311,
+              "prediction_std": 0.015182106330596645,
+              "r2": 0.3277883031256653,
+              "rmse": 0.0295549425075407,
+              "slog": 0.19830718219369126,
+              "target_std": 0.03604766067433209
+            },
+            "seconds": 540.1999401560752,
+            "updates": 453
+          },
+          "720": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/pumadyn32nh/run/lr1e-4/checkpoints/94f83edd36846192bc71ddbedc686babba3423d9158f3e60e7a830c919ea517f.pt",
+            "checkpoint_sha256": "94f83edd36846192bc71ddbedc686babba3423d9158f3e60e7a830c919ea517f",
+            "metrics": {
+              "mae": 0.018580953232738808,
+              "mse": 0.0005609455804193047,
+              "n": 1311,
+              "prediction_std": 0.02467400942462587,
+              "r2": 0.5683153977430049,
+              "rmse": 0.023684289738544088,
+              "slog": 0.4006008728887408,
+              "target_std": 0.03604766067433209
+            },
+            "seconds": 720.9792327161413,
+            "updates": 604
+          },
+          "900": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/pumadyn32nh/run/lr1e-4/checkpoints/bc07c7cddf4c86830024a76041c175a11e998130a4c92483e6c0b80f82f383c1.pt",
+            "checkpoint_sha256": "bc07c7cddf4c86830024a76041c175a11e998130a4c92483e6c0b80f82f383c1",
+            "metrics": {
+              "mae": 0.017680581281742644,
+              "mse": 0.0005014974422292418,
+              "n": 1311,
+              "prediction_std": 0.0342543264227988,
+              "r2": 0.6140646589642331,
+              "rmse": 0.022394138568590707,
+              "slog": 0.4389729416706446,
+              "target_std": 0.03604766067433209
+            },
+            "seconds": 900.5961934610968,
+            "updates": 754
+          }
+        },
+        "selected_node": "900",
+        "seconds": 900.5961934610968,
+        "updates": 754
+      }
+    },
+    "qsar_fish_toxicity": {
+      "mlp-256x3": {
+        "metrics": {
+          "test": {
+            "mae": 0.6865025043003817,
+            "mse": 1.0962678513862414,
+            "n": 182,
+            "prediction_std": 1.272058409500059,
+            "r2": 0.505417785892089,
+            "rmse": 1.0470281043917786,
+            "slog": 0.47692820941162917,
+            "target_std": 1.488809365044359
+          },
+          "train": {
+            "mae": 0.39400224702632103,
+            "mse": 0.2626336079014583,
+            "n": 581,
+            "prediction_std": 1.2835215009637133,
+            "r2": 0.8744018648442431,
+            "rmse": 0.5124779096716836,
+            "slog": 0.7316840021127289,
+            "target_std": 1.4460508141387913
+          }
+        },
+        "refit": false,
+        "selected_rounds": 71
+      },
+      "xgboost-depth6": {
+        "metrics": {
+          "test": {
+            "mae": 0.6820648831045101,
+            "mse": 1.0265738714422368,
+            "n": 182,
+            "prediction_std": 1.1383326417375326,
+            "r2": 0.5368602867983331,
+            "rmse": 1.0131998181218929,
+            "slog": 0.4788626642155642,
+            "target_std": 1.488809365044359
+          },
+          "train": {
+            "mae": 0.22340611726721576,
+            "mse": 0.09098461617586039,
+            "n": 581,
+            "prediction_std": 1.338782232683039,
+            "r2": 0.9564888202585328,
+            "rmse": 0.3016365630620074,
+            "slog": 0.8904663031526009,
+            "target_std": 1.4460508141387913
+          }
+        },
+        "refit": false,
+        "selected_rounds": 144
+      },
+      "dustinstudio": {
+        "outcome": "completed",
+        "metrics": {
+          "test": {
+            "mae": 0.7262418008636642,
+            "mse": 1.1028598433118768,
+            "n": 182,
+            "prediction_std": 1.2937034136614256,
+            "r2": 0.5024438028843419,
+            "rmse": 1.050171339978328,
+            "slog": 0.43048945977312836,
+            "target_std": 1.488809365044359
+          },
+          "train": {
+            "mae": 0.1271591098870755,
+            "mse": 0.03539919093990794,
+            "n": 581,
+            "prediction_std": 1.4631417066560806,
+            "r2": 0.9830711979186487,
+            "rmse": 0.18814672715704608,
+            "slog": 0.9557760511583242,
+            "target_std": 1.4460508141387924
+          }
+        },
+        "nodes": {
+          "0": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-all730-dustin-targetonly60m-20260929/half2/run/checkpoints/94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114.pt",
+            "checkpoint_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+            "metrics": {
+              "mae": 0.486654512050234,
+              "mse": 0.44711062686616043,
+              "n": 145,
+              "prediction_std": 1.1848568676665974,
+              "r2": 0.7859351023355061,
+              "rmse": 0.6686633135339193,
+              "slog": 0.6297554165923891,
+              "target_std": 1.4452226765545806
+            },
+            "seconds": 0.0,
+            "updates": 0
+          },
+          "180": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/qsar_fish_toxicity/run/lr1e-4/checkpoints/355924edcdeb1bfb7df857de709f7d4324d110ad4f6ef552df3323bcf07d0dd2.pt",
+            "checkpoint_sha256": "355924edcdeb1bfb7df857de709f7d4324d110ad4f6ef552df3323bcf07d0dd2",
+            "metrics": {
+              "mae": 0.3227678505996178,
+              "mse": 0.17830308528274902,
+              "n": 145,
+              "prediction_std": 1.3451731756466012,
+              "r2": 0.9146331368327314,
+              "rmse": 0.42225949993191275,
+              "slog": 0.799345159492133,
+              "target_std": 1.4452226765545806
+            },
+            "seconds": 180.25478963018395,
+            "updates": 286
+          },
+          "360": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/qsar_fish_toxicity/run/lr1e-4/checkpoints/1b2506c1721faa291146191aa37bc7b272ca4bd4c8dbfdef9e0669958ab5f1a0.pt",
+            "checkpoint_sha256": "1b2506c1721faa291146191aa37bc7b272ca4bd4c8dbfdef9e0669958ab5f1a0",
+            "metrics": {
+              "mae": 0.3623191293913743,
+              "mse": 0.2284045862621253,
+              "n": 145,
+              "prediction_std": 1.2910685967459476,
+              "r2": 0.890645845912898,
+              "rmse": 0.4779169240172661,
+              "slog": 0.7639703249164975,
+              "target_std": 1.4452226765545806
+            },
+            "seconds": 360.08744136989117,
+            "updates": 578
+          },
+          "540": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/qsar_fish_toxicity/run/lr1e-4/checkpoints/83b8174bef695745bd25df49985a71d8d337487f95dae254ed0fcdcc8fcdc7e4.pt",
+            "checkpoint_sha256": "83b8174bef695745bd25df49985a71d8d337487f95dae254ed0fcdcc8fcdc7e4",
+            "metrics": {
+              "mae": 0.3796045658637738,
+              "mse": 0.24889260129551308,
+              "n": 145,
+              "prediction_std": 1.2836717296592723,
+              "r2": 0.880836719092963,
+              "rmse": 0.49889137224000285,
+              "slog": 0.7405630427985628,
+              "target_std": 1.4452226765545806
+            },
+            "seconds": 540.4234615692403,
+            "updates": 869
+          },
+          "720": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/qsar_fish_toxicity/run/lr1e-4/checkpoints/cb13d5a4ec22b6331864452f4466e612751258c8187649df2ff4aeeedf8c7d45.pt",
+            "checkpoint_sha256": "cb13d5a4ec22b6331864452f4466e612751258c8187649df2ff4aeeedf8c7d45",
+            "metrics": {
+              "mae": 0.3748412060704725,
+              "mse": 0.25133012925329623,
+              "n": 145,
+              "prediction_std": 1.3082289567571481,
+              "r2": 0.8796696943311172,
+              "rmse": 0.5013283647005187,
+              "slog": 0.7427303224452549,
+              "target_std": 1.4452226765545806
+            },
+            "seconds": 720.2305706194602,
+            "updates": 1153
+          },
+          "900": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/qsar_fish_toxicity/run/lr1e-4/checkpoints/545eefb31ccaa10048c8e080235702fb1bc90041f7b550a71a566e24dec01e5a.pt",
+            "checkpoint_sha256": "545eefb31ccaa10048c8e080235702fb1bc90041f7b550a71a566e24dec01e5a",
+            "metrics": {
+              "mae": 0.4041941490567964,
+              "mse": 0.2858218050545215,
+              "n": 145,
+              "prediction_std": 1.2369597311695562,
+              "r2": 0.863155980259015,
+              "rmse": 0.5346230494979818,
+              "slog": 0.7175577357558296,
+              "target_std": 1.4452226765545806
+            },
+            "seconds": 904.0799384508282,
+            "updates": 1384
+          }
+        },
+        "selected_node": "180",
+        "seconds": 904.0799384508282,
+        "updates": 1384
+      },
+      "dgx2": {
+        "outcome": "completed",
+        "metrics": {
+          "test": {
+            "mae": 0.7293619817192537,
+            "mse": 1.0542188102084165,
+            "n": 182,
+            "prediction_std": 1.3432233733547134,
+            "r2": 0.5243882481386519,
+            "rmse": 1.0267515815465864,
+            "slog": 0.42076091800065163,
+            "target_std": 1.488809365044359
+          },
+          "train": {
+            "mae": 0.1254811914606633,
+            "mse": 0.03408226881989336,
+            "n": 581,
+            "prediction_std": 1.4349906775352275,
+            "r2": 0.9837009838921227,
+            "rmse": 0.18461383702175024,
+            "slog": 0.956350276134108,
+            "target_std": 1.4460508141387924
+          }
+        },
+        "nodes": {
+          "0": {
+            "checkpoint": "/home/cms/experiments/v6-all730-hostloss-5h-20260929/hour5/run/checkpoints/f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08.pt",
+            "checkpoint_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+            "metrics": {
+              "mae": 0.9438595225896432,
+              "mse": 1.7201718549304288,
+              "n": 145,
+              "prediction_std": 0.516837349800872,
+              "r2": 0.176426615775224,
+              "rmse": 1.311553222301874,
+              "slog": 0.1632897067302318,
+              "target_std": 1.4452226765545806
+            },
+            "seconds": 0.0,
+            "updates": 0
+          },
+          "180": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/qsar_fish_toxicity/run/lr1e-4/checkpoints/bf4ee0699fbdf42fd7d9482f10a29c26f7fe879a8bffb326d68c92632ed273ac.pt",
+            "checkpoint_sha256": "bf4ee0699fbdf42fd7d9482f10a29c26f7fe879a8bffb326d68c92632ed273ac",
+            "metrics": {
+              "mae": 0.4879694742032496,
+              "mse": 0.4262282274405806,
+              "n": 145,
+              "prediction_std": 1.3439937609482693,
+              "r2": 0.7959330501082035,
+              "rmse": 0.652861568359312,
+              "slog": 0.6247124547813825,
+              "target_std": 1.4452226765545806
+            },
+            "seconds": 180.14817996084457,
+            "updates": 431
+          },
+          "360": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/qsar_fish_toxicity/run/lr1e-4/checkpoints/b8fe90fc8d454ef1d5769b7d285fe810984acb03eeed9d8dce2f5c2f75d45119.pt",
+            "checkpoint_sha256": "b8fe90fc8d454ef1d5769b7d285fe810984acb03eeed9d8dce2f5c2f75d45119",
+            "metrics": {
+              "mae": 0.5143694732316465,
+              "mse": 0.4956658582598508,
+              "n": 145,
+              "prediction_std": 1.3365804273784645,
+              "r2": 0.7626881249325792,
+              "rmse": 0.7040354098053953,
+              "slog": 0.5959915799367559,
+              "target_std": 1.4452226765545806
+            },
+            "seconds": 360.0912314745947,
+            "updates": 861
+          },
+          "540": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/qsar_fish_toxicity/run/lr1e-4/checkpoints/2f24c3ebdd88eb1b1c0702e90f1b8c20fae384a702ccc259a9ca97cd181b260e.pt",
+            "checkpoint_sha256": "2f24c3ebdd88eb1b1c0702e90f1b8c20fae384a702ccc259a9ca97cd181b260e",
+            "metrics": {
+              "mae": 0.5237834699284735,
+              "mse": 0.5072831314167766,
+              "n": 145,
+              "prediction_std": 1.3042253641404282,
+              "r2": 0.7571260777790405,
+              "rmse": 0.7122381142685195,
+              "slog": 0.5852601084795883,
+              "target_std": 1.4452226765545806
+            },
+            "seconds": 540.0956706647121,
+            "updates": 1291
+          },
+          "720": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/qsar_fish_toxicity/run/lr1e-4/checkpoints/61db671728badda045343bd48308e40191c5f89d36cfdf89c981f68686636cc4.pt",
+            "checkpoint_sha256": "61db671728badda045343bd48308e40191c5f89d36cfdf89c981f68686636cc4",
+            "metrics": {
+              "mae": 0.5446657829043123,
+              "mse": 0.5326443889016316,
+              "n": 145,
+              "prediction_std": 1.2908808619000938,
+              "r2": 0.7449837696746897,
+              "rmse": 0.7298249029059173,
+              "slog": 0.5648884797502238,
+              "target_std": 1.4452226765545806
+            },
+            "seconds": 720.3368312356179,
+            "updates": 1722
+          },
+          "900": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/qsar_fish_toxicity/run/lr1e-4/checkpoints/338162d2ee53016548ed7bcd9eb19a2455941be5f4967786a2d338b5e0480399.pt",
+            "checkpoint_sha256": "338162d2ee53016548ed7bcd9eb19a2455941be5f4967786a2d338b5e0480399",
+            "metrics": {
+              "mae": 0.5532855270352823,
+              "mse": 0.5623321785269816,
+              "n": 145,
+              "prediction_std": 1.2979258312126467,
+              "r2": 0.7307700309125871,
+              "rmse": 0.7498881106718399,
+              "slog": 0.551757786596109,
+              "target_std": 1.4452226765545806
+            },
+            "seconds": 900.2778627938824,
+            "updates": 2153
+          }
+        },
+        "selected_node": "180",
+        "seconds": 900.2778627938824,
+        "updates": 2153
+      }
+    },
+    "red_wine": {
+      "mlp-256x3": {
+        "metrics": {
+          "test": {
+            "mae": 0.4817714250186048,
+            "mse": 0.4025481623176035,
+            "n": 320,
+            "prediction_std": 0.5925308601490737,
+            "r2": 0.3710184963787445,
+            "rmse": 0.6344668331107651,
+            "slog": 0.4319491088719656,
+            "target_std": 0.8000000000000014
+          },
+          "train": {
+            "mae": 0.39353705069686,
+            "mse": 0.26747368570795854,
+            "n": 1023,
+            "prediction_std": 0.5856686353399824,
+            "r2": 0.5918037162006571,
+            "rmse": 0.5171785820274836,
+            "slog": 0.5773039054340533,
+            "target_std": 0.8094797852479866
+          }
+        },
+        "refit": false,
+        "selected_rounds": 20
+      },
+      "xgboost-depth6": {
+        "metrics": {
+          "test": {
+            "mae": 0.422906830220892,
+            "mse": 0.3423592068945646,
+            "n": 320,
+            "prediction_std": 0.6066657388265245,
+            "r2": 0.46506373922724276,
+            "rmse": 0.5851146955038513,
+            "slog": 0.5129917963589732,
+            "target_std": 0.8000000000000014
+          },
+          "train": {
+            "mae": 0.11163400990428898,
+            "mse": 0.02530204533060735,
+            "n": 1023,
+            "prediction_std": 0.7302163697909678,
+            "r2": 0.9613861047708697,
+            "rmse": 0.15906616651760785,
+            "slog": 0.9489396144395081,
+            "target_std": 0.8094797852479866
+          }
+        },
+        "refit": false,
+        "selected_rounds": 271
+      },
+      "dustinstudio": {
+        "outcome": "completed",
+        "metrics": {
+          "test": {
+            "mae": 0.4193210542201996,
+            "mse": 0.3715235084911953,
+            "n": 320,
+            "prediction_std": 0.706122094418726,
+            "r2": 0.41949451798250736,
+            "rmse": 0.6095272828111924,
+            "slog": 0.5020157845636568,
+            "target_std": 0.8000000000000014
+          },
+          "train": {
+            "mae": 0.08183318871789896,
+            "mse": 0.011190240959875973,
+            "n": 1023,
+            "prediction_std": 0.8440301665262372,
+            "r2": 0.9829223769712138,
+            "rmse": 0.10578393526370615,
+            "slog": 0.9765854743127913,
+            "target_std": 0.8094797852479872
+          }
+        },
+        "nodes": {
+          "0": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-all730-dustin-targetonly60m-20260929/half2/run/checkpoints/94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114.pt",
+            "checkpoint_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+            "metrics": {
+              "mae": 0.36915837600827217,
+              "mse": 0.2260263158960143,
+              "n": 256,
+              "prediction_std": 0.5764463333212582,
+              "r2": 0.6533868251927838,
+              "rmse": 0.4754222501061707,
+              "slog": 0.6230741328616098,
+              "target_std": 0.8075268474639093
+            },
+            "seconds": 0.0,
+            "updates": 0
+          },
+          "180": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/red_wine/run/lr1e-4/checkpoints/1d3edcb2060690c6c5b9d1980d65e41e5416afce7a5258b16f360c2313cd3ae8.pt",
+            "checkpoint_sha256": "1d3edcb2060690c6c5b9d1980d65e41e5416afce7a5258b16f360c2313cd3ae8",
+            "metrics": {
+              "mae": 0.33101340755820274,
+              "mse": 0.18542281188796925,
+              "n": 256,
+              "prediction_std": 0.6701388621920777,
+              "r2": 0.7156526254237656,
+              "rmse": 0.43060749167654905,
+              "slog": 0.6773908731446348,
+              "target_std": 0.8075268474639093
+            },
+            "seconds": 192.99256600183435,
+            "updates": 11
+          },
+          "360": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/red_wine/run/lr1e-4/checkpoints/9fa8b4247519e11a4d2bbd2966a40cf615b5f43d57667d65f9567d4d21a63bf4.pt",
+            "checkpoint_sha256": "9fa8b4247519e11a4d2bbd2966a40cf615b5f43d57667d65f9567d4d21a63bf4",
+            "metrics": {
+              "mae": 0.27922723162919283,
+              "mse": 0.14016383547879682,
+              "n": 256,
+              "prediction_std": 0.6933097210350775,
+              "r2": 0.7850576300557275,
+              "rmse": 0.37438460903033505,
+              "slog": 0.7512151441056891,
+              "target_std": 0.8075268474639093
+            },
+            "seconds": 360.56052795704454,
+            "updates": 86
+          },
+          "540": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/red_wine/run/lr1e-4/checkpoints/bdf98eba9f1e82106b784d5b3b7f82937bb0ab233c047b723014c12da5f085f6.pt",
+            "checkpoint_sha256": "bdf98eba9f1e82106b784d5b3b7f82937bb0ab233c047b723014c12da5f085f6",
+            "metrics": {
+              "mae": 0.2665141923353076,
+              "mse": 0.13136080216962776,
+              "n": 256,
+              "prediction_std": 0.7227064313781958,
+              "r2": 0.798557152494648,
+              "rmse": 0.3624373079163178,
+              "slog": 0.7652351856620104,
+              "target_std": 0.8075268474639093
+            },
+            "seconds": 540.332983831875,
+            "updates": 361
+          },
+          "720": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/red_wine/run/lr1e-4/checkpoints/4eb75c70539ac19ebca843ffc5d1eabe9b9d1d1ee434f75894085711bea24a4b.pt",
+            "checkpoint_sha256": "4eb75c70539ac19ebca843ffc5d1eabe9b9d1d1ee434f75894085711bea24a4b",
+            "metrics": {
+              "mae": 0.26707509253174067,
+              "mse": 0.1436192379514154,
+              "n": 256,
+              "prediction_std": 0.6577501916733217,
+              "r2": 0.7797587425499822,
+              "rmse": 0.37897128908588235,
+              "slog": 0.7534544568378243,
+              "target_std": 0.8075268474639093
+            },
+            "seconds": 720.5622318703681,
+            "updates": 635
+          },
+          "900": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/red_wine/run/lr1e-4/checkpoints/6e968f057726128a69549411d68722b4e23ef2af3bb8d71a25b548cd3b2a1136.pt",
+            "checkpoint_sha256": "6e968f057726128a69549411d68722b4e23ef2af3bb8d71a25b548cd3b2a1136",
+            "metrics": {
+              "mae": 0.27898484375327826,
+              "mse": 0.15206686273760386,
+              "n": 256,
+              "prediction_std": 0.6742490644476096,
+              "r2": 0.766804241941885,
+              "rmse": 0.38995751401608336,
+              "slog": 0.7366362938480162,
+              "target_std": 0.8075268474639093
+            },
+            "seconds": 900.1472227845807,
+            "updates": 902
+          }
+        },
+        "selected_node": "540",
+        "seconds": 900.1472227845807,
+        "updates": 902
+      },
+      "dgx2": {
+        "outcome": "completed",
+        "metrics": {
+          "test": {
+            "mae": 0.48130547479841335,
+            "mse": 0.43375984120597466,
+            "n": 320,
+            "prediction_std": 0.7093208635972892,
+            "r2": 0.3222502481156646,
+            "rmse": 0.6586044649150009,
+            "slog": 0.41448822945718333,
+            "target_std": 0.8000000000000014
+          },
+          "train": {
+            "mae": 0.12125394968272574,
+            "mse": 0.02539301102447287,
+            "n": 1023,
+            "prediction_std": 0.8218752306966245,
+            "r2": 0.9612472804297355,
+            "rmse": 0.15935184663025675,
+            "slog": 0.9483316139478016,
+            "target_std": 0.8094797852479872
+          }
+        },
+        "nodes": {
+          "0": {
+            "checkpoint": "/home/cms/experiments/v6-all730-hostloss-5h-20260929/hour5/run/checkpoints/f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08.pt",
+            "checkpoint_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+            "metrics": {
+              "mae": 0.6150393554540563,
+              "mse": 0.5954591684534374,
+              "n": 256,
+              "prediction_std": 0.25946534316944786,
+              "r2": 0.08685857207589687,
+              "rmse": 0.7716600083284331,
+              "slog": 0.21696339384671692,
+              "target_std": 0.8075268474639093
+            },
+            "seconds": 0.0,
+            "updates": 0
+          },
+          "180": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/red_wine/run/lr1e-4/checkpoints/6243f212bc9ff00b83cd0af1ac4a5357bae3f8a33aa20e34997b3a71ad99b38e.pt",
+            "checkpoint_sha256": "6243f212bc9ff00b83cd0af1ac4a5357bae3f8a33aa20e34997b3a71ad99b38e",
+            "metrics": {
+              "mae": 0.35259228078073523,
+              "mse": 0.2522246440387794,
+              "n": 256,
+              "prediction_std": 0.6989045858800899,
+              "r2": 0.613211478104515,
+              "rmse": 0.5022197168956825,
+              "slog": 0.6125693912715446,
+              "target_std": 0.8075268474639093
+            },
+            "seconds": 180.27431226629415,
+            "updates": 325
+          },
+          "360": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/red_wine/run/lr1e-4/checkpoints/d504ecde91bf926cabdf6158453b9a105ddfc09fb425920a5633773e64494e55.pt",
+            "checkpoint_sha256": "d504ecde91bf926cabdf6158453b9a105ddfc09fb425920a5633773e64494e55",
+            "metrics": {
+              "mae": 0.36131077265075145,
+              "mse": 0.27193945402731107,
+              "n": 256,
+              "prediction_std": 0.6735380179612008,
+              "r2": 0.5829786582943219,
+              "rmse": 0.5214781433840838,
+              "slog": 0.5907042064196424,
+              "target_std": 0.8075268474639093
+            },
+            "seconds": 360.4960001511208,
+            "updates": 651
+          },
+          "540": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/red_wine/run/lr1e-4/checkpoints/d999b5dae4fddcf6a07e6b33f76340d392fa0a7677957c241ebbe38730004542.pt",
+            "checkpoint_sha256": "d999b5dae4fddcf6a07e6b33f76340d392fa0a7677957c241ebbe38730004542",
+            "metrics": {
+              "mae": 0.3540923907000892,
+              "mse": 0.26808987303200366,
+              "n": 256,
+              "prediction_std": 0.6537470645301943,
+              "r2": 0.588882021737519,
+              "rmse": 0.5177739593992765,
+              "slog": 0.597416496786887,
+              "target_std": 0.8075268474639093
+            },
+            "seconds": 540.189731876133,
+            "updates": 975
+          },
+          "720": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/red_wine/run/lr1e-4/checkpoints/a2a14ba2f0b1903b84ec9b29cf5e1aa12184bcf9f2e46883a4ca5bd249272a70.pt",
+            "checkpoint_sha256": "a2a14ba2f0b1903b84ec9b29cf5e1aa12184bcf9f2e46883a4ca5bd249272a70",
+            "metrics": {
+              "mae": 0.35894024759402454,
+              "mse": 0.2855077321140849,
+              "n": 256,
+              "prediction_std": 0.6337226109441174,
+              "r2": 0.5621715946314895,
+              "rmse": 0.5343292356909595,
+              "slog": 0.5804045717962434,
+              "target_std": 0.8075268474639093
+            },
+            "seconds": 720.3672631873633,
+            "updates": 1300
+          },
+          "900": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/red_wine/run/lr1e-4/checkpoints/2628e4adad485893b630d8a3ef08b9e6d24dcc5ddbd5613df2a6b966e31a6e87.pt",
+            "checkpoint_sha256": "2628e4adad485893b630d8a3ef08b9e6d24dcc5ddbd5613df2a6b966e31a6e87",
+            "metrics": {
+              "mae": 0.35753987287154926,
+              "mse": 0.28143111670696264,
+              "n": 256,
+              "prediction_std": 0.6417531165112543,
+              "r2": 0.5684231171726997,
+              "rmse": 0.5305008168768099,
+              "slog": 0.5829272182660729,
+              "target_std": 0.8075268474639093
+            },
+            "seconds": 900.1535894797707,
+            "updates": 1625
+          }
+        },
+        "selected_node": "180",
+        "seconds": 900.1535894797707,
+        "updates": 1625
+      }
+    },
+    "space_ga": {
+      "mlp-256x3": {
+        "metrics": {
+          "test": {
+            "mae": 0.0682265950580894,
+            "mse": 0.00845888788294081,
+            "n": 622,
+            "prediction_std": 0.1702142435386772,
+            "r2": 0.7723268625698765,
+            "rmse": 0.09197221255868976,
+            "slog": 0.6330044581587897,
+            "target_std": 0.19275281894544072
+          },
+          "train": {
+            "mae": 0.06064228066363935,
+            "mse": 0.0063105302492474005,
+            "n": 1988,
+            "prediction_std": 0.17827887009512913,
+            "r2": 0.8440793448404839,
+            "rmse": 0.07943884597127152,
+            "slog": 0.7029009486474784,
+            "target_std": 0.20117828471141344
+          }
+        },
+        "refit": false,
+        "selected_rounds": 68
+      },
+      "xgboost-depth6": {
+        "metrics": {
+          "test": {
+            "mae": 0.07919950661198533,
+            "mse": 0.01296280187924187,
+            "n": 622,
+            "prediction_std": 0.16712116598713272,
+            "r2": 0.6511028619159265,
+            "rmse": 0.1138543011011963,
+            "slog": 0.557863787007753,
+            "target_std": 0.19275281894544072
+          },
+          "train": {
+            "mae": 0.042717791154494617,
+            "mse": 0.003090834697852349,
+            "n": 1988,
+            "prediction_std": 0.1795869647712795,
+            "r2": 0.9236316201580084,
+            "rmse": 0.05559527585912628,
+            "slog": 0.82955717531304,
+            "target_std": 0.20117828471141344
+          }
+        },
+        "refit": false,
+        "selected_rounds": 215
+      },
+      "dustinstudio": {
+        "outcome": "completed",
+        "metrics": {
+          "test": {
+            "mae": 0.07044463468533041,
+            "mse": 0.009462762872975523,
+            "n": 622,
+            "prediction_std": 0.16459268848512668,
+            "r2": 0.7453073096769048,
+            "rmse": 0.09727673346168406,
+            "slog": 0.6243710174661088,
+            "target_std": 0.19275281894544072
+          },
+          "train": {
+            "mae": 0.059641835606445,
+            "mse": 0.005889245273438739,
+            "n": 1988,
+            "prediction_std": 0.18590195206032128,
+            "r2": 0.8544884589469857,
+            "rmse": 0.07674141823968814,
+            "slog": 0.7118186023079622,
+            "target_std": 0.20117828471141336
+          }
+        },
+        "nodes": {
+          "0": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-all730-dustin-targetonly60m-20260929/half2/run/checkpoints/94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114.pt",
+            "checkpoint_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+            "metrics": {
+              "mae": 0.09279788765855507,
+              "mse": 0.014099531544070969,
+              "n": 497,
+              "prediction_std": 0.11375898944812254,
+              "r2": 0.6153958565975353,
+              "rmse": 0.1187414482986921,
+              "slog": 0.46211644679047015,
+              "target_std": 0.19146763036542958
+            },
+            "seconds": 0.0,
+            "updates": 0
+          },
+          "180": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/space_ga/run/lr1e-4/checkpoints/b06a4282f16c1a5bfd1f1b34d451fa15b04e899b776f705a7341d5e4be5919d4.pt",
+            "checkpoint_sha256": "b06a4282f16c1a5bfd1f1b34d451fa15b04e899b776f705a7341d5e4be5919d4",
+            "metrics": {
+              "mae": 0.0775569688824617,
+              "mse": 0.010136330305206257,
+              "n": 497,
+              "prediction_std": 0.13804894343381668,
+              "r2": 0.7235032510056936,
+              "rmse": 0.10067934398478298,
+              "slog": 0.5738098996826247,
+              "target_std": 0.19146763036542958
+            },
+            "seconds": 180.41256695543416,
+            "updates": 363
+          },
+          "360": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/space_ga/run/lr1e-4/checkpoints/1da881dfa238808d6a453242b7859310220e9893ba0032c76dbae1d298b7b472.pt",
+            "checkpoint_sha256": "1da881dfa238808d6a453242b7859310220e9893ba0032c76dbae1d298b7b472",
+            "metrics": {
+              "mae": 0.0730794549948943,
+              "mse": 0.009096116086622428,
+              "n": 497,
+              "prediction_std": 0.1622147337874828,
+              "r2": 0.7518780021272464,
+              "rmse": 0.09537356073159074,
+              "slog": 0.6059094929862336,
+              "target_std": 0.19146763036542958
+            },
+            "seconds": 360.0625622991938,
+            "updates": 684
+          },
+          "540": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/space_ga/run/lr1e-4/checkpoints/1af8e2a90efc4c144a70d0c8cc43a0d4b51b2123bc8aaec4432ffcb9b3f6cbe0.pt",
+            "checkpoint_sha256": "1af8e2a90efc4c144a70d0c8cc43a0d4b51b2123bc8aaec4432ffcb9b3f6cbe0",
+            "metrics": {
+              "mae": 0.0740347617504544,
+              "mse": 0.009216900657055738,
+              "n": 497,
+              "prediction_std": 0.15539905093488462,
+              "r2": 0.7485832652700299,
+              "rmse": 0.09600469080756283,
+              "slog": 0.596664278551724,
+              "target_std": 0.19146763036542958
+            },
+            "seconds": 540.3987083851825,
+            "updates": 1008
+          },
+          "720": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/space_ga/run/lr1e-4/checkpoints/5c61fca309f6b3c1f864bcecc9d1efcbf6bbf98e2b424e2a67e9c039a9bc9928.pt",
+            "checkpoint_sha256": "5c61fca309f6b3c1f864bcecc9d1efcbf6bbf98e2b424e2a67e9c039a9bc9928",
+            "metrics": {
+              "mae": 0.07591411272399758,
+              "mse": 0.009607910031057872,
+              "n": 497,
+              "prediction_std": 0.16053892257629462,
+              "r2": 0.7379173913805059,
+              "rmse": 0.09801994710801405,
+              "slog": 0.5876721448107614,
+              "target_std": 0.19146763036542958
+            },
+            "seconds": 720.2463173950091,
+            "updates": 1359
+          },
+          "900": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/space_ga/run/lr1e-4/checkpoints/828b4352213a1514edce3145364a24f99b1193228db1ea9faa99bc7a067daef2.pt",
+            "checkpoint_sha256": "828b4352213a1514edce3145364a24f99b1193228db1ea9faa99bc7a067daef2",
+            "metrics": {
+              "mae": 0.07508548520888485,
+              "mse": 0.009341993187062667,
+              "n": 497,
+              "prediction_std": 0.16287949067686355,
+              "r2": 0.7451710167709232,
+              "rmse": 0.09665398691757453,
+              "slog": 0.5936220927827089,
+              "target_std": 0.19146763036542958
+            },
+            "seconds": 900.4699572888203,
+            "updates": 1674
+          }
+        },
+        "selected_node": "360",
+        "seconds": 900.4699572888203,
+        "updates": 1674
+      },
+      "dgx2": {
+        "outcome": "completed",
+        "metrics": {
+          "test": {
+            "mae": 0.07226345474004443,
+            "mse": 0.009713486012484767,
+            "n": 622,
+            "prediction_std": 0.16792338576403373,
+            "r2": 0.7385590320559755,
+            "rmse": 0.09855701909293303,
+            "slog": 0.6056714536706413,
+            "target_std": 0.19275281894544072
+          },
+          "train": {
+            "mae": 0.04865829034361329,
+            "mse": 0.00402442293659351,
+            "n": 1988,
+            "prediction_std": 0.18056462168036397,
+            "r2": 0.9005645110428748,
+            "rmse": 0.06343833964247102,
+            "slog": 0.7888601580239376,
+            "target_std": 0.20117828471141336
+          }
+        },
+        "nodes": {
+          "0": {
+            "checkpoint": "/home/cms/experiments/v6-all730-hostloss-5h-20260929/hour5/run/checkpoints/f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08.pt",
+            "checkpoint_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+            "metrics": {
+              "mae": 0.13232431843731346,
+              "mse": 0.029094654335909173,
+              "n": 497,
+              "prediction_std": 0.05893827972961224,
+              "r2": 0.20636195795039303,
+              "rmse": 0.17057155195374513,
+              "slog": 0.15744537148087667,
+              "target_std": 0.19146763036542958
+            },
+            "seconds": 0.0,
+            "updates": 0
+          },
+          "180": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/space_ga/run/lr1e-4/checkpoints/6d2f14ae1d339556b862a92c0adcd73691e157ca9f0f45b8613cf6c8c60ffb68.pt",
+            "checkpoint_sha256": "6d2f14ae1d339556b862a92c0adcd73691e157ca9f0f45b8613cf6c8c60ffb68",
+            "metrics": {
+              "mae": 0.08597419982753193,
+              "mse": 0.012808024488081932,
+              "n": 497,
+              "prediction_std": 0.16139082434682028,
+              "r2": 0.6506253224428582,
+              "rmse": 0.11317254299556025,
+              "slog": 0.5124298743962592,
+              "target_std": 0.19146763036542958
+            },
+            "seconds": 180.40053497819463,
+            "updates": 431
+          },
+          "360": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/space_ga/run/lr1e-4/checkpoints/4408a78d59f3f1febc875a3296eeed844b86b72430ec78aeea5cb2dd01036e4a.pt",
+            "checkpoint_sha256": "4408a78d59f3f1febc875a3296eeed844b86b72430ec78aeea5cb2dd01036e4a",
+            "metrics": {
+              "mae": 0.07852154516413186,
+              "mse": 0.010659628365189595,
+              "n": 497,
+              "prediction_std": 0.16912607900782783,
+              "r2": 0.709228833343307,
+              "rmse": 0.10324547624564281,
+              "slog": 0.5663024057910329,
+              "target_std": 0.19146763036542958
+            },
+            "seconds": 360.20623824122595,
+            "updates": 861
+          },
+          "540": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/space_ga/run/lr1e-4/checkpoints/217fd7bb89835254d3995cde788271e7a55a27cd97454a1165570fdbaf4e4c78.pt",
+            "checkpoint_sha256": "217fd7bb89835254d3995cde788271e7a55a27cd97454a1165570fdbaf4e4c78",
+            "metrics": {
+              "mae": 0.07508046329280404,
+              "mse": 0.010137408167611873,
+              "n": 497,
+              "prediction_std": 0.16991620034181798,
+              "r2": 0.723473849295011,
+              "rmse": 0.10068469678959098,
+              "slog": 0.5899968882843687,
+              "target_std": 0.19146763036542958
+            },
+            "seconds": 540.1565585202188,
+            "updates": 1292
+          },
+          "720": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/space_ga/run/lr1e-4/checkpoints/5c31fbef785cfc5d29082cb45d29962a87989a8c6303b528b7e28629d662eb04.pt",
+            "checkpoint_sha256": "5c31fbef785cfc5d29082cb45d29962a87989a8c6303b528b7e28629d662eb04",
+            "metrics": {
+              "mae": 0.07757398494117444,
+              "mse": 0.010674675310298198,
+              "n": 497,
+              "prediction_std": 0.15737755742150938,
+              "r2": 0.7088183858460813,
+              "rmse": 0.10331832030331406,
+              "slog": 0.5730398338085275,
+              "target_std": 0.19146763036542958
+            },
+            "seconds": 720.2721974565648,
+            "updates": 1723
+          },
+          "900": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/space_ga/run/lr1e-4/checkpoints/167587fed061bab4933cf21474c3b72542b9c1ee92146cdbf37974943f3f4da1.pt",
+            "checkpoint_sha256": "167587fed061bab4933cf21474c3b72542b9c1ee92146cdbf37974943f3f4da1",
+            "metrics": {
+              "mae": 0.07294430569078059,
+              "mse": 0.009516478415072312,
+              "n": 497,
+              "prediction_std": 0.16503717335451804,
+              "r2": 0.7404114443379475,
+              "rmse": 0.09755243930867291,
+              "slog": 0.6087342521627289,
+              "target_std": 0.19146763036542958
+            },
+            "seconds": 900.104754733009,
+            "updates": 2153
+          }
+        },
+        "selected_node": "900",
+        "seconds": 900.104754733009,
+        "updates": 2153
+      }
+    },
+    "white_wine": {
+      "mlp-256x3": {
+        "metrics": {
+          "test": {
+            "mae": 0.5425104210017772,
+            "mse": 0.4865550375795476,
+            "n": 980,
+            "prediction_std": 0.5946811111445476,
+            "r2": 0.41855008393933557,
+            "rmse": 0.6975349722985562,
+            "slog": 0.344414966601128,
+            "target_std": 0.9147656129380451
+          },
+          "train": {
+            "mae": 0.49203998059938403,
+            "mse": 0.3892085842130287,
+            "n": 3134,
+            "prediction_std": 0.5688775315092582,
+            "r2": 0.4948559032550669,
+            "rmse": 0.6238658383122357,
+            "slog": 0.40678197984348996,
+            "target_std": 0.8777757207862283
+          }
+        },
+        "refit": false,
+        "selected_rounds": 10
+      },
+      "xgboost-depth6": {
+        "metrics": {
+          "test": {
+            "mae": 0.46105220351031084,
+            "mse": 0.4319838670571725,
+            "n": 980,
+            "prediction_std": 0.6897064852910149,
+            "r2": 0.4837644997172824,
+            "rmse": 0.6572547961461921,
+            "slog": 0.44151374564918866,
+            "target_std": 0.9147656129380451
+          },
+          "train": {
+            "mae": 0.09153966081998012,
+            "mse": 0.018949500803289263,
+            "n": 3134,
+            "prediction_std": 0.813500505931555,
+            "r2": 0.9754059163766909,
+            "rmse": 0.13765718580331818,
+            "slog": 0.9603611585139231,
+            "target_std": 0.8777757207862283
+          }
+        },
+        "refit": false,
+        "selected_rounds": 830
+      },
+      "dustinstudio": {
+        "outcome": "completed",
+        "metrics": {
+          "test": {
+            "mae": 0.532369454539552,
+            "mse": 0.5230869028533767,
+            "n": 980,
+            "prediction_std": 0.6815200105338697,
+            "r2": 0.37489325509901206,
+            "rmse": 0.7232474699944527,
+            "slog": 0.34053164594507135,
+            "target_std": 0.9147656129380451
+          },
+          "train": {
+            "mae": 0.34214667552736205,
+            "mse": 0.2031245717490842,
+            "n": 3134,
+            "prediction_std": 0.7303914887602236,
+            "r2": 0.7363696935658242,
+            "rmse": 0.45069343433101416,
+            "slog": 0.6509599696893347,
+            "target_std": 0.8777757207862334
+          }
+        },
+        "nodes": {
+          "0": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-all730-dustin-targetonly60m-20260929/half2/run/checkpoints/94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114.pt",
+            "checkpoint_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+            "metrics": {
+              "mae": 0.5223081282206944,
+              "mse": 0.45524659646715276,
+              "n": 784,
+              "prediction_std": 0.46459817877140985,
+              "r2": 0.4111530892295576,
+              "rmse": 0.6747196428644662,
+              "slog": 0.3361934109835023,
+              "target_std": 0.8792697928374557
+            },
+            "seconds": 0.0,
+            "updates": 0
+          },
+          "180": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/white_wine/run/lr1e-4/checkpoints/c583fa465313ec9728a384d74858c54e954938ec132a137639b8e4644ff1f428.pt",
+            "checkpoint_sha256": "c583fa465313ec9728a384d74858c54e954938ec132a137639b8e4644ff1f428",
+            "metrics": {
+              "mae": 0.44846734891132434,
+              "mse": 0.36046228765478994,
+              "n": 784,
+              "prediction_std": 0.6822480486808331,
+              "r2": 0.5337535608570232,
+              "rmse": 0.600385116116972,
+              "slog": 0.4571634684704231,
+              "target_std": 0.8792697928374557
+            },
+            "seconds": 180.07874358003028,
+            "updates": 283
+          },
+          "360": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/white_wine/run/lr1e-4/checkpoints/d6e9d22b73acfe585b5f948ca5d76b788c7c6e12a1597e8ea017d0656dc7de2c.pt",
+            "checkpoint_sha256": "d6e9d22b73acfe585b5f948ca5d76b788c7c6e12a1597e8ea017d0656dc7de2c",
+            "metrics": {
+              "mae": 0.4472422386918749,
+              "mse": 0.365710754528016,
+              "n": 784,
+              "prediction_std": 0.6894947600127797,
+              "r2": 0.526964836836759,
+              "rmse": 0.6047402372324964,
+              "slog": 0.45558454531615444,
+              "target_std": 0.8792697928374557
+            },
+            "seconds": 360.26902099722065,
+            "updates": 555
+          },
+          "540": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/white_wine/run/lr1e-4/checkpoints/6e6c3bc2f9eda8a675e4f63b4860183ea927e668a5af8ee2c2c731554439a5cd.pt",
+            "checkpoint_sha256": "6e6c3bc2f9eda8a675e4f63b4860183ea927e668a5af8ee2c2c731554439a5cd",
+            "metrics": {
+              "mae": 0.4536328741482326,
+              "mse": 0.3836477999417818,
+              "n": 784,
+              "prediction_std": 0.738769657362842,
+              "r2": 0.5037638423379297,
+              "rmse": 0.6193930900016417,
+              "slog": 0.43537472385289255,
+              "target_std": 0.8792697928374557
+            },
+            "seconds": 540.6677809585817,
+            "updates": 832
+          },
+          "720": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/white_wine/run/lr1e-4/checkpoints/acd906c11dc1b7e675587c9bd632feae417f684df13b05fe9cc16e6ee8bbdb41.pt",
+            "checkpoint_sha256": "acd906c11dc1b7e675587c9bd632feae417f684df13b05fe9cc16e6ee8bbdb41",
+            "metrics": {
+              "mae": 0.4628322443791798,
+              "mse": 0.408548503381375,
+              "n": 784,
+              "prediction_std": 0.7169028096593715,
+              "r2": 0.4715555789259629,
+              "rmse": 0.6391779903762136,
+              "slog": 0.41246887905577456,
+              "target_std": 0.8792697928374557
+            },
+            "seconds": 720.1257668798789,
+            "updates": 1111
+          },
+          "900": {
+            "checkpoint": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/white_wine/run/lr1e-4/checkpoints/a4c60746f081d64a9f9e4258d1cce0c738e7b67ee57db71d877d22e5fd8a43fb.pt",
+            "checkpoint_sha256": "a4c60746f081d64a9f9e4258d1cce0c738e7b67ee57db71d877d22e5fd8a43fb",
+            "metrics": {
+              "mae": 0.46210008221013205,
+              "mse": 0.40854982847693266,
+              "n": 784,
+              "prediction_std": 0.6998542640863026,
+              "r2": 0.4715538649572443,
+              "rmse": 0.6391790269376277,
+              "slog": 0.41732607460625737,
+              "target_std": 0.8792697928374557
+            },
+            "seconds": 900.2147144989576,
+            "updates": 1415
+          }
+        },
+        "selected_node": "180",
+        "seconds": 900.2147144989576,
+        "updates": 1415
+      },
+      "dgx2": {
+        "outcome": "completed",
+        "metrics": {
+          "test": {
+            "mae": 0.5382483300924631,
+            "mse": 0.510354175592658,
+            "n": 980,
+            "prediction_std": 0.5945461041704708,
+            "r2": 0.3901092997910943,
+            "rmse": 0.7143907723316827,
+            "slog": 0.34489747662443093,
+            "target_std": 0.9147656129380451
+          },
+          "train": {
+            "mae": 0.4762870211303083,
+            "mse": 0.37890299510087017,
+            "n": 3134,
+            "prediction_std": 0.590925304583889,
+            "r2": 0.5082312698698905,
+            "rmse": 0.6155509687270991,
+            "slog": 0.42632082889547784,
+            "target_std": 0.8777757207862334
+          }
+        },
+        "nodes": {
+          "0": {
+            "checkpoint": "/home/cms/experiments/v6-all730-hostloss-5h-20260929/hour5/run/checkpoints/f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08.pt",
+            "checkpoint_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+            "metrics": {
+              "mae": 0.6753362318930453,
+              "mse": 0.7572145897141774,
+              "n": 784,
+              "prediction_std": 0.22271812531891952,
+              "r2": 0.02056714887340605,
+              "rmse": 0.8701807799039102,
+              "slog": 0.03615108284510071,
+              "target_std": 0.8792697928374557
+            },
+            "seconds": 0.0,
+            "updates": 0
+          },
+          "180": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/white_wine/run/lr1e-4/checkpoints/1d7a3903c5abaabc614528731a875960eed63c82076ba599468a6d868ee56c01.pt",
+            "checkpoint_sha256": "1d7a3903c5abaabc614528731a875960eed63c82076ba599468a6d868ee56c01",
+            "metrics": {
+              "mae": 0.5318165664388177,
+              "mse": 0.4864098736568666,
+              "n": 784,
+              "prediction_std": 0.5738789028386466,
+              "r2": 0.37084438698982536,
+              "rmse": 0.6974309095938225,
+              "slog": 0.3110205385520193,
+              "target_std": 0.8792697928374557
+            },
+            "seconds": 180.47383461898426,
+            "updates": 325
+          },
+          "360": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/white_wine/run/lr1e-4/checkpoints/2ed14a26d565a32e2f5f2520eafe80971fddc8fd5809e4b923f6c676679fa8d7.pt",
+            "checkpoint_sha256": "2ed14a26d565a32e2f5f2520eafe80971fddc8fd5809e4b923f6c676679fa8d7",
+            "metrics": {
+              "mae": 0.5314498999028126,
+              "mse": 0.49975242979016943,
+              "n": 784,
+              "prediction_std": 0.6516398583995457,
+              "r2": 0.3535862174134967,
+              "rmse": 0.7069317009373461,
+              "slog": 0.30765724779438197,
+              "target_std": 0.8792697928374557
+            },
+            "seconds": 360.1631482029625,
+            "updates": 649
+          },
+          "540": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/white_wine/run/lr1e-4/checkpoints/911d1ecfa6c00c787df6f2a5cdbd35548311ac5b8562970bbf73ff71d808d154.pt",
+            "checkpoint_sha256": "911d1ecfa6c00c787df6f2a5cdbd35548311ac5b8562970bbf73ff71d808d154",
+            "metrics": {
+              "mae": 0.5216229841489284,
+              "mse": 0.49114947041657475,
+              "n": 784,
+              "prediction_std": 0.7160969156675224,
+              "r2": 0.36471387018440604,
+              "rmse": 0.700820569344661,
+              "slog": 0.3199463364413677,
+              "target_std": 0.8792697928374557
+            },
+            "seconds": 540.5478759287798,
+            "updates": 974
+          },
+          "720": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/white_wine/run/lr1e-4/checkpoints/82b793b5fc175a04bb8026e0418d3038515b988ae761152fe375f3cbe3e60e94.pt",
+            "checkpoint_sha256": "82b793b5fc175a04bb8026e0418d3038515b988ae761152fe375f3cbe3e60e94",
+            "metrics": {
+              "mae": 0.5242296460279942,
+              "mse": 0.5092340553780855,
+              "n": 784,
+              "prediction_std": 0.7366517468151453,
+              "r2": 0.3413220379998473,
+              "rmse": 0.7136063728541706,
+              "slog": 0.3164127561353114,
+              "target_std": 0.8792697928374557
+            },
+            "seconds": 720.2744430624298,
+            "updates": 1298
+          },
+          "900": {
+            "checkpoint": "/home/cms/experiments/v6-openml12-single-table-earlystop-20260929/tables/white_wine/run/lr1e-4/checkpoints/87d7286bc15ce4d020e3984a7ea6aa4610a98267054d48c3663f195df79d572b.pt",
+            "checkpoint_sha256": "87d7286bc15ce4d020e3984a7ea6aa4610a98267054d48c3663f195df79d572b",
+            "metrics": {
+              "mae": 0.5211358594755999,
+              "mse": 0.5102751402794522,
+              "n": 784,
+              "prediction_std": 0.7678430724002044,
+              "r2": 0.3399754279806251,
+              "rmse": 0.7143354536066736,
+              "slog": 0.3164704709827991,
+              "target_std": 0.8792697928374557
+            },
+            "seconds": 900.5384072115994,
+            "updates": 1623
+          }
+        },
+        "selected_node": "180",
+        "seconds": 900.5384072115994,
+        "updates": 1623
+      }
+    }
+  },
+  "protocol": "fit-only updates/support; validation-selected; no refit; pretrained monitor exposure",
+  "paired_complete": [
+    "airfoil_self_noise",
+    "bodyfat",
+    "cars",
+    "concrete_compressive_strength",
+    "cpu_activity",
+    "energy_efficiency",
+    "kin8nm",
+    "pumadyn32nh",
+    "qsar_fish_toxicity",
+    "red_wine",
+    "space_ga",
+    "white_wine"
+  ],
+  "comparisons": {
+    "dustinstudio": {
+      "mlp-256x3": {
+        "wins": 6,
+        "ties": 0,
+        "losses": 6,
+        "paired_tables": 12
+      },
+      "xgboost-depth6": {
+        "wins": 5,
+        "ties": 0,
+        "losses": 7,
+        "paired_tables": 12
+      }
+    },
+    "dgx2": {
+      "mlp-256x3": {
+        "wins": 6,
+        "ties": 0,
+        "losses": 6,
+        "paired_tables": 12
+      },
+      "xgboost-depth6": {
+        "wins": 4,
+        "ties": 0,
+        "losses": 8,
+        "paired_tables": 12
+      }
+    }
+  },
+  "all_complete": true
+}

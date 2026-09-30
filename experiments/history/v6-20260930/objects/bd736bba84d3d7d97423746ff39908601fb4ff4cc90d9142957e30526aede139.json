@@ -1,0 +1,681 @@
+{
+  "before-eval.json": {
+    "bank_sha256": "2090f8d9074c3b80c40667aeb2995db80ef1799a801b8c5c6b8badffe6d413d4",
+    "checkpoint_sha256": "10e75ff0b4d6355ffa5347a723a46fcfb3172b2a859367b334e5e2de7f4fc395",
+    "checkpoint_update": 55279,
+    "evaluation": "all train support + all test Query in one forward per table",
+    "identity": {
+      "code": {
+        "source/src/tabu_lab/models/restoration_v53/readout.py": "fe7965e58e06701f1f1595eed92c2f936e22c41439fbf80631d031eb9ce9306a",
+        "source/src/tabu_lab/models/restoration_v6/.___init__.py": "b78edc8369f701d784ca6b425eb235ba9760392125b2ca90c6a7d8f12179b3b5",
+        "source/src/tabu_lab/models/restoration_v6/._model.py": "b78edc8369f701d784ca6b425eb235ba9760392125b2ca90c6a7d8f12179b3b5",
+        "source/src/tabu_lab/models/restoration_v6/._training.py": "b78edc8369f701d784ca6b425eb235ba9760392125b2ca90c6a7d8f12179b3b5",
+        "source/src/tabu_lab/models/restoration_v6/__init__.py": "e75a42c4c5a6ffc5334a59b2868968525cf41e496b2466d1cd2f4c8d1c56119a",
+        "source/src/tabu_lab/models/restoration_v6/model.py": "8c0d47aabcad1c7eb484197539dfe21ca5e23b2a25cb651af95f1c71effa8432",
+        "source/src/tabu_lab/models/restoration_v6/training.py": "923da21540c92cae19c2016c085dd1bedf4db96791073637ccccdd125ca64adb",
+        "train_jointall.py": "c333a15d161c308def8332a81b6485f0b8689beecb2839d791fa02903c77dfd3",
+        "training_support.py": "6c0d77318134d63f60b3caeca283597aff503a0b9b7ff687665153f551c162bd"
+      },
+      "model_config": {
+        "backbone": {
+          "ff_width": 256,
+          "heads": 8,
+          "kind": "inducing",
+          "layers": 3,
+          "norm_eps": 1e-06,
+          "reference_mass": 1.0,
+          "slots": 256,
+          "tau_presence": 1.0,
+          "width": 128
+        },
+        "bandwidth": 1.0,
+        "center_chunk_size": 128,
+        "codec_version": "constant_weight_composition_v2",
+        "epsilon": 1e-06,
+        "numeric_scaling": "zscore",
+        "regression_width": null,
+        "ridge": 0.001,
+        "size": "small",
+        "slope_source": "shared_ll",
+        "subtokens": 1,
+        "unit_layers": 3
+      },
+      "parent_identity_sha256": "dc6f172065fd52be30bfe3556a2c2989ae535f0dbca867961edcf43ed680f321",
+      "parent_manifest_sha256": "60aba5730a7d8ecb983b2df6082876220d08a03fdc0060bf51566a5895c5112b",
+      "parent_sha256": "ca356663381523c1c01cd98a15ccbf88e154617d28be623ec0d49355e79ed04c",
+      "runtime": {
+        "cublas_workspace_config": ":4096:8",
+        "cuda_capability": [
+          12,
+          1
+        ],
+        "cuda_device": "NVIDIA GB10",
+        "cuda_runtime": "13.0",
+        "cudnn": 92000,
+        "deterministic_algorithms": true,
+        "device": "cuda:0",
+        "dtype": "float64",
+        "interop_threads": 20,
+        "platform": [
+          "Linux",
+          "6.17.0-1014-nvidia",
+          "aarch64"
+        ],
+        "python": "3.12.3",
+        "threads": 1,
+        "torch": "2.12.0.dev20260322+cu130",
+        "torch_build_sha256": "b62d287846a05b05f6dfa176679c95c75d9a9911ca563e92882a1b5802ec92e4"
+      },
+      "sampling": [
+        {
+          "cohort": "focus2",
+          "episodes": 2
+        },
+        {
+          "cohort": "other10",
+          "episodes": 10
+        },
+        {
+          "cohort": "history618",
+          "episodes": 8
+        }
+      ],
+      "schema": "tabu.v6.jointall-continuation.v1",
+      "sha256": "d696b0dd798ce6cf4c03df071c3fc784e03cb8ffd7b1f077fee8d933165845d8",
+      "supervision": "target_only"
+    },
+    "macro": {
+      "r2": 0.7543018014543562,
+      "slog": 0.6844438220396795
+    },
+    "model_state_sha256": "cc9f45e212f763aa4db5d9eda83de83c014df8421bd1c358fb60aea202920f5e",
+    "optimizer_updates": 0,
+    "outcome": "completed",
+    "runtime": {
+      "cublas_workspace_config": ":4096:8",
+      "cuda_capability": [
+        12,
+        1
+      ],
+      "cuda_device": "NVIDIA GB10",
+      "cuda_runtime": "13.0",
+      "cudnn": 92000,
+      "deterministic_algorithms": true,
+      "device": "cuda:0",
+      "dtype": "float64",
+      "interop_threads": 20,
+      "platform": [
+        "Linux",
+        "6.17.0-1014-nvidia",
+        "aarch64"
+      ],
+      "python": "3.12.3",
+      "threads": 1,
+      "torch": "2.12.0.dev20260322+cu130",
+      "torch_build_sha256": "b62d287846a05b05f6dfa176679c95c75d9a9911ca563e92882a1b5802ec92e4"
+    },
+    "schema": "tabu.v6.broadcast-explicit-supervision.full-context.v1",
+    "tables": {
+      "airfoil_self_noise": {
+        "forward_rows": 1503,
+        "mae": 1.193664843438661,
+        "n": 301,
+        "query_rows": 301,
+        "r2": 0.94041162733049,
+        "rmse": 1.5792884539295726,
+        "seconds": 1.151620250000633,
+        "slog": 0.8875707104449746,
+        "support_rows": 1202
+      },
+      "bodyfat": {
+        "forward_rows": 252,
+        "mae": 0.4392208352097504,
+        "n": 51,
+        "query_rows": 51,
+        "r2": 0.9872108657207161,
+        "rmse": 0.9229261773562725,
+        "seconds": 0.11208187500051281,
+        "slog": 0.976702270792877,
+        "support_rows": 201
+      },
+      "cars": {
+        "forward_rows": 804,
+        "mae": 1549.3810635258355,
+        "n": 161,
+        "query_rows": 161,
+        "r2": 0.9589561917965012,
+        "rmse": 2243.3749778508363,
+        "seconds": 0.4377062060011667,
+        "slog": 0.8661013510780196,
+        "support_rows": 643
+      },
+      "concrete_compressive_strength": {
+        "forward_rows": 1030,
+        "mae": 2.9898786549992518,
+        "n": 206,
+        "query_rows": 206,
+        "r2": 0.9274668607639639,
+        "rmse": 4.529369857723213,
+        "seconds": 0.43009395800072525,
+        "slog": 0.8703516396106956,
+        "support_rows": 824
+      },
+      "cpu_activity": {
+        "forward_rows": 8192,
+        "mae": 2.203216640365188,
+        "n": 1639,
+        "query_rows": 1639,
+        "r2": 0.9723770994276847,
+        "rmse": 2.9649275512798043,
+        "seconds": 19.218706851001116,
+        "slog": 0.800842231220401,
+        "support_rows": 6553
+      },
+      "energy_efficiency": {
+        "forward_rows": 768,
+        "mae": 0.4039012553051038,
+        "n": 154,
+        "query_rows": 154,
+        "r2": 0.9970929637071788,
+        "rmse": 0.5553534165720638,
+        "seconds": 0.27256245399985346,
+        "slog": 0.9939565054719871,
+        "support_rows": 614
+      },
+      "kin8nm": {
+        "forward_rows": 8192,
+        "mae": 0.08427596007110663,
+        "n": 1639,
+        "query_rows": 1639,
+        "r2": 0.8265550325754305,
+        "rmse": 0.10932352075264133,
+        "seconds": 17.288392546000978,
+        "slog": 0.713558168868095,
+        "support_rows": 6553
+      },
+      "pumadyn32nh": {
+        "forward_rows": 8192,
+        "mae": 0.01708552161257816,
+        "n": 1639,
+        "query_rows": 1639,
+        "r2": 0.6413511169919283,
+        "rmse": 0.02163368605333254,
+        "seconds": 20.9793688310001,
+        "slog": 0.4577254656474443,
+        "support_rows": 6553
+      },
+      "qsar_fish_toxicity": {
+        "forward_rows": 908,
+        "mae": 0.7531037807715334,
+        "n": 182,
+        "query_rows": 182,
+        "r2": 0.49565135163016316,
+        "rmse": 1.0573153142403835,
+        "seconds": 0.3713476440007071,
+        "slog": 0.39283021771756677,
+        "support_rows": 726
+      },
+      "red_wine": {
+        "forward_rows": 1599,
+        "mae": 0.4744029352953403,
+        "n": 320,
+        "query_rows": 320,
+        "r2": 0.33699847842335884,
+        "rmse": 0.6513992430215515,
+        "seconds": 0.9282267649996356,
+        "slog": 0.43641057237403125,
+        "support_rows": 1279
+      },
+      "space_ga": {
+        "forward_rows": 3107,
+        "mae": 0.09084786817987281,
+        "n": 622,
+        "query_rows": 622,
+        "r2": 0.5723013104218313,
+        "rmse": 0.12605779262214867,
+        "seconds": 2.7388713260006625,
+        "slog": 0.4697633731634674,
+        "support_rows": 2485
+      },
+      "white_wine": {
+        "forward_rows": 4898,
+        "mae": 0.5386925105935675,
+        "n": 980,
+        "query_rows": 980,
+        "r2": 0.3952487186630288,
+        "rmse": 0.7113743949479605,
+        "seconds": 6.777760001999923,
+        "slog": 0.3475133580865952,
+        "support_rows": 3918
+      }
+    },
+    "total_predictions": 7894
+  },
+  "hour-start-eval.json": {
+    "bank_sha256": "2090f8d9074c3b80c40667aeb2995db80ef1799a801b8c5c6b8badffe6d413d4",
+    "checkpoint_sha256": "01a29f496fcdfb266d71b830e878902eb4c20f48d9a4890a9007fabc16eaf3ff",
+    "checkpoint_update": 51328,
+    "evaluation": "all train support + all test Query in one forward per table",
+    "identity": {
+      "code": {
+        "source/src/tabu_lab/models/restoration_v53/readout.py": "fe7965e58e06701f1f1595eed92c2f936e22c41439fbf80631d031eb9ce9306a",
+        "source/src/tabu_lab/models/restoration_v6/.___init__.py": "b78edc8369f701d784ca6b425eb235ba9760392125b2ca90c6a7d8f12179b3b5",
+        "source/src/tabu_lab/models/restoration_v6/._model.py": "b78edc8369f701d784ca6b425eb235ba9760392125b2ca90c6a7d8f12179b3b5",
+        "source/src/tabu_lab/models/restoration_v6/._training.py": "b78edc8369f701d784ca6b425eb235ba9760392125b2ca90c6a7d8f12179b3b5",
+        "source/src/tabu_lab/models/restoration_v6/__init__.py": "e75a42c4c5a6ffc5334a59b2868968525cf41e496b2466d1cd2f4c8d1c56119a",
+        "source/src/tabu_lab/models/restoration_v6/model.py": "8c0d47aabcad1c7eb484197539dfe21ca5e23b2a25cb651af95f1c71effa8432",
+        "source/src/tabu_lab/models/restoration_v6/training.py": "923da21540c92cae19c2016c085dd1bedf4db96791073637ccccdd125ca64adb",
+        "train_jointall.py": "beffef8dd0f5a743c8d3e1553955273683721188480e663539d0fd7f765c7c21",
+        "training_support.py": "6c0d77318134d63f60b3caeca283597aff503a0b9b7ff687665153f551c162bd"
+      },
+      "model_config": {
+        "backbone": {
+          "ff_width": 256,
+          "heads": 8,
+          "kind": "inducing",
+          "layers": 3,
+          "norm_eps": 1e-06,
+          "reference_mass": 1.0,
+          "slots": 256,
+          "tau_presence": 1.0,
+          "width": 128
+        },
+        "bandwidth": 1.0,
+        "center_chunk_size": 128,
+        "codec_version": "constant_weight_composition_v2",
+        "epsilon": 1e-06,
+        "numeric_scaling": "zscore",
+        "regression_width": null,
+        "ridge": 0.001,
+        "size": "small",
+        "slope_source": "shared_ll",
+        "subtokens": 1,
+        "unit_layers": 3
+      },
+      "parent_identity_sha256": "a0c4e1c0aead44f3cb0a75972ba01439a5e648e1af5aef9ac68e06b052adc50c",
+      "parent_manifest_sha256": "8348dac33f10364fda05df09422ecf67317be319b58fa802d57f7e6331135e66",
+      "parent_sha256": "c1c52885fdb609f37df0709971afe5ee17823454b7bffd0411e647fed83302fe",
+      "runtime": {
+        "cublas_workspace_config": ":4096:8",
+        "cuda_capability": [
+          12,
+          1
+        ],
+        "cuda_device": "NVIDIA GB10",
+        "cuda_runtime": "13.0",
+        "cudnn": 92000,
+        "deterministic_algorithms": true,
+        "device": "cuda:0",
+        "dtype": "float64",
+        "interop_threads": 20,
+        "platform": [
+          "Linux",
+          "6.17.0-1014-nvidia",
+          "aarch64"
+        ],
+        "python": "3.12.3",
+        "threads": 1,
+        "torch": "2.12.0.dev20260322+cu130",
+        "torch_build_sha256": "b62d287846a05b05f6dfa176679c95c75d9a9911ca563e92882a1b5802ec92e4"
+      },
+      "sampling": [
+        {
+          "cohort": "focus2",
+          "episodes": 2
+        },
+        {
+          "cohort": "other10",
+          "episodes": 10
+        },
+        {
+          "cohort": "history618",
+          "episodes": 8
+        }
+      ],
+      "schema": "tabu.v6.jointall-continuation.v1",
+      "sha256": "e84ce561c3504e9435721dadeb11aab818863defe982a05f4b14ab38ce1012ba",
+      "supervision": "target_only"
+    },
+    "macro": {
+      "r2": 0.748967485343314,
+      "slog": 0.6802379277773745
+    },
+    "model_state_sha256": "571304e1762a9c1ffe265e57995be3d9470e5a9552e9e28626c9859b4965ead3",
+    "optimizer_updates": 0,
+    "outcome": "completed",
+    "runtime": {
+      "cublas_workspace_config": ":4096:8",
+      "cuda_capability": [
+        12,
+        1
+      ],
+      "cuda_device": "NVIDIA GB10",
+      "cuda_runtime": "13.0",
+      "cudnn": 92000,
+      "deterministic_algorithms": true,
+      "device": "cuda:0",
+      "dtype": "float64",
+      "interop_threads": 20,
+      "platform": [
+        "Linux",
+        "6.17.0-1014-nvidia",
+        "aarch64"
+      ],
+      "python": "3.12.3",
+      "threads": 1,
+      "torch": "2.12.0.dev20260322+cu130",
+      "torch_build_sha256": "b62d287846a05b05f6dfa176679c95c75d9a9911ca563e92882a1b5802ec92e4"
+    },
+    "schema": "tabu.v6.broadcast-explicit-supervision.full-context.v1",
+    "tables": {
+      "airfoil_self_noise": {
+        "forward_rows": 1503,
+        "mae": 1.4093439137599963,
+        "n": 301,
+        "query_rows": 301,
+        "r2": 0.9205281305659232,
+        "rmse": 1.8238428386357521,
+        "seconds": 1.1447547440002381,
+        "slog": 0.8539095527443968,
+        "support_rows": 1202
+      },
+      "bodyfat": {
+        "forward_rows": 252,
+        "mae": 0.4585734492896414,
+        "n": 51,
+        "query_rows": 51,
+        "r2": 0.9876230816535644,
+        "rmse": 0.9079306002899555,
+        "seconds": 0.11556991700035724,
+        "slog": 0.9771252817735969,
+        "support_rows": 201
+      },
+      "cars": {
+        "forward_rows": 804,
+        "mae": 1538.353523725615,
+        "n": 161,
+        "query_rows": 161,
+        "r2": 0.9583043544205664,
+        "rmse": 2261.118888939564,
+        "seconds": 0.43957942399993044,
+        "slog": 0.8628198206390031,
+        "support_rows": 643
+      },
+      "concrete_compressive_strength": {
+        "forward_rows": 1030,
+        "mae": 3.4841968767267026,
+        "n": 206,
+        "query_rows": 206,
+        "r2": 0.9016330213959606,
+        "rmse": 5.274656889584721,
+        "seconds": 0.43360613500044565,
+        "slog": 0.8353223251923914,
+        "support_rows": 824
+      },
+      "cpu_activity": {
+        "forward_rows": 8192,
+        "mae": 2.3011528745363297,
+        "n": 1639,
+        "query_rows": 1639,
+        "r2": 0.9723336424968592,
+        "rmse": 2.967258878051881,
+        "seconds": 19.262924869000017,
+        "slog": 0.7946196141258869,
+        "support_rows": 6553
+      },
+      "energy_efficiency": {
+        "forward_rows": 768,
+        "mae": 0.4131685743512406,
+        "n": 154,
+        "query_rows": 154,
+        "r2": 0.9967203912227457,
+        "rmse": 0.5898685495258503,
+        "seconds": 0.2751288299996304,
+        "slog": 0.9932130047364879,
+        "support_rows": 614
+      },
+      "kin8nm": {
+        "forward_rows": 8192,
+        "mae": 0.08704056701012128,
+        "n": 1639,
+        "query_rows": 1639,
+        "r2": 0.8174058277628519,
+        "rmse": 0.1121698694001311,
+        "seconds": 17.322084033000465,
+        "slog": 0.699202953774483,
+        "support_rows": 6553
+      },
+      "pumadyn32nh": {
+        "forward_rows": 8192,
+        "mae": 0.017553783500845344,
+        "n": 1639,
+        "query_rows": 1639,
+        "r2": 0.6271722435592657,
+        "rmse": 0.022057175585144997,
+        "seconds": 20.9896254159994,
+        "slog": 0.43954960915424957,
+        "support_rows": 6553
+      },
+      "qsar_fish_toxicity": {
+        "forward_rows": 908,
+        "mae": 0.7155772460538897,
+        "n": 182,
+        "query_rows": 182,
+        "r2": 0.5291189518066874,
+        "rmse": 1.0216324942274218,
+        "seconds": 0.37629646599998523,
+        "slog": 0.4337317245141714,
+        "support_rows": 726
+      },
+      "red_wine": {
+        "forward_rows": 1599,
+        "mae": 0.4819614478741804,
+        "n": 320,
+        "query_rows": 320,
+        "r2": 0.28262722646360383,
+        "rmse": 0.6775828916548097,
+        "seconds": 0.93212220300029,
+        "slog": 0.41144114029387435,
+        "support_rows": 1279
+      },
+      "space_ga": {
+        "forward_rows": 3107,
+        "mae": 0.08585107791734381,
+        "n": 622,
+        "query_rows": 622,
+        "r2": 0.5922230621873341,
+        "rmse": 0.12308696642616668,
+        "seconds": 2.7577408150000338,
+        "slog": 0.5089398254188867,
+        "support_rows": 2485
+      },
+      "white_wine": {
+        "forward_rows": 4898,
+        "mae": 0.5318989111300249,
+        "n": 980,
+        "query_rows": 980,
+        "r2": 0.40191989058440647,
+        "rmse": 0.7074398341652757,
+        "seconds": 6.822761745999742,
+        "slog": 0.35298028096106493,
+        "support_rows": 3918
+      }
+    },
+    "total_predictions": 7894
+  },
+  "status.json": {
+    "outcome": "evaluating",
+    "started_utc": "2026-09-28T05:21:44.963360+00:00",
+    "start_update": 55279,
+    "start_successful_seconds": 0,
+    "additional_seconds_target": 1799.971169814914,
+    "prior_training_seconds": 1800.028830185086,
+    "total_successful_seconds_target": 3600,
+    "start_sha256": "10e75ff0b4d6355ffa5347a723a46fcfb3172b2a859367b334e5e2de7f4fc395",
+    "sampling": "OpenML12 once plus 8 old618 per20; OpenML window512",
+    "supervision": "target_only",
+    "completed_training_seconds": 900.3806854330178,
+    "phase": "half1",
+    "phase_budget": 900,
+    "additional_successful_seconds": 900.3806854330178,
+    "checkpoint_sha256": "a774aae3a8e65e380f5e4c1ddb08809eda4b16ad4d6cde7cb0fd0f0cd3da0af6",
+    "checkpoint_update": 57258
+  },
+  "half1/run/campaign.json": {
+    "allocator_fraction_cap": 0.5,
+    "balanced_manifest": "/home/cms/experiments/v6-window512-replay40-extend60m-20260928/balanced-manifest.json",
+    "checkpoint": "/home/cms/experiments/v6-window512-replay40-extend60m-20260928/half1/run/checkpoints/a774aae3a8e65e380f5e4c1ddb08809eda4b16ad4d6cde7cb0fd0f0cd3da0af6.pt",
+    "checkpoint_sha256": "a774aae3a8e65e380f5e4c1ddb08809eda4b16ad4d6cde7cb0fd0f0cd3da0af6",
+    "checkpoint_update": 57258,
+    "cohort_updates": {
+      "focus2": 197,
+      "history618": 791,
+      "other10": 991
+    },
+    "continuation": "new_stage_preserve_weights_optimizer_rng_sampling_cursor_episode_positions",
+    "first_cycle": [
+      "white_wine",
+      "airfoil_self_noise",
+      "qsar_fish_toxicity",
+      "red_wine",
+      "pumadyn32nh",
+      "kin8nm",
+      "space_ga",
+      "bodyfat",
+      "cars",
+      "energy_efficiency",
+      "cpu_activity",
+      "concrete_compressive_strength"
+    ],
+    "host": "dgx2",
+    "identity": {
+      "code": {
+        "source/src/tabu_lab/models/restoration_v53/readout.py": "fe7965e58e06701f1f1595eed92c2f936e22c41439fbf80631d031eb9ce9306a",
+        "source/src/tabu_lab/models/restoration_v6/.___init__.py": "b78edc8369f701d784ca6b425eb235ba9760392125b2ca90c6a7d8f12179b3b5",
+        "source/src/tabu_lab/models/restoration_v6/._model.py": "b78edc8369f701d784ca6b425eb235ba9760392125b2ca90c6a7d8f12179b3b5",
+        "source/src/tabu_lab/models/restoration_v6/._training.py": "b78edc8369f701d784ca6b425eb235ba9760392125b2ca90c6a7d8f12179b3b5",
+        "source/src/tabu_lab/models/restoration_v6/__init__.py": "e75a42c4c5a6ffc5334a59b2868968525cf41e496b2466d1cd2f4c8d1c56119a",
+        "source/src/tabu_lab/models/restoration_v6/model.py": "8c0d47aabcad1c7eb484197539dfe21ca5e23b2a25cb651af95f1c71effa8432",
+        "source/src/tabu_lab/models/restoration_v6/training.py": "923da21540c92cae19c2016c085dd1bedf4db96791073637ccccdd125ca64adb",
+        "train_jointall.py": "c333a15d161c308def8332a81b6485f0b8689beecb2839d791fa02903c77dfd3",
+        "training_support.py": "6c0d77318134d63f60b3caeca283597aff503a0b9b7ff687665153f551c162bd"
+      },
+      "model_config": {
+        "backbone": {
+          "ff_width": 256,
+          "heads": 8,
+          "kind": "inducing",
+          "layers": 3,
+          "norm_eps": 1e-06,
+          "reference_mass": 1.0,
+          "slots": 256,
+          "tau_presence": 1.0,
+          "width": 128
+        },
+        "bandwidth": 1.0,
+        "center_chunk_size": 128,
+        "codec_version": "constant_weight_composition_v2",
+        "epsilon": 1e-06,
+        "numeric_scaling": "zscore",
+        "regression_width": null,
+        "ridge": 0.001,
+        "size": "small",
+        "slope_source": "shared_ll",
+        "subtokens": 1,
+        "unit_layers": 3
+      },
+      "parent_identity_sha256": "d696b0dd798ce6cf4c03df071c3fc784e03cb8ffd7b1f077fee8d933165845d8",
+      "parent_manifest_sha256": "60aba5730a7d8ecb983b2df6082876220d08a03fdc0060bf51566a5895c5112b",
+      "parent_sha256": "10e75ff0b4d6355ffa5347a723a46fcfb3172b2a859367b334e5e2de7f4fc395",
+      "runtime": {
+        "cublas_workspace_config": ":4096:8",
+        "cuda_capability": [
+          12,
+          1
+        ],
+        "cuda_device": "NVIDIA GB10",
+        "cuda_runtime": "13.0",
+        "cudnn": 92000,
+        "deterministic_algorithms": true,
+        "device": "cuda:0",
+        "dtype": "float64",
+        "interop_threads": 20,
+        "platform": [
+          "Linux",
+          "6.17.0-1014-nvidia",
+          "aarch64"
+        ],
+        "python": "3.12.3",
+        "threads": 1,
+        "torch": "2.12.0.dev20260322+cu130",
+        "torch_build_sha256": "b62d287846a05b05f6dfa176679c95c75d9a9911ca563e92882a1b5802ec92e4"
+      },
+      "sampling": [
+        {
+          "cohort": "focus2",
+          "episodes": 2
+        },
+        {
+          "cohort": "other10",
+          "episodes": 10
+        },
+        {
+          "cohort": "history618",
+          "episodes": 8
+        }
+      ],
+      "schema": "tabu.v6.jointall-continuation.v1",
+      "sha256": "fae6d2e0712686365c5ec40b8eb7220af10f394e98975a13ac1052a04394b30a",
+      "supervision": "target_only"
+    },
+    "openml_table_updates": {
+      "airfoil_self_noise": 99,
+      "bodyfat": 99,
+      "cars": 99,
+      "concrete_compressive_strength": 98,
+      "cpu_activity": 99,
+      "energy_efficiency": 99,
+      "kin8nm": 99,
+      "pumadyn32nh": 98,
+      "qsar_fish_toxicity": 99,
+      "red_wine": 100,
+      "space_ga": 100,
+      "white_wine": 99
+    },
+    "optimizer_restored": true,
+    "outcome": "training_completed",
+    "parent": "/home/cms/experiments/v6-window512-replay40-30m-20260928/half2/run/checkpoints/10e75ff0b4d6355ffa5347a723a46fcfb3172b2a859367b334e5e2de7f4fc395.pt",
+    "parent_sha256": "10e75ff0b4d6355ffa5347a723a46fcfb3172b2a859367b334e5e2de7f4fc395",
+    "parent_update": 55279,
+    "per_table_episode_positions_preserved": true,
+    "rng_restored": true,
+    "runtime": {
+      "cublas_workspace_config": ":4096:8",
+      "cuda_capability": [
+        12,
+        1
+      ],
+      "cuda_device": "NVIDIA GB10",
+      "cuda_runtime": "13.0",
+      "cudnn": 92000,
+      "deterministic_algorithms": true,
+      "device": "cuda:0",
+      "dtype": "float64",
+      "interop_threads": 20,
+      "platform": [
+        "Linux",
+        "6.17.0-1014-nvidia",
+        "aarch64"
+      ],
+      "python": "3.12.3",
+      "threads": 1,
+      "torch": "2.12.0.dev20260322+cu130",
+      "torch_build_sha256": "b62d287846a05b05f6dfa176679c95c75d9a9911ca563e92882a1b5802ec92e4"
+    },
+    "sampling": "each OpenML table once plus 8 old618 per 20 updates; OpenML window512",
+    "schedule_cursor_reset": false,
+    "successful_update_seconds": 900.3806854330178,
+    "successful_update_seconds_target": 900.0,
+    "supervision": "target_only"
+  }
+}

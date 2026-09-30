@@ -1,0 +1,169 @@
+{
+  "attempts": [
+    {
+      "mode": "weights_only_initialization",
+      "path": "/home/cms/experiments/joint618-60min-20260926/runs/attempt-001-initial",
+      "pid": 3390830
+    },
+    {
+      "mode": "strict_resume",
+      "path": "/home/cms/experiments/joint618-60min-20260926/runs/attempt-002-main",
+      "pid": 3397494
+    }
+  ],
+  "budget": {
+    "authorization": "User amended the same joint618 run to two hours per host before DGX2 launch; directory retained.",
+    "evaluation_and_checkpoint_time_charged": false,
+    "successful_training_seconds_maximum": 7200.0,
+    "successful_training_seconds_target": 7197.0
+  },
+  "finite_losses_and_gradients": true,
+  "initial_parity": {
+    "initial_checkpoint": {
+      "path": "/home/cms/experiments/joint618-60min-20260926/runs/attempt-001-initial/checkpoints/35a9c59c2a9f13dae578ecdaa5bc97afc7f279b0825b28880f312d71fe1900bf.pt",
+      "sha256": "35a9c59c2a9f13dae578ecdaa5bc97afc7f279b0825b28880f312d71fe1900bf",
+      "source_checkpoint_sha256": "1c909b761323c24b7f770964958350e388c573f67a349e2df914013eb9dfed26",
+      "update": 0
+    },
+    "initial_evaluation": "/home/cms/experiments/joint618-60min-20260926/runs/attempt-001-initial/evaluation-000-000000000-initial.json",
+    "initial_update": 0,
+    "old_five_probe_content_sha256": "7b04b6cfd930aca47afb1f4070931035888598d62d0837f4ba6d04d0ea7c87a8",
+    "passed": true,
+    "source_checkpoint_sha256": "1c909b761323c24b7f770964958350e388c573f67a349e2df914013eb9dfed26"
+  },
+  "initial_typed_metrics": {
+    "new120_fit/nominal/query_discrete_accuracy": {
+      "max": 1.0,
+      "mean": 0.6202221509722166,
+      "median": 0.7443181818181818,
+      "min": 0.07692307692307693,
+      "p10": 0.14004329004329005,
+      "p95": 0.9880897317298797,
+      "table_count": 43
+    },
+    "new120_fit/numeric/query_numeric_r2": {
+      "max": 0.9978023464522113,
+      "mean": 0.33839077918229105,
+      "median": 0.34508720313595265,
+      "min": -0.5844654287453932,
+      "p10": -0.22719534908459535,
+      "p95": 0.9386486998993326,
+      "table_count": 57
+    },
+    "new120_fit/ordinal/query_discrete_accuracy": {
+      "max": 1.0,
+      "mean": 0.652126069802653,
+      "median": 0.7303743961352657,
+      "min": 0.125,
+      "p10": 0.28404170008019247,
+      "p95": 0.9786516853932584,
+      "table_count": 20
+    },
+    "new120_fit/ordinal/query_ordinal_rank_mae": {
+      "max": 0.5057471264367817,
+      "mean": 0.13754840564093138,
+      "median": 0.10501453488372092,
+      "min": 0.0,
+      "p10": 0.017592295345104342,
+      "p95": 0.3151553687441994,
+      "table_count": 20
+    },
+    "nominal100_fit/nominal/query_discrete_accuracy": {
+      "max": 0.7527472527472527,
+      "mean": 0.5614345202675523,
+      "median": 0.555562415112977,
+      "min": 0.35789473684210527,
+      "p10": 0.42176470588235293,
+      "p95": 0.7007954545454544,
+      "table_count": 100
+    },
+    "ordinal100_fit/ordinal/query_discrete_accuracy": {
+      "max": 0.8357487922705313,
+      "mean": 0.5018445752864995,
+      "median": 0.5053402566700439,
+      "min": 0.18734793187347934,
+      "p10": 0.2733812949640288,
+      "p95": 0.7408465608465608,
+      "table_count": 100
+    },
+    "ordinal100_fit/ordinal/query_ordinal_rank_mae": {
+      "max": 0.2727272727272727,
+      "mean": 0.1571231991223522,
+      "median": 0.15749639682064015,
+      "min": 0.03864734299516908,
+      "p10": 0.08697859318297274,
+      "p95": 0.23998226950354612,
+      "table_count": 100
+    },
+    "real78_fit/numeric/query_numeric_r2": {
+      "max": 0.9969940296567228,
+      "mean": 0.5823722873243916,
+      "median": 0.6945409419114373,
+      "min": -0.43592538939087633,
+      "p10": -0.024059595137005705,
+      "p95": 0.9881745782993722,
+      "table_count": 78
+    },
+    "tanh100_fit/numeric/query_numeric_r2": {
+      "max": 0.997211891853159,
+      "mean": 0.9804017930499328,
+      "median": 0.991344537391279,
+      "min": 0.7997686598248934,
+      "p10": 0.9635365382775757,
+      "p95": 0.9967108820379583,
+      "table_count": 100
+    },
+    "train_fit/nominal/query_discrete_accuracy": {
+      "max": 1.0,
+      "mean": 0.6616507067943457,
+      "median": 0.7647058823529411,
+      "min": 0.0,
+      "p10": 0.16470588235294117,
+      "p95": 0.9803921568627451,
+      "table_count": 43
+    },
+    "train_fit/numeric/query_numeric_r2": {
+      "max": 0.9953510366037893,
+      "mean": 0.5262330006434771,
+      "median": 0.6780881678158166,
+      "min": -0.658014666482037,
+      "p10": -0.04007836436563024,
+      "p95": 0.9787129963968093,
+      "table_count": 57
+    },
+    "train_fit/ordinal/query_discrete_accuracy": {
+      "max": 0.9803921568627451,
+      "mean": 0.7098039215686275,
+      "median": 0.7549019607843137,
+      "min": 0.37254901960784315,
+      "p10": 0.37254901960784315,
+      "p95": 0.9431372549019608,
+      "table_count": 20
+    },
+    "train_fit/ordinal/query_ordinal_rank_mae": {
+      "max": 0.29901960784313725,
+      "mean": 0.12854575163398693,
+      "median": 0.11911764705882354,
+      "min": 0.0065359477124183,
+      "p10": 0.01911764705882353,
+      "p95": 0.2943627450980392,
+      "table_count": 20
+    }
+  },
+  "latest_actual_update": 178,
+  "latest_completed_evaluation": {
+    "checkpoint_sha256": "35a9c59c2a9f13dae578ecdaa5bc97afc7f279b0825b28880f312d71fe1900bf",
+    "checkpoint_update": 0,
+    "path": "/home/cms/experiments/joint618-60min-20260926/runs/attempt-001-initial/evaluation-000-000000000-initial.json",
+    "scope": "six complete probes at u0; immutable pre-update generation captured during initial evaluation",
+    "source_checkpoint_sha256": "1c909b761323c24b7f770964958350e388c573f67a349e2df914013eb9dfed26"
+  },
+  "latest_saved_checkpoint": {
+    "path": "/home/cms/experiments/joint618-60min-20260926/runs/attempt-002-main/checkpoint-progress.pt",
+    "sha256": "cd0329f48f7779406bdb125ce3a71682275232a996b50b7d8789d295c69486f2",
+    "update": 1
+  },
+  "status": "training",
+  "successful_seconds": 47.13033890398219,
+  "utc": "2026-09-26T14:48:42.354873+00:00"
+}

@@ -1,0 +1,17 @@
+{
+  "schema": "tabu.v6.broadcast-oldloss.matched-speed.v1",
+  "host": "dgx2",
+  "runtime": "train-20260920; CUDA FP64; NVIDIA GB10",
+  "old_run": "/home/cms/experiments/v6-target-broadcast-dgx2-20260927/stage15m-v6/updates.jsonl",
+  "new_run": "/home/cms/experiments/v6-broadcast-oldloss-openml12-20260927/stage1h/run/updates.jsonl",
+  "matched_updates": 827,
+  "same_cohort_table_episode_index_query_rows_hidden_target_cells_per_update": true,
+  "old_joint_all_successful_update_seconds": 900.4368089148775,
+  "new_target_only_successful_update_seconds": 316.8704819146078,
+  "speedup_old_seconds_divided_by_new_seconds": 2.841655693121749,
+  "by_cohort": {
+    "focus2": {"updates": 248, "old_seconds": 202.68084793165326, "new_seconds": 88.10937477624975},
+    "other10": {"updates": 413, "old_seconds": 591.5215982242953, "new_seconds": 182.9342792162206},
+    "history618": {"updates": 166, "old_seconds": 106.23436275892891, "new_seconds": 45.826827922137454}
+  }
+}

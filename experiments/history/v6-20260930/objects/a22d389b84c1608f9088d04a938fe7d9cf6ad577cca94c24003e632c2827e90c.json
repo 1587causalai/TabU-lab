@@ -1,0 +1,560 @@
+{
+  "outcome": "passed",
+  "runtime": {
+    "torch": "2.13.0",
+    "device": "mps",
+    "dtype": "float32",
+    "deterministic_algorithms": true,
+    "threads": 1,
+    "interop_threads": 10,
+    "platform": [
+      "Darwin",
+      "25.5.0",
+      "arm64"
+    ],
+    "python": "3.12.13",
+    "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1",
+    "mps_available": true,
+    "mps_cpu_fallback": false
+  },
+  "config": {
+    "kind": "random_two_nontarget_columns",
+    "donors": 2,
+    "coefficient": 1.0,
+    "location": "raw_cell_encoding_before_projection",
+    "target_broadcast": "original_unmixed_target_carrier",
+    "mapping": "episode_code_seed_and_stable_column_keys",
+    "same_mapping_all_rows": true,
+    "destination": "all_active_cells_including_target",
+    "source": "visible_non_target_cells_only",
+    "shortfall": "use_available_distinct_donors",
+    "namespace": "tabu-randommix2-v1"
+  },
+  "tests": [
+    {
+      "table": "tanh_anm_train_000",
+      "kind": "synthetic",
+      "rows": 204,
+      "columns": 9,
+      "loss": 0.8095729947090149,
+      "seconds": 0.7758724587038159,
+      "mapping": {
+        "config": {
+          "kind": "random_two_nontarget_columns",
+          "donors": 2,
+          "coefficient": 1.0,
+          "location": "raw_cell_encoding_before_projection",
+          "target_broadcast": "original_unmixed_target_carrier",
+          "mapping": "episode_code_seed_and_stable_column_keys",
+          "same_mapping_all_rows": true,
+          "destination": "all_active_cells_including_target",
+          "source": "visible_non_target_cells_only",
+          "shortfall": "use_available_distinct_donors",
+          "namespace": "tabu-randommix2-v1"
+        },
+        "donors": [
+          [
+            4,
+            3
+          ],
+          [
+            6,
+            4
+          ],
+          [
+            5,
+            1
+          ],
+          [
+            0,
+            6
+          ],
+          [
+            7,
+            3
+          ],
+          [
+            6,
+            2
+          ],
+          [
+            2,
+            7
+          ],
+          [
+            2,
+            6
+          ],
+          [
+            1,
+            7
+          ]
+        ],
+        "target_column": 8,
+        "sha256": "7b02b2264219ec65d7e6994a3288d2cac04ba2d996d8047f4241c68106160399",
+        "code_seed": 10568735826510080182
+      },
+      "allocated": 54668800,
+      "reserved": 1004257280
+    },
+    {
+      "table": "nominal_gumbel_train_000",
+      "kind": "synthetic",
+      "rows": 204,
+      "columns": 9,
+      "loss": 0.052237264811992645,
+      "seconds": 0.29447820875793695,
+      "mapping": {
+        "config": {
+          "kind": "random_two_nontarget_columns",
+          "donors": 2,
+          "coefficient": 1.0,
+          "location": "raw_cell_encoding_before_projection",
+          "target_broadcast": "original_unmixed_target_carrier",
+          "mapping": "episode_code_seed_and_stable_column_keys",
+          "same_mapping_all_rows": true,
+          "destination": "all_active_cells_including_target",
+          "source": "visible_non_target_cells_only",
+          "shortfall": "use_available_distinct_donors",
+          "namespace": "tabu-randommix2-v1"
+        },
+        "donors": [
+          [
+            2,
+            3
+          ],
+          [
+            4,
+            7
+          ],
+          [
+            5,
+            7
+          ],
+          [
+            7,
+            2
+          ],
+          [
+            5,
+            7
+          ],
+          [
+            2,
+            0
+          ],
+          [
+            5,
+            1
+          ],
+          [
+            4,
+            0
+          ],
+          [
+            7,
+            5
+          ]
+        ],
+        "target_column": 8,
+        "sha256": "b960412e7bf87b0aef03ecfca709e6dd3cdff4c744bea9c014c24711c80a15a4",
+        "code_seed": 6663400234225369636
+      },
+      "allocated": 50824960,
+      "reserved": 1004240896
+    },
+    {
+      "table": "ordinal_latent_train_000",
+      "kind": "synthetic",
+      "rows": 204,
+      "columns": 9,
+      "loss": 0.14953693747520447,
+      "seconds": 0.2821818748489022,
+      "mapping": {
+        "config": {
+          "kind": "random_two_nontarget_columns",
+          "donors": 2,
+          "coefficient": 1.0,
+          "location": "raw_cell_encoding_before_projection",
+          "target_broadcast": "original_unmixed_target_carrier",
+          "mapping": "episode_code_seed_and_stable_column_keys",
+          "same_mapping_all_rows": true,
+          "destination": "all_active_cells_including_target",
+          "source": "visible_non_target_cells_only",
+          "shortfall": "use_available_distinct_donors",
+          "namespace": "tabu-randommix2-v1"
+        },
+        "donors": [
+          [
+            3,
+            7
+          ],
+          [
+            4,
+            7
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            2,
+            6
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            4,
+            7
+          ],
+          [
+            5,
+            3
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            6,
+            5
+          ]
+        ],
+        "target_column": 8,
+        "sha256": "d073270ccf73e3b92cbc0a204515e979df6fe26d34abdaec3cc2ef895675d3ce",
+        "code_seed": 17697162517983754275
+      },
+      "allocated": 51750656,
+      "reserved": 1004257280
+    },
+    {
+      "table": "pumadyn32nh",
+      "kind": "real",
+      "rows": 512,
+      "columns": 33,
+      "loss": 6.414535999298096,
+      "seconds": 1.3722310001030564,
+      "mapping": {
+        "config": {
+          "kind": "random_two_nontarget_columns",
+          "donors": 2,
+          "coefficient": 1.0,
+          "location": "raw_cell_encoding_before_projection",
+          "target_broadcast": "original_unmixed_target_carrier",
+          "mapping": "episode_code_seed_and_stable_column_keys",
+          "same_mapping_all_rows": true,
+          "destination": "all_active_cells_including_target",
+          "source": "visible_non_target_cells_only",
+          "shortfall": "use_available_distinct_donors",
+          "namespace": "tabu-randommix2-v1"
+        },
+        "donors": [
+          [
+            26,
+            25
+          ],
+          [
+            24,
+            6
+          ],
+          [
+            24,
+            25
+          ],
+          [
+            17,
+            5
+          ],
+          [
+            28,
+            23
+          ],
+          [
+            13,
+            18
+          ],
+          [
+            16,
+            1
+          ],
+          [
+            2,
+            31
+          ],
+          [
+            16,
+            28
+          ],
+          [
+            17,
+            30
+          ],
+          [
+            18,
+            30
+          ],
+          [
+            23,
+            8
+          ],
+          [
+            9,
+            14
+          ],
+          [
+            19,
+            11
+          ],
+          [
+            22,
+            29
+          ],
+          [
+            18,
+            13
+          ],
+          [
+            13,
+            6
+          ],
+          [
+            4,
+            29
+          ],
+          [
+            24,
+            26
+          ],
+          [
+            6,
+            26
+          ],
+          [
+            31,
+            15
+          ],
+          [
+            11,
+            27
+          ],
+          [
+            3,
+            29
+          ],
+          [
+            9,
+            16
+          ],
+          [
+            27,
+            25
+          ],
+          [
+            0,
+            8
+          ],
+          [
+            10,
+            0
+          ],
+          [
+            22,
+            24
+          ],
+          [
+            15,
+            16
+          ],
+          [
+            10,
+            5
+          ],
+          [
+            28,
+            22
+          ],
+          [
+            5,
+            30
+          ],
+          [
+            10,
+            3
+          ]
+        ],
+        "target_column": 32,
+        "sha256": "0f6820833ed7ce70b426f9c6a6c4f699761233ff9894fa07ef561c9fa4d9e2d8",
+        "code_seed": 9957626163637360372
+      },
+      "allocated": 92176640,
+      "reserved": 4389289984
+    },
+    {
+      "table": "sparse_000",
+      "kind": "synthetic",
+      "rows": 204,
+      "columns": 33,
+      "loss": 6.029987335205078,
+      "seconds": 0.7464482905343175,
+      "mapping": {
+        "config": {
+          "kind": "random_two_nontarget_columns",
+          "donors": 2,
+          "coefficient": 1.0,
+          "location": "raw_cell_encoding_before_projection",
+          "target_broadcast": "original_unmixed_target_carrier",
+          "mapping": "episode_code_seed_and_stable_column_keys",
+          "same_mapping_all_rows": true,
+          "destination": "all_active_cells_including_target",
+          "source": "visible_non_target_cells_only",
+          "shortfall": "use_available_distinct_donors",
+          "namespace": "tabu-randommix2-v1"
+        },
+        "donors": [
+          [
+            21,
+            30
+          ],
+          [
+            12,
+            30
+          ],
+          [
+            28,
+            5
+          ],
+          [
+            29,
+            21
+          ],
+          [
+            7,
+            6
+          ],
+          [
+            1,
+            17
+          ],
+          [
+            17,
+            1
+          ],
+          [
+            17,
+            31
+          ],
+          [
+            6,
+            5
+          ],
+          [
+            13,
+            28
+          ],
+          [
+            23,
+            15
+          ],
+          [
+            27,
+            21
+          ],
+          [
+            17,
+            25
+          ],
+          [
+            4,
+            27
+          ],
+          [
+            19,
+            9
+          ],
+          [
+            28,
+            17
+          ],
+          [
+            3,
+            23
+          ],
+          [
+            23,
+            1
+          ],
+          [
+            14,
+            3
+          ],
+          [
+            25,
+            23
+          ],
+          [
+            0,
+            8
+          ],
+          [
+            2,
+            28
+          ],
+          [
+            26,
+            3
+          ],
+          [
+            5,
+            20
+          ],
+          [
+            5,
+            3
+          ],
+          [
+            14,
+            7
+          ],
+          [
+            8,
+            6
+          ],
+          [
+            31,
+            15
+          ],
+          [
+            12,
+            2
+          ],
+          [
+            5,
+            24
+          ],
+          [
+            14,
+            28
+          ],
+          [
+            0,
+            7
+          ],
+          [
+            30,
+            22
+          ]
+        ],
+        "target_column": 32,
+        "sha256": "a049877185d647d332f80621c258e72b6069e7d6d784915a48c3592b8f0ca2c5",
+        "code_seed": 8083214586006470609
+      },
+      "allocated": 64179968,
+      "reserved": 4389404672
+    }
+  ],
+  "disabled_matches_legacy_loss": 0.0,
+  "successful_disposable_updates": 5,
+  "parent_unchanged": true
+}

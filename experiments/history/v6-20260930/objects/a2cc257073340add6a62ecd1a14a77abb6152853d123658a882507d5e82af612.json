@@ -1,0 +1,262 @@
+{
+  "bank_sha256": "2090f8d9074c3b80c40667aeb2995db80ef1799a801b8c5c6b8badffe6d413d4",
+  "checkpoint_sha256": "2a1f980ce99e83bb175f64e03e7a9002b74ffe2ff8b818a2234869afe7cdb036",
+  "checkpoint_update": 190617,
+  "evaluation": "all train support + all test Query in one forward per table",
+  "evaluation_supervision": "target_only",
+  "identity": {
+    "branch_sampling": {
+      "forwards": 1,
+      "mode": "independent_Bernoulli_per_update",
+      "optimizer_steps": 1,
+      "probability_v55": 0.5,
+      "probability_v6": 0.5,
+      "seed": 2026092901,
+      "selected_loss_weight": 1.0
+    },
+    "code": {
+      "branch_sampling.py": "f59d69c61770f4df45a8aaa96af061969504f3e96632feddb699e05727ffdc09",
+      "dual.py": "2e82302f7ae600fd06165bb025174f5ba48b556a5ab622cd604c415e1d02c0e9",
+      "experiment.json": "e168dc5b8a32b4d66553d8b67474b4e96a44c7a04f20810487ebe6b99f8f543a",
+      "source/src/tabu_lab/models/restoration_v53/readout.py": "fe7965e58e06701f1f1595eed92c2f936e22c41439fbf80631d031eb9ce9306a",
+      "source/src/tabu_lab/models/restoration_v6/__init__.py": "e75a42c4c5a6ffc5334a59b2868968525cf41e496b2466d1cd2f4c8d1c56119a",
+      "source/src/tabu_lab/models/restoration_v6/model.py": "8c0d47aabcad1c7eb484197539dfe21ca5e23b2a25cb651af95f1c71effa8432",
+      "source/src/tabu_lab/models/restoration_v6/training.py": "923da21540c92cae19c2016c085dd1bedf4db96791073637ccccdd125ca64adb",
+      "train.py": "8965a110543933a2e42a384935d82b781c7ff6d2b4bd28a3bf6fa571cdcd4338",
+      "training_support.py": "2ee5c702d7ee1f9818ac143aa8c97e8acf2b82e60cdad87b87559b1603b82a1a"
+    },
+    "forward_passes_per_update": 1,
+    "loss_config": {
+      "discrete_weight": 1.0,
+      "state_weights": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ]
+    },
+    "loss_scope": "query_target_cells",
+    "model_config": {
+      "backbone": {
+        "ff_width": 256,
+        "heads": 4,
+        "kind": "inducing",
+        "layers": 3,
+        "norm_eps": 1e-06,
+        "reference_mass": 1.0,
+        "slots": 256,
+        "tau_presence": 1.0,
+        "width": 128
+      },
+      "bandwidth": 1.0,
+      "center_chunk_size": 128,
+      "codec_version": "constant_weight_composition_v2",
+      "epsilon": 1e-06,
+      "numeric_scaling": "zscore",
+      "regression_width": null,
+      "ridge": 0.001,
+      "size": "small",
+      "slope_source": "shared_ll",
+      "subtokens": 1,
+      "unit_layers": 3
+    },
+    "objective": "v6_v55_bernoulli50_all730",
+    "openml_template": null,
+    "optimizer_steps_per_update": 1,
+    "parent_identity_sha256": "766fc559dfbdb9571f3935ab82e562331d86cb2a7d72fe667a073471efad109d",
+    "parent_manifest_sha256": "d38cfc85a040cc703088d0f30133ab911c29285630062aaa342cddddd9ba38f0",
+    "parent_sha256": "1cb0c8cf1bbeeb7f8b6e5a4d1c3d0208117a824802143ea2c462082d7790643a",
+    "response": "own_cell_encoding",
+    "runtime": {
+      "deterministic_algorithms": true,
+      "device": "mps",
+      "dtype": "float32",
+      "interop_threads": 10,
+      "mps_available": true,
+      "mps_cpu_fallback": false,
+      "platform": [
+        "Darwin",
+        "25.5.0",
+        "arm64"
+      ],
+      "python": "3.12.13",
+      "threads": 1,
+      "torch": "2.13.0",
+      "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+    },
+    "sampling": [
+      {
+        "cohort": "focus2",
+        "episodes": 2
+      },
+      {
+        "cohort": "other10",
+        "episodes": 10
+      },
+      {
+        "cohort": "history718",
+        "episodes": 718
+      }
+    ],
+    "schema": "tabu.v6.branchsample50.v1",
+    "sha256": "85549f2f54b24ec985cfa5838c5224263e2c012a6551a404104d5858758b59e6",
+    "strict_resume": false,
+    "supervision": "target_only"
+  },
+  "inference_branch": "v6",
+  "model_state_sha256": "701c10d31c651b4c9de80a084f4e0b58e54842f11f02d936b6a5b7734d7b65df",
+  "optimizer_updates": 0,
+  "outcome": "running",
+  "runtime": {
+    "deterministic_algorithms": true,
+    "device": "mps",
+    "dtype": "float32",
+    "interop_threads": 10,
+    "mps_available": true,
+    "mps_cpu_fallback": false,
+    "platform": [
+      "Darwin",
+      "25.5.0",
+      "arm64"
+    ],
+    "python": "3.12.13",
+    "threads": 1,
+    "torch": "2.13.0",
+    "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+  },
+  "schema": "tabu.v6.broadcast-explicit-supervision.full-context.v1",
+  "tables": {
+    "airfoil_self_noise": {
+      "forward_rows": 1503,
+      "mae": 2.066848303303766,
+      "n": 301,
+      "query_rows": 301,
+      "r2": 0.8245576817143894,
+      "rmse": 2.709866376903754,
+      "seconds": 0.7537457495927811,
+      "slog": 0.7258380648343356,
+      "support_rows": 1202
+    },
+    "bodyfat": {
+      "forward_rows": 252,
+      "mae": 0.9029303494621727,
+      "n": 51,
+      "query_rows": 51,
+      "r2": 0.9753754822953885,
+      "rmse": 1.2806494201565974,
+      "seconds": 0.2341337911784649,
+      "slog": 0.9506840744998513,
+      "support_rows": 201
+    },
+    "cars": {
+      "forward_rows": 804,
+      "mae": 1762.6925118885872,
+      "n": 161,
+      "query_rows": 161,
+      "r2": 0.950904868732841,
+      "rmse": 2453.5632584340497,
+      "seconds": 0.4816607916727662,
+      "slog": 0.8342039945986299,
+      "support_rows": 643
+    },
+    "concrete_compressive_strength": {
+      "forward_rows": 1030,
+      "mae": 4.230309565930601,
+      "n": 206,
+      "query_rows": 206,
+      "r2": 0.8732348636463126,
+      "rmse": 5.987830009026152,
+      "seconds": 0.4739599172025919,
+      "slog": 0.7821575103520014,
+      "support_rows": 824
+    },
+    "cpu_activity": {
+      "forward_rows": 8192,
+      "mae": 4.158638175047338,
+      "n": 1639,
+      "query_rows": 1639,
+      "r2": 0.7925545562697257,
+      "rmse": 8.125150160867216,
+      "seconds": 14.36263470724225,
+      "slog": 0.5691286943517986,
+      "support_rows": 6553
+    },
+    "energy_efficiency": {
+      "forward_rows": 768,
+      "mae": 1.011454133021367,
+      "n": 154,
+      "query_rows": 154,
+      "r2": 0.9828135809374892,
+      "rmse": 1.350320682620861,
+      "seconds": 0.344848875887692,
+      "slog": 0.9656641990390529,
+      "support_rows": 614
+    },
+    "kin8nm": {
+      "forward_rows": 8192,
+      "mae": 0.1414537225651003,
+      "n": 1639,
+      "query_rows": 1639,
+      "r2": 0.5540388596442626,
+      "rmse": 0.175299737894881,
+      "seconds": 12.936423291452229,
+      "slog": 0.4033631047570996,
+      "support_rows": 6553
+    },
+    "pumadyn32nh": {
+      "forward_rows": 8192,
+      "mae": 0.02669606333742329,
+      "n": 1639,
+      "query_rows": 1639,
+      "r2": 0.12589499138447147,
+      "rmse": 0.033773617930368025,
+      "seconds": 15.787037624977529,
+      "slog": 0.058903511543372034,
+      "support_rows": 6553
+    },
+    "qsar_fish_toxicity": {
+      "forward_rows": 908,
+      "mae": 0.6674576964954754,
+      "n": 182,
+      "query_rows": 182,
+      "r2": 0.5681878596285761,
+      "rmse": 0.9783325792936055,
+      "seconds": 0.38453516736626625,
+      "slog": 0.4895319360505157,
+      "support_rows": 726
+    },
+    "red_wine": {
+      "forward_rows": 1599,
+      "mae": 0.5283145099878311,
+      "n": 320,
+      "query_rows": 320,
+      "r2": 0.3450097164069579,
+      "rmse": 0.6474517599787237,
+      "seconds": 0.8620356656610966,
+      "slog": 0.387488519794317,
+      "support_rows": 1279
+    },
+    "space_ga": {
+      "forward_rows": 3107,
+      "mae": 0.12911423198554947,
+      "n": 622,
+      "query_rows": 622,
+      "r2": 0.2206165200038478,
+      "rmse": 0.17016738940510306,
+      "seconds": 2.1638466250151396,
+      "slog": 0.1736896241338538,
+      "support_rows": 2485
+    },
+    "white_wine": {
+      "forward_rows": 4898,
+      "mae": 0.564655927735932,
+      "n": 980,
+      "query_rows": 980,
+      "r2": 0.3720756236205902,
+      "rmse": 0.7248756348234817,
+      "seconds": 5.234608332626522,
+      "slog": 0.30327535818396545,
+      "support_rows": 3918
+    }
+  }
+}

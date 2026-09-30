@@ -1,0 +1,212 @@
+"""V5.3 episode-local affine value spaces; no learned or hidden codec state."""
+
+from __future__ import annotations
+
+import math
+from dataclasses import dataclass
+
+import torch
+from torch import Tensor, nn
+from torch.nn import functional as F
+
+from ..restoration._dtype import solve_dtype
+from ..restoration._validation import finite, matrix, positive
+from ..restoration.answers import CategoricalAnswers, NumericAnswers
+from ..restoration.contracts import RestorationInput
+from ..restoration.encoding import EncodingLayout, prepare_features, visible_codes
+from .answers import (
+    ANSWER_WIDTH,
+    AffineOrdinalAnswers,
+    CompositionNominalAnswers,
+    CompositionOrdinalAnswers,
+    ConstantWeightNominalAnswers,
+    GaussianNominalAnswers,
+    IdentityOrdinalAnswers,
+    ZScoreAnswers,
+    composition_vectors,
+    constant_weight_vectors,
+    unit_gaussians,
+)
+from .codec_versions import (
+    CODEC_VERSIONS,
+    COMPOSITION_CODEC_VERSIONS,
+    DEFAULT_CODEC_VERSION,
+    V55_CODEC_VERSIONS,
+    V55_NEW_CODEC_VERSIONS,
+)
+
+
+@dataclass(frozen=True)
+class AffineNumericAnswers:
+    scalar: ZScoreAnswers | NumericAnswers
+    origin: Tensor
+    direction: Tensor
+    encoded: Tensor
+    direction_norm_squared: float = 1.0
+
+    @classmethod
+    def from_visible(
+        cls, values: Tensor, *, epsilon: float, seed: int, key: str,
+        scaling: str = "zscore",
+        codec_version: str = DEFAULT_CODEC_VERSION,
+    ):
+        if scaling not in ("zscore", "median_half_iqr"):
+            raise ValueError("unknown numeric scaling")
+        scalar_type = ZScoreAnswers if scaling == "zscore" else NumericAnswers
+        scalar = scalar_type.from_visible(values, epsilon=epsilon)
+        # No orthogonalization or overlap screening. The local generator consumes
+        # no process RNG and is stable under column reordering.
+        if codec_version == "constant_weight_v1":
+            basis = constant_weight_vectors(["v53-affine-constant", seed, key], 2, 4, values.device)
+        elif codec_version in V55_CODEC_VERSIONS:
+            basis = composition_vectors(
+                ["numeric-affine", seed, key], 2, values.device, codec_version=codec_version,
+            )
+        elif codec_version in CODEC_VERSIONS:
+            basis = unit_gaussians(["v53-affine", seed, key], 2, values.device)
+        else:
+            raise ValueError("unknown V5.3 codec version")
+        origin, direction = basis.unbind()
+        encoded = origin + scalar.encoded * direction
+        finite(encoded, "affine visible encoding")
+        norm_squared = 4.0 if codec_version == "constant_weight_v1" else 1.0
+        if codec_version in V55_CODEC_VERSIONS:
+            norm_squared = float(direction.square().sum())
+        return cls(scalar, origin, direction, encoded, norm_squared)
+
+    def encode_targets(self, values: Tensor) -> Tensor:
+        """Scorer-only truth encoding with this episode's visible statistics."""
+        encoded = self.origin + self.scalar.encode_targets(values) * self.direction
+        finite(encoded, "affine truth encoding")
+        return encoded
+
+    def decode(self, encoded: Tensor) -> Tensor:
+        matrix(encoded, "affine prediction")
+        if encoded.shape[1] != ANSWER_WIDTH or encoded.device != self.origin.device:
+            raise ValueError("affine predictions need 128 coordinates on the codec device")
+        z = (encoded.to(self.origin.dtype) - self.origin) @ self.direction
+        # Raw 128/4 directions have squared norm 4; Gaussian directions have 1.
+        z = z / self.direction_norm_squared
+        return self.scalar.decode(z[:, None])
+
+
+@dataclass(frozen=True)
+class V53ColumnFacts:
+    rows: Tensor
+    answers: (
+        AffineNumericAnswers | GaussianNominalAnswers | AffineOrdinalAnswers
+        | ConstantWeightNominalAnswers | CompositionNominalAnswers | CompositionOrdinalAnswers
+        | IdentityOrdinalAnswers | CategoricalAnswers
+    )
+    input_coordinates: Tensor
+    rank: Tensor | None = None
+
+
+class AffineValueEncoder(nn.Module):
+    """Shared bias-free W_enc; default typed input and answer lifts coincide."""
+
+    def __init__(self, width: int = 128, epsilon: float = 1e-6, *,
+                 codec_version: str = DEFAULT_CODEC_VERSION, numeric_scaling: str = "zscore"):
+        super().__init__()
+        if type(width) is not int or width < ANSWER_WIDTH:
+            raise ValueError("carrier width must be at least 128")
+        positive(epsilon, "epsilon")
+        if codec_version not in CODEC_VERSIONS:
+            raise ValueError("unknown V5.3 codec version")
+        if numeric_scaling not in ("zscore", "median_half_iqr"):
+            raise ValueError("unknown numeric scaling")
+        self.width, self.epsilon = width, epsilon
+        self.codec_version, self.numeric_scaling = codec_version, numeric_scaling
+        self.projection = nn.Linear(ANSWER_WIDTH, width, bias=False)
+        with torch.no_grad():
+            q, _ = torch.linalg.qr(torch.randn(width, ANSWER_WIDTH), mode="reduced")
+            self.projection.weight.copy_(q / 8)
+        self.cell_seed = nn.Parameter(torch.randn(width) / math.sqrt(width))
+        self.unit_seed = nn.Parameter(torch.randn(width) / math.sqrt(width))
+        self.feature_seed = nn.Parameter(torch.randn(width) / math.sqrt(width))
+
+    @torch.no_grad()
+    def prepare(self, inputs: RestorationInput) -> tuple[V53ColumnFacts, ...]:
+        facts = []
+        for a, schema in enumerate(inputs.schema):
+            rows = inputs.visible[:, a].nonzero(as_tuple=True)[0]
+            values = inputs.values[a][rows]
+            rank = None
+            if schema.kind == "numeric":
+                codec = AffineNumericAnswers.from_visible(
+                    values, epsilon=self.epsilon, seed=inputs.code_seed, key=schema.key,
+                    scaling=self.numeric_scaling,
+                    codec_version=self.codec_version,
+                )
+            elif self.codec_version == "legacy_v53":
+                classes, codes = visible_codes(
+                    values, width=ANSWER_WIDTH, seed=inputs.code_seed, key=schema.key
+                )
+                codec = CategoricalAnswers.from_visible(
+                    values, classes, codes, domain_size=schema.domain_size
+                )
+                if schema.kind == "ordinal":
+                    positions = torch.tensor(
+                        schema.rank_positions(), dtype=solve_dtype(values), device=values.device
+                    )
+                    rank = positions[values] / max(schema.domain_size - 1, 1)
+            elif schema.kind == "nominal":
+                if self.codec_version in V55_CODEC_VERSIONS:
+                    codec = CompositionNominalAnswers.from_visible(
+                        values, schema=schema, seed=inputs.code_seed,
+                        codec_version=self.codec_version,
+                    )
+                else:
+                    nominal_type = (ConstantWeightNominalAnswers
+                                    if self.codec_version == "constant_weight_v1"
+                                    else GaussianNominalAnswers)
+                    codec = nominal_type.from_visible(
+                        values, schema=schema, seed=inputs.code_seed
+                    )
+            elif self.codec_version in V55_NEW_CODEC_VERSIONS:
+                codec = CompositionOrdinalAnswers.from_visible(
+                    values, schema=schema, seed=inputs.code_seed,
+                    codec_version=self.codec_version,
+                )
+                rank = codec.rank_by_label[values]
+            elif self.codec_version in (
+                "unit_gaussian_v1", "constant_weight_v1", *COMPOSITION_CODEC_VERSIONS,
+            ):
+                codec = AffineOrdinalAnswers.from_visible(
+                    values, schema=schema, seed=inputs.code_seed,
+                    codec_version=self.codec_version,
+                )
+                rank = codec.rank_by_label[values]
+            else:
+                codec = IdentityOrdinalAnswers.from_visible(
+                    values, schema=schema, seed=inputs.code_seed, codec_version=self.codec_version,
+                )
+                rank = codec.rank_by_label[values]
+            facts.append(V53ColumnFacts(rows, codec, codec.encoded, rank))
+        return tuple(facts)
+
+    def forward(self, inputs: RestorationInput, facts: tuple[V53ColumnFacts, ...]) -> Tensor:
+        return self.forward_prepared(inputs, prepare_features(inputs, facts))
+
+    def forward_prepared(self, inputs: RestorationInput, layout: EncodingLayout) -> Tensor:
+        n, m = inputs.visible.shape
+        weight = self.projection.weight
+        if inputs.visible.device != weight.device:
+            raise ValueError("model and input must share a device")
+        h = weight.new_zeros(n + 1, m + 1, self.width)
+        h[:n, :m] = torch.where(inputs.query[..., None], self.cell_seed, 0)
+        h[:n, m] = self.unit_seed
+        h[n, :m] = self.feature_seed
+        lifts = []
+        for kind, coordinates, fixed_rank in layout.groups:
+            lift = coordinates.to(weight)
+            if kind == "ordinal" and self.codec_version == "legacy_v53":
+                lift = lift + fixed_rank.to(weight)[:, None]
+            lifts.append(lift)
+        h = h.flatten(0, 1).index_copy(
+            0, layout.addresses, F.linear(torch.cat(lifts), weight)
+        ).reshape(n + 1, m + 1, self.width)
+        finite(h, "V5.3 initial carriers")
+        if bool((h[layout.active].square().sum(-1) == 0).any()):
+            raise FloatingPointError("non-Null input carrier collapsed to zero")
+        return h

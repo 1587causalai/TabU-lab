@@ -1,0 +1,162 @@
+{
+  "automation_id": "openml12",
+  "notified_tables": [
+    "airfoil_self_noise",
+    "bodyfat",
+    "cars",
+    "concrete_compressive_strength",
+    "cpu_activity",
+    "energy_efficiency",
+    "kin8nm",
+    "pumadyn32nh",
+    "qsar_fish_toxicity",
+    "red_wine",
+    "space_ga",
+    "white_wine"
+  ],
+  "final_notified": true,
+  "automation_deleted": true,
+  "launch_notified": true,
+  "launch_verified": true,
+  "formal_updates_verified": true,
+  "phase_at_launch": "waiting_for_prior",
+  "budget_decision": "user requested simplify; one config per family, TabU900sec per table",
+  "last_checked_utc": "2026-09-29T19:41:06.740496+00:00",
+  "last_checked_status": {
+    "dustinstudio": {
+      "outcome": "completed",
+      "phase": "completed",
+      "active_table": "white_wine",
+      "preflight_verified": [
+        "airfoil_self_noise",
+        "bodyfat",
+        "cars",
+        "concrete_compressive_strength",
+        "cpu_activity",
+        "energy_efficiency",
+        "kin8nm",
+        "pumadyn32nh",
+        "qsar_fish_toxicity",
+        "red_wine",
+        "space_ga",
+        "white_wine"
+      ],
+      "formal_update_tables": [
+        "airfoil_self_noise",
+        "bodyfat",
+        "cars",
+        "concrete_compressive_strength",
+        "cpu_activity",
+        "energy_efficiency",
+        "kin8nm",
+        "pumadyn32nh",
+        "qsar_fish_toxicity",
+        "red_wine",
+        "space_ga",
+        "white_wine"
+      ],
+      "completed": [
+        "airfoil_self_noise",
+        "bodyfat",
+        "cars",
+        "concrete_compressive_strength",
+        "cpu_activity",
+        "energy_efficiency",
+        "kin8nm",
+        "pumadyn32nh",
+        "qsar_fish_toxicity",
+        "red_wine",
+        "space_ga",
+        "white_wine"
+      ]
+    },
+    "dgx2": {
+      "outcome": "completed",
+      "phase": "completed",
+      "active_table": "white_wine",
+      "preflight_verified": [
+        "airfoil_self_noise",
+        "bodyfat",
+        "cars",
+        "concrete_compressive_strength",
+        "cpu_activity",
+        "energy_efficiency",
+        "kin8nm",
+        "pumadyn32nh",
+        "qsar_fish_toxicity",
+        "red_wine",
+        "space_ga",
+        "white_wine"
+      ],
+      "formal_update_tables": [
+        "airfoil_self_noise",
+        "bodyfat",
+        "cars",
+        "concrete_compressive_strength",
+        "cpu_activity",
+        "energy_efficiency",
+        "kin8nm",
+        "pumadyn32nh",
+        "qsar_fish_toxicity",
+        "red_wine",
+        "space_ga",
+        "white_wine"
+      ],
+      "completed": [
+        "airfoil_self_noise",
+        "bodyfat",
+        "cars",
+        "concrete_compressive_strength",
+        "cpu_activity",
+        "energy_efficiency",
+        "kin8nm",
+        "pumadyn32nh",
+        "qsar_fish_toxicity",
+        "red_wine",
+        "space_ga",
+        "white_wine"
+      ]
+    }
+  },
+  "matched_banks_verified": true,
+  "notified_partial_results": [
+    "dgx2:cars",
+    "dgx2:concrete_compressive_strength",
+    "dgx2:cpu_activity",
+    "dgx2:energy_efficiency",
+    "dgx2:kin8nm"
+  ],
+  "notified_anomalies": [
+    "dustinstudio:cars:gradient_assertion:2026-09-29T15:37"
+  ],
+  "recovery": {
+    "host": "dustinstudio",
+    "controller_pid": 6289,
+    "observer_pid": 85875,
+    "started_utc": "2026-09-29T16:12:25.798656+00:00",
+    "user_authorized": true,
+    "extra_diagnostics_stopped_by_user": true,
+    "prior_cars_seconds": 40.17525950097479,
+    "remaining_cars_seconds": 859.8247404990252,
+    "launch_notified": true
+  },
+  "latest_active_update_audit": [
+    {
+      "host": "dustinstudio",
+      "table": "cars",
+      "updates": 30,
+      "backward_replays": 0,
+      "attempted_forward_passes": 30,
+      "failed_attempt_seconds": 0.0
+    },
+    {
+      "host": "dgx2",
+      "table": "cpu_activity",
+      "updates": 910,
+      "backward_replays": 0,
+      "attempted_forward_passes": 910,
+      "failed_attempt_seconds": 0
+    }
+  ],
+  "latest_recovery_replays": 0
+}

@@ -1,0 +1,32 @@
+{
+  "dustinstudio": {
+    "host": "dustinstudio",
+    "current": "training",
+    "phase": "half2",
+    "extension": {
+      "outcome": "waiting_parent",
+      "parent_root": "/Users/dustinstudio/experiments/v6-window512-replay40-30m-20260928",
+      "total_successful_seconds_target": 3600
+    }
+  },
+  "dgx2": {
+    "host": "dgx2",
+    "current": "training",
+    "phase": "half2",
+    "extension": {
+      "outcome": "waiting_parent",
+      "parent_root": "/home/cms/experiments/v6-window512-replay40-30m-20260928",
+      "total_successful_seconds_target": 3600
+    }
+  },
+  "gongqian-mini": {
+    "host": "gongqian-mini",
+    "current": "training",
+    "phase": "half2",
+    "extension": {
+      "outcome": "waiting_parent",
+      "parent_root": "/Users/gongqian/experiments/v6-window512-replay40-30m-20260928",
+      "total_successful_seconds_target": 3600
+    }
+  }
+}

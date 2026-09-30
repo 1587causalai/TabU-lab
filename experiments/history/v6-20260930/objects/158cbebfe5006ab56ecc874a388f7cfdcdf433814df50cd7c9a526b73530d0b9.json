@@ -1,0 +1,59 @@
+{
+  "status": "authorized_simplified",
+  "hosts": {
+    "dustinstudio": "v6",
+    "dgx2": "v55"
+  },
+  "learning_rate": 0.0001,
+  "tables": [
+    "airfoil_self_noise",
+    "bodyfat",
+    "cars",
+    "concrete_compressive_strength",
+    "cpu_activity",
+    "energy_efficiency",
+    "kin8nm",
+    "pumadyn32nh",
+    "qsar_fish_toxicity",
+    "red_wine",
+    "space_ga",
+    "white_wine"
+  ],
+  "successful_seconds_per_table": 900,
+  "successful_seconds_per_host": 10800,
+  "monitor_seconds": [
+    0,
+    180,
+    360,
+    540,
+    720,
+    900
+  ],
+  "seed": 20260929,
+  "validation_fraction": 0.2,
+  "full_train_refit": false,
+  "test_support": "fit_rows_only",
+  "mlp": {
+    "width": 256,
+    "layers": 3,
+    "lr": 0.001,
+    "weight_decay": 0,
+    "batch_size": 256,
+    "patience": 50,
+    "seconds_cap": 300,
+    "epochs_cap": 10000
+  },
+  "xgboost": {
+    "depth": 6,
+    "eta": 0.05,
+    "lambda": 1.0,
+    "patience": 100,
+    "rounds_cap": 4000,
+    "seconds_cap": 140
+  },
+  "baseline_host": "dgx2",
+  "memory_fraction": 0.5,
+  "default_replacement": false,
+  "parent_exposed_to_monitor": true,
+  "wait_for": "v6-puma-lrval-grid-20260929"
+}

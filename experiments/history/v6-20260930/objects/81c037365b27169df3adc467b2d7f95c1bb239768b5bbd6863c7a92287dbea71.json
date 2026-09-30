@@ -1,0 +1,169 @@
+{
+  "pid": 30682,
+  "root": "/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929",
+  "launched_once": true,
+  "source_sha256": {
+    "baselines.py": "53d86a61f54d68c0af7de6186fb639ad3f8978dc43f1d852a7dd01f818fc0a61",
+    "run_table.py": "ba8679f5f6f76186acbb000cc8dcbd73880742c5c622eaf52691526e7e35afed",
+    "controller.py": "615f5a85b38d8aa1635c7493fc5e54b2dad99fd8acc40a18c736004a80b35499",
+    "setup.py": "62f42ba4c7ad343f3f2628346c641f45e492adc4ed7a1a53bcd7118ffc9fc714",
+    "observe.py": "95988007ff54f578b3abe8badc50a47b7b1ec8cafb9c7ee92e306ca54393398c",
+    "report.py": "7e1d406c73e81b48f6734ce0262d87f3a135ae67f7b0ad53e9477fa0346f1eea"
+  },
+  "status": {
+    "outcome": "waiting",
+    "phase": "wait_prior",
+    "host": "dustinstudio",
+    "branch": "v6",
+    "parent_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+    "pid": 30682,
+    "started_utc": "2026-09-29T14:35:35.592309+00:00",
+    "tables": {},
+    "baselines": {},
+    "successful_seconds_budget": 10800
+  },
+  "setup": {
+    "host": "dustinstudio",
+    "parent_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+    "source_helpers": {
+      "common.py": "4f2fbc0423a832abe41d0ff2a998e9c6a03adf8474f41d1136ba986842f0ba3c",
+      "dual.py": "2e82302f7ae600fd06165bb025174f5ba48b556a5ab622cd604c415e1d02c0e9",
+      "frozen_evaluate.py": "726b6495ef02aa1865026f9fa19a46ebd6302b610ec9478686da9272446cd4f3",
+      "training_support.py": "2ee5c702d7ee1f9818ac143aa8c97e8acf2b82e60cdad87b87559b1603b82a1a"
+    },
+    "tables": {
+      "airfoil_self_noise": {
+        "bank_sha256": "3c188a4880464035edbb761381564eec596741e5c6ee7f18e2417f2af85b95c6",
+        "columns": 6,
+        "fit_rows": 962,
+        "monitor_rows": 240,
+        "original_data_sha256": "ec522f702d8884432a41525b010be9edbbfeb68347f68607e3167fd634e85019",
+        "split_sha256": "a61adddaa3e213ad667795a5546776e25592f40f2af7abcc11bf993622029023",
+        "test_rows": 301,
+        "training_source_sha256": "6985bfee9657ec561aaca0cae3bdb791db930adcefd31ac7c50872c6f7ccafd2",
+        "window_rows": 512
+      },
+      "bodyfat": {
+        "bank_sha256": "8382945126d0a7a33acad48ac20ca48ef12c351a6e1de4fab01d12c8cb641970",
+        "columns": 15,
+        "fit_rows": 161,
+        "monitor_rows": 40,
+        "original_data_sha256": "3c22b81b697581c55657034afd3b885f23ea35f3fec9df1cd6e9be903c2171b9",
+        "split_sha256": "d53deedbdf526cdd31da7d487400e28728a510605276365da8f6c5ae4609e98d",
+        "test_rows": 51,
+        "training_source_sha256": "f132d5e176d756f24054984ed92a8cb6c48e235164317c2bc05426292b938202",
+        "window_rows": 161
+      },
+      "cars": {
+        "bank_sha256": "3654488d50fd61117f619f8dbd7ee73f6964af80b6e500d08ff3da4296e37fc6",
+        "columns": 18,
+        "fit_rows": 514,
+        "monitor_rows": 129,
+        "original_data_sha256": "c239fe676e37528fda3eff165bc43d57f52adba81f6bb4912a69d7c74608c714",
+        "split_sha256": "3d60d4bd40fbf098669b07bae4e7ad6277f208910efa609394f4a214d5ff13a6",
+        "test_rows": 161,
+        "training_source_sha256": "41085fbff460790e34633f9833205012299dd61e7d63a0b17dffe7b770da7968",
+        "window_rows": 512
+      },
+      "concrete_compressive_strength": {
+        "bank_sha256": "78fedab1e96b2e0ac53e58836994733b6467e72a570ce43f0b93fcfe15f84e0d",
+        "columns": 9,
+        "fit_rows": 659,
+        "monitor_rows": 165,
+        "original_data_sha256": "8c7f1276c126ede73f3d02692696467e238df902e729378df77271a21ea1fbc2",
+        "split_sha256": "a6f0112d61cfda8f02f11a2cdc5cd19dacca151ff6d1e7927090b04ed14eb61d",
+        "test_rows": 206,
+        "training_source_sha256": "1749b616316cba274e0ef3e24c5610b6f645089d35612973de7f64480d5262b4",
+        "window_rows": 512
+      },
+      "cpu_activity": {
+        "bank_sha256": "40707d9dae658aca840c77b62b36fcc9760fa5e3ac81064e7313c912a68a55a2",
+        "columns": 22,
+        "fit_rows": 5242,
+        "monitor_rows": 1311,
+        "original_data_sha256": "a4920adefb565787dc23586e23e2191487321db6c03799c96457dc9b2d8e050b",
+        "split_sha256": "0082784a2661f61e65b0db2ee0534c2c85d083051c2b0cd37aedc3f9a3a039c2",
+        "test_rows": 1639,
+        "training_source_sha256": "cb2d24f1f45ac94340e37f7ef312e4a0605bdaa7d030fcb7eb7d99f9f3ba551b",
+        "window_rows": 512
+      },
+      "energy_efficiency": {
+        "bank_sha256": "a4980c6db7b524d57d3724782525f368e5d1a48c1bde88bcca184f203351a994",
+        "columns": 9,
+        "fit_rows": 491,
+        "monitor_rows": 123,
+        "original_data_sha256": "80d4fda975a2deb0ab01592d644a224c0b715bca099596af6d1ac4aba583aeea",
+        "split_sha256": "81749782dbbdf5686cbb0f7205f31124d657925f3e096b5c355b26f7b565a00f",
+        "test_rows": 154,
+        "training_source_sha256": "1bb6eff6465a6591a1f5beb3ed2cea7127ef0b5a5671197d6d0a712734d22322",
+        "window_rows": 491
+      },
+      "kin8nm": {
+        "bank_sha256": "f3da7ad4095285c572eb88861cdf1ebc0228be292c19341af22ce036f7c84280",
+        "columns": 9,
+        "fit_rows": 5242,
+        "monitor_rows": 1311,
+        "original_data_sha256": "6eedd40306c5b3fefd63497a3a1b6eabd300ab7e7382acc0cf723af9bc5002c2",
+        "split_sha256": "144730662b43a8e718b03bae7154c0c5d9800e5e8fbb85052af6ed4abe4f29f1",
+        "test_rows": 1639,
+        "training_source_sha256": "198718f564ea3e4e85b7a974a244d9366d9776d9c7a02afb1c6e0430626706b7",
+        "window_rows": 512
+      },
+      "pumadyn32nh": {
+        "bank_sha256": "793fb89cb2699911a6c94a8bb10e6f22dae0328d4e99236631b5091f2aa6a5cf",
+        "columns": 33,
+        "fit_rows": 5242,
+        "monitor_rows": 1311,
+        "original_data_sha256": "2f11bcd411e69c4bfffd93b534eb37eeb10dc33c0b616ecc15b2769319c22bd1",
+        "split_sha256": "64b23a2bbd53590278bb622d25b857583ba6f8ffca6f1fd19ab1d2be0358658d",
+        "test_rows": 1639,
+        "training_source_sha256": "4ba5415e0e70bf1945771d2a87400cc96d804c7dba862ac41baae248d691ec7a",
+        "window_rows": 512
+      },
+      "qsar_fish_toxicity": {
+        "bank_sha256": "954e50c0977dae92071d57153464b5aa886e93b1c4eb6149f7acf2e32c551df9",
+        "columns": 7,
+        "fit_rows": 581,
+        "monitor_rows": 145,
+        "original_data_sha256": "c7c22a6bd8634247678fd9f9c4231204ef4ae56ed81b8d7bbcbc5ff504002949",
+        "split_sha256": "2d6ed783f7590063d32c1fca060067f44156df2be53c1411701a74455809dc5c",
+        "test_rows": 182,
+        "training_source_sha256": "143d3e9b1d378eeba39faf67bcf054ba6e07335f6f05e6672d4da59a23cd660f",
+        "window_rows": 512
+      },
+      "red_wine": {
+        "bank_sha256": "126ecab849b17ff26f75b64807b286e0a320ba2af91d4f7db253a7dc7e286de4",
+        "columns": 12,
+        "fit_rows": 1023,
+        "monitor_rows": 256,
+        "original_data_sha256": "a19ce80995bb56e10aa9f755427773454c0460b9ee9c3a3da9884580f8fa87b8",
+        "split_sha256": "c16537f769eb525f1e0cbdd57ca9916cf7d65b7113cab30ada102ab402a06fc7",
+        "test_rows": 320,
+        "training_source_sha256": "412fcedf4a8eef9e25b357852cb50e55f855f4f369ad0714219b6d8af2f2d575",
+        "window_rows": 512
+      },
+      "space_ga": {
+        "bank_sha256": "b276dce823697630b9a6da99b62b37823c47508cb0353c6d8ddc8598fb3fa0f9",
+        "columns": 7,
+        "fit_rows": 1988,
+        "monitor_rows": 497,
+        "original_data_sha256": "327c897b299f64b4dba21174c7898fa9d78eb86812a3ad3f0c815b319416c756",
+        "split_sha256": "d99d7d8be87479f4755e41292d16277e3956adde0fe7e39ff0858e99f4a2e11e",
+        "test_rows": 622,
+        "training_source_sha256": "a2c928a4535ac1e4ac42981466910a1a7ef61b68223adfc9c15748a52eb288e3",
+        "window_rows": 512
+      },
+      "white_wine": {
+        "bank_sha256": "70ffabcb2c6167d3cd73f9688cc287546ed3941e20cb776807da20474fe2ae06",
+        "columns": 12,
+        "fit_rows": 3134,
+        "monitor_rows": 784,
+        "original_data_sha256": "85ac54c02770cd04647cba09f15dd1630bc4fa3333697c99632b30cead437664",
+        "split_sha256": "21036b67d4c6f7059b41a07e5d7d79cca82304c6df1cca1b112794bd7f5f61a4",
+        "test_rows": 980,
+        "training_source_sha256": "76ed460bafd18bac432a559dbdc9568fc4b693ec9d3b433708c8293351c34eda",
+        "window_rows": 512
+      }
+    }
+  }
+}

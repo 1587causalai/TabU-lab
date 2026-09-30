@@ -1,0 +1,12 @@
+{
+  "continuation": "new_stage_preserve_weights_optimizer_rng_sampling_cursor_episode_positions",
+  "error": "qualified execution interface requires cpu, cuda:0 or mps",
+  "error_type": "ValueError",
+  "host": "dgx2",
+  "outcome": "failed",
+  "parent": "/home/cms/experiments/v6-replay40-5h-20260928/hour5/run/checkpoints/34b9ab75ed580a0cd3fccfa23137913594aa985b31da9fd72236adbfc0f2f2b0.pt",
+  "parent_sha256": "34b9ab75ed580a0cd3fccfa23137913594aa985b31da9fd72236adbfc0f2f2b0",
+  "sampling": "each OpenML table once plus 8 old618 per 20 updates; OpenML window2048",
+  "successful_update_seconds_target": 900.0,
+  "supervision": "target_only"
+}

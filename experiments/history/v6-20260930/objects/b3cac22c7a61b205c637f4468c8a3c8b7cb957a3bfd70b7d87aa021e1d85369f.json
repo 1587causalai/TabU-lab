@@ -1,0 +1,31 @@
+{
+  "outcome": "completed",
+  "started_utc": "2026-09-28T08:07:24.001590+00:00",
+  "additional_seconds_target": 3600,
+  "completed_training_seconds": 3600.9076009246055,
+  "start_update": 70716,
+  "start_successful_seconds": 0,
+  "start_sha256": "dfaf831b193d08422cb7bd1d315d4c71988573c7695912951b93b1f2a4b95844",
+  "supervision": "joint_all",
+  "phase": "half2",
+  "phase_budget": 1798.9811231005006,
+  "checkpoint_sha256": "f4c8e43abbb026615b417304d58fef75dba03337b41eaa13cbcae4e5146d6e2f",
+  "checkpoint_update": 74773,
+  "evaluations": {
+    "half1": {
+      "macro": {
+        "r2": 0.23211337287291645,
+        "slog": 0.1374303936687139
+      },
+      "checkpoint_sha256": "402e2bd3a076161bd817c1bebfaa421cf3cdcebdd2f8af4d046762424d0f1f6d"
+    },
+    "half2": {
+      "macro": {
+        "r2": 0.2621892507290224,
+        "slog": 0.15943784356096982
+      },
+      "checkpoint_sha256": "f4c8e43abbb026615b417304d58fef75dba03337b41eaa13cbcae4e5146d6e2f"
+    }
+  },
+  "completed_utc": "2026-09-28T09:17:43.614518+00:00"
+}

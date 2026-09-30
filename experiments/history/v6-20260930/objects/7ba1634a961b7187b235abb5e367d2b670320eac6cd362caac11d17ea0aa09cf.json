@@ -1,0 +1,213 @@
+{
+  "candidate_root": "/Users/cms/.codex/worktrees/245d/workspace/projects/causal-superintelligence/TabU/preparations/ordinal100-20260926",
+  "checks": {
+    "cohort_counts": {
+      "nominal100": 100,
+      "old120": 120,
+      "ordinal100": 100,
+      "real78": 78,
+      "tanh100": 100
+    },
+    "fixed_bank": {
+      "actual_table_count": 498,
+      "all_masks_basic_contract": true,
+      "bank_sha256_declared": "32d723aaba9074f26ac8dc3348dd5f322fadd0c95cf7bce7db632d0f14e64819",
+      "bank_sha256_recomputed": "32d723aaba9074f26ac8dc3348dd5f322fadd0c95cf7bce7db632d0f14e64819",
+      "declared_table_count": 498,
+      "ordinal_masks_checked": 400,
+      "ordinal_support_class_coverage": "all 400 masks contain classes 0..7",
+      "ordinal_tables": 100,
+      "query_target_column_contract": "all 400 ordinal masks query target column",
+      "recompute_mismatches": [],
+      "recomputed_against_build_episode": true
+    },
+    "manifest": {
+      "expected_table_count": 498,
+      "parent_sha256": "4194add1160f4213faf94e5bdc05340b129ba77175f2f389a4eeebf1da64ad88",
+      "sha256": "2b5e82da899bf069a3b929e023aa0fc3fe81ff81142833fd0904f081cdf079e5",
+      "table_count": 498
+    },
+    "model_optimizer_same_as_nominal_parent": true,
+    "probe_contract": {
+      "nominal100_fit": [
+        [
+          "nominal100"
+        ],
+        2,
+        "train",
+        "fit"
+      ],
+      "ordinal100_fit": [
+        [
+          "ordinal100"
+        ],
+        4,
+        "train",
+        "fit"
+      ],
+      "real78_fit": [
+        [
+          "real78"
+        ],
+        1,
+        "train",
+        "fit"
+      ],
+      "tanh100_fit": [
+        [
+          "tanh100"
+        ],
+        2,
+        "train",
+        "fit"
+      ],
+      "train_fit": [
+        [
+          "old120"
+        ],
+        1,
+        "train",
+        "fit"
+      ]
+    },
+    "replay": {
+      "byte_identical_count": 398,
+      "mismatches": [],
+      "parent_table_count": 398,
+      "replay_id_count": 398
+    },
+    "schedule": {
+      "expected": [
+        [
+          "ordinal100",
+          1900
+        ],
+        [
+          "tanh100",
+          100
+        ],
+        [
+          "nominal100",
+          100
+        ],
+        [
+          "old120",
+          120
+        ],
+        [
+          "real78",
+          156
+        ]
+      ],
+      "ordinal_fraction": 0.7996632996632996,
+      "replay_episodes": 476,
+      "replay_fraction": 0.20033670033670034,
+      "sampling": [
+        [
+          "ordinal100",
+          1900
+        ],
+        [
+          "tanh100",
+          100
+        ],
+        [
+          "nominal100",
+          100
+        ],
+        [
+          "old120",
+          120
+        ],
+        [
+          "real78",
+          156
+        ]
+      ],
+      "total_episodes": 2376,
+      "within_80_20_tolerance": true
+    },
+    "selection_guard": {
+      "no_model_score_selection": true,
+      "prepare_imports": [
+        "Path",
+        "adapt_table",
+        "canonical_hash",
+        "collections",
+        "copy",
+        "hashlib",
+        "json",
+        "numpy",
+        "sample_rows",
+        "sample_world",
+        "shutil",
+        "sys",
+        "time"
+      ],
+      "prepare_suspicious_model_calls": [],
+      "recipe_row_acceptance": "At least 4 occurrences of every ordered target level in the 204 train rows; reject independent world/event seeds otherwise. No model-performance filtering.",
+      "recipe_world_conditioning": "Use existing ordinal sampler; accept n_classes==8 and 2 or 3 target parents. No model scores."
+    },
+    "worlds": {
+      "declared": 100,
+      "edge_transform_contract": "all tanh",
+      "failures": [],
+      "fixed_threshold_contract": true,
+      "latent_family": "additive_score",
+      "latent_noise_family": "gaussian",
+      "latent_noise_scale": 0.5,
+      "numeric_input_contract": true,
+      "target_class_counts": {
+        "8": 100
+      },
+      "target_parent_counts": {
+        "2": 43,
+        "3": 57
+      },
+      "target_type_counts": {
+        "ordinal": 100
+      },
+      "thresholds": [
+        -0.9,
+        -0.6000000000000001,
+        -0.30000000000000004,
+        -1.1102230246251565e-16,
+        0.29999999999999993,
+        0.6,
+        0.9
+      ],
+      "unique_data_hashes": 100,
+      "unique_seed_pairs": 100,
+      "unique_upstream_hashes": 100,
+      "unique_world_hashes": 100,
+      "widths": {
+        "13": 25,
+        "17": 25,
+        "21": 25,
+        "9": 25
+      },
+      "world_files_checked": 100
+    }
+  },
+  "failures": [],
+  "identity": {
+    "corpus_manifest_sha256": "98e87f9e10e32a2cfe9141b7053a6ccd197ac65a19506ecd09654cacee49b67d",
+    "generator_source_sha256": "0b2cba29ed0ab11f4bed1156610734028d9ac42d7fad5e0288cdcf41b7ea31be",
+    "manifest_sha256": "2b5e82da899bf069a3b929e023aa0fc3fe81ff81142833fd0904f081cdf079e5",
+    "parent_manifest_sha256": "4194add1160f4213faf94e5bdc05340b129ba77175f2f389a4eeebf1da64ad88",
+    "plan_identity_sha256": "6161840153c9b7a681aba90f5a0a6c72b8901d5be2a551ce82c2a223f4b50873",
+    "recipe_sha256": "135181c0503cfdb0625ca7cbc8cb15d94882f941c1ea514be0fa1dd2c09918e6",
+    "source_sha256": "9998c71b1d6c377ef3b8d7a2207284d1cea42a7edaea6efaefa91b1992ca751e"
+  },
+  "outcome": "passed",
+  "parent_root": "/Users/cms/.codex/worktrees/245d/workspace/projects/causal-superintelligence/TabU/preparations/nominal100-20260926",
+  "recorded_utc": "2026-09-26T05:29:01.348200+00:00",
+  "runtime": {
+    "elapsed_seconds": 1.6474519171752036,
+    "model_forward_backward": false,
+    "python": "3.13.5 | packaged by Anaconda, Inc. | (main, Jun 12 2025, 11:23:37) [Clang 14.0.6 ]",
+    "read_only_inputs": true,
+    "training_started": false
+  },
+  "schema": "tabu.ordinal100.independent-data-audit.v1"
+}

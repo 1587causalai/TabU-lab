@@ -1,0 +1,47 @@
+{
+  "half1": {
+    "n": 622,
+    "median_absolute_error": 0.17783076128490188,
+    "mae": 0.23972018175919083,
+    "rmse": 0.32429640589540526,
+    "p95_absolute_error": 0.7328214176474788,
+    "p99_absolute_error": 0.9153932082115372,
+    "max_absolute_error": 1.1946421180967628,
+    "top5pct_count": 32,
+    "top5pct_sse_share": 0.37662281969204453,
+    "top1pct_count": 7,
+    "top1pct_sse_share": 0.11062484018859364
+  },
+  "half2": {
+    "n": 622,
+    "median_absolute_error": 0.15627744807910215,
+    "mae": 0.3300077507514561,
+    "rmse": 0.753448164546576,
+    "p95_absolute_error": 1.1993955289129554,
+    "p99_absolute_error": 4.1766825825027665,
+    "max_absolute_error": 4.840998563317405,
+    "top5pct_count": 32,
+    "top5pct_sse_share": 0.8958104683430607,
+    "top1pct_count": 7,
+    "top1pct_sse_share": 0.4114926823993585
+  },
+  "macro_decomposition": {
+    "r2": {
+      "45min": 0.18066420151308402,
+      "60min": -0.8992819039160791,
+      "delta": -1.079946105429163,
+      "space_ga_delta_contribution": -1.0373946830679903,
+      "other11_delta_contribution": -0.04255142236117271,
+      "60min_other11_mean": 0.3170892114589022
+    },
+    "slog": {
+      "45min": 0.2485329074686348,
+      "60min": 0.2535126032167318,
+      "delta": 0.004979695748097007,
+      "space_ga_delta_contribution": -0.0012192344089387852,
+      "other11_delta_contribution": 0.006198930157035792,
+      "60min_other11_mean": 0.32689744310959806
+    }
+  },
+  "verified_utc": "2026-09-29T05:36:39.539589+00:00"
+}

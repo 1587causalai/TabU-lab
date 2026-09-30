@@ -1,0 +1,106 @@
+{
+  "notified": {
+    "dustinstudio/stage1": {
+      "notified_utc": "2026-09-29T10:01:27.260791+00:00",
+      "checkpoint_sha256": "d9a0e9ce557b3bec1f8b72f32d8873e984220749d4d9b9d911ab00f2ede887e3",
+      "report": "STAGE1.md"
+    },
+    "dgx2/stage1": {
+      "notified_utc": "2026-09-29T10:01:27.260791+00:00",
+      "checkpoint_sha256": "6de8069439e62e40e764f11b2015693ecd3cfd7672d823c14b887f332671ab77",
+      "report": "STAGE1.md"
+    },
+    "gongqian-mini/stage1": {
+      "notified_utc": "2026-09-29T10:01:27.260791+00:00",
+      "checkpoint_sha256": "efdaf454979a0fae18a0b4553247029f222b6230784d1132fd936d5b60e0d6af",
+      "report": "STAGE1.md"
+    },
+    "dustinstudio/stage2": {
+      "notified_utc": "2026-09-29T10:39:21.193504+00:00",
+      "checkpoint_sha256": "fa029392836b597a842d6bda376fe73a87d826d8224df7e44c89e5ef451aaa81",
+      "report": "STAGE2.md"
+    },
+    "dgx2/stage2": {
+      "notified_utc": "2026-09-29T10:39:21.193504+00:00",
+      "checkpoint_sha256": "d9e4fdbf91f7f976db3c82489ed003e924d10b8e4db5d19fe5bd6e8f0f9bd47e",
+      "report": "STAGE2.md"
+    },
+    "gongqian-mini/stage2": {
+      "notified_utc": "2026-09-29T10:39:21.193504+00:00",
+      "checkpoint_sha256": "11d74eda701a8bfcf8d7ab44e7bd1548e2757a6145d61d8df81084300aabb116",
+      "report": "STAGE2.md"
+    }
+  },
+  "final_notified": true,
+  "automation_deleted": true,
+  "automation_id": "tabu-30",
+  "launch_notified": true,
+  "launch_verified_utc": "2026-09-29T09:18:08.571308+00:00",
+  "sampling_choice": 0.3,
+  "phase_notifications": {
+    "dustinstudio/stage1": {
+      "notified_utc": "2026-09-29T10:01:27.260791+00:00",
+      "checkpoint_sha256": "d9a0e9ce557b3bec1f8b72f32d8873e984220749d4d9b9d911ab00f2ede887e3",
+      "report": "STAGE1.md"
+    },
+    "dgx2/stage1": {
+      "notified_utc": "2026-09-29T10:01:27.260791+00:00",
+      "checkpoint_sha256": "6de8069439e62e40e764f11b2015693ecd3cfd7672d823c14b887f332671ab77",
+      "report": "STAGE1.md"
+    },
+    "gongqian-mini/stage1": {
+      "notified_utc": "2026-09-29T10:01:27.260791+00:00",
+      "checkpoint_sha256": "efdaf454979a0fae18a0b4553247029f222b6230784d1132fd936d5b60e0d6af",
+      "report": "STAGE1.md"
+    },
+    "dustinstudio/stage2": {
+      "notified_utc": "2026-09-29T10:39:21.193504+00:00",
+      "checkpoint_sha256": "fa029392836b597a842d6bda376fe73a87d826d8224df7e44c89e5ef451aaa81",
+      "report": "STAGE2.md"
+    },
+    "dgx2/stage2": {
+      "notified_utc": "2026-09-29T10:39:21.193504+00:00",
+      "checkpoint_sha256": "d9e4fdbf91f7f976db3c82489ed003e924d10b8e4db5d19fe5bd6e8f0f9bd47e",
+      "report": "STAGE2.md"
+    },
+    "gongqian-mini/stage2": {
+      "notified_utc": "2026-09-29T10:39:21.193504+00:00",
+      "checkpoint_sha256": "11d74eda701a8bfcf8d7ab44e7bd1548e2757a6145d61d8df81084300aabb116",
+      "report": "STAGE2.md"
+    }
+  },
+  "last_checked_utc": "2026-09-29T10:39:21.193504+00:00",
+  "last_check": {
+    "new_complete_nodes": [
+      "dustinstudio/stage2",
+      "dgx2/stage2",
+      "gongqian-mini/stage2"
+    ],
+    "anomalies": [],
+    "hosts": {
+      "dustinstudio": {
+        "controller": "completed",
+        "successful_seconds": 3600.16023595538,
+        "updates": 14005,
+        "coverage": 730,
+        "all_final_evaluations_verified": true
+      },
+      "dgx2": {
+        "controller": "completed",
+        "successful_seconds": 3600.238269369409,
+        "updates": 9910,
+        "coverage": 730,
+        "all_final_evaluations_verified": true
+      },
+      "gongqian-mini": {
+        "controller": "completed",
+        "successful_seconds": 3600.152755415067,
+        "updates": 8544,
+        "coverage": 730,
+        "all_final_evaluations_verified": true
+      }
+    }
+  },
+  "final_notified_utc": "2026-09-29T10:39:21.193504+00:00",
+  "automation_deleted_utc": "2026-09-29T10:39:21.193504+00:00"
+}

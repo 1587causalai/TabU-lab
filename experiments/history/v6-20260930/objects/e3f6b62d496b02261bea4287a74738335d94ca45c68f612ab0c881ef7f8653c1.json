@@ -1,0 +1,109 @@
+{
+  "aggregation": "per-address mean over repeated masks; equal addresses per table; equal tables per type",
+  "bank": "/Users/dustinstudio/experiments/openml12-joint30m-squared-20260927/fixed-query-bank.json",
+  "bank_checked_masks": 4,
+  "bank_checked_query_addresses": 204,
+  "bank_sha256": "e791488f67179a67ae2057440100144b34edbccb9c900f9633e2004d26284f41",
+  "by_cohort": {
+    "ordinal100": {
+      "nominal": {
+        "accuracy": null,
+        "tables": 0
+      },
+      "numeric": {
+        "r2": null,
+        "tables": 0
+      },
+      "ordinal": {
+        "accuracy": 0.6134751773049646,
+        "rank_mae": 0.11972306653157716,
+        "tables": 1
+      }
+    }
+  },
+  "checkpoint": "/Users/dustinstudio/experiments/v6-replay40-5h-20260928/hour5/run/checkpoints/8df55cd41141669280f2cacf6c64242b2f4df0a9451b39ce6cb5db9b90662638.pt",
+  "checkpoint_sha256": "8df55cd41141669280f2cacf6c64242b2f4df0a9451b39ce6cb5db9b90662638",
+  "checkpoint_update": 63149,
+  "claim_boundary": "one-table evaluator smoke only",
+  "evaluator_sha256": "ad2655c158e580068a00196bd9c6df9ae5ba8f3128bbc4c5dba01cc5559db2c9",
+  "expected_checkpoint_sha256": "8df55cd41141669280f2cacf6c64242b2f4df0a9451b39ce6cb5db9b90662638",
+  "host": "dustinstudio",
+  "label": "hour5-smoke",
+  "macro": {
+    "nominal": {
+      "accuracy": null,
+      "tables": 0
+    },
+    "numeric": {
+      "r2": null,
+      "tables": 0
+    },
+    "ordinal": {
+      "accuracy": 0.6134751773049646,
+      "rank_mae": 0.11972306653157716,
+      "tables": 1
+    }
+  },
+  "model_state_sha256": "7196a59b0e59750e886a305e507210d693e472123e762fb3e803a40fb788494d",
+  "optimizer_updates": 0,
+  "ordinal_rank_metric": "absolute difference of decoded declared rank divided by domain_size-1",
+  "outcome": "completed",
+  "probes": {
+    "ordinal100_fit": {
+      "by_table": [
+        {
+          "cohort": "ordinal100",
+          "masks": 4,
+          "metrics": {
+            "accuracy": 0.6134751773049646,
+            "query_exposures": 204,
+            "rank_mae": 0.11972306653157716,
+            "unique_query_rows": 141
+          },
+          "probe": "ordinal100_fit",
+          "seconds": 0.49157158308662474,
+          "table": "ordinal_latent_train_000",
+          "target_column": 8,
+          "target_kind": "ordinal"
+        }
+      ],
+      "macro": {
+        "nominal": {
+          "accuracy": null,
+          "tables": 0
+        },
+        "numeric": {
+          "r2": null,
+          "tables": 0
+        },
+        "ordinal": {
+          "accuracy": 0.6134751773049646,
+          "rank_mae": 0.11972306653157716,
+          "tables": 1
+        }
+      },
+      "tables": 1
+    }
+  },
+  "runtime": {
+    "deterministic_algorithms": true,
+    "device": "mps",
+    "dtype": "float32",
+    "interop_threads": 16,
+    "mps_available": true,
+    "mps_cpu_fallback": false,
+    "platform": [
+      "Darwin",
+      "25.6.0",
+      "arm64"
+    ],
+    "python": "3.12.13",
+    "threads": 1,
+    "torch": "2.13.0",
+    "torch_build_sha256": "1943041ad11240ec18f123ae0f5aa98ed16a9ebf53b479bb4f0c11ea4c6f12f1"
+  },
+  "schema": "tabu.v6.old618-fixed-query-retention.v1",
+  "seconds": 3.041874957969412,
+  "tables": 1,
+  "v6_identity_sha256": "061fd06b0484ced9c0b5085d4ba8ac989254b4885787d87505b1ef73355ce93c"
+}

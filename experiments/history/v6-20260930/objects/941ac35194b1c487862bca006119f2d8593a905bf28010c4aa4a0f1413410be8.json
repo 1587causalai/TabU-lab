@@ -1,0 +1,73 @@
+{
+  "audited_utc": "2026-09-26T05:26:01.728046+00:00",
+  "blocked": false,
+  "checks": {
+    "active_tabu_training_or_evaluation_processes": false,
+    "parent_sha_matches_expected_and_sha256sum": true,
+    "runtime_cuda_fp64_ok": true,
+    "sidecar_sha_update_consistent": true,
+    "target_root_exists": false,
+    "terminal_sha_update_durable_consistent": true
+  },
+  "decision": "pass",
+  "host": "dgx2",
+  "parent": {
+    "actual_sha256_sha256sum": "cb0ed2b5e80612de00a1888dc8a345132f36dc92a3fa097ea3a473065135a776",
+    "expected_sha256": "cb0ed2b5e80612de00a1888dc8a345132f36dc92a3fa097ea3a473065135a776",
+    "sidecar": {
+      "cursor": 13292,
+      "schema": "tabu.curriculum.v55.checkpoint.v1",
+      "sha256": "cb0ed2b5e80612de00a1888dc8a345132f36dc92a3fa097ea3a473065135a776",
+      "update": 13292
+    },
+    "terminal": {
+      "checkpoint_sha256": "cb0ed2b5e80612de00a1888dc8a345132f36dc92a3fa097ea3a473065135a776",
+      "durable_update": 13292,
+      "error": null,
+      "outcome": "interrupted",
+      "status": "local_unissued",
+      "update": 13292
+    },
+    "update": 13292
+  },
+  "remote_parent": "/home/cms/experiments/tabu-v55-nominal100-retention-dgx2-20260926/runs/attempt-003-second30min/checkpoint-progress.pt",
+  "remote_target_root": "/home/cms/experiments/tabu-v55-ordinal100-continuous-dgx2-20260926",
+  "resources": {
+    "disk_root": {
+      "available": "1.6T",
+      "size": "3.7T",
+      "use_percent": 57,
+      "used": "2.0T"
+    },
+    "gpu": {
+      "memory_total": "N/A",
+      "memory_used": "N/A",
+      "name": "NVIDIA GB10",
+      "power_draw_w": 4.91,
+      "temperature_c": 49,
+      "utilization_percent": 0
+    },
+    "load_average": [
+      0.18,
+      0.14,
+      0.18
+    ]
+  },
+  "runtime": {
+    "backend": "docker-gpu",
+    "cuda_available": true,
+    "dtype": "float64",
+    "ok": true,
+    "package_fingerprint_sha256": "74414ebf7ce09a1305c61452a3bc48f75fb180bf85647eaa3696b7940d2c868d",
+    "profile": "train-20260920",
+    "python": "3.12.3",
+    "runtime_id": "wehub-train-dgx2-20260920",
+    "torch": "2.12.0.dev20260322+cu130"
+  },
+  "schema": "tabu.ordinal100.dgx2.preflight.v1",
+  "scope": "read-only DGX2 preflight; no training, evaluation, process control, or remote writes",
+  "target_root": {
+    "active_processes": [],
+    "exists": false
+  }
+}

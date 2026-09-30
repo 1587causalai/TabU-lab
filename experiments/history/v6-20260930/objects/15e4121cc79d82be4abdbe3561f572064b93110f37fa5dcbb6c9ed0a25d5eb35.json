@@ -1,0 +1,12 @@
+{
+  "outcome": "failed",
+  "phase": "main",
+  "started_utc": "2026-09-27T14:51:37.739570+00:00",
+  "start_update": 8423,
+  "start_successful_seconds": 0,
+  "additional_seconds_target": 1800,
+  "start_sha256": "d6ef5f9da5dcd50572045cff485970e7b1ff36464ef4b85deea369ae66640088",
+  "sampling": "OpenML12 equal:12 + history618:3 per 15 updates",
+  "error_type": "CalledProcessError",
+  "error": "Command '['/Users/gongqian/.local/bin/wehub-python', '--profile', 'train-20260920', '-u', '-c', \"import runpy; runpy.run_path('/Users/gongqian/experiments/v6-broadcast-balanced30m-20260927/train_balanced.py',run_name='__main__')\", '--host', 'gongqian-mini', '--device', 'mps', '--parent', '/Users/gongqian/experiments/v6-broadcast-oldloss-openml12-round2-20260927/half2/run/checkpoints/d6ef5f9da5dcd50572045cff485970e7b1ff36464ef4b85deea369ae66640088.pt', '--parent-sha', 'd6ef5f9da5dcd50572045cff485970e7b1ff36464ef4b85deea369ae66640088', '--manifest', '/Users/gongqian/experiments/openml12-joint2h-squared-20260927/manifests/joint-openml12-squared.json']' returned non-zero exit status 1."
+}

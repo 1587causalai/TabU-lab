@@ -1,0 +1,57 @@
+{
+  "outcome": "failed",
+  "phase": "tabu_training",
+  "host": "dustinstudio",
+  "branch": "v6",
+  "parent_sha256": "94088403aed2501e5f145272fc843f9b0954bd775f920af73c4004fa570ad114",
+  "pid": 30682,
+  "started_utc": "2026-09-29T14:35:35.592309+00:00",
+  "tables": {
+    "airfoil_self_noise": {
+      "preflight": "passed",
+      "outcome": "completed",
+      "successful_seconds": 903.2187417838722
+    },
+    "bodyfat": {
+      "preflight": "passed",
+      "outcome": "completed",
+      "successful_seconds": 901.9478713739663
+    },
+    "cars": {
+      "preflight": "passed"
+    },
+    "concrete_compressive_strength": {
+      "preflight": "passed"
+    },
+    "cpu_activity": {
+      "preflight": "passed"
+    },
+    "energy_efficiency": {
+      "preflight": "passed"
+    },
+    "kin8nm": {
+      "preflight": "passed"
+    },
+    "pumadyn32nh": {
+      "preflight": "passed"
+    },
+    "qsar_fish_toxicity": {
+      "preflight": "passed"
+    },
+    "red_wine": {
+      "preflight": "passed"
+    },
+    "space_ga": {
+      "preflight": "passed"
+    },
+    "white_wine": {
+      "preflight": "passed"
+    }
+  },
+  "baselines": {},
+  "successful_seconds_budget": 10800,
+  "prior_completed_utc": "2026-09-29T14:51:46.081586+00:00",
+  "active_table": "cars",
+  "error_type": "CalledProcessError",
+  "error": "Command '['/Users/dustinstudio/.local/bin/wehub-python', '--profile', 'train-20260920', '-u', '/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/run_table.py', '--root', '/Users/dustinstudio/experiments/v6-openml12-single-table-earlystop-20260929/tables/cars']' returned non-zero exit status 1."
+}

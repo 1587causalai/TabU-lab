@@ -1,0 +1,114 @@
+{
+  "outcome": "completed",
+  "phase": "completed",
+  "host": "dgx2",
+  "branch": "v55",
+  "parent_sha256": "f172e312d7fafd41d72668b3f1f35a1ed59ee5d7d11a2e231be2df2f211dfe08",
+  "pid": 1491917,
+  "started_utc": "2026-09-29T14:35:35.664622+00:00",
+  "tables": {
+    "airfoil_self_noise": {
+      "preflight": "passed",
+      "outcome": "completed",
+      "successful_seconds": 900.1815789786633
+    },
+    "bodyfat": {
+      "preflight": "passed",
+      "outcome": "completed",
+      "successful_seconds": 900.1921569409315
+    },
+    "cars": {
+      "preflight": "passed",
+      "outcome": "completed",
+      "successful_seconds": 900.1853098981373
+    },
+    "concrete_compressive_strength": {
+      "preflight": "passed",
+      "outcome": "completed",
+      "successful_seconds": 900.4191536333528
+    },
+    "cpu_activity": {
+      "preflight": "passed",
+      "outcome": "completed",
+      "successful_seconds": 900.2013509877434
+    },
+    "energy_efficiency": {
+      "preflight": "passed",
+      "outcome": "completed",
+      "successful_seconds": 900.2146850340941
+    },
+    "kin8nm": {
+      "preflight": "passed",
+      "outcome": "completed",
+      "successful_seconds": 900.3147098841728
+    },
+    "pumadyn32nh": {
+      "preflight": "passed",
+      "outcome": "completed",
+      "successful_seconds": 900.5961934610968
+    },
+    "qsar_fish_toxicity": {
+      "preflight": "passed",
+      "outcome": "completed",
+      "successful_seconds": 900.2778627938824
+    },
+    "red_wine": {
+      "preflight": "passed",
+      "outcome": "completed",
+      "successful_seconds": 900.1535894797707
+    },
+    "space_ga": {
+      "preflight": "passed",
+      "outcome": "completed",
+      "successful_seconds": 900.104754733009
+    },
+    "white_wine": {
+      "preflight": "passed",
+      "outcome": "completed",
+      "successful_seconds": 900.5384072115994
+    }
+  },
+  "baselines": {
+    "airfoil_self_noise": {
+      "outcome": "completed"
+    },
+    "bodyfat": {
+      "outcome": "completed"
+    },
+    "cars": {
+      "outcome": "completed"
+    },
+    "concrete_compressive_strength": {
+      "outcome": "completed"
+    },
+    "cpu_activity": {
+      "outcome": "completed"
+    },
+    "energy_efficiency": {
+      "outcome": "completed"
+    },
+    "kin8nm": {
+      "outcome": "completed"
+    },
+    "pumadyn32nh": {
+      "outcome": "completed"
+    },
+    "qsar_fish_toxicity": {
+      "outcome": "completed"
+    },
+    "red_wine": {
+      "outcome": "completed"
+    },
+    "space_ga": {
+      "outcome": "completed"
+    },
+    "white_wine": {
+      "outcome": "completed"
+    }
+  },
+  "successful_seconds_budget": 10800,
+  "prior_completed_utc": "2026-09-29T14:52:52.793895+00:00",
+  "active_table": "white_wine",
+  "completed_utc": "2026-09-29T18:21:54.385608+00:00",
+  "total_successful_seconds": 10803.379753036454
+}

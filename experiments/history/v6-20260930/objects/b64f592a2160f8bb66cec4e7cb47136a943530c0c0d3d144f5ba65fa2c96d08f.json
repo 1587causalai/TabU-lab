@@ -1,0 +1,30 @@
+{
+  "outcome": "completed",
+  "host": "gongqian-mini",
+  "started_utc": "2026-09-28T15:46:59.724237+00:00",
+  "completed_training_seconds": 1804.2930924668908,
+  "additional_seconds_target": 1800,
+  "start_successful_seconds": 0,
+  "start_sha256": "cf3731e8941261c73dd02725402a7e04545d2e71c941500fed39f7153716f818",
+  "objective": "broadcast_allcell_restoration",
+  "phase": "half2",
+  "phase_budget": 899.2021645624191,
+  "checkpoint_sha256": "119435398a2b3957dae7d3ba8a61b530fa709379d6c81e3da16cc3cb3772616a",
+  "evaluations": {
+    "half1": {
+      "macro": {
+        "r2": 0.7617296402512856,
+        "slog": 0.6941406692044653
+      },
+      "checkpoint_sha256": "556413ae41aabd0e57d98fed164d7962d50780c0943963b8c7de9267dc2ccc41"
+    },
+    "half2": {
+      "macro": {
+        "r2": 0.7636189447734586,
+        "slog": 0.6948070987508147
+      },
+      "checkpoint_sha256": "119435398a2b3957dae7d3ba8a61b530fa709379d6c81e3da16cc3cb3772616a"
+    }
+  },
+  "completed_utc": "2026-09-28T16:19:52.704717+00:00"
+}

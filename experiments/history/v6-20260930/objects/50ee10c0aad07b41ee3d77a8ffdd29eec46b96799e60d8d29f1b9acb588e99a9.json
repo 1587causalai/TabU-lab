@@ -1,0 +1,659 @@
+{
+  "dustinstudio": {
+    "seconds": 3600.2391510407906,
+    "updates": 9356,
+    "coverage": [
+      718,
+      718
+    ],
+    "counts": {
+      "old618/v6/loss/vs_start": {
+        "improved": 414,
+        "declined": 204,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v6/loss/vs_midpoint": {
+        "improved": 312,
+        "declined": 306,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v6/r2/vs_start": {
+        "improved": 200,
+        "declined": 92,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v6/r2/vs_midpoint": {
+        "improved": 158,
+        "declined": 134,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v6/slog/vs_start": {
+        "improved": 187,
+        "declined": 99,
+        "tied": 0,
+        "undefined": 6
+      },
+      "old618/v6/slog/vs_midpoint": {
+        "improved": 146,
+        "declined": 140,
+        "tied": 0,
+        "undefined": 6
+      },
+      "old618/v6/accuracy/vs_start": {
+        "improved": 161,
+        "declined": 141,
+        "tied": 24,
+        "undefined": 0
+      },
+      "old618/v6/accuracy/vs_midpoint": {
+        "improved": 150,
+        "declined": 154,
+        "tied": 22,
+        "undefined": 0
+      },
+      "old618/v6/rank_mae/vs_start": {
+        "improved": 76,
+        "declined": 60,
+        "tied": 4,
+        "undefined": 0
+      },
+      "old618/v6/rank_mae/vs_midpoint": {
+        "improved": 61,
+        "declined": 74,
+        "tied": 5,
+        "undefined": 0
+      },
+      "old618/v55/loss/vs_start": {
+        "improved": 498,
+        "declined": 120,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v55/loss/vs_midpoint": {
+        "improved": 342,
+        "declined": 276,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v55/r2/vs_start": {
+        "improved": 235,
+        "declined": 57,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v55/r2/vs_midpoint": {
+        "improved": 177,
+        "declined": 115,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v55/slog/vs_start": {
+        "improved": 223,
+        "declined": 63,
+        "tied": 0,
+        "undefined": 6
+      },
+      "old618/v55/slog/vs_midpoint": {
+        "improved": 166,
+        "declined": 120,
+        "tied": 0,
+        "undefined": 6
+      },
+      "old618/v55/accuracy/vs_start": {
+        "improved": 188,
+        "declined": 113,
+        "tied": 25,
+        "undefined": 0
+      },
+      "old618/v55/accuracy/vs_midpoint": {
+        "improved": 145,
+        "declined": 149,
+        "tied": 32,
+        "undefined": 0
+      },
+      "old618/v55/rank_mae/vs_start": {
+        "improved": 76,
+        "declined": 59,
+        "tied": 5,
+        "undefined": 0
+      },
+      "old618/v55/rank_mae/vs_midpoint": {
+        "improved": 65,
+        "declined": 69,
+        "tied": 6,
+        "undefined": 0
+      },
+      "sparse100/v6/loss/vs_start": {
+        "improved": 51,
+        "declined": 49,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v6/loss/vs_midpoint": {
+        "improved": 40,
+        "declined": 60,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v6/r2/vs_start": {
+        "improved": 50,
+        "declined": 50,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v6/r2/vs_midpoint": {
+        "improved": 41,
+        "declined": 59,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v6/slog/vs_start": {
+        "improved": 51,
+        "declined": 49,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v6/slog/vs_midpoint": {
+        "improved": 45,
+        "declined": 55,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v55/loss/vs_start": {
+        "improved": 33,
+        "declined": 67,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v55/loss/vs_midpoint": {
+        "improved": 29,
+        "declined": 71,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v55/r2/vs_start": {
+        "improved": 32,
+        "declined": 68,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v55/r2/vs_midpoint": {
+        "improved": 29,
+        "declined": 71,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v55/slog/vs_start": {
+        "improved": 35,
+        "declined": 65,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v55/slog/vs_midpoint": {
+        "improved": 30,
+        "declined": 70,
+        "tied": 0,
+        "undefined": 0
+      }
+    },
+    "checkpoint_sha256": "d454eb19e3d37a1b4bf166efad3b4d14d78b3ff913772c16f14c965833aaf320",
+    "sparse_thresholds": {
+      "0": [
+        4,
+        15,
+        26,
+        35,
+        22
+      ],
+      "0.1": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "dgx2": {
+    "seconds": 3600.7432381122635,
+    "updates": 5945,
+    "coverage": [
+      718,
+      718
+    ],
+    "counts": {
+      "old618/v6/loss/vs_start": {
+        "improved": 395,
+        "declined": 223,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v6/loss/vs_midpoint": {
+        "improved": 330,
+        "declined": 288,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v6/r2/vs_start": {
+        "improved": 166,
+        "declined": 126,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v6/r2/vs_midpoint": {
+        "improved": 149,
+        "declined": 143,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v6/slog/vs_start": {
+        "improved": 163,
+        "declined": 123,
+        "tied": 0,
+        "undefined": 6
+      },
+      "old618/v6/slog/vs_midpoint": {
+        "improved": 153,
+        "declined": 133,
+        "tied": 0,
+        "undefined": 6
+      },
+      "old618/v6/accuracy/vs_start": {
+        "improved": 174,
+        "declined": 124,
+        "tied": 28,
+        "undefined": 0
+      },
+      "old618/v6/accuracy/vs_midpoint": {
+        "improved": 182,
+        "declined": 125,
+        "tied": 19,
+        "undefined": 0
+      },
+      "old618/v6/rank_mae/vs_start": {
+        "improved": 99,
+        "declined": 36,
+        "tied": 5,
+        "undefined": 0
+      },
+      "old618/v6/rank_mae/vs_midpoint": {
+        "improved": 63,
+        "declined": 69,
+        "tied": 8,
+        "undefined": 0
+      },
+      "old618/v55/loss/vs_start": {
+        "improved": 481,
+        "declined": 137,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v55/loss/vs_midpoint": {
+        "improved": 362,
+        "declined": 256,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v55/r2/vs_start": {
+        "improved": 218,
+        "declined": 74,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v55/r2/vs_midpoint": {
+        "improved": 167,
+        "declined": 125,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v55/slog/vs_start": {
+        "improved": 213,
+        "declined": 73,
+        "tied": 0,
+        "undefined": 6
+      },
+      "old618/v55/slog/vs_midpoint": {
+        "improved": 155,
+        "declined": 131,
+        "tied": 0,
+        "undefined": 6
+      },
+      "old618/v55/accuracy/vs_start": {
+        "improved": 201,
+        "declined": 99,
+        "tied": 26,
+        "undefined": 0
+      },
+      "old618/v55/accuracy/vs_midpoint": {
+        "improved": 141,
+        "declined": 164,
+        "tied": 21,
+        "undefined": 0
+      },
+      "old618/v55/rank_mae/vs_start": {
+        "improved": 85,
+        "declined": 48,
+        "tied": 7,
+        "undefined": 0
+      },
+      "old618/v55/rank_mae/vs_midpoint": {
+        "improved": 65,
+        "declined": 69,
+        "tied": 6,
+        "undefined": 0
+      },
+      "sparse100/v6/loss/vs_start": {
+        "improved": 56,
+        "declined": 44,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v6/loss/vs_midpoint": {
+        "improved": 62,
+        "declined": 38,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v6/r2/vs_start": {
+        "improved": 56,
+        "declined": 44,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v6/r2/vs_midpoint": {
+        "improved": 60,
+        "declined": 40,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v6/slog/vs_start": {
+        "improved": 54,
+        "declined": 46,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v6/slog/vs_midpoint": {
+        "improved": 65,
+        "declined": 35,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v55/loss/vs_start": {
+        "improved": 60,
+        "declined": 40,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v55/loss/vs_midpoint": {
+        "improved": 56,
+        "declined": 44,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v55/r2/vs_start": {
+        "improved": 61,
+        "declined": 39,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v55/r2/vs_midpoint": {
+        "improved": 55,
+        "declined": 45,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v55/slog/vs_start": {
+        "improved": 57,
+        "declined": 43,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v55/slog/vs_midpoint": {
+        "improved": 51,
+        "declined": 49,
+        "tied": 0,
+        "undefined": 0
+      }
+    },
+    "checkpoint_sha256": "4f1ded54395282bc82e93bef24ed21aaf0010dbd29e2e60f33aa50a866b0370d",
+    "sparse_thresholds": {
+      "0": [
+        19,
+        16,
+        20,
+        32,
+        30
+      ],
+      "0.1": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "gongqian-mini": {
+    "seconds": 3600.188532281667,
+    "updates": 5927,
+    "coverage": [
+      718,
+      718
+    ],
+    "counts": {
+      "old618/v6/loss/vs_start": {
+        "improved": 366,
+        "declined": 252,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v6/loss/vs_midpoint": {
+        "improved": 356,
+        "declined": 262,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v6/r2/vs_start": {
+        "improved": 188,
+        "declined": 104,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v6/r2/vs_midpoint": {
+        "improved": 177,
+        "declined": 115,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v6/slog/vs_start": {
+        "improved": 176,
+        "declined": 110,
+        "tied": 0,
+        "undefined": 6
+      },
+      "old618/v6/slog/vs_midpoint": {
+        "improved": 166,
+        "declined": 120,
+        "tied": 0,
+        "undefined": 6
+      },
+      "old618/v6/accuracy/vs_start": {
+        "improved": 177,
+        "declined": 127,
+        "tied": 22,
+        "undefined": 0
+      },
+      "old618/v6/accuracy/vs_midpoint": {
+        "improved": 172,
+        "declined": 133,
+        "tied": 21,
+        "undefined": 0
+      },
+      "old618/v6/rank_mae/vs_start": {
+        "improved": 79,
+        "declined": 58,
+        "tied": 3,
+        "undefined": 0
+      },
+      "old618/v6/rank_mae/vs_midpoint": {
+        "improved": 75,
+        "declined": 59,
+        "tied": 6,
+        "undefined": 0
+      },
+      "old618/v55/loss/vs_start": {
+        "improved": 494,
+        "declined": 124,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v55/loss/vs_midpoint": {
+        "improved": 450,
+        "declined": 168,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v55/r2/vs_start": {
+        "improved": 245,
+        "declined": 47,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v55/r2/vs_midpoint": {
+        "improved": 223,
+        "declined": 69,
+        "tied": 0,
+        "undefined": 0
+      },
+      "old618/v55/slog/vs_start": {
+        "improved": 235,
+        "declined": 51,
+        "tied": 0,
+        "undefined": 6
+      },
+      "old618/v55/slog/vs_midpoint": {
+        "improved": 212,
+        "declined": 74,
+        "tied": 0,
+        "undefined": 6
+      },
+      "old618/v55/accuracy/vs_start": {
+        "improved": 190,
+        "declined": 117,
+        "tied": 19,
+        "undefined": 0
+      },
+      "old618/v55/accuracy/vs_midpoint": {
+        "improved": 176,
+        "declined": 125,
+        "tied": 25,
+        "undefined": 0
+      },
+      "old618/v55/rank_mae/vs_start": {
+        "improved": 81,
+        "declined": 54,
+        "tied": 5,
+        "undefined": 0
+      },
+      "old618/v55/rank_mae/vs_midpoint": {
+        "improved": 97,
+        "declined": 40,
+        "tied": 3,
+        "undefined": 0
+      },
+      "sparse100/v6/loss/vs_start": {
+        "improved": 82,
+        "declined": 18,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v6/loss/vs_midpoint": {
+        "improved": 56,
+        "declined": 44,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v6/r2/vs_start": {
+        "improved": 85,
+        "declined": 15,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v6/r2/vs_midpoint": {
+        "improved": 59,
+        "declined": 41,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v6/slog/vs_start": {
+        "improved": 76,
+        "declined": 24,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v6/slog/vs_midpoint": {
+        "improved": 60,
+        "declined": 40,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v55/loss/vs_start": {
+        "improved": 58,
+        "declined": 42,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v55/loss/vs_midpoint": {
+        "improved": 61,
+        "declined": 39,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v55/r2/vs_start": {
+        "improved": 56,
+        "declined": 44,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v55/r2/vs_midpoint": {
+        "improved": 60,
+        "declined": 40,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v55/slog/vs_start": {
+        "improved": 51,
+        "declined": 49,
+        "tied": 0,
+        "undefined": 0
+      },
+      "sparse100/v55/slog/vs_midpoint": {
+        "improved": 58,
+        "declined": 42,
+        "tied": 0,
+        "undefined": 0
+      }
+    },
+    "checkpoint_sha256": "2fd259588903115aa032c79881f0e13db115939046097be85250b39e0511ffba",
+    "sparse_thresholds": {
+      "0": [
+        10,
+        25,
+        32,
+        30,
+        39
+      ],
+      "0.1": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  }
+}

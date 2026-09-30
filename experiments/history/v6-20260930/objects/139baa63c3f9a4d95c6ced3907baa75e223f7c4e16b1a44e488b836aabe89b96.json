@@ -1,0 +1,54 @@
+{
+  "completed_utc": "2026-09-29T14:49:53.250411+00:00",
+  "selected_trial": "lr1e-4",
+  "trials": {
+    "lr1e-4": {
+      "checkpoint": "/home/cms/experiments/v6-puma-lrval-grid-20260929/run/lr1e-4/checkpoints/1d38415918a8165c25a32803de4f9141f3744e99e59e3bd0e98bec78e86f26ab.pt",
+      "checkpoint_sha256": "1d38415918a8165c25a32803de4f9141f3744e99e59e3bd0e98bec78e86f26ab",
+      "metrics": {
+        "mae": 0.0176292171601948,
+        "mse": 0.0004985590960060722,
+        "n": 1311,
+        "prediction_std": 0.034062065427643104,
+        "r2": 0.6163259100818446,
+        "rmse": 0.022328436936025597,
+        "slog": 0.44074463184917256,
+        "target_std": 0.03604766067433209
+      },
+      "seconds": 900.3122250119341,
+      "updates": 755
+    },
+    "lr1e-5": {
+      "checkpoint": "/home/cms/experiments/v6-puma-lrval-grid-20260929/run/lr1e-5/checkpoints/db51597937b47a0eeeeea1231e1d7d1f8a6db2d26b6999b24921634087b0f2b6.pt",
+      "checkpoint_sha256": "db51597937b47a0eeeeea1231e1d7d1f8a6db2d26b6999b24921634087b0f2b6",
+      "metrics": {
+        "mae": 0.025938517017191985,
+        "mse": 0.001057353457362302,
+        "n": 1311,
+        "prediction_std": 0.013447743406783322,
+        "r2": 0.18629681270451537,
+        "rmse": 0.03251697183567839,
+        "slog": 0.09903414633566443,
+        "target_std": 0.03604766067433209
+      },
+      "seconds": 900.782741925912,
+      "updates": 752
+    },
+    "lr3e-5": {
+      "checkpoint": "/home/cms/experiments/v6-puma-lrval-grid-20260929/run/lr3e-5/checkpoints/2e824c3a5893c92fc92d48b5c25cb5077cb2273a340c51e99a01fedaab2d8e42.pt",
+      "checkpoint_sha256": "2e824c3a5893c92fc92d48b5c25cb5077cb2273a340c51e99a01fedaab2d8e42",
+      "metrics": {
+        "mae": 0.025743059294504298,
+        "mse": 0.0010457172126238168,
+        "n": 1311,
+        "prediction_std": 0.013968064677134294,
+        "r2": 0.19525167010430644,
+        "rmse": 0.0323375511228636,
+        "slog": 0.10685272457332706,
+        "target_std": 0.03604766067433209
+      },
+      "seconds": 900.9951760220429,
+      "updates": 752
+    }
+  }
+}
