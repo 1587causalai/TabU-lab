@@ -91,6 +91,10 @@ remain available. `train_step` and `evaluate_task` dispatch joint masks automati
 
 Choose `device: mps, dtype: float32` for Apple training; use the configured
 `cuda/float64` on the existing CUDA training hosts. No device fallback is performed.
+MPS indexed accumulation does not support PyTorch's strict deterministic-algorithm
+mode; the library honors the caller's setting and does not disable it silently.
+Exact continuation checks describe the tested local execution, not a universal
+bitwise guarantee across devices or library versions.
 `gradient_checkpointing: true` recomputes the backbone during backward to save
 memory. The small CPU fixture is an implementation check, not a trained candidate.
 

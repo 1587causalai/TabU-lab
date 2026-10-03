@@ -38,18 +38,19 @@ def test_default_parameter_count_matches_design() -> None:
 
 
 @pytest.mark.parametrize("scale", [True, False])
-def test_inverse_is_algebraically_exact_in_float64(scale: bool) -> None:
-    value_map = CouplingValueMap(scale=scale).double()
-    _perturb_parameters(value_map)
-    x = torch.randn(256, 64, dtype=torch.float64)
-
-    y = value_map(x)
-
-    tolerance = 1.0e-12 * float(y.abs().max())
-
-    assert not torch.allclose(y, x)
-    assert torch.allclose(value_map.inverse(y), x, rtol=0.0, atol=100 * tolerance)
-    assert torch.allclose(value_map(value_map.inverse(x)), x, rtol=0.0, atol=100 * tolerance)
+@pytest.mark.parametrize("seed", [0, 1, 7])
+def test_float64_round_trip_with_moderate_parameters(scale: bool, seed: int) -> None:
+    # Invertibility does not guarantee conditioning for arbitrary large shift
+    # networks. Exercise nonidentity maps with reproducible, moderate parameters.
+    with torch.random.fork_rng(devices=[]):
+        torch.manual_seed(seed)
+        value_map = CouplingValueMap(scale=scale).double()
+        _perturb_parameters(value_map, seed=seed, std=0.05)
+        x = torch.randn(256, 64, dtype=torch.float64)
+        y = value_map(x)
+        assert not torch.allclose(y, x)
+        torch.testing.assert_close(value_map.inverse(y), x, rtol=0.0, atol=1e-10)
+        torch.testing.assert_close(value_map(value_map.inverse(x)), x, rtol=0.0, atol=1e-10)
 
 
 @pytest.mark.parametrize("scale", [True, False])

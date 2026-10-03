@@ -13,6 +13,22 @@ from tabu_lab.models.restoration_v7 import MaskingSpec, load_typed_table, sample
 from tabu_lab.models.restoration_v7.fit import run_fit
 
 
+@pytest.fixture(autouse=True)
+def isolated_runtime(request):
+    threads = torch.get_num_threads()
+    deterministic = torch.are_deterministic_algorithms_enabled()
+    warn_only = torch.is_deterministic_algorithms_warn_only_enabled()
+    parameters = getattr(getattr(request.node, "callspec", None), "params", {})
+    if parameters.get("device") == "mps":
+        torch.use_deterministic_algorithms(False)
+    try:
+        with torch.random.fork_rng(devices=[]):
+            yield
+    finally:
+        torch.set_num_threads(threads)
+        torch.use_deterministic_algorithms(deterministic, warn_only=warn_only)
+
+
 def fixture(tmp_path, mode="mixed"):
     table_path = tmp_path / "toy.json"
     table_path.write_text(

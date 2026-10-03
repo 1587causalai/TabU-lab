@@ -145,8 +145,21 @@ def test_joint_seed_and_unshared_rounds_train(share_rounds):
     assert model.query_seed_nominal.grad is not None
 
 
+@pytest.fixture
+def mps_algorithm_mode():
+    deterministic = torch.are_deterministic_algorithms_enabled()
+    warn_only = torch.is_deterministic_algorithms_warn_only_enabled()
+    # MPS index accumulation has no strict deterministic implementation.
+    # Restore the caller's process-wide mode after this backend check.
+    torch.use_deterministic_algorithms(False)
+    try:
+        yield
+    finally:
+        torch.use_deterministic_algorithms(deterministic, warn_only=warn_only)
+
+
 @pytest.mark.skipif(not torch.backends.mps.is_available(), reason="MPS unavailable")
-def test_mps_fp32_joint_real_update_and_evaluation():
+def test_mps_fp32_joint_real_update_and_evaluation(mps_algorithm_mode):
     model = V7Model(config(gradient_checkpointing=True)).to(device="mps", dtype=torch.float32)
     item = task(device="mps", dtype=torch.float32)
     record = train_step(model, make_optimizer(model), [item], grad_clip_norm=1)
