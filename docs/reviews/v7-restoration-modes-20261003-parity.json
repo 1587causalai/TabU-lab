@@ -1,0 +1,57 @@
+{
+  "status": "passed",
+  "reference": "frozen scale12 joint_v7.py",
+  "parent_sha256": "8a3e453fc03ee59f58652c20e3f068446d9bc276411a97716c08dd842e09c15b",
+  "scope": "real Mini parent; synthetic numeric table, 16 rows; no training-quality claim",
+  "torch": "2.13.0",
+  "cases": [
+    {
+      "device": "cpu",
+      "dtype": "torch.float64",
+      "mode": "single",
+      "rounds": 4,
+      "exact_states": true,
+      "exact_loss": true,
+      "exact_parameter_gradients": true,
+      "compared_gradients": 122,
+      "loss": 4.548283020648081,
+      "checkpoint_tensors": 125
+    },
+    {
+      "device": "cpu",
+      "dtype": "torch.float64",
+      "mode": "joint",
+      "rounds": 4,
+      "exact_states": true,
+      "exact_loss": true,
+      "exact_parameter_gradients": true,
+      "compared_gradients": 122,
+      "loss": 14.311807028371563,
+      "checkpoint_tensors": 125
+    },
+    {
+      "device": "mps",
+      "dtype": "torch.float32",
+      "mode": "single",
+      "rounds": 4,
+      "exact_states": true,
+      "exact_loss": true,
+      "exact_parameter_gradients": true,
+      "compared_gradients": 122,
+      "loss": 4.548270225524902,
+      "checkpoint_tensors": 125
+    },
+    {
+      "device": "mps",
+      "dtype": "torch.float32",
+      "mode": "joint",
+      "rounds": 4,
+      "exact_states": true,
+      "exact_loss": true,
+      "exact_parameter_gradients": true,
+      "compared_gradients": 122,
+      "loss": 14.311803817749023,
+      "checkpoint_tensors": 125
+    }
+  ]
+}

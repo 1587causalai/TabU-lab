@@ -1,0 +1,41 @@
+# Runnable implementation smoke fixture; not a recommended research budget/model size.
+schema: tabu.restoration.v7-fit.v1
+output_dir: ./output-mixed
+seed: 20261003
+steps: 8
+num_threads: 2
+device: cpu
+dtype: float64
+window_rows: 16
+query_rows: 4
+eval_query_rows: 4
+grad_clip_norm: 1.0
+tables:
+  - path: ./toy.json
+masking:
+  mode: mixed                  # single | joint | mixed
+  columns: [0, 1, target]       # indices, column names, or target; omit for all columns
+  joint_probability: 0.5       # in mixed mode, probability per episode
+  joint_columns: 3             # omit/null to hide all eligible columns jointly
+model:
+  query_init: donor
+  query_source: true
+  rounds: 4
+  share_rounds: true
+  gradient_checkpointing: false
+  unit_layers: 1
+  coupling_blocks: 1
+  coupling_hidden: [16]
+  coupling_alpha: 0.1
+  chi_numeric: 32.0
+  chi_discrete: 0.25
+  center_chunk_size: 16
+  backbone:
+    width: 64
+    layers: 1
+    heads: 2
+    ff_width: 64
+    slots: 4
+optimizer:
+  lr: 0.0001
+  weight_decay: 0.0
