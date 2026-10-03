@@ -8,6 +8,7 @@ import warnings
 
 import torch
 
+from ..restoration_v53.codec_versions import CODEC_IDS
 from .config import V7Config
 from .model import V7Model
 
@@ -28,6 +29,16 @@ def from_v6_checkpoint(parent, *, device="cpu", dtype=torch.float64, value_map="
         raise ValueError("unsupported V6 scaling or projected regression migration")
     if old.get("slope_source", "shared_ll") != "shared_ll":
         raise ValueError("only shared-LL V6 checkpoints are supported")
+    weights = parent["model"]
+    signature = weights.get("_codec_signature")
+    expected_signature = torch.tensor([CODEC_IDS[old["codec_version"]], 1], dtype=torch.long)
+    if (
+        not isinstance(signature, torch.Tensor)
+        or signature.dtype != torch.long
+        or not torch.equal(signature.detach().cpu(), expected_signature)
+    ):
+        raise ValueError("parent checkpoint codec/scaling signature differs from its config")
+    # Validate identity before constructing a model or changing the caller's RNG.
     config = V7Config(
         code_dim=128,
         codec=old["codec_version"],
@@ -41,7 +52,6 @@ def from_v6_checkpoint(parent, *, device="cpu", dtype=torch.float64, value_map="
     )
     torch.manual_seed(seed)
     model = V7Model(config).to(device=device, dtype=dtype)
-    weights = parent["model"]
     transferred = {}
     for k, v in weights.items():
         if v.is_floating_point() and not bool(torch.isfinite(v).all()):

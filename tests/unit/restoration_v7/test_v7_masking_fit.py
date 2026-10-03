@@ -173,3 +173,39 @@ def test_weights_only_parent_inherits_shape_and_starts_fresh_optimizer(tmp_path)
     assert state["step"] == 1
     assert all(float(value["step"]) == 1 for value in state["optimizer"]["state"].values())
     assert state["manifest"]["initialization"]["sha256"] == parent["checkpoint_sha256"]
+
+
+@pytest.mark.parametrize(
+    "optimizer",
+    [
+        {"lr": -1},
+        {"lr": float("nan")},
+        {"lr": float("inf")},
+        {"lr": "0.1"},
+        {"eps": -1},
+        {"eps": float("nan")},
+        {"weight_decay": -1},
+        {"betas": [0.9]},
+        {"betas": [0.9, 1.0]},
+        {"betas": [0.9, float("nan")]},
+        {"betas": [True, 0.9]},
+        {"lr": True},
+    ],
+)
+def test_dry_run_rejects_invalid_optimizer_before_model_creation(tmp_path, optimizer):
+    path, cfg, _ = fixture(tmp_path)
+    path.write_text(yaml.safe_dump(cfg | {"optimizer": optimizer}))
+    rng = torch.get_rng_state().clone()
+    with pytest.raises(ValueError, match="optimizer"):
+        run_fit(path)
+    assert not (tmp_path / "run").exists()
+    assert torch.equal(torch.get_rng_state(), rng)
+
+
+@pytest.mark.parametrize("scale", ["false", "true", 0, 1, None])
+def test_dry_run_rejects_non_boolean_coupling_scale(tmp_path, scale):
+    path, cfg, _ = fixture(tmp_path)
+    cfg["model"]["coupling_scale"] = scale
+    path.write_text(yaml.safe_dump(cfg))
+    with pytest.raises(ValueError, match="coupling_scale must be a boolean"):
+        run_fit(path)

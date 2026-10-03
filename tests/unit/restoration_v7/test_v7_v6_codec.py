@@ -101,3 +101,21 @@ def test_exact_preimage_does_not_claim_training_stability():
     assert receipt["query_seed_norm_amplification"] == pytest.approx(1e6)
     assert receipt["amplified_query_preimage"]
     assert receipt["training_stability_qualified"] is False
+
+
+@pytest.mark.parametrize("signature", [None, [6, 0], [6], [999, 1]])
+def test_v6_transfer_rejects_missing_or_inconsistent_signature_before_rng_change(signature):
+    cfg = V55Config(
+        backbone=BackboneConfig(width=128, layers=1, heads=4, ff_width=128, slots=4),
+        unit_layers=1,
+        codec_version="constant_weight_composition_v2",
+    )
+    parent = {"model_config": cfg.as_dict(), "model": V55Model(cfg).state_dict()}
+    if signature is None:
+        parent["model"].pop("_codec_signature")
+    else:
+        parent["model"]["_codec_signature"] = torch.tensor(signature, dtype=torch.long)
+    rng = torch.get_rng_state().clone()
+    with pytest.raises(ValueError, match="codec/scaling signature"):
+        from_v6_checkpoint(parent)
+    assert torch.equal(torch.get_rng_state(), rng)

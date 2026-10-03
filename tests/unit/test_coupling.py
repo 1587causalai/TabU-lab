@@ -132,3 +132,11 @@ def test_invalid_configuration_is_rejected() -> None:
         AffineCoupling(4, [2, 3], alpha=0.0)
     with pytest.raises(ValueError):
         CouplingValueMap()(torch.randn(3, 32))
+
+
+@pytest.mark.parametrize("scale", ["false", "true", 0, 1, None])
+def test_public_coupling_constructor_rejects_non_boolean_scale(scale):
+    with pytest.raises(ValueError, match="scale must be a boolean"):
+        AffineCoupling(4, [2, 3], scale=scale)
+    with pytest.raises(ValueError, match="scale must be a boolean"):
+        CouplingValueMap(scale=scale)

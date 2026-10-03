@@ -60,6 +60,8 @@ class AffineCoupling(nn.Module):
         scale: bool = True,
     ) -> None:
         super().__init__()
+        if type(scale) is not bool:
+            raise ValueError("scale must be a boolean")
         if dim < 2:
             raise ValueError("dim must be at least 2")
         update = sorted({int(i) for i in update_index})

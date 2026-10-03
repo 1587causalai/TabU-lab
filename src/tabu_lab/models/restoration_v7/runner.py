@@ -42,6 +42,28 @@ class OptimizerSpec:
     eps: float = 1e-8
     weight_decay: float = 0.0
 
+    def __post_init__(self):
+        for name in ("lr", "eps", "weight_decay"):
+            value = getattr(self, name)
+            if (
+                isinstance(value, bool)
+                or not isinstance(value, (int, float))
+                or not math.isfinite(value)
+                or value < 0
+            ):
+                raise ValueError(f"optimizer.{name} must be finite and nonnegative")
+        if not isinstance(self.betas, (list, tuple)) or len(self.betas) != 2:
+            raise ValueError("optimizer.betas must contain two coefficients")
+        if any(
+            isinstance(value, bool)
+            or not isinstance(value, (int, float))
+            or not math.isfinite(value)
+            or not 0 <= value < 1
+            for value in self.betas
+        ):
+            raise ValueError("optimizer.betas coefficients must be finite and lie in [0, 1)")
+        object.__setattr__(self, "betas", tuple(self.betas))
+
 
 @dataclass(frozen=True)
 class StepRecord:

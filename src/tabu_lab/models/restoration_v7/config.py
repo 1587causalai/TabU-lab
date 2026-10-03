@@ -69,7 +69,7 @@ class V7Config:
             raise ValueError("codec must be G64 or C64/8 or constant_weight_composition_v2")
         if self.query_init not in ("seed", "donor"):
             raise ValueError("query_init must be seed or donor")
-        for name in ("query_source", "gradient_checkpointing", "share_rounds"):
+        for name in ("query_source", "gradient_checkpointing", "share_rounds", "coupling_scale"):
             if type(getattr(self, name)) is not bool:
                 raise ValueError(f"{name} must be a boolean")
         if self.codec == "C64/8" and self.code_dim != 64:
