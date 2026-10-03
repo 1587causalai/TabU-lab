@@ -10,6 +10,16 @@ from typing import Any
 import yaml
 
 
+def _run_v7_fit(args: argparse.Namespace) -> int:
+    from tabu_lab.models.restoration_v7.fit import run_fit
+
+    result = run_fit(
+        args.config, execute=args.execute, resume=args.resume, output_dir=args.output_dir
+    )
+    print(json.dumps(result, indent=2, sort_keys=True))
+    return 0
+
+
 def _load_preregistration(path: Path) -> dict[str, Any]:
     if not path.is_file():
         raise ValueError(f"preregistration does not exist: {path}")
@@ -305,6 +315,14 @@ def build_parser() -> argparse.ArgumentParser:
     corpus.set_defaults(handler=_run_tar)
     restoration = subparsers.add_parser("restoration", help="five-step table-restoration reference")
     restoration_sub = restoration.add_subparsers(dest="restoration_command", required=True)
+    v7_fit = restoration_sub.add_parser(
+        "v7-fit", help="configure V7 single/joint/mixed restoration; validate unless --execute"
+    )
+    v7_fit.add_argument("--config", type=Path, required=True)
+    v7_fit.add_argument("--execute", action="store_true")
+    v7_fit.add_argument("--output-dir", type=Path, help="new output directory override")
+    v7_fit.add_argument("--resume", type=Path, help="strict native checkpoint resume")
+    v7_fit.set_defaults(handler=_run_v7_fit)
     restoration_inspect = restoration_sub.add_parser(
         "inspect", help="show the reference configuration"
     )

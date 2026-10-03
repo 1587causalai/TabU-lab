@@ -28,12 +28,13 @@ process part of the deliverable.
 
 ## What exists today
 
-Status as of **2026-09-27**: active experimental development. The repository contains
+Status as of **2026-10-03**: active experimental development. The repository contains
 implementation checks and exploratory training reports; broad unseen-table
 generalization remains an open research question.
 
 | Research asset | What a reader can inspect | What the evidence supports |
 | --- | --- | --- |
+| V7 cyclic restoration | [Single / joint / mixed configuration](docs/tutorials/v7-restoration-modes.md), [runnable YAML](examples/v7-restoration/mixed.yaml) | Shared cyclic recovery, configurable masking, per-column evaluation and native continuation; implementation checks, not a mixed-training quality claim |
 | Table-restoration implementation | [Five-step guide](docs/tutorials/table-restoration.md), [implementation review](docs/reviews/restoration-five-step-20260915/README.md) | Typed value encoding, contextual representations, Unit-based geometry, and LL/NW restoration; bounded implementation checks |
 | V5.4 reference and curriculum | [Design, versioned API and episode defaults](docs/design/restoration-v54.md), [CPU example](examples/restoration_v54_smoke.py) | Shared-column composition codes, named sizes, Small with 3 Unit layers, Nano comparison, and supervised-row episodes; local implementation checks, not a fitting result |
 | V5.5 implementation | [Version and continuation boundaries](docs/design/restoration-v55.md) | Explicit codec and Unit-depth identities, squared default with an opt-in Query log loss, guarded model-only warm starts, and versioned curriculum checks; local implementation scope only |
@@ -49,6 +50,11 @@ receipts or accepted capability claims. Each linked review describes its dated
 source and scope; its test totals are not a current whole-repository certification.
 
 ## Try the implementation
+
+For V7 single-column, joint-column or mixed restoration, start with the
+[configuration guide](docs/tutorials/v7-restoration-modes.md). The command
+`tabu-lab restoration v7-fit --config examples/v7-restoration/mixed.yaml` validates
+the run; add `--execute` for its bounded synthetic fixture.
 
 Use Python 3.11 or 3.12 and [uv](https://docs.astral.sh/uv/):
 
