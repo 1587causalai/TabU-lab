@@ -44,6 +44,10 @@ dev = [
 telemetry = [
   "wandb>=0.19,<1",
 ]
+tabarena-inference = [
+  "pandas>=2.2,<3",
+  "scikit-learn>=1.4,<2",
+]
 [tool.setuptools]
 package-dir = {"" = "src"}
 include-package-data = true

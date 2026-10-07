@@ -21,8 +21,8 @@ from dataclasses import dataclass
 import torch
 from torch import Tensor, nn
 
-from ._validation import finite, positive
 from ._dtype import solve_dtype
+from ._validation import finite, positive
 
 
 @dataclass(frozen=True)
@@ -36,11 +36,14 @@ class BackboneConfig:
     tau_presence: float = 1.0
     reference_mass: float = 1.0
     norm_eps: float = 1e-6
+    row_slots: int = 0  # compress variables within each row; 0 keeps direct row attention
 
     def __post_init__(self):
         for name in ("width", "layers", "heads", "ff_width", "slots"):
             if type(getattr(self, name)) is not int or getattr(self, name) < 1:
                 raise ValueError(f"{name} must be a positive integer")
+        if type(self.row_slots) is not int or self.row_slots < 0:
+            raise ValueError("row_slots must be a nonnegative integer")
         if self.width % self.heads:
             raise ValueError("carrier width must be divisible by head count")
         if self.kind not in ("direct", "inducing"):
@@ -50,27 +53,10 @@ class BackboneConfig:
         positive(self.norm_eps, "norm_eps")
 
 
-class OMAB(nn.Module):
-    """One receiver set and one source set; empty sources retain local FFN work."""
+class _PresenceOps:
+    """Shared presence gate; subclasses own ``attention_presence``/``ff_presence``."""
 
-    def __init__(self, config: BackboneConfig):
-        super().__init__()
-        self.config = config
-        d = config.width
-        self.attention_presence = nn.Linear(d, d, bias=False)
-        self.ff_presence = nn.Linear(d, d, bias=False)
-        nn.init.eye_(self.attention_presence.weight)
-        nn.init.eye_(self.ff_presence.weight)
-        self.q = nn.Linear(d, d, bias=False)
-        self.k = nn.Linear(d, d, bias=False)
-        self.v = nn.Linear(d, d, bias=False)
-        self.out = nn.Linear(d, d, bias=False)
-        self.norm_scale = nn.Parameter(torch.ones(d))
-        self.ff = nn.Sequential(
-            nn.Linear(d, config.ff_width, bias=False),
-            nn.GELU(),
-            nn.Linear(config.ff_width, d, bias=False),
-        )
+    config: BackboneConfig
 
     def log_presence(self, carriers: Tensor, *, local: bool = False) -> Tensor:
         """Stable log rho; only an EXACT zero projection has log presence -inf.
@@ -110,19 +96,14 @@ class OMAB(nn.Module):
     def presence(self, carriers: Tensor, *, local: bool = False) -> Tensor:
         return self.log_presence(carriers, local=local).exp()
 
-    def forward(self, receivers: Tensor, sources: Tensor, eligible: Tensor) -> Tensor:
-        """Single receiver/source sets; a thin wrapper over the batched operator."""
-        if receivers.ndim != 2 or sources.ndim != 2 or eligible.ndim != 1:
-            raise ValueError("single-set OMAB expects [R,d] receivers, [S,d] sources, [S] mask")
-        if len(sources) != len(eligible) or receivers.shape[1] != sources.shape[1]:
-            raise ValueError("sources, mask, and receiver width must align")
-        return self.batched(receivers[None], sources[None], eligible[None])[0]
 
-    def batched(self, receivers: Tensor, sources: Tensor, eligible: Tensor) -> Tensor:
-        return self._batched_with_presence(receivers, sources, eligible)[0]
+class _AttentionOps(_PresenceOps):
+    """OAttention update term only: no residual, no FFN."""
 
-    def _batched_with_presence(self, receivers, sources, eligible):
-        """Batched OMAB over independent receiver/source pairs.
+    strict_finite_content: bool
+
+    def attention_update(self, receivers, sources, eligible):
+        """Return ``(update, log_p_source)``; ``receivers + update`` is the OMAB residual.
 
         ``receivers`` is [B, R, d], ``sources`` is [B, S, d], and ``eligible``
         is the [B, S] boolean source-eligibility mask. Batches share this
@@ -132,12 +113,11 @@ class OMAB(nn.Module):
         them from a per-set list. The fixed reference mass keeps every softmax
         row well defined, including fully masked rows.
 
-        Receivers, sources, and intermediate logits are not separately
-        finite-checked: every model-internal call passes stage-checked tensors
-        (encoder output or a previous OMAB output), nonfinite content propagates
-        through the softmax into the result, and the output check below is the
-        explicit stage boundary. This keeps one host sync per OMAB instead of
-        one per intermediate tensor.
+        Historical callers keep the output-stage finite check. With the explicit
+        strict_finite_content option, active content is checked before softmax
+        and empty-source QK edges are removed before their backward computation.
+        Deleted sources and their -inf presence sentinels are excluded from that
+        additional check. V7.3 enables this option; earlier model defaults do not.
         """
         if receivers.ndim != 3 or sources.ndim != 3 or eligible.ndim != 2:
             raise ValueError("batched OMAB expects [B,R,d], [B,S,d], [B,S] tensors")
@@ -162,8 +142,19 @@ class OMAB(nn.Module):
         q = self.q(receivers).reshape(batch, n_receivers, heads, dim).transpose(1, 2)
         k = self.k(sources).reshape(batch, -1, heads, dim).transpose(1, 2)
         v = self.v(sources).reshape(batch, -1, heads, dim).transpose(1, 2)
+        if self.strict_finite_content:
+            # An empty source set has no QK edges. Delete its queries before
+            # matmul: masking NaNs afterward leaves 0 * inf in K's gradient.
+            has_sources = (~torch.isneginf(log_p_source)).any(-1)
+            q = torch.where(has_sources[:, None, None, None], q, torch.zeros_like(q))
         dtype = solve_dtype(q)
         content = q.to(dtype) @ k.to(dtype).transpose(-1, -2) / math.sqrt(dim)
+        if self.strict_finite_content:
+            content = content.masked_fill(torch.isneginf(log_p_source)[:, None, None, :], 0)
+            # Invalid presence still propagates to the output-stage guard.
+            finite_content = torch.isfinite(content) | ~torch.isfinite(log_p_source)[:, None, None, :]
+            if not bool(finite_content.all()):
+                raise FloatingPointError("numerical-failure: nonfinite OMAB attention content")
         logits = content + log_p_source[:, None, None, :]
         reference = logits.new_full(
             (*logits.shape[:-1], 1), math.log(self.config.reference_mass)
@@ -173,7 +164,13 @@ class OMAB(nn.Module):
         update = torch.nn.functional.linear(
             self.presence(receivers)[..., None] * mixed, self.out.weight.to(dtype)
         ).to(receivers)
-        residual = receivers + update
+        return update, log_p_source
+
+
+class _LocalOps(_PresenceOps):
+    """Gated RMS/GELU OFFN update term only: no residual."""
+
+    def local_update(self, residual: Tensor) -> Tensor:
         normalized = (
             self.norm_scale
             * residual
@@ -182,9 +179,103 @@ class OMAB(nn.Module):
         local_update = self.presence(residual, local=True)[..., None] * self.ff(
             normalized
         ).to(residual)
-        result = residual + local_update.to(residual)
+        return local_update.to(residual)
+
+
+class OMAB(_AttentionOps, _LocalOps, nn.Module):
+    """One receiver set and one source set; empty sources retain local FFN work.
+
+    ``forward`` is ``x + a`` followed by ``(x + a) + f(x + a)`` where ``a`` is
+    :meth:`attention_update` and ``f`` is :meth:`local_update`. The separate
+    update operators let reversible callers reuse exactly the same arithmetic.
+    """
+
+    def __init__(self, config: BackboneConfig, *, strict_finite_content: bool = False):
+        super().__init__()
+        if type(strict_finite_content) is not bool:
+            raise ValueError("strict_finite_content must be a boolean")
+        self.config = config
+        # Historical callers retain the original attention computation and
+        # output-stage failure boundary. V7.3 opts into the new content guard.
+        self.strict_finite_content = strict_finite_content
+        d = config.width
+        self.attention_presence = nn.Linear(d, d, bias=False)
+        self.ff_presence = nn.Linear(d, d, bias=False)
+        nn.init.eye_(self.attention_presence.weight)
+        nn.init.eye_(self.ff_presence.weight)
+        self.q = nn.Linear(d, d, bias=False)
+        self.k = nn.Linear(d, d, bias=False)
+        self.v = nn.Linear(d, d, bias=False)
+        self.out = nn.Linear(d, d, bias=False)
+        self.norm_scale = nn.Parameter(torch.ones(d))
+        self.ff = nn.Sequential(
+            nn.Linear(d, config.ff_width, bias=False),
+            nn.GELU(),
+            nn.Linear(config.ff_width, d, bias=False),
+        )
+
+    def forward(self, receivers: Tensor, sources: Tensor, eligible: Tensor) -> Tensor:
+        """Single receiver/source sets; a thin wrapper over the batched operator."""
+        if receivers.ndim != 2 or sources.ndim != 2 or eligible.ndim != 1:
+            raise ValueError("single-set OMAB expects [R,d] receivers, [S,d] sources, [S] mask")
+        if len(sources) != len(eligible) or receivers.shape[1] != sources.shape[1]:
+            raise ValueError("sources, mask, and receiver width must align")
+        return self.batched(receivers[None], sources[None], eligible[None])[0]
+
+    def batched(self, receivers: Tensor, sources: Tensor, eligible: Tensor) -> Tensor:
+        return self._batched_with_presence(receivers, sources, eligible)[0]
+
+    def _batched_with_presence(self, receivers, sources, eligible):
+        """Batched OMAB over independent receiver/source pairs; see ``attention_update``."""
+        update, log_p_source = self.attention_update(receivers, sources, eligible)
+        residual = receivers + update
+        result = residual + self.local_update(residual)
         finite(result, "OMAB output")
         return result, log_p_source
+
+
+class OAttention(_AttentionOps, nn.Module):
+    """Stand-alone OAttention update ``A(x)`` with OMAB's attention parameters.
+
+    No residual and no FFN: a reversible caller adds the update itself.
+    """
+
+    def __init__(self, config: BackboneConfig, *, strict_finite_content: bool = False):
+        super().__init__()
+        if type(strict_finite_content) is not bool:
+            raise ValueError("strict_finite_content must be a boolean")
+        self.config = config
+        self.strict_finite_content = strict_finite_content
+        d = config.width
+        self.attention_presence = nn.Linear(d, d, bias=False)
+        nn.init.eye_(self.attention_presence.weight)
+        self.q = nn.Linear(d, d, bias=False)
+        self.k = nn.Linear(d, d, bias=False)
+        self.v = nn.Linear(d, d, bias=False)
+        self.out = nn.Linear(d, d, bias=False)
+
+    def forward(self, receivers: Tensor, sources: Tensor, eligible: Tensor) -> Tensor:
+        return self.attention_update(receivers, sources, eligible)[0]
+
+
+class OFFN(_LocalOps, nn.Module):
+    """Stand-alone token-wise gated OFFN update ``F(x)`` with OMAB's FFN parameters."""
+
+    def __init__(self, config: BackboneConfig):
+        super().__init__()
+        self.config = config
+        d = config.width
+        self.ff_presence = nn.Linear(d, d, bias=False)
+        nn.init.eye_(self.ff_presence.weight)
+        self.norm_scale = nn.Parameter(torch.ones(d))
+        self.ff = nn.Sequential(
+            nn.Linear(d, config.ff_width, bias=False),
+            nn.GELU(),
+            nn.Linear(config.ff_width, d, bias=False),
+        )
+
+    def forward(self, carriers: Tensor) -> Tensor:
+        return self.local_update(carriers)
 
 
 class AxialLayer(nn.Module):
@@ -201,6 +292,15 @@ class AxialLayer(nn.Module):
         else:
             self.collect = None
             self.register_parameter("slot_seed", None)
+        if config.row_slots:
+            self.row_collect = OMAB(config)
+            # Shared across real rows; summaries are recomputed per row/layer.
+            self.row_slot_seed = nn.Parameter(
+                torch.randn(config.row_slots, config.width) / math.sqrt(config.width)
+            )
+        else:
+            self.row_collect = None
+            self.register_parameter("row_slot_seed", None)
 
     def forward(self, h: Tensor, source_mask: Tensor, null_mask: Tensor) -> Tensor:
         m = h.shape[1] - 1
@@ -224,7 +324,24 @@ class AxialLayer(nn.Module):
         else:
             h = self.column.batched(columns, columns, source_mask.transpose(0, 1)).transpose(0, 1)
         h = h.masked_fill(null_mask[..., None], 0)
-        h = self.row.batched(h, h, source_mask)
+        if self.row_collect is not None:
+            n = h.shape[0] - 1
+            summaries, source_presence = self.row_collect._batched_with_presence(
+                self.row_slot_seed.unsqueeze(0).expand(n, -1, -1),
+                h[:n, :m],
+                source_mask[:n, :m],
+            )
+            # Seeds are receivers, not evidence. Empty rows must not broadcast
+            # the seed residual; keep the same projected-presence gate as columns.
+            has_evidence = torch.isfinite(source_presence).any(-1)
+            summaries = summaries * has_evidence.to(summaries.dtype)[:, None, None]
+            # All Cell and Unit receivers read; the Feature extension row has
+            # no Cell sources and retains only its residual/local FFN update.
+            read_sources = torch.cat((summaries, h.new_zeros(1, *summaries.shape[1:])), dim=0)
+            read_eligible = source_mask.new_ones(n + 1, summaries.shape[1])
+            h = self.row.batched(h, read_sources, read_eligible)
+        else:
+            h = self.row.batched(h, h, source_mask)
         return h.masked_fill(null_mask[..., None], 0)
 
 

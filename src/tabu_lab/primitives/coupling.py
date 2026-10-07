@@ -25,19 +25,23 @@ from torch import Tensor, nn
 from tabu_lab.numerics import DEFAULT_FLOAT_DTYPE
 
 
-def _parameter_network(in_features: int, hidden: Sequence[int], out_features: int) -> nn.Sequential:
+def _parameter_network(
+    in_features: int, hidden: Sequence[int], out_features: int, *, bias: bool = True
+) -> nn.Sequential:
     layers: list[nn.Module] = []
     width = in_features
     for size in hidden:
-        layer = nn.Linear(width, size, dtype=DEFAULT_FLOAT_DTYPE)
+        layer = nn.Linear(width, size, dtype=DEFAULT_FLOAT_DTYPE, bias=bias)
         nn.init.xavier_uniform_(layer.weight)
-        nn.init.zeros_(layer.bias)
+        if layer.bias is not None:
+            nn.init.zeros_(layer.bias)
         layers.extend((layer, nn.GELU()))
         width = size
-    last = nn.Linear(width, out_features, dtype=DEFAULT_FLOAT_DTYPE)
+    last = nn.Linear(width, out_features, dtype=DEFAULT_FLOAT_DTYPE, bias=bias)
     # A zero final layer gives s = t = 0, so every block starts as the identity.
     nn.init.zeros_(last.weight)
-    nn.init.zeros_(last.bias)
+    if last.bias is not None:
+        nn.init.zeros_(last.bias)
     layers.append(last)
     return nn.Sequential(*layers)
 
@@ -48,6 +52,8 @@ class AffineCoupling(nn.Module):
     ``update_index`` selects the coordinates in ``B``; every other coordinate
     is ``A`` and passes through unchanged.  With ``scale=False`` the block is
     the additive coupling ``y_B = x_B + t(x_A)``.  Inputs are ``[..., dim]``.
+    ``bias=False`` makes both parameter branches zero-preserving at every
+    update; the shared primitive defaults to True for historical callers.
     """
 
     def __init__(
@@ -58,10 +64,13 @@ class AffineCoupling(nn.Module):
         hidden: Sequence[int] = (128, 128),
         alpha: float = 0.5,
         scale: bool = True,
+        bias: bool = True,
     ) -> None:
         super().__init__()
         if type(scale) is not bool:
             raise ValueError("scale must be a boolean")
+        if type(bias) is not bool:
+            raise ValueError("bias must be a boolean")
         if dim < 2:
             raise ValueError("dim must be at least 2")
         update = sorted({int(i) for i in update_index})
@@ -84,7 +93,7 @@ class AffineCoupling(nn.Module):
         )
         n_update = len(update)
         self.net = _parameter_network(
-            len(keep), tuple(int(size) for size in hidden), (2 if scale else 1) * n_update
+            len(keep), tuple(int(size) for size in hidden), (2 if scale else 1) * n_update, bias=bias
         )
 
     def _shift_and_log_scale(self, kept: Tensor) -> tuple[Tensor, Tensor | None]:
@@ -123,7 +132,8 @@ class CouplingValueMap(nn.Module):
     Block ``k`` updates the second half of the coordinates when ``k`` is even
     and the first half when ``k`` is odd, so no permutation is left over and
     the zero-initialised stack is exactly ``Id``.  The V7 default is
-    ``dim=64``, four blocks, ``hidden=(128, 128)`` and ``alpha=0.5``.
+    ``dim=64``, four blocks, ``hidden=(128, 128)``, ``alpha=0.5`` and
+    explicitly ``bias=False``; historical callers retain the bias=True default.
     """
 
     def __init__(
@@ -134,6 +144,7 @@ class CouplingValueMap(nn.Module):
         hidden: Sequence[int] = (128, 128),
         alpha: float = 0.5,
         scale: bool = True,
+        bias: bool = True,
     ) -> None:
         super().__init__()
         if n_blocks <= 0:
@@ -148,6 +159,7 @@ class CouplingValueMap(nn.Module):
                 hidden=hidden,
                 alpha=alpha,
                 scale=scale,
+                bias=bias,
             )
             for k in range(n_blocks)
         )

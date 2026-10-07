@@ -1,0 +1,126 @@
+{
+  "date": "2026-10-08",
+  "base_commit": "af7e5f519df781dd42e402359e280295b28edf51",
+  "runtime": {
+    "python": "3.11.14",
+    "torch": "2.13.0",
+    "cpu_fp64": true,
+    "mps_fp32": true
+  },
+  "checks": [
+    {
+      "name": "full_core_suite",
+      "tests": 1839,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 141.086,
+      "original_junit_sha256": "2a48e52bcebf390b05d6847881a2610d566889bc5658c5ef772af33fb7d1c5f2"
+    },
+    {
+      "name": "native_inference",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.46,
+      "original_junit_sha256": "1d060ce6d029269d6783a4d503e1596db7312053e8d8f9985abb6678b769155f"
+    }
+  ],
+  "example": {
+    "path": "examples/v7-restoration/row-dual-stream.yaml",
+    "completed_steps": 8,
+    "status": "completed",
+    "device": "cpu",
+    "dtype": "float64"
+  },
+  "product_source": {
+    "src/tabu_lab/evaluation/__init__.py": {
+      "sha256": "189100ca739d11c5dbe4e7ef286d44c9af53357950c53aa296addce51922fc53",
+      "review_source": "review-baseline"
+    },
+    "src/tabu_lab/evaluation/tabarena/__init__.py": {
+      "sha256": "dd010bf5055983446484e4daadea4718784e55ef525c5b28985bc53a4cc64324",
+      "review_source": "review-baseline"
+    },
+    "src/tabu_lab/evaluation/tabarena/estimator.py": {
+      "sha256": "a01224106adb9529851d5f48d02acc86fe6536203e917f8f4a532b06a593dd17",
+      "review_source": "review-baseline"
+    },
+    "src/tabu_lab/evaluation/tabarena/network.py": {
+      "sha256": "a53f9485ff40bda66090bccc3797b6a00bd5ff9526e24b18379b7bf8a6f8b9b8",
+      "review_source": "review-baseline"
+    },
+    "src/tabu_lab/models/restoration/backbone.py": {
+      "sha256": "83d27bc412864f5965490cc86fa441822e663b33db9942637bf27689909d7cff",
+      "review_source": "final-dual-stream-acceptance"
+    },
+    "src/tabu_lab/models/restoration_v7/__init__.py": {
+      "sha256": "f64beb248f70ce2711d6f79ac30cc1d42d2ca6dbffd39bae60339853bf5f9b65",
+      "review_source": "final-dual-stream-acceptance"
+    },
+    "src/tabu_lab/models/restoration_v7/auxiliary.py": {
+      "sha256": "b61d311aaa96cafca9bcb213dd6cc3a8e6fb57501cf8e756b13d69b2d023f720",
+      "review_source": "review-baseline"
+    },
+    "src/tabu_lab/models/restoration_v7/codec.py": {
+      "sha256": "0ee5bbd56622e1161cbb3183415eb24e644d59c6b377ede781aad06f6f43644f",
+      "review_source": "review-baseline"
+    },
+    "src/tabu_lab/models/restoration_v7/config.py": {
+      "sha256": "b28a20ef956b1919104cbcf793e8d4feedd130b5ac9e9ea3ab280bbe46642ad6",
+      "review_source": "final-dual-stream-acceptance"
+    },
+    "src/tabu_lab/models/restoration_v7/dual_stream.py": {
+      "sha256": "96f0cd2f2dceec6f684ec8ddefab69863ecb413aa9197f31ae5f29b12896983b",
+      "review_source": "final-dual-stream-acceptance"
+    },
+    "src/tabu_lab/models/restoration_v7/evaluation.py": {
+      "sha256": "6546d3e4b1988e8c124840a1caee478159d76c8ccf028d4f554350ac5449b312",
+      "review_source": "review-baseline"
+    },
+    "src/tabu_lab/models/restoration_v7/fit.py": {
+      "sha256": "10efe3e2399c58fcdf9e768cdaa7ce7e10002a79cb813ea978d06e0b2e912768",
+      "review_source": "final-dual-stream-acceptance"
+    },
+    "src/tabu_lab/models/restoration_v7/joint.py": {
+      "sha256": "a359cf3196caae3cd51e753a3d64dcc1f4717a075be3f8ae028b5f9a7b5b9547",
+      "review_source": "final-dual-stream-acceptance"
+    },
+    "src/tabu_lab/models/restoration_v7/model.py": {
+      "sha256": "2bfff49289e37ef5596dcf998387a7e3f0128badc9698a2e0048ef42e9b67724",
+      "review_source": "final-dual-stream-acceptance"
+    },
+    "src/tabu_lab/models/restoration_v7/readout.py": {
+      "sha256": "9e150aa99a9235d74549fcfe0bf6042860205e7418308cbf390d39c709aef636",
+      "review_source": "review-baseline"
+    },
+    "src/tabu_lab/models/restoration_v7/runner.py": {
+      "sha256": "b44342bb7dc2352a0d530a884218ad4c05692f111872061e8c22b2b8088cdc5e",
+      "review_source": "final-dual-stream-acceptance"
+    },
+    "src/tabu_lab/models/restoration_v7/tables.py": {
+      "sha256": "23cb78b1485a4655ebd6ff44e85238b1ad3a3fbad9a1b354f8a57bf6a1c0fa75",
+      "review_source": "review-baseline"
+    },
+    "src/tabu_lab/models/restoration_v7/training.py": {
+      "sha256": "da592dff77b4a159c1b6f7f4d42a3e29d1a74447e7427b14c14dedf277f30485",
+      "review_source": "review-baseline"
+    },
+    "src/tabu_lab/models/restoration_v7/warm_start.py": {
+      "sha256": "c6f129a188b89ba8309737e9047a2cb344875b7700882909c7c1c7e7d1a14983",
+      "review_source": "final-dual-stream-acceptance"
+    },
+    "src/tabu_lab/primitives/coupling.py": {
+      "sha256": "8146055d62b408ce81405f868fa7f2987d28eb65df5527895b6e61ece59769cf",
+      "review_source": "review-baseline"
+    },
+    "src/tabu_lab/restoration_pipeline_benchmark.py": {
+      "sha256": "bfd8d4e61b262e2638efc476df8fa7603f9ff20b5a38046cc1afcb58a8986664",
+      "review_source": "review-baseline"
+    }
+  },
+  "independent_review": "Reused existing independent implementation/acceptance reviews with exact product-source hash checks; no new subagent or remote training.",
+  "test_isolation_fix": "The first full run had 1838 passes and one MPS failure inherited from a prior strict-determinism setting. The fixture now restores incoming mode and thread count in finally. The full rerun passed.",
+  "scope": "Engineering and checkpoint/inference compatibility only; no prediction-quality or training-stability claim; no adopted checkpoint change."
+}

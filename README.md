@@ -28,6 +28,14 @@ process part of the deliverable.
 
 ## What exists today
 
+The **2026-10-08 V7 / V7.3 integration** adds explicit version selection,
+asinh numeric coordinates for new V7.3 configurations, and an opt-in row dual-stream
+value encoder while preserving recorded V7 checkpoint settings. See the
+[version and configuration guide](docs/tutorials/v7-restoration-modes.md) and
+[integration evidence](docs/reviews/v73-integration-20261008/README.md).
+The dual-stream encoder remains experimental: engineering checks do not establish
+training stability or a predictive advantage, and no adopted checkpoint changes.
+
 Status as of **2026-10-03**: active experimental development. The repository contains
 implementation checks and exploratory training reports; broad unseen-table
 generalization remains an open research question.

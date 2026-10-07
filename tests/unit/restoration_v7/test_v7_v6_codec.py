@@ -15,7 +15,9 @@ def test_legacy_codec_exact_codes_and_decoder():
     inputs, _, _ = table()
     legacy = AffineValueEncoder(128, codec_version="constant_weight_composition_v2")
     facts = legacy.prepare(inputs)
-    codec = build_value_codec(inputs, codec="constant_weight_composition_v2", dim=128)
+    codec = build_value_codec(
+        inputs, codec="constant_weight_composition_v2", dim=128, numeric_preprocessing="legacy"
+    )
     for a, (column, fact) in enumerate(zip(codec.columns, facts, strict=True)):
         values = inputs.values[a][fact.rows]
         torch.testing.assert_close(column.encode(values), fact.answers.encoded, rtol=0, atol=0)
@@ -40,11 +42,17 @@ def test_inheritance_forward_gradients_and_reload(value_map):
     parent = {"model_config": cfg.as_dict(), "model": parent_model.state_dict()}
     model = from_v6_checkpoint(parent, value_map=value_map)
     assert model.transfer_receipt["query_seed_exact_within_1e_5"]
+    assert model.config.model_version == "v7"
+    assert model.config.numeric_preprocessing == "legacy"
+    assert model.config.coupling_bias is True
     torch.testing.assert_close(
         model.rounds[0].lift.weight, parent_model.encoder.projection.weight, rtol=0, atol=0
     )
     inputs, _, truth = table()
-    episode = prepare_episode(inputs, donor_seed=2, code_dim=128, codec=model.config.codec)
+    episode = prepare_episode(
+        inputs, donor_seed=2, code_dim=128, codec=model.config.codec,
+        numeric_preprocessing=model.config.numeric_preprocessing,
+    )
     output = model(episode)
     score = score_rounds(output, episode, reference_values(episode, truth), model.config)
     score.loss.backward()
@@ -66,7 +74,7 @@ def test_original_codec_training_and_evaluation_all_kinds(target):
         inputs.schema, truth.values, torch.ones_like(query), query, code_seed=3
     )
     model = V7Model(
-        V7Config(
+        V7Config.legacy(
             codec="constant_weight_composition_v2",
             code_dim=128,
             backbone=dict(width=128, layers=1, heads=4, ff_width=128, slots=4),

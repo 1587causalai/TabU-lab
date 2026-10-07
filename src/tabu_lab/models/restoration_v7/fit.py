@@ -12,7 +12,7 @@ from pathlib import Path
 import torch
 import yaml
 
-from .config import V7Config
+from .config import V7Config, _version_defaults
 from .evaluation import evaluate_joint_task
 from .masking import MaskingSpec, sample_task
 from .model import V7Model
@@ -155,9 +155,37 @@ def resolve_run(path):
     parent = torch.load(init_path, map_location="cpu", weights_only=True) if init_path else None
     if parent is not None and not all(key in parent for key in ("config", "model")):
         raise ValueError("weights-only initialization requires a V7 config and model state")
-    model_values = V7Config.from_dict(parent["config"]).as_dict() if parent else {}
-    _known(cfg.get("model", {}), V7Config.__dataclass_fields__, "model")
-    model = V7Config.from_dict(model_values | cfg.get("model", {}))
+    overrides = cfg.get("model", {})
+    _known(overrides, V7Config.__dataclass_fields__, "model")
+    parent_config = V7Config.from_dict(parent["config"]) if parent else None
+    if parent_config is not None and (
+        parent.get("model_version", parent_config.model_version) != parent_config.model_version
+    ):
+        raise ValueError("initial checkpoint model_version differs from its stored ModelSpec")
+    version = overrides.get(
+        "model_version", parent_config.model_version if parent_config is not None else "v7"
+    )
+    if parent_config is None:
+        model_values = V7Config.for_version(version).as_dict()
+    else:
+        model_values = parent_config.as_dict()
+        if version != parent_config.model_version:
+            # Preserve the parent's parameter layout. Unit depth and sharing
+            # change state keys; for unshared rounds, K also counts modules.
+            # Shared recurrence can adopt the target version's default K.
+            version_defaults = _version_defaults(version)
+            version_defaults.pop("unit_layers")
+            version_defaults.pop("share_rounds")
+            if not parent_config.share_rounds:
+                version_defaults.pop("rounds")
+            model_values.update(version_defaults)
+    model = V7Config.from_dict(model_values | overrides)
+    if parent_config is not None and parent_config.value_encoder != model.value_encoder:
+        # Strict all-key initialization cannot change the value encoder.
+        raise ValueError(
+            "value_encoder differs from init_checkpoint; use the explicit weights-only "
+            "migration row_dual_stream_from_checkpoint and initialize from its checkpoint"
+        )
     init = (
         None
         if parent is None
@@ -165,7 +193,20 @@ def resolve_run(path):
             path=str(init_path),
             sha256=_sha(init_path),
             kind="weights-only; fresh optimizer/RNG/sampler",
+            source_model_version=parent_config.model_version,
+            target_model_version=model.model_version,
             source_config=parent["config"],
+            configuration_changes={
+                name: {"from": value, "to": model.as_dict()[name]}
+                for name, value in parent_config.as_dict().items()
+                if value != model.as_dict()[name]
+            },
+            weight_transfer_plan={
+                "policy": "strict-all-keys; reject any missing, extra or incompatible tensor",
+                "inherit_state_keys": sorted(parent["model"]),
+                "reinitialize_state_keys": [],
+                "optimizer_rng_sampler": "fresh",
+            },
         )
     )
     manifest = dict(
@@ -272,6 +313,13 @@ def _evaluate(model, run):
                             metrics=r.metrics,
                             baselines=r.baselines,
                             predictions=[p.detach().cpu().tolist() for p in r.predictions],
+                            candidates=None
+                            if r.candidates is None
+                            else r.candidates.cpu().tolist(),
+                            probabilities=None
+                            if r.probabilities is None
+                            else r.probabilities.cpu().tolist(),
+                            probability_temperature=r.probability_temperature,
                         )
                         for c, r in result.columns.items()
                     },

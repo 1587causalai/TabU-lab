@@ -73,8 +73,12 @@ def task(*, single=False, device="cpu", dtype=torch.float64, changed_truth=False
 @pytest.mark.parametrize("query_source", [False, True])
 @pytest.mark.parametrize("query_init", ["seed", "donor"])
 @pytest.mark.parametrize("dtype", [torch.float32, torch.float64])
-def test_one_column_joint_matches_legacy_states_loss_and_gradients(query_source, query_init, dtype):
+@pytest.mark.parametrize("row_slots", [0, 3])
+def test_one_column_joint_matches_legacy_states_loss_and_gradients(
+    query_source, query_init, dtype, row_slots
+):
     cfg = config(query_source=query_source, query_init=query_init)
+    cfg = replace(cfg, backbone=replace(cfg.backbone, row_slots=row_slots))
     model = V7Model(cfg).to(dtype=dtype)
     item = task(single=True, dtype=dtype)
     old = prepare_episode(item.inputs, donor_seed=item.donor_seed)
@@ -123,8 +127,12 @@ def test_joint_truth_isolation_row_equal_loss_and_shared_backbone():
     assert all(len(r.predictions) == 2 for r in report.columns.values())
 
 
-def test_joint_checkpointing_preserves_forward_and_backward():
-    plain = V7Model(config()).double()
+@pytest.mark.parametrize("row_slots", [0, 3])
+@pytest.mark.parametrize("unit_layers", [0, 1])
+def test_joint_checkpointing_preserves_forward_and_backward(row_slots, unit_layers):
+    cfg = config(unit_layers=unit_layers)
+    cfg = replace(cfg, backbone=replace(cfg.backbone, row_slots=row_slots))
+    plain = V7Model(cfg).double()
     recomputed = V7Model(replace(plain.config, gradient_checkpointing=True)).double()
     recomputed.load_state_dict(plain.state_dict())
     item = task()
@@ -159,8 +167,12 @@ def mps_algorithm_mode():
 
 
 @pytest.mark.skipif(not torch.backends.mps.is_available(), reason="MPS unavailable")
-def test_mps_fp32_joint_real_update_and_evaluation(mps_algorithm_mode):
-    model = V7Model(config(gradient_checkpointing=True)).to(device="mps", dtype=torch.float32)
+@pytest.mark.parametrize("row_slots", [0, 3])
+@pytest.mark.parametrize("unit_layers", [0, 1])
+def test_mps_fp32_joint_real_update_and_evaluation(row_slots, unit_layers, mps_algorithm_mode):
+    cfg = config(gradient_checkpointing=True, unit_layers=unit_layers)
+    cfg = replace(cfg, backbone=replace(cfg.backbone, row_slots=row_slots))
+    model = V7Model(cfg).to(device="mps", dtype=torch.float32)
     item = task(device="mps", dtype=torch.float32)
     record = train_step(model, make_optimizer(model), [item], grad_clip_norm=1)
     assert torch.isfinite(torch.tensor(record.loss))
@@ -175,6 +187,7 @@ def test_legacy_native_checkpoint_without_new_config_fields_loads(tmp_path):
     state = checkpoint_state(model, make_optimizer(model), step=0, manifest={"legacy": True})
     state["config"].pop("query_source")
     state["config"].pop("gradient_checkpointing")
+    state["config"]["backbone"].pop("row_slots")
     state.pop("accelerator_rng")
     path = tmp_path / "legacy.pt"
     save_checkpoint(path, state)

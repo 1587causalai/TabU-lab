@@ -60,9 +60,7 @@ def test_constant_weight_bank_rejects_a_request_past_capacity_and_redraws_collis
         constant_weight_bank(7, 4, 2, generator)
     filled = constant_weight_bank(3, 3, 1, generator)
     assert set(tuple(row.tolist()) for row in filled) == {
-        (1.0, 0.0, 0.0),
-        (0.0, 1.0, 0.0),
-        (0.0, 0.0, 1.0),
+        (1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0)
     }
 
 
@@ -151,8 +149,7 @@ def test_c64_is_default_and_keeps_the_loss_coefficient():
         build_c64_codec(*table()[:1], dim=32)
     with pytest.raises(ValueError, match="C64/8 requires code_dim 64"):
         V7Config(
-            codec="C64/8",
-            code_dim=32,
+            codec="C64/8", code_dim=32,
             backbone=dict(width=64, layers=1, heads=2, ff_width=64, slots=4),
         )
     with pytest.raises(ValueError, match="codec must be G64 or C64/8"):

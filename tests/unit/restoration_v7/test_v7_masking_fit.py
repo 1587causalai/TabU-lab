@@ -9,7 +9,17 @@ import pytest
 import torch
 import yaml
 
-from tabu_lab.models.restoration_v7 import MaskingSpec, load_typed_table, sample_task
+from tabu_lab.models.restoration_v7 import (
+    MaskingSpec,
+    V7Config,
+    V7Model,
+    checkpoint_state,
+    load_checkpoint,
+    load_typed_table,
+    make_optimizer,
+    sample_task,
+    save_checkpoint,
+)
 from tabu_lab.models.restoration_v7.fit import run_fit
 
 
@@ -96,6 +106,7 @@ def test_masking_counts_endpoints_determinism_and_no_test_exposure(tmp_path):
 
 
 @pytest.mark.parametrize("mode", ["single", "joint", "mixed"])
+@pytest.mark.parametrize("loss_mode", ["query_only", "balanced_reconstruction"])
 @pytest.mark.parametrize(
     "device",
     [
@@ -108,14 +119,29 @@ def test_masking_counts_endpoints_determinism_and_no_test_exposure(tmp_path):
         ),
     ],
 )
-def test_configured_training_resume_and_evaluation(tmp_path, mode, device):
+def test_configured_training_resume_and_evaluation(tmp_path, mode, device, loss_mode):
     path, cfg, table = fixture(tmp_path, mode)
     cfg.update(device=device, dtype="float32" if device == "mps" else "float64")
+    cfg["model"]["loss_mode"] = loss_mode
     path.write_text(yaml.safe_dump(cfg))
     plan = run_fit(path)
     assert plan["status"] == "validated-not-run"
     assert not (tmp_path / "run").exists()
     complete = run_fit(path, execute=True)
+    updates = [
+        json.loads(line) for line in (tmp_path / "run/updates.jsonl").read_text().splitlines()
+    ]
+    for update in updates:
+        (plan,) = update["auxiliary_plans"]
+        if loss_mode == "query_only":
+            assert plan is None
+        else:
+            assert plan["sampling"] == "all_visible_per_column"
+            for column in plan["columns"]:
+                assert column["n_aux"] == len(column["rows"])
+                assert column["w_bal"] == pytest.approx(
+                    column["n_query"] / (column["n_query"] + column["n_aux"])
+                )
     evaluation = json.loads((tmp_path / "run/evaluation.json").read_text())
     assert {report["mode"] for report in evaluation} == {"target_only", "joint"}
     for report in evaluation:
@@ -209,3 +235,214 @@ def test_dry_run_rejects_non_boolean_coupling_scale(tmp_path, scale):
     path.write_text(yaml.safe_dump(cfg))
     with pytest.raises(ValueError, match="coupling_scale must be a boolean"):
         run_fit(path)
+
+
+def test_cyclic_factory_leaves_constructor_and_legacy_loading_unchanged():
+    cyclic = V7Config.cyclic()
+    assert (cyclic.query_init, cyclic.query_source, cyclic.rounds, cyclic.share_rounds) == (
+        "donor",
+        True,
+        4,
+        True,
+    )
+    assert cyclic.unit_source_policy == "observed"
+    assert V7Config.from_dict(cyclic.as_dict()) == cyclic
+    variant = V7Config.cyclic(
+        rounds=8, share_rounds=False, unit_source_policy="legacy_cell_sources"
+    )
+    assert (variant.rounds, variant.share_rounds, variant.unit_source_policy) == (
+        8,
+        False,
+        "legacy_cell_sources",
+    )
+    for old in (V7Config(), V7Config.from_dict({})):
+        assert (old.query_init, old.query_source, old.rounds, old.share_rounds) == (
+            "seed",
+            False,
+            1,
+            True,
+        )
+
+
+def test_unit_source_policy_is_versioned_independently_of_query_source(tmp_path):
+    current = V7Config.cyclic(unit_layers=1)
+    old_values = current.as_dict()
+    del old_values["model_version"]
+    del old_values["unit_source_policy"]
+    old = V7Config.from_dict(old_values)
+    assert old.unit_source_policy == "legacy_cell_sources"
+    assert old.query_source and old.rounds == 4
+    assert V7Config.from_dict(old.as_dict()) == old
+    assert (
+        V7Config.from_dict(old_values | {"model_version": "v7.3", "unit_source_policy": "observed"})
+        == current
+    )
+    path, _, _ = fixture(tmp_path)
+    assert run_fit(path)["manifest"]["model"]["unit_source_policy"] == "legacy_cell_sources"
+
+
+@pytest.mark.parametrize("policy", ["cell_sources", "", None, True])
+def test_invalid_unit_source_policy_rejected_before_run(tmp_path, policy):
+    path, cfg, _ = fixture(tmp_path)
+    cfg["model"]["unit_source_policy"] = policy
+    path.write_text(yaml.safe_dump(cfg))
+    with pytest.raises(ValueError, match="unit_source_policy"):
+        run_fit(path)
+
+
+def test_explicit_model_versions_and_historical_field_preservation():
+    legacy, modern = V7Config.legacy(), V7Config.v73()
+    assert legacy == V7Config.for_version("v7") == V7Config.from_dict({})
+    assert modern == V7Config.for_version("v7.3") == V7Config.cyclic()
+    assert modern == V7Config.from_dict({"model_version": "v7.3"})
+    assert (
+        legacy.model_version,
+        legacy.coupling_bias,
+        legacy.numeric_preprocessing,
+        legacy.unit_source_policy,
+        legacy.query_init,
+        legacy.query_source,
+        legacy.rounds,
+    ) == ("v7", True, "legacy", "legacy_cell_sources", "seed", False, 1)
+    assert (
+        modern.model_version,
+        modern.coupling_bias,
+        modern.numeric_preprocessing,
+        modern.unit_source_policy,
+        modern.unit_layers,
+        modern.query_init,
+        modern.query_source,
+        modern.rounds,
+        modern.share_rounds,
+    ) == ("v7.3", False, "standard_asinh_v1", "observed", 0, "donor", True, 4, True)
+    # The low-level constructor and old explicit checkpoint fields keep their meaning.
+    plain = V7Config()
+    assert plain == legacy
+    assert V7Config(model_version="v7.3") == modern
+    old_values = V7Config.cyclic(rounds=8, unit_layers=1).as_dict()
+    old_values.pop("model_version")
+    restored = V7Config.from_dict(old_values)
+    assert restored.model_version == "v7"
+    assert restored.as_dict() == old_values | {"model_version": "v7"}
+    for config in (legacy, modern, plain, restored):
+        assert V7Config.from_dict(config.as_dict()) == config
+
+
+@pytest.mark.parametrize("version", ["v7.2", "V7", "", None, True])
+def test_invalid_model_version_fails_dry_run(tmp_path, version):
+    path, cfg, _ = fixture(tmp_path)
+    cfg["model"]["model_version"] = version
+    path.write_text(yaml.safe_dump(cfg))
+    with pytest.raises(ValueError, match="model_version"):
+        run_fit(path)
+
+
+def test_version_switch_resets_semantics_but_keeps_parent_tensor_dimensions(tmp_path):
+    path, cfg, _ = fixture(tmp_path)
+    parent = V7Config.legacy(**cfg["model"], round_loss_rho=0.7)
+    parent_path = tmp_path / "parent.pt"
+    torch.save({"config": parent.as_dict(), "model": {}}, parent_path)
+    cfg["init_checkpoint"] = str(parent_path)
+    cfg["model"] = {}
+    path.write_text(yaml.safe_dump(cfg))
+    assert run_fit(path)["manifest"]["model"] == parent.as_dict()
+
+    cfg["model"] = {"model_version": "v7.3", "rounds": 8}
+    path.write_text(yaml.safe_dump(cfg))
+    plan = run_fit(path)["manifest"]
+    model = V7Config.from_dict(plan["model"])
+    assert model.model_version == "v7.3" and model.rounds == 8
+    assert model.backbone == parent.backbone and model.coupling_hidden == parent.coupling_hidden
+    assert not model.coupling_bias and model.numeric_preprocessing == "standard_asinh_v1"
+    assert model.unit_source_policy == "observed" and model.unit_layers == parent.unit_layers
+    assert model.query_init == "donor" and model.query_source and model.share_rounds
+    assert model.round_loss_rho == 0.7
+    assert plan["initialization"]["source_model_version"] == "v7"
+    assert plan["initialization"]["target_model_version"] == "v7.3"
+    assert plan["initialization"]["kind"].startswith("weights-only")
+
+
+@pytest.mark.parametrize("share_rounds", [True, False])
+def test_cross_version_weights_only_keeps_compatible_parent_layout(tmp_path, share_rounds):
+    path, cfg, _ = fixture(tmp_path)
+    parent_config = V7Config.legacy(**cfg["model"], coupling_bias=False, share_rounds=share_rounds)
+    parent = V7Model(parent_config).double()
+    parent_path = tmp_path / "parent.pt"
+    torch.save({"config": parent_config.as_dict(), "model": parent.state_dict()}, parent_path)
+    cfg.update(init_checkpoint=str(parent_path), steps=1, model={"model_version": "v7.3"})
+    path.write_text(yaml.safe_dump(cfg))
+    plan = run_fit(path)["manifest"]
+    child_config = V7Config.from_dict(plan["model"])
+    assert child_config.unit_layers == parent_config.unit_layers == 1
+    assert child_config.share_rounds == share_rounds
+    assert child_config.rounds == (4 if share_rounds else parent_config.rounds)
+    assert child_config.numeric_preprocessing == "standard_asinh_v1"
+    assert child_config.unit_source_policy == "observed"
+    migration = plan["initialization"]
+    assert migration["configuration_changes"]["numeric_preprocessing"] == {
+        "from": "legacy", "to": "standard_asinh_v1",
+    }
+    assert migration["weight_transfer_plan"]["inherit_state_keys"] == sorted(parent.state_dict())
+    assert migration["weight_transfer_plan"]["reinitialize_state_keys"] == []
+    assert migration["weight_transfer_plan"]["optimizer_rng_sampler"] == "fresh"
+    result = run_fit(path, execute=True)
+    saved = torch.load(result["checkpoint"], weights_only=True)
+    assert saved["step"] == 1 and saved["model_version"] == "v7.3"
+    assert set(saved["model"]) == set(parent.state_dict())
+    assert all(float(value["step"]) == 1 for value in saved["optimizer"]["state"].values())
+
+
+def test_cross_version_biased_parent_requires_explicit_weight_migration(tmp_path):
+    path, cfg, _ = fixture(tmp_path)
+    parent_config = V7Config.legacy(**cfg["model"])
+    parent_path = tmp_path / "biased-parent.pt"
+    torch.save(
+        {"config": parent_config.as_dict(), "model": V7Model(parent_config).double().state_dict()},
+        parent_path,
+    )
+    cfg.update(init_checkpoint=str(parent_path), steps=1, model={"model_version": "v7.3"})
+    path.write_text(yaml.safe_dump(cfg))
+    with pytest.raises(RuntimeError, match="Unexpected key"):
+        run_fit(path, execute=True)
+    assert not (tmp_path / "run").exists()
+
+
+def test_checkpoint_version_identity_and_unversioned_compatibility(tmp_path):
+    config = V7Config.v73(
+        backbone=dict(width=64, layers=1, heads=2, ff_width=64, slots=3),
+        coupling_blocks=1,
+        coupling_hidden=(16,),
+    )
+    model = V7Model(config).double()
+    state = checkpoint_state(model, make_optimizer(model), step=0, manifest={})
+    assert state["model_version"] == state["config"]["model_version"] == "v7.3"
+    path = tmp_path / "modern.pt"
+    save_checkpoint(path, state)
+    assert load_checkpoint(path, V7Model(config).double(), manifest={}) == 0
+    with pytest.raises(ValueError, match="ModelSpec"):
+        load_checkpoint(path, V7Model(replace(config, model_version="v7")).double(), manifest={})
+
+    state["model_version"] = "v7"
+    mismatched = tmp_path / "mismatched.pt"
+    save_checkpoint(mismatched, state)
+    with pytest.raises(ValueError, match="model_version"):
+        load_checkpoint(mismatched, model, manifest={})
+
+    del state["model_version"]
+    del state["config"]["model_version"]
+    old = tmp_path / "unversioned.pt"
+    save_checkpoint(old, state)
+    restored_config = V7Config.from_dict(state["config"])
+    assert restored_config.model_version == "v7"
+    assert load_checkpoint(old, V7Model(restored_config).double(), manifest={}) == 0
+
+
+def test_v73_example_resolves_without_running():
+    from pathlib import Path
+
+    path = Path(__file__).resolve().parents[3] / "examples/v7-restoration/v73.yaml"
+    plan = run_fit(path)
+    config = V7Config.from_dict(plan["manifest"]["model"])
+    assert plan["status"] == "validated-not-run" and plan["steps"] == 8
+    assert config.model_version == "v7.3" and config.unit_layers == 0
+    assert config.query_source and config.rounds == 4 and not config.coupling_bias

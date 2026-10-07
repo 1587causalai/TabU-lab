@@ -1,5 +1,6 @@
 """TabU V7: configurable single-column, joint and mixed cyclic restoration."""
 
+from .auxiliary import AuxiliaryPlan, prepare_auxiliary_reconstruction
 from .codec import (
     G64Codec,
     G64ColumnCodec,
@@ -8,7 +9,8 @@ from .codec import (
     build_g64_codec,
     build_value_codec,
 )
-from .config import V7Config, round_weights
+from .config import DualStreamConfig, V7Config, round_weights
+from .dual_stream import RowDualStreamEncoder, dual_stream_round, forward_dual_stream
 from .evaluation import (
     V7JointTrajectory,
     V7Trajectory,
@@ -34,11 +36,17 @@ from .runner import (
 )
 from .tables import TypedTable, load_typed_table, table_mask_task, table_task
 from .training import V7Score, reference_values, score_rounds, state_loss
-from .warm_start import from_v6_checkpoint
+from .warm_start import from_v6_checkpoint, row_dual_stream_from_checkpoint
 
 __all__ = [
     "CHECKPOINT_SCHEMA",
+    "AuxiliaryPlan",
     "ColumnRecovery",
+    "DualStreamConfig",
+    "RowDualStreamEncoder",
+    "dual_stream_round",
+    "forward_dual_stream",
+    "row_dual_stream_from_checkpoint",
     "G64Codec",
     "G64ColumnCodec",
     "JointEpisode",
@@ -69,6 +77,7 @@ __all__ = [
     "load_typed_table",
     "make_optimizer",
     "manifest_digest",
+    "prepare_auxiliary_reconstruction",
     "prepare_episode",
     "prepare_joint_episode",
     "reference_values",

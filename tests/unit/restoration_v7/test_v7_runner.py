@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+from dataclasses import replace
 
 import pytest
 import torch
@@ -109,8 +110,11 @@ def test_empty_step_is_rejected():
         train_step(model, make_optimizer(model), [])
 
 
-def test_checkpoint_resume_reproduces_the_next_update_exactly(tmp_path):
-    model = V7Model(small_config())
+@pytest.mark.parametrize("row_slots", [0, 3])
+def test_checkpoint_resume_reproduces_the_next_update_exactly(tmp_path, row_slots):
+    cfg = small_config()
+    cfg = replace(cfg, backbone=replace(cfg.backbone, row_slots=row_slots))
+    model = V7Model(cfg)
     optimizer = make_optimizer(model)
     train_step(model, optimizer, [task(1)])
     path = tmp_path / "step1.pt"
@@ -118,7 +122,7 @@ def test_checkpoint_resume_reproduces_the_next_update_exactly(tmp_path):
     with pytest.raises(FileExistsError):
         save_checkpoint(path, checkpoint_state(model, optimizer, step=1, manifest=MANIFEST))
 
-    resumed = V7Model(small_config())
+    resumed = V7Model(cfg)
     resumed_optimizer = make_optimizer(resumed)
     assert load_checkpoint(path, resumed, resumed_optimizer, manifest=MANIFEST) == 1
     first = train_step(model, optimizer, [task(2)])
