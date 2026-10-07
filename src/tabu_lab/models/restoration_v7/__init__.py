@@ -93,3 +93,9 @@ __all__ = [
     "train_step",
     "value_metrics",
 ]
+
+from .config import RowReversible64Config
+from .reversible64 import RowReversible64Encoder, reversible64_round
+from .reversible64_migration import row_reversible64_from_checkpoint
+
+__all__ += ["RowReversible64Config", "RowReversible64Encoder", "reversible64_round", "row_reversible64_from_checkpoint"]

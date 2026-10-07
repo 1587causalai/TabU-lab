@@ -184,7 +184,7 @@ def resolve_run(path):
         # Strict all-key initialization cannot change the value encoder.
         raise ValueError(
             "value_encoder differs from init_checkpoint; use the explicit weights-only "
-            "migration row_dual_stream_from_checkpoint and initialize from its checkpoint"
+            "migration row_dual_stream_from_checkpoint or row_reversible64_from_checkpoint and initialize from its checkpoint"
         )
     init = (
         None

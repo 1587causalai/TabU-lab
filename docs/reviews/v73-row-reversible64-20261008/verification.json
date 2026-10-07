@@ -1,0 +1,244 @@
+{
+  "base_commit": "f6411375",
+  "main_tests": {
+    "passed": 78,
+    "failed": 0,
+    "skipped": 0
+  },
+  "zichao_tests": {
+    "first_batch_passed": 77,
+    "first_batch_failed": 1,
+    "reason": "backward-compatible exception wording",
+    "targeted_rerun_passed": 8,
+    "targeted_rerun_failed": 0
+  },
+  "legacy_parity": {
+    "passed": true,
+    "cases": [
+      "v7 CPU FP64",
+      "v7 MPS FP32",
+      "v7.3 CPU FP64",
+      "v7.3 MPS FP32",
+      "row_dual_stream CPU FP64",
+      "row_dual_stream MPS FP32"
+    ],
+    "exact": [
+      "config",
+      "weights",
+      "forward",
+      "loss",
+      "gradients"
+    ]
+  },
+  "comparison": {
+    "value_metric_recomputation": true,
+    "paired_saved_step": 15,
+    "logged_steps": {
+      "row_reversible64": 21,
+      "row_dual_stream": 20
+    },
+    "not_a_completed_30_update_run": true,
+    "branches": {
+      "row_reversible64": {
+        "finite_training": true,
+        "max_gradient_15": 23.14545440673828,
+        "mean_step_seconds_15": 0.9367854138525824,
+        "evaluations": [
+          {
+            "step": 0,
+            "tables": [
+              {
+                "table": "discoscm_048",
+                "kind": "numeric",
+                "weighted_code_loss": 0.08957784622907639,
+                "mae": 0.10886286544458318,
+                "rmse": 0.12983689328124415,
+                "standardized_rmse": 0.18279940334914158,
+                "r2": 0.9482213139415692
+              },
+              {
+                "table": "discoscm_049",
+                "kind": "nominal",
+                "weighted_code_loss": 0.0051134005188941956,
+                "accuracy": 0.9166666666666666
+              },
+              {
+                "table": "discoscm_051",
+                "kind": "ordinal",
+                "weighted_code_loss": 0.012912768870592117,
+                "accuracy": 0.7916666666666666,
+                "mean_rank_distance": 0.2916666666666667
+              }
+            ],
+            "mean_weighted_code_loss": 0.03586800520618757
+          },
+          {
+            "step": 15,
+            "tables": [
+              {
+                "table": "discoscm_048",
+                "kind": "numeric",
+                "weighted_code_loss": 0.04760075733065605,
+                "mae": 0.07763143766593808,
+                "rmse": 0.10247371575805819,
+                "standardized_rmse": 0.14427435550977216,
+                "r2": 0.9677462835488179
+              },
+              {
+                "table": "discoscm_049",
+                "kind": "nominal",
+                "weighted_code_loss": 0.004135982599109411,
+                "accuracy": 0.9166666666666666
+              },
+              {
+                "table": "discoscm_051",
+                "kind": "ordinal",
+                "weighted_code_loss": 0.012755286879837513,
+                "accuracy": 0.7916666666666666,
+                "mean_rank_distance": 0.2916666666666667
+              }
+            ],
+            "mean_weighted_code_loss": 0.02149734226986766
+          }
+        ]
+      },
+      "row_dual_stream": {
+        "finite_training": true,
+        "max_gradient_15": 4526923776.0,
+        "mean_step_seconds_15": 0.9099225499667227,
+        "evaluations": [
+          {
+            "step": 0,
+            "tables": [
+              {
+                "table": "discoscm_048",
+                "kind": "numeric",
+                "weighted_code_loss": 12.119412422180176,
+                "mae": 1.9327997577687102,
+                "rmse": 5.153458768323651,
+                "standardized_rmse": 7.2556356227144185,
+                "r2": -80.57412170864443
+              },
+              {
+                "table": "discoscm_049",
+                "kind": "nominal",
+                "weighted_code_loss": 0.3903504014015198,
+                "accuracy": 0.625
+              },
+              {
+                "table": "discoscm_051",
+                "kind": "ordinal",
+                "weighted_code_loss": 0.044498417526483536,
+                "accuracy": 0.25,
+                "mean_rank_distance": 1.5
+              }
+            ],
+            "mean_weighted_code_loss": 4.184753747036059
+          },
+          {
+            "step": 15,
+            "tables": [
+              {
+                "table": "discoscm_048",
+                "kind": "numeric",
+                "weighted_code_loss": 8.427979469299316,
+                "mae": 1.005358816978211,
+                "rmse": 1.347624381298194,
+                "standardized_rmse": 1.897341553809746,
+                "r2": -4.578179874367053
+              },
+              {
+                "table": "discoscm_049",
+                "kind": "nominal",
+                "weighted_code_loss": 0.5463523864746094,
+                "accuracy": 0.625
+              },
+              {
+                "table": "discoscm_051",
+                "kind": "ordinal",
+                "weighted_code_loss": 0.04716423153877258,
+                "accuracy": 0.25,
+                "mean_rank_distance": 1.5
+              }
+            ],
+            "mean_weighted_code_loss": 3.0071653624375663
+          }
+        ]
+      }
+    },
+    "array_sha256": {
+      "row_reversible64-000-2.npz": "ae7840b922621dc336e436d4930f7781120f986d61f6b8f3ed87449769d0d3af",
+      "row_reversible64-000-1.npz": "8991c29b36649f4274d9ae16c0b42b144e460d5ecf3f97ab91b8386f38938f97",
+      "row_reversible64-000-0.npz": "1559acfe838e6bfaf8db5ffc24d306c721c8d938b7d4193a5032c707b20d687a",
+      "row_dual_stream-015-1.npz": "d68a95fa4dcf4a839e92108207e4e4afe797810418072c9d4a91b90884dbe887",
+      "row_dual_stream-015-0.npz": "aebc14a8b41c40429ec2341ce766b5176087e414de960ae03103af3ec34da10c",
+      "row_dual_stream-015-2.npz": "440df9fa34cf0b6b277890eb5c2a1be1a22e5e8cdab37759cfbc0f719c08d7cb",
+      "row_dual_stream-000-2.npz": "100dbbfa4921390e217083e50e652770c4ffc5fcdf4697c3a8e1e8f2171257dd",
+      "row_dual_stream-000-1.npz": "3c3b714739a08a39cba45dc75966513ad6aab0dfa3e3abb23974d8c56dbc53bf",
+      "row_dual_stream-000-0.npz": "453ba93acf0e9dda883c4c643f1450ceea7d06aea01af90fdb5b606bd830ace2",
+      "row_reversible64-015-1.npz": "d2961f928227bac2059bcf2c9f57dc8dfa3c022374a5a165e9c45549f35f2800",
+      "row_reversible64-015-0.npz": "1b63551f8ec84aadf897798d7c6701a461382539cbbdf557044131bc09f0c476",
+      "row_reversible64-015-2.npz": "42482390d0f69984773f3972a97f75e86aa0b5d79e996229160dd21674618bf3"
+    }
+  },
+  "final_targeted_tests": {
+    "passed": 31,
+    "failed": 0,
+    "skipped": 0,
+    "composition": "15 new encoder cases after fixture isolation +16 historical runner cases"
+  },
+  "unique_selected_cases_passed": 94,
+  "latest_main_real_donor_migration_and_step15_reload": true,
+  "previous_mainline_audit": {
+    "checked_ref": "origin/main",
+    "commit": "f6411375f318f2ac27334ae67ceed1a6f3c3edea",
+    "matched_previous_implementation": [
+      "src/tabu_lab/models/restoration_v7/warm_start.py",
+      "src/tabu_lab/models/restoration_v7/runner.py",
+      "src/tabu_lab/models/restoration_v7/fit.py",
+      "src/tabu_lab/models/restoration_v7/config.py",
+      "src/tabu_lab/models/restoration_v7/evaluation.py",
+      "src/tabu_lab/models/restoration_v7/__init__.py",
+      "src/tabu_lab/models/restoration_v7/masking.py",
+      "src/tabu_lab/models/restoration_v7/model.py",
+      "src/tabu_lab/models/restoration_v7/dual_stream.py",
+      "src/tabu_lab/models/restoration_v7/readout.py",
+      "src/tabu_lab/models/restoration_v7/joint.py",
+      "src/tabu_lab/models/restoration_v7/tables.py",
+      "src/tabu_lab/models/restoration_v7/codec.py",
+      "src/tabu_lab/models/restoration_v7/auxiliary.py",
+      "src/tabu_lab/models/restoration_v7/training.py",
+      "tests/unit/restoration_v7/test_v7_runner.py",
+      "tests/unit/restoration_v7/test_v7_c64.py",
+      "tests/unit/restoration_v7/test_v7_v6_codec.py",
+      "tests/unit/restoration_v7/test_v7_masking_fit.py",
+      "tests/unit/restoration_v7/test_v7_config_versions.py",
+      "tests/unit/restoration_v7/test_v7_auxiliary.py",
+      "tests/unit/restoration_v7/test_v7_unit_contract.py",
+      "tests/unit/restoration_v7/test_v7_asinh.py",
+      "tests/unit/restoration_v7/test_v7_tables.py",
+      "tests/unit/restoration_v7/test_v7_numeric_zero.py",
+      "tests/unit/restoration_v7/test_v7_joint.py",
+      "tests/unit/restoration_v7/test_v7_evaluation.py",
+      "tests/unit/restoration_v7/test_v7.py",
+      "tests/unit/restoration_v7/test_v7_probabilities.py",
+      "src/tabu_lab/models/restoration/backbone.py",
+      "src/tabu_lab/primitives/coupling.py"
+    ],
+    "different_previous_implementation": [
+      "tests/unit/restoration_v7/test_v7_openml12_single.py",
+      "tests/unit/restoration_v7/test_v7_pilot.py",
+      "tests/unit/restoration_v7/test_v7_warm_fit.py",
+      "tests/unit/restoration_v7/test_v7_row_dual_stream.py"
+    ],
+    "conclusion": "All 15 prior V7 product modules and shared backbone/coupling match current main. Three historical runner regression tests absent; include their runner sources only after current regression passes. Retain main dual-stream fixture because it contains a newer verified determinism fix.",
+    "historical_runner_backfill": [
+      "experiments/v7-openml12-single-table-20260930/run_v7_openml12_single.py",
+      "experiments/local/v7-old120-pilot-20260930/run_v7_old120.py",
+      "experiments/v7-seed-singlepass-fit-20261001/run_comparison.py",
+      "tests/unit/restoration_v7/test_v7_openml12_single.py",
+      "tests/unit/restoration_v7/test_v7_pilot.py",
+      "tests/unit/restoration_v7/test_v7_warm_fit.py"
+    ]
+  }
+}

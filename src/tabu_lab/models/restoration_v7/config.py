@@ -90,7 +90,57 @@ class DualStreamConfig:
         return asdict(self)
 
 
-VALUE_ENCODERS = ("phi_lift", "row_dual_stream")
+@dataclass(frozen=True)
+class RowReversible64Config:
+    """64-dimensional row bijection, split 32+32; zero-initialized increments."""
+
+    blocks: int = 4
+    heads: int = 4
+    ff_width: int = 64
+    tau_presence: float = 1.0
+    reference_mass: float = 1.0
+    norm_eps: float = 1e-6
+    block_parameters: str = "independent"
+    readback: str = "inverse_concat"
+    assembly: str = "query_ll_whole_row"
+
+    def __post_init__(self):
+        for name in ("blocks", "heads", "ff_width"):
+            if type(getattr(self, name)) is not int or getattr(self, name) < 1:
+                raise ValueError(f"row_reversible64.{name} must be a positive integer")
+        for name in ("tau_presence", "reference_mass", "norm_eps"):
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                raise ValueError(f"row_reversible64.{name} must be a real number")
+            if not math.isfinite(value):
+                raise ValueError(f"row_reversible64.{name} must be finite")
+            positive(value, f"row_reversible64.{name}")
+        if self.block_parameters != "independent":
+            raise ValueError("row_reversible64.block_parameters must be independent")
+        if self.readback != "inverse_concat":
+            raise ValueError("row_reversible64.readback must be inverse_concat")
+        if self.assembly != "query_ll_whole_row":
+            raise ValueError("row_reversible64.assembly must be query_ll_whole_row")
+
+    def operator_config(self, code_dim: int) -> BackboneConfig:
+        """Width-``code_dim`` operator settings for ``A_l`` and ``F_l``."""
+        return BackboneConfig(
+            width=code_dim,
+            layers=self.blocks,
+            heads=self.heads,
+            ff_width=self.ff_width,
+            kind="direct",
+            slots=1,
+            tau_presence=self.tau_presence,
+            reference_mass=self.reference_mass,
+            norm_eps=self.norm_eps,
+        )
+
+    def as_dict(self):
+        return asdict(self)
+
+
+VALUE_ENCODERS = ("phi_lift", "row_dual_stream", "row_reversible64")
 
 
 def _version_defaults(version: str) -> dict:
@@ -161,6 +211,8 @@ class V7Config:
     value_encoder: str = field(default="phi_lift", kw_only=True)
     dual_stream: DualStreamConfig | None = field(default=None, kw_only=True)
 
+    row_reversible64: RowReversible64Config | None = field(default=None, kw_only=True)
+
     def __post_init__(self):
         for name, value in _version_defaults(self.model_version).items():
             if getattr(self, name) is _VERSION_DEFAULT:
@@ -169,6 +221,8 @@ class V7Config:
             object.__setattr__(self, "backbone", BackboneConfig(**self.backbone))
         if isinstance(self.dual_stream, dict):
             object.__setattr__(self, "dual_stream", DualStreamConfig(**self.dual_stream))
+        if isinstance(self.row_reversible64, dict):
+            object.__setattr__(self, "row_reversible64", RowReversible64Config(**self.row_reversible64))
         object.__setattr__(self, "coupling_hidden", tuple(self.coupling_hidden))
         for name in ("code_dim", "rounds", "coupling_blocks", "center_chunk_size"):
             if type(getattr(self, name)) is not int or getattr(self, name) < 1:
@@ -231,7 +285,19 @@ class V7Config:
 
     def _validate_value_encoder(self):
         if self.value_encoder not in VALUE_ENCODERS:
-            raise ValueError("value_encoder must be phi_lift or row_dual_stream")
+            raise ValueError("value_encoder must be phi_lift, row_dual_stream or row_reversible64")
+        if self.value_encoder == "row_reversible64":
+            if not isinstance(self.row_reversible64, RowReversible64Config):
+                raise ValueError("row_reversible64 requires explicit RowReversible64Config")
+            if self.dual_stream is not None:
+                raise ValueError("row_reversible64 cannot use dual_stream settings")
+            if self.code_dim != 64 or self.backbone.width != 128:
+                raise ValueError("row_reversible64 requires code_dim=64 and token width=128")
+            if 32 % self.row_reversible64.heads:
+                raise ValueError("row_reversible64.heads must divide 32")
+            return
+        if self.row_reversible64 is not None:
+            raise ValueError("row_reversible64 settings require the explicit encoder")
         if self.value_encoder == "phi_lift":
             if self.dual_stream is not None:
                 raise ValueError("dual_stream settings require value_encoder row_dual_stream")
@@ -255,6 +321,8 @@ class V7Config:
 
     def as_dict(self):
         values = asdict(self)
+        if self.value_encoder != "row_reversible64":
+            del values["row_reversible64"]
         if self.value_encoder == "phi_lift":
             # Historical ModelSpec dictionaries and their digests stay identical.
             del values["value_encoder"], values["dual_stream"]

@@ -217,6 +217,12 @@ class V7Round(nn.Module):
                 if isinstance(module, OMAB):
                     module.strict_finite_content = True
 
+        if config.value_encoder == "row_reversible64":
+            from .reversible64 import RowReversible64Encoder
+            self.row_encoder = RowReversible64Encoder(
+                config.row_reversible64, strict_finite_content=config.model_version == "v7.3"
+            )
+
     def _init_row_dual_stream(self, config: V7Config) -> None:
         """Experimental branch: row encoder ``G`` replaces ``phi`` and ``lift``.
 
@@ -285,6 +291,9 @@ class V7Model(nn.Module):
     ) -> V7Output | JointOutput:
         from .joint import JointEpisode, forward_joint
 
+        if self.config.value_encoder == "row_reversible64":
+            from .reversible64 import forward_reversible64
+            return forward_reversible64(self, episode, decode=decode)
         if self.config.value_encoder == "row_dual_stream":
             from .dual_stream import forward_dual_stream
 
