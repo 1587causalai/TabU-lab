@@ -19,6 +19,7 @@ import torch
 from torch import Tensor
 
 from ..restoration.contracts import RestorationInput, TruthSidecar
+from .auxiliary import prepare_auxiliary_reconstruction
 from .config import V7Config
 from .model import V7Model, prepare_episode
 from .training import reference_values, score_rounds
@@ -70,6 +71,7 @@ class StepRecord:
     loss: float  # task-equal mean of the per-episode weighted round sums
     round_losses: tuple[tuple[float, ...], ...]  # [B_ep][K]
     initial_losses: tuple[float, ...]  # L_0 per episode; diagnostic only
+    auxiliary_plans: tuple[dict | None, ...] = ()
 
 
 def make_optimizer(model: V7Model, spec: OptimizerSpec | None = None) -> torch.optim.AdamW:
@@ -88,9 +90,9 @@ def train_step(
 
     Cyclic configurations backpropagate through the complete unroll.
 
-    Each episode is first averaged over its own Query rows, then episodes are
-    averaged with equal weight; a nonfinite loss or gradient aborts before the
-    parameters change.
+    Query-only averages rows; balanced reconstruction uses its explicit column
+    sums and scale. Episodes are then averaged with equal weight. A nonfinite
+    loss or gradient aborts before the parameters change.
     """
     if not tasks:
         raise ValueError("a V7 optimizer step needs at least one episode")
@@ -99,12 +101,17 @@ def train_step(
     model.train()
     optimizer.zero_grad(set_to_none=True)
     scores = []
+    auxiliary_plans = []
     for task in tasks:
         if int(task.inputs.query.any(0).sum()) > 1:
             from .joint import prepare_joint_episode, score_joint
 
             episode = prepare_joint_episode(
                 task.inputs, donor_seed=task.donor_seed, config=model.config
+            )
+            episode = prepare_auxiliary_reconstruction(episode, model.config, seed=task.donor_seed)
+            auxiliary_plans.append(
+                None if episode.auxiliary is None else episode.auxiliary.as_dict()
             )
             scores.append(
                 score_joint(model(episode, decode=False), episode, task.truth, model.config)
@@ -116,7 +123,10 @@ def train_step(
             code_dim=model.config.code_dim,
             epsilon=model.config.epsilon,
             codec=model.config.codec,
+            numeric_preprocessing=model.config.numeric_preprocessing,
         )
+        episode = prepare_auxiliary_reconstruction(episode, model.config, seed=task.donor_seed)
+        auxiliary_plans.append(None if episode.auxiliary is None else episode.auxiliary.as_dict())
         output = model(episode, decode=False)
         scores.append(
             score_rounds(output, episode, reference_values(episode, task.truth), model.config)
@@ -133,6 +143,7 @@ def train_step(
         float(loss.detach()),
         tuple(tuple(score.round_losses.detach().tolist()) for score in scores),
         tuple(float(score.initial_loss) for score in scores),
+        tuple(auxiliary_plans),
     )
 
 
@@ -164,7 +175,7 @@ def _finite(value) -> bool:
 
 
 def _execution(model: V7Model) -> dict:
-    weight = model.rounds[0].lift.weight
+    weight = model.rounds[0].unit_seed  # present on both value-encoder branches
     return {
         "device": weight.device.type,
         "dtype": str(weight.dtype),
@@ -191,6 +202,7 @@ def checkpoint_state(
         {
             "schema": CHECKPOINT_SCHEMA,
             "architecture": "restoration_v7",
+            "model_version": model.config.model_version,
             "share_rounds": model.config.share_rounds,
             "config": model.config.as_dict(),
             "manifest": manifest,
@@ -224,7 +236,10 @@ def load_checkpoint(
     state = torch.load(path, map_location="cpu", weights_only=True)
     if state.get("schema") != CHECKPOINT_SCHEMA or state.get("architecture") != "restoration_v7":
         raise ValueError("unsupported V7 checkpoint schema")
-    if V7Config.from_dict(state["config"]) != model.config:
+    saved_config = V7Config.from_dict(state["config"])
+    if state.get("model_version", saved_config.model_version) != saved_config.model_version:
+        raise ValueError("checkpoint model_version differs from its stored ModelSpec")
+    if saved_config != model.config:
         raise ValueError("checkpoint ModelSpec or sharing mode differs from the model")
     if not isinstance(state.get("manifest"), dict) or (
         state.get("manifest_sha256") != manifest_digest(state["manifest"])

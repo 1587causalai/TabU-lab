@@ -29,9 +29,10 @@ def write_table(path, **overrides):
     return hashlib.sha256(raw).hexdigest()
 
 
-def test_loader_types_columns_and_checks_digest(tmp_path):
+@pytest.mark.parametrize("schema_id", ["tabu.tar.typed-fit-table.1", "tfm-data.sparse-relevance-table.1"])
+def test_loader_types_columns_and_checks_digest(tmp_path, schema_id):
     path = tmp_path / "toy.json"
-    digest = write_table(path)
+    digest = write_table(path, schema=schema_id)
     table = load_typed_table(path, target=3, expected_sha256=digest)
     assert [s.kind for s in table.schema] == ["numeric", "nominal", "ordinal", "numeric"]
     assert table.schema[2].domain_size == 3 and table.schema[2].order == (0, 1, 2)
@@ -42,9 +43,10 @@ def test_loader_types_columns_and_checks_digest(tmp_path):
         load_typed_table(path, target=3, expected_sha256="0" * 64)
 
 
-def test_loader_rejects_discrete_values_outside_the_domain(tmp_path):
+@pytest.mark.parametrize("schema_id", ["tabu.tar.typed-fit-table.1", "tfm-data.sparse-relevance-table.1"])
+def test_loader_rejects_discrete_values_outside_the_domain(tmp_path, schema_id):
     path = tmp_path / "bad.json"
-    write_table(path, values=[[0.0, 2, 0, 1.0]] * 4)
+    write_table(path, schema=schema_id, values=[[0.0, 2, 0, 1.0]] * 4)
     with pytest.raises(ValueError, match="declared domain"):
         load_typed_table(path, target=3)
 

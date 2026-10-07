@@ -1,8 +1,8 @@
 # Runnable implementation smoke fixture; not a recommended research budget/model size.
 schema: tabu.restoration.v7-fit.v1
-output_dir: ./output-mixed
+output_dir: ./output-balanced
 seed: 20261003
-steps: 8
+steps: 4
 num_threads: 2
 device: cpu
 dtype: float64
@@ -18,7 +18,10 @@ masking:
   joint_probability: 0.5       # in mixed mode, probability per episode
   joint_columns: 3             # omit/null to hide all eligible columns jointly
 model:
-  model_version: v7
+  loss_mode: balanced_reconstruction
+  auxiliary_per_query: null     # all visible cells in each queried column
+  auxiliary_min_group_weight: 0.05
+  balanced_loss_scale: 1.0       # document formula, no extra count normalization
   query_init: donor
   query_source: true
   rounds: 4

@@ -94,7 +94,9 @@ def load_typed_table(
         raise ValueError(f"dataset digest mismatch: {path}")
     payload = json.loads(raw)
     schema_id = payload.get("schema")
-    if schema_id not in (TABLE_SCHEMA, None):
+    # The existing sparse100 replay pool uses the same values/features/splits
+    # contract under its TFM-Data schema; retain the frozen V7 loader support.
+    if schema_id not in (TABLE_SCHEMA, "tfm-data.sparse-relevance-table.1", None):
         raise ValueError(f"unsupported table schema: {schema_id}")
     name = name or payload.get("dataset") or Path(path).stem
     rows = payload["values"]
@@ -156,13 +158,8 @@ def table_task(
     enter the episode at all.
     """
     return table_mask_task(
-        table,
-        rows,
-        {table.target: query},
-        code_seed=code_seed,
-        donor_seed=donor_seed,
-        device=device,
-        dtype=dtype,
+        table, rows, {table.target: query}, code_seed=code_seed, donor_seed=donor_seed,
+        device=device, dtype=dtype,
     )
 
 

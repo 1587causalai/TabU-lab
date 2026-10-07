@@ -12,9 +12,10 @@ from torch import Tensor
 
 from ..restoration._validation import finite
 from ..restoration.contracts import RestorationInput, TruthSidecar
-from .codec import G64Codec, V7ProtocolError, build_value_codec
+from .auxiliary import AuxiliaryPlan, balanced_round_losses, validate_auxiliary_plan
+from .codec import G64Codec, V7ProtocolError, build_value_codec, null_constant_inputs
 from .config import round_weights
-from .readout import column_shared_ll
+from .readout import column_shared_ll, evaluate_fitted_ll
 from .training import V7Score
 from .training import state_loss as single_state_loss
 
@@ -38,6 +39,7 @@ class JointEpisode:
     donor_rows: Tensor
     observed: Tensor
     cell_weights: Tensor  # 1 / (number of Query rows * Query cells in this row)
+    auxiliary: AuxiliaryPlan | None = None
 
 
 @dataclass(frozen=True)
@@ -46,6 +48,7 @@ class JointOutput:
     states: tuple[Tensor, ...]
     slopes: tuple[dict[int, Tensor], ...]
     decoded: dict[int, Tensor] | None = None
+    auxiliary_states: tuple[dict[int, Tensor], ...] = ()
 
 
 def prepare_joint_episode(inputs, *, donor_seed, config, admission="training"):
@@ -53,6 +56,7 @@ def prepare_joint_episode(inputs, *, donor_seed, config, admission="training"):
         raise ValueError("invalid admission")
     if type(donor_seed) is not int:
         raise ValueError("donor seed must be an integer")
+    inputs = null_constant_inputs(inputs, config.numeric_preprocessing)
     qr, qc = inputs.query.nonzero(as_tuple=True)
     if not len(qr):
         raise ValueError("no Query cells")
@@ -77,7 +81,11 @@ def prepare_joint_episode(inputs, *, donor_seed, config, admission="training"):
         parts.append(ColumnQuery(a, supports, rows, positions, chosen))
     # Every Query was hidden in RestorationInput before any codec is built.
     codec = build_value_codec(
-        inputs, codec=config.codec, dim=config.code_dim, epsilon=config.epsilon
+        inputs,
+        codec=config.codec,
+        dim=config.code_dim,
+        epsilon=config.epsilon,
+        numeric_preprocessing=config.numeric_preprocessing,
     )
     observed = codec.encode_observed(inputs)
     counts = inputs.query.sum(1)
@@ -87,11 +95,14 @@ def prepare_joint_episode(inputs, *, donor_seed, config, admission="training"):
 
 def forward_joint(model, episode, *, decode=True):
     config = model.config
+    validate_auxiliary_plan(episode, config)
     if episode.codec.dim != config.code_dim or episode.codec.family != config.codec:
         raise ValueError("codec differs from model")
+    if episode.codec.numeric_preprocessing != config.numeric_preprocessing:
+        raise ValueError("episode numeric preprocessing differs from model config")
     visible, query = episode.inputs.visible, episode.inputs.query
     n, m = visible.shape
-    dtype = model.rounds[0].lift.weight.dtype
+    dtype = model.rounds[0].unit_seed.dtype
     observed = episode.observed.to(dtype)
     active_rows, active_cols = (visible | query).nonzero(as_tuple=True)
     if config.query_init == "donor":
@@ -103,6 +114,12 @@ def forward_joint(model, episode, *, decode=True):
             current = current.index_put((part.positions,), seed.expand(len(part.rows), -1))
     initial = current
     states, slopes = [], []
+    auxiliary_states = []
+    auxiliary_columns = (
+        {} if episode.auxiliary is None else {p.column: p for p in episode.auxiliary.columns}
+    )
+    if auxiliary_columns and config.loss_mode != "balanced_reconstruction":
+        raise ValueError("auxiliary plan requires balanced_reconstruction")
     for t in range(config.rounds):
         block = model.round_module(t)
         table = observed.index_put((episode.query_rows, episode.query_cols), current)
@@ -117,6 +134,7 @@ def forward_joint(model, episode, *, decode=True):
         h = model.run_backbone(block, h, visible, query)  # exactly once for all columns
         next_state = torch.zeros_like(current)
         round_slopes = {}
+        round_auxiliary = {}
         # All columns read the same h and embeddings snapshot. No per-column
         # write can affect another column's readout within this round.
         for part in episode.columns:
@@ -135,9 +153,24 @@ def forward_joint(model, episode, *, decode=True):
             finite(predicted, "joint V7 Query writeback")
             next_state = next_state.index_put((part.positions,), predicted)
             round_slopes[a] = recovery.slope
+            if a in auxiliary_columns:
+                aux = evaluate_fitted_ll(
+                    h[:n, m],
+                    part.supports,
+                    embeddings[part.supports, a],
+                    h[:n, a],
+                    auxiliary_columns[a].rows,
+                    slope=recovery.slope,
+                    bandwidth=config.bandwidth,
+                )
+                aux_codes = block.phi.inverse(aux.to(dtype))
+                finite(aux_codes, "auxiliary reconstructed codes")
+                round_auxiliary[a] = aux_codes
         current = next_state  # simultaneous writeback, no detach
         states.append(current)
         slopes.append(round_slopes)
+        if episode.auxiliary is not None:
+            auxiliary_states.append(round_auxiliary)
     decoded = (
         {
             part.column: episode.codec.columns[part.column].decode(current[part.positions].detach())
@@ -146,7 +179,7 @@ def forward_joint(model, episode, *, decode=True):
         if decode
         else None
     )
-    return JointOutput(initial, tuple(states), tuple(slopes), decoded)
+    return JointOutput(initial, tuple(states), tuple(slopes), decoded, tuple(auxiliary_states))
 
 
 def reference_codes(episode, truth: TruthSidecar, config):
@@ -185,6 +218,8 @@ def score_joint(output, episode, truth, config):
         return joint_state_loss(state, reference, chi, episode.cell_weights)
 
     losses = torch.stack([score(s) for s in output.states])
+    if config.loss_mode == "balanced_reconstruction":
+        losses = balanced_round_losses(output, episode, reference, config)
     weights = round_weights(len(output.states), config.round_loss_rho)
     loss = (losses * losses.new_tensor(weights)).sum()
     finite(loss, "joint coder loss")

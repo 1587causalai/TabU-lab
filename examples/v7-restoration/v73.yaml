@@ -1,0 +1,35 @@
+# V7.3 scratch smoke fixture; not a research budget or a trained-quality claim.
+schema: tabu.restoration.v7-fit.v1
+output_dir: ./output-v73
+seed: 20261004
+steps: 8
+num_threads: 2
+device: cpu
+dtype: float64
+window_rows: 16
+query_rows: 4
+eval_query_rows: 4
+grad_clip_norm: 1.0
+tables:
+  - path: ./toy.json
+masking:
+  mode: mixed
+  columns: [0, 1, target]
+  joint_probability: 0.5
+  joint_columns: 3
+model:
+  model_version: v7.3
+  unit_layers: 0
+  coupling_blocks: 1
+  coupling_hidden: [16]
+  coupling_alpha: 0.1
+  center_chunk_size: 16
+  backbone:
+    width: 64
+    layers: 1
+    heads: 2
+    ff_width: 64
+    slots: 4
+optimizer:
+  lr: 0.0001
+  weight_decay: 0.0

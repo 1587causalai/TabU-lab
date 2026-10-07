@@ -46,11 +46,16 @@ def load_reference(root):
 
 
 def make_pair(config, device, root):
+    reference_config = config.as_dict()
+    # The frozen implementation predates optional variable-axis inducing.
+    # Only the disabled case has an equivalent graph in that reference.
+    if reference_config["backbone"].pop("row_slots", 0):
+        raise ValueError("frozen reference does not support row_slots")
     reference = load_reference(root)
     torch.manual_seed(1729)
     current = RestorationModel(config).double().to(device)
     previous = reference.RestorationModel(
-        reference.RestorationConfig.from_dict(config.as_dict())
+        reference.RestorationConfig.from_dict(reference_config)
     ).double().to(device)
     previous.load_state_dict(current.state_dict(), strict=True)
     return {"previous_batched": (previous, reference.score_episode),

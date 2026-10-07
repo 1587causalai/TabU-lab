@@ -1,0 +1,392 @@
+{
+  "scope": "Existing independent review and acceptance, checked against this integration. No new remote training or reviewer was launched.",
+  "source_date": "2026-10-07",
+  "original_final_acceptance_sha256": "b0b242676ade0bcbe31e9096a1181e8442a8cfad226880b1141266dc99cee8d1",
+  "original_cuda_receipt_sha256": "6acc3170495a1e0e564ef6a1f5a85d77b95d612d467f15f1806cf729c8f1416e",
+  "reviewed_files": [
+    {
+      "path": "src/tabu_lab/models/restoration_v7/warm_start.py",
+      "sha256": "c6f129a188b89ba8309737e9047a2cb344875b7700882909c7c1c7e7d1a14983",
+      "review_source": "final-dual-stream-acceptance",
+      "integration_sha256": "c6f129a188b89ba8309737e9047a2cb344875b7700882909c7c1c7e7d1a14983"
+    },
+    {
+      "path": "src/tabu_lab/models/restoration_v7/runner.py",
+      "sha256": "b44342bb7dc2352a0d530a884218ad4c05692f111872061e8c22b2b8088cdc5e",
+      "review_source": "final-dual-stream-acceptance",
+      "integration_sha256": "b44342bb7dc2352a0d530a884218ad4c05692f111872061e8c22b2b8088cdc5e"
+    },
+    {
+      "path": "src/tabu_lab/models/restoration_v7/fit.py",
+      "sha256": "10efe3e2399c58fcdf9e768cdaa7ce7e10002a79cb813ea978d06e0b2e912768",
+      "review_source": "final-dual-stream-acceptance",
+      "integration_sha256": "10efe3e2399c58fcdf9e768cdaa7ce7e10002a79cb813ea978d06e0b2e912768"
+    },
+    {
+      "path": "src/tabu_lab/models/restoration_v7/config.py",
+      "sha256": "b28a20ef956b1919104cbcf793e8d4feedd130b5ac9e9ea3ab280bbe46642ad6",
+      "review_source": "final-dual-stream-acceptance",
+      "integration_sha256": "b28a20ef956b1919104cbcf793e8d4feedd130b5ac9e9ea3ab280bbe46642ad6"
+    },
+    {
+      "path": "src/tabu_lab/models/restoration_v7/evaluation.py",
+      "sha256": "6546d3e4b1988e8c124840a1caee478159d76c8ccf028d4f554350ac5449b312",
+      "review_source": "review-baseline",
+      "integration_sha256": "6546d3e4b1988e8c124840a1caee478159d76c8ccf028d4f554350ac5449b312"
+    },
+    {
+      "path": "src/tabu_lab/models/restoration_v7/__init__.py",
+      "sha256": "f64beb248f70ce2711d6f79ac30cc1d42d2ca6dbffd39bae60339853bf5f9b65",
+      "review_source": "final-dual-stream-acceptance",
+      "integration_sha256": "f64beb248f70ce2711d6f79ac30cc1d42d2ca6dbffd39bae60339853bf5f9b65"
+    },
+    {
+      "path": "src/tabu_lab/models/restoration_v7/masking.py",
+      "sha256": "c17255a7056d46b95145a787098d5d89ee1e31af2873ef02806f5d69bd081e92",
+      "review_source": "review-baseline",
+      "integration_sha256": "c17255a7056d46b95145a787098d5d89ee1e31af2873ef02806f5d69bd081e92"
+    },
+    {
+      "path": "src/tabu_lab/models/restoration_v7/model.py",
+      "sha256": "2bfff49289e37ef5596dcf998387a7e3f0128badc9698a2e0048ef42e9b67724",
+      "review_source": "final-dual-stream-acceptance",
+      "integration_sha256": "2bfff49289e37ef5596dcf998387a7e3f0128badc9698a2e0048ef42e9b67724"
+    },
+    {
+      "path": "src/tabu_lab/models/restoration_v7/dual_stream.py",
+      "sha256": "96f0cd2f2dceec6f684ec8ddefab69863ecb413aa9197f31ae5f29b12896983b",
+      "review_source": "final-dual-stream-acceptance",
+      "integration_sha256": "96f0cd2f2dceec6f684ec8ddefab69863ecb413aa9197f31ae5f29b12896983b"
+    },
+    {
+      "path": "src/tabu_lab/models/restoration_v7/readout.py",
+      "sha256": "9e150aa99a9235d74549fcfe0bf6042860205e7418308cbf390d39c709aef636",
+      "review_source": "review-baseline",
+      "integration_sha256": "9e150aa99a9235d74549fcfe0bf6042860205e7418308cbf390d39c709aef636"
+    },
+    {
+      "path": "src/tabu_lab/models/restoration_v7/joint.py",
+      "sha256": "a359cf3196caae3cd51e753a3d64dcc1f4717a075be3f8ae028b5f9a7b5b9547",
+      "review_source": "final-dual-stream-acceptance",
+      "integration_sha256": "a359cf3196caae3cd51e753a3d64dcc1f4717a075be3f8ae028b5f9a7b5b9547"
+    },
+    {
+      "path": "src/tabu_lab/models/restoration_v7/tables.py",
+      "sha256": "23cb78b1485a4655ebd6ff44e85238b1ad3a3fbad9a1b354f8a57bf6a1c0fa75",
+      "review_source": "review-baseline",
+      "integration_sha256": "23cb78b1485a4655ebd6ff44e85238b1ad3a3fbad9a1b354f8a57bf6a1c0fa75"
+    },
+    {
+      "path": "src/tabu_lab/models/restoration_v7/codec.py",
+      "sha256": "0ee5bbd56622e1161cbb3183415eb24e644d59c6b377ede781aad06f6f43644f",
+      "review_source": "review-baseline",
+      "integration_sha256": "0ee5bbd56622e1161cbb3183415eb24e644d59c6b377ede781aad06f6f43644f"
+    },
+    {
+      "path": "src/tabu_lab/models/restoration_v7/auxiliary.py",
+      "sha256": "b61d311aaa96cafca9bcb213dd6cc3a8e6fb57501cf8e756b13d69b2d023f720",
+      "review_source": "review-baseline",
+      "integration_sha256": "b61d311aaa96cafca9bcb213dd6cc3a8e6fb57501cf8e756b13d69b2d023f720"
+    },
+    {
+      "path": "src/tabu_lab/models/restoration_v7/training.py",
+      "sha256": "da592dff77b4a159c1b6f7f4d42a3e29d1a74447e7427b14c14dedf277f30485",
+      "review_source": "review-baseline",
+      "integration_sha256": "da592dff77b4a159c1b6f7f4d42a3e29d1a74447e7427b14c14dedf277f30485"
+    },
+    {
+      "path": "src/tabu_lab/models/restoration/backbone.py",
+      "sha256": "83d27bc412864f5965490cc86fa441822e663b33db9942637bf27689909d7cff",
+      "review_source": "final-dual-stream-acceptance",
+      "integration_sha256": "83d27bc412864f5965490cc86fa441822e663b33db9942637bf27689909d7cff"
+    },
+    {
+      "path": "src/tabu_lab/primitives/coupling.py",
+      "sha256": "8146055d62b408ce81405f868fa7f2987d28eb65df5527895b6e61ece59769cf",
+      "review_source": "review-baseline",
+      "integration_sha256": "8146055d62b408ce81405f868fa7f2987d28eb65df5527895b6e61ece59769cf"
+    },
+    {
+      "path": "tests/unit/restoration_v7/test_v7_runner.py",
+      "sha256": "8b6e74eec5478fb3fb4ca5435de78aec92aaabc559900ec063b5b8fcb4b31c71",
+      "review_source": "review-baseline",
+      "integration_sha256": "8b6e74eec5478fb3fb4ca5435de78aec92aaabc559900ec063b5b8fcb4b31c71"
+    },
+    {
+      "path": "tests/unit/restoration_v7/test_v7_c64.py",
+      "sha256": "b5f856a987fba1658eb5616fae5489ffead48737a8388cc8d0efc004ae2b1696",
+      "review_source": "review-baseline",
+      "integration_sha256": "b5f856a987fba1658eb5616fae5489ffead48737a8388cc8d0efc004ae2b1696"
+    },
+    {
+      "path": "tests/unit/restoration_v7/test_v7_v6_codec.py",
+      "sha256": "8afe99ec35df5a4cc97f7843aad9a99fd27c3aec1970ded808fe0c2d2961e9c7",
+      "review_source": "review-baseline",
+      "integration_sha256": "8afe99ec35df5a4cc97f7843aad9a99fd27c3aec1970ded808fe0c2d2961e9c7"
+    },
+    {
+      "path": "tests/unit/restoration_v7/test_v7_masking_fit.py",
+      "sha256": "8bd479b33630bc8b9d5d6c8e913041463cfe1842c23b00df392088b7c7be2c30",
+      "review_source": "review-baseline",
+      "integration_sha256": "8bd479b33630bc8b9d5d6c8e913041463cfe1842c23b00df392088b7c7be2c30"
+    },
+    {
+      "path": "tests/unit/restoration_v7/test_v7_config_versions.py",
+      "sha256": "6ee47def141a1151e67594fe95e6c0fd61fd42353272785382d979b83a59f103",
+      "review_source": "review-baseline",
+      "integration_sha256": "6ee47def141a1151e67594fe95e6c0fd61fd42353272785382d979b83a59f103"
+    },
+    {
+      "path": "tests/unit/restoration_v7/test_v7_auxiliary.py",
+      "sha256": "7c6a3ff272916ac2ad9f9226e6eeba3f94832f9ed6783d79ec10e1e946884dc5",
+      "review_source": "review-baseline",
+      "integration_sha256": "7c6a3ff272916ac2ad9f9226e6eeba3f94832f9ed6783d79ec10e1e946884dc5"
+    },
+    {
+      "path": "tests/unit/restoration_v7/test_v7_unit_contract.py",
+      "sha256": "7aaee4b2280004a66fe4623c62b87099fd6ff4dc9aa7fed16221e3d2b246b034",
+      "review_source": "review-baseline",
+      "integration_sha256": "7aaee4b2280004a66fe4623c62b87099fd6ff4dc9aa7fed16221e3d2b246b034"
+    },
+    {
+      "path": "tests/unit/restoration_v7/test_v7_asinh.py",
+      "sha256": "7b12d2ab12f98a232b14fe41b63c8e28f719a7832a6b65825730e1d3bfa17256",
+      "review_source": "review-baseline",
+      "integration_sha256": "7b12d2ab12f98a232b14fe41b63c8e28f719a7832a6b65825730e1d3bfa17256"
+    },
+    {
+      "path": "tests/unit/restoration_v7/test_v7_tables.py",
+      "sha256": "e31598aef708b621f099fba2bbd27a99507a3751772bb9c5759bf1fd7ea551e2",
+      "review_source": "review-baseline",
+      "integration_sha256": "e31598aef708b621f099fba2bbd27a99507a3751772bb9c5759bf1fd7ea551e2"
+    },
+    {
+      "path": "tests/unit/restoration_v7/test_v7_numeric_zero.py",
+      "sha256": "933aec58c18afb45d2e447510c9afadaff41b97b9757e529cee516e867236a4d",
+      "review_source": "review-baseline",
+      "integration_sha256": "933aec58c18afb45d2e447510c9afadaff41b97b9757e529cee516e867236a4d"
+    },
+    {
+      "path": "tests/unit/restoration_v7/test_v7_joint.py",
+      "sha256": "6ca8a67a24318a915df7a3019c0bdde6b49f0bfe2d1a108cf3dde40eafc6f885",
+      "review_source": "review-baseline",
+      "integration_sha256": "6ca8a67a24318a915df7a3019c0bdde6b49f0bfe2d1a108cf3dde40eafc6f885"
+    },
+    {
+      "path": "tests/unit/restoration_v7/test_v7_row_dual_stream.py",
+      "sha256": "045539fc5c40225ff9a7c77b93c8d3e74e76048e23d129e1445d2cd605682d87",
+      "review_source": "final-dual-stream-acceptance",
+      "integration_sha256": "46c32b9bc9f23569e863ed8bf9de49fe7c153b8ed238f683ed19f2cc48953f92",
+      "integration_change": "Test fixture only: isolate and restore deterministic-algorithm mode and thread count. Product source unchanged."
+    },
+    {
+      "path": "tests/unit/restoration_v7/test_v7_evaluation.py",
+      "sha256": "e01a91e240013ad2e1e39a5ae245bac42743cde00d28d91f7d8501356c06cd7d",
+      "review_source": "review-baseline",
+      "integration_sha256": "e01a91e240013ad2e1e39a5ae245bac42743cde00d28d91f7d8501356c06cd7d"
+    },
+    {
+      "path": "tests/unit/restoration_v7/test_v7.py",
+      "sha256": "2d7230d70e60862401b4e66967846e38152ea848d9ce8004afc824112ad4c5ec",
+      "review_source": "review-baseline",
+      "integration_sha256": "2d7230d70e60862401b4e66967846e38152ea848d9ce8004afc824112ad4c5ec"
+    },
+    {
+      "path": "tests/unit/restoration_v7/test_v7_probabilities.py",
+      "sha256": "c6637121e6f92fa053c85a971c40275a9ffca0efadd41cc3f75dc7a8cf2a83cb",
+      "review_source": "review-baseline",
+      "integration_sha256": "c6637121e6f92fa053c85a971c40275a9ffca0efadd41cc3f75dc7a8cf2a83cb"
+    }
+  ],
+  "prior_selected_regression": [
+    {
+      "name": "dual-stream-tests-final.xml",
+      "original_sha256": "2d49c52fbe03688467f4079dc7a2cdd166b27a28f276013934f537c470c8318a",
+      "cases": 63,
+      "failures": 0,
+      "skips": 0
+    },
+    {
+      "name": "candidate-regression-final.xml",
+      "original_sha256": "a079880833d32ef2df6efda850a179ec38f4008d446437e2e07800c878969fc4",
+      "cases": 806,
+      "failures": 17,
+      "skips": 0
+    },
+    {
+      "name": "reviewer-extra-regression.xml",
+      "original_sha256": "706585ceab760daf9c290947b56ff242e4787675f35ad18d0429827af255daac",
+      "cases": 17,
+      "failures": 0,
+      "skips": 0,
+      "test_identities": [
+        "tests.unit.restoration.test_parallel_v2::test_complete_pipeline_parity_with_frozen_previous_code[nw-identity128-direct]",
+        "tests.unit.restoration.test_parallel_v2::test_complete_pipeline_parity_with_frozen_previous_code[nw-identity128-inducing]",
+        "tests.unit.restoration.test_parallel_v2::test_complete_pipeline_parity_with_frozen_previous_code[nw-rotary32-direct]",
+        "tests.unit.restoration.test_parallel_v2::test_complete_pipeline_parity_with_frozen_previous_code[nw-rotary32-inducing]",
+        "tests.unit.restoration.test_parallel_v2::test_complete_pipeline_parity_with_frozen_previous_code[nw-mlp32-direct]",
+        "tests.unit.restoration.test_parallel_v2::test_complete_pipeline_parity_with_frozen_previous_code[nw-mlp32-inducing]",
+        "tests.unit.restoration.test_parallel_v2::test_complete_pipeline_parity_with_frozen_previous_code[nw-mlp256-direct]",
+        "tests.unit.restoration.test_parallel_v2::test_complete_pipeline_parity_with_frozen_previous_code[nw-mlp256-inducing]",
+        "tests.unit.restoration.test_parallel_v2::test_complete_pipeline_parity_with_frozen_previous_code[ll-identity128-direct]",
+        "tests.unit.restoration.test_parallel_v2::test_complete_pipeline_parity_with_frozen_previous_code[ll-identity128-inducing]",
+        "tests.unit.restoration.test_parallel_v2::test_complete_pipeline_parity_with_frozen_previous_code[ll-rotary32-direct]",
+        "tests.unit.restoration.test_parallel_v2::test_complete_pipeline_parity_with_frozen_previous_code[ll-rotary32-inducing]",
+        "tests.unit.restoration.test_parallel_v2::test_complete_pipeline_parity_with_frozen_previous_code[ll-mlp32-direct]",
+        "tests.unit.restoration.test_parallel_v2::test_complete_pipeline_parity_with_frozen_previous_code[ll-mlp32-inducing]",
+        "tests.unit.restoration.test_parallel_v2::test_complete_pipeline_parity_with_frozen_previous_code[ll-mlp256-direct]",
+        "tests.unit.restoration.test_parallel_v2::test_complete_pipeline_parity_with_frozen_previous_code[ll-mlp256-inducing]",
+        "tests.unit.restoration.test_curriculum_weighted_loss::test_query95_recipe_is_distinct_and_historical_recipe_stays_legacy"
+      ]
+    }
+  ],
+  "independent_cuda_acceptance": {
+    "device": "cuda",
+    "dtype": "torch.float64",
+    "torch": "2.12.0.dev20260322+cu130",
+    "legacy_omab_exact_initialization_forward_input_and_parameter_gradients": true,
+    "code_left_inverse_max_abs": 1.970645868709653e-15,
+    "arbitrary_state_roundtrip_max_abs": 4.371503159461554e-15,
+    "row_context_changes_peer_cell_but_not_other_row": true,
+    "support_response_query_dependency_directional_derivative": {
+      "autograd": -0.0650369108294454,
+      "finite_difference": -0.06503691052373027
+    },
+    "whole_round_LL_inverse_directional_derivative": {
+      "autograd": 0.08793119282325781,
+      "finite_difference": 0.08793118784211627
+    },
+    "simultaneous_order_independent_128_response_query_only_writeback": true,
+    "multi_round_gradient_norm": 0.5213531067117985,
+    "three_cuda_optimizer_steps_loss": [
+      10.345464456990182,
+      10.585425866426633,
+      6.0618116463515985
+    ],
+    "new_checkpoint_strict_roundtrip_exact_predictions": true,
+    "passed": true,
+    "transfer": {
+      "source_sha256": "8e4de8a7af1fb597ff2caabac3f05f20750933c19401902e677a0c6c7fe416a9",
+      "source_step": 7580,
+      "source_execution": {
+        "device": "cuda",
+        "dtype": "torch.float64",
+        "torch": "2.12.0.dev20260322+cu130"
+      },
+      "donor_config": {
+        "model_version": "v7.3",
+        "code_dim": 64,
+        "codec": "C64/8",
+        "unit_layers": 0,
+        "unit_source_policy": "observed",
+        "value_map": "coupling",
+        "query_init": "donor",
+        "query_source": true,
+        "gradient_checkpointing": true,
+        "backbone": {
+          "width": 128,
+          "layers": 3,
+          "heads": 4,
+          "ff_width": 256,
+          "kind": "inducing",
+          "slots": 256,
+          "tau_presence": 1.0,
+          "reference_mass": 1.0,
+          "norm_eps": 1e-06,
+          "row_slots": 0
+        },
+        "rounds": 4,
+        "share_rounds": true,
+        "coupling_blocks": 2,
+        "coupling_hidden": [
+          64
+        ],
+        "coupling_alpha": 0.1,
+        "coupling_bias": false,
+        "numeric_preprocessing": "standard_asinh_v1",
+        "coupling_scale": true,
+        "bandwidth": 1.0,
+        "ridge": 0.001,
+        "epsilon": 1e-06,
+        "center_chunk_size": 128,
+        "round_loss_rho": 0.5,
+        "chi_numeric": 32.0,
+        "chi_discrete": 0.25,
+        "loss_mode": "query_only",
+        "auxiliary_per_query": null,
+        "auxiliary_min_group_weight": 0.05,
+        "balanced_loss_scale": 1.0
+      },
+      "target_config": {
+        "model_version": "v7.3",
+        "code_dim": 64,
+        "codec": "C64/8",
+        "unit_layers": 0,
+        "unit_source_policy": "observed",
+        "value_map": "coupling",
+        "query_init": "donor",
+        "query_source": true,
+        "gradient_checkpointing": true,
+        "backbone": {
+          "width": 128,
+          "layers": 3,
+          "heads": 4,
+          "ff_width": 256,
+          "kind": "inducing",
+          "slots": 256,
+          "tau_presence": 1.0,
+          "reference_mass": 1.0,
+          "norm_eps": 1e-06,
+          "row_slots": 0
+        },
+        "rounds": 4,
+        "share_rounds": true,
+        "coupling_blocks": 2,
+        "coupling_hidden": [
+          64
+        ],
+        "coupling_alpha": 0.1,
+        "coupling_bias": false,
+        "numeric_preprocessing": "standard_asinh_v1",
+        "coupling_scale": true,
+        "bandwidth": 1.0,
+        "ridge": 0.001,
+        "epsilon": 1e-06,
+        "center_chunk_size": 128,
+        "round_loss_rho": 0.5,
+        "chi_numeric": 32.0,
+        "chi_discrete": 0.25,
+        "loss_mode": "query_only",
+        "auxiliary_per_query": null,
+        "auxiliary_min_group_weight": 0.05,
+        "balanced_loss_scale": 1.0,
+        "value_encoder": "row_dual_stream",
+        "dual_stream": {
+          "blocks": 4,
+          "heads": 4,
+          "ff_width": 128,
+          "tau_presence": 1.0,
+          "reference_mass": 1.0,
+          "norm_eps": 1e-06,
+          "block_parameters": "independent",
+          "readback": "mean",
+          "assembly": "query_ll_whole_row"
+        }
+      },
+      "copied_tensor_count": 86,
+      "copied_parameter_count": 1574272,
+      "new_parameter_count": 164096,
+      "shape_mismatched": [],
+      "load_strict": true,
+      "optimizer_resume": false,
+      "qualification_scope": "weight transfer only; it does not show that the new row encoding is semantically adapted to the donor token dynamics"
+    }
+  },
+  "limitations": [
+    "The 806 selected tests passed across the initial run and a 17-case environment repair, not one all-green full-suite execution.",
+    "CUDA acceptance preceded the final strict-migration guard and semantics-preserving expression cleanup; the final files and regression identities are separately pinned.",
+    "Engineering acceptance does not establish training stability or predictive superiority."
+  ],
+  "reviewed_product_file_hashes_match": true,
+  "reviewed_files_verified_before_test_isolation_patch": true
+}

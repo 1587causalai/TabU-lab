@@ -1,0 +1,43 @@
+# Eight-update CPU implementation fixture; not a model-quality experiment.
+schema: tabu.restoration.v7-fit.v1
+output_dir: ./output-row-dual-stream
+seed: 20261008
+steps: 8
+num_threads: 2
+device: cpu
+dtype: float64
+window_rows: 16
+query_rows: 4
+eval_query_rows: 4
+grad_clip_norm: 1.0
+tables:
+  - path: ./toy.json
+masking:
+  mode: mixed
+  columns: [0, 1, target]
+  joint_probability: 0.5
+  joint_columns: 3
+model:
+  model_version: v7.3
+  value_encoder: row_dual_stream
+  numeric_preprocessing: standard_asinh_v1
+  unit_layers: 0
+  rounds: 4
+  share_rounds: true
+  center_chunk_size: 16
+  dual_stream:
+    blocks: 4
+    heads: 4
+    ff_width: 128
+    block_parameters: independent
+    readback: mean
+    assembly: query_ll_whole_row
+  backbone:
+    width: 128
+    layers: 1
+    heads: 4
+    ff_width: 128
+    slots: 4
+optimizer:
+  lr: 0.00003
+  weight_decay: 0.0

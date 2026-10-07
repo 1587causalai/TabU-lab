@@ -28,8 +28,12 @@ class V7Trajectory:
     state_changes: tuple[float, ...]  # mean row ||C^(t) - C^(t-1)||, t = 1..K
     predictions: tuple[Tensor, ...]  # decoded values of rounds 1..K
     donor: Tensor  # sampled-support baseline, distinct from the default seed initial state
-    metrics: dict[str, float]  # final round, original value units
+    metrics: dict[str, float | None]  # final round; log_loss undefined if any truth lacks a code
     baselines: dict[str, dict[str, float]]
+    candidates: Tensor | None = None  # fixed domain indices aligned with probability columns
+    probabilities: Tensor | None = None  # [Query count, candidate count], final round only
+    log_probabilities: Tensor | None = None
+    probability_temperature: float | None = None
 
 
 @dataclass(frozen=True)
@@ -103,9 +107,11 @@ def _baselines(episode: V7Episode, truth: Tensor, codes: Tensor | None, chi: flo
 
 
 @torch.no_grad()
-def evaluate_task(model: V7Model, task: V7Task) -> V7Trajectory | V7JointTrajectory:
+def evaluate_task(
+    model: V7Model, task: V7Task, *, probability_temperature: float = 1.0
+) -> V7Trajectory | V7JointTrajectory:
     if int(task.inputs.query.any(0).sum()) > 1:
-        return evaluate_joint_task(model, task)
+        return evaluate_joint_task(model, task, probability_temperature=probability_temperature)
     model.eval()
     config = model.config
     episode = prepare_episode(
@@ -114,13 +120,14 @@ def evaluate_task(model: V7Model, task: V7Task) -> V7Trajectory | V7JointTraject
         code_dim=config.code_dim,
         epsilon=config.epsilon,
         codec=config.codec,
+        numeric_preprocessing=config.numeric_preprocessing,
         admission="inference",
     )
     output = model(episode, decode=False)
-    return _trajectory(episode, output, task, config)
+    return _trajectory(episode, output, task, config, probability_temperature)
 
 
-def _trajectory(episode, output, task, config):
+def _trajectory(episode, output, task, config, probability_temperature):
     column = episode.codec.columns[episode.target]
     truth = reference_values(episode, task.truth)
     chi = config.chi_numeric if column.kind == "numeric" else config.chi_discrete
@@ -132,6 +139,31 @@ def _trajectory(episode, output, task, config):
         float((after - before).norm(dim=-1).mean()) for before, after in pairwise(trail)
     )
     predictions = tuple(column.decode(state) for state in output.states)
+    metrics = value_metrics(column, predictions[-1], truth)
+    candidates = probabilities = log_probabilities = temperature = None
+    if column.kind != "numeric":
+        temperature = float(probability_temperature)
+        log_probabilities = column.log_probabilities(
+            output.states[-1], temperature=probability_temperature
+        )
+        probabilities = log_probabilities.exp()
+        candidates = column.categories.detach().clone()
+        eligible = column.encodable(truth)
+        # The denominator is always the full fixed Query set. A missing truth
+        # code invalidates the complete-set log loss, not just that one row.
+        metrics["answer_code_count"] = int(eligible.sum())
+        metrics["query_count"] = len(truth)
+        metrics["answer_code_coverage"] = int(eligible.sum()) / len(truth)
+        metrics["log_loss"] = None
+        if encodable:
+            indices = column._lookup(truth).to(log_probabilities.device)
+            selected = log_probabilities.gather(1, indices[:, None]).squeeze(1)
+            # -inf for a far candidate is a valid numerical readout, but an
+            # unrepresentable true-class score must not be clipped or dropped.
+            finite(selected, "V7 true-class log probabilities")
+            loss = -selected.cpu().double().mean()
+            finite(loss, "V7 classification log loss")
+            metrics["log_loss"] = float(loss)
     return V7Trajectory(
         target=episode.target,
         kind=column.kind,
@@ -140,13 +172,19 @@ def _trajectory(episode, output, task, config):
         state_changes=changes,
         predictions=predictions,
         donor=column.decode(episode.observed[episode.donor_rows, episode.target]),
-        metrics=value_metrics(column, predictions[-1], truth),
+        metrics=metrics,
         baselines=_baselines(episode, truth, codes, chi),
+        candidates=candidates,
+        probabilities=probabilities,
+        log_probabilities=log_probabilities,
+        probability_temperature=temperature,
     )
 
 
 @torch.no_grad()
-def evaluate_joint_task(model: V7Model, task: V7Task) -> V7JointTrajectory:
+def evaluate_joint_task(
+    model: V7Model, task: V7Task, *, probability_temperature: float = 1.0
+) -> V7JointTrajectory:
     """Report every queried column from the same joint forward, including all rounds."""
     from .joint import prepare_joint_episode
 
@@ -158,28 +196,20 @@ def evaluate_joint_task(model: V7Model, task: V7Task) -> V7JointTrajectory:
     reports = {}
     for part in episode.columns:
         column_episode = V7Episode(
-            episode.inputs,
-            episode.codec,
-            part.column,
-            part.supports,
-            part.rows,
-            part.donors,
-            episode.observed,
+            episode.inputs, episode.codec, part.column, part.supports, part.rows,
+            part.donors, episode.observed,
         )
         column_output = V7Output(
             output.initial[part.positions],
             tuple(s[part.positions] for s in output.states),
-            tuple(s[part.column] for s in output.slopes),
-            None,
+            tuple(s[part.column] for s in output.slopes), None,
         )
-        reports[part.column] = _trajectory(column_episode, column_output, task, model.config)
+        reports[part.column] = _trajectory(
+            column_episode, column_output, task, model.config, probability_temperature
+        )
     return V7JointTrajectory(reports)
 
 
 __all__ = [
-    "V7JointTrajectory",
-    "V7Trajectory",
-    "evaluate_joint_task",
-    "evaluate_task",
-    "value_metrics",
+    "V7JointTrajectory", "V7Trajectory", "evaluate_joint_task", "evaluate_task", "value_metrics"
 ]

@@ -94,4 +94,22 @@ def column_shared_ll(
     return ColumnRecovery(recovered, solution.T, eval_weights)
 
 
-__all__ = ["ColumnRecovery", "column_shared_ll", "support_weights"]
+def evaluate_fitted_ll(units, support_rows, responses, features, eval_rows, *, slope, bandwidth):
+    """Evaluate an already fitted slope at extra rows; preserves its gradient.
+
+    Used for explicit visible reconstruction. This is an in-sample prediction,
+    not a copy of the clamped observed code and not a leave-one-out estimate.
+    """
+    dtype = slope.dtype
+    origin_x = features[support_rows[:1]].to(dtype)
+    origin_y = responses[:1].to(dtype)
+    x = features[support_rows].to(dtype) - origin_x
+    y = responses.to(dtype) - origin_y
+    weights = support_weights(units[eval_rows], units[support_rows], bandwidth)
+    delta = (features[eval_rows].to(dtype) - origin_x) - weights @ x
+    recovered = origin_y + weights @ y + delta @ slope.T
+    finite(recovered, "auxiliary recovered embeddings")
+    return recovered
+
+
+__all__ = ["ColumnRecovery", "column_shared_ll", "evaluate_fitted_ll", "support_weights"]

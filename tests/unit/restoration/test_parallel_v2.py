@@ -75,6 +75,13 @@ def test_numeric_native_codec_wrong_answer_width_is_not_silently_truncated():
         model._forward_prepared(inputs, request, tuple(facts))
 
 
+def test_frozen_reference_rejects_enabled_row_slots():
+    cfg = small_config()
+    cfg = replace(cfg, backbone=replace(cfg.backbone, row_slots=2))
+    with pytest.raises(ValueError, match="frozen reference does not support row_slots"):
+        make_pair(cfg, "cpu", Path(__file__).resolve().parents[3])
+
+
 @pytest.mark.parametrize("backbone", ["direct", "inducing"])
 @pytest.mark.parametrize("mapping", ["identity128", "rotary32", "mlp32", "mlp256"])
 @pytest.mark.parametrize("readout", ["nw", "ll"])

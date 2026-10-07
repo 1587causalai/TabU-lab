@@ -112,7 +112,7 @@ def test_numeric_statistics_and_roundtrip_survive_representable_extremes(
     inputs = RestorationInput(
         (ColumnSchema("y", "numeric"),), (values,), visible, torch.zeros_like(visible), 3
     )
-    column = build_g64_codec(inputs, epsilon=epsilon).columns[0]
+    column = build_g64_codec(inputs, epsilon=epsilon, numeric_preprocessing="legacy").columns[0]
     assert column.mean == pytest.approx(expected_mean, rel=1e-14, abs=0)
     assert column.scale == pytest.approx(expected_scale, rel=1e-14, abs=0)
     codes = column.encode(values)
@@ -342,8 +342,12 @@ def test_compose_state_changes_only_query_target_cells():
 # --- model -----------------------------------------------------------------
 
 
-def test_initialisation_follows_the_example_spec():
-    model = V7Model(small_config())
+@pytest.mark.parametrize("row_slots", [0, 3])
+def test_initialisation_follows_the_example_spec(row_slots):
+    cfg = small_config()
+    cfg = replace(cfg, backbone=replace(cfg.backbone, row_slots=row_slots))
+    assert V7Config.from_dict(cfg.as_dict()) == cfg
+    model = V7Model(cfg)
     block = model.rounds[0]
     x = torch.randn(10, 64)
     assert torch.equal(block.phi(x), x)
@@ -357,6 +361,12 @@ def test_initialisation_follows_the_example_spec():
         assert parameter.shape == (64,)
     slots = block.backbone.layers[0].slot_seed
     assert torch.allclose(slots.norm(dim=-1), torch.ones(len(slots)))
+    row_seed = block.backbone.layers[0].row_slot_seed
+    if row_slots:
+        assert row_seed.shape == (row_slots, cfg.backbone.width)
+        assert torch.allclose(row_seed.norm(dim=-1), torch.ones(row_slots))
+    else:
+        assert row_seed is None
 
 
 def test_default_config_is_the_example_spec():
@@ -373,6 +383,7 @@ def test_default_config_is_the_example_spec():
         small_config(query_init="broadcast")
     assert config.chi_numeric == 128
     assert (config.backbone.ff_width, config.backbone.slots, config.backbone.heads) == (512, 256, 4)
+    assert config.backbone.row_slots == 0
     assert V7Config.from_dict(config.as_dict()) == config
     with pytest.raises(ValueError, match="token width"):
         small_config(backbone=dict(width=32, layers=1, heads=2, ff_width=64, slots=4))

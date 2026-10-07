@@ -1,4 +1,4 @@
-"""Scorer-only coder-space losses; the only V7 code that reads Query truth."""
+"""Coder losses: Query-only by default, optional visible reconstruction."""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ from torch import Tensor
 
 from ..restoration._validation import finite
 from ..restoration.contracts import TruthSidecar
+from .auxiliary import balanced_round_losses
 from .config import V7Config, round_weights
 from .model import V7Episode, V7Output
 
@@ -35,8 +36,8 @@ def score_rounds(
 ) -> V7Score:
     """Score every written state against one fixed reference and denominator.
 
-    The default K=1 has weight 1 for every rho and is exactly the main
-    design's single-output loss. Multi-round weights apply only to controls.
+    K=1 has weight 1 for every rho; cyclic runs use normalized round weights.
+    Optional balanced reconstruction also scores explicit auxiliary predictions.
 
     A hidden nominal target category without a visible code raises the
     ``no-answer-code`` protocol status; training admission must exclude it
@@ -46,6 +47,8 @@ def score_rounds(
     codes = column.encode(reference).to(output.initial)
     chi = config.chi_numeric if column.kind == "numeric" else config.chi_discrete
     losses = torch.stack([state_loss(state, codes, chi) for state in output.states])
+    if config.loss_mode == "balanced_reconstruction":
+        losses = balanced_round_losses(output, episode, codes, config)
     weights = round_weights(len(output.states), config.round_loss_rho)
     loss = (losses * losses.new_tensor(weights)).sum()
     finite(loss, "V7 weighted round loss")
