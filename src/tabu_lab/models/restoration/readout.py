@@ -13,12 +13,13 @@ from typing import Literal
 import torch
 from torch import Tensor
 
-from ._validation import finite, matrix, positive
 from ._dtype import solve_dtype
+from ._validation import finite, matrix, positive
 
 
 def unit_kernel_logits(
-    target_units: Tensor, source_units: Tensor, *, bandwidth: float, query_chunk_size: int = 32
+    target_units: Tensor, source_units: Tensor, *, bandwidth: float, query_chunk_size: int = 32,
+    compute_dtype: torch.dtype | None = None
 ) -> Tensor:
     """Return [requested row, source row] Gaussian logits, reusable across columns.
 
@@ -36,7 +37,7 @@ def unit_kernel_logits(
         raise ValueError("target and source Units must share a nonzero width")
     if target_units.device != source_units.device:
         raise ValueError("target and source Units must share a device")
-    dtype = solve_dtype(target_units)
+    dtype = solve_dtype(target_units) if compute_dtype is None else compute_dtype
     targets = target_units.to(dtype)
     sources = source_units.to(dtype)
     if not len(targets):

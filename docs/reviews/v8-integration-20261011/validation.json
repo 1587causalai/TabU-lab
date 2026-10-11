@@ -1,0 +1,71 @@
+{
+  "date": "2026-10-11",
+  "evidence_level": "local_unissued",
+  "base_commit": "f8e2f6963bd8f4aad7890d7d5e3c5aa61b444970",
+  "scope": "V8 baseline mainline integration, not V8.1 or predictive-quality evaluation",
+  "full_suite": {
+    "command": "PYTHONPATH=src python -m pytest tests -q -o faulthandler_timeout=60",
+    "environment": {
+      "OMP_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1",
+      "VECLIB_MAXIMUM_THREADS": "1"
+    },
+    "passed": 1909,
+    "skipped": 1,
+    "warnings": 3,
+    "seconds": 138.24,
+    "exit_code": 0,
+    "skip_reason": "optional pandas unavailable for tests/unit/test_v7_native_inference.py"
+  },
+  "focused_v8": {
+    "passed": 39,
+    "seconds": 7.02,
+    "mps_executed": true
+  },
+  "independent_review": {
+    "reviewer": "v8_mainline_review",
+    "mode": "read-only independent agent",
+    "result": "no blocking findings",
+    "independent_tests_passed": 166,
+    "combined_test_collection_count": 75,
+    "final_increment_reviewed": [
+      "synthetic example",
+      "module and top-level READMEs",
+      "integration record",
+      "V8 tests package and relative imports"
+    ],
+    "limits": [
+      "no CUDA execution",
+      "no real-data inference or ranking replay",
+      "no 1024-window qualification"
+    ]
+  },
+  "lint": {
+    "tool": "ruff",
+    "scope": "new V8 package/tests/example and four shared dependency files",
+    "result": "pass"
+  },
+  "whitespace": "git diff --cached --check passed",
+  "smoke": {
+    "cpu": "smoke-cpu.json",
+    "mps": "smoke-mps.json",
+    "steps_per_device": 1,
+    "weights_replay_exact": true
+  },
+  "real_checkpoint_load": "checkpoint-load.json",
+  "integration_fixes": [
+    "packaged V8 tests to prevent legacy same-basename collection collision",
+    "removed an unused test variable",
+    "clarified external historical-artifact references"
+  ],
+  "earlier_attempts": [
+    "Initial full-suite collection failed on duplicate test_readout module names; fixed before final run.",
+    "An OMP_NUM_THREADS=2 full-suite attempt stalled inside the existing XGBoost OpenMP barrier; interrupted. The two affected tests passed with the one-thread environment, followed by the complete suite."
+  ],
+  "unchanged": [
+    "V7 factories and defaults",
+    "adopted checkpoints",
+    "historical source snapshots",
+    "V8.1 design and implementation status"
+  ]
+}

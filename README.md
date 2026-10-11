@@ -28,6 +28,16 @@ process part of the deliverable.
 
 ## What exists today
 
+The **2026-10-11 V8 completion integration** adds an explicit, opt-in masked
+completion API with a reversible whole-table value encoder and inherited
+Gaussian local-linear recovery. Start with the
+[runnable synthetic example](examples/completion_v8_smoke.py),
+[module contract](src/tabu_lab/models/completion_v8/README.md), and
+[integration record](docs/reviews/v8-integration-20261011/README.md).
+This preserves the 64-coordinate V8 baseline; the proposed V8.1 learnable
+codebooks are not implemented here. Existing factories and adopted checkpoints
+do not change.
+
 The **2026-10-08 V7 / V7.3 integration** adds explicit version selection,
 asinh numeric coordinates for new V7.3 configurations, and an opt-in row dual-stream
 value encoder while preserving recorded V7 checkpoint settings. See the

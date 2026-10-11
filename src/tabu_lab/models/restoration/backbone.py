@@ -58,6 +58,10 @@ class _PresenceOps:
 
     config: BackboneConfig
 
+    def accumulation_dtype(self, carriers: Tensor) -> torch.dtype:
+        """Scoped execution override; historical modules keep their reference dtype."""
+        return getattr(self, "_accumulation_dtype_override", None) or solve_dtype(carriers)
+
     def log_presence(self, carriers: Tensor, *, local: bool = False) -> Tensor:
         """Stable log rho; only an EXACT zero projection has log presence -inf.
 
@@ -71,7 +75,7 @@ class _PresenceOps:
         source. The output check below reports it without adding a host sync here.
         """
         projection = self.ff_presence if local else self.attention_presence
-        dtype = solve_dtype(carriers)
+        dtype = self.accumulation_dtype(carriers)
         projected = torch.nn.functional.linear(carriers.to(dtype), projection.weight.to(dtype))
         finite_projection = torch.isfinite(projected).all(-1)
         scale = projected.abs().amax(-1)
@@ -147,12 +151,14 @@ class _AttentionOps(_PresenceOps):
             # matmul: masking NaNs afterward leaves 0 * inf in K's gradient.
             has_sources = (~torch.isneginf(log_p_source)).any(-1)
             q = torch.where(has_sources[:, None, None, None], q, torch.zeros_like(q))
-        dtype = solve_dtype(q)
+        dtype = self.accumulation_dtype(q)
         content = q.to(dtype) @ k.to(dtype).transpose(-1, -2) / math.sqrt(dim)
         if self.strict_finite_content:
             content = content.masked_fill(torch.isneginf(log_p_source)[:, None, None, :], 0)
             # Invalid presence still propagates to the output-stage guard.
-            finite_content = torch.isfinite(content) | ~torch.isfinite(log_p_source)[:, None, None, :]
+            finite_content = (
+                torch.isfinite(content) | ~torch.isfinite(log_p_source)[:, None, None, :]
+            )
             if not bool(finite_content.all()):
                 raise FloatingPointError("numerical-failure: nonfinite OMAB attention content")
         logits = content + log_p_source[:, None, None, :]

@@ -1,0 +1,156 @@
+"""Audited weights-only imports; no optimizer or training resume implication."""
+
+import hashlib
+from pathlib import Path
+
+import torch
+
+from ..restoration_v7.config import V7Config
+from ..restoration_v7.model import V7Model
+from ..restoration_v7.runner import CHECKPOINT_SCHEMA, manifest_digest
+from .model import V8CompletionModel, V8Config
+
+
+def _finite_state(state):
+    if any(not bool(torch.isfinite(value).all()) for value in state.values()):
+        raise ValueError("checkpoint contains nonfinite model weights")
+
+
+def from_v7(
+    donor: V7Model, *, round_index=None, rounds=1, copy_value_interface=True, readout="gaussian_ll"
+):
+    """Copy the COMPLETE selected Token Dynamics and its Unit/Feature seeds.
+
+    Compatible per-cell phi/lift can also be copied. A row encoder is never
+    copied; the four V8 table blocks and shared Query seed are always new.
+    Unshared donors require an explicit selected round, rather than dropping
+    other trained rounds silently. This preserves weights, not old predictions.
+    """
+    if round_index is None:
+        if not donor.config.share_rounds and donor.config.rounds > 1:
+            raise ValueError("unshared donor requires an explicit round_index")
+        round_index = 0
+    if type(round_index) is not int or not 0 <= round_index < donor.config.rounds:
+        raise ValueError("donor round_index is out of bounds")
+    source = donor.round_module(round_index)
+    if copy_value_interface and not (hasattr(source, "phi") and hasattr(source, "lift")):
+        raise ValueError(
+            "donor has no compatible phi/lift; explicitly disable value-interface copy"
+        )
+    _finite_state(donor.state_dict())
+    parameter = next(donor.parameters())
+    target = V8CompletionModel(V8Config(donor.config, rounds, readout)).to(parameter)
+    copied = []
+    modules = [("backbone", target.backbone, source.backbone)]
+    if copy_value_interface:
+        modules += [
+            ("encoder.phi", target.encoder.phi, source.phi),
+            ("lift", target.lift, source.lift),
+        ]
+    for name, destination, origin in modules:
+        destination.load_state_dict(origin.state_dict(), strict=True)
+        for key, value in destination.state_dict().items():
+            if not torch.equal(value, origin.state_dict()[key]):
+                raise ValueError(f"weight copy mismatch: {name}.{key}")
+            copied.append(f"{name}.{key}")
+    with torch.no_grad():
+        target.unit_seed.copy_(source.unit_seed)
+        target.feature_seed.copy_(source.feature_seed)
+    copied += ["unit_seed", "feature_seed"]
+    target.migration_receipt = {
+        "mode": "weights_only",
+        "donor_version": donor.config.model_version,
+        "donor_round": round_index,
+        "donor_value_encoder": donor.config.value_encoder,
+        "copied_keys": copied,
+        "new_keys": sorted(set(target.state_dict()) - set(copied)),
+        "omitted_donor_components": [
+            "query_initialization",
+            "row_encoder_if_any",
+            "other_unshared_rounds_if_any",
+            "optimizer",
+            "rng",
+        ],
+    }
+    return target
+
+
+def from_v7_checkpoint(
+    path,
+    *,
+    round_index=None,
+    rounds=1,
+    copy_value_interface=True,
+    device="cpu",
+    readout="gaussian_ll",
+):
+    path = Path(path)
+    state = torch.load(path, map_location="cpu", weights_only=True)
+    if state.get("schema") != CHECKPOINT_SCHEMA or state.get("architecture") != "restoration_v7":
+        raise ValueError("unsupported V7 checkpoint schema")
+    config = V7Config.from_dict(state["config"])
+    if state.get("model_version", config.model_version) != config.model_version:
+        raise ValueError("donor version disagrees with its architecture spec")
+    if not isinstance(state.get("manifest"), dict) or state.get(
+        "manifest_sha256"
+    ) != manifest_digest(state["manifest"]):
+        raise ValueError("donor manifest digest mismatch")
+    _finite_state(state["model"])
+    dtypes = {value.dtype for value in state["model"].values() if value.is_floating_point()}
+    if len(dtypes) != 1 or not dtypes <= {torch.float32, torch.float64}:
+        raise ValueError("donor requires uniform FP32 or FP64 parameters")
+    donor = V7Model(config).to(device=device, dtype=next(iter(dtypes)))
+    donor.load_state_dict(state["model"], strict=True)
+    model = from_v7(
+        donor,
+        round_index=round_index,
+        rounds=rounds,
+        copy_value_interface=copy_value_interface,
+        readout=readout,
+    )
+    with path.open("rb") as handle:
+        digest = hashlib.file_digest(handle, "sha256").hexdigest()
+    model.migration_receipt.update(donor_sha256=digest, donor_step=state["step"])
+    return model
+
+
+def save_weights(model, path):
+    """Write once, portable V8 weights plus architecture and migration receipt."""
+    state = {key: value.detach().cpu().clone() for key, value in model.state_dict().items()}
+    _finite_state(state)
+    with Path(path).open("xb") as handle:
+        torch.save(
+            {
+                "schema": "completion_v8_weights_v1",
+                "config": model.config.as_dict(),
+                "model": state,
+                "migration": model.migration_receipt,
+                "execution_precision": model.execution_precision,
+            },
+            handle,
+        )
+
+
+def load_weights(path, *, device="cpu", precision=None, precision_reason=None):
+    """Preserve weight dtype; FP32 weights default to current FP32 execution.
+
+    For historical execution explicitly pass ``precision="reference"`` or the
+    recorded mixed mode. The saved receipt is provenance, not an implicit override.
+    """
+    state = torch.load(path, map_location="cpu", weights_only=True)
+    if state.get("schema") != "completion_v8_weights_v1":
+        raise ValueError("unsupported V8 weights schema")
+    _finite_state(state["model"])
+    dtypes = {value.dtype for value in state["model"].values() if value.is_floating_point()}
+    if len(dtypes) != 1 or not dtypes <= {torch.float32, torch.float64}:
+        raise ValueError("V8 weights require uniform FP32 or FP64 parameters")
+    model = V8CompletionModel(V8Config.from_dict(state["config"])).to(
+        device=device, dtype=next(iter(dtypes))
+    )
+    model.load_state_dict(state["model"], strict=True)
+    model.migration_receipt = state["migration"]
+    if precision is not None:
+        from .precision import configure_precision
+
+        configure_precision(model, mode=precision, reason=precision_reason)
+    return model
