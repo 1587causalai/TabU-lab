@@ -1,17 +1,20 @@
 """First executable completion branch, separate from existing V7 defaults."""
 
-from dataclasses import dataclass, replace
+import math
+from dataclasses import dataclass, field, replace
 
 import torch
 from torch import nn
 
+from ...primitives.coupling import CouplingValueMap
 from ..restoration._validation import finite
 from ..restoration.contracts import RestorationInput, TruthSidecar
 from ..restoration_v7.codec import build_value_codec, null_constant_inputs
 from ..restoration_v7.config import V7Config
-from ..restoration_v7.model import V7Round
+from ..restoration_v7.model import IdentityValueMap, V7Round
 from ..restoration_v7.readout import column_shared_ll
 from .cell_dynamics import cell_only_dynamics
+from .codebook import LEARNED_MODE, FeatureCodebookPlan, make_feature_bank, prepare_feature_plan
 from .encoder import TableEncoder
 from .readout import PositiveLinearReadout, SignedLinearReadout
 
@@ -23,6 +26,7 @@ class V8Config:
     inherited: V7Config
     rounds: int = 1
     readout: str = "gaussian_ll"
+    codebook_mode: str = field(default="inherited", kw_only=True)
 
     def __post_init__(self):
         if not isinstance(self.inherited, V7Config) or self.inherited.code_dim != 64:
@@ -31,6 +35,10 @@ class V8Config:
             raise ValueError("first V8 branch requires 128-wide Token Dynamics")
         if type(self.rounds) is not int or self.rounds < 1:
             raise ValueError("V8 rounds must be a positive integer")
+        if self.codebook_mode not in ("inherited", LEARNED_MODE):
+            raise ValueError("unknown V8 codebook_mode")
+        if self.codebook_mode == LEARNED_MODE and self.readout != "gaussian_ll":
+            raise ValueError("V8.1 learned feature pool supports gaussian_ll only")
 
         if self.readout not in (
             "gaussian_ll",
@@ -39,10 +47,27 @@ class V8Config:
         ):
             raise ValueError("unknown V8 readout")
 
+    @property
+    def code_dim(self):
+        return 32 if self.codebook_mode == LEARNED_MODE else 64
+
+    @property
+    def model_version(self):
+        return "v8.1" if self.codebook_mode == LEARNED_MODE else "v8"
+
+    @property
+    def codec_family(self):
+        if self.codebook_mode == "inherited":
+            return self.inherited.codec
+        random_family = "C32/8" if self.inherited.codec == "C64/8" else "G32"
+        return f"{LEARNED_MODE}:{random_family}"
+
     def as_dict(self):
         result = {"inherited": self.inherited.as_dict(), "rounds": self.rounds}
         if self.readout != "gaussian_ll":
             result["readout"] = self.readout
+        if self.codebook_mode != "inherited":
+            result["codebook_mode"] = self.codebook_mode
         return result
 
     @classmethod
@@ -51,12 +76,14 @@ class V8Config:
             "inherited",
             "rounds",
             "readout",
+            "codebook_mode",
         }:
             raise ValueError("unknown V8 configuration fields")
         return cls(
             V7Config.from_dict(value["inherited"]),
             value["rounds"],
             value.get("readout", "gaussian_ll"),
+            codebook_mode=value.get("codebook_mode", "inherited"),
         )
 
 
@@ -64,7 +91,7 @@ class V8Config:
 class CompletionEpisode:
     inputs: RestorationInput
     codec: object
-    observed: torch.Tensor
+    observed: torch.Tensor | None
 
 
 @dataclass(frozen=True)
@@ -73,9 +100,15 @@ class CompletionOutput:
     states: tuple[torch.Tensor, ...]
     completed_codes: torch.Tensor  # visible clamped, Query predicted, Null zero
     decoded: dict[int, torch.Tensor] | None
+    # New-mode losses/decoding must consume the codec bound by this forward,
+    # not rebuild it from possibly updated parameters or mutate an Episode.
+    codec: object | None = None
+    source_episode: CompletionEpisode | None = field(default=None, repr=False)
 
 
-def prepare_completion(inputs: RestorationInput, config: V8Config):
+def prepare_completion(
+    inputs: RestorationInput, config: V8Config, *, recode_columns=None, reference_seed=0
+):
     spec = config.inherited
     inputs = null_constant_inputs(inputs, spec.numeric_preprocessing)
     if not bool(inputs.query.any()):
@@ -83,6 +116,13 @@ def prepare_completion(inputs: RestorationInput, config: V8Config):
     for a in inputs.query.any(0).nonzero().flatten().tolist():
         if not bool(inputs.visible[:, a].any()):
             raise ValueError(f"no-support: completion column {a}")
+    if config.codebook_mode == LEARNED_MODE:
+        plan = prepare_feature_plan(
+            inputs, spec, recode_columns=recode_columns, reference_seed=reference_seed
+        )
+        return CompletionEpisode(inputs, plan, None)
+    if recode_columns is not None:
+        raise ValueError("recode_columns helper requires learned_pool_v1")
     codec = build_value_codec(
         inputs,
         codec=spec.codec,
@@ -104,12 +144,23 @@ class V8CompletionModel(nn.Module):
                 config.inherited, value_encoder="phi_lift", dual_stream=None, row_reversible64=None
             )
         )
-        self.encoder = TableEncoder(base.phi)
+        if config.codebook_mode == LEARNED_MODE:
+            spec = config.inherited
+            base.phi = (
+                IdentityValueMap() if spec.value_map == "identity" else CouplingValueMap(
+                    config.code_dim, n_blocks=spec.coupling_blocks, hidden=spec.coupling_hidden,
+                    alpha=spec.coupling_alpha, scale=spec.coupling_scale, bias=spec.coupling_bias,
+                )
+            )
+            base.lift = nn.Linear(config.code_dim, spec.backbone.width, bias=False)
+            nn.init.orthogonal_(base.lift.weight)
+            self.feature_codebook = make_feature_bank()
+        self.encoder = TableEncoder(base.phi, code_dim=config.code_dim)
         self.lift = base.lift
         self.unit_seed = base.unit_seed
         self.feature_seed = base.feature_seed
         self.backbone = base.backbone
-        self.query_seed = nn.Parameter(torch.randn(64) / 8)
+        self.query_seed = nn.Parameter(torch.randn(config.code_dim) / math.sqrt(config.code_dim))
         if config.readout == "positive_linear_attention":
             self.attention_readout = PositiveLinearReadout()
         elif config.readout == "signed_linear_attention":
@@ -139,8 +190,8 @@ class V8CompletionModel(nn.Module):
     def forward(self, episode: CompletionEpisode, *, decode=True):
         spec = self.config.inherited
         if (episode.codec.dim, episode.codec.family, episode.codec.numeric_preprocessing) != (
-            64,
-            spec.codec,
+            self.config.code_dim,
+            self.config.codec_family,
             spec.numeric_preprocessing,
         ):
             raise ValueError("completion episode codec differs from model")
@@ -148,7 +199,14 @@ class V8CompletionModel(nn.Module):
         if visible.device != self.query_seed.device:
             raise ValueError("completion inputs and model must share a device")
         valid = visible | query
-        observed = episode.observed.to(self.query_seed)
+        if self.config.codebook_mode == LEARNED_MODE:
+            if not isinstance(episode.codec, FeatureCodebookPlan) or episode.observed is not None:
+                raise ValueError("V8.1 requires a codebook plan, not cached learned codes")
+            codec = episode.codec.bind(self.feature_codebook)
+            observed = codec.encode_observed(episode.inputs)
+        else:
+            codec = episode.codec
+            observed = episode.observed.to(self.query_seed)
         current = self.query_seed.expand(int(query.sum()), -1)
         initial = current
         states = []
@@ -199,26 +257,37 @@ class V8CompletionModel(nn.Module):
             states.append(current)
         completed = observed.clone()
         completed[query] = current
-        decoded = (
-            None
-            if not decode
-            else {
-                a: episode.codec.columns[a].decode(completed[query[:, a], a].detach())
-                for a in query.any(0).nonzero().flatten().tolist()
-            }
+        with torch.no_grad():
+            decoded = (
+                None
+                if not decode
+                else {
+                    a: codec.columns[a].decode(completed[query[:, a], a].detach())
+                    for a in query.any(0).nonzero().flatten().tolist()
+                }
+            )
+        return CompletionOutput(
+            initial, tuple(states), completed, decoded,
+            codec=codec if self.config.codebook_mode == LEARNED_MODE else None,
+            source_episode=episode if self.config.codebook_mode == LEARNED_MODE else None,
         )
-        return CompletionOutput(initial, tuple(states), completed, decoded)
 
 
 def completion_loss(
     output: CompletionOutput, episode: CompletionEpisode, truth: TruthSidecar, *, score_mask=None
 ):
-    """Frozen visible-fitted codec; hidden truth is consumed only HERE.
+    """Same-forward visible-fitted codec; hidden truth is consumed only HERE.
 
     First reference objective: terminal-round mean squared error per held-out
-    cell and across 64 coordinates (no type multipliers). Natural missing Query
+    cell and across the actual code width (no type multipliers). Natural missing Query
     can be completed but never scored. An explicit scoring subset is allowed.
     """
+    if isinstance(episode.codec, FeatureCodebookPlan):
+        if output.codec is None or output.source_episode is not episode:
+            raise ValueError("V8.1 loss requires the same forward episode and bound codec")
+        codec = output.codec
+    else:
+        codec = episode.codec
     query = episode.inputs.query
     if truth.states.shape != query.shape or truth.states.device != query.device:
         raise ValueError("truth state must align with completion inputs")
@@ -234,11 +303,12 @@ def completion_loss(
         raise ValueError("score mask must select held-out observed Query cells")
     if not bool(score_mask.any()):
         raise ValueError("loss requires at least one held-out observed Query")
-    reference = torch.zeros_like(episode.observed)
-    for a in score_mask.any(0).nonzero().flatten().tolist():
-        reference[score_mask[:, a], a] = (
-            episode.codec.columns[a].encode(truth.values[a][score_mask[:, a]]).to(reference)
-        )
+    reference = torch.zeros_like(output.completed_codes)
+    with torch.no_grad():
+        for a in score_mask.any(0).nonzero().flatten().tolist():
+            reference[score_mask[:, a], a] = (
+                codec.columns[a].encode(truth.values[a][score_mask[:, a]]).to(reference)
+            )
     reference = reference[score_mask].detach()
     predicted = output.states[-1][score_mask[query]]
     loss = (predicted - reference.to(predicted)).square().mean()

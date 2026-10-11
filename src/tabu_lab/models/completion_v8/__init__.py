@@ -1,6 +1,6 @@
 """Opt-in V8 matrix completion prototype; never selected by V7 factories."""
 
-from .migration import from_v7, from_v7_checkpoint, load_weights, save_weights
+from .migration import from_v7, from_v7_checkpoint, from_v8, load_weights, save_weights
 from .model import (
     CompletionEpisode,
     CompletionOutput,
@@ -20,6 +20,7 @@ __all__ = [
     "configure_precision",
     "from_v7",
     "from_v7_checkpoint",
+    "from_v8",
     "load_weights",
     "prepare_completion",
     "save_weights",

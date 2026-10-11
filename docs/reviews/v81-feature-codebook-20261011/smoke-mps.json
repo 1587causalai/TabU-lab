@@ -1,0 +1,73 @@
+{
+  "model": "completion_v8",
+  "model_version": "v8.1",
+  "evidence_level": "local_unissued",
+  "claim_boundary": "synthetic integration smoke; not predictive quality or exact resume",
+  "device": "mps",
+  "dtype": "float32",
+  "torch_version": "2.13.0",
+  "config": {
+    "inherited": {
+      "model_version": "v7.3",
+      "code_dim": 64,
+      "codec": "C64/8",
+      "unit_layers": 1,
+      "unit_source_policy": "observed",
+      "value_map": "coupling",
+      "query_init": "donor",
+      "query_source": true,
+      "gradient_checkpointing": false,
+      "backbone": {
+        "width": 128,
+        "layers": 1,
+        "heads": 4,
+        "ff_width": 64,
+        "kind": "inducing",
+        "slots": 3,
+        "tau_presence": 1.0,
+        "reference_mass": 1.0,
+        "norm_eps": 1e-06,
+        "row_slots": 0
+      },
+      "rounds": 4,
+      "share_rounds": true,
+      "coupling_blocks": 1,
+      "coupling_hidden": [
+        16
+      ],
+      "coupling_alpha": 0.5,
+      "coupling_bias": false,
+      "numeric_preprocessing": "standard_asinh_v1",
+      "coupling_scale": true,
+      "bandwidth": 1.0,
+      "ridge": 0.001,
+      "epsilon": 1e-06,
+      "center_chunk_size": 4,
+      "round_loss_rho": 0.5,
+      "chi_numeric": 128.0,
+      "chi_discrete": 1.0,
+      "loss_mode": "query_only",
+      "auxiliary_per_query": null,
+      "auxiliary_min_group_weight": 0.05,
+      "balanced_loss_scale": 1.0
+    },
+    "rounds": 1,
+    "codebook_mode": "learned_pool_v1"
+  },
+  "execution_precision": {
+    "policy_version": 2,
+    "mode": "fast_fp32",
+    "attention_and_presence": "float32",
+    "gaussian_ll": "float32",
+    "codec": "stable_reference_preprocessing_and_codebook",
+    "reason": null,
+    "modules": 8,
+    "weights_changed": false
+  },
+  "query_cells": 5,
+  "optimizer_steps": 1,
+  "loss_before": 0.5689136385917664,
+  "loss_after": 0.4376087188720703,
+  "gradient_norm": 12.648553848266602,
+  "weights_replay_exact": true
+}

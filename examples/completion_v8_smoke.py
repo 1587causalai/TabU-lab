@@ -23,6 +23,9 @@ from tabu_lab.models.restoration_v7 import V7Config
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--device", choices=("cpu", "mps", "cuda"), default="cpu")
+    parser.add_argument(
+        "--codebook-mode", choices=("inherited", "learned_pool_v1"), default="inherited"
+    )
     args = parser.parse_args()
     torch.set_num_threads(2)
     torch.manual_seed(8)
@@ -33,7 +36,9 @@ def main():
         coupling_hidden=(16,),
         center_chunk_size=4,
     )
-    model = V8CompletionModel(V8Config(spec)).to(device=args.device, dtype=torch.float32)
+    model = V8CompletionModel(
+        V8Config(spec, codebook_mode=args.codebook_mode)
+    ).to(device=args.device, dtype=torch.float32)
     schema = (
         ColumnSchema("measurement", "numeric"),
         ColumnSchema("category", "nominal", 3),
@@ -75,6 +80,7 @@ def main():
                 torch.testing.assert_close(replay.decoded[column], prediction, rtol=0, atol=0)
     print(json.dumps({
         "model": "completion_v8",
+        "model_version": model.config.model_version,
         "evidence_level": "local_unissued",
         "claim_boundary": "synthetic integration smoke; not predictive quality or exact resume",
         "device": args.device,

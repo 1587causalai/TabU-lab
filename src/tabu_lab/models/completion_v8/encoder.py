@@ -33,17 +33,18 @@ def stable_normalize(x, *, mean_square=False, epsilon=1e-6):
 
 
 class SetAttention(nn.Module):
-    """32-wide, one-head sum attention; receiver presence, no source gate."""
+    """One-head sum attention with an independent Q/K width (historically 32)."""
 
-    def __init__(self):
+    def __init__(self, width=32, head_dim=32):
         super().__init__()
-        self.q = nn.Linear(32, 32, bias=False)
-        self.k = nn.Linear(32, 32, bias=False)
-        self.v = nn.Linear(32, 32, bias=False)
-        self.out = nn.Linear(32, 32, bias=False)
-        self.presence_projection = nn.Linear(32, 32, bias=False)
+        self.width, self.head_dim = width, head_dim
+        self.q = nn.Linear(width, head_dim, bias=False)
+        self.k = nn.Linear(width, head_dim, bias=False)
+        self.v = nn.Linear(width, width, bias=False)
+        self.out = nn.Linear(width, width, bias=False)
+        self.presence_projection = nn.Linear(width, width, bias=False)
         nn.init.eye_(self.presence_projection.weight)
-        self.rms_gain = nn.Parameter(torch.ones(32))
+        self.rms_gain = nn.Parameter(torch.ones(width))
 
     def forward(self, x, valid):
         # Delete Null payload before projections, including nonfinite sentinels.
@@ -51,16 +52,16 @@ class SetAttention(nn.Module):
         finite(x, "V8 attention input")
         dtype = torch.float64 if x.dtype == torch.float64 else torch.float32
         raw = x.to(dtype)
-        b = F.layer_norm(raw, (32,), eps=1e-5)
+        b = F.layer_norm(raw, (self.width,), eps=1e-5)
         q, k, v = [F.silu(F.linear(b, p.weight.to(dtype))) for p in (self.q, self.k, self.v)]
         q, k = stable_normalize(q), stable_normalize(k)
         k, v = [torch.where(valid[..., None], z, 0) for z in (k, v)]
         # Accumulate over source chunks: no quadratic cell-to-cell matrix.
-        summary = raw.new_zeros((*raw.shape[:-2], 32, 32))
+        summary = raw.new_zeros((*raw.shape[:-2], self.head_dim, self.width))
         for kc, vc in zip(k.split(256, -2), v.split(256, -2), strict=True):
             summary = summary + kc.transpose(-1, -2) @ vc
         finite(summary, "V8 K transpose V")
-        h = (q @ summary) / math.sqrt(32)
+        h = (q @ summary) / math.sqrt(self.head_dim)
         finite(h, "V8 attention aggregate")
         h = self.rms_gain.to(dtype) * stable_normalize(h, mean_square=True)
         projected = F.linear(raw, self.presence_projection.weight.to(dtype))
@@ -77,14 +78,14 @@ class SetAttention(nn.Module):
 
 
 class CouplingBlock(nn.Module):
-    def __init__(self, axis):
+    def __init__(self, axis, width=32):
         super().__init__()
         self.axis = axis
-        self.attention = SetAttention()
-        # Reuse the established RMS/GELU/presence OFFN arithmetic, at width 32.
+        self.attention = SetAttention(width=width)
+        # Reuse the established RMS/GELU/presence OFFN arithmetic; the FFN hidden width remains 64.
         self.offn = OFFN(
             BackboneConfig(
-                width=32, layers=1, heads=1, ff_width=64, kind="direct", slots=1, norm_eps=1e-6
+                width=width, layers=1, heads=1, ff_width=64, kind="direct", slots=1, norm_eps=1e-6
             )
         )
 
@@ -124,17 +125,19 @@ class TableEncoder(nn.Module):
     outside the active-coordinate bijection and never passes through phi.
     """
 
-    def __init__(self, phi):
+    def __init__(self, phi, *, code_dim=64):
         super().__init__()
+        if code_dim not in (32, 64):
+            raise ValueError("V8 table code_dim must be 32 or 64")
+        self.code_dim = code_dim
         self.phi = phi
         self.blocks = nn.ModuleList(
-            CouplingBlock(axis) for axis in ("column", "row", "column", "row")
+            CouplingBlock(axis, width=code_dim // 2) for axis in ("column", "row", "column", "row")
         )
 
-    @staticmethod
-    def validate(table, valid):
-        if table.ndim != 3 or table.shape[-1] != 64 or table.shape[:2] != valid.shape:
-            raise ValueError("V8 encoder requires [rows, columns, 64] and aligned mask")
+    def validate(self, table, valid):
+        if table.ndim != 3 or table.shape[-1] != self.code_dim or table.shape[:2] != valid.shape:
+            raise ValueError(f"V8 encoder requires [rows, columns, {self.code_dim}] and mask")
         if valid.dtype != torch.bool or valid.device != table.device:
             raise ValueError("V8 encoder mask must be boolean on the table device")
 

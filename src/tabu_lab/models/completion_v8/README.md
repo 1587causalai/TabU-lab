@@ -2,8 +2,9 @@
 
 ## Mainline integration boundary (2026-10-11)
 
-This is the **64-coordinate V8 baseline**, not the proposed 32-coordinate V8.1
-learnable-codebook model. Its default is one completion round and Gaussian
+The default remains the **64-coordinate V8 baseline**. The opt-in V8.1 mode
+below adds a learned feature codebook and 32-coordinate values.
+The default is one completion round and Gaussian
 column-shared local-linear recovery. The positive/signed attention readouts
 remain opt-in, paused research alternatives; merging their code does not resume
 their exploration or promote any checkpoint.
@@ -28,7 +29,71 @@ historical receipts, not files available after cloning this repository. Historic
 words such as "latest" describe the corresponding run and do not select today's
 training parent. Real checkpoints, original datasets and full optimizer/RNG
 artifacts are not distributed in this integration. Current research has stopped
-the V8 baseline exploration and is preparing V8.1 separately.
+the V8 baseline exploration; V8.1 engineering checks are separate from model-quality results.
+
+## V8.1: learned feature vocabulary (opt-in)
+
+```python
+from tabu_lab.models.completion_v8 import V8Config, V8CompletionModel, from_v8
+
+config = V8Config(inherited_spec, codebook_mode="learned_pool_v1")
+model = V8CompletionModel(config)
+# Or copy only a V8 donor's 128D backbone and compatible Unit/Feature seeds:
+# model = from_v8(v8_donor)  # weights-only migration; new value interface and optimizer
+```
+
+Only `model.feature_codebook.weight` is the new learned vocabulary:
+10000 by 32, 320000 parameters, iid Gaussian normalized to unit length **once**.
+The feature index is sampled uniformly; the bank is not reset or renormalized
+after updates. Numeric and category directions remain non-trainable random
+constants. C64/8 donors retain the weight-8, unnormalized binary sampling rule
+at 32 dimensions (C32/8); G64 donors retain unit-Gaussian draws at 32 dimensions.
+This does not rewrite the donor's serialized 64D spec or the old codec constructor.
+
+The typed sum formulas, visible-only statistics, category eligibility, ordinal
+ranks, distance-based decoding and reference stop-gradient remain unchanged.
+The 10000-entry feature vocabulary does not cap the number of categories.
+Code/query/phi widths are 32, table-coupling branches are 16+16, lift is 32→128.
+Q/K width 32, OFFN hidden width 64 and the 128D backbone are unchanged.
+This first mode supports Gaussian LL only.
+
+Preparation caches feature **indices**, random directions and fitted statistics.
+`episode.observed` is `None` in this mode: every forward binds a fresh
+differentiable codec to the current bank. `output.codec` contains that forward's
+snapshot for probabilities/decoding and `completion_loss`; pass the same episode
+to forward and loss, then update the optimizer. Reusing the prepared episode
+across optimizer steps is supported; caching learned observed codes is not.
+
+```python
+episode = prepare_completion(
+    visible_only_inputs, model.config,
+    recode_columns=selected_columns, reference_seed=0,
+)
+output = model(episode)
+loss = completion_loss(output, episode, truth_sidecar)
+loss.backward()
+optimizer.step()
+```
+
+Omit `recode_columns` to draw the entire encoding from `inputs.code_seed`.
+For partial recoding, unselected columns keep reference feature indices **and**
+random directions; they still read the current bank. The caller controls the
+selected column count and each input seed, so this option changes neither
+training exposure nor replay proportions. Seeds determine draws with a local
+generator; no hidden global sampling cursor is introduced.
+
+`save_weights` records the bank and mode with schema
+`completion_v81_weights_v1`; `load_weights` checks schema/mode agreement.
+Old configs with no mode keep the original serialization and initialization.
+These are weights-only files. A full training runner must separately preserve
+optimizer, sampling state/input seeds, reference seed and recoding selection
+to resume exactly. No old experimental runner or saved run is rewritten.
+
+```bash
+uv run python examples/completion_v8_smoke.py --codebook-mode learned_pool_v1
+uv run python examples/completion_v8_smoke.py --codebook-mode learned_pool_v1 --device mps
+uv run pytest tests/unit/completion_v8 -q
+```
 
 ## 当前探索精度默认（2026-10-10 owner更新）
 
@@ -78,7 +143,7 @@ loss.backward()
 save_weights(model, output_path)  # write once; no optimizer-resume claim
 ```
 
-## Actual choices and inheritance boundaries
+## Baseline V8 choices and inheritance boundaries
 
 1. Reuse the visible-fitted V7 codec, declared column schemas and input sanitation.
    Natural missing Query may be completed; only `TruthSidecar.states == 1` Query

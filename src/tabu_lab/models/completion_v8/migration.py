@@ -1,6 +1,7 @@
 """Audited weights-only imports; no optimizer or training resume implication."""
 
 import hashlib
+from dataclasses import replace
 from pathlib import Path
 
 import torch
@@ -9,6 +10,37 @@ from ..restoration_v7.config import V7Config
 from ..restoration_v7.model import V7Model
 from ..restoration_v7.runner import CHECKPOINT_SCHEMA, manifest_digest
 from .model import V8CompletionModel, V8Config
+
+
+def from_v8(donor: V8CompletionModel):
+    """Initialize V8.1 from V8 backbone/seeds only, with a new value interface.
+
+    No slicing/padding of old 64D weights and no optimizer migration.
+    """
+    if donor.config.codebook_mode != "inherited" or donor.config.readout != "gaussian_ll":
+        raise ValueError("V8.1 migration requires an inherited-code Gaussian LL V8 donor")
+    _finite_state(donor.state_dict())
+    target = V8CompletionModel(
+        replace(donor.config, codebook_mode="learned_pool_v1")
+    ).to(next(donor.parameters()))
+    target.backbone.load_state_dict(donor.backbone.state_dict(), strict=True)
+    with torch.no_grad():
+        target.unit_seed.copy_(donor.unit_seed)
+        target.feature_seed.copy_(donor.feature_seed)
+    copied = [f"backbone.{key}" for key in donor.backbone.state_dict()]
+    copied += ["unit_seed", "feature_seed"]
+    for key in copied:
+        if not torch.equal(target.state_dict()[key], donor.state_dict()[key]):
+            raise ValueError(f"weight copy mismatch: {key}")
+    target.migration_receipt = {
+        "mode": "weights_only",
+        "donor_version": "v8",
+        "copied_keys": copied,
+        "new_keys": sorted(set(target.state_dict()) - set(copied)),
+        "donor_config": donor.config.as_dict(),
+        "omitted_donor_components": ["value_interface", "query_seed", "optimizer", "rng"],
+    }
+    return target
 
 
 def _finite_state(state):
@@ -121,7 +153,10 @@ def save_weights(model, path):
     with Path(path).open("xb") as handle:
         torch.save(
             {
-                "schema": "completion_v8_weights_v1",
+                "schema": (
+                    "completion_v81_weights_v1" if model.config.model_version == "v8.1"
+                    else "completion_v8_weights_v1"
+                ),
                 "config": model.config.as_dict(),
                 "model": state,
                 "migration": model.migration_receipt,
@@ -138,13 +173,20 @@ def load_weights(path, *, device="cpu", precision=None, precision_reason=None):
     recorded mixed mode. The saved receipt is provenance, not an implicit override.
     """
     state = torch.load(path, map_location="cpu", weights_only=True)
-    if state.get("schema") != "completion_v8_weights_v1":
+    if state.get("schema") not in ("completion_v8_weights_v1", "completion_v81_weights_v1"):
         raise ValueError("unsupported V8 weights schema")
+    config = V8Config.from_dict(state["config"])
+    expected = (
+        "completion_v81_weights_v1" if config.model_version == "v8.1"
+        else "completion_v8_weights_v1"
+    )
+    if state["schema"] != expected:
+        raise ValueError("weights schema disagrees with codebook mode")
     _finite_state(state["model"])
     dtypes = {value.dtype for value in state["model"].values() if value.is_floating_point()}
     if len(dtypes) != 1 or not dtypes <= {torch.float32, torch.float64}:
         raise ValueError("V8 weights require uniform FP32 or FP64 parameters")
-    model = V8CompletionModel(V8Config.from_dict(state["config"])).to(
+    model = V8CompletionModel(config).to(
         device=device, dtype=next(iter(dtypes))
     )
     model.load_state_dict(state["model"], strict=True)
