@@ -1,0 +1,16 @@
+{
+  "checkpoint_sha256": "4c7a1261839393a20d2d2a3c9937c18ce30d015be222819a566871f15e8120aa",
+  "state_keys": 132,
+  "weights_equal": true,
+  "precision": {
+    "policy_version": 2,
+    "mode": "fast_fp32",
+    "attention_and_presence": "float32",
+    "gaussian_ll": "float32",
+    "codec": "stable_reference_preprocessing_and_codebook",
+    "reason": null,
+    "modules": 13,
+    "weights_changed": false
+  },
+  "version_scope": "V8 checkpoint load only; no real-data inference or new benchmark"
+}

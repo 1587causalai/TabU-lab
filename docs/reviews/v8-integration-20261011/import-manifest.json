@@ -1,0 +1,108 @@
+{
+  "base_commit": "f8e2f6963bd8f4aad7890d7d5e3c5aa61b444970",
+  "scope": "64D V8 baseline integration; not V8.1",
+  "file_identities": [
+    {
+      "path": "src/tabu_lab/models/completion_v8/README.md",
+      "original_workspace_sha256": "dbef0925558f3a6bbea39aca5897362b7019edb9206c63a2e2471dc2cf2d588a",
+      "candidate_sha256": "259f7f3c654724a828dbebace20ccb0d2ecef6c8ead81a8ab5bc50383d90428b",
+      "unchanged_from_workspace": false
+    },
+    {
+      "path": "src/tabu_lab/models/completion_v8/__init__.py",
+      "original_workspace_sha256": "a84a2f372fdec04f90269389e3decca0951dccb51ab6062fbb1d280d4993fe13",
+      "candidate_sha256": "a84a2f372fdec04f90269389e3decca0951dccb51ab6062fbb1d280d4993fe13",
+      "unchanged_from_workspace": true
+    },
+    {
+      "path": "src/tabu_lab/models/completion_v8/cell_dynamics.py",
+      "original_workspace_sha256": "2fa74e083a93f483f1b08addbbc98b397720d5cff72b53058bc049709afa06ec",
+      "candidate_sha256": "2fa74e083a93f483f1b08addbbc98b397720d5cff72b53058bc049709afa06ec",
+      "unchanged_from_workspace": true
+    },
+    {
+      "path": "src/tabu_lab/models/completion_v8/encoder.py",
+      "original_workspace_sha256": "2e9e2c8a093a1e25c3887375962af653cef34c3c441f2d59ef6f2443c46ecae1",
+      "candidate_sha256": "2e9e2c8a093a1e25c3887375962af653cef34c3c441f2d59ef6f2443c46ecae1",
+      "unchanged_from_workspace": true
+    },
+    {
+      "path": "src/tabu_lab/models/completion_v8/migration.py",
+      "original_workspace_sha256": "5c01e85a214cbf3bc2d9f8e3515878645bcae44e1e8c927890c2f45742d87c18",
+      "candidate_sha256": "5c01e85a214cbf3bc2d9f8e3515878645bcae44e1e8c927890c2f45742d87c18",
+      "unchanged_from_workspace": true
+    },
+    {
+      "path": "src/tabu_lab/models/completion_v8/model.py",
+      "original_workspace_sha256": "98444afe537ff5f852e35706bca7fbb4394296e0f25730336ac76ce2dc66d113",
+      "candidate_sha256": "98444afe537ff5f852e35706bca7fbb4394296e0f25730336ac76ce2dc66d113",
+      "unchanged_from_workspace": true
+    },
+    {
+      "path": "src/tabu_lab/models/completion_v8/precision.py",
+      "original_workspace_sha256": "d741f393c391f3143277aab30b97accfa4b9e44968e2204cb11a379ff542f6b6",
+      "candidate_sha256": "d741f393c391f3143277aab30b97accfa4b9e44968e2204cb11a379ff542f6b6",
+      "unchanged_from_workspace": true
+    },
+    {
+      "path": "src/tabu_lab/models/completion_v8/readout.py",
+      "original_workspace_sha256": "cc21cdfc43e86de991a0171fdf56a46c0f553e581a3ff8e5eab76c01584b97f9",
+      "candidate_sha256": "cc21cdfc43e86de991a0171fdf56a46c0f553e581a3ff8e5eab76c01584b97f9",
+      "unchanged_from_workspace": true
+    },
+    {
+      "path": "src/tabu_lab/models/restoration/_dtype.py",
+      "original_workspace_sha256": "ec716e78aec3cf23eb4495aa20914338f6cecc097aa9eebcdc2c5eafc7b46110",
+      "candidate_sha256": "ec716e78aec3cf23eb4495aa20914338f6cecc097aa9eebcdc2c5eafc7b46110",
+      "unchanged_from_workspace": true
+    },
+    {
+      "path": "src/tabu_lab/models/restoration/backbone.py",
+      "original_workspace_sha256": "97e96925390e4c27b35ef588c78cd3dac1f8c27802b5aaf845a5c5722f57a25d",
+      "candidate_sha256": "97e96925390e4c27b35ef588c78cd3dac1f8c27802b5aaf845a5c5722f57a25d",
+      "unchanged_from_workspace": true
+    },
+    {
+      "path": "src/tabu_lab/models/restoration/readout.py",
+      "original_workspace_sha256": "e1de96337e9f58aab17ec18ee2f3fd1ea6a03f2810fa1997aae3c41da389dff0",
+      "candidate_sha256": "e1de96337e9f58aab17ec18ee2f3fd1ea6a03f2810fa1997aae3c41da389dff0",
+      "unchanged_from_workspace": true
+    },
+    {
+      "path": "src/tabu_lab/models/restoration_v7/readout.py",
+      "original_workspace_sha256": "298649fc34cdea501d37ec82bd3f357e421834232143a31aa76bf6a8b1f44f83",
+      "candidate_sha256": "298649fc34cdea501d37ec82bd3f357e421834232143a31aa76bf6a8b1f44f83",
+      "unchanged_from_workspace": true
+    },
+    {
+      "path": "tests/unit/completion_v8/__init__.py",
+      "original_workspace_sha256": null,
+      "candidate_sha256": "3ec2ee72672f77ceb991357e949ae37c4089124bbbb7eea0740ebb15d7ee9c93",
+      "unchanged_from_workspace": false
+    },
+    {
+      "path": "tests/unit/completion_v8/test_completion.py",
+      "original_workspace_sha256": "d37da9e332b9f3e7e9f9c02b75a558358327c511d56decb77fb5e3d6d5abc16e",
+      "candidate_sha256": "d37da9e332b9f3e7e9f9c02b75a558358327c511d56decb77fb5e3d6d5abc16e",
+      "unchanged_from_workspace": true
+    },
+    {
+      "path": "tests/unit/completion_v8/test_precision.py",
+      "original_workspace_sha256": "cf3bad26b530910ca6b04873828434515be629cbc6ae07a0d9c89611c9bda244",
+      "candidate_sha256": "45ae396bc3fb474e6fe6c76e9a74ca87bb0ffb08aed24e65d3ecc8361e535abd",
+      "unchanged_from_workspace": false
+    },
+    {
+      "path": "tests/unit/completion_v8/test_readout.py",
+      "original_workspace_sha256": "ce3d59da5e5c9d172231698a9e4e2b41dca8c983c5ba9aa582ae80f7afb692f1",
+      "candidate_sha256": "327dc656a1325c65b448617895695d527238ccf315820f71097899a468ef3f94",
+      "unchanged_from_workspace": false
+    }
+  ],
+  "integration_repairs": [
+    "V8 test package and relative helper imports avoid collection collisions",
+    "Remove one unused test binding",
+    "README identifies historical artifacts as external; adds public smoke entry point"
+  ],
+  "note": "No weights, private datasets, credentials, unrelated workspace changes or historical source snapshots imported."
+}

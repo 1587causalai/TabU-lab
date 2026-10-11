@@ -1,4 +1,8 @@
-"""Device-aware numeric dtype policy for restoration execution."""
+"""Legacy reference precision, retained for historical protocols and stable codecs.
+
+New V8 exploration overrides model computation per instance with FP32; this
+shared reference helper is not a recommendation for new exploration runs.
+"""
 
 from __future__ import annotations
 

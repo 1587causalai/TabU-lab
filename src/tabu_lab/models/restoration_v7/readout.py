@@ -26,9 +26,14 @@ class ColumnRecovery:
     eval_weights: Tensor  # [R,n] center weights of the evaluation rows
 
 
-def support_weights(centers: Tensor, supports: Tensor, bandwidth: float) -> Tensor:
+def support_weights(
+    centers: Tensor, supports: Tensor, bandwidth: float, *, compute_dtype=None
+) -> Tensor:
     """Row-normalised Gaussian Unit weights, via a stable log-softmax."""
-    return unit_kernel_logits(centers, supports, bandwidth=bandwidth).log_softmax(-1).exp()
+    logits = unit_kernel_logits(
+        centers, supports, bandwidth=bandwidth, compute_dtype=compute_dtype
+    )
+    return logits.log_softmax(-1).exp()
 
 
 def column_shared_ll(
@@ -41,6 +46,7 @@ def column_shared_ll(
     ridge: float,
     bandwidth: float,
     center_chunk_size: int = 32,
+    compute_dtype: torch.dtype | None = None,
 ) -> ColumnRecovery:
     """Fit ``B`` over all centers, then read ``E_bar_r + B (g_r - g_bar_r)``.
 
@@ -62,7 +68,7 @@ def column_shared_ll(
         raise ValueError("no-support: column-shared LL needs at least one support")
     if len(responses) != n or len(features) != len(units):
         raise ValueError("support responses and features must align with rows")
-    dtype = solve_dtype(units)
+    dtype = solve_dtype(units) if compute_dtype is None else compute_dtype
     source_units = units[support_rows]
     origin_x = features[support_rows[:1]].to(dtype)
     origin_y = responses[:1].to(dtype)
@@ -71,7 +77,7 @@ def column_shared_ll(
     covariance = x.new_zeros(x.shape[1], x.shape[1])
     cross = x.new_zeros(x.shape[1], y.shape[1])
     for centers in units.split(center_chunk_size):
-        weights = support_weights(centers, source_units, bandwidth)
+        weights = support_weights(centers, source_units, bandwidth, compute_dtype=dtype)
         centered_x = x[None] - (weights @ x)[:, None]
         centered_y = y[None] - (weights @ y)[:, None]
         flat_x = centered_x.flatten(0, 1)
@@ -87,7 +93,7 @@ def column_shared_ll(
         raise FloatingPointError("solve-failed: column-shared LL Cholesky failed")
     solution = torch.cholesky_solve(cross, factor)  # T = B^T, [d_R,p]
     finite(solution, "column-shared slope")
-    eval_weights = support_weights(units[eval_rows], source_units, bandwidth)
+    eval_weights = support_weights(units[eval_rows], source_units, bandwidth, compute_dtype=dtype)
     delta = (features[eval_rows].to(dtype) - origin_x) - eval_weights @ x
     recovered = origin_y + eval_weights @ y + delta @ solution
     finite(recovered, "recovered embeddings")
@@ -105,7 +111,7 @@ def evaluate_fitted_ll(units, support_rows, responses, features, eval_rows, *, s
     origin_y = responses[:1].to(dtype)
     x = features[support_rows].to(dtype) - origin_x
     y = responses.to(dtype) - origin_y
-    weights = support_weights(units[eval_rows], units[support_rows], bandwidth)
+    weights = support_weights(units[eval_rows], units[support_rows], bandwidth, compute_dtype=dtype)
     delta = (features[eval_rows].to(dtype) - origin_x) - weights @ x
     recovered = origin_y + weights @ y + delta @ slope.T
     finite(recovered, "auxiliary recovered embeddings")
