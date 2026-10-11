@@ -24,6 +24,7 @@ from .codebook import (
 )
 from .encoder import TableEncoder
 from .readout import PositiveLinearReadout, SignedLinearReadout
+from .row_attention import LINEAR_MODES
 
 
 @dataclass(frozen=True)
@@ -34,6 +35,7 @@ class V8Config:
     rounds: int = 1
     readout: str = "gaussian_ll"
     codebook_mode: str = field(default="inherited", kw_only=True)
+    row_attention: str = field(default="inherited", kw_only=True)
 
     def __post_init__(self):
         if not isinstance(self.inherited, V7Config) or self.inherited.code_dim != 64:
@@ -46,6 +48,14 @@ class V8Config:
             raise ValueError("unknown V8 codebook_mode")
         if self.codebook_mode in LEARNED_MODES and self.readout != "gaussian_ll":
             raise ValueError("V8.1 learned feature pool supports gaussian_ll only")
+        if self.row_attention not in ("inherited", *LINEAR_MODES):
+            raise ValueError("unknown V8 row_attention")
+        if self.row_attention in LINEAR_MODES and (
+            self.codebook_mode != FEATURE64_MODE
+            or self.readout != "gaussian_ll"
+            or self.inherited.backbone.row_slots != 0
+        ):
+            raise ValueError("V8.2 requires learned_feature64_v1, gaussian_ll and row_slots=0")
 
         if self.readout not in (
             "gaussian_ll",
@@ -60,7 +70,17 @@ class V8Config:
 
     @property
     def model_version(self):
+        if self.row_attention in LINEAR_MODES:
+            return "v8.2"
         return "v8.1" if self.codebook_mode in LEARNED_MODES else "v8"
+
+    @property
+    def weights_schema(self):
+        return {
+            "v8": "completion_v8_weights_v1",
+            "v8.1": "completion_v81_weights_v1",
+            "v8.2": "completion_v82_weights_v1",
+        }[self.model_version]
 
     @property
     def codec_family(self):
@@ -77,6 +97,8 @@ class V8Config:
             result["readout"] = self.readout
         if self.codebook_mode != "inherited":
             result["codebook_mode"] = self.codebook_mode
+        if self.row_attention != "inherited":
+            result["row_attention"] = self.row_attention
         return result
 
     @classmethod
@@ -86,6 +108,7 @@ class V8Config:
             "rounds",
             "readout",
             "codebook_mode",
+            "row_attention",
         }:
             raise ValueError("unknown V8 configuration fields")
         return cls(
@@ -93,6 +116,7 @@ class V8Config:
             value["rounds"],
             value.get("readout", "gaussian_ll"),
             codebook_mode=value.get("codebook_mode", "inherited"),
+            row_attention=value.get("row_attention", "inherited"),
         )
 
 
@@ -177,6 +201,10 @@ class V8CompletionModel(nn.Module):
         elif config.readout == "signed_linear_attention":
             self.attention_readout = SignedLinearReadout()
         self.migration_receipt = None
+        if config.row_attention in LINEAR_MODES:
+            from .row_attention import install_presence_linear_rows
+
+            install_presence_linear_rows(self.backbone, mode=config.row_attention)
         from .precision import configure_precision
 
         configure_precision(

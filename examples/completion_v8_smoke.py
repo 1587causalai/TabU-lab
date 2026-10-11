@@ -28,6 +28,9 @@ def main():
         choices=("inherited", "learned_pool_v1", "learned_feature64_v1"),
         default="inherited",
     )
+    parser.add_argument("--row-attention", choices=("inherited", "presence_linear_v1",
+                                                  "presence_linear_mean_v1"),
+                        default="inherited")
     args = parser.parse_args()
     torch.set_num_threads(2)
     torch.manual_seed(8)
@@ -39,7 +42,7 @@ def main():
         center_chunk_size=4,
     )
     model = V8CompletionModel(
-        V8Config(spec, codebook_mode=args.codebook_mode)
+        V8Config(spec, codebook_mode=args.codebook_mode, row_attention=args.row_attention)
     ).to(device=args.device, dtype=torch.float32)
     schema = (
         ColumnSchema("measurement", "numeric"),

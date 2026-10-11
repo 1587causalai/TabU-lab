@@ -3,7 +3,7 @@
 ## Mainline integration boundary (2026-10-11)
 
 The default remains the **64-coordinate V8 baseline**. The opt-in V8.1 mode
-below adds a learned feature codebook and 32-coordinate values.
+below adds a learned feature codebook with the same 64-coordinate value interface.
 The default is one completion round and Gaussian
 column-shared local-linear recovery. The positive/signed attention readouts
 remain opt-in, paused research alternatives; merging their code does not resume
@@ -30,6 +30,96 @@ words such as "latest" describe the corresponding run and do not select today's
 training parent. Real checkpoints, original datasets and full optimizer/RNG
 artifacts are not distributed in this integration. Current research has stopped
 the V8 baseline exploration; V8.1 engineering checks are separate from model-quality results.
+
+## V8.2: presence-preserving linear row attention (2026-10-12, opt-in)
+
+V8.2 addresses the quadratic **column-count** cost of Step 3's within-row
+attention. It retains V8.1's learned 64D feature pool, reversible encoder,
+column inducing attention, FFN, Unit receivers, Gaussian LL and completion loss.
+It does not replace the recovery readout with linear attention. The current
+candidate is `presence_linear_mean_v1`; `presence_linear_v1` retains the raw
+sum formulation as a diagnostic comparison. Neither selects a project-wide
+default or a trained checkpoint.
+
+```python
+from tabu_lab.models.completion_v8 import (
+    V8Config, V8CompletionModel, from_v81, configure_memory,
+)
+
+config = V8Config(
+    inherited_spec, codebook_mode="learned_feature64_v1",
+    row_attention="presence_linear_mean_v1",
+)
+model = V8CompletionModel(config)  # all model arithmetic defaults to FP32
+# Or copy every V8.1 model tensor, with no added parameters:
+# model = from_v81(v81_donor)
+configure_memory(model, attention_mib=128, checkpoint_activations=True)
+```
+
+For each row/head, let `n=max(1, number of role-eligible sources)` and
+`rho(x)=||P_A x||²/(tau+||P_A x||²)`. Q/K/V project raw states; normalized
+queries/keys are `q_hat=q/sqrt(||q||²+eps)` and similarly for `k_hat`.
+
+```text
+S = (1/n) sum_j rho(y_j) k_hat_j v_j^T
+h_i = S^T q_hat_i / sqrt(head_width)
+attention_update_i = rho(x_i) W_O concat_heads(h_i)
+```
+
+The existing residual and local FFN follow unchanged. Source presence occurs
+once, before aggregation; receiver presence gates the output. The divisor counts
+role eligibility, not presence mass. For fixed Q/K/V and masks, multiplying every
+source gate by `c` multiplies the attention increment by `c`. No positive kernel,
+softmax/weight-sum denominator or attention-output RMS cancels this attenuation.
+A role-eligible zero-presence source contributes zero but still counts in `n`;
+this avoids a discontinuous divisor at gate zero. Null/ineligible positions do
+not count and are deleted before projection. Unit/Feature tokens remain receivers
+only; Query source eligibility follows the inherited policy.
+
+The original raw sum overflowed after direct migration of the latest V8.1
+weights on all three real wide-table forwards. Q/K normalization removes their
+unbounded dot-product scale; the role-count mean removes width-dependent sum
+growth. These are explicit **new design choices**, not an algebraically equivalent
+optimization of softmax. With normalized Q/K, each head satisfies
+`||h_i|| <= max_j ||v_j|| / sqrt(head_width)` (before receiver gate/output
+projection); this does not prove stability of the whole network or training.
+The raw diagnostic mode uses unnormalized Q/K and no count divisor; failures
+remain explicit. It is not the recommended migration mode.
+
+Each head stores a `head_width × head_width` summary. With `N` rows, `M` columns,
+width `D` and head width `d`, row aggregation changes from `O(N M² D)` to
+`O(N M D d)`, plus unchanged projections/FFN. Columns, encoder, codec preparation
+and Gaussian LL still cost time; narrow tables may see no speed benefit.
+
+`from_v81` requires the current 64D Gaussian-LL donor with `row_slots=0` and
+copies every tensor exactly. Changed attention changes predictions. Optimizer
+and RNG are not implicitly migrated. Saved files use the separate
+`completion_v82_weights_v1` schema and serialize the precise row mode. Old
+configs without `row_attention` retain inherited attention and their old schema.
+The explicit memory helper bounds **independent batches**, preserves all sources
+for each receiver, and recomputes encoder stages/backbone layers during backward.
+The workspace budget is an estimate, not an allocator limit; weights files do
+not automatically enable memory policies after reload.
+
+The source also carries forward the latest frozen V8.1 without-replacement
+feature allocation correction from 2026-10-11. This matches the current trained
+donor's execution source, not the earlier V8.1 sampling implementation at
+commit `76eb4dd6`. Full recoding assigns distinct indices to at most 10000 columns;
+numeric/token RNG is unchanged. Historical sampling reproduction must use its
+recorded frozen source. Partial mixing of independently sampled reference/new
+plans can still collide; the qualified current protocol uses full recoding.
+
+```bash
+uv run python examples/completion_v8_smoke.py --codebook-mode learned_feature64_v1 --row-attention presence_linear_mean_v1
+uv run pytest tests/unit/completion_v8 -q
+# Private donor/data optional; no optimizer updates:
+uv run python examples/completion_v82_benchmark.py --checkpoint V81.pt --output speed.json --device cuda
+```
+
+Engineering evidence, exact source/runtime identities and actual speed results
+are recorded in the outer research workspace's
+`preparations/v82-presence-linear-20261012/REPORT.md`. Numerical qualification
+does not establish retained predictive accuracy or unseen-table generalization.
 
 ## V8.1: learned feature vocabulary (opt-in, corrected to 64D)
 

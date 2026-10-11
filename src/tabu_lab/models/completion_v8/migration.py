@@ -11,6 +11,45 @@ from ..restoration_v7.model import V7Model
 from ..restoration_v7.runner import CHECKPOINT_SCHEMA, manifest_digest
 from .codebook import FEATURE64_MODE, LEARNED_MODES
 from .model import V8CompletionModel, V8Config
+from .row_attention import LINEAR_MODES, MEAN_LINEAR
+
+
+def from_v81(donor: V8CompletionModel, *, row_attention=MEAN_LINEAR):
+    """V8.1 -> V8.2 weights-only migration; attention semantics change.
+
+    Every parameter is copied, including both presence projections and the
+    learned feature pool. Optimizer/RNG and predictive equivalence are not implied.
+    """
+    if donor.config.model_version != "v8.1" or donor.config.codebook_mode != FEATURE64_MODE:
+        raise ValueError("V8.2 migration requires a 64D V8.1 donor")
+    if row_attention not in LINEAR_MODES:
+        raise ValueError("V8.2 migration requires an explicit linear row mode")
+    _finite_state(donor.state_dict())
+    target = V8CompletionModel(
+        replace(donor.config, row_attention=row_attention)
+    ).to(next(donor.parameters()))
+    target.load_state_dict(donor.state_dict(), strict=True)
+    for key, value in target.state_dict().items():
+        if not torch.equal(value, donor.state_dict()[key]):
+            raise ValueError(f"weight copy mismatch: {key}")
+    from .precision import configure_precision
+
+    configure_precision(
+        target, mode=donor.execution_precision["mode"],
+        reason=donor.execution_precision.get("reason"),
+    )
+    target.train(donor.training)
+    target.migration_receipt = {
+        "mode": "weights_only",
+        "donor_version": "v8.1",
+        "donor_config": donor.config.as_dict(),
+        "copied_keys": list(donor.state_dict()),
+        "new_keys": [],
+        "changed_operator": f"Step 3 row attention: {row_attention}",
+        "omitted_donor_components": ["optimizer", "rng"],
+        "prediction_equivalence": False,
+    }
+    return target
 
 
 def from_v8(donor: V8CompletionModel, *, codebook_mode=FEATURE64_MODE):
@@ -166,10 +205,7 @@ def save_weights(model, path):
     with Path(path).open("xb") as handle:
         torch.save(
             {
-                "schema": (
-                    "completion_v81_weights_v1" if model.config.model_version == "v8.1"
-                    else "completion_v8_weights_v1"
-                ),
+                "schema": model.config.weights_schema,
                 "config": model.config.as_dict(),
                 "model": state,
                 "migration": model.migration_receipt,
@@ -186,15 +222,13 @@ def load_weights(path, *, device="cpu", precision=None, precision_reason=None):
     recorded mixed mode. The saved receipt is provenance, not an implicit override.
     """
     state = torch.load(path, map_location="cpu", weights_only=True)
-    if state.get("schema") not in ("completion_v8_weights_v1", "completion_v81_weights_v1"):
+    if state.get("schema") not in (
+        "completion_v8_weights_v1", "completion_v81_weights_v1", "completion_v82_weights_v1"
+    ):
         raise ValueError("unsupported V8 weights schema")
     config = V8Config.from_dict(state["config"])
-    expected = (
-        "completion_v81_weights_v1" if config.model_version == "v8.1"
-        else "completion_v8_weights_v1"
-    )
-    if state["schema"] != expected:
-        raise ValueError("weights schema disagrees with codebook mode")
+    if state["schema"] != config.weights_schema:
+        raise ValueError("weights schema disagrees with codebook mode or row attention")
     _finite_state(state["model"])
     dtypes = {value.dtype for value in state["model"].values() if value.is_floating_point()}
     if len(dtypes) != 1 or not dtypes <= {torch.float32, torch.float64}:

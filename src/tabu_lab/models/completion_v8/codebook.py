@@ -91,7 +91,17 @@ def prepare_feature_plan(
     if spec.codec not in ("C64/8", "G64"):
         raise ValueError("learned feature pool requires C64/8 or G64 baseline directions")
     generator = torch.Generator().manual_seed(inputs.code_seed)
-    indices = tuple(torch.randint(POOL_SIZE, (len(inputs.schema),), generator=generator).tolist())
+    if len(inputs.schema) > POOL_SIZE:
+        raise ValueError("without-replacement feature allocation requires at most10000 columns")
+    # Rejection sampling preserves old assignments whenever no collision occurred.
+    draws = torch.randint(POOL_SIZE, (len(inputs.schema),), generator=generator).tolist()
+    used = set()
+    for column, index in enumerate(draws):
+        while index in used:
+            index = int(torch.randint(POOL_SIZE, (1,), generator=generator).item())
+        draws[column] = index
+        used.add(index)
+    indices = tuple(draws)
     if mode not in LEARNED_MODES:
         raise ValueError("unknown learned feature mode")
     if mode == FEATURE64_MODE:
