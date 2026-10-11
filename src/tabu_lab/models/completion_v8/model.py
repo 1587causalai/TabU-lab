@@ -14,7 +14,14 @@ from ..restoration_v7.config import V7Config
 from ..restoration_v7.model import IdentityValueMap, V7Round
 from ..restoration_v7.readout import column_shared_ll
 from .cell_dynamics import cell_only_dynamics
-from .codebook import LEARNED_MODE, FeatureCodebookPlan, make_feature_bank, prepare_feature_plan
+from .codebook import (
+    FEATURE64_MODE,
+    LEARNED_MODE,
+    LEARNED_MODES,
+    FeatureCodebookPlan,
+    make_feature_bank,
+    prepare_feature_plan,
+)
 from .encoder import TableEncoder
 from .readout import PositiveLinearReadout, SignedLinearReadout
 
@@ -35,9 +42,9 @@ class V8Config:
             raise ValueError("first V8 branch requires 128-wide Token Dynamics")
         if type(self.rounds) is not int or self.rounds < 1:
             raise ValueError("V8 rounds must be a positive integer")
-        if self.codebook_mode not in ("inherited", LEARNED_MODE):
+        if self.codebook_mode not in ("inherited", *LEARNED_MODES):
             raise ValueError("unknown V8 codebook_mode")
-        if self.codebook_mode == LEARNED_MODE and self.readout != "gaussian_ll":
+        if self.codebook_mode in LEARNED_MODES and self.readout != "gaussian_ll":
             raise ValueError("V8.1 learned feature pool supports gaussian_ll only")
 
         if self.readout not in (
@@ -53,12 +60,14 @@ class V8Config:
 
     @property
     def model_version(self):
-        return "v8.1" if self.codebook_mode == LEARNED_MODE else "v8"
+        return "v8.1" if self.codebook_mode in LEARNED_MODES else "v8"
 
     @property
     def codec_family(self):
         if self.codebook_mode == "inherited":
             return self.inherited.codec
+        if self.codebook_mode == FEATURE64_MODE:
+            return f"{FEATURE64_MODE}:{self.inherited.codec}"
         random_family = "C32/8" if self.inherited.codec == "C64/8" else "G32"
         return f"{LEARNED_MODE}:{random_family}"
 
@@ -116,9 +125,10 @@ def prepare_completion(
     for a in inputs.query.any(0).nonzero().flatten().tolist():
         if not bool(inputs.visible[:, a].any()):
             raise ValueError(f"no-support: completion column {a}")
-    if config.codebook_mode == LEARNED_MODE:
+    if config.codebook_mode in LEARNED_MODES:
         plan = prepare_feature_plan(
-            inputs, spec, recode_columns=recode_columns, reference_seed=reference_seed
+            inputs, spec, recode_columns=recode_columns, reference_seed=reference_seed,
+            mode=config.codebook_mode
         )
         return CompletionEpisode(inputs, plan, None)
     if recode_columns is not None:
@@ -154,7 +164,8 @@ class V8CompletionModel(nn.Module):
             )
             base.lift = nn.Linear(config.code_dim, spec.backbone.width, bias=False)
             nn.init.orthogonal_(base.lift.weight)
-            self.feature_codebook = make_feature_bank()
+        if config.codebook_mode in LEARNED_MODES:
+            self.feature_codebook = make_feature_bank(config.code_dim)
         self.encoder = TableEncoder(base.phi, code_dim=config.code_dim)
         self.lift = base.lift
         self.unit_seed = base.unit_seed
@@ -199,7 +210,7 @@ class V8CompletionModel(nn.Module):
         if visible.device != self.query_seed.device:
             raise ValueError("completion inputs and model must share a device")
         valid = visible | query
-        if self.config.codebook_mode == LEARNED_MODE:
+        if self.config.codebook_mode in LEARNED_MODES:
             if not isinstance(episode.codec, FeatureCodebookPlan) or episode.observed is not None:
                 raise ValueError("V8.1 requires a codebook plan, not cached learned codes")
             codec = episode.codec.bind(self.feature_codebook)
@@ -268,8 +279,8 @@ class V8CompletionModel(nn.Module):
             )
         return CompletionOutput(
             initial, tuple(states), completed, decoded,
-            codec=codec if self.config.codebook_mode == LEARNED_MODE else None,
-            source_episode=episode if self.config.codebook_mode == LEARNED_MODE else None,
+            codec=codec if self.config.codebook_mode in LEARNED_MODES else None,
+            source_episode=episode if self.config.codebook_mode in LEARNED_MODES else None,
         )
 
 

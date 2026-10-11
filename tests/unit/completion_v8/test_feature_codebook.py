@@ -226,7 +226,7 @@ def test_saved_weights_replay_and_schema_mismatch_rejected(tmp_path):
 
 def test_migration_copies_only_backbone_and_compatible_seeds():
     donor = V8CompletionModel(V8Config(spec())).double()
-    target = from_v8(donor)
+    target = from_v8(donor, codebook_mode="learned_pool_v1")
     assert target.config.model_version == "v8.1"
     assert target.query_seed.shape == (32,)
     assert all(torch.equal(target.state_dict()[k], donor.state_dict()[k])

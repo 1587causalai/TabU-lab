@@ -12,15 +12,17 @@ from torch import nn
 
 from ..restoration._dtype import solve_dtype
 from ..restoration._validation import finite
-from ..restoration_v7.codec import G64Codec, _column_codec, select_softlog
+from ..restoration_v7.codec import G64Codec, _column_codec, build_value_codec, select_softlog
 
 POOL_SIZE = 10_000
 CODE_DIM = 32
-LEARNED_MODE = "learned_pool_v1"
+LEARNED_MODE = "learned_pool_v1"  # Historical 32D checkpoints; never reinterpret.
+FEATURE64_MODE = "learned_feature64_v1"
+LEARNED_MODES = (LEARNED_MODE, FEATURE64_MODE)
 
 
-def make_feature_bank():
-    bank = nn.Embedding(POOL_SIZE, CODE_DIM)
+def make_feature_bank(dim=CODE_DIM):
+    bank = nn.Embedding(POOL_SIZE, dim)
     with torch.no_grad():
         # Embedding initializes iid N(0,1); unit length is initialization only.
         bank.weight.div_(bank.weight.norm(dim=-1, keepdim=True))
@@ -46,8 +48,8 @@ class FeatureCodebookPlan:
 
     def bind(self, bank: nn.Embedding):
         """Fresh differentiable gathers; this codec is one forward's snapshot."""
-        if tuple(bank.weight.shape) != (POOL_SIZE, CODE_DIM):
-            raise ValueError("feature bank must be [10000,32]")
+        if tuple(bank.weight.shape) != (POOL_SIZE, self.dim):
+            raise ValueError(f"feature bank must be [10000,{self.dim}]")
         indices = torch.tensor(self.indices, device=bank.weight.device, dtype=torch.long)
         features = bank(indices)
         finite(features, "V8.1 feature codes")
@@ -74,8 +76,12 @@ class FeatureCodebookPlan:
         return replace(self.template, columns=tuple(columns))
 
 
-def prepare_feature_plan(inputs, spec, *, recode_columns=None, reference_seed=0):
-    """Preserve baseline draws/statistics at p=32; only the origin is learned.
+def prepare_feature_plan(
+    inputs, spec, *, recode_columns=None, reference_seed=0, mode=LEARNED_MODE
+):
+    """Preserve baseline directions; current 64D mode keeps exact old draws.
+
+    The historical 32D mode remains available to read its saved checkpoints.
 
     _column_codec reuses the constant-weight-8 or unit-Gaussian sampling rule
     without calling the public C64/8 constructor (which must remain 64D-only).
@@ -86,31 +92,50 @@ def prepare_feature_plan(inputs, spec, *, recode_columns=None, reference_seed=0)
         raise ValueError("learned feature pool requires C64/8 or G64 baseline directions")
     generator = torch.Generator().manual_seed(inputs.code_seed)
     indices = tuple(torch.randint(POOL_SIZE, (len(inputs.schema),), generator=generator).tolist())
-    dtype = solve_dtype(inputs.visible)
-    epsilon = spec.epsilon if spec.numeric_preprocessing == "legacy" else 0.01
-    columns = []
-    for a, schema in enumerate(inputs.schema):
-        column = _column_codec(
-            schema, inputs.values[a][inputs.visible[:, a]], CODE_DIM, epsilon,
-            generator, inputs.visible.device, dtype, spec.codec,
+    if mode not in LEARNED_MODES:
+        raise ValueError("unknown learned feature mode")
+    if mode == FEATURE64_MODE:
+        # A separate local index generator must not consume the baseline codec
+        # RNG. Same inputs/seed retain the exact old numeric/category draws.
+        baseline = build_value_codec(
+            inputs, codec=spec.codec, dim=64, epsilon=spec.epsilon,
+            numeric_preprocessing=spec.numeric_preprocessing,
         )
-        # Keep only random offsets/directions and fitted statistics in the plan.
-        column = replace(
-            column,
-            codes=None if column.codes is None else (column.codes - column.base).detach(),
-            base=torch.zeros_like(column.base),
-            numeric_encoding=(
-                "asinh" if schema.kind == "numeric"
-                and spec.numeric_preprocessing == "standard_asinh_v1" else "affine"
-            ),
+        template = replace(
+            baseline,
+            family=f"{mode}:{spec.codec}",
+            columns=tuple(replace(
+                c, base=torch.zeros_like(c.base),
+                codes=None if c.codes is None else (c.codes - c.base).detach(),
+            ) for c in baseline.columns),
         )
-        columns.append(column)
-    random_family = "C32/8" if spec.codec == "C64/8" else "G32"
-    template = select_softlog(
-        G64Codec(tuple(columns), CODE_DIM, f"{LEARNED_MODE}:{random_family}",
-                 spec.numeric_preprocessing),
-        inputs,
-    )
+    else:
+        dtype = solve_dtype(inputs.visible)
+        epsilon = spec.epsilon if spec.numeric_preprocessing == "legacy" else 0.01
+        columns = []
+        for a, schema in enumerate(inputs.schema):
+            column = _column_codec(
+                schema, inputs.values[a][inputs.visible[:, a]], CODE_DIM, epsilon,
+                generator, inputs.visible.device, dtype, spec.codec,
+            )
+            # Keep only random offsets/directions and fitted statistics in the plan.
+            column = replace(
+                column,
+                codes=None if column.codes is None else (column.codes - column.base).detach(),
+                base=torch.zeros_like(column.base),
+                numeric_encoding=(
+                    "asinh" if schema.kind == "numeric"
+                    and spec.numeric_preprocessing == "standard_asinh_v1" else "affine"
+                ),
+            )
+            columns.append(column)
+        random_family = "C32/8" if spec.codec == "C64/8" else "G32"
+        template = select_softlog(
+            G64Codec(tuple(columns), CODE_DIM, f"{LEARNED_MODE}:{random_family}",
+                     spec.numeric_preprocessing),
+            inputs,
+        )
+    columns = template.columns
     plan = FeatureCodebookPlan(indices, template)
     if recode_columns is None:
         return plan
@@ -121,7 +146,9 @@ def prepare_feature_plan(inputs, spec, *, recode_columns=None, reference_seed=0)
         raise ValueError("recode_columns must not repeat a column")
     if type(reference_seed) is not int:
         raise ValueError("reference_seed must be an integer")
-    reference = prepare_feature_plan(replace(inputs, code_seed=reference_seed), spec)
+    reference = prepare_feature_plan(
+        replace(inputs, code_seed=reference_seed), spec, mode=mode
+    )
     chosen = set(selected)
     return FeatureCodebookPlan(
         tuple(plan.indices[a] if a in chosen else reference.indices[a]

@@ -31,31 +31,35 @@ training parent. Real checkpoints, original datasets and full optimizer/RNG
 artifacts are not distributed in this integration. Current research has stopped
 the V8 baseline exploration; V8.1 engineering checks are separate from model-quality results.
 
-## V8.1: learned feature vocabulary (opt-in)
+## V8.1: learned feature vocabulary (opt-in, corrected to 64D)
 
 ```python
 from tabu_lab.models.completion_v8 import V8Config, V8CompletionModel, from_v8
 
-config = V8Config(inherited_spec, codebook_mode="learned_pool_v1")
+config = V8Config(inherited_spec, codebook_mode="learned_feature64_v1")
 model = V8CompletionModel(config)
-# Or copy only a V8 donor's 128D backbone and compatible Unit/Feature seeds:
-# model = from_v8(v8_donor)  # weights-only migration; new value interface and optimizer
+# Preserve EVERY donor model weight; only the feature bank is new:
+# model = from_v8(v8_donor)  # optimizer migration is not implicit
 ```
 
 Only `model.feature_codebook.weight` is the new learned vocabulary:
-10000 by 32, 320000 parameters, iid Gaussian normalized to unit length **once**.
-The feature index is sampled uniformly; the bank is not reset or renormalized
-after updates. Numeric and category directions remain non-trainable random
-constants. C64/8 donors retain the weight-8, unnormalized binary sampling rule
-at 32 dimensions (C32/8); G64 donors retain unit-Gaussian draws at 32 dimensions.
-This does not rewrite the donor's serialized 64D spec or the old codec constructor.
+10000 by 64, 640000 parameters, iid Gaussian normalized to unit length **once**.
+The feature index is sampled uniformly; the bank is not reset or renormalized.
+Numeric/category directions remain constants from the unchanged C64/8 or G64
+codec: same inputs and seed preserve the old draws and preprocessing exactly.
+Feature-index sampling uses a separate generator and does not consume codec RNG.
+A unit-length Gaussian feature and a weight-8 binary direction share 64D shape,
+not norm/distribution: their initial norms are 1 and sqrt(8), respectively.
 
-The typed sum formulas, visible-only statistics, category eligibility, ordinal
-ranks, distance-based decoding and reference stop-gradient remain unchanged.
-The 10000-entry feature vocabulary does not cap the number of categories.
-Code/query/phi widths are 32, table-coupling branches are 16+16, lift is 32→128.
-Q/K width 32, OFFN hidden width 64 and the 128D backbone are unchanged.
-This first mode supports Gaussian LL only.
+Code/query/phi widths remain 64; table-coupling branches remain 32+32, lift64→128.
+The whole encoder, lift, Query seed, backbone, Unit/Feature seeds can be copied
+without slicing, padding or reinitializing old interfaces. Changing the feature
+origins can still change predictions; this is not prediction-equivalent resume.
+Typed sums, category eligibility, ranks, decoding and loss are unchanged.
+The 10000-entry feature vocabulary does not limit category count.
+The historical `learned_pool_v1` mode **continues to mean 32D** so its checkpoints
+remain readable; request it explicitly in `from_v8(..., codebook_mode=...)` only
+for historical reproduction. Do not continue the failed 32D run as the 64D donor.
 
 Preparation caches feature **indices**, random directions and fitted statistics.
 `episode.observed` is `None` in this mode: every forward binds a fresh
@@ -90,8 +94,8 @@ optimizer, sampling state/input seeds, reference seed and recoding selection
 to resume exactly. No old experimental runner or saved run is rewritten.
 
 ```bash
-uv run python examples/completion_v8_smoke.py --codebook-mode learned_pool_v1
-uv run python examples/completion_v8_smoke.py --codebook-mode learned_pool_v1 --device mps
+uv run python examples/completion_v8_smoke.py --codebook-mode learned_feature64_v1
+uv run python examples/completion_v8_smoke.py --codebook-mode learned_feature64_v1 --device mps
 uv run pytest tests/unit/completion_v8 -q
 ```
 

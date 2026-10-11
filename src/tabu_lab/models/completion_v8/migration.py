@@ -9,26 +9,36 @@ import torch
 from ..restoration_v7.config import V7Config
 from ..restoration_v7.model import V7Model
 from ..restoration_v7.runner import CHECKPOINT_SCHEMA, manifest_digest
+from .codebook import FEATURE64_MODE, LEARNED_MODES
 from .model import V8CompletionModel, V8Config
 
 
-def from_v8(donor: V8CompletionModel):
-    """Initialize V8.1 from V8 backbone/seeds only, with a new value interface.
+def from_v8(donor: V8CompletionModel, *, codebook_mode=FEATURE64_MODE):
+    """Keep every V8 weight for current 64D mode; initialize only the feature pool.
 
-    No slicing/padding of old 64D weights and no optimizer migration.
+    Explicit historical 32D mode retains its old backbone-only migration.
+    No optimizer state is implicitly migrated.
     """
     if donor.config.codebook_mode != "inherited" or donor.config.readout != "gaussian_ll":
         raise ValueError("V8.1 migration requires an inherited-code Gaussian LL V8 donor")
+    if codebook_mode not in LEARNED_MODES:
+        raise ValueError("unknown learned feature mode")
     _finite_state(donor.state_dict())
     target = V8CompletionModel(
-        replace(donor.config, codebook_mode="learned_pool_v1")
+        replace(donor.config, codebook_mode=codebook_mode)
     ).to(next(donor.parameters()))
-    target.backbone.load_state_dict(donor.backbone.state_dict(), strict=True)
-    with torch.no_grad():
-        target.unit_seed.copy_(donor.unit_seed)
-        target.feature_seed.copy_(donor.feature_seed)
-    copied = [f"backbone.{key}" for key in donor.backbone.state_dict()]
-    copied += ["unit_seed", "feature_seed"]
+    if codebook_mode == FEATURE64_MODE:
+        state = target.state_dict()
+        state.update(donor.state_dict())
+        target.load_state_dict(state, strict=True)
+        copied = list(donor.state_dict())
+    else:
+        target.backbone.load_state_dict(donor.backbone.state_dict(), strict=True)
+        with torch.no_grad():
+            target.unit_seed.copy_(donor.unit_seed)
+            target.feature_seed.copy_(donor.feature_seed)
+        copied = [f"backbone.{key}" for key in donor.backbone.state_dict()]
+        copied += ["unit_seed", "feature_seed"]
     for key in copied:
         if not torch.equal(target.state_dict()[key], donor.state_dict()[key]):
             raise ValueError(f"weight copy mismatch: {key}")
@@ -38,7 +48,10 @@ def from_v8(donor: V8CompletionModel):
         "copied_keys": copied,
         "new_keys": sorted(set(target.state_dict()) - set(copied)),
         "donor_config": donor.config.as_dict(),
-        "omitted_donor_components": ["value_interface", "query_seed", "optimizer", "rng"],
+        "omitted_donor_components": (
+            ["optimizer", "rng"] if codebook_mode == FEATURE64_MODE
+            else ["value_interface", "query_seed", "optimizer", "rng"]
+        ),
     }
     return target
 

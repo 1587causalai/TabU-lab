@@ -24,7 +24,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--device", choices=("cpu", "mps", "cuda"), default="cpu")
     parser.add_argument(
-        "--codebook-mode", choices=("inherited", "learned_pool_v1"), default="inherited"
+        "--codebook-mode",
+        choices=("inherited", "learned_pool_v1", "learned_feature64_v1"),
+        default="inherited",
     )
     args = parser.parse_args()
     torch.set_num_threads(2)
