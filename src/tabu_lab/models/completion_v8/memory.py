@@ -51,12 +51,16 @@ def _bounded(self, receivers, sources, eligible):
 
 
 def _recompute(module, method):
-    original = getattr(module, method)
+    # Keep only the unbound function: a deepcopy must call its own module,
+    # not an original instance retained inside this function's closure.
+    original = getattr(type(module), method)
 
     def wrapped(self, *args, **kwargs):
         if not torch.is_grad_enabled():
-            return original(*args, **kwargs)
-        return checkpoint(original, *args, use_reentrant=False, preserve_rng_state=True, **kwargs)
+            return original(self, *args, **kwargs)
+        return checkpoint(
+            original, self, *args, use_reentrant=False, preserve_rng_state=True, **kwargs
+        )
 
     setattr(module, method, types.MethodType(wrapped, module))
 
@@ -90,7 +94,8 @@ def configure_memory(model, *, attention_mib=128, checkpoint_activations=True):
         for layer in axial.layers:
             _recompute(layer, "forward")
         for block in getattr(model.backbone, "unit_blocks", []):
-            _recompute(block, "forward")
+            # Both legacy forward and supervised dynamics use this entry point.
+            _recompute(block, "batched")
     model.execution_memory = {
         "policy_version": 1,
         "attention_mib": attention_mib,

@@ -201,6 +201,66 @@ def test_recomputation_chunks_outputs_and_gradients(force_chunks):
             torch.testing.assert_close(p.grad, q.grad, rtol=1e-3, atol=2e-6, msg=name)
 
 
+@pytest.mark.parametrize("policy", ["legacy_cell_sources", SUPPORT_ROWS_NULL])
+@pytest.mark.parametrize("checkpoint_activations", [False, True])
+def test_optional_unit_stack_actually_recomputes(policy, checkpoint_activations):
+    model = V8CompletionModel(replace(config(), attention_policy=policy))
+    calls = []
+    hook = model.backbone.unit_blocks[0].ff[0].register_forward_pre_hook(
+        lambda *_: calls.append(None)
+    )
+    configure_memory(model, attention_mib=128, checkpoint_activations=checkpoint_activations)
+    inputs, truth = episode_data()
+    ep = prepare_completion(inputs, model.config)
+    try:
+        out = model(ep, decode=False)
+        assert len(calls) == 1
+        completion_loss(out, ep, truth).backward()
+        # Output/gradient equivalence alone cannot detect a bypassed wrapper.
+        assert len(calls) == (2 if checkpoint_activations else 1)
+    finally:
+        hook.remove()
+
+
+@pytest.mark.parametrize("policy", ["legacy_cell_sources", SUPPORT_ROWS_NULL])
+@pytest.mark.parametrize("device", ["cpu", pytest.param("mps", marks=pytest.mark.skipif(
+    not torch.backends.mps.is_available(), reason="MPS unavailable"
+))])
+def test_deepcopy_after_recomputation_uses_clone_weights_and_gradients(policy, device):
+    original = V8CompletionModel(replace(config(), attention_policy=policy)).to(device)
+    configure_memory(original, checkpoint_activations=True)
+    clone = copy.deepcopy(original)
+    inputs, truth = episode_data(device)
+    ep = prepare_completion(inputs, clone.config)
+    with torch.no_grad():
+        before = clone(ep, decode=False).completed_codes.clone()
+        for p in (*clone.encoder.parameters(), *clone.backbone.parameters()):
+            p.add_(0.005)
+        after = clone(ep, decode=False).completed_codes
+        assert not torch.equal(before, after)
+        assert torch.equal(before, original(ep, decode=False).completed_codes)
+
+    # Rebuilding from the clone's weights is independent of its method wrappers.
+    reference = V8CompletionModel(clone.config).to(device)
+    reference.load_state_dict(clone.state_dict())
+    with torch.no_grad():
+        assert torch.equal(after, reference(ep, decode=False).completed_codes)
+    actual, expected = clone(ep, decode=False), reference(ep, decode=False)
+    torch.testing.assert_close(actual.completed_codes, expected.completed_codes)
+    completion_loss(actual, ep, truth).backward()
+    completion_loss(expected, ep, truth).backward()
+    assert all(p.grad is None for p in original.parameters())
+    for (name, p), (other_name, q) in zip(
+        clone.named_parameters(), reference.named_parameters(), strict=True
+    ):
+        assert name == other_name
+        if q.grad is None:
+            assert p.grad is None
+        else:
+            assert p.grad is not None and torch.isfinite(p.grad).all()
+            torch.testing.assert_close(p.grad, q.grad, rtol=1e-3, atol=2e-6, msg=name)
+
+
 def test_migration_preserves_weights_and_legacy_serialization(tmp_path):
     donor = V8CompletionModel(config()).eval()
     assert "attention_policy" not in donor.config.as_dict()
