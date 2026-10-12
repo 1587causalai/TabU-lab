@@ -33,6 +33,11 @@ the V8 baseline exploration; V8.1 engineering checks are separate from model-qua
 
 ## V8.2: presence-preserving linear row attention (2026-10-12, opt-in)
 
+See the [integration and validation record](../../../../docs/reviews/v82-integration-20261012/README.md)
+for the merged scope, independent review, and regression evidence. Activation
+recomputation wraps the shared Unit `batched` entry point; copying a configured
+model preserves ownership of the clone's parameters and gradients.
+
 ### Current supervised attention policy
 
 The current supervised design is implemented as

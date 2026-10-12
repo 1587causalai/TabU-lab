@@ -34,9 +34,13 @@ Gaussian local-linear recovery. Start with the
 [runnable synthetic example](examples/completion_v8_smoke.py),
 [module contract](src/tabu_lab/models/completion_v8/README.md), and
 [integration record](docs/reviews/v8-integration-20261011/README.md).
-This preserves the 64-coordinate V8 baseline; the proposed V8.1 learnable
-codebooks are not implemented here. Existing factories and adopted checkpoints
-do not change.
+The **2026-10-12 V8.1 / V8.2 integration** adds an optional learned feature
+codebook, presence-preserving linear row attention, Support-only cross-row
+sources for supervised episodes, and bounded execution with activation
+recomputation. The current learned feature mode keeps the 64-coordinate value
+interface; historical configurations remain readable. See the
+[V8.2 integration and validation record](docs/reviews/v82-integration-20261012/README.md).
+The V8 baseline, existing factories and adopted checkpoints remain unchanged.
 
 The **2026-10-08 V7 / V7.3 integration** adds explicit version selection,
 asinh numeric coordinates for new V7.3 configurations, and an opt-in row dual-stream
