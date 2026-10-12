@@ -1,0 +1,72 @@
+{
+  "source_commit": "3bcc352b77193b611e0baee4aced2cce89b98564",
+  "base_commit": "a60b259805c9c1d1511c5595b6e4fa148aba8f28",
+  "environment": {
+    "python": "3.11.14",
+    "torch": "2.13.0",
+    "mps_available": true,
+    "OMP_NUM_THREADS": 1,
+    "MKL_NUM_THREADS": 1,
+    "VECLIB_MAXIMUM_THREADS": 1
+  },
+  "source_import": "repository src via PYTHONPATH=src",
+  "source_sha256": {
+    "examples/completion_v82_benchmark.py": "b7c61cc0daab0c6278f2e03d40c591cdac3a1e014cd2afaea271bed32a177d0d",
+    "examples/completion_v8_smoke.py": "60243b93e51d4a85e2f53641b270356052a2ffb10e7ebc2b01186ebc9b7c7452",
+    "src/tabu_lab/models/completion_v8/__init__.py": "e9d3074394c1819532f39cdb3e67cfa096b82e59a35c9aadd80f9847d758bf91",
+    "src/tabu_lab/models/completion_v8/codebook.py": "604fa9b0dfb62a794d082c00cd2b09390e47a7aed117848d06084c936fa20a08",
+    "src/tabu_lab/models/completion_v8/encoder.py": "1e536c22536170b0ec1ecd32f951a690e55db25db94d1edc59a04bcd1335c544",
+    "src/tabu_lab/models/completion_v8/memory.py": "16fe9f02fdd241735867aca857dd05a205d27d7e89e2ea33bbadd4842e831e9b",
+    "src/tabu_lab/models/completion_v8/migration.py": "3adee43f1679496afb0764b1156d8004ec7a188ac4acf40e52901ed110f7f4c3",
+    "src/tabu_lab/models/completion_v8/model.py": "d4bad7582ccb0c156e4be63485ee64c60305870182a928140f514346200a9885",
+    "src/tabu_lab/models/completion_v8/row_attention.py": "5dd0fc838dccbccdd57ef437ff26f539d68fcaebd9eec6bc1d347b5bf865da15",
+    "src/tabu_lab/models/completion_v8/supervised.py": "37bacdb1a4236c3c19da554e167691d105972ebabf619a35f6cb4309af965e52",
+    "src/tabu_lab/models/restoration/backbone.py": "97dc2920a8227d80631eec363751bd4bd4af0b12afb6b5142b3c34cc8a66a769",
+    "tests/unit/completion_v8/test_feature64.py": "6d59229c8b189477698a0b28e17c58d8a08db4a0c0cd36f53dc67eb04cc1ca1e",
+    "tests/unit/completion_v8/test_feature_codebook.py": "0cd27a88e3cccfaafa55bc975bd625b03d2f5abfe72527ad4d62877c02829243",
+    "tests/unit/completion_v8/test_supervised.py": "197ae9c6f8a4e9c7f9bc5a7bfe656422c8e03d76a5312f73c2f8b82f67d68cbc",
+    "tests/unit/completion_v8/test_v82.py": "33131499cdc2b27d561bc5ef04c97d53b3a56de282b405448c74db2f00eed550"
+  },
+  "focused_regressions": {
+    "passed": 93,
+    "seconds": 10.95,
+    "evidence": "prior fixed-source run; modified-file SHA256 match verified before merge"
+  },
+  "independent_review": {
+    "reviewer": "Claude Code 2.1.286 / Opus 5.5",
+    "snapshot_base": "6eeaadc73c44aee35a13baa19655e4eb27de1501",
+    "additional_snapshot_changes": "Unit recomputation fix and its four regression cases",
+    "focused_tests_passed_on_each_of_two_machines": 89,
+    "findings": [
+      {
+        "severity": "P2",
+        "issue": "Recomputation closure captures original module across deepcopy",
+        "fixed_in": "3bcc352b77193b611e0baee4aced2cce89b98564",
+        "regression_before": "4 failed",
+        "regression_after": "4 passed within 93-test focused suite"
+      }
+    ],
+    "independent_review_after_fix": false
+  },
+  "ruff": "passed for completion source/tests, shared restoration backbone, and both completion examples",
+  "git_diff_check": "passed",
+  "limitations": [
+    "No new real-data training, CUDA measurement or quality evaluation in this merge",
+    "No change to adopted checkpoint, factory defaults or historical frozen execution source",
+    "Whole-model Query-group independence and FP32 bitwise chunk equivalence are not claimed"
+  ],
+  "full_suite": {
+    "passed": 1963,
+    "skipped": 1,
+    "warnings": 3,
+    "seconds": 136.09,
+    "exit_code": 0,
+    "skip_reason": "optional pandas is not installed",
+    "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1 python -m pytest -q -p no:cacheprovider tests",
+    "cwd": "repository root",
+    "includes_completion_cases": 93,
+    "includes_classical_xgboost_contracts": true,
+    "raw_log_sha256": "80f4c82a15268a08dc76ae2438cdbb7532c7088f11566f2a19b6349cc11c7c18",
+    "public_log": "pytest-full.txt; checkout and Torch build path prefixes normalized"
+  }
+}

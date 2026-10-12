@@ -2,8 +2,9 @@
 
 ## Mainline integration boundary (2026-10-11)
 
-This is the **64-coordinate V8 baseline**, not the proposed 32-coordinate V8.1
-learnable-codebook model. Its default is one completion round and Gaussian
+The default remains the **64-coordinate V8 baseline**. The opt-in V8.1 mode
+below adds a learned feature codebook with the same 64-coordinate value interface.
+The default is one completion round and Gaussian
 column-shared local-linear recovery. The positive/signed attention readouts
 remain opt-in, paused research alternatives; merging their code does not resume
 their exploration or promote any checkpoint.
@@ -28,7 +29,219 @@ historical receipts, not files available after cloning this repository. Historic
 words such as "latest" describe the corresponding run and do not select today's
 training parent. Real checkpoints, original datasets and full optimizer/RNG
 artifacts are not distributed in this integration. Current research has stopped
-the V8 baseline exploration and is preparing V8.1 separately.
+the V8 baseline exploration; V8.1 engineering checks are separate from model-quality results.
+
+## V8.2: presence-preserving linear row attention (2026-10-12, opt-in)
+
+See the [integration and validation record](../../../../docs/reviews/v82-integration-20261012/README.md)
+for the merged scope, independent review, and regression evidence. Activation
+recomputation wraps the shared Unit `batched` entry point; copying a configured
+model preserves ownership of the clone's parameters and gradients.
+
+### Current supervised attention policy
+
+The current supervised design is implemented as
+`attention_policy="support_rows_null_v1"`. It requires one target column and
+each row to be either a labeled Support or a target Query. Across rows, the
+encoder (forward and inverse), column collect/read and optional Unit stack
+use only **Support rows** as sources, including when Query features are known.
+Within each row, every real column participates, including the Query target.
+
+There is **no per-Cell source mask** on this path. Source sets are physical row
+or column slices. Exact-zero Null carriers contribute zero through the existing
+presence gates and bias-free dynamics; intermediate layers do not reset them
+with a Null mask. Visible/Query roles remain at the input/codec/phi boundary and
+for the supervised readout and loss. Unit/Feature remain structural receivers.
+
+The mean divisor on this path is the table's real column count `M`, including
+Null addresses, never an active-Cell count or sum of learned presence. Removing
+a column therefore changes the mean, even if its carrier was zero. This is an
+explicit protocol change from the historical active-source mean.
+
+```python
+from tabu_lab.models.completion_v8 import with_supervised_attention, configure_memory
+
+model = with_supervised_attention(v82_donor)  # exact weights-only copy, new config
+configure_memory(model, attention_mib=128, checkpoint_activations=True)
+# For a fresh V8Config, set attention_policy="support_rows_null_v1" explicitly.
+```
+
+Serialization records the policy. Old configurations without the field retain
+`legacy_cell_sources`; loading an old checkpoint never silently changes its
+graph. The old `inherited.query_source` toggle has no effect on the new policy.
+No parameters are added and no optimizer/RNG state is implicitly transferred.
+
+```bash
+uv run python examples/completion_v8_smoke.py --codebook-mode learned_feature64_v1 --row-attention presence_linear_mean_v1 --attention-policy support_rows_null_v1
+```
+
+Communication tests check Query-row isolation and gradients at encoder/backbone
+boundaries, same-row communication, Null closure, forward/inverse consistency,
+FP32 CPU/MPS loss/backward, checkpoint replay and activation recomputation.
+FP64 is used only as an algebraic reference for forced tiny batch chunks.
+FP32 chunking can change rounding, amplified by Gaussian LL on poorly
+conditioned small episodes; bitwise equivalence across batch shapes is not
+claimed. Preprocessing and LL's joint centers remain unchanged, so the complete
+prediction is **not claimed independent of Query grouping**. No new quality
+result or training budget follows from these engineering checks.
+
+### Historical row operator and compatibility
+
+V8.2 addresses the quadratic **column-count** cost of Step 3's within-row
+attention. It retains V8.1's learned 64D feature pool, reversible encoder,
+column inducing attention, FFN, Unit receivers, Gaussian LL and completion loss.
+It does not replace the recovery readout with linear attention. The current
+candidate is `presence_linear_mean_v1`; `presence_linear_v1` retains the raw
+sum formulation as a diagnostic comparison. Neither selects a project-wide
+default or a trained checkpoint.
+
+```python
+from tabu_lab.models.completion_v8 import (
+    V8Config, V8CompletionModel, from_v81, configure_memory,
+)
+
+config = V8Config(
+    inherited_spec, codebook_mode="learned_feature64_v1",
+    row_attention="presence_linear_mean_v1",
+)
+model = V8CompletionModel(config)  # all model arithmetic defaults to FP32
+# Or copy every V8.1 model tensor, with no added parameters:
+# model = from_v81(v81_donor)
+configure_memory(model, attention_mib=128, checkpoint_activations=True)
+```
+
+For each row/head, let `n=max(1, number of role-eligible sources)` and
+`rho(x)=||P_A x||²/(tau+||P_A x||²)`. Q/K/V project raw states; normalized
+queries/keys are `q_hat=q/sqrt(||q||²+eps)` and similarly for `k_hat`.
+
+```text
+S = (1/n) sum_j rho(y_j) k_hat_j v_j^T
+h_i = S^T q_hat_i / sqrt(head_width)
+attention_update_i = rho(x_i) W_O concat_heads(h_i)
+```
+
+The existing residual and local FFN follow unchanged. Source presence occurs
+once, before aggregation; receiver presence gates the output. The divisor counts
+role eligibility, not presence mass. For fixed Q/K/V and masks, multiplying every
+source gate by `c` multiplies the attention increment by `c`. No positive kernel,
+softmax/weight-sum denominator or attention-output RMS cancels this attenuation.
+A role-eligible zero-presence source contributes zero but still counts in `n`;
+this avoids a discontinuous divisor at gate zero. Null/ineligible positions do
+not count and are deleted before projection. Unit/Feature tokens remain receivers
+only; Query source eligibility follows the inherited policy.
+
+The original raw sum overflowed after direct migration of the latest V8.1
+weights on all three real wide-table forwards. Q/K normalization removes their
+unbounded dot-product scale; the role-count mean removes width-dependent sum
+growth. These are explicit **new design choices**, not an algebraically equivalent
+optimization of softmax. With normalized Q/K, each head satisfies
+`||h_i|| <= max_j ||v_j|| / sqrt(head_width)` (before receiver gate/output
+projection); this does not prove stability of the whole network or training.
+The raw diagnostic mode uses unnormalized Q/K and no count divisor; failures
+remain explicit. It is not the recommended migration mode.
+
+Each head stores a `head_width × head_width` summary. With `N` rows, `M` columns,
+width `D` and head width `d`, row aggregation changes from `O(N M² D)` to
+`O(N M D d)`, plus unchanged projections/FFN. Columns, encoder, codec preparation
+and Gaussian LL still cost time; narrow tables may see no speed benefit.
+
+`from_v81` requires the current 64D Gaussian-LL donor with `row_slots=0` and
+copies every tensor exactly. Changed attention changes predictions. Optimizer
+and RNG are not implicitly migrated. Saved files use the separate
+`completion_v82_weights_v1` schema and serialize the precise row mode. Old
+configs without `row_attention` retain inherited attention and their old schema.
+The explicit memory helper bounds **independent batches**, preserves all sources
+for each receiver, and recomputes encoder stages/backbone layers during backward.
+The workspace budget is an estimate, not an allocator limit; weights files do
+not automatically enable memory policies after reload.
+
+The source also carries forward the latest frozen V8.1 without-replacement
+feature allocation correction from 2026-10-11. This matches the current trained
+donor's execution source, not the earlier V8.1 sampling implementation at
+commit `76eb4dd6`. Full recoding assigns distinct indices to at most 10000 columns;
+numeric/token RNG is unchanged. Historical sampling reproduction must use its
+recorded frozen source. Partial mixing of independently sampled reference/new
+plans can still collide; the qualified current protocol uses full recoding.
+
+```bash
+uv run python examples/completion_v8_smoke.py --codebook-mode learned_feature64_v1 --row-attention presence_linear_mean_v1
+uv run pytest tests/unit/completion_v8 -q
+# Private donor/data optional; no optimizer updates:
+uv run python examples/completion_v82_benchmark.py --checkpoint V81.pt --output speed.json --device cuda
+```
+
+Engineering evidence, exact source/runtime identities and actual speed results
+are recorded in the outer research workspace's
+`preparations/v82-presence-linear-20261012/REPORT.md`. Numerical qualification
+does not establish retained predictive accuracy or unseen-table generalization.
+
+## V8.1: learned feature vocabulary (opt-in, corrected to 64D)
+
+```python
+from tabu_lab.models.completion_v8 import V8Config, V8CompletionModel, from_v8
+
+config = V8Config(inherited_spec, codebook_mode="learned_feature64_v1")
+model = V8CompletionModel(config)
+# Preserve EVERY donor model weight; only the feature bank is new:
+# model = from_v8(v8_donor)  # optimizer migration is not implicit
+```
+
+Only `model.feature_codebook.weight` is the new learned vocabulary:
+10000 by 64, 640000 parameters, iid Gaussian normalized to unit length **once**.
+The feature index is sampled uniformly; the bank is not reset or renormalized.
+Numeric/category directions remain constants from the unchanged C64/8 or G64
+codec: same inputs and seed preserve the old draws and preprocessing exactly.
+Feature-index sampling uses a separate generator and does not consume codec RNG.
+A unit-length Gaussian feature and a weight-8 binary direction share 64D shape,
+not norm/distribution: their initial norms are 1 and sqrt(8), respectively.
+
+Code/query/phi widths remain 64; table-coupling branches remain 32+32, lift64→128.
+The whole encoder, lift, Query seed, backbone, Unit/Feature seeds can be copied
+without slicing, padding or reinitializing old interfaces. Changing the feature
+origins can still change predictions; this is not prediction-equivalent resume.
+Typed sums, category eligibility, ranks, decoding and loss are unchanged.
+The 10000-entry feature vocabulary does not limit category count.
+The historical `learned_pool_v1` mode **continues to mean 32D** so its checkpoints
+remain readable; request it explicitly in `from_v8(..., codebook_mode=...)` only
+for historical reproduction. Do not continue the failed 32D run as the 64D donor.
+
+Preparation caches feature **indices**, random directions and fitted statistics.
+`episode.observed` is `None` in this mode: every forward binds a fresh
+differentiable codec to the current bank. `output.codec` contains that forward's
+snapshot for probabilities/decoding and `completion_loss`; pass the same episode
+to forward and loss, then update the optimizer. Reusing the prepared episode
+across optimizer steps is supported; caching learned observed codes is not.
+
+```python
+episode = prepare_completion(
+    visible_only_inputs, model.config,
+    recode_columns=selected_columns, reference_seed=0,
+)
+output = model(episode)
+loss = completion_loss(output, episode, truth_sidecar)
+loss.backward()
+optimizer.step()
+```
+
+Omit `recode_columns` to draw the entire encoding from `inputs.code_seed`.
+For partial recoding, unselected columns keep reference feature indices **and**
+random directions; they still read the current bank. The caller controls the
+selected column count and each input seed, so this option changes neither
+training exposure nor replay proportions. Seeds determine draws with a local
+generator; no hidden global sampling cursor is introduced.
+
+`save_weights` records the bank and mode with schema
+`completion_v81_weights_v1`; `load_weights` checks schema/mode agreement.
+Old configs with no mode keep the original serialization and initialization.
+These are weights-only files. A full training runner must separately preserve
+optimizer, sampling state/input seeds, reference seed and recoding selection
+to resume exactly. No old experimental runner or saved run is rewritten.
+
+```bash
+uv run python examples/completion_v8_smoke.py --codebook-mode learned_feature64_v1
+uv run python examples/completion_v8_smoke.py --codebook-mode learned_feature64_v1 --device mps
+uv run pytest tests/unit/completion_v8 -q
+```
 
 ## 当前探索精度默认（2026-10-10 owner更新）
 
@@ -78,7 +291,7 @@ loss.backward()
 save_weights(model, output_path)  # write once; no optimizer-resume claim
 ```
 
-## Actual choices and inheritance boundaries
+## Baseline V8 choices and inheritance boundaries
 
 1. Reuse the visible-fitted V7 codec, declared column schemas and input sanitation.
    Natural missing Query may be completed; only `TruthSidecar.states == 1` Query

@@ -23,6 +23,18 @@ from tabu_lab.models.restoration_v7 import V7Config
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--device", choices=("cpu", "mps", "cuda"), default="cpu")
+    parser.add_argument(
+        "--codebook-mode",
+        choices=("inherited", "learned_pool_v1", "learned_feature64_v1"),
+        default="inherited",
+    )
+    parser.add_argument("--row-attention", choices=("inherited", "presence_linear_v1",
+                                                  "presence_linear_mean_v1"),
+                        default="inherited")
+    parser.add_argument(
+        "--attention-policy", choices=("legacy_cell_sources", "support_rows_null_v1"),
+        default="legacy_cell_sources",
+    )
     args = parser.parse_args()
     torch.set_num_threads(2)
     torch.manual_seed(8)
@@ -33,7 +45,10 @@ def main():
         coupling_hidden=(16,),
         center_chunk_size=4,
     )
-    model = V8CompletionModel(V8Config(spec)).to(device=args.device, dtype=torch.float32)
+    model = V8CompletionModel(
+        V8Config(spec, codebook_mode=args.codebook_mode, row_attention=args.row_attention,
+                 attention_policy=args.attention_policy)
+    ).to(device=args.device, dtype=torch.float32)
     schema = (
         ColumnSchema("measurement", "numeric"),
         ColumnSchema("category", "nominal", 3),
@@ -46,7 +61,10 @@ def main():
     observed = torch.ones(12, 4, dtype=torch.bool, device=args.device)
     query = torch.zeros_like(observed)
     query[-3:, -1] = True
-    query[-1, 1:3] = True
+    if args.attention_policy == "legacy_cell_sources":
+        query[-1, 1:3] = True
+    else:
+        observed[1, 1] = False  # Natural missing feature: zero Null dynamics.
     inputs, _, truth = make_episode(schema, values, observed, query, code_seed=17)
     episode = prepare_completion(inputs, model.config)
     optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4, weight_decay=0)
@@ -75,6 +93,7 @@ def main():
                 torch.testing.assert_close(replay.decoded[column], prediction, rtol=0, atol=0)
     print(json.dumps({
         "model": "completion_v8",
+        "model_version": model.config.model_version,
         "evidence_level": "local_unissued",
         "claim_boundary": "synthetic integration smoke; not predictive quality or exact resume",
         "device": args.device,

@@ -1,0 +1,56 @@
+{
+  "base_commit": "a60b259805c9c1d1511c5595b6e4fa148aba8f28",
+  "codebook_mode": "learned_pool_v1",
+  "learned_roles": [
+    "feature"
+  ],
+  "random_constant_roles": [
+    "numeric",
+    "token"
+  ],
+  "code_dim": 32,
+  "feature_pool_shape": [
+    10000,
+    32
+  ],
+  "feature_pool_parameters": 320000,
+  "focused_tests": {
+    "passed": 51,
+    "seconds": 9.19
+  },
+  "full_suite": {
+    "passed": 1921,
+    "skipped": 1,
+    "warnings": 3,
+    "seconds": 161.55,
+    "skip_reason": "optional pandas unavailable for native V7 inference test"
+  },
+  "lint": "passed",
+  "diff_check": "passed",
+  "environment": {
+    "python": "3.11",
+    "torch": "2.13.0",
+    "OMP_NUM_THREADS": 1,
+    "MKL_NUM_THREADS": 1,
+    "VECLIB_MAXIMUM_THREADS": 1,
+    "source_import": "PYTHONPATH=src in isolated worktree"
+  },
+  "source_sha256": {
+    "examples/completion_v8_smoke.py": "423c6c30d58740648641bc9fc56dc502b06e324c4f3f6c4923088cc871ea587c",
+    "src/tabu_lab/models/completion_v8/__init__.py": "eebfb41db378e009739ec5c1e21c9473207501ecb49f5fd77b0cd35abe32e1bf",
+    "src/tabu_lab/models/completion_v8/cell_dynamics.py": "2fa74e083a93f483f1b08addbbc98b397720d5cff72b53058bc049709afa06ec",
+    "src/tabu_lab/models/completion_v8/codebook.py": "bf852a8af6e1b391d6fc6c93a77f2ef6843d68267aba0a257ab1d8ac50ce14a4",
+    "src/tabu_lab/models/completion_v8/encoder.py": "fc373ec777c790ba4b94c42cb65a37adc7eb2abc94c2355e7b313f0314e8b783",
+    "src/tabu_lab/models/completion_v8/migration.py": "0e2c99713ba8b39bd779a4f8fb6abe4bce4ddb77dce52c039addbed82b982b39",
+    "src/tabu_lab/models/completion_v8/model.py": "950ba88c19187a136db9bfd4bb7708695c64c3a6f01d6f7583c0ecf3cdba6132",
+    "src/tabu_lab/models/completion_v8/precision.py": "d741f393c391f3143277aab30b97accfa4b9e44968e2204cb11a379ff542f6b6",
+    "src/tabu_lab/models/completion_v8/readout.py": "cc21cdfc43e86de991a0171fdf56a46c0f553e581a3ff8e5eab76c01584b97f9",
+    "tests/unit/completion_v8/test_feature_codebook.py": "13bbdcb7f4987ac1ccfd9e6cc91ed3ed219dbc926577ca321076eea888a55f4b"
+  },
+  "limits": [
+    "No real-data V8.1 training or ranking evaluation",
+    "No CUDA or full wide-table backward qualification in this change",
+    "Weights-only replay; external full optimizer/sampler resume not claimed",
+    "Historical V8 runs and original dirty checkout unchanged"
+  ]
+}
