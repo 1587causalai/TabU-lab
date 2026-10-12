@@ -31,6 +31,10 @@ def main():
     parser.add_argument("--row-attention", choices=("inherited", "presence_linear_v1",
                                                   "presence_linear_mean_v1"),
                         default="inherited")
+    parser.add_argument(
+        "--attention-policy", choices=("legacy_cell_sources", "support_rows_null_v1"),
+        default="legacy_cell_sources",
+    )
     args = parser.parse_args()
     torch.set_num_threads(2)
     torch.manual_seed(8)
@@ -42,7 +46,8 @@ def main():
         center_chunk_size=4,
     )
     model = V8CompletionModel(
-        V8Config(spec, codebook_mode=args.codebook_mode, row_attention=args.row_attention)
+        V8Config(spec, codebook_mode=args.codebook_mode, row_attention=args.row_attention,
+                 attention_policy=args.attention_policy)
     ).to(device=args.device, dtype=torch.float32)
     schema = (
         ColumnSchema("measurement", "numeric"),
@@ -56,7 +61,10 @@ def main():
     observed = torch.ones(12, 4, dtype=torch.bool, device=args.device)
     query = torch.zeros_like(observed)
     query[-3:, -1] = True
-    query[-1, 1:3] = True
+    if args.attention_policy == "legacy_cell_sources":
+        query[-1, 1:3] = True
+    else:
+        observed[1, 1] = False  # Natural missing feature: zero Null dynamics.
     inputs, _, truth = make_episode(schema, values, observed, query, code_seed=17)
     episode = prepare_completion(inputs, model.config)
     optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4, weight_decay=0)

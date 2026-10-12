@@ -33,6 +33,55 @@ the V8 baseline exploration; V8.1 engineering checks are separate from model-qua
 
 ## V8.2: presence-preserving linear row attention (2026-10-12, opt-in)
 
+### Current supervised attention policy
+
+The current supervised design is implemented as
+`attention_policy="support_rows_null_v1"`. It requires one target column and
+each row to be either a labeled Support or a target Query. Across rows, the
+encoder (forward and inverse), column collect/read and optional Unit stack
+use only **Support rows** as sources, including when Query features are known.
+Within each row, every real column participates, including the Query target.
+
+There is **no per-Cell source mask** on this path. Source sets are physical row
+or column slices. Exact-zero Null carriers contribute zero through the existing
+presence gates and bias-free dynamics; intermediate layers do not reset them
+with a Null mask. Visible/Query roles remain at the input/codec/phi boundary and
+for the supervised readout and loss. Unit/Feature remain structural receivers.
+
+The mean divisor on this path is the table's real column count `M`, including
+Null addresses, never an active-Cell count or sum of learned presence. Removing
+a column therefore changes the mean, even if its carrier was zero. This is an
+explicit protocol change from the historical active-source mean.
+
+```python
+from tabu_lab.models.completion_v8 import with_supervised_attention, configure_memory
+
+model = with_supervised_attention(v82_donor)  # exact weights-only copy, new config
+configure_memory(model, attention_mib=128, checkpoint_activations=True)
+# For a fresh V8Config, set attention_policy="support_rows_null_v1" explicitly.
+```
+
+Serialization records the policy. Old configurations without the field retain
+`legacy_cell_sources`; loading an old checkpoint never silently changes its
+graph. The old `inherited.query_source` toggle has no effect on the new policy.
+No parameters are added and no optimizer/RNG state is implicitly transferred.
+
+```bash
+uv run python examples/completion_v8_smoke.py --codebook-mode learned_feature64_v1 --row-attention presence_linear_mean_v1 --attention-policy support_rows_null_v1
+```
+
+Communication tests check Query-row isolation and gradients at encoder/backbone
+boundaries, same-row communication, Null closure, forward/inverse consistency,
+FP32 CPU/MPS loss/backward, checkpoint replay and activation recomputation.
+FP64 is used only as an algebraic reference for forced tiny batch chunks.
+FP32 chunking can change rounding, amplified by Gaussian LL on poorly
+conditioned small episodes; bitwise equivalence across batch shapes is not
+claimed. Preprocessing and LL's joint centers remain unchanged, so the complete
+prediction is **not claimed independent of Query grouping**. No new quality
+result or training budget follows from these engineering checks.
+
+### Historical row operator and compatibility
+
 V8.2 addresses the quadratic **column-count** cost of Step 3's within-row
 attention. It retains V8.1's learned 64D feature pool, reversible encoder,
 column inducing attention, FFN, Unit receivers, Gaussian LL and completion loss.

@@ -23,6 +23,7 @@ class PresenceLinearOMAB(OMAB):
 
     Q/K/V project raw carriers; the mean variant then normalizes Q/K per head
     and averages over role-eligible sources (independent of presence values).
+    With ``eligible=None``, all physical source addresses count, including Null.
     Source presence occurs exactly once. No softmax,
     positive feature map, weight-sum denominator or output RMS is introduced.
     The inherited reference_mass applies to the unchanged column OMABs only.
@@ -35,18 +36,21 @@ class PresenceLinearOMAB(OMAB):
         self.mode = mode
 
     def attention_update(self, receivers, sources, eligible):
-        if receivers.ndim != 3 or sources.ndim != 3 or eligible.ndim != 2:
+        if receivers.ndim != 3 or sources.ndim != 3 or (
+            eligible is not None and eligible.ndim != 2
+        ):
             raise ValueError("batched linear OMAB expects [B,R,D], [B,S,D], [B,S]")
         if (
             receivers.shape[0] != sources.shape[0]
-            or sources.shape[:2] != eligible.shape
+            or (eligible is not None and sources.shape[:2] != eligible.shape)
             or receivers.shape[-1] != self.config.width
             or sources.shape[-1] != self.config.width
-            or eligible.dtype != torch.bool
+            or (eligible is not None and eligible.dtype != torch.bool)
         ):
             raise ValueError("linear OMAB receivers, sources and boolean mask must align")
         # Delete before projection, including NaN payloads outside eligibility.
-        sources = torch.where(eligible[..., None], sources, torch.zeros_like(sources))
+        if eligible is not None:
+            sources = torch.where(eligible[..., None], sources, torch.zeros_like(sources))
         log_p_source = self.log_presence(sources)
         has_presence = ~torch.isneginf(log_p_source)
         sources = torch.where(has_presence[..., None], sources, torch.zeros_like(sources))
@@ -69,7 +73,10 @@ class PresenceLinearOMAB(OMAB):
             k = stable_normalize(k, epsilon=self.config.norm_eps)
             # Count structural eligibility, never learned presence. This keeps
             # the gate smooth at zero and preserves common gate attenuation.
-            count = eligible.sum(-1, keepdim=True).clamp_min(1).to(dtype)
+            count = (
+                max(1, ns) if eligible is None
+                else eligible.sum(-1, keepdim=True).clamp_min(1).to(dtype)
+            )
             source_weight = source_weight / count
         summary = k.transpose(-1, -2) @ (source_weight[:, None, :, None] * v)
         finite(summary, "V8.2 row attention summary")

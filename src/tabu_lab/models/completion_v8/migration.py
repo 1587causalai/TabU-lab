@@ -12,6 +12,39 @@ from ..restoration_v7.runner import CHECKPOINT_SCHEMA, manifest_digest
 from .codebook import FEATURE64_MODE, LEARNED_MODES
 from .model import V8CompletionModel, V8Config
 from .row_attention import LINEAR_MODES, MEAN_LINEAR
+from .supervised import SUPPORT_ROWS_NULL
+
+
+def with_supervised_attention(donor: V8CompletionModel):
+    """Explicit weights-only V8.2 protocol change; never a strict resume."""
+    if donor.config.model_version != "v8.2":
+        raise ValueError("supervised attention migration requires V8.2 weights")
+    if donor.config.attention_policy == SUPPORT_ROWS_NULL:
+        raise ValueError("supervised attention is already enabled")
+    _finite_state(donor.state_dict())
+    with torch.random.fork_rng(devices=[]):
+        target = V8CompletionModel(
+            replace(donor.config, attention_policy=SUPPORT_ROWS_NULL)
+        ).to(next(donor.parameters()))
+    target.load_state_dict(donor.state_dict(), strict=True)
+    from .precision import configure_precision
+
+    configure_precision(
+        target, mode=donor.execution_precision["mode"],
+        reason=donor.execution_precision.get("reason"),
+    )
+    target.train(donor.training)
+    target.migration_receipt = {
+        "mode": "weights_only",
+        "donor_version": donor.config.model_version,
+        "donor_config": donor.config.as_dict(),
+        "copied_keys": list(donor.state_dict()),
+        "new_keys": [],
+        "changed_operator": "Support rows across rows; Null dynamics; full-column row mean",
+        "omitted_donor_components": ["optimizer", "rng"],
+        "prediction_equivalence": False,
+    }
+    return target
 
 
 def from_v81(donor: V8CompletionModel, *, row_attention=MEAN_LINEAR):

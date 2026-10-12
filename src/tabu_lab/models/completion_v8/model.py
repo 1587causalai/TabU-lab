@@ -25,6 +25,12 @@ from .codebook import (
 from .encoder import TableEncoder
 from .readout import PositiveLinearReadout, SignedLinearReadout
 from .row_attention import LINEAR_MODES
+from .supervised import (
+    SUPPORT_ROWS_NULL,
+    install_supervised_layers,
+    supervised_dynamics,
+    supervised_rows,
+)
 
 
 @dataclass(frozen=True)
@@ -36,6 +42,7 @@ class V8Config:
     readout: str = "gaussian_ll"
     codebook_mode: str = field(default="inherited", kw_only=True)
     row_attention: str = field(default="inherited", kw_only=True)
+    attention_policy: str = field(default="legacy_cell_sources", kw_only=True)
 
     def __post_init__(self):
         if not isinstance(self.inherited, V7Config) or self.inherited.code_dim != 64:
@@ -50,6 +57,10 @@ class V8Config:
             raise ValueError("V8.1 learned feature pool supports gaussian_ll only")
         if self.row_attention not in ("inherited", *LINEAR_MODES):
             raise ValueError("unknown V8 row_attention")
+        if self.attention_policy not in ("legacy_cell_sources", SUPPORT_ROWS_NULL):
+            raise ValueError("unknown V8 attention_policy")
+        if self.attention_policy == SUPPORT_ROWS_NULL and self.row_attention not in LINEAR_MODES:
+            raise ValueError("support_rows_null_v1 requires V8.2 linear rows")
         if self.row_attention in LINEAR_MODES and (
             self.codebook_mode != FEATURE64_MODE
             or self.readout != "gaussian_ll"
@@ -99,6 +110,8 @@ class V8Config:
             result["codebook_mode"] = self.codebook_mode
         if self.row_attention != "inherited":
             result["row_attention"] = self.row_attention
+        if self.attention_policy != "legacy_cell_sources":
+            result["attention_policy"] = self.attention_policy
         return result
 
     @classmethod
@@ -109,6 +122,7 @@ class V8Config:
             "readout",
             "codebook_mode",
             "row_attention",
+            "attention_policy",
         }:
             raise ValueError("unknown V8 configuration fields")
         return cls(
@@ -117,6 +131,7 @@ class V8Config:
             value.get("readout", "gaussian_ll"),
             codebook_mode=value.get("codebook_mode", "inherited"),
             row_attention=value.get("row_attention", "inherited"),
+            attention_policy=value.get("attention_policy", "legacy_cell_sources"),
         )
 
 
@@ -146,6 +161,8 @@ def prepare_completion(
     inputs = null_constant_inputs(inputs, spec.numeric_preprocessing)
     if not bool(inputs.query.any()):
         raise ValueError("completion requires at least one Query cell")
+    if config.attention_policy == SUPPORT_ROWS_NULL:
+        supervised_rows(inputs)
     for a in inputs.query.any(0).nonzero().flatten().tolist():
         if not bool(inputs.visible[:, a].any()):
             raise ValueError(f"no-support: completion column {a}")
@@ -205,6 +222,8 @@ class V8CompletionModel(nn.Module):
             from .row_attention import install_presence_linear_rows
 
             install_presence_linear_rows(self.backbone, mode=config.row_attention)
+        if config.attention_policy == SUPPORT_ROWS_NULL:
+            install_supervised_layers(self.backbone)
         from .precision import configure_precision
 
         configure_precision(
@@ -238,6 +257,11 @@ class V8CompletionModel(nn.Module):
         if visible.device != self.query_seed.device:
             raise ValueError("completion inputs and model must share a device")
         valid = visible | query
+        support_rows = (
+            supervised_rows(episode.inputs)
+            if self.config.attention_policy == SUPPORT_ROWS_NULL else None
+        )
+        encoder_kwargs = {} if support_rows is None else {"support_rows": support_rows}
         if self.config.codebook_mode in LEARNED_MODES:
             if not isinstance(episode.codec, FeatureCodebookPlan) or episode.observed is not None:
                 raise ValueError("V8.1 requires a codebook plan, not cached learned codes")
@@ -253,16 +277,20 @@ class V8CompletionModel(nn.Module):
         for _ in range(self.config.rounds):
             codes = observed.clone()
             codes[query] = current
-            embeddings = self.encoder(codes, valid)
+            embeddings = self.encoder(codes, valid, **encoder_kwargs)
             cells = self.lift(embeddings)
-            sources = valid if spec.query_source else visible
             if self.config.readout != "gaussian_ll":
+                sources = valid if spec.query_source else visible
                 h = cell_only_dynamics(self.backbone, cells, sources, query)
             else:
                 units = self.unit_seed.expand(n, 1, -1)
                 features = torch.cat((self.feature_seed.expand(m, -1), cells.new_zeros(1, 128)))
                 h = torch.cat((torch.cat((cells, units), 1), features[None]), 0)
-                h = self.backbone(h, sources, query)
+                if support_rows is None:
+                    sources = valid if spec.query_source else visible
+                    h = self.backbone(h, sources, query)
+                else:
+                    h = supervised_dynamics(self.backbone, h, support_rows)
             finite(h, "V8 inherited Token Dynamics")
             # Fit every column from the SAME latent snapshot. Only after all
             # predictions exist is the assembled WHOLE table inverted once.
@@ -290,7 +318,7 @@ class V8CompletionModel(nn.Module):
                     compute_dtype=self._ll_compute_dtype,
                 )
                 assembled[rows, a] = recovery.recovered.to(assembled)
-            candidate = self.encoder.inverse(assembled, valid)
+            candidate = self.encoder.inverse(assembled, valid, **encoder_kwargs)
             current = candidate[query]
             finite(current, "V8 Query writeback")
             states.append(current)

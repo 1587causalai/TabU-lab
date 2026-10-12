@@ -117,23 +117,32 @@ class _AttentionOps(_PresenceOps):
         them from a per-set list. The fixed reference mass keeps every softmax
         row well defined, including fully masked rows.
 
+        ``eligible=None`` accepts a physical source set without a Cell mask;
+        exact-zero Null states then disappear through the same presence gate.
+        Historical boolean-mask calls retain their original computation.
+
         Historical callers keep the output-stage finite check. With the explicit
         strict_finite_content option, active content is checked before softmax
         and empty-source QK edges are removed before their backward computation.
         Deleted sources and their -inf presence sentinels are excluded from that
         additional check. V7.3 enables this option; earlier model defaults do not.
         """
-        if receivers.ndim != 3 or sources.ndim != 3 or eligible.ndim != 2:
+        if receivers.ndim != 3 or sources.ndim != 3 or (
+            eligible is not None and eligible.ndim != 2
+        ):
             raise ValueError("batched OMAB expects [B,R,d], [B,S,d], [B,S] tensors")
         if (
             receivers.shape[0] != sources.shape[0]
-            or sources.shape[:2] != eligible.shape
+            or (eligible is not None and sources.shape[:2] != eligible.shape)
             or receivers.shape[2] != sources.shape[2]
         ):
             raise ValueError("batched receivers, sources, and mask must align")
         # Delete ineligible sources before any projection: exact zero carriers,
         # never NaN payloads, enter K/V. Zero projection gives -inf log presence.
-        sources = torch.where(eligible[..., None], sources, torch.zeros_like(sources))
+        # None means a physical source set: exact-zero Null carriers are
+        # handled by presence, without manufacturing a per-cell role mask.
+        if eligible is not None:
+            sources = torch.where(eligible[..., None], sources, torch.zeros_like(sources))
         log_p_source = self.log_presence(sources)  # [B, S], -inf deletes the entry
         # Delete only exact-zero presence before K/V. A nonfinite presence is
         # retained so it propagates through the stage and is reported by the

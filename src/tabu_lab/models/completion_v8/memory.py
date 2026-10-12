@@ -16,7 +16,7 @@ from .row_attention import LINEAR_MODES, PresenceLinearOMAB
 
 def _bounded(self, receivers, sources, eligible):
     original = type(self)._batched_with_presence
-    if receivers.ndim != 3 or sources.ndim != 3 or eligible.ndim != 2:
+    if receivers.ndim != 3 or sources.ndim != 3 or (eligible is not None and eligible.ndim != 2):
         return original(self, receivers, sources, eligible)
     itemsize = torch.empty((), dtype=self.accumulation_dtype(receivers)).element_size()
     if isinstance(self, PresenceLinearOMAB):
@@ -35,7 +35,7 @@ def _bounded(self, receivers, sources, eligible):
         args = (
             receivers[start : start + block],
             sources[start : start + block],
-            eligible[start : start + block],
+            None if eligible is None else eligible[start : start + block],
         )
 
         def op(a, b, c):
