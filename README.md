@@ -1,150 +1,57 @@
 # TabU-lab
 
-**Learning from tables. Building the evidence in the open.**
+TabU-lab is WeHub Research's open lab for tabular foundation models. We study
+whether a model can learn how each row or entity responds from the values
+observed in a table, and whether it can use those representations to fill in
+missing values and make predictions on new tables.
 
-TabU-lab develops tabular foundation models and the open research software needed
-to understand how they learn. Our central question is whether reconstructing
-available table evidence can teach a model the relationships specific to each
-unit (a row or entity), and whether those representations transfer to new tables.
-
+[Model versions and evidence](docs/design/README.md) ·
 [Research website](https://research.wehub.us/tabu-lab/) ·
-[Research and support brief](docs/research-support.md) ·
-[Try the implementation](#try-the-implementation) ·
-[Evidence](#what-exists-today) ·
 [中文](https://research.wehub.us/tabu-lab/zh/)
-
-## Why this research
-
-Tables bring together different variable types, incomplete observations, and
-relationships that can change across datasets. We investigate how a shared model
-can organize the evidence relevant to each unit and reconstruct table values.
-Prediction is one downstream use of that learned structure.
-
-The long-term aim is useful, transferable tabular models. The public contribution
-also includes inspectable implementations, training recipes, evaluation protocols,
-and documented limitations that other researchers can reuse as the work develops.
-Inspired by [Marin](https://github.com/marin-community/marin), we make the research
-process part of the deliverable.
 
 ## What exists today
 
-The **2026-10-11 V8 completion integration** adds an explicit, opt-in masked
-completion API with a reversible whole-table value encoder and inherited
-Gaussian local-linear recovery. Start with the
-[runnable synthetic example](examples/completion_v8_smoke.py),
-[module contract](src/tabu_lab/models/completion_v8/README.md), and
-[integration record](docs/reviews/v8-integration-20261011/README.md).
-The **2026-10-12 V8.1 / V8.2 integration** adds an optional learned feature
-codebook, presence-preserving linear row attention, Support-only cross-row
-sources for supervised episodes, and bounded execution with activation
-recomputation. The current learned feature mode keeps the 64-coordinate value
-interface; historical configurations remain readable. See the
-[V8.2 integration and validation record](docs/reviews/v82-integration-20261012/README.md).
-The V8 baseline, existing factories and adopted checkpoints remain unchanged.
-
-The **2026-10-08 V7 / V7.3 integration** adds explicit version selection,
-asinh numeric coordinates for new V7.3 configurations, and an opt-in row dual-stream
-value encoder while preserving recorded V7 checkpoint settings. See the
-[version and configuration guide](docs/tutorials/v7-restoration-modes.md) and
-[integration evidence](docs/reviews/v73-integration-20261008/README.md).
-The dual-stream encoder remains experimental: engineering checks do not establish
-training stability or a predictive advantage, and no adopted checkpoint changes.
-
-Status as of **2026-10-03**: active experimental development. The repository contains
-implementation checks and exploratory training reports; broad unseen-table
-generalization remains an open research question.
-
-| Research asset | What a reader can inspect | What the evidence supports |
-| --- | --- | --- |
-| V7 cyclic restoration | [Single / joint / mixed configuration](docs/tutorials/v7-restoration-modes.md), [runnable YAML](examples/v7-restoration/mixed.yaml) | Shared cyclic recovery, configurable masking, per-column evaluation and native continuation; implementation checks, not a mixed-training quality claim |
-| Table-restoration implementation | [Five-step guide](docs/tutorials/table-restoration.md), [implementation review](docs/reviews/restoration-five-step-20260915/README.md) | Typed value encoding, contextual representations, Unit-based geometry, and LL/NW restoration; bounded implementation checks |
-| V5.4 reference and curriculum | [Design, versioned API and episode defaults](docs/design/restoration-v54.md), [CPU example](examples/restoration_v54_smoke.py) | Shared-column composition codes, named sizes, Small with 3 Unit layers, Nano comparison, and supervised-row episodes; local implementation checks, not a fitting result |
-| V5.5 implementation | [Version and continuation boundaries](docs/design/restoration-v55.md) | Explicit codec and Unit-depth identities, squared default with an opt-in Query log loss, guarded model-only warm starts, and versioned curriculum checks; local implementation scope only |
-| V6 implementation and experiment replay | [Model contract](docs/design/restoration-v6.md), [experiment archive](experiments/history/v6-20260930/README.md) | Target broadcasting with explicit `target_only` / `joint_all`; byte-preserved historical source, per-host configurations, fixed Query banks and result receipts |
-| V5.3 reference implementation | [Design and Python entry point](docs/design/restoration-v53.md), [CPU example](examples/restoration_v53_smoke.py) | Affine numeric encoding and column-shared LL, with local correctness checks; a separate API from the historical training CLI |
-| V5.3 curriculum runner | [Protocol and runnable fixture](docs/tutorials/v53-curriculum.md) | Explicit stage questions, frozen probes, train/validation/test isolation, budgets, atomic checkpoints, and exact local resume; single-process FP64 |
-| Reusable execution work | [Prepared-execution review](docs/reviews/restoration-prepared-20260916/README.md) | Scoped equivalence and timing checks, with source, configuration, and limitations recorded |
-| Historical TabU-TAR experiments | [120-table shared-fit report and curves](docs/research/tar-shared-fit-20260907/README.md) | Joint fitting on fixed training tables under its own recipe; these are TAR results, not restoration or unseen-table results |
-| Reproducible research tools | [Program manifests](docs/architecture/evolvable-pretraining-programs.md), [evaluation protocol](docs/architecture/real-evaluation-default-protocol.md), [catalog](catalog.json) | Versioned model/data/recipe identities and explicit evaluation boundaries |
-
-These records are `local_unissued` where stated. The catalog records no formal
-receipts or accepted capability claims. Each linked review describes its dated
-source and scope; its test totals are not a current whole-repository certification.
+- **Code you can run.** V8.2 is the most recent model integration on `main`.
+  The V8 completion API fills masked cells. V8.2 adds opt-in attention and
+  memory settings for supervised prediction. [Implementation and examples](src/tabu_lab/models/completion_v8/README.md)
+- **Published experiments.** The October V9 and V10.1 reports examine
+  whether better reconstruction helps on new observations, how predictive
+  models compare on matched tasks, and where training time goes. [Version and evidence index](docs/design/README.md#published-research)
+- **A public checkpoint.** Kumo Small + CellRidge-1024 is our first TabArena
+  submission and a V10.4 milestone. Classification and regression inference
+  weights are available. As of 2026-11-19, the upstream pull request is open
+  and maintainer verification is pending. [Weights release](https://github.com/1587causalai/kumo-small-cellridge-1024/releases/tag/v1.0) ·
+  [TabArena PR #735](https://github.com/autogluon/tabarena/pull/735)
 
 ## Try the implementation
 
-For V7 single-column, joint-column or mixed restoration, start with the
-[configuration guide](docs/tutorials/v7-restoration-modes.md). The command
-`tabu-lab restoration v7-fit --config examples/v7-restoration/mixed.yaml` validates
-the run; add `--execute` for its bounded synthetic fixture.
-
-Use Python 3.11 or 3.12 and [uv](https://docs.astral.sh/uv/):
+With Python 3.11 or 3.12 and [uv](https://docs.astral.sh/uv/), inspect the
+reference restoration configuration:
 
 ```bash
 git clone https://github.com/1587causalai/TabU-lab.git
 cd TabU-lab
 uv sync --frozen --extra dev
 uv run tabu-lab restoration inspect
-uv run tabu-lab restoration verify
 ```
 
-The verifier uses a reduced CPU reference model and returns JSON with check
-outcomes and source identity. It checks implementation behavior, including
-forward/backward paths and checkpoint continuation. It does not launch a training
-campaign. See the [restoration guide](docs/tutorials/table-restoration.md) for
-the Python API, check scope, and optional device probes.
+For a small example with synthetic data, use the [V8 completion example](examples/completion_v8_smoke.py)
+or follow the [V7 restoration guide](docs/tutorials/v7-restoration-modes.md).
+The [version index](docs/design/README.md#implementations-and-archives) links older
+runtimes, checkpoint contracts, and experiment records.
 
-The separate TAR implementation is selected explicitly as `tabu.tar`; start
-with its [guide](docs/tutorials/tabu-tar.md) and
-[design snapshot](docs/design/README.md). The no-argument model factory retains
-`tabu.v2.tabur` for compatibility. [Historical runtime documentation](docs/history/compatibility-runtime.md)
-preserves those model contracts and formulas. [MAINLINE.yaml](MAINLINE.yaml)
-continues to select the query-family pretraining program; it does not select the
-restoration model or change the identity of previous experiments.
+## V11 research roadmap
 
-## What additional support would make possible
-
-We organize potential collaborations around a scientific question, a bounded
-work package, a resource budget, and a public result. The next questions are
-which reconstruction choices learn reliably, whether they transfer beyond
-training tables, and when additional data or compute changes that answer.
-
-| Support | Research or maintenance work it can enable | Proposed public output |
-| --- | --- | --- |
-| Research grants or fellowships | Researcher time for controlled comparisons, analysis, and independent reproduction | Methods, comparison reports, reusable protocols, and documented negative results |
-| GPU or cloud credits | Matched training and evaluation budgets across model/data configurations | Learning curves, resource measurements, and reproducible recipes |
-| Coding tools or API credits | Review, numerical regression checks, documentation, and release maintenance | Tested changes, reproducibility fixes, and contributor documentation |
-| Data or research partnerships | Permissioned evaluation data, domain questions, and independent validation | Agreed evaluation reports and reusable adapters where sharing is permitted |
-
-These are candidate work packages, not funded commitments. Budget, milestones,
-data permissions, and publication scope are agreed for each collaboration.
-The [research and support brief](docs/research-support.md) connects the questions,
-existing evidence, next decisions, and possible deliverables.
+We plan to study whether learned representations make unit-specific
+relationships easier to predict with a simple linear readout. The proposed
+design fits a shared rule from observed rows, then uses residuals from similar
+units to estimate a local correction. The research will test accuracy after
+decoding predictions back to table values and measure cost as tables grow.
+This is a design-stage research question.
 
 ## Participate
 
-Maintained by [Heyang Gong](https://github.com/1587causalai) / WeHub Research.
-Researchers, maintainers, and potential supporters can
-[open a public issue](https://github.com/1587causalai/TabU-lab/issues/new) with a
-research question, reproduction result, bug, or collaboration outline.
-Please keep private data and confidential terms out of public issues.
-
-Code is licensed under [Apache-2.0](LICENSE); dataset and artifact permissions are
-recorded separately. Useful contributions include reproducing a published check,
-testing an evaluation assumption, improving an adapter, or making an experiment
-easier for the next researcher to run.
-
-## Explore the repository
-
-- [V5.4 training and monitoring playbook](docs/guides/v54-training-and-monitoring.md)
-  — reusable lessons on fitting, budgets, checkpoint lineage, CUDA/MPS speed and W&B
-- [V5.4 old120 fitting handoff](docs/reports/v54-old120-fit-handoff-2026-09-23.md)
-  — dated per-table evidence, frozen checkpoints and next-design questions
-- [Token dynamic model growth](docs/research/v54-model-growth/README.md)
-  — trained-backbone replication and distinct function-preserving growth routes
-- [Restoration experiments](experiments/local/restoration/README.md) and
-  [TAR / historical experiment routes](experiments/README.md)
-- [Research reports](docs/reports/README.md) and [review records](docs/reviews/)
-- [Compiler and truth boundary](docs/architecture/compiler-data-boundary.md)
-- [Evidence semantics](docs/architecture/evidence-core.md)
-- [Source](src/tabu_lab/), [model specifications](specs/models/), and [tests](tests/)
+Maintained by Heyang Gong and WeHub Research. The code is
+[Apache-2.0](LICENSE). Model weights and data have their own terms.
+[Issues](https://github.com/1587causalai/TabU-lab/issues) ·
+[Research and support brief](docs/research-support.md)
