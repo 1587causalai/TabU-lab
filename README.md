@@ -6,6 +6,7 @@ observed in a table, and whether it can use those representations to fill in
 missing values and make predictions on new tables.
 
 [Documentation](docs/README.md) ·
+[Repository layout](docs/architecture/README.md) ·
 [Research questions](docs/research-questions/README.md) ·
 [Research website](https://research.wehub.us/tabu-lab/) ·
 [中文](https://research.wehub.us/tabu-lab/zh/)
@@ -35,6 +36,8 @@ cd TabU-lab
 uv sync --frozen --extra dev
 uv run tabu-lab restoration inspect
 ```
+
+For a smaller working tree, use the [lightweight checkout](docs/architecture/README.md#lightweight-checkout).
 
 For a small example with synthetic data, use the [V8 completion example](examples/completion_v8_smoke.py)
 or follow the [V7 restoration guide](docs/tutorials/v7-restoration-modes.md).

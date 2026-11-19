@@ -14,6 +14,9 @@
 
 ## Follow an implementation or evaluation
 
+- [Repository layout](architecture/README.md) shows where the package, contracts,
+  experiments and generated files live and how to skip the large V6 object archive.
+
 - [V7 and V7.3 restoration](tutorials/v7-restoration-modes.md) covers masking
   modes, version selection, and a synthetic fixture.
   [Earlier implementations](design/README.md#implementations-and-archives)
