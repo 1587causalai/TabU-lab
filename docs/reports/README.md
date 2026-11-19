@@ -1,7 +1,10 @@
 # Reports
 
-Consolidated learnings across experiments. Each report must cite experiment receipts.
+[Model versions and evidence](../design/README.md) links the public results,
+implementation reviews, and archives by generation.
 
-Current TabU V5.4 fitting handoff: [old120 training-row fit and next-design inputs](v54-old120-fit-handoff-2026-09-23.md). It is a dated snapshot of running jobs, not a terminal or held-out result.
-
-Historical strategy change: [old120 replay v1 rollout](v54-old120-replay-rollout-2026-09-22.md). Use the [replay v2 contract](../../experiments/local/v54-old120-replay-v2-20260922/README.md) for current budgets and policy.
+- [V5.4 old120 fitting handoff](v54-old120-fit-handoff-2026-09-23.md) records
+  the state of the training runs on September 23, 2026.
+- [V5.4 old120 replay v1 rollout](v54-old120-replay-rollout-2026-09-22.md)
+  records the earlier strategy. The [replay v2 contract](../../experiments/local/v54-old120-replay-v2-20260922/README.md)
+  documents the follow-up budgets and replay policy.
