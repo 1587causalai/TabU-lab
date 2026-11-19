@@ -20,9 +20,9 @@
 
 - `experiments/local/v54-nano-fit-20260921/manifests/`：本机 r0 manifests
 - `experiments/local/v54-nano-fit-20260921/data/`：本机冻结数据
-- [常数参考及逐表指标](../../experiments/local/v54-nano-fit-20260921/naive-query-reference.json)
-- [当前主线预算与调度来源](../../experiments/local/v54-nano-fit-20260921/ALLOCATION.md)
-- [主线状态记录](../../experiments/local/v54-nano-fit-20260921/followup-decisions.json)
+- 常数参考及逐表指标（`naive-query-reference.json`）
+- 当时的预算与调度来源（`ALLOCATION.md`）
+- 主线状态记录（`followup-decisions.json`）
 
 | 项目 | 本轮 r0 设置 |
 | --- | --- |

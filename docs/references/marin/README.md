@@ -12,7 +12,7 @@ Marin 是我们当前最重要的**研究过程参考**，不是 TabU 要照抄�
 - [Marin project site](https://marin.community/)
 - [Marin documentation](https://marin.readthedocs.io/en/latest/)
 - [First experiment tutorial](https://github.com/marin-community/marin/blob/main/docs/tutorials/first-experiment.md)
-- [Experiment reports index](https://github.com/marin-community/marin/tree/main/docs/reports)
+- [Experiment reports index](https://github.com/marin-community/marin/blob/main/docs/reports/index.md)
 - [Open development article](https://openathena.ai/blog/open-development-of-frontier-ai/)
 - [原始 Percy / Marin 综合稿](../../percy-liang-marin-open-science.md)
 

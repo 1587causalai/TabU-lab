@@ -1,6 +1,6 @@
 # 模型无关课程接口：先绑定证据，再选择探针
 
-[独立设计规范](../design/pretraining-curriculum.tex)（[PDF](../design/pretraining-curriculum.pdf)）
+[独立设计规范（TeX）](../design/pretraining-curriculum.tex)
 解释三层边界：不变的语义合同、可修订的经验默认、可替换的实现。
 这里说明首个最小实现 `tabu_lab.curriculum` 的实际调用范围。
 
