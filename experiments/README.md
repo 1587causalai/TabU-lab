@@ -1,14 +1,23 @@
 # Experiments ledger
 
+## Finding an experiment
+
+- The [report index](../docs/reports/README.md) lists published findings by
+  version. [Examples](../examples/) contains small runnable fixtures.
+- The `local/` tree contains experiment records included in this repository,
+  such as the [restoration recipes](local/restoration/README.md) and the
+  [first old120 joint fit](local/restoration-old120-joint-fit/README.md).
+  Read each experiment's date, model and data identifiers before reusing it.
+- The [V6 history](history/v6-20260930/README.md) binds frozen evidence to content
+  hashes. Its objects are optional for routine development. See the
+  [lightweight checkout](../docs/architecture/README.md#lightweight-checkout).
+
 ## Table-restoration research
 
-The current research focus is reconstructing available table evidence and
-learning Unit-specific relationships. Start with the
-[restoration guide](../docs/tutorials/table-restoration.md) and
-[restoration experiment routes](local/restoration/README.md) for implementation
-checks, dated recipes, and execution records. These experiments retain their
-own source, objective, precision, and evidence identities; historical TAR fitting
-results do not establish restoration performance or unseen-table transfer.
+For the original implementation and the scope of its checks, start with the
+[restoration guide](../docs/tutorials/table-restoration.md). The
+[V8/V8.2 API](../src/tabu_lab/models/completion_v8/README.md) covers the newer
+masked-completion implementation on `main`.
 
 ## TAR training routes
 
@@ -46,8 +55,8 @@ batch-size result describes its recipe, not the entire batch training route.
 
 ## Default real-data estimand
 
-For real-data model comparisons, the default estimand is the complete train/test
-split:
+For the query-family evaluators in this repository, the default estimand is the
+complete train/test split:
 
 - make one deterministic split before compilation;
 - place every labeled train row in model context;
@@ -55,10 +64,10 @@ split:
 - score every held-out row against scorer-only truth;
 - fit classical baselines on all and only the same train partition.
 
-Finite context or query limits are diagnostic overrides. They must be explicit
-in the manifest and report and must not replace the default table-foundation-
-model result. See
-[`real-evaluation-default-protocol.md`](../docs/architecture/real-evaluation-default-protocol.md).
+Record any finite context or query limits in the manifest and report. See the
+[full-context evaluation protocol](../docs/architecture/real-evaluation-default-protocol.md).
+TabArena comparisons use their benchmark protocol and recorded support caps.
+[Published evaluation reports](../docs/reports/README.md#published-results)
 
 ## State routing
 

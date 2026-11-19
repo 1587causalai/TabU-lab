@@ -23,6 +23,9 @@ Query cells. This is required by the visible-only answer codec; it is not a
 robustness claim. Tables with sparse or singleton classes are reported in the
 mask metadata and are not silently removed from the loss.
 
+[Completed two-round report](REPORT.md) records the original source identity,
+fixed-mask results and terminal status.
+
 ## Plan and execution
 
 From the repository root:
