@@ -1,30 +1,18 @@
-# 表格 foundation model 参考线
+# 表格基础模型与评测参考
 
-这一层只讨论模型与任务问题，不讨论“如何运营一个开放研究仓库”。Marin 的方法卡在上一级；这里比较的是表格模型如何使用 prior、context、missingness、任务标签和跨任务泛化。
+从模型所属版本的论文、代码和权重读起。比较时同时记录可见样本、数据划分、训练预算和输出指标。[TabU 研究问题](../../research-questions/README.md)
 
-## 当前参考对象
+| 参考对象 | 公开入口 | 与 TabU 的关系 |
+| --- | --- | --- |
+| TabPFN | [历史阅读卡](tabpfn.md) | 合成先验、Support 与 Query 的条件化、表内推理。 |
+| LimiX | [历史阅读卡](limix.md) | 统一预测和补全任务、缺失信息与特征交互。 |
+| TabICLv2 | [论文第二版](https://arxiv.org/abs/2602.11139v2) · [官方代码与权重入口](https://github.com/soda-inria/tabicl) | V10.1 同任务量比较的参考。作者报告沿原论文查阅，本项目的证据沿[匹配任务报告](https://research.wehub.us/tabu-lab/experiments/research-update-20261029/)查阅。 |
+| NVIDIA Kumo Tabular Small | [官方代码](https://github.com/NVIDIA/structured-data-models) · [模型卡](https://huggingface.co/nvidia/Kumo-Tabular) | V10.1 比较参照和 CellRidge-1024 的父模型。衍生版沿[发布清单与本地评测](https://github.com/1587causalai/kumo-small-cellridge-1024)查阅。 |
+| TabArena | [基准仓库与 protocol](https://github.com/autogluon/tabarena) | 定义独立的任务、划分、指标与提交。TabU 的首次提交和本地 Lite 复现材料从[公开评测记录](../../reports/README.md#published-results)进入。 |
 
-| 工作 | 主要问题 | 我们要看什么 | 当前状态 |
-|---|---|---|---|
-| [TabPFN](tabpfn.md) | prior-data fitted / in-context prediction | 合成 prior、上下文形式、单次前向预测、任务边界 | 第一轮 source read |
-| [LimiX](limix.md) | 统一结构化数据任务 | 任务统一、缺失值、样本与特征交互、训练数据与 claim | 第一轮 source read |
+## 阅读时核对什么
 
-## 共同比较维度
-
-读这些工作时固定回答以下问题：
-
-1. **任务是什么**：classification、regression、imputation 或生成是否共用一个学习对象？
-2. **上下文是什么**：support / train rows、feature schema、task description、prior 还是 Unit 语义？
-3. **泛化到哪里**：新行、新列、新数据集、新任务，还是新的数据生成机制？
-4. **缺失值是什么**：数值上的空、显式 mask、未知状态，还是生成机制的一部分？
-5. **训练数据来自哪里**：真实数据、合成数据、混合数据，split 是否可能泄漏？
-6. **证据如何获得**：固定 benchmark、多个 seed、compute budget、baseline 和是否有独立复核？
-
-## 与 TabU 的边界
-
-TabPFN 与 LimiX 可以帮助我们理解表格 foundation model 的能力空间，但它们不会自动回答 TabU 的 Unit 语义、因果生成假设或响应律问题。尤其要保持：
-
-- `Unit` 不是普通 sample token 的同义词；
-- 任务泛化不等于因果识别；
-- 缺失值处理不等于 null semantics 已成立；
-- benchmark 胜出不等于 TabU 的理论主张成立。
+- 模型学习哪类任务，数据先验如何构造，待预测目标何时可见。
+- 表内上下文包含哪些行和特征，模型怎样区分缺失和已知值。
+- 对比涉及已见表的留出行、未见表还是新的生成机制，选择检查点时看过哪些数据。
+- 分类和回归分别用了什么指标，模型及基线的计算预算如何匹配。

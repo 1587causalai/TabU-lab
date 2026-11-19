@@ -1,9 +1,14 @@
-# Real-data evaluation default
+<a id="real-data-evaluation-default"></a>
+# Full-context real-data evaluation
+
+This page describes the query-family evaluation protocol in TabU-lab.
+TabArena uses its own splits and metrics. See the [published reports](../reports/README.md#published-results)
+for the support caps and evidence scope of the local Lite comparisons.
 
 ## Decision
 
-All new real-data model evaluations use the full train/test estimand by
-default.  For one deterministic split, let $D = D_{\mathrm{train}} \cup
+The query-family runners use the full train/test estimand by
+default. For one deterministic split, let $D = D_{\mathrm{train}} \cup
 D_{\mathrm{test}}$.  The model receives
 
 $$

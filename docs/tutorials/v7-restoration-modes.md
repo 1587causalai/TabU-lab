@@ -1,9 +1,9 @@
 # V7 / V7.3 single, joint and mixed restoration
 
-The local V7 implementation now uses one `V7Model` and one optimizer for all three
-training modes. The joint numerical path was promoted from the audited 2026-10-03
-single/joint experiment. Mixed sampling is available for experiments; its quality
-advantage has **not** been established by that single-versus-joint comparison.
+This guide covers the V7 and V7.3 implementations on `main`. All three masking
+modes use one `V7Model` and optimizer. The joint path comes from the audited
+2026-10-03 single/joint experiment, which covered those two modes. For the later
+masked-completion API, see the [V8 and V8.2 guide](../../src/tabu_lab/models/completion_v8/README.md).
 
 ## Configuration and command
 
@@ -11,19 +11,15 @@ Choose the [V7 YAML](../../examples/v7-restoration/mixed.yaml) or
 [V7.3 scratch YAML](../../examples/v7-restoration/v73.yaml), both using the same
 small synthetic table and eight-update smoke budget. Paths inside YAML resolve
 relative to that file. The YAML field `model.model_version` selects `v7` or `v7.3`.
+Run these commands from the repository root after `uv sync --frozen --extra dev`.
 
 ```bash
 # Inspect the resolved run without training or creating outputs.
-python -m tabu_lab.cli restoration v7-fit --config examples/v7-restoration/mixed.yaml
+uv run tabu-lab restoration v7-fit --config examples/v7-restoration/mixed.yaml
 
 # Execute the explicitly bounded eight-update fixture.
-python -m tabu_lab.cli restoration v7-fit --config examples/v7-restoration/mixed.yaml --execute
+uv run tabu-lab restoration v7-fit --config examples/v7-restoration/mixed.yaml --execute
 ```
-
-On configured training hosts use their existing launcher instead of generic
-Python: `~/.local/bin/wehub-python --profile train-20260920 -m tabu_lab.cli ...`,
-from the deployed project/environment that contains this package. Merging this
-implementation does not update host checkouts or start remote experiments.
 
 Only `masking.mode` needs to change to switch modes:
 

@@ -9,8 +9,8 @@ Git 只归档复用所需的协议、脚本、摘要与冻结索引。文中部�
 - 数学设计与实现合同：[V5.4 设计入口](../design/restoration-v54.md)。
 - 当前加训合同：[old120 replay-v2](../../experiments/local/v54-old120-replay-v2-20260922/README.md)。
 - 日常查看：[restoration5.4 专用工作区](https://wandb.ai/zj3712/restoration?nw=brg2pegawui)。
-- 最新有界结论：[old120 逐表拟合与下一代设计输入](../reports/v54-old120-fit-handoff-2026-09-23.md)。
-- 本文审阅所用最近一次训练快照：[2026-09-22 15:32–15:35 回查](../../experiments/local/v54-old120-wandb-20260922/heartbeat-report-20260922T0731Z.md)。当时三路仍在训练，不能据此宣称完成。
+- 2026-09-23 的拟合快照见 [old120 逐表拟合与下一代设计输入](../reports/v54-old120-fit-handoff-2026-09-23.md)。
+- 本文审阅所用最近一次训练快照：2026-09-22 15:32–15:35 回查（`heartbeat-report-20260922T0731Z.md`）。这是当时三路仍在训练的快照。原始回执留在各次实验档案，公开的[监控说明](../../experiments/local/v54-old120-wandb-20260922/README.md)保留采集和读回协议。
 
 ## 1. 保留下来的基本判断
 
@@ -48,7 +48,7 @@ Git 只归档复用所需的协议、脚本、摘要与冻结索引。文中部�
 
 父权重使用 dustinstudio 当时已落盘的 **old120 138,240 步**检查点，冻结文件与 SHA；不能在复制过程中反复读取仍在变化的 `latest` 指针。转换后使用 weights-only 初始化，**AdamW、RNG、训练游标重新开始**。初始三类 episode 输出差为 0；完整 120 表初始固定 Query 比较中，63 张离散目标表 accuracy 一致，数值最大 R² 差约 `9.06e-7`、NMSE 差约 `8.22e-7`。这支持该检查点的起点行为得到保留，不证明以后训练轨迹相同、每步更快或最终更优。
 
-可复核：[转换回执](../../experiments/local/v54-small-warm-old120-20260922/conversion-small-h4.json)、[初始状态](../../experiments/local/v54-small-warm-old120-20260922/initial-checkpoint-readback.json)、[完整初始 Query 比较](../../experiments/local/v54-small-warm-old120-20260922/initial-fixed-query-comparison.json)。起点已有能力不得记作新任务的训练收益。
+可复核：转换回执（`conversion-small-h4.json`）、初始状态（`initial-checkpoint-readback.json`）、完整初始 Query 比较（`initial-fixed-query-comparison.json`）。起点已有能力不得记作新任务的训练收益。
 
 ### 从一次 Small-H4 转换，发展为可逐步加深的模型
 
@@ -256,7 +256,7 @@ W&B `_step` 在这套镜像中是 outbox 投递序号，不是训练步数；绘
 
 Mean 与分位数可以是不同的稀疏 history 事件，读取时按事件类别分别取字段；一次要求所有类别的键可能只得到空交集。耗时也要对齐边界：接续的新增 wall time 减去父 terminal 的累计时间（包含末次评估），不能改减父 journal 尾行时间。
 
-本轮 observer 升级后的验证使用每路恢复边界前 24、后 48 个事件，72 个 payload 全字段匹配，并确认旧 outbox 前缀保留；最近回查另核对完整 fixed 事件与 120 表集合。零差异仅覆盖冻结快照，不应宣传为未来永久无丢点。证据见 [lifecycle-resolution.json](../../experiments/local/v54-old120-wandb-20260922/lifecycle-resolution.json) 与[最近云端回查](../../experiments/local/v54-old120-wandb-20260922/heartbeat-cloud-20260922T073444Z.json)。
+本轮 observer 升级后的验证使用每路恢复边界前 24、后 48 个事件，72 个 payload 全字段匹配，并确认旧 outbox 前缀保留；最近回查另核对完整 fixed 事件与 120 表集合。零差异仅覆盖冻结快照，不应宣传为未来永久无丢点。证据见 `lifecycle-resolution.json` 与最近云端回查（`heartbeat-cloud-20260922T073444Z.json`）。
 
 ## 11. 主动停止、失败和预算完成分开记录
 
@@ -272,7 +272,7 @@ Mean 与分位数可以是不同的稀疏 history 事件，读取时按事件类
 
 对已有六个误标旧 run，本次先审计父 checkpoint 与 bridge，再用原 ID `resume="must"`、不调用 `log`、正常 finish，恢复原 summary 并添加停止原因和后继链接；核对原 storage ID/config/name/history 末步及原 summary。SDK 会更新会话元数据，不能说云端毫无变化。这是针对已确认主动停止的修复，不可批量应用于所有 Failed，也不要为改标签恢复旧 trainer 或旧 observer。
 
-复用的是 [terminal_lifecycle.py](../../experiments/local/v54-old120-wandb-20260922/terminal_lifecycle.py) 的证据判断；一次性修复脚本不是无条件运维入口。证据：[终态验证](../../experiments/local/v54-old120-wandb-20260922/terminal-lifecycle-fix-readback.json)、[旧 run 云端最终读回](../../experiments/local/v54-old120-wandb-20260922/lifecycle-cloud-final.json)。消费者先排空 raw/cycle outbox，SDK finish 返回后才持久化本地已关闭状态，避免过早“完成”。
+复用的是 [terminal_lifecycle.py](../../experiments/local/v54-old120-wandb-20260922/terminal_lifecycle.py) 的证据判断；一次性修复脚本不是无条件运维入口。证据：终态验证（`terminal-lifecycle-fix-readback.json`）、旧 run 云端最终读回（`lifecycle-cloud-final.json`）。消费者先排空 raw/cycle outbox，SDK finish 返回后才持久化本地已关闭状态，避免过早“完成”。
 
 ## 12. 给用户看的工作区应少而明确
 
@@ -286,7 +286,7 @@ v54-nano-replay-v2-old120-dustin-20260922
 v54-small-h4-replay-v2-old120-gq-20260922
 ```
 
-新 workspace 复用实时 run，不复制、移动、删除或重记实验。视图修改前保存原 spec，修改后通过准确 URL 重载检查 ID 过滤、panel 顺序、轴和自动生成设置。这里已完成配置/API 读回；没有把未登录浏览器的结果称为用户登录视角的视觉验收。[工作区回执](../../experiments/local/v54-old120-wandb-20260922/restoration54-workspace-receipt.json)记录了验证范围。
+新 workspace 复用实时 run，不复制、移动、删除或重记实验。视图修改前保存原 spec，修改后通过准确 URL 重载检查 ID 过滤、panel 顺序、轴和自动生成设置。这里已完成配置/API 读回；没有把未登录浏览器的结果称为用户登录视角的视觉验收。工作区回执（`restoration54-workspace-receipt.json`）记录了验证范围。
 
 ## 13. 日常回查与常见故障
 

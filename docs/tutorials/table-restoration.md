@@ -1,17 +1,16 @@
 # Five-step table-restoration reference
 
-This is an independent table-restoration implementation, not a reinterpretation
-of TAR's additive heads, checkpoints, or published fit results. Status is
-`local_unissued`: implementation verification is not F0 fit, benchmark readiness,
-an accepted claim, or evidence of unseen-table generalization.
+This tutorial describes the original fifth-generation Restoration contract.
+It provides scalar numeric answers and per-target local linear estimation or
+full Nadaraya–Watson estimation. Its verification records cover the reference
+implementation. For more recent masked completion on `main`, start with
+the [V8 and V8.2 guide](../../src/tabu_lab/models/completion_v8/README.md).
 
-This tutorial describes the original fifth-generation Restoration contract:
-scalar numeric answers and per-target LL / full NW. The separate
+The separate
 [V5.3 reference](../design/restoration-v53.md) uses affine numeric encoding and
-column-shared LL within Gen-5.x. Its versioned design snapshot, APIs and
-validation records are documented at that entry; they do not silently replace
-this path or its checkpoints. The protected parent canonical design remains
-`latex/model-factory/table-restoration/end-to-end-design.tex`.
+column-shared LL within Gen-5.x. Its design, API, and validation records are
+documented at that entry. See the [version index](../design/README.md#implementations-and-archives)
+for other restoration versions and the separate TAR implementation.
 
 ## Boundaries and extension points
 

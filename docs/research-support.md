@@ -5,18 +5,21 @@ open-source maintenance support, and research partnerships. It is grounded in th
 project's scientific question and public work. Individual applications adapt the
 scope and budget to the supporter without changing the project's evidence claims.
 
-Reviewed against repository materials on **2026-09-16**.
+Reviewed against the public implementation and research reports on
+**2026-11-20**. [Documentation](README.md) · [Research questions](research-questions/README.md)
 
 ## The question and its value
 
 Can a model learn relationships specific to each unit in a table by reconstructing
 available evidence, then reuse those representations across tables?
 
-TabU investigates this question through typed value encoding, contextual cell
-representations, and Unit-based geometry that organizes relevant observations.
-The current restoration implementation separates learning which observations to
-refer to from estimating values using those observations. Whole-table
-reconstruction supplies the learning objective; prediction is a downstream use.
+TabU investigates this question through supervised prediction and
+whole-observation reconstruction. Both use representations of cells and units
+to organize relevant evidence. The V9 reconstruction study found that reducing
+reconstruction error had little effect on prediction for fresh observations
+from the same worlds. The V11 plan studies whether a simple shared readout and
+unit-specific corrections can improve those predictions. [V9 study](https://research.wehub.us/tabu-lab/experiments/v9-reconstruction/) ·
+[V11 roadmap](../README.md#v11-research-roadmap)
 
 The intended beneficiaries are researchers developing tabular models and
 maintainers building reproducible tabular learning software. Useful transfer is a
@@ -34,9 +37,9 @@ bounded follow-up questions to fund.
 
 | Existing asset | Evidence to inspect | Interpretation |
 | --- | --- | --- |
-| Five-step table-restoration implementation | [Guide](tutorials/table-restoration.md), [dated independent review](reviews/restoration-five-step-20260915/README.md) | Implementation and bounded correctness checks |
-| Prepared restoration execution | [Independent review and recorded checks](reviews/restoration-prepared-20260916/README.md) | Equivalence and timing for the stated small configuration |
-| Historical TabU-TAR shared fitting | [120-table report, curves, and protocol](research/tar-shared-fit-20260907/README.md) | Fixed-training-table fitting; no transfer of its results to restoration |
+| V8 and V8.2 implementation | [Completion API](../src/tabu_lab/models/completion_v8/README.md), [integration and validation](reviews/v82-integration-20261012/README.md) | Runnable masked completion and opt-in supervised settings with scoped implementation checks |
+| Published research reports | [Report index](reports/README.md) | Dated studies of learning and retention, readout, reconstruction, matched tasks, and training cost |
+| V10.4 CellRidge-1024 release | [Inference weights](https://github.com/1587causalai/kumo-small-cellridge-1024/releases/tag/v1.0), [local Lite evaluation](https://github.com/1587causalai/kumo-small-cellridge-1024/blob/main/LITE.md), [TabArena submission](https://github.com/autogluon/tabarena/pull/735) | Public inference release with documented development exposure and a closed upstream submission |
 | Research execution and evaluation software | [Program kernel](architecture/evolvable-pretraining-programs.md), [evaluation protocol](architecture/real-evaluation-default-protocol.md) | Reusable manifests, source identities, and controls |
 
 The catalog currently records zero formal receipts and zero accepted capability
@@ -104,9 +107,9 @@ of that initial public message.
 
 ## 展示与申请共用的中文口径
 
-TabU-lab 研究如何通过恢复表格中的可用证据，学习每个 Unit 的特有规律，
-并检验这些表征能否迁移到新表。我们已经公开参考实现、局部验证、历史实验
-报告与可复现研究工具；跨表泛化仍是需要实验回答的问题。
+TabU-lab 通过监督预测和全观测重构，研究怎样从表格证据学习每个 Unit 的特有规律，
+以及这些表征能否迁移到新表。公开材料包括 V8.2 实现、各期研究报告和 V10.4
+CellRidge-1024 推理权重。V11 将研究共享线性读出和个体修正。[研究问题与证据](research-questions/README.md)
 
 不同形式的支持共同服务于同一条逻辑：
 **重要问题 → 已有证据 → 尚待回答的问题 → 有边界的工作与资源 → 可检查的成果

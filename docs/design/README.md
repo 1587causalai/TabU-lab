@@ -1,6 +1,6 @@
 # TabU design and version index
 
-[Project overview](../../README.md) · [V11 research roadmap](../../README.md#v11-research-roadmap)
+[Documentation](../README.md) · [Research questions](../research-questions/README.md) · [V11 research roadmap](../../README.md#v11-research-roadmap)
 
 Use this index to find the implementation, design, or result for a specific
 version. For checkpoint compatibility, use the configuration and source
@@ -17,14 +17,18 @@ contains separate classification and regression inference weights under
 OpenMDW-1.1. The [release manifest](https://github.com/1587causalai/kumo-small-cellridge-1024/blob/v1.0/weights.json)
 records their checkpoint identities and digests.
 
-[TabArena PR #735](https://github.com/autogluon/tabarena/pull/735) is open as of
-2026-11-19. The [submitted adapter](https://github.com/autogluon/tabarena/pull/735/files)
+TabArena closed [PR #735](https://github.com/autogluon/tabarena/pull/735) on
+2026-11-20 (UTC+8). The [maintainer’s note](https://github.com/autogluon/tabarena/pull/735#issuecomment-7015532014)
+cites the local Lite results, where the best measured configuration trailed
+the parent Kumo Small model and default CatBoost.
+The [submitted adapter](https://github.com/autogluon/tabarena/pull/735/files)
 defaults to a cap of 200,000 labeled support rows. The local TabArena-Lite
 reports use the same frozen weights with caps of
 [512 and 2,048 rows](https://github.com/1587causalai/kumo-small-cellridge-1024/blob/main/LITE.md)
 and [8,192 rows](https://github.com/1587causalai/kumo-small-cellridge-1024/blob/main/support-8192/README.md).
 These splits informed development and checkpoint selection.
-Maintainer verification and the full default-cap run are pending.
+The published results cover the measured caps above. A full run at the
+200,000-row default remains unreported.
 
 ### V10.1 · Matched tasks and training cost
 

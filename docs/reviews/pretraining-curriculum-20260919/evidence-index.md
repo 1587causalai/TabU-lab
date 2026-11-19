@@ -1,16 +1,16 @@
 # 课程包证据索引
 
-核查日期：2026-09-19。以下是来源和结论边界，非新的训练收据；历史状态不当作当前运行状态。
+核查日期为 2026-09-19。E4–E7 的原始报告归当时的实验档案。可在本仓查阅的材料附有链接，表中状态均对应这次历史核查。
 
 | ID | 来源 | 证据与边界 |
 |---|---|---|
 | E1 | [V5.3 教程](../../tutorials/v53-curriculum.md) | manifest、固定探针、resume、final-test 隔离合同；示例运行不证明模型效果 |
 | E2 | [模型无关课程](../../tutorials/model-independent-curriculum.md)及[设计规范](../../design/pretraining-curriculum.tex) | 数据冻结与 episode 接口；world 来源不完整时不可补造身份 |
 | E3 | [历史 TAR 共享拟合](../../research/tar-shared-fit-20260907/README.md) | old120 768 rounds/92,160 updates；57 数值表 median NMSE 0.038238、63 离散表 median accuracy 99.265%；训练行证据，属于 TAR |
-| E4 | [历史新120](../../../../archive/tar-new120-muon-20260908/REPORT.md) | 3,840 updates，新表 median accuracy 60.48%→90.99%，旧表99.26%→80.88%；同时换 Muon，无 scratch 对照，不能证明预训练增益 |
-| E5 | [real12 历史报告](../../../../research-proposals/restoration-real12-rescue-20260917/REPORT.md) | 不同训练阶段和读出对照；历史 reserved 已观察，比较预算不匹配；TAR/旧 Restoration 均不等于 V5.3 |
-| E6 | [V5.3 编码对照与单表验收说明](../../../../research-proposals/v53-sparse-codec-20260919/README.md) | 短对照、充分拟合和用户撤销统一 1e-3 门槛分别记录；单表验收不等于八表通过 |
-| E7 | [V5.3 八表共享协议](../../../../research-proposals/v53-eight-joint-fit-20260919/README.md) | 当前一个共享模型、均衡曝光、raw4 混合类型校准；当前状态需读取 DGX2 原始收据 |
+| E4 | 历史新120（历史档案） | 3,840 updates，新表 median accuracy 60.48%→90.99%，旧表99.26%→80.88%；同时换 Muon，无 scratch 对照，不能证明预训练增益 |
+| E5 | real12 历史报告（历史档案） | 不同训练阶段和读出对照；历史 reserved 已观察，比较预算不匹配；TAR/旧 Restoration 均不等于 V5.3 |
+| E6 | V5.3 编码对照与单表验收说明（历史档案） | 短对照、充分拟合和用户撤销统一 1e-3 门槛分别记录；单表验收不等于八表通过 |
+| E7 | V5.3 八表共享协议（历史档案） | 当前一个共享模型、均衡曝光、raw4 混合类型校准；当前状态需读取 DGX2 原始收据 |
 
 ## 六级阶梯的资格状态
 

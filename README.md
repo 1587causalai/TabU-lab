@@ -5,7 +5,8 @@ whether a model can learn how each row or entity responds from the values
 observed in a table, and whether it can use those representations to fill in
 missing values and make predictions on new tables.
 
-[Model versions and evidence](docs/design/README.md) ·
+[Documentation](docs/README.md) ·
+[Research questions](docs/research-questions/README.md) ·
 [Research website](https://research.wehub.us/tabu-lab/) ·
 [中文](https://research.wehub.us/tabu-lab/zh/)
 
@@ -19,8 +20,8 @@ missing values and make predictions on new tables.
   models compare on matched tasks, and where training time goes. [Version and evidence index](docs/design/README.md#published-research)
 - **A public checkpoint.** Kumo Small + CellRidge-1024 is our first TabArena
   submission and a V10.4 milestone. Classification and regression inference
-  weights are available. As of 2026-11-19, the upstream pull request is open
-  and maintainer verification is pending. [Weights release](https://github.com/1587causalai/kumo-small-cellridge-1024/releases/tag/v1.0) ·
+  weights are available. TabArena closed the submission after reviewing the
+  local Lite results against Kumo Small. [Weights release](https://github.com/1587causalai/kumo-small-cellridge-1024/releases/tag/v1.0) ·
   [TabArena PR #735](https://github.com/autogluon/tabarena/pull/735)
 
 ## Try the implementation

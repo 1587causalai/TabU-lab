@@ -3,8 +3,7 @@
 2026-09-19，在 saved `tabu-lab` 的 `main` 基线 `6293e95` 上完成。
 本轮是本地未提交的 additive 实现，没有启动训练、移动数据或改写历史记录。
 
-交付为 [6 页独立规范](../../design/pretraining-curriculum.tex)
-（[PDF](../../design/pretraining-curriculum.pdf)）、
+交付为 [独立规范（TeX）](../../design/pretraining-curriculum.tex)、
 [Python 调用说明](../../tutorials/model-independent-curriculum.md)，以及
 `src/tabu_lab/curriculum`。文档将不变语义、可修订经验政策、可替换实现分开；
 四参考阶段不构成强制 pipeline。结果 schema、自动质量 gate 与通用 trainer 仍是设计边界，

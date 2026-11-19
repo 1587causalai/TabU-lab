@@ -34,8 +34,9 @@ The goal is not to make a foundation-model or benchmark claim. The goal is to
 construct a falsifiable pretraining prior for frozen-weight in-context learning
 (ICL), including real-table ICL with no optimizer and no parameter update.
 
-This proposal is downstream of the six-link evaluation contract in
-[`eval-chain.md`](eval-chain.md). It does not replace a future pretraining
+This proposal was developed against the historical six-link evaluation
+contract. See the [full-context protocol](real-evaluation-default-protocol.md)
+for the published query-family evaluation policy. The proposal does not replace a future pretraining
 manifest, preregistration, immutable receipt, or independent review.
 
 ## 2. Motivation from the current evidence

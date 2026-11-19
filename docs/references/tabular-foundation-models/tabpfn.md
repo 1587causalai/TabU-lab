@@ -7,8 +7,8 @@
 ## Canonical sources
 
 - [PriorLabs/TabPFN repository](https://github.com/PriorLabs/TabPFN)
-- [Prior Labs documentation](https://priorlabs.ai/docs)
-- [TabPFN original paper](https://arxiv.org/abs/2207.01814)
+- [Prior Labs documentation](https://docs.priorlabs.ai/overview)
+- [TabPFN original paper](https://arxiv.org/abs/2207.01848)
 - [TabPFN local demo notebook](https://colab.research.google.com/github/PriorLabs/TabPFN/blob/main/examples/notebooks/TabPFN_Demo_Local.ipynb)
 
 ## 第一轮理解
