@@ -6,8 +6,9 @@
   the runnable code on `main`. Use the [V8 completion guide](../src/tabu_lab/models/completion_v8/README.md)
   for masked-cell completion and the opt-in V8.2 supervised settings.
 - [Research questions](research-questions/README.md) records what each study
-  has answered and what remains open. [The V11 roadmap](../README.md#v11-research-roadmap)
-  describes the planned work on linear readout and unit-specific corrections.
+  has answered and what remains open. The V11 prototype has completed initial
+  training checks on synthetic classification and regression tables.
+  [V11 research progress](../README.md#v11-research-roadmap)
 - [Version and design index](design/README.md) maps each model family to its
   implementation, design, or dated evidence. [Research reports](reports/README.md)
   collects the published results and historical records.

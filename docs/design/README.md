@@ -1,6 +1,6 @@
 # TabU design and version index
 
-[Documentation](../README.md) · [Research questions](../research-questions/README.md) · [V11 research roadmap](../../README.md#v11-research-roadmap)
+[Documentation](../README.md) · [Research questions](../research-questions/README.md) · [V11 research progress](../../README.md#v11-research-roadmap)
 
 Use this index to find the implementation, design, or result for a specific
 version. For checkpoint compatibility, use the configuration and source
