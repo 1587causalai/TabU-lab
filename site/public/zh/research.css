@@ -92,6 +92,22 @@ h3 { font-size: 1.125rem; line-height: 1.45; }
 .diagram figcaption { margin-top: .4rem; color: var(--muted); font-size: .86rem; }
 
 .home-section { padding-block: 2rem; border-top: 1px solid var(--rule); }
+
+.study-context { max-width: 46rem; margin-top: .65rem; color: var(--muted); }
+.study-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: .9rem 0;
+  border: 1px solid var(--rule);
+  border-radius: .2rem;
+  background: var(--surface);
+}
+.study-metrics > div { padding: .75rem clamp(.7rem, 2vw, 1.25rem); }
+.study-metrics > div + div { border-left: 1px solid var(--rule); }
+.study-metrics dt { color: var(--muted); font-size: .88rem; }
+.study-metrics dd { margin: .2rem 0 0; color: var(--accent); font-size: clamp(1.1rem, 3.8vw, 1.9rem); font-weight: 650; }
+.study-link { margin-top: .55rem; font-size: .9rem; }
+
 .milestone {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.04fr);
@@ -158,6 +174,8 @@ h3 { font-size: 1.125rem; line-height: 1.45; }
 }
 
 @media (max-width: 22rem) {
+  .study-metrics { grid-template-columns: minmax(0, 1fr); }
+  .study-metrics > div + div { border-left: 0; border-top: 1px solid var(--rule); }
   .hero { padding-block: 1.65rem 1.35rem; }
   .home-section { padding-block: 1.1rem; }
   .research-list article { padding-block: .65rem; }
