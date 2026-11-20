@@ -46,12 +46,18 @@ runtimes, checkpoint contracts, and experiment records.
 
 ## V11 research roadmap
 
-We plan to study whether learned representations make unit-specific
-relationships easier to predict with a simple linear readout. The proposed
-design fits a shared rule from observed rows, then uses residuals from similar
-units to estimate a local correction. The research will test accuracy after
-decoding predictions back to table values and measure cost as tables grow.
-This is a design-stage research question.
+V11 has reached an experimental prototype for classification and regression.
+It fits a shared ridge readout on labeled support rows and uses residuals from
+similar reference rows to estimate a correction for each query.
+
+The initial FP32 run completed two classification updates with 64 synthetic
+tables of 1,024 rows per update. A prototype with six row rounds and six column
+rounds also completed one such update, using augmented FP32 QR for two ridge
+fits that failed with Cholesky. A separate four-table trial completed one
+shared FP32 update on classification and regression.
+
+Held-out comparisons will test whether the correction improves decoded
+predictions. Scaling tests will measure cost as tables grow.
 
 ## Participate
 
