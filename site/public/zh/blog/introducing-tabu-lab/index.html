@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>启动 TabU-lab — TabU-lab · WeHub Research</title>
+  <meta name="description" content="为什么 TabU-lab 要公开建造表格基座模型的过程，第一批证据 gate 要求什么，以及目前明确不声称什么。">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://research.wehub.us/tabu-lab/zh/blog/introducing-tabu-lab/">
+  <link rel="alternate" hreflang="zh-CN" href="https://research.wehub.us/tabu-lab/zh/blog/introducing-tabu-lab/">
+  <link rel="alternate" hreflang="en" href="https://research.wehub.us/tabu-lab/blog/introducing-tabu-lab/">
+  <link rel="alternate" hreflang="x-default" href="https://research.wehub.us/tabu-lab/blog/introducing-tabu-lab/">
+  <link rel="icon" href="../../../assets/tabu-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../../styles.css?v=20260827-02">
+  <link rel="stylesheet" href="../../../blog.css?v=20260827-02">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="启动 TabU-lab：一座公开建造表格基座模型的实验室">
+  <meta property="og:description" content="为什么现在打开训练过程，第一批 gate 要求什么，以及我们目前明确不声称什么。">
+  <meta property="og:url" content="https://research.wehub.us/tabu-lab/zh/blog/introducing-tabu-lab/">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "启动 TabU-lab：一座公开建造表格基座模型的实验室",
+    "datePublished": "2026-08-27",
+    "author": {"@type": "Organization", "name": "WeHub Research"},
+    "isPartOf": {"@type": "ResearchProject", "name": "TabU-lab", "url": "https://research.wehub.us/tabu-lab/zh/"},
+    "mainEntityOfPage": "https://research.wehub.us/tabu-lab/zh/blog/introducing-tabu-lab/"
+  }
+  </script>
+</head>
+<body class="blog-page" data-site-version="tabu-lab-site-v20260827-02">
+  <a class="skip-link" href="#main">跳到正文</a>
+  <div class="ambient ambient-a" aria-hidden="true"></div>
+  <div class="ambient ambient-b" aria-hidden="true"></div>
+  <div class="grid-field" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <nav class="nav-shell" aria-label="主导航">
+      <a class="brand" href="../../" aria-label="TabU-lab 首页">
+        <img src="../../../assets/tabu-mark.svg" alt="" width="42" height="42">
+        <span><strong>TabU-lab</strong><small>WeHub Research 开放实验室</small></span>
+      </a>
+      <div class="nav-actions">
+        <div class="nav-links" id="nav-links">
+          <a href="../../#mission">使命</a>
+          <a href="../" aria-current="page">Blog</a>
+          <a href="../../#protocol">实验协议</a>
+          <a href="../../#ledger">公开账本</a>
+          <a href="../../#join">加入</a>
+          <a class="nav-external" href="https://research.wehub.us/zh/">WeHub Research <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="language-switch" aria-label="语言">
+          <a class="active" href="./" lang="zh-CN" hreflang="zh-CN" aria-current="page">中文</a>
+          <a href="../../../blog/introducing-tabu-lab/" lang="en" hreflang="en">EN</a>
+        </div>
+        <button class="menu-button" type="button" aria-expanded="false" aria-controls="nav-links">
+          <span class="sr-only">展开导航</span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main" class="article-main">
+    <header class="section-shell article-header">
+      <time class="kicker article-date" datetime="2026-08-27">2026 年 8 月 27 日</time>
+      <h1>启动 TabU-lab：一座公开建造表格基座模型的实验室</h1>
+      <p class="article-dek">为什么现在打开训练过程，第一批 gate 要求什么，以及我们目前明确不声称什么。</p>
+      <div class="blog-meta"><span>WeHub Research</span><span>TabU-lab</span></div>
+    </header>
+
+    <div class="section-shell article-layout">
+      <article class="article-prose">
+        <p>表格无处不在。科学实验、医院记录、推荐日志、经营台账，最后往往都落成一张表。可是，从表里做通用学习，至今仍然别扭。</p>
+        <p>一张表可以同时装连续量、类别、缺失、标识符、处理、结局、时间戳，以及人定义出来的角色。存储类型相同的两列，语义可以完全不同；schema 不同的两张表，却可能描述相近的机制。常见做法是：每个数据集重新走一遍流水线——清洗、造特征、选模型、调参；schema 一变，再来一次。</p>
+        <p>表格基座模型问的是更难的问题：模型能不能先在许多表、许多任务上学会可复用的结构，再以很少甚至无需任务特化训练，适应一张新表？</p>
+        <p>TabPFN、LimiX 这类系统说明，这条路是认真的研究方向。它们也把未决问题问得更清楚：模型该把什么当作 context？什么样的训练分布带来的是可迁移结构，而不是对基准的熟悉？值、特征角色、缺失、行与行之间的关系，该如何表示？增益里有多少来自预训练，有多少来自架构、调参或评测选择？</p>
+        <p>我们开办 TabU-lab，就是要在开放条件下做这些问题。</p>
+
+        <h2>TabU-lab 是什么</h2>
+        <p>TabU-lab 是 WeHub 的开放研究实验室，从零建造表格基座模型。它既是在训练模型，也是在公开记录模型是怎么被造出来的。</p>
+        <p>仓库里会留下代码、配置、实验预注册、run receipt、曲线、失败，以及据此写成的综合报告。我们不想只发布最后活下来的那个 checkpoint，而希望通向它的路径仍然可被检查。</p>
+        <p>眼下的目标很小：先做出一个小规模训练闭环，可复现、可证伪，并且强到足以告诉我们某个想法已经不行。放大规模是后面的事。</p>
+        <p>实验室从一份空账本开始。我们还没有接受任何公开模型结果或 benchmark 声明。第一项结果只会在假设、对照、预算和通过/淘汰标准已经提交之后才出现。</p>
+
+        <h2>实验契约</h2>
+        <p>每一项正式实验都走同一条基本序列：</p>
+        <ol>
+          <li><strong>预注册。</strong> 执行前写明假设、baseline、算力预算、目标指标，以及通过/淘汰标准。</li>
+          <li><strong>实现。</strong> 提交跑这次对照所需的准确代码和配置。</li>
+          <li><strong>运行。</strong> 记录 command、git revision、配置哈希、数据版本、划分、seed、环境、机器和所用算力。</li>
+          <li><strong>公布 receipt。</strong> 保留原始指标、曲线、日志、产物、失败，以及对解释的限制。</li>
+          <li><strong>给出裁决。</strong> 将实验标为 <code>pass</code>、<code>kill</code> 或 <code>revise</code>。综合报告只能声称 receipt 支撑得住的内容。</li>
+        </ol>
+        <p>失败会留在账本里。一次协议干净的失败，可以替后来者省时间；一次没有来源的成功，支撑不了多少东西。</p>
+
+        <h2>第一批门</h2>
+        <p>我们会先切一条很窄的纵切片，而不是铺开一轮大基准战役：一个数据源、一个模型族、一个目标、一小批数据集、多个 seed。</p>
+        <ul>
+          <li><strong>Gate 0：健全性。</strong> 实现必须能在大约 100 条样本的小数据集上过拟合。做不到，更大的 run 还太早。</li>
+          <li><strong>Gate 1：可复现。</strong> 在干净环境里，一条命令必须产出 checkpoint 和完整 receipt。</li>
+          <li><strong>Gate 2：预训练归因。</strong> 预训练模型必须在相同微调预算下，打赢同一架构的随机初始化。否则所谓预训练增益，可能只是来自架构或协议。</li>
+          <li><strong>Gate 3：baseline 对照。</strong> 在固定协议和匹配预算下，对照 XGBoost、CatBoost、FT-Transformer 等强表格 baseline。报告多种子均值和波动，而不是一次好看的 run。</li>
+        </ul>
+        <p>通过这些门，并不证明我们已经造出通用表格基座模型。它只说明训练系统能跑、证据链能闭合，并且第一项被声称的迁移效应经得住基本对照。</p>
+
+        <h2>我们希望模型学到什么</h2>
+        <p>TabU-lab 长在更广的 TabU 研究纲领里。TabU 问的是：<code>Unit</code> 应不应该被当作原语，而不是样本 token 的另一个名字。这个视角会带出标准表格预测不会自动回答的问题：</p>
+        <ul>
+          <li>一行、一组行、或一段任务上下文，代表的学习单元是什么？</li>
+          <li>表里哪些部分是观测值，哪些部分是角色或机制？</li>
+          <li>缺失、未知状态、结构上的空，应当如何分开？</li>
+          <li>schema、任务或观测上下文改变时，什么应当保持不变？</li>
+        </ul>
+        <p>这些是研究问题，不是当前能力。基准分数再高，也不能单独验证 Unit 语义、因果识别，或更广的 TabU 理论。每一条理论声称都需要自己的形式假设和证伪检验。</p>
+        <p>起步时的数学纪律很简单：新的架构部件，应当对应模型对 unit、机制或噪声的明确对象。我们不想加一套能抬基准、却说不清模型在学什么的机关。</p>
+
+        <h2>我们宣布什么，以及没有宣布什么</h2>
+        <p>在数据许可、隐私约束和基础设施安全允许的范围内，我们会公开实验预注册、模型与数据处理代码、版本化配置、数据和 split provenance、command、seed、环境、算力预算、原始指标、曲线、日志、许可范围内的 checkpoint、裁决，以及连回 receipt 的报告。</p>
+        <p>这不是成品模型发布。我们不声称达到 state-of-the-art，不声称预训练已经改进了表格预测，也不声称具备因果推理、通用 schema 理解或广泛任务泛化。那些声称需要证据，而公开账本里现在还没有。</p>
+        <p>我们宣布的是：工作已经开始，而且证据标准会设在第一项公开训练结果之前。</p>
+        <p>最有用的贡献不是宏大的承诺，而是一个有可信失败方式的假设，再加上一份让下一个人接得住的 receipt。</p>
+
+        <div class="article-footer"><a href="../">← 全部 Blog 文章</a><a href="https://github.com/1587causalai/TabU-lab">Repository ↗</a></div>
+      </article>
+      <aside class="article-side">
+        <span>当前事实</span>
+        <p>实验室基础设施已经上线。尚无公开训练结果、模型 checkpoint 或 benchmark claim 被接受。</p>
+        <a href="../../../agent.json">查看 agent card →</a>
+        <a href="../../#ledger">查看公开账本 →</a>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="section-shell footer-inner">
+      <div class="footer-brand"><img src="../../../assets/tabu-mark.svg" alt="" width="36" height="36"><span><strong>TabU-lab</strong><small>Tabular Foundation Modeling from Scratch</small></span></div>
+      <p>公开研究 surface · 源码与 evidence 保留在项目 repository。</p>
+      <nav aria-label="页脚导航"><a href="../../">实验室</a><a href="../">Blog</a><a href="https://research.wehub.us/zh/">Research</a><a href="https://github.com/1587causalai/TabU-lab">GitHub</a></nav>
+    </div>
+  </footer>
+  <script src="../../../app.js?v=20260827-02"></script>
+</body>
+</html>
