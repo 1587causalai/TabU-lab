@@ -1,0 +1,164 @@
+:root {
+  color-scheme: light;
+  --paper: #f7f7f0;
+  --surface: #fffef9;
+  --ink: #202922;
+  --muted: #515c54;
+  --accent: #205644;
+  --wash: #e9efe5;
+  --rule: #d0d8cc;
+  --sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", system-ui, sans-serif;
+  --mono: ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 1rem/1.65 var(--sans);
+  -webkit-text-size-adjust: 100%;
+}
+h1, h2, h3, p, figure { margin: 0; }
+a { color: var(--accent); text-underline-offset: .2em; }
+a:hover { text-decoration-thickness: .13em; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+section[id], article[id], h1[id] { scroll-margin-top: 1rem; }
+.wrap { width: min(100% - 3.5rem, 68rem); margin-inline: auto; }
+.narrow { max-width: 46rem; }
+.skip-link {
+  position: absolute;
+  top: .5rem;
+  left: .5rem;
+  padding: .5rem .75rem;
+  background: var(--surface);
+  transform: translateY(-160%);
+}
+.skip-link:focus { transform: none; }
+
+.site-header { border-bottom: 1px solid var(--rule); }
+.site-nav, .nav-links, .links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.site-nav { justify-content: space-between; gap: .5rem 1.5rem; min-height: 4rem; padding-block: .4rem; }
+.brand { color: var(--ink); font-size: 1.2rem; font-weight: 750; letter-spacing: -.025em; text-decoration: none; }
+.nav-links { gap: 0 1.5rem; font-size: .9rem; }
+.nav-links a { display: inline-flex; align-items: center; min-height: 2rem; text-decoration: none; }
+.nav-links a:hover, .nav-links a[aria-current] { text-decoration: underline; }
+.language, .version, time, .metric { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(2rem, 6vw, 5rem);
+  padding-block: clamp(2.75rem, 7vw, 5rem);
+}
+h1 { font-size: clamp(2.25rem, 5.6vw, 4rem); font-weight: 750; line-height: 1.13; letter-spacing: -.054em; }
+h2 { font-size: clamp(1.6rem, 3vw, 2.05rem); line-height: 1.3; letter-spacing: -.03em; }
+h3 { font-size: 1.125rem; line-height: 1.45; }
+.lede { max-width: 29rem; margin-top: 1.2rem; color: var(--muted); font-size: 1.075rem; }
+.links { gap: .45rem 1.15rem; }
+.hero-actions { margin-top: 1.45rem; gap: .65rem; }
+.button {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  padding: .5rem .85rem;
+  border: 1px solid var(--accent);
+  border-radius: .22rem;
+  font-weight: 650;
+  font-size: .9rem;
+  text-decoration: none;
+}
+.button.primary { color: var(--surface); background: var(--accent); }
+.button:hover { background: var(--wash); color: var(--accent); }
+
+.diagram {
+  min-width: 0;
+  padding: clamp(.75rem, 1.8vw, 1.25rem);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: .2rem;
+}
+.diagram svg { display: block; width: 100%; height: auto; font-family: var(--sans); }
+.diagram text { fill: var(--ink); }
+.diagram .diagram-heading { font-size: 17px; font-weight: 700; }
+.diagram .diagram-label { font-size: 15px; }
+.diagram .diagram-number { font: 16px var(--mono); }
+.diagram figcaption { margin-top: .4rem; color: var(--muted); font-size: .86rem; }
+
+.home-section { padding-block: 2rem; border-top: 1px solid var(--rule); }
+.milestone {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.04fr);
+  align-items: start;
+  gap: 1.55rem 2.8rem;
+  margin-top: 1.15rem;
+}
+.milestone h3, .roadmap h3 { display: flex; align-items: baseline; flex-wrap: wrap; gap: .3rem .65rem; }
+.version { color: var(--accent); font-size: .9em; }
+.milestone p, .roadmap p { margin-top: .45rem; }
+.milestone .links { margin-top: .65rem; font-size: .9rem; }
+.benchmark { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.benchmark caption { padding-bottom: .55rem; color: var(--muted); text-align: left; font-size: .84rem; }
+.benchmark th, .benchmark td { padding: .5rem .65rem; border-bottom: 1px solid var(--rule); text-align: left; }
+.benchmark thead { background: var(--wash); }
+.benchmark tbody th { font-weight: 500; }
+.benchmark .metric { text-align: right; white-space: nowrap; }
+.benchmark th:nth-child(2), .benchmark td:nth-child(2) { text-align: right; }
+.benchmark-note { margin-top: .55rem; color: var(--muted); font-size: .84rem; }
+.roadmap { margin-top: 1.2rem; padding: .8rem 0 .8rem .9rem; border-left: 2px solid var(--accent); }
+.roadmap p { max-width: 57rem; color: var(--muted); font-size: .95rem; }
+.roadmap a { white-space: nowrap; }
+
+.research-list { margin: .85rem 0 1rem; padding: 0; list-style: none; }
+.research-list li { border-top: 1px solid var(--rule); }
+.research-list li:last-child { border-bottom: 1px solid var(--rule); }
+.research-list article {
+  display: grid;
+  grid-template-columns: 9.5rem minmax(0, 1fr);
+  gap: .35rem 1.25rem;
+  padding-block: .78rem;
+}
+.log-meta { display: flex; flex-wrap: wrap; align-content: start; gap: .15rem .8rem; font-size: .83rem; color: var(--muted); }
+.log-meta time { display: block; }
+.log-status { color: var(--accent); }
+.research-list h3 { font-size: 1.015rem; }
+.research-list p { margin-top: .18rem; color: var(--muted); font-size: .92rem; }
+.section-links { font-size: .9rem; }
+
+.site-footer { border-top: 1px solid var(--rule); padding-block: 1.15rem 1.5rem; font-size: .9rem; color: var(--muted); }
+.site-footer .links { margin-top: .25rem; }
+.support { padding-block: clamp(2.25rem, 6vw, 4rem); }
+.support .lede { max-width: 44rem; }
+.support section { margin-top: 1.65rem; padding-top: 1.35rem; border-top: 1px solid var(--rule); }
+.support section > p, .support .links { margin-top: .55rem; }
+.support dl { margin: .8rem 0 0; }
+.support dt { margin-top: .7rem; font-weight: 700; }
+.support dd { margin: .1rem 0 0; color: var(--muted); }
+
+@media (max-width: 52rem) {
+  .hero, .milestone { grid-template-columns: minmax(0, 1fr); }
+  .hero { gap: 1.15rem; }
+  .diagram { max-width: 33rem; }
+  .milestone { gap: 1rem; }
+}
+
+@media (max-width: 36rem) {
+  .wrap { width: calc(100% - 2rem); }
+  .nav-links { gap: 0 .8rem; }
+  .hero { padding-block: 2.15rem 1.65rem; }
+  .home-section { padding-block: 1.4rem; }
+  .research-list article { grid-template-columns: minmax(0, 1fr); }
+  .benchmark th, .benchmark td { padding-inline: .43rem; }
+}
+
+@media (max-width: 22rem) {
+  .hero { padding-block: 1.65rem 1.35rem; }
+  .home-section { padding-block: 1.1rem; }
+  .research-list article { padding-block: .65rem; }
+}

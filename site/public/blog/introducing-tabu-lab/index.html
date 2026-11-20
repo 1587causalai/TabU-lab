@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Introducing TabU-lab — TabU-lab · WeHub Research</title>
+  <meta name="description" content="Why TabU-lab is opening the process of building a tabular foundation model, and what the first evidence gates require.">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://research.wehub.us/tabu-lab/blog/introducing-tabu-lab/">
+  <link rel="alternate" hreflang="zh-CN" href="https://research.wehub.us/tabu-lab/zh/blog/introducing-tabu-lab/">
+  <link rel="alternate" hreflang="en" href="https://research.wehub.us/tabu-lab/blog/introducing-tabu-lab/">
+  <link rel="alternate" hreflang="x-default" href="https://research.wehub.us/tabu-lab/blog/introducing-tabu-lab/">
+  <link rel="icon" href="../../assets/tabu-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../styles.css?v=20260827-02">
+  <link rel="stylesheet" href="../../blog.css?v=20260827-02">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Introducing TabU-lab: An Open Lab for Building Tabular Foundation Models">
+  <meta property="og:description" content="Why we are opening the training process, what the first gates require, and what we are deliberately not claiming yet.">
+  <meta property="og:url" content="https://research.wehub.us/tabu-lab/blog/introducing-tabu-lab/">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "Introducing TabU-lab: An Open Lab for Building Tabular Foundation Models",
+    "datePublished": "2026-08-27",
+    "author": {"@type": "Organization", "name": "WeHub Research"},
+    "isPartOf": {"@type": "ResearchProject", "name": "TabU-lab", "url": "https://research.wehub.us/tabu-lab/"},
+    "mainEntityOfPage": "https://research.wehub.us/tabu-lab/blog/introducing-tabu-lab/"
+  }
+  </script>
+</head>
+<body class="blog-page" data-site-version="tabu-lab-site-v20260827-02">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="ambient ambient-a" aria-hidden="true"></div>
+  <div class="ambient ambient-b" aria-hidden="true"></div>
+  <div class="grid-field" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <nav class="nav-shell" aria-label="Primary navigation">
+      <a class="brand" href="../../" aria-label="TabU-lab home">
+        <img src="../../assets/tabu-mark.svg" alt="" width="42" height="42">
+        <span><strong>TabU-lab</strong><small>WeHub Research open lab</small></span>
+      </a>
+      <div class="nav-actions">
+        <div class="nav-links" id="nav-links">
+          <a href="../../#mission">Mission</a>
+          <a href="../" aria-current="page">Blog</a>
+          <a href="../../#protocol">Protocol</a>
+          <a href="../../#ledger">Ledger</a>
+          <a href="../../#join">Join</a>
+          <a class="nav-external" href="https://research.wehub.us/">WeHub Research <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="language-switch" aria-label="Language">
+          <a href="../../zh/blog/introducing-tabu-lab/" lang="zh-CN" hreflang="zh-CN">中文</a>
+          <a class="active" href="./" lang="en" hreflang="en" aria-current="page">EN</a>
+        </div>
+        <button class="menu-button" type="button" aria-expanded="false" aria-controls="nav-links">
+          <span class="sr-only">Toggle navigation</span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main" class="article-main">
+    <header class="section-shell article-header">
+      <time class="kicker article-date" datetime="2026-08-27">27 August 2026</time>
+      <h1>Introducing TabU-lab: An Open Lab for Building Tabular Foundation Models</h1>
+      <p class="article-dek">Why we are opening the training process, what the first gates require, and what we are deliberately not claiming yet.</p>
+      <div class="blog-meta"><span>WeHub Research</span><span>TabU-lab</span></div>
+    </header>
+
+    <div class="section-shell article-layout">
+      <article class="article-prose">
+        <p>Tables are everywhere in science and industry, but general-purpose learning from tables remains a stubborn problem.</p>
+        <p>A table can mix continuous measurements, categories, missing values, identifiers, treatments, outcomes, timestamps, and human-defined roles. Two columns with the same storage type can mean completely different things. Two tables with different schemas can describe closely related mechanisms. The usual machine-learning workflow handles this by building a new pipeline for each dataset: clean the data, define features, select a model, tune it, and start over when the schema changes.</p>
+        <p>Tabular foundation models ask a harder question: can a model learn reusable structure across many tables and tasks, then adapt to a new table with little or no task-specific training?</p>
+        <p>Recent systems such as TabPFN and LimiX show that this is a serious research direction. They also make the open questions sharper. What should the model treat as context? What training distribution produces useful transfer rather than benchmark familiarity? How should it represent values, feature roles, missingness, and relationships between rows? Which gains come from pretraining, and which come from architecture, tuning, or evaluation choices?</p>
+        <p>We are starting TabU-lab to work on these questions in the open.</p>
+
+        <h2>What TabU-lab is</h2>
+        <p>TabU-lab is a WeHub open research lab for building tabular foundation models from scratch. It is both a model-building effort and a public record of how the models are built.</p>
+        <p>The repository will contain the code, configurations, experiment preregistrations, run receipts, curves, failures, and consolidated reports produced along the way. We do not want to publish only the checkpoint that survived. We want the path to that checkpoint to remain inspectable.</p>
+        <p>Our immediate goal is modest: establish a small-scale training loop that is reproducible, falsifiable, and strong enough to tell us when an idea is not working. Scaling comes later.</p>
+        <p>The lab begins with an empty ledger. We have not accepted a public model result or benchmark claim. The first result will appear only after its hypothesis, comparison, budget, and pass/kill criterion have been committed.</p>
+
+        <h2>Our experiment contract</h2>
+        <p>Each formal experiment will move through the same basic sequence:</p>
+        <ol>
+          <li><strong>Preregister.</strong> Write the hypothesis, baseline, compute budget, target metric, and pass/kill criterion before execution.</li>
+          <li><strong>Implement.</strong> Commit the exact code and configuration needed to run the comparison.</li>
+          <li><strong>Run.</strong> Record the command, git revision, configuration hash, dataset version, split, seed, environment, host, and compute used.</li>
+          <li><strong>Publish the receipt.</strong> Preserve raw metrics, curves, logs, artifacts, failures, and limits on interpretation.</li>
+          <li><strong>Declare a verdict.</strong> Mark the experiment <code>pass</code>, <code>kill</code>, or <code>revise</code>. Consolidated reports may claim only what the receipts support.</li>
+        </ol>
+        <p>Failures will remain in the ledger. A failed run with a clean protocol can save other researchers time. A successful run without provenance cannot support much.</p>
+
+        <h2>The first gates</h2>
+        <p>We will begin with a narrow vertical slice rather than a broad benchmark campaign: one data source, one model family, one objective, a small set of datasets, and multiple seeds.</p>
+        <ul>
+          <li><strong>Gate 0: sanity.</strong> The implementation must overfit a tiny dataset of roughly 100 examples. If it cannot, larger runs are premature.</li>
+          <li><strong>Gate 1: reproducibility.</strong> One command must produce a checkpoint and a complete receipt from a clean environment.</li>
+          <li><strong>Gate 2: pretraining attribution.</strong> A pretrained model must beat the same architecture with random initialization under the same finetuning budget. Otherwise an apparent pretraining gain may come from the architecture or protocol.</li>
+          <li><strong>Gate 3: baseline comparison.</strong> Under a fixed protocol and matched budget, compare against strong tabular baselines such as XGBoost, CatBoost, and FT-Transformer. Report multiple-seed mean and variation rather than a single favorable run.</li>
+        </ul>
+        <p>Passing these gates would not prove that we have built a general tabular foundation model. It would show that the training system works, the evidence chain closes, and the first claimed transfer effect survives basic controls.</p>
+
+        <h2>What we want the model to learn</h2>
+        <p>TabU-lab sits inside the broader TabU research program. TabU studies whether <code>Unit</code> should be treated as a primitive rather than as another name for a sample token. That perspective raises questions that standard tabular prediction does not automatically answer:</p>
+        <ul>
+          <li>What is the learning unit represented by a row, group of rows, or task context?</li>
+          <li>Which parts of a table describe observed values, and which describe roles or mechanisms?</li>
+          <li>How should missingness differ from an unknown state or a structural null?</li>
+          <li>What should stay invariant when the schema, task, or observed context changes?</li>
+        </ul>
+        <p>These are research questions, not current capabilities. A strong benchmark score would not by itself validate Unit semantics, causal identification, or the broader TabU theory. Every theoretical claim will need its own formal assumptions and falsification tests.</p>
+        <p>Our starting mathematical discipline is simple: new architectural components should correspond to an explicit object in the model's account of the unit, mechanism, or noise. We want to avoid adding machinery that improves a benchmark while leaving us unable to say what the model is learning.</p>
+
+        <h2>What we are and are not announcing</h2>
+        <p>We intend to publish experiment preregistrations, model and data-processing code, versioned configurations, dataset and split provenance, commands, seeds, environments, compute budgets, raw metrics, curves, logs, checkpoints when permitted, verdicts, and reports tied back to receipts.</p>
+        <p>This is not a release of a finished model. We are not claiming state-of-the-art performance. We are not claiming that pretraining already improves tabular prediction. We are not claiming causal reasoning, universal schema understanding, or broad task generalization. Those claims require evidence that does not yet exist in the public ledger.</p>
+        <p>We are announcing that the work has started, and that the standard of evidence is being set before the first public training result.</p>
+        <p>The most useful contribution is not a large promise. It is a hypothesis with a credible way to fail, followed by a receipt that lets the next person continue.</p>
+
+        <div class="article-footer"><a href="../">← All blog articles</a><a href="https://github.com/1587causalai/TabU-lab">Repository ↗</a></div>
+      </article>
+      <aside class="article-side">
+        <span>Current truth</span>
+        <p>The lab infrastructure is live. No public training result, model checkpoint, or benchmark claim has been accepted yet.</p>
+        <a href="../../agent.json">Read the agent card →</a>
+        <a href="../../#ledger">See the ledger →</a>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="section-shell footer-inner">
+      <div class="footer-brand"><img src="../../assets/tabu-mark.svg" alt="" width="36" height="36"><span><strong>TabU-lab</strong><small>Tabular Foundation Modeling from Scratch</small></span></div>
+      <p>Public research surface · Source and evidence remain in the project repository.</p>
+      <nav aria-label="Footer navigation"><a href="../../">Lab</a><a href="../">Blog</a><a href="https://research.wehub.us/">Research</a><a href="https://github.com/1587causalai/TabU-lab">GitHub</a></nav>
+    </div>
+  </footer>
+  <script src="../../app.js?v=20260827-02"></script>
+</body>
+</html>

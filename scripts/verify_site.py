@@ -5,30 +5,37 @@ import json
 import sys
 from html.parser import HTMLParser
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC = ROOT / "site" / "public"
-REQUIRED = {
-    "index.html",
-    "styles.css",
-    "app.js",
-    "agent.json",
-    "assets/tabu-mark.svg",
-    "zh/index.html",
-}
-MARKER = "tabu-lab-site-v20260916-research"
+PUBLIC_PREFIX = "/tabu-lab/"
 PAGES = {
     "index.html": {
+        "version": 'data-site-version="tabu-lab-site-v20261024-retrospective"',
         "lang": '<html lang="en">',
         "canonical": 'href="https://research.wehub.us/tabu-lab/"',
         "switch": 'href="zh/"',
     },
     "zh/index.html": {
+        "version": 'data-page-revision="tabu-lab-zh-home-v20261120"',
         "lang": '<html lang="zh-CN">',
         "canonical": 'href="https://research.wehub.us/tabu-lab/zh/"',
         "switch": 'href="../"',
     },
+    "zh/support/index.html": {
+        "version": 'data-page-revision="tabu-lab-zh-support-v20261120"',
+        "lang": '<html lang="zh-CN">',
+        "canonical": 'href="https://research.wehub.us/tabu-lab/zh/support/"',
+    },
+}
+REQUIRED = {
+    *PAGES,
+    "styles.css",
+    "app.js",
+    "agent.json",
+    "assets/tabu-mark.svg",
+    "zh/research.css",
 }
 
 
@@ -84,19 +91,13 @@ def main() -> None:
             except UnicodeDecodeError as exc:
                 fail(f"non-UTF-8 text file {path.relative_to(ROOT)}: {exc}")
 
-    total_ids = 0
-    total_refs = 0
-    for page_ref, expected in PAGES.items():
-        page = PUBLIC / page_ref
+    pages = {}
+    for page in sorted(PUBLIC.rglob("*.html")):
+        page_ref = page.relative_to(PUBLIC).as_posix()
         html = page.read_text(encoding="utf-8")
-        if MARKER not in html:
-            fail(f"page-specific version marker missing in {page_ref}")
-        if expected["lang"] not in html:
-            fail(f"unexpected html lang in {page_ref}")
-        if expected["canonical"] not in html:
-            fail(f"canonical public URL missing in {page_ref}")
-        if expected["switch"] not in html:
-            fail(f"language switch missing in {page_ref}")
+        for field, expected in PAGES.get(page_ref, {}).items():
+            if expected not in html:
+                fail(f"missing or unexpected {field} in {page_ref}")
         if any(token in html for token in ("file://", "/Users/", "/home/cms/", "localhost:")):
             fail(f"local-only path leaked into {page_ref}")
 
@@ -106,26 +107,29 @@ def main() -> None:
             fail(f"unexpected title in {page_ref}")
         if len(parser.ids) != len(set(parser.ids)):
             fail(f"duplicate HTML id in {page_ref}")
+        pages[page] = parser
 
-        ids = set(parser.ids)
+    for page, parser in pages.items():
+        page_ref = page.relative_to(PUBLIC).as_posix()
         for attr, ref in parser.refs:
             parsed = urlparse(ref)
             if parsed.scheme in {"http", "https", "mailto", "data"} or ref.startswith("//"):
                 continue
-            if ref.startswith("#"):
-                if ref[1:] not in ids:
-                    fail(f"broken anchor {ref} in {page_ref}")
+            path = unquote(parsed.path)
+            if path.startswith(PUBLIC_PREFIX):
+                target = (PUBLIC / path.removeprefix(PUBLIC_PREFIX)).resolve()
+            elif path.startswith("/"):
                 continue
-            target_ref = ref.split("#", 1)[0].split("?", 1)[0]
-            if not target_ref or target_ref.startswith("/"):
-                continue
-            target = (page.parent / target_ref).resolve()
-            if PUBLIC.resolve() not in target.parents and target != PUBLIC.resolve():
+            else:
+                target = (page.parent / path).resolve() if path else page
+            if not target.is_relative_to(PUBLIC):
                 fail(f"path escapes site root in {page_ref}: {ref}")
-            if not target.exists():
+            if target.is_dir():
+                target /= "index.html"
+            if not target.is_file():
                 fail(f"missing local {attr} target in {page_ref}: {ref}")
-        total_ids += len(parser.ids)
-        total_refs += len(parser.refs)
+            if parsed.fragment and target in pages and unquote(parsed.fragment) not in pages[target].ids:
+                fail(f"broken anchor {ref} in {page_ref}")
 
     card = json.loads((PUBLIC / "agent.json").read_text(encoding="utf-8"))
     catalog = json.loads((ROOT / "catalog.json").read_text(encoding="utf-8"))
@@ -152,10 +156,10 @@ def main() -> None:
         fail("agent card public URL mismatch")
 
     print(
-        f"PASS: {len(REQUIRED)} required files, {len(PAGES)} language pages, "
-        f"{total_ids} ids, {total_refs} references"
+        f"PASS: {len(REQUIRED)} required files, {len(pages)} HTML pages, "
+        f"{sum(len(page.ids) for page in pages.values())} ids, "
+        f"{sum(len(page.refs) for page in pages.values())} references"
     )
-    print(f"PASS: marker={MARKER}")
     print("PASS: agent-card counts match the catalog; evidence documents exist")
 
 

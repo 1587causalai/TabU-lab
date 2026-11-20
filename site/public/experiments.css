@@ -1,0 +1,28 @@
+.notebook{padding-top:125px;padding-bottom:80px;max-width:1120px}
+.notebook-heading{max-width:900px;margin:30px 0 40px}
+.notebook h1{font-size:clamp(36px,5.2vw,66px);line-height:1.16;letter-spacing:-.035em;text-wrap:balance;margin:22px 0}
+.lead{font-size:clamp(17px,1.7vw,21px);color:#b7c6d8;line-height:1.8}
+.entry-meta{display:flex;flex-wrap:wrap;gap:16px;align-items:center;font-size:13px;color:#9caec2}
+.result-badge{border:1px solid #536477;border-radius:30px;padding:5px 12px;font-size:12px}
+.result-badge.mixed{border-color:#426b70;color:#99e9e4}.result-badge.negative{border-color:#745e34;color:#f6cf87}
+.evidence-note{border-left:3px solid #67e8f9;padding:18px 24px;background:#0d1b2d;color:#b7c6d8;line-height:1.85;margin:30px 0 40px}
+.experiment-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin:30px 0}
+.experiment-card{border:1px solid var(--line);border-radius:18px;padding:28px;background:var(--panel-soft);display:flex;flex-direction:column;align-items:start}
+.experiment-card h2,.experiment-card h3{font-size:25px;line-height:1.45;margin:20px 0 8px;text-wrap:balance}
+.experiment-card h2 a,.experiment-card h3 a{text-decoration:none}.experiment-card p{color:#b7c6d8;line-height:1.8}
+.text-link{color:#8ee8f3;text-decoration:none}.experiment-card>.text-link{margin-top:auto;padding-top:12px}
+.report-section{max-width:940px;margin:48px 0;scroll-margin-top:100px}.report-section h2{font-size:27px;line-height:1.35}
+.report-section p{color:#bdc9d8;line-height:1.9;font-size:17px}.report-section .annotation{font-size:13px;color:#9caec2}
+.result-table{max-width:100%;overflow:auto;border:1px solid var(--line);border-radius:12px;margin-top:24px}
+.result-table table{border-collapse:collapse;min-width:650px;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+.result-table caption{text-align:left;padding:15px 18px;background:#102239;font-weight:700}
+.result-table th,.result-table td{padding:15px 18px;text-align:left;border-top:1px solid var(--line);white-space:nowrap}
+.result-table th{color:#d9e8f7}.result-table td{color:#b8cadd}.result-table thead{background:#0a1829}
+.report-section figure{margin:32px 0}.report-section figure img{width:100%;height:auto;border-radius:12px;background:#fff}
+.report-section figcaption{font-size:13px;line-height:1.75;color:#9caec2;margin-top:12px}
+.provenance{border-top:1px solid var(--line);padding-top:20px}.provenance dt{color:#9caec2;margin-top:18px;font-size:13px}
+.provenance dd{margin:6px 0 18px;overflow-wrap:anywhere;font-family:var(--mono);font-size:12px}.hash{color:#a8c3dd}
+.reading-links{display:flex;flex-wrap:wrap;gap:15px 26px;padding:26px 0;border-top:1px solid var(--line);margin-top:36px}
+.reading-links a{color:#8ee8f3;text-decoration:none;font-size:14px}.recent-experiments{padding-block:85px}.recent-experiments h2{font-size:clamp(32px,4vw,54px);line-height:1.2;text-wrap:balance}.recent-experiments>p{max-width:800px;color:#b7c6d8}
+@media(max-width:760px){.experiment-grid{grid-template-columns:1fr}.experiment-card{padding:22px}.notebook{padding-top:100px}.notebook h1{font-size:36px}.evidence-note{padding:16px}.report-section p{font-size:16px}.entry-meta{gap:10px}.notebook-heading{margin-top:20px}.nav-links{gap:18px}.recent-experiments{padding-block:55px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
