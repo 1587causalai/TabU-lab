@@ -18,10 +18,15 @@ PAGES = {
         "switch": 'href="zh/"',
     },
     "zh/index.html": {
-        "version": 'data-page-revision="tabu-lab-zh-home-v20261120"',
+        "version": 'data-page-revision="tabu-lab-zh-home-v20261121"',
         "lang": '<html lang="zh-CN">',
         "canonical": 'href="https://research.wehub.us/tabu-lab/zh/"',
         "switch": 'href="../"',
+    },
+    "zh/experiments/index.html": {
+        "version": 'data-page-revision="tabu-lab-zh-experiments-v20261121"',
+        "lang": '<html lang="zh-CN">',
+        "canonical": 'href="https://research.wehub.us/tabu-lab/zh/experiments/"',
     },
     "zh/support/index.html": {
         "version": 'data-page-revision="tabu-lab-zh-support-v20261120"',

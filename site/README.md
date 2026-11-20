@@ -9,6 +9,8 @@ a [Chinese homepage](https://research.wehub.us/tabu-lab/zh/), and a
 - [English homepage](public/index.html)
 - [Chinese homepage](public/zh/index.html), [support page](public/zh/support/index.html),
   and their [shared stylesheet](public/zh/research.css)
+- [Chinese experiment index](public/zh/experiments/index.html) is maintained here.
+  It preserves the October retrospective and links to earlier and later public reports.
 - [Experiment index](public/experiments/index.html) and [research notes](public/blog/index.html).
   The checked-in reports preserve the published wording and dates of the pages
   linked by the homepages.
