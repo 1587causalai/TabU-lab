@@ -18,7 +18,7 @@ PAGES = {
         "switch": 'href="zh/"',
     },
     "zh/index.html": {
-        "version": 'data-page-revision="tabu-lab-zh-home-v20261121"',
+        "version": 'data-page-revision="tabu-lab-zh-home-v20261126"',
         "lang": '<html lang="zh-CN">',
         "canonical": 'href="https://research.wehub.us/tabu-lab/zh/"',
         "switch": 'href="../"',
@@ -88,6 +88,10 @@ def main() -> None:
         if not path.is_file():
             continue
         data = path.read_bytes()
+        if path.suffix == ".png":
+            if not data.startswith(b"\x89PNG\r\n\x1a\n"):
+                fail(f"invalid PNG signature in {path.relative_to(ROOT)}")
+            continue
         if b"\x00" in data:
             fail(f"NUL byte in {path.relative_to(ROOT)}")
         if path.suffix in {".html", ".css", ".js", ".json", ".svg"}:
