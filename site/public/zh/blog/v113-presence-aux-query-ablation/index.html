@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TabU 消融札记：多一个参数，多一行数据，真的值得吗？ — TabU-lab</title><meta name="description" content="两个架构选择：参与度是否要学，辅助 Query 要不要留。现有第 900 步对照和两张训练损失图。">
+<meta name="theme-color" content="#050b14"><link rel="canonical" href="https://research.wehub.us/tabu-lab/zh/blog/v113-presence-aux-query-ablation/">
+<link rel="alternate" hreflang="zh-CN" href="https://research.wehub.us/tabu-lab/zh/blog/v113-presence-aux-query-ablation/">
+<link rel="icon" href="/tabu-lab/assets/tabu-mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/tabu-lab/styles.css?v=20261024"><link rel="stylesheet" href="/tabu-lab/experiments.css?v=20261024">
+<meta property="og:title" content="TabU 消融札记：多一个参数，多一行数据，真的值得吗？"><meta property="og:url" content="https://research.wehub.us/tabu-lab/zh/blog/v113-presence-aux-query-ablation/">
+</head><body data-site-version="tabu-lab-site-v20261024-retrospective">
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="site-header"><nav class="nav-shell" aria-label="主导航">
+<a class="brand" href="https://research.wehub.us/tabu-lab/zh/"><img src="/tabu-lab/assets/tabu-mark.svg" width="36" height="36" alt=""><span><strong>TabU-lab</strong><small>Research notebook</small></span></a>
+<div class="nav-actions"><div class="nav-links" id="nav-links"><a href="https://research.wehub.us/tabu-lab/zh/experiments/">实验</a><a href="https://research.wehub.us/tabu-lab/zh/blog/">研究札记</a><a href="https://wehub.us/gong/tabular-foundation-models/model-atlas/">模型图谱 ↗</a><a href="https://wehub.us/gong/tabular-foundation-models/development-system/">研发体系 ↗</a></div><div class="language-switch"><a href="https://research.wehub.us/tabu-lab/blog/v11-classification-residual-retrieval/">EN</a></div><button class="menu-button" type="button" aria-expanded="false" aria-controls="nav-links"><span class="sr-only">展开导航</span><span></span><span></span></button></div>
+</nav></header><main id="main" class="notebook section-shell"><a class="text-link" href="../">← 研究札记</a><div class="notebook-heading"><span class="kicker">消融实验 · 2026-11-26</span><h1>TabU 消融札记：多一个参数，多一行数据，真的值得吗？</h1></div><article class="report-sheet">
+<p>给模型加东西时，我总能想出它为什么可能有用。真正难的是问：如果拿掉它，我到底会失去什么？这次 TabU V11.3 的消融，我想弄清两件事。</p>
+<h2>一个可能晚一点赢的参数</h2>
+<p>OTransformer 有个量叫 Presence，可以理解为一条信息有多大程度参与这次更新。最简单的做法是由向量范数决定；另一种做法是先用一个投影变换向量，再算范数，让这个投影也能学习。两种方案从单位投影出发，固定投影不等于把参与度固定为 1。</p>
+<p>我的预期是，可学习版可能起步慢一点，训得更久后，才有机会靠更丰富的表达反超。我看过的曲线给了我一点这样的直觉，但眼下两条新线用的都是固定投影，不能拿来证明反超。值得做的对照很明确：同一个起点、同一批训练表，只改变投影能不能学，再分别比较同一步数和同一训练时间的表现。</p>
+<figure style="margin:1.5rem auto;max-width:44rem"><a href="presence-loss.png"><img src="presence-loss.png" alt="WeStudio 两条现有训练线：可学习版前段的凸起主要由第 184 步的一次回归损失尖峰造成，其余阶段两条曲线大多相近。两条线的代码修订和回归批次不同，这不是严格的单因素消融。" width="1040" height="1040" loading="lazy" style="width:100%;height:auto"></a><figcaption>WeStudio 两条现有训练线：可学习版前段的凸起主要由第 184 步的一次回归损失尖峰造成，其余阶段两条曲线大多相近。两条线的代码修订和回归批次不同，这不是严格的单因素消融。</figcaption></figure>
+<h2>一行我想保留的数据，一份反而可能添乱的损失</h2>
+<p>辅助 Query 是把一条带标签的 Context 行复制一份，把标签遮住。它和真正要预测的行一样，在跨行交互时只接收信息。到读出阶段，我再把它的表征和原件的标签配起来，用它帮助拟合这张表的预测规律。我喜欢它，是因为<strong>用来学规律的点和真正要预测的点，可以用同一种方式构造</strong>。代价也很实在：即使特征相同，多出来的行也要重新计算。</p>
+<p>我们把两条现成的第 900 步权重放到同一套 12 张真实开发表上。两边都没有辅助损失：有辅助 Query 的版本二分类 AUC 是 <strong>0.6846</strong>，没有的是 <strong>0.6838</strong>，几乎持平；多分类概率损失略低，平均回归 R² 却是 <strong>0.698 对 0.756</strong>，差距几乎都来自一张表。两条线的训练损失都在下降，硬件和列读取方式又不一样。这组结果值得追，但还不能归因给辅助 Query。</p>
+<figure style="margin:1.5rem auto;max-width:44rem"><a href="aux-query-loss.png"><img src="aux-query-loss.png" alt="两条线均固定 Presence、只算主损失。图上是最近 50 步的均值，虚线标出两组使用同一批真实表评测的第 900 步。" width="1040" height="1040" loading="lazy" style="width:100%;height:auto"></a><figcaption>两条线均固定 Presence、只算主损失。图上是最近 50 步的均值，虚线标出两组使用同一批真实表评测的第 900 步。</figcaption></figure>
+<p>更反直觉的是，<strong>留着这行，和给它加一份训练损失，是两件事。</strong> 主辅各占一半的那次，训练频繁触发梯度裁剪。换成小权重、把原件真正留出后，有些指标出现改善，但随保存点变化，还要多花不少时间。为什么有时有帮助、有时却让训练更不稳？这个问题还没解开。</p>
+<p>所以我暂时不打开辅助损失，也不凭这一次把辅助 Query 删掉。下一轮先验证 Presence 能不能后来居上，再在同一台机器上，只改辅助 Query 的有无。我要知道的不是哪一版更复杂，而是哪一份复杂度真的值它花掉的算力。</p>
+</article></main>
+<footer class="site-footer"><div class="section-shell footer-inner"><p>TabU-lab · 整理发布 2026-11-26</p><nav><a href="https://research.wehub.us/tabu-lab/zh/">首页</a><a href="https://research.wehub.us/">WeHub Research ↗</a></nav></div></footer>
+<script src="/tabu-lab/app.js?v=20261024"></script></body></html>

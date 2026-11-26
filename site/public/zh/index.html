@@ -11,7 +11,7 @@
   <link rel="alternate" hreflang="en" href="https://research.wehub.us/tabu-lab/">
   <link rel="alternate" hreflang="x-default" href="https://research.wehub.us/tabu-lab/">
   <link rel="icon" href="../assets/tabu-mark.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="research.css?v=20261121">
+  <link rel="stylesheet" href="research.css?v=20261121.4">
   <meta property="og:type" content="website">
   <meta property="og:title" content="TabU-lab · 表格基座模型开放研究">
   <meta property="og:description" content="个体规律、表格恢复与预测。查看公开推理权重、评估结果和下一步的研究问题。">
@@ -19,14 +19,15 @@
   <meta property="og:image" content="https://research.wehub.us/tabu-lab/assets/tabu-mark.svg">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"ResearchProject","name":"TabU-lab","description":"研究个体规律、表格恢复与预测。","url":"https://research.wehub.us/tabu-lab/zh/","codeRepository":"https://github.com/1587causalai/TabU-lab","parentOrganization":{"@type":"Organization","name":"WeHub Research","url":"https://research.wehub.us/"}}</script>
 </head>
-<body data-site-version="tabu-lab-site-v20261024-retrospective" data-page-revision="tabu-lab-zh-home-v20261121">
+<body data-site-version="tabu-lab-site-v20261024-retrospective" data-page-revision="tabu-lab-zh-home-v20261126">
   <a class="skip-link" href="#main">跳到正文</a>
   <header class="site-header" id="top">
     <nav class="site-nav wrap" aria-label="主导航">
       <a class="brand" href="./" aria-label="TabU-lab 中文首页">TabU-lab</a>
       <div class="nav-links">
-        <a href="#current">当前进展</a>
-        <a href="#recent">研究记录</a>
+        <a href="#v9-study">核心发现</a>
+        <a href="#current">当前研究</a>
+        <a href="#research-timeline">研究历程</a>
         <a href="support/">支持研究</a>
         <a class="language" href="../" lang="en" hreflang="en" aria-label="English">EN</a>
       </div>
@@ -39,8 +40,8 @@
         <h1 id="mission">表格模型怎样<br>学到个体规律？</h1>
         <p class="lede">TabU-lab 研究能否从已观测的单元格（Cell）学习个体（Unit）的规律，用于补全缺失值和预测新表格。</p>
         <div class="links hero-actions">
-          <a class="button primary" href="#current">查看最新进展 ↓</a>
-          <a class="button" href="https://github.com/1587causalai/TabU-lab">GitHub ↗</a>
+          <a class="button primary" href="#current">查看当前研究 ↓</a>
+          <a class="quiet-link" href="https://github.com/1587causalai/kumo-small-cellridge-1024/releases/tag/v1.0">下载推理权重 ↗</a>
         </div>
       </div>
       <figure class="diagram">
@@ -97,31 +98,37 @@
 
     <section class="home-section study" id="v9-study" aria-labelledby="v9-study-heading">
       <h2 id="v9-study-heading">重构更准，模型就更会预测吗？</h2>
-      <p class="study-context">V9 用 3 个训练种子，在固定的 6 张合成监控表上同时追踪两项指标。</p>
+      <p class="study-context">重构对照用了 3 个训练种子和 6 张固定合成监控表。新噪声观测沿用同一生成规律，以下是相对变化。</p>
       <dl class="study-metrics">
         <div>
           <dt>监控集的编码重构 MSE</dt>
           <dd class="metric">下降 46%–53%</dd>
         </div>
         <div>
-          <dt>同一生成规律下，新噪声观测期望 NMSE 的相对变化</dt>
+          <dt>新噪声观测期望 NMSE 变化</dt>
           <dd class="metric">−0.1% 至 +1%</dd>
         </div>
       </dl>
-      <p class="study-context">重构误差约减半，新观测的预测风险几乎没变。V11 接着追问，怎样的 Unit–Cell 表征能让简单的线性读出预测新观测？</p>
-      <p class="study-link"><a href="https://research.wehub.us/tabu-lab/zh/experiments/v9-reconstruction/">查看 V9 实验与独立留出结果 ↗</a></p>
+      <p class="study-context">重构误差约减半，新观测的预测风险几乎没变。接下来要检验，怎样的 Unit–Cell 表征能让简单的线性读出预测新观测。</p>
+      <p class="study-link"><a class="quiet-link" href="https://research.wehub.us/tabu-lab/zh/experiments/v9-reconstruction/">查看重构对照与留出结果 →</a></p>
     </section>
 
     <section class="home-section" id="current" aria-labelledby="current-heading">
-      <h2 id="current-heading">当前进展</h2>
+      <h2 id="current-heading">当前研究与可复现产物</h2>
+      <article class="roadmap" id="v113-ablation">
+        <h3><span class="version">V11.3</span> 两项消融：参与度与辅助 Query</h3>
+        <p>注意力里的参与度（Presence）要不要让模型自己学？辅助 Query 多算一批行，值不值得？这一轮训练的损失整体下降；第 900 步在 12 张真实开发表上的比较，各项指标有得有失，还不足以决定默认架构。</p>
+        <p><a class="quiet-link" href="blog/v113-presence-aux-query-ablation/">读消融札记，查看两张训练曲线 →</a></p>
+      </article>
+
       <div class="milestone">
         <article>
           <h3><span class="version">V10.4</span> CellRidge-1024 推理权重</h3>
           <p>基于 Kumo Tabular Small 的分类和回归权重已公开。增加支撑行数提高了本地 Lite 分数，最佳实测配置仍落后于 Kumo Small。TabArena 于 2026 年 11 月 20 日（北京时间）关闭了提交。</p>
           <div class="links">
-            <a href="https://github.com/1587causalai/kumo-small-cellridge-1024/releases/tag/v1.0">下载权重 ↗</a>
-            <a href="https://github.com/autogluon/tabarena/pull/735">TabArena PR #735 ↗</a>
-            <a href="https://github.com/1587causalai/kumo-small-cellridge-1024/blob/main/LITE.md">复现说明 ↗</a>
+            <a class="button primary" href="https://github.com/1587causalai/kumo-small-cellridge-1024/releases/tag/v1.0">下载权重 ↗</a>
+            <a class="quiet-link" href="https://github.com/autogluon/tabarena/pull/735">提交反馈 ↗</a>
+            <a class="quiet-link" href="https://github.com/1587causalai/kumo-small-cellridge-1024/blob/main/LITE.md">复现说明 ↗</a>
           </div>
         </article>
         <div>
@@ -134,7 +141,7 @@
               <tr><th scope="row">CellRidge · <span class="metric">512</span> 支撑行</th><td class="metric">987.5</td></tr>
               <tr><th scope="row">CellRidge · <span class="metric">2,048</span> 支撑行</th><td class="metric">1,196.8</td></tr>
               <tr><th scope="row">CellRidge · <span class="metric">8,192</span> 支撑行</th><td class="metric">1,297.6</td></tr>
-              <tr><th scope="row">Kumo Small · 公开默认配置</th><td class="metric">1,836.8</td></tr>
+              <tr class="benchmark-baseline"><th scope="row">Kumo Small <small>外部基线 · 公开默认配置</small></th><td class="metric">1,836.8</td></tr>
             </tbody>
           </table>
           <p class="benchmark-note" id="lite-scope">这些划分已用于开发选型。CellRidge 提交的默认上限为 <span class="metric">200,000</span> 行，尚无全量 Lite 结果。</p>
@@ -142,59 +149,93 @@
       </div>
       <article class="roadmap" id="v11-roadmap">
         <h3><span class="version">V11</span> 原型短测</h3>
-        <p>V11 从有标签的支撑行拟合共享 ridge，再用相似参考行的残差修正每条 Query 的预测。</p>
-        <p>初版完成两次 FP32 分类更新，每批 64 张合成表，每张 1,024 行。行、列各 6 轮的原型也完成了一次同规模更新，两张表的 ridge 求解采用增广 QR。另用 2 张分类表和 2 张回归表完成了一次共享更新。逐行修正能否改善留出表的预测，仍待验证。</p>
-        <p><a href="https://github.com/1587causalai/TabU-lab/blob/main/README.md#v11-research-roadmap">查看 V11 短测说明 ↗</a></p>
+        <p>从有标签的支撑行拟合共享 ridge，再用相似参考行的残差修正每条 Query 的预测。</p>
+        <p>已完成 FP32 分类短测，每批 64 张合成表，每张 1,024 行。另用 2 张分类表和 2 张回归表完成一次共享更新。</p>
+        <p><a class="quiet-link" href="https://github.com/1587causalai/TabU-lab/blob/main/README.md#v11-research-roadmap">查看原型短测 ↗</a></p>
       </article>
+
+      <div class="open-questions" id="research-questions" role="region" aria-labelledby="research-questions-heading">
+        <h3 id="research-questions-heading">三个待验证问题</h3>
+        <div class="question-grid">
+          <article class="question-card">
+            <h4>表征、重构与读出</h4>
+            <p>重构实验的三种读出在独立列上均落后于列均值基线。</p>
+            <p class="question-next"><strong>固定 Unit–Cell 表征，加入逐 Query 残差修正后，留出表预测能否优于共享 ridge？</strong></p>
+            <div class="links">
+              <a class="quiet-link" href="https://github.com/1587causalai/TabU-lab/blob/main/docs/research-questions/README.md#表征重构与读出">读出验证方案 ↗</a>
+            </div>
+          </article>
+          <article class="question-card">
+            <h4>训练、适应与迁移</h4>
+            <p>早期多任务实验显示，任务顺序和回放会影响模型保留已学规律。</p>
+            <p class="question-next"><strong>在相同训练预算下，调整课程和回放能否缩小新世界的回归差距，同时保留已学规律上的表现？</strong></p>
+            <div class="links">
+              <a class="quiet-link" href="https://github.com/1587causalai/TabU-lab/blob/main/docs/research-questions/README.md#训练适应与迁移">课程与回放方案 ↗</a>
+              <a class="quiet-link" href="https://research.wehub.us/tabu-lab/zh/experiments/v82-learning-ladder/">早期学习实验 →</a>
+            </div>
+          </article>
+          <article class="question-card">
+            <h4>上下文规模、效率与评测</h4>
+            <p>固定权重时，支撑行从 2,048 增至 8,192，总推理耗时约为原来的 3.5 倍。</p>
+            <p class="question-next"><strong>固定权重和支撑行预算，按 Query 选行能否比等量随机选行更准？</strong></p>
+            <div class="links">
+              <a class="quiet-link" href="https://github.com/1587causalai/TabU-lab/blob/main/docs/research-questions/README.md#上下文规模效率与评测">选行验证方案 ↗</a>
+              <a class="quiet-link" href="https://github.com/1587causalai/kumo-small-cellridge-1024/blob/main/support-8192/README.md">支撑行规模对照 ↗</a>
+            </div>
+          </article>
+        </div>
+      </div>
     </section>
 
-    <section class="home-section" id="recent" aria-labelledby="recent-heading">
-      <h2 id="recent-heading">近期研究记录</h2>
-      <ul class="research-list">
-        <li>
-          <article>
-            <div class="log-meta"><time datetime="2026-11-21">2026-11-21</time></div>
-            <div>
-              <h3><a href="#v11-roadmap">V11 完成分类整批更新和分类／回归联合短测</a></h3>
-              <p>共享读出和逐行残差修正已打通训练，留出表上的预测收益待测。</p>
-            </div>
-          </article>
+    <section class="home-section" id="research-timeline" aria-labelledby="research-timeline-heading">
+      <h2 id="research-timeline-heading">2026 年研究历程</h2>
+      <ol class="research-timeline">
+        <li class="early-milestone">
+          <time datetime="2026-05">5 月</time>
+          <h3>从个体机制到稳健预测</h3>
+          <p>梳理 Causal Regression，追问能否从观测推断个体状态，再用它改善噪声下的回归预测。</p>
+          <a href="https://research.wehub.us/blog/hcgm/causal-regression/">因果回归研究 ↗</a>
+        </li>
+        <li class="early-milestone">
+          <time datetime="2026-06">6 月</time>
+          <h3>以 Unit 为建模起点</h3>
+          <p>《因果关系导论》借 DiscoSCM 等框架追问，什么时候可以用共享规律，什么时候要刻画个体差异。</p>
+          <a href="https://arxiv.org/abs/2401.15911">DiscoSCM 理论背景 ↗</a>
+        </li>
+        <li class="early-milestone">
+          <time datetime="2026-07">7 月</time>
+          <h3>探索表格基础模型</h3>
+          <p>调研 TabPFN、TabICL 和 LimiX 各自学到了什么，并在早期 TabUF 设计中探索如何用表格观测推断 Unit。</p>
+          <a href="https://wehub.us/gong/10-paper-portfolio/papers/p11-tabular-foundation-models/technical-articles/model-architecture/">TabUF 早期架构说明 ↗</a>
         </li>
         <li>
-          <article>
-            <div class="log-meta"><time datetime="2026-11-19">2026-11-19</time></div>
-            <div>
-              <h3><a href="https://github.com/1587causalai/kumo-small-cellridge-1024/blob/main/support-8192/README.md">增加支撑行，本地 Lite 分数和推理时间同时上升</a></h3>
-              <p>同一冻结权重，支撑行上限从 2,048 增至 8,192，汇总推理时间从约 282 秒增至 997 秒。</p>
-            </div>
-          </article>
+          <time datetime="2026-08">8 月</time>
+          <h3>公开 Unit 理论预印本</h3>
+          <p>预印本从与同一个体关联的观测出发，讨论怎样学习个体规律。</p>
+          <a href="https://arxiv.org/abs/2608.25118v1">理论预印本 ↗</a>
         </li>
         <li>
-          <article id="speed-milestone-20261029">
-            <div class="log-meta"><time datetime="2026-10-29">2026-10-29</time><span class="log-status">速度收益</span></div>
-            <div>
-              <h3><a href="https://research.wehub.us/tabu-lab/zh/blog/speed-bottleneck-breakthrough-20261029/">完整训练步加快 <span class="metric">3.34×</span>／<span class="metric">2.30×</span></a></h3>
-              <p>同机两项任务的对照定位了中间状态与执行开销。能力保持仍待单独验证。</p>
-            </div>
-          </article>
+          <time datetime="2026-09">9 月</time>
+          <h3>让一个模型共学多张表</h3>
+          <p>TAR 用一个共享模型拟合 120 张固定合成表，留下训练行遮蔽评估的逐表轨迹。</p>
+          <a href="https://github.com/1587causalai/TabU-lab/blob/main/docs/research/tar-shared-fit-20260907/README.md">TAR 拟合记录 ↗</a>
         </li>
         <li>
-          <article id="review-20261029">
-            <div class="log-meta"><time datetime="2026-10-29">2026-10-29</time><span class="log-status">收益与取舍</span></div>
-            <div>
-              <h3><a href="https://research.wehub.us/tabu-lab/zh/experiments/research-update-20261029/"><span class="metric">10,080</span> 任务对照中，多类分类领先，数值回归仍有差距</a></h3>
-              <p>真实多类任务对两家参考均为 8 胜 0 负，真实数据与新生成数据的数值回归均值仍落后。</p>
-            </div>
-          </article>
+          <time datetime="2026-10">10 月</time>
+          <h3>把重构与预测分开检验</h3>
+          <p>用对照实验追踪重构和定向加训，检验拟合收益能否迁移到新观测。</p>
+          <a href="https://research.wehub.us/tabu-lab/zh/blog/october-research-retrospective/">十月研究回顾 ↗</a>
         </li>
-      </ul>
-      <nav class="links section-links" id="ledger" aria-label="研究档案">
-        <a href="experiments/">全部实验记录</a>
-        <a href="https://research.wehub.us/tabu-lab/zh/blog/october-research-retrospective/">十月研究回顾</a>
-        <a href="https://wehub.us/gong/tabular-foundation-models/model-atlas/">模型图谱 ↗</a>
-        <a href="https://github.com/1587causalai/TabU-lab/blob/main/docs/design/README.md">历史版本 ↗</a>
-      </nav>
+        <li id="recent">
+          <time datetime="2026-11">11 月</time>
+          <h3>记录评测条件与反馈</h3>
+          <p>归档公开权重、复现协议和 TabArena 提交反馈，为后续对照保留可核对的条件。</p>
+          <a class="quiet-link" href="#v113-ablation">V11.3 消融 →</a>
+          <a class="quiet-link archive-link" id="ledger" href="experiments/#recent">全部实验记录 →</a>
+        </li>
+      </ol>
     </section>
+
   </main>
 
   <footer class="site-footer" id="support">
