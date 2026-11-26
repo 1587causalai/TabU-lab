@@ -18,7 +18,7 @@ PAGES = {
         "switch": 'href="zh/"',
     },
     "zh/index.html": {
-        "version": 'data-page-revision="tabu-lab-zh-home-v20261126"',
+        "version": 'data-page-revision="tabu-lab-zh-home-v20261126.2"',
         "lang": '<html lang="zh-CN">',
         "canonical": 'href="https://research.wehub.us/tabu-lab/zh/"',
         "switch": 'href="../"',
